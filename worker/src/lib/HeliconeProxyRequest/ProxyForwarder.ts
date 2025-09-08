@@ -514,109 +514,109 @@ async function log(
         console.error("Error reading response", responseBody.error);
       }
 
-  const rawResponse = await loggable.getRawResponse();
-  const successfulAttempt = proxyRequest.requestWrapper.getSuccessfulAttempt();
-  if (successfulAttempt) {
-    const attemptModel = successfulAttempt.endpoint.providerModelId;
-    const attemptProvider = successfulAttempt.endpoint.provider;
+      const rawResponse = await loggable.getRawResponse();
+      const successfulAttempt = proxyRequest.requestWrapper.getSuccessfulAttempt();
+      if (successfulAttempt) {
+        const attemptModel = successfulAttempt.endpoint.providerModelId;
+        const attemptProvider = successfulAttempt.endpoint.provider;
 
-    const usageProcessor = getUsageProcessor(attemptProvider);
-    const usage = await usageProcessor.parse({
-      responseBody: rawResponse,
-      isStream: proxyRequest.isStream,
+        const usageProcessor = getUsageProcessor(attemptProvider);
+        const usage = await usageProcessor.parse({
+          responseBody: rawResponse,
+          isStream: proxyRequest.isStream,
+        });
+
+        if (usage.error !== null) {
+          throw new Error(`Error parsing usage for provider ${attemptProvider}: ${usage.error}`);
+        }
+
+        const breakdown = modelCostBreakdownFromRegistry({
+          modelUsage: usage.data,
+          model: attemptModel,
+          provider: attemptProvider,
+        });
+        // TODO: Refactor other code so we only pull response once
+        // apply breakdown totalCost to escrow    
+      }
+
+      const model = responseBody.data?.response.model;
+      const promptTokens = responseBody.data?.response.prompt_tokens ?? 0;
+      const completionTokens =
+        responseBody.data?.response.completion_tokens ?? 0;
+      const provider = proxyRequest.provider;
+      const promptCacheWriteTokens =
+        responseBody.data?.response.prompt_cache_write_tokens ?? 0;
+      const promptCacheReadTokens =
+        responseBody.data?.response.prompt_cache_read_tokens ?? 0;
+      const promptAudioTokens =
+        responseBody.data?.response.prompt_audio_tokens ?? 0;
+      const completionAudioTokens =
+        responseBody.data?.response.completion_audio_tokens ?? 0;
+
+      let cost;
+      if (model && provider) {
+        cost =
+          costOfPrompt({
+            model,
+            promptTokens,
+            completionTokens,
+            provider,
+            promptCacheWriteTokens,
+            promptCacheReadTokens,
+            promptAudioTokens,
+            completionAudioTokens,
+          }) ?? 0;
+      } else {
+        cost = 0;
+      }
+
+      // Handle escrow finalization if needed
+      if (responseBody.data && proxyRequest.escrowInfo) {
+        const walletId = env.WALLET.idFromName(orgData.organizationId);
+        const walletStub = env.WALLET.get(walletId);
+        const walletManager = new WalletManager(env, ctx, walletStub);
+        const escrowFinalizationResult =
+          await walletManager.finalizeEscrowAndSyncSpend(
+            orgData.organizationId,
+            proxyRequest,
+            cost,
+            cachedResponse
+          );
+        if (escrowFinalizationResult.error !== null) {
+          console.error(
+            "Error finalizing escrow and syncing spend",
+            escrowFinalizationResult.error
+          );
+        }
+      }
+
+      // Update rate limit counters if not a cached response
+      if (
+        (!rateLimited && cachedResponse === undefined) ||
+        (!rateLimited && cachedResponse === null)
+      ) {
+        if (
+          proxyRequest &&
+          finalRateLimitOptions &&
+          !orgError &&
+          orgData?.organizationId
+        ) {
+          const costInCents = cost * 100;
+          await updateRateLimitCounterDO({
+            organizationId: orgData?.organizationId,
+            heliconeProperties:
+              proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+            rateLimiterDO: env.RATE_LIMITER_SQL,
+            rateLimitOptions: finalRateLimitOptions,
+            userId: proxyRequest.userId,
+            cost: costInCents,
+          });
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Error in response processing chain:", error);
     });
-
-    if (usage.error !== null) {
-      throw new Error(`Error parsing usage for provider ${attemptProvider}: ${usage.error}`);
-    }
-
-    const breakdown = modelCostBreakdownFromRegistry({
-      modelUsage: usage.data,
-      model: attemptModel,
-      provider: attemptProvider,
-    });
-    // TODO: Refactor other code so we only pull response once
-    // apply breakdown totalCost to escrow    
-  }
-
-  const model = responseBody.data?.response.model;
-  const promptTokens = responseBody.data?.response.prompt_tokens ?? 0;
-  const completionTokens =
-    responseBody.data?.response.completion_tokens ?? 0;
-  const provider = proxyRequest.provider;
-  const promptCacheWriteTokens =
-    responseBody.data?.response.prompt_cache_write_tokens ?? 0;
-  const promptCacheReadTokens =
-    responseBody.data?.response.prompt_cache_read_tokens ?? 0;
-  const promptAudioTokens =
-    responseBody.data?.response.prompt_audio_tokens ?? 0;
-  const completionAudioTokens =
-    responseBody.data?.response.completion_audio_tokens ?? 0;
-
-  let cost;
-  if (model && provider) {
-    cost =
-      costOfPrompt({
-        model,
-        promptTokens,
-        completionTokens,
-        provider,
-        promptCacheWriteTokens,
-        promptCacheReadTokens,
-        promptAudioTokens,
-        completionAudioTokens,
-      }) ?? 0;
-  } else {
-    cost = 0;
-  }
-
-  // Handle escrow finalization if needed
-  if (responseBody.data && proxyRequest.escrowInfo) {
-    const walletId = env.WALLET.idFromName(orgData.organizationId);
-    const walletStub = env.WALLET.get(walletId);
-    const walletManager = new WalletManager(env, ctx, walletStub);
-    const escrowFinalizationResult =
-      await walletManager.finalizeEscrowAndSyncSpend(
-        orgData.organizationId,
-        proxyRequest,
-        cost,
-        cachedResponse
-      );
-    if (escrowFinalizationResult.error !== null) {
-      console.error(
-        "Error finalizing escrow and syncing spend",
-        escrowFinalizationResult.error
-      );
-    }
-  }
-
-  // Update rate limit counters if not a cached response
-  if (
-    (!rateLimited && cachedResponse === undefined) ||
-    (!rateLimited && cachedResponse === null)
-  ) {
-    if (
-      proxyRequest &&
-      finalRateLimitOptions &&
-      !orgError &&
-      orgData?.organizationId
-    ) {
-      const costInCents = cost * 100;
-      await updateRateLimitCounterDO({
-        organizationId: orgData?.organizationId,
-        heliconeProperties:
-          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-        rateLimiterDO: env.RATE_LIMITER_SQL,
-        rateLimitOptions: finalRateLimitOptions,
-        userId: proxyRequest.userId,
-        cost: costInCents,
-      });
-    }
-  }
-})
-.catch((error) => {
-  console.error("Error in response processing chain:", error);
-});
 
   // Wait for both logging and response processing to complete
   await Promise.all([
