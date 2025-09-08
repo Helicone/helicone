@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OpenAIUsageProcessor usage processing snapshot 1`] = `
+{
+  "cached-response": {
+    "data": {
+      "cacheDetails": {
+        "cachedInput": 1152,
+      },
+      "input": 96,
+      "output": 10,
+    },
+    "error": null,
+  },
+  "stream-response": {
+    "data": {
+      "input": 1248,
+      "output": 10,
+    },
+    "error": null,
+  },
+}
+`;
