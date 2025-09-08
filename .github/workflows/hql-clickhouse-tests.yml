@@ -72,6 +72,10 @@ jobs:
             fi
             echo "Waiting for ClickHouse... ($i/30)"
             sleep 2
+            if [ $i -eq 30 ]; then
+              echo "ClickHouse failed to start after 30 attempts"
+              exit 1
+            fi
           done
 
       - name: Run ClickHouse Wrapper Tests
