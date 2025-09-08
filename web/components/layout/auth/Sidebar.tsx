@@ -12,7 +12,6 @@ import {
   TriangleAlertIcon,
   UsersIcon,
   Code2Icon,
-  Coins,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useMemo } from "react";

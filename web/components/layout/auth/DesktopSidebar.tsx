@@ -48,7 +48,7 @@ const DesktopSidebar = ({
   const router = useRouter();
   const onboardingStatus = orgContext?.currentOrg
     ?.onboarding_status as unknown as OnboardingState;
-  
+
   // Fetch credit balance - defaults to 0 if it fails
   const { data: creditData } = useCredits();
 
@@ -418,12 +418,14 @@ const DesktopSidebar = ({
                             Beta
                           </span>
                         </span>
-                        <span className={cn(
-                          "text-xs",
-                          router.pathname.includes("/credits")
-                            ? "text-blue-700 dark:text-blue-300"
-                            : "text-muted-foreground"
-                        )}>
+                        <span
+                          className={cn(
+                            "text-xs",
+                            router.pathname.includes("/credits")
+                              ? "text-blue-700 dark:text-blue-300"
+                              : "text-muted-foreground",
+                          )}
+                        >
                           ${((creditData?.balance ?? 0) / 100).toFixed(0)}
                         </span>
                       </span>
