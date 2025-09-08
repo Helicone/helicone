@@ -134,11 +134,12 @@ const Credits: NextPageWithLayout<void> = () => {
                     if (balance % 1 === 0) {
                       return balance.toFixed(2);
                     }
+                    if (balance >= 100) {
+                      return balance.toFixed(4);
+                    }
                     if (balance >= 10) {
                       return balance.toFixed(3);
                     }
-                    if (balance >= 100) {
-                      return balance.toFixed(4);
                     }
                     const formattedBalance = balance.toFixed(5);
                     return formattedBalance;
