@@ -1,0 +1,68 @@
+name: HQL Security Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      # HQL security-related implementation files
+      - "valhalla/jawn/src/lib/stores/HqlStore.ts"
+      - "valhalla/jawn/src/lib/errors/HqlErrors.ts"
+      - "valhalla/jawn/src/managers/HqlQueryManager.ts"
+      - "valhalla/jawn/src/controllers/public/heliconeSqlController.ts"
+      # HQL security test files
+      - "valhalla/jawn/src/lib/db/test/hqlSecurityTests.test.ts"
+      - "valhalla/jawn/src/lib/db/test/MockClickhouseWrapper.ts"
+      - "valhalla/jawn/src/controllers/public/__tests__/heliconeSqlController.test.ts"
+      # Web HQL files
+      - "web/lib/api/hql/**"
+      # Workflow file itself
+      - ".github/workflows/hql-security-tests.yml"
+
+jobs:
+  hql-security-tests:
+  hql-security-tests:
+    name: Run HQL Security Tests
+    defaults:
+      run:
+        working-directory: valhalla/jawn
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
+
+      - name: Install dependencies
+        run: |
+          # Retry logic for yarn install with fallback to npm
+          for i in 1 2 3; do
+            echo "Attempt $i: Installing dependencies..."
+            if yarn install --frozen-lockfile --network-timeout 100000; then
+              echo "✓ Successfully installed dependencies"
+              exit 0
+            fi
+            echo "Attempt $i failed, waiting 5 seconds..."
+            sleep 5
+          done
+          # Fallback to npm if yarn fails
+          echo "Yarn failed, using npm install..."
+          npm install
+
+      - name: Run HQL Security Tests
+        run: yarn test:jawn hqlSecurityTests.test.ts
+        env:
+          NODE_ENV: test
+
+      # Note: API integration tests are skipped in CI because they require 
+      # the full Jawn server to be running on port 8585.
+      # These tests should be run locally or in a more complete E2E test environment.
+      # To run locally: 
+      # 1. Start the Jawn server: yarn start
+      # 2. Run tests: yarn test:jawn heliconeSqlController.test.ts
