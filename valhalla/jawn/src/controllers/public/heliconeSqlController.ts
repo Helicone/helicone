@@ -228,11 +228,11 @@ export class HeliconeSqlController extends Controller {
     @Body() requestBody: BulkDeleteSavedQueriesRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<void, string>> {
-    const heliconeSqlManager = new HqlQueryManager(request.authParams);
-    const result = await heliconeSqlManager.bulkDeleteSavedQueries(requestBody.ids);
-    if (result.error) {
-      this.setStatus(500);
-      return err(result.error);
+    const hqlQueryManager = new HqlQueryManager(request.authParams);
+    const result = await hqlQueryManager.bulkDeleteSavedQueries(requestBody.ids);
+    if (isError(result)) {
+      this.setStatus(result.error.statusCode || 500);
+      return err(formatHqlError(result.error));
     }
     this.setStatus(200);
     return ok(undefined);
