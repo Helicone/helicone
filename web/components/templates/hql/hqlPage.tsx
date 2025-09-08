@@ -372,7 +372,7 @@ function HQLPage() {
                   // Define and apply transparent background themes
                   // Apply the custom theme immediately
                   monaco.editor.setTheme(
-                    currentTheme === "dark" ? "custom-dark" : "custom-light"
+                    currentTheme === "dark" ? "custom-dark" : "custom-light",
                   );
 
                   // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
