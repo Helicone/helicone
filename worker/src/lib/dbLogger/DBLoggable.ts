@@ -536,6 +536,19 @@ export class DBLoggable {
         };
   }
 
+  async readRawResponse(): Promise<Result<string, string>> {
+    try {
+      const rawResponse = await withTimeout(
+        this.getRawResponse(),
+        1000 * 60 * 15
+      ); // 15 minutes
+
+      return ok(rawResponse);
+    } catch (e) {
+      return err("error getting raw response, " + e);
+    }
+  }
+  
   async readResponse(): Promise<
     Result<
       {

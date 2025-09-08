@@ -514,9 +514,14 @@ async function log(
         console.error("Error reading response", responseBody.error);
       }
 
-      const rawResponse = await loggable.getRawResponse();
+      const rawResponseResult = await loggable.readRawResponse();
+      if (rawResponseResult.error !== null) {
+        console.error("Error reading raw response:", rawResponseResult.error);
+      }
+      
+      const rawResponse = rawResponseResult.data;
       const successfulAttempt = proxyRequest.requestWrapper.getSuccessfulAttempt();
-      if (successfulAttempt) {
+      if (rawResponse && successfulAttempt) {
         const attemptModel = successfulAttempt.endpoint.providerModelId;
         const attemptProvider = successfulAttempt.endpoint.provider;
 
