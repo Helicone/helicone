@@ -90,8 +90,8 @@ export function FeatureWaitlist({
         <div>
           <H3 className="mb-2">You&lsquo;re on the list!</H3>
           <P className="text-muted-foreground">
-            We&lsquo;ll notify you at <strong>{email}</strong> when this
-            feature is available.
+            We&lsquo;ll notify you at <strong>{email}</strong> when this feature
+            is available.
           </P>
         </div>
       </div>
@@ -110,7 +110,7 @@ export function FeatureWaitlist({
 
   const content = (
     <>
-      <div className="flex items-center gap-3 mb-4">
+      <div className="mb-4 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
           <Mail className="h-5 w-5 text-muted-foreground" />
         </div>

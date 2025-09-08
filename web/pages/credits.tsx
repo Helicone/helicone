@@ -18,8 +18,9 @@ import {
   type PurchasedCredits,
 } from "@/services/hooks/useCredits";
 import { formatDate } from "@/utils/date";
-import { ChevronLeft, ChevronRight, RefreshCcw, PlayCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCcw } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { ReactElement, useState } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import { NextPageWithLayout } from "./_app";
@@ -65,7 +66,7 @@ const Credits: NextPageWithLayout<void> = () => {
     return (
       <div className="flex h-full w-full flex-col">
         <Header title="Credits" />
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-1 items-center justify-center">
           <Small className="text-muted-foreground">Loading...</Small>
         </div>
       </div>
@@ -99,334 +100,358 @@ const Credits: NextPageWithLayout<void> = () => {
           </div>
         }
       />
-      
-      <div className="flex-1 flex justify-center">
-        <div className="max-w-6xl w-full border-l border-r border-border flex flex-col">
+
+      <div className="flex flex-1 justify-center">
+        <div className="flex w-full max-w-6xl flex-col border-l border-r border-border">
           <div className="flex-1 overflow-auto">
-        {/* Waitlist Experience - Show when no access */}
-        {!hasAccess ? (
-          <div className="px-4 sm:px-6 lg:px-8 py-12">
-            {/* Hero Section */}
-            <div className="text-center mb-16">
-              <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-                Helicone Credits
-              </h1>
-              <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
-                Pay-as-you-go LLM billing. Simple, transparent, and flexible.
-              </p>
-            </div>
+            {/* Waitlist Experience - Show when no access */}
+            {!hasAccess ? (
+              <div className="px-4 py-12 sm:px-6 lg:px-8">
+                {/* Hero Section */}
+                <div className="mb-16 text-center">
+                  <h1 className="mb-4 text-4xl font-bold text-slate-900 dark:text-slate-100">
+                    Helicone Credits
+                  </h1>
+                  <p className="mb-8 text-xl text-slate-600 dark:text-slate-400">
+                    Pay-as-you-go LLM billing. Simple, transparent, and
+                    flexible.
+                  </p>
+                </div>
 
-            {/* Demo Image with Waitlist Overlay */}
-            <div className="mb-16">
-              <div className="rounded-lg border border-border overflow-hidden relative">
-                <img 
-                  src="/static/credits-demo.png"
-                  alt="Credits Dashboard Demo"
-                  className="w-full h-auto"
-                />
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-xl max-w-md w-full mx-4">
-                    <FeatureWaitlist
-                      feature="credits"
-                      title="Get Early Access"
-                      description="Be the first to know when Credits launches for your organization."
-                      organizationId={org?.currentOrg?.id}
-                      variant="flat"
+                {/* Demo Image with Waitlist Overlay */}
+                <div className="mb-16">
+                  <div className="relative overflow-hidden rounded-lg border border-border">
+                    <Image
+                      src="/static/credits-demo.png"
+                      alt="Credits Dashboard Demo"
+                      width={1200}
+                      height={600}
+                      className="h-auto w-full"
                     />
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Benefits Section */}
-            <div className="mb-16">
-              <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-8 text-center">
-                Why Helicone Credits?
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 rounded-lg border border-border flex items-center justify-center">
-                      <span className="text-green-600 dark:text-green-400">✓</span>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                      <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-slate-900">
+                        <FeatureWaitlist
+                          feature="credits"
+                          title="Get Early Access"
+                          description="Be the first to know when Credits launches for your organization."
+                          organizationId={org?.currentOrg?.id}
+                          variant="flat"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                      No subscriptions or commitments
-                    </h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">
-                      Add credits when you need them. Pay only for what you use with no monthly fees.
-                    </p>
-                  </div>
                 </div>
-                
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 rounded-lg border border-border flex items-center justify-center">
-                      <span className="text-green-600 dark:text-green-400">✓</span>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                      Real-time usage tracking
-                    </h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">
-                      Monitor your AI spending as it happens with detailed analytics and insights.
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 rounded-lg border border-border flex items-center justify-center">
-                      <span className="text-green-600 dark:text-green-400">✓</span>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                      Shared across your team
-                    </h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">
-                      One balance for your entire organization. Simplify billing and management.
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 rounded-lg border border-border flex items-center justify-center">
-                      <span className="text-green-600 dark:text-green-400">✓</span>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                      Detailed transaction history
-                    </h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">
-                      Complete visibility into every credit spent with comprehensive reporting.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Credits Management Experience - Show when has access */
-          <div>
-            {/* Current Balance Section */}
-            <div className="border-b border-border bg-slate-100 dark:bg-slate-900 px-6 py-8">
-              <Small className="text-muted-foreground">Current Balance</Small>
-              <div className="mt-2 text-3xl font-bold">
-                {isLoading ? (
-                  <span className="text-muted-foreground">Loading...</span>
-                ) : creditError ? (
-                  <span className="text-destructive">
-                    Error loading balance
-                  </span>
-                ) : (
-                  `$${(() => {
-                    const balance = (creditData?.balance ?? 0) / 100;
-                    if (balance % 1 === 0) {
-                      return balance.toFixed(2);
-                    }
-                    if (balance >= 100) {
-                      return balance.toFixed(4);
-                    }
-                    if (balance >= 10) {
-                      return balance.toFixed(3);
-                    }
-                    const formattedBalance = balance.toFixed(5);
-                    return formattedBalance;
-                  })()}`
-                )}
-              </div>
-            </div>
 
-          {/* Buy Credits and Auto Top-Up Section */}
-          <div className="border-b border-border px-6 py-8">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              {/* Buy Credits */}
-              <div>
-                <Small className="mb-4 font-semibold text-slate-900 dark:text-slate-100">Buy Credits</Small>
-                <div className="mt-2 flex flex-col gap-3">
-                  <Button
-                    size="sm"
-                    className="w-full"
-                    onClick={() => setIsPaymentModalOpen(true)}
-                  >
-                    Add Credits
-                  </Button>
-                  <Link href="/requests" className="w-full">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                    >
-                      View Usage
-                    </Button>
-                  </Link>
-                </div>
-              </div>
+                {/* Benefits Section */}
+                <div className="mb-16">
+                  <h2 className="mb-8 text-center text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                    Why Helicone Credits?
+                  </h2>
+                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
+                          <span className="text-green-600 dark:text-green-400">
+                            ✓
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="mb-1 font-semibold text-slate-900 dark:text-slate-100">
+                          No subscriptions or commitments
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Add credits when you need them. Pay only for what you
+                          use with no monthly fees.
+                        </p>
+                      </div>
+                    </div>
 
-              {/* Auto Top-Up */}
-              <div>
-                <div className="mb-3 flex items-center justify-between">
-                  <Small className="font-semibold text-slate-900 dark:text-slate-100">Auto Top-Up</Small>
-                  <div className="opacity-50">
-                    <Switch checked={false} disabled />
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
+                          <span className="text-green-600 dark:text-green-400">
+                            ✓
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="mb-1 font-semibold text-slate-900 dark:text-slate-100">
+                          Real-time usage tracking
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Monitor your AI spending as it happens with detailed
+                          analytics and insights.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
+                          <span className="text-green-600 dark:text-green-400">
+                            ✓
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="mb-1 font-semibold text-slate-900 dark:text-slate-100">
+                          Shared across your team
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          One balance for your entire organization. Simplify
+                          billing and management.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
+                          <span className="text-green-600 dark:text-green-400">
+                            ✓
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="mb-1 font-semibold text-slate-900 dark:text-slate-100">
+                          Detailed transaction history
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          Complete visibility into every credit spent with
+                          comprehensive reporting.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <Small className="text-xs text-muted-foreground">
-                    <span className="italic">
-                      Auto Top-Up is still in development and not yet available.
-                    </span>
+              </div>
+            ) : (
+              /* Credits Management Experience - Show when has access */
+              <div>
+                {/* Current Balance Section */}
+                <div className="border-b border-border bg-slate-100 px-6 py-8 dark:bg-slate-900">
+                  <Small className="text-muted-foreground">
+                    Current Balance
                   </Small>
-                  <Muted className="text-xs">
-                    Automatically purchase credits when your balance is below a
-                    certain threshold. Your most recent payment method will be
-                    used.
-                  </Muted>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Transactions Section */}
-          <div className="px-6 py-8">
-            <div className="mb-6 flex items-center justify-between">
-              <Small className="font-semibold text-slate-900 dark:text-slate-100">Recent Transactions</Small>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  Page size
-                </span>
-                <Select
-                  value={pageSize.toString()}
-                  onValueChange={(value) => {
-                    setPageSize(Number(value));
-                    // Reset pagination when changing page size
-                    setCurrentPage(0);
-                  }}
-                >
-                  <SelectTrigger className="h-8 w-[60px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="5">5</SelectItem>
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="25">25</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <div>
-                {transactionsLoading ? (
-                  <div className="py-8 text-center">
-                    <Muted>Loading transactions...</Muted>
-                  </div>
-                ) : transactionsError ? (
-                  <div className="py-8 text-center">
-                    <Muted>Error loading transactions</Muted>
-                  </div>
-                ) : transactions.length > 0 ? (
-                  <div className="space-y-0">
-                    {transactions.map(
-                      (transaction: PurchasedCredits, index: number) => {
-                        // Backend returns credits in cents
-                        const amount = transaction.credits || 0;
-
-                        // Convert timestamp to Date
-                        const created = new Date(transaction.createdAt);
-                        const createdStr = created.toISOString();
-
-                        // All transactions are credit purchases for now
-                        const description = "Credit purchase";
-                        const isCredit = true; // All are credits being added
-
-                        return (
-                          <div
-                            key={transaction.id || index}
-                            className="flex items-center justify-between border-b border-border py-4 last:border-b-0"
-                          >
-                            <div className="flex flex-col gap-1">
-                              <div
-                                className="text-sm"
-                                title={created.toLocaleString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              >
-                                {formatDate(createdStr)}
-                              </div>
-                              <XSmall className="text-muted-foreground">
-                                {description}
-                              </XSmall>
-                            </div>
-                            <div
-                              className={`text-sm font-medium ${isCredit ? "text-green-600 dark:text-green-500" : "text-muted-foreground"}`}
-                            >
-                              {isCredit ? "+" : "-"}
-                              {(amount / 100).toLocaleString("en-US", {
-                                style: "currency",
-                                currency: "usd",
-                              })}
-                            </div>
-                          </div>
-                        );
-                      },
+                  <div className="mt-2 text-3xl font-bold">
+                    {isLoading ? (
+                      <span className="text-muted-foreground">Loading...</span>
+                    ) : creditError ? (
+                      <span className="text-destructive">
+                        Error loading balance
+                      </span>
+                    ) : (
+                      `$${(() => {
+                        const balance = (creditData?.balance ?? 0) / 100;
+                        if (balance % 1 === 0) {
+                          return balance.toFixed(2);
+                        }
+                        if (balance >= 100) {
+                          return balance.toFixed(4);
+                        }
+                        if (balance >= 10) {
+                          return balance.toFixed(3);
+                        }
+                        const formattedBalance = balance.toFixed(5);
+                        return formattedBalance;
+                      })()}`
                     )}
                   </div>
-                ) : (
-                  <div className="py-8 text-center">
-                    <Muted>No transactions yet</Muted>
-                  </div>
-                )}
-              </div>
-
-              {/* Pagination */}
-              {transactions.length > 0 && (
-                <div className="mt-6 flex items-center justify-center gap-2 border-t border-border pt-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      // Go to previous page
-                      if (hasPrevious) {
-                        setCurrentPage(currentPage - 1);
-                      }
-                    }}
-                    disabled={!hasPrevious}
-                  >
-                    <ChevronLeft className="h-3 w-3" />
-                  </Button>
-                  <Badge variant="secondary" className="text-xs">
-                    Page {currentPage + 1} of {totalPages || 1}
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      // Go to next page
-                      if (hasMore) {
-                        setCurrentPage(currentPage + 1);
-                      }
-                    }}
-                    disabled={!hasMore}
-                  >
-                    <ChevronRight className="h-3 w-3" />
-                  </Button>
                 </div>
-              )}
-            </div>
-          </div>
-          </div>
-        )}
+
+                {/* Buy Credits and Auto Top-Up Section */}
+                <div className="border-b border-border px-6 py-8">
+                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                    {/* Buy Credits */}
+                    <div>
+                      <Small className="mb-4 font-semibold text-slate-900 dark:text-slate-100">
+                        Buy Credits
+                      </Small>
+                      <div className="mt-2 flex flex-col gap-3">
+                        <Button
+                          size="sm"
+                          className="w-full"
+                          onClick={() => setIsPaymentModalOpen(true)}
+                        >
+                          Add Credits
+                        </Button>
+                        <Link href="/requests" className="w-full">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                          >
+                            View Usage
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Auto Top-Up */}
+                    <div>
+                      <div className="mb-3 flex items-center justify-between">
+                        <Small className="font-semibold text-slate-900 dark:text-slate-100">
+                          Auto Top-Up
+                        </Small>
+                        <div className="opacity-50">
+                          <Switch checked={false} disabled />
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Small className="text-xs text-muted-foreground">
+                          <span className="italic">
+                            Auto Top-Up is still in development and not yet
+                            available.
+                          </span>
+                        </Small>
+                        <Muted className="text-xs">
+                          Automatically purchase credits when your balance is
+                          below a certain threshold. Your most recent payment
+                          method will be used.
+                        </Muted>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Transactions Section */}
+                <div className="px-6 py-8">
+                  <div className="mb-6 flex items-center justify-between">
+                    <Small className="font-semibold text-slate-900 dark:text-slate-100">
+                      Recent Transactions
+                    </Small>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        Page size
+                      </span>
+                      <Select
+                        value={pageSize.toString()}
+                        onValueChange={(value) => {
+                          setPageSize(Number(value));
+                          // Reset pagination when changing page size
+                          setCurrentPage(0);
+                        }}
+                      >
+                        <SelectTrigger className="h-8 w-[60px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="5">5</SelectItem>
+                          <SelectItem value="10">10</SelectItem>
+                          <SelectItem value="25">25</SelectItem>
+                          <SelectItem value="50">50</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div>
+                      {transactionsLoading ? (
+                        <div className="py-8 text-center">
+                          <Muted>Loading transactions...</Muted>
+                        </div>
+                      ) : transactionsError ? (
+                        <div className="py-8 text-center">
+                          <Muted>Error loading transactions</Muted>
+                        </div>
+                      ) : transactions.length > 0 ? (
+                        <div className="space-y-0">
+                          {transactions.map(
+                            (transaction: PurchasedCredits, index: number) => {
+                              // Backend returns credits in cents
+                              const amount = transaction.credits || 0;
+
+                              // Convert timestamp to Date
+                              const created = new Date(transaction.createdAt);
+                              const createdStr = created.toISOString();
+
+                              // All transactions are credit purchases for now
+                              const description = "Credit purchase";
+                              const isCredit = true; // All are credits being added
+
+                              return (
+                                <div
+                                  key={transaction.id || index}
+                                  className="flex items-center justify-between border-b border-border py-4 last:border-b-0"
+                                >
+                                  <div className="flex flex-col gap-1">
+                                    <div
+                                      className="text-sm"
+                                      title={created.toLocaleString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}
+                                    >
+                                      {formatDate(createdStr)}
+                                    </div>
+                                    <XSmall className="text-muted-foreground">
+                                      {description}
+                                    </XSmall>
+                                  </div>
+                                  <div
+                                    className={`text-sm font-medium ${isCredit ? "text-green-600 dark:text-green-500" : "text-muted-foreground"}`}
+                                  >
+                                    {isCredit ? "+" : "-"}
+                                    {(amount / 100).toLocaleString("en-US", {
+                                      style: "currency",
+                                      currency: "usd",
+                                    })}
+                                  </div>
+                                </div>
+                              );
+                            },
+                          )}
+                        </div>
+                      ) : (
+                        <div className="py-8 text-center">
+                          <Muted>No transactions yet</Muted>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Pagination */}
+                    {transactions.length > 0 && (
+                      <div className="mt-6 flex items-center justify-center gap-2 border-t border-border pt-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            // Go to previous page
+                            if (hasPrevious) {
+                              setCurrentPage(currentPage - 1);
+                            }
+                          }}
+                          disabled={!hasPrevious}
+                        >
+                          <ChevronLeft className="h-3 w-3" />
+                        </Button>
+                        <Badge variant="secondary" className="text-xs">
+                          Page {currentPage + 1} of {totalPages || 1}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            // Go to next page
+                            if (hasMore) {
+                              setCurrentPage(currentPage + 1);
+                            }
+                          }}
+                          disabled={!hasMore}
+                        >
+                          <ChevronRight className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
