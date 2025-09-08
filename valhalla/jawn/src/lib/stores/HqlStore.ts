@@ -3,7 +3,7 @@ import { err, ok, Result } from "../../packages/common/result";
 import { S3Client } from "../shared/db/s3Client";
 import fs from "fs";
 
-const HQL_STORE_BUCKET = "hql-store";
+const HQL_STORE_BUCKET = process.env.HQL_STORE_BUCKET || "hql-store";
 
 export class HqlStore {
   private s3Client: S3Client;

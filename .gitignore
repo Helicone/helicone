@@ -1,4 +1,5 @@
 scripts/ 
+!valhalla/jawn/scripts/
 dist/
 server.py
 

@@ -10,10 +10,11 @@ import { FilterASTEditor } from "./FilterASTEditor";
 import { useFilterAST } from "./context/filterContext";
 import { Badge } from "@/components/ui/badge";
 import { Row } from "@/components/layout/common";
+import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
 
-interface FilterASTButtonProps {}
+interface FilterASTButtonProps { }
 
-export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
+export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ }) => {
   const { store } = useFilterAST();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -36,10 +37,10 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
   const numFilters = store.getFilterNodeCount();
 
   return (
-    <Row>
+    <Row className="space-x-2 mr-4">
       <Popover onOpenChange={setIsOpen} open={isOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" className="gap-2" size="sm">
             <Filter className="h-4 w-4" />
             Filter
             {!isOpen && store.activeFilterId && (
@@ -60,11 +61,11 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
           <FilterASTEditor />
         </PopoverContent>
       </Popover>
+      <SavedFiltersDropdown />
       {store.getFilterNodeCount() > 0 && (
         <Button
           variant="glass"
           size="sm"
-          className="gap-2 ml-2"
           onClick={() => {
             store.clearActiveFilter();
           }}
