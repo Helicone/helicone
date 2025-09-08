@@ -233,6 +233,7 @@ export class AttemptBuilder {
     );
 
     if (!heliconeKey) {
+      console.error("Can't do PTB without Helicone's key");
       return []; // Can't do PTB without Helicone's key
     }
 
