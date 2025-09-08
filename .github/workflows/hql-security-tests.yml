@@ -24,8 +24,8 @@ on:
 
 jobs:
   hql-security-tests:
-    name: HQL Security Tests
-    runs-on: ubuntu-latest
+  hql-security-tests:
+    name: Run HQL Security Tests
     defaults:
       run:
         working-directory: valhalla/jawn
