@@ -1,0 +1,5 @@
+# Datadog API credentials
+# Get these from your Datadog account: https://app.datadoghq.com/organization-settings/api-keys
+datadog_api_key = "your_datadog_api_key_here"
+datadog_app_key = "your_datadog_app_key_here"
+datadog_api_url = "https://api.us5.datadoghq.com"
