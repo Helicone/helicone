@@ -2,6 +2,8 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import React from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { TableSchema } from "./types";
+import { normalizeJawnResponse } from "./utils/normalizeJawnResponse";
 
 export const SQL_KEYWORDS = [
   "SELECT",
@@ -71,19 +73,11 @@ export const CLICKHOUSE_KEYWORDS = [
 
 export const ALL_KEYWORDS = [...SQL_KEYWORDS, ...CLICKHOUSE_KEYWORDS];
 
-export const getTableNames = (
-  schemas: {
-    table_name: string;
-    columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[],
-) => Array.from(new Set(schemas?.map((d) => d.table_name) ?? []));
+export const getTableNames = (schemas: TableSchema[]) =>
+  Array.from(new Set(schemas?.map((d) => d.table_name) ?? []));
 
-export const getTableNamesSet = (
-  schemas: {
-    table_name: string;
-    columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[],
-) => new Set(getTableNames(schemas));
+export const getTableNamesSet = (schemas: TableSchema[]) =>
+  new Set(getTableNames(schemas));
 
 export function parseSqlAndFindTableNameAndAliases(sql: string) {
   const regex =
@@ -113,20 +107,29 @@ export const createExecuteQueryMutation = (
   setQueryLoading: (loading: boolean) => void,
 ) => {
   return {
-    mutationFn: async (sql: string) => {
+    mutationFn: async (
+      sql: string,
+    ): Promise<{
+      error?: { error: string };
+      data?: { data: components["schemas"]["ExecuteSqlResponse"] };
+    }> => {
       setQueryLoading(true);
       const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
         body: {
           sql: sql,
         },
       });
-      return response;
+      return normalizeJawnResponse<components["schemas"]["ExecuteSqlResponse"]>(
+        response,
+      );
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: {
+      error?: { error: string };
+      data?: { data: components["schemas"]["ExecuteSqlResponse"] };
+    }) => {
       setQueryLoading(false);
       if (data.error || !data.data?.data) {
-        // @ts-ignore
-        setQueryError(data.error.error);
+        setQueryError(data.error?.error || "Query execution failed");
         setResult({
           rows: [],
           elapsedMilliseconds: 0,
@@ -143,7 +146,7 @@ export const createExecuteQueryMutation = (
         });
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       setQueryError(error.message);
       setResult({
         rows: [],
@@ -203,7 +206,7 @@ export const useSaveQueryMutation = (
       });
       setNotification("Successfully saved query", "success");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       setNotification(error.message, "error");
     },
   };
@@ -252,7 +255,7 @@ export const useBulkDeleteQueryMutation = (
       );
       return response;
     },
-    onSuccess: (_data: any, queryIds: string[]) => {
+    onSuccess: (_data: unknown, queryIds: string[]) => {
       const count = queryIds.length;
       setNotification(
         `${count} ${count === 1 ? "query" : "queries"} deleted successfully`,

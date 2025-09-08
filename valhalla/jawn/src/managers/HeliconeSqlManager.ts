@@ -49,7 +49,7 @@ function validateSql(sql: string): Result<null, HqlError> {
     });
 
     if (invalidTable) {
-      const [type, _, tableName] = invalidTable.split("::");
+      const [type, _, tableName] = invalidTable.split("::");  // TODO This may not be the best way to get the type and table name
       if (type !== "select") {
         return hqlError(
           HqlErrorCode.INVALID_STATEMENT,
@@ -188,6 +188,7 @@ export class HeliconeSqlManager {
       const normalizedAst = normalizeAst(ast)[0];
       
       // Add limit to prevent excessive data retrieval
+      // TODO Need to set a more dynamic limit, tied specifically to pagination
       let limitedAst;
       try {
         limitedAst = addLimit(normalizedAst, limit);
@@ -209,19 +210,15 @@ export class HeliconeSqlManager {
       const start = Date.now();
 
       // Execute query with organization context for row-level security
-      const result = await clickhouseDb.hqlQueryWithContext<
+      const result = await clickhouseDb.dbQuery<
         ExecuteSqlResponse["rows"]
-      >({
-        query: firstSql,
-        organizationId: this.authParams.organizationId,
-        parameters: [],
-      });
+      >(firstSql, [], z.array(z.any()));
 
       const elapsedMilliseconds = Date.now() - start;
 
       if (isError(result)) {
         const errorCode = parseClickhouseError(result.error);
-        return hqlError(errorCode, result.error);
+        return hqlError(errorCode, String(result.error));  // TODO Need a better way to parse the error
       }
 
       return ok({
@@ -231,7 +228,7 @@ export class HeliconeSqlManager {
         rowCount: result.data?.length ?? 0,
       });
     } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : String(e);
+      const errorMessage = e instanceof Error ? e.message : String(e);  // TODO Casting to string is not the best way to get the error message
       return hqlError(
         HqlErrorCode.UNEXPECTED_ERROR,
         errorMessage

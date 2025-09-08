@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { TableSchema } from "./types";
 import { clsx } from "clsx";
 import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,10 +28,7 @@ import { CommandLineIcon } from "@heroicons/react/24/outline";
 import { useBulkDeleteQueryMutation } from "./constants";
 
 interface DirectoryProps {
-  tables: {
-    table_name: string;
-    columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[];
+  tables: TableSchema[];
   currentQuery: {
     id: string | undefined;
     name: string;
@@ -184,7 +182,7 @@ export function Directory({
   );
 }
 
-function TableList({ tables }: { tables: any[] }) {
+function TableList({ tables }: { tables: TableSchema[] }) {
   const [expandedTables, setExpandedTables] = useState<Set<string>>(new Set());
 
   return (
@@ -213,7 +211,7 @@ function TableList({ tables }: { tables: any[] }) {
             </div>
             {expandedTables.has(table.table_name) && (
               <div className="mb-2 ml-6">
-                {table.columns.map((col: any) => (
+                {table.columns.map((col) => (
                   <div
                     key={col.name}
                     className="flex justify-between py-0.5 text-xs text-muted-foreground"
