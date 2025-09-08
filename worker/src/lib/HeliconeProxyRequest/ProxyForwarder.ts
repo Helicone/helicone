@@ -516,7 +516,7 @@ async function log(
       }
 
   const rawResponse = await loggable.getRawResponse();
-  const registryProviderName = heliconeProviderToProvider(proxyRequest.provider) ?? "openai";
+  const registryProviderName = heliconeProviderToProvider[proxyRequest.provider] ?? "openai";
   const usageProcessor = getUsageProcessor(registryProviderName);
   const usage = await usageProcessor.parse({
     responseBody: rawResponse,

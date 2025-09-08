@@ -1,6 +1,6 @@
-import { IUsageProcessor, ParseInput, Result } from "./IUsageProcessor";
+import { IUsageProcessor, ParseInput } from "./IUsageProcessor";
 import { ModelUsage } from "./types";
-
+import { Result } from "../../common/result";
 
 export class OpenAIUsageProcessor implements IUsageProcessor {
   public async parse(parseInput: ParseInput): Promise<Result<ModelUsage, string>> {

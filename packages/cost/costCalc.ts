@@ -4,7 +4,7 @@ import type { ModelProviderName } from "./models/providers";
 import { calculateModelCostBreakdown, CostBreakdown } from "./models/calculate-cost";
 
 // since costs in clickhouse are multiplied by the multiplier
-// divide to get real cost
+// divide to get real cost in USD in dollars
 export const COST_PRECISION_MULTIPLIER = 1_000_000_000;
 
 /**

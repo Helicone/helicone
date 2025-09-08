@@ -54,43 +54,45 @@ export const dbProviderToProvider = (
   return null;
 };
 
-
-export function heliconeProviderToProvider(
-  provider: Provider
-): ModelProviderName | null {
-  if (provider === "OPENAI") {
-    return "openai";
-  }
-  if (provider === "ANTHROPIC") {
-    return "anthropic";
-  }
-  if (provider === "BEDROCK" || provider === "AWS") {
-    return "bedrock";
-  }
-  if (provider === "GOOGLE") {
-    return "google-ai-studio";
-  }
-  if (provider === "AZURE") {
-    return "azure";
-  }
-  if (provider === "GROQ") {
-    return "groq";
-  }
-  if (provider === "DEEPSEEK") {
-    return "deepseek";
-  }
-  if (provider === "COHERE") {
-    return "cohere";
-  }
-  if (provider === "X") {
-    return "xai";
-  }
-  if (provider === "PERPLEXITY") {
-    return "perplexity";
-  }
-  // Note: does not catch all possible providers and CUSTOM
-  return null;
-}
+export const heliconeProviderToProvider: Record<Provider, ModelProviderName | null> = {
+  OPENAI: "openai",
+  ANTHROPIC: "anthropic",
+  BEDROCK: "bedrock",
+  AWS: "bedrock",
+  GOOGLE: "google-ai-studio",
+  AZURE: "azure",
+  GROQ: "groq",
+  DEEPSEEK: "deepseek",
+  COHERE: "cohere",
+  X: "xai",
+  PERPLEXITY: "perplexity",
+  
+  LOCAL: null,
+  HELICONE: null,
+  AMDBARTEK: null,
+  ANYSCALE: null,
+  CLOUDFLARE: null,
+  "2YFV": null,
+  TOGETHER: null,
+  LEMONFOX: null,
+  FIREWORKS: null,
+  OPENROUTER: null,
+  WISDOMINANUTSHELL: null,
+  MISTRAL: null,
+  DEEPINFRA: null,
+  QSTASH: null,
+  FIRECRAWL: null,
+  AVIAN: null,
+  NEBIUS: null,
+  NOVITA: null,
+  OPENPIPE: null,
+  CHUTES: null,
+  LLAMA: null,
+  NVIDIA: null,
+  VERCEL: null,
+  
+  CUSTOM: null,
+};
 
 export function buildEndpointUrl(
   endpointConfig: ModelProviderConfig,

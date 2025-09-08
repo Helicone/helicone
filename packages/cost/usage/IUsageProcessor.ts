@@ -1,6 +1,5 @@
 import { ModelUsage } from "./types";
-
-export type Result<T, E> = { data: T; error: null } | { data: null; error: E };
+import { Result } from "../../common/result";
 
 export interface ParseInput {
   responseBody: string;
