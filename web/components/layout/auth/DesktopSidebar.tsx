@@ -1,5 +1,6 @@
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
@@ -11,7 +12,7 @@ import {
 import { MessageCircle, Rocket, Settings } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ChangelogModal from "../ChangelogModal";
 import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
@@ -258,7 +259,11 @@ const DesktopSidebar = ({
 
           {/* Main content area */}
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="mb-2 flex h-full flex-1 flex-col justify-between overflow-y-auto">
+            <ScrollArea
+              className="mb-2 flex h-full flex-1 flex-col justify-between"
+              width="thin"
+              type="scroll"
+            >
               {/* Navigation items */}
               <div className="flex flex-col">
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
@@ -355,7 +360,7 @@ const DesktopSidebar = ({
                     </div>
                   </div>
                 ))}
-            </div>
+            </ScrollArea>
 
             <div className="flex flex-col gap-2 p-3">
               <Button
