@@ -1,0 +1,85 @@
+name: HQL ClickHouse Wrapper Tests
+
+on:
+  push:
+    branches:
+      - main
+      - devin/eng-3012-ci
+  pull_request:
+    branches:
+      - main
+    paths:
+      # ClickHouse wrapper and database implementation files
+      - "valhalla/jawn/src/lib/db/ClickhouseWrapper.ts"
+      - "valhalla/jawn/src/managers/HeliconeSqlManager.ts"
+      # ClickHouse wrapper test files
+      - "valhalla/jawn/src/lib/db/test/TestClickhouseWrapper.test.ts"
+      - "valhalla/jawn/src/lib/db/test/TestClickhouseWrapper.ts"
+      - "valhalla/jawn/src/lib/db/test/clickhouseMockData.ts"
+      # Workflow file itself
+      - ".github/workflows/hql-clickhouse-tests.yml"
+
+jobs:
+  hql-clickhouse-wrapper-tests:
+    name: HQL ClickHouse Wrapper Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: valhalla/jawn
+    services:
+      clickhouse:
+        image: clickhouse/clickhouse-server:latest
+        ports:
+          - 8123:8123
+          - 9000:9000
+        options: >-
+          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
+
+      - name: Install dependencies
+        run: |
+          # Retry logic for yarn install with fallback to npm
+          for i in 1 2 3; do
+            echo "Attempt $i: Installing dependencies..."
+            if yarn install --frozen-lockfile --network-timeout 100000; then
+              echo "✓ Successfully installed dependencies"
+              exit 0
+            fi
+            echo "Attempt $i failed, waiting 5 seconds..."
+            sleep 5
+          done
+          # Fallback to npm if yarn fails
+          echo "Yarn failed, using npm install..."
+          npm install
+
+      - name: Wait for ClickHouse
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:8123/ping > /dev/null; then
+              echo "ClickHouse is ready"
+              break
+            fi
+            echo "Waiting for ClickHouse... ($i/30)"
+            sleep 2
+          done
+
+      - name: Run ClickHouse Wrapper Tests
+        run: yarn test:jawn TestClickhouseWrapper.test.ts
+        env:
+          NODE_ENV: test
+          CLICKHOUSE_HOST: localhost
+          CLICKHOUSE_PORT: 8123
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: ""
+          CLICKHOUSE_DATABASE: default
