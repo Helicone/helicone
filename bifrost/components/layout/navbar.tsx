@@ -40,6 +40,7 @@ interface NavBarProps {
   stars?: number;
   featuredBlogMetadata: BlogStructureMetaData;
   featuredBlogFolderName?: string;
+  noMargin?: boolean;
 }
 
 const MobileHeader = (props: {
@@ -337,7 +338,7 @@ const NavBar = (props: NavBarProps) => {
   return (
     <div
       ref={headerRef}
-      className="bg-background top-0 sticky z-30 border-b border-border mb-10"
+      className={`bg-background top-0 sticky z-30 border-b border-border ${props.noMargin ? "" : "mb-10"}`}
     >
       <MobileNav />
 
