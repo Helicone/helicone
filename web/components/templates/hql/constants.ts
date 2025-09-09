@@ -170,9 +170,9 @@ export const useSaveQueryMutation = (
       sql: string;
     }) => {
       if (savedQuery.id) {
-        const response = await $JAWN_API.PUT("/v1/helicone-sql/saved-query", {
+        const response = await $JAWN_API.PUT("/v1/helicone-sql/saved-query/{queryId}", {
+          params: { path: { queryId: savedQuery.id } },
           body: {
-            id: savedQuery.id,
             name: savedQuery.name,
             sql: savedQuery.sql,
           },
