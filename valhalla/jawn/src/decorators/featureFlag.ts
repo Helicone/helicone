@@ -6,50 +6,40 @@ import { JawnAuthenticatedRequest } from "../types/request";
 
 const FEATURE_FLAG_METADATA_KEY = Symbol("featureFlags");
 
-export interface FeatureFlagError {
+/**
+ * Generic error formatter type that can work with any error system
+ */
+export type ErrorFormatter<T = any> = (flag: string) => {
   message: string;
   statusCode: number;
-  code?: string;
-}
+  error?: T;
+};
 
-export interface FeatureFlagOptions {
-  errorFormatter?: (flag: string) => FeatureFlagError;
-}
-
-export interface FeatureFlagMetadata {
-  flags: string[];
-  options?: FeatureFlagOptions;
+/**
+ * Options for feature flag decorator with generic error type
+ */
+export interface FeatureFlagOptions<T = any> {
+  errorFormatter?: ErrorFormatter<T>;
 }
 
 /**
- * Decorator to require feature flag(s) for a controller method.
- * 
- * @param flag - The feature flag name to check
- * @param options - Optional configuration for error handling
- * 
- * @example
- * // Using default error format
- * @RequireFeatureFlag("my-feature")
- * 
- * @example
- * // Using custom error format for HQL
- * @RequireFeatureFlag(HQL_FEATURE_FLAG, {
- *   errorFormatter: (flag) => ({
- *     message: `[HQL_FEATURE_NOT_ENABLED] Access to HQL feature is not enabled for your organization`,
- *     statusCode: 403
- *   })
- * })
+ * Metadata stored for feature flags
  */
-export function RequireFeatureFlag(
+export interface FeatureFlagMetadata<T = any> {
+  flags: string[];
+  options?: FeatureFlagOptions<T>;
+}
+
+export function RequireFeatureFlag<T = any>(
   flag: string,
-  options?: FeatureFlagOptions
+  options?: FeatureFlagOptions<T>
 ): MethodDecorator {
   return function (
     target: any,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor
   ) {
-    const existingMetadata: FeatureFlagMetadata = Reflect.getMetadata(
+    const existingMetadata: FeatureFlagMetadata<T> = Reflect.getMetadata(
       FEATURE_FLAG_METADATA_KEY,
       target,
       propertyKey
@@ -85,7 +75,7 @@ export function RequireFeatureFlag(
         };
       }
 
-      const metadata: FeatureFlagMetadata = Reflect.getMetadata(
+      const metadata: FeatureFlagMetadata<T> = Reflect.getMetadata(
         FEATURE_FLAG_METADATA_KEY,
         target,
         propertyKey
@@ -127,10 +117,15 @@ export function RequireFeatureFlag(
  * 
  * @param flags - Array of feature flag names to check
  * @param options - Optional configuration for error handling
+ * 
+ * @example
+ * @RequireFeatureFlags<MyErrorType>(["feature1", "feature2"], {
+ *   errorFormatter: (flag) => ({ ... })
+ * })
  */
-export function RequireFeatureFlags(
+export function RequireFeatureFlags<T = any>(
   flags: string[],
-  options?: FeatureFlagOptions
+  options?: FeatureFlagOptions<T>
 ): MethodDecorator {
   return function (
     target: any,
@@ -138,15 +133,40 @@ export function RequireFeatureFlags(
     descriptor: PropertyDescriptor
   ) {
     flags.forEach((flag) => {
-      RequireFeatureFlag(flag, options)(target, propertyKey, descriptor);
+      RequireFeatureFlag<T>(flag, options)(target, propertyKey, descriptor);
     });
     return descriptor;
   };
 }
 
-export function getFeatureFlagMetadata(
+/**
+ * Helper function to create a typed error formatter for a specific error system
+ * 
+ * @example
+ * const hqlErrorFormatter = createErrorFormatter<HqlErrorCode>(
+ *   (flag) => HqlErrorCode.FEATURE_NOT_ENABLED,
+ *   (code) => `[${code}] Feature not enabled`,
+ *   403
+ * );
+ */
+export function createErrorFormatter<T>(
+  errorSelector: (flag: string) => T,
+  messageFormatter: (error: T, flag: string) => string,
+  statusCode: number = 403
+): ErrorFormatter<T> {
+  return (flag: string) => {
+    const error = errorSelector(flag);
+    return {
+      message: messageFormatter(error, flag),
+      statusCode,
+      error
+    };
+  };
+}
+
+export function getFeatureFlagMetadata<T = any>(
   target: any,
   propertyKey: string | symbol
-): FeatureFlagMetadata | undefined {
+): FeatureFlagMetadata<T> | undefined {
   return Reflect.getMetadata(FEATURE_FLAG_METADATA_KEY, target, propertyKey);
 }

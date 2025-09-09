@@ -21,15 +21,14 @@ import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { HQL_FEATURE_FLAG } from "../../lib/utils/featureFlags";
 import { HqlQueryManager } from "../../managers/HqlQueryManager";
-import { RequireFeatureFlag, FeatureFlagOptions } from "../../decorators/featureFlag";
+import { RequireFeatureFlag, createErrorFormatter } from "../../decorators/featureFlag";
 
-// Custom error formatter for HQL feature flag
-const hqlFeatureFlagOptions: FeatureFlagOptions = {
-  errorFormatter: () => ({
-    message: `[${HqlErrorCode.FEATURE_NOT_ENABLED}] ${HqlErrorMessages[HqlErrorCode.FEATURE_NOT_ENABLED]}`,
-    statusCode: 403
-  })
-};
+// Create a typed error formatter for HQL feature flags
+const hqlFeatureFlagFormatter = createErrorFormatter<HqlErrorCode>(
+  () => HqlErrorCode.FEATURE_NOT_ENABLED,
+  (code) => `[${code}] ${HqlErrorMessages[code]}`,
+  403
+);
 
 // --- Response Types ---
 export interface ClickHouseTableSchema {
@@ -110,7 +109,9 @@ export class HeliconeSqlController extends Controller {
   }
 
   @Post("execute")
-  @RequireFeatureFlag(HQL_FEATURE_FLAG, hqlFeatureFlagOptions)
+  @RequireFeatureFlag<HqlErrorCode>(HQL_FEATURE_FLAG, {
+    errorFormatter: hqlFeatureFlagFormatter
+  })
   public async executeSql(
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
@@ -135,7 +136,9 @@ export class HeliconeSqlController extends Controller {
   }
 
   @Post("download")
-  @RequireFeatureFlag(HQL_FEATURE_FLAG, hqlFeatureFlagOptions)
+  @RequireFeatureFlag<HqlErrorCode>(HQL_FEATURE_FLAG, {
+    errorFormatter: hqlFeatureFlagFormatter
+  })
   public async downloadCsv(
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
