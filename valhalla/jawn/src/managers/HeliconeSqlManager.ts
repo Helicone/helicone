@@ -109,14 +109,21 @@ function normalizeAst(ast: AST | AST[]): AST[] {
   return [ast];
 }
 
-// TODO This is very ugly and needs a refactor
 function checkForbiddenColumns(ast: AST): boolean {
   if ((ast as any)?.type !== "select") return false;
   const columns = (ast as any)?.columns ?? [];
   const forbidden = new Set(["request_body", "response_body"]);
   for (const col of columns) {
     const expr = (col as any)?.expr;
+    // Disallow wildcard projections as they may include forbidden columns
+    if (expr?.type === "star") {
+      return true;
+    }
     if (expr?.type !== "column_ref") continue;
+    // Handle table.* case where column_ref has column === '*'
+    if ((expr as any)?.column === "*") {
+      return true;
+    }
     const raw = (expr as any)?.column;
     const nameCandidate = typeof raw === "string" ? raw : (raw as any)?.expr?.value;
     if (typeof nameCandidate !== "string") continue;
