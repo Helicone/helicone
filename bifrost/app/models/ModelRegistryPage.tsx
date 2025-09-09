@@ -169,7 +169,7 @@ export function ModelRegistryPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
-      <div className="max-w-7xl mx-auto">
+      <div>
         {/* Main Layout: Sidebar + Content */}
         <div className="flex">
           {/* Left Sidebar - Filters - Sticky position */}
@@ -190,7 +190,7 @@ export function ModelRegistryPage() {
                     />
                   </button>
                   {expandedSections.has("providers") && (
-                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                    <div className="space-y-1 max-h-48 overflow-y-auto pr-2">
                       {availableFilters.providers.map((provider) => {
                         const providerName =
                           typeof provider === "string"
@@ -215,7 +215,7 @@ export function ModelRegistryPage() {
                             }}
                             className={`flex items-center justify-between px-2 py-1.5 text-sm cursor-pointer transition-colors ${
                               isSelected
-                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
+                                ? "bg-sky-50 dark:bg-sky-900/10 text-sky-700 dark:text-sky-400"
                                 : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
                             }`}
                           >
@@ -357,9 +357,9 @@ export function ModelRegistryPage() {
           </div>
 
           {/* Right Content - Table */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 min-h-[calc(100vh-var(--header-offset))] flex flex-col">
             {/* Controls Box - Connected to sidebar and table */}
-            <div className="bg-white dark:bg-gray-900 border-l border-r border-gray-200 dark:border-gray-800">
+            <div className="bg-white dark:bg-gray-900 border-l border-r border-b border-gray-200 dark:border-gray-800 sticky top-[var(--header-offset)] z-10 shadow-sm">
               <div className="p-6">
                 <div className="flex flex-col gap-4">
                   {/* Title and model count */}
@@ -430,10 +430,10 @@ export function ModelRegistryPage() {
             </div>
 
             {/* Models Table - Connected to controls box with divider */}
-            <div className="overflow-hidden bg-white dark:bg-gray-900 border-t border-l border-r border-b border-gray-200 dark:border-gray-800">
+            <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900 border-l border-r border-b border-gray-200 dark:border-gray-800">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
-                  {filteredModels.map((model) => {
+                  {filteredModels.map((model, index) => {
                     const minInputCost = Math.min(
                       ...model.endpoints.map((e) => e.pricing.prompt)
                     );
@@ -529,11 +529,13 @@ export function ModelRegistryPage() {
                           </td>
                         </tr>
 
-                        <tr>
-                          <td className="px-6 py-2">
-                            <div className="border-b border-gray-100 dark:border-gray-800/50 mx-12"></div>
-                          </td>
-                        </tr>
+                        {index < filteredModels.length - 1 && (
+                          <tr>
+                            <td className="px-6 py-2">
+                              <div className="border-b border-gray-100 dark:border-gray-800/50 mx-12"></div>
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     );
                   })}
