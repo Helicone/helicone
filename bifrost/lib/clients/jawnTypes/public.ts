@@ -414,6 +414,10 @@ export interface paths {
     post: operations["GetCostsOverTime"];
   };
   "/v1/public/model-registry/models": {
+    /**
+     * Returns a comprehensive list of all AI models with their configurations, pricing, and capabilities
+     * @description Get all available models from the registry
+     */
     get: operations["GetModelRegistry"];
   };
   "/v1/public/compare/models": {
@@ -443,27 +447,62 @@ export interface paths {
     get: operations["GetSlackChannels"];
   };
   "/v1/helicone-sql/schema": {
-    /** @description Get ClickHouse schema (tables and columns) */
+    /**
+     * Get database schema
+     * @description Get ClickHouse schema (tables and columns)
+     */
     get: operations["GetClickHouseSchema"];
   };
   "/v1/helicone-sql/execute": {
+    /**
+     * Execute SQL query
+     * @description Execute a SQL query against ClickHouse
+     */
     post: operations["ExecuteSql"];
   };
   "/v1/helicone-sql/download": {
+    /**
+     * Download query results as CSV
+     * @description Execute a SQL query and download results as CSV
+     */
     post: operations["DownloadCsv"];
   };
   "/v1/helicone-sql/saved-queries": {
+    /**
+     * List saved queries
+     * @description Get all saved queries for the organization
+     */
     get: operations["GetSavedQueries"];
   };
   "/v1/helicone-sql/saved-query/{queryId}": {
+    /**
+     * Get saved query
+     * @description Get a specific saved query by ID
+     */
     get: operations["GetSavedQuery"];
+    /**
+     * Update saved query
+     * @description Update an existing saved query
+     */
+    put: operations["UpdateSavedQuery"];
+    /**
+     * Delete saved query
+     * @description Delete a saved query by ID
+     */
     delete: operations["DeleteSavedQuery"];
   };
   "/v1/helicone-sql/saved-queries/bulk-delete": {
+    /**
+     * Bulk delete saved queries
+     * @description Delete multiple saved queries at once
+     */
     post: operations["BulkDeleteSavedQueries"];
   };
   "/v1/helicone-sql/saved-query": {
-    put: operations["UpdateSavedQuery"];
+    /**
+     * Create saved query
+     * @description Create a new saved query
+     */
     post: operations["CreateSavedQuery"];
   };
   "/v1/experiment/new-empty": {
@@ -3084,11 +3123,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_HqlSavedQuery.string_": components["schemas"]["ResultSuccess_HqlSavedQuery_"] | components["schemas"]["ResultError_string_"];
-    UpdateSavedQueryRequest: {
-      name: string;
-      sql: string;
-      id: string;
-    };
     "ResultSuccess__tableId-string--experimentId-string__": {
       data: {
         experimentId: string;
@@ -6348,9 +6382,13 @@ export interface operations {
       };
     };
   };
+  /**
+   * Returns a comprehensive list of all AI models with their configurations, pricing, and capabilities
+   * @description Get all available models from the registry
+   */
   GetModelRegistry: {
     responses: {
-      /** @description Ok */
+      /** @description Complete model registry with models and filter options */
       200: {
         content: {
           "application/json": components["schemas"]["Result_ModelRegistryResponse.string_"];
@@ -6496,10 +6534,13 @@ export interface operations {
       };
     };
   };
-  /** @description Get ClickHouse schema (tables and columns) */
+  /**
+   * Get database schema
+   * @description Get ClickHouse schema (tables and columns)
+   */
   GetClickHouseSchema: {
     responses: {
-      /** @description Ok */
+      /** @description Array of table schemas with columns */
       200: {
         content: {
           "application/json": components["schemas"]["Result_ClickHouseTableSchema-Array.string_"];
@@ -6507,14 +6548,19 @@ export interface operations {
       };
     };
   };
+  /**
+   * Execute SQL query
+   * @description Execute a SQL query against ClickHouse
+   */
   ExecuteSql: {
+    /** @description The SQL query to execute */
     requestBody: {
       content: {
         "application/json": components["schemas"]["ExecuteSqlRequest"];
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description Query results with rows and metadata */
       200: {
         content: {
           "application/json": components["schemas"]["Result_ExecuteSqlResponse.string_"];
@@ -6522,14 +6568,19 @@ export interface operations {
       };
     };
   };
+  /**
+   * Download query results as CSV
+   * @description Execute a SQL query and download results as CSV
+   */
   DownloadCsv: {
+    /** @description The SQL query to execute */
     requestBody: {
       content: {
         "application/json": components["schemas"]["ExecuteSqlRequest"];
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description URL to download the CSV file */
       200: {
         content: {
           "application/json": components["schemas"]["Result_string.string_"];
@@ -6537,9 +6588,13 @@ export interface operations {
       };
     };
   };
+  /**
+   * List saved queries
+   * @description Get all saved queries for the organization
+   */
   GetSavedQueries: {
     responses: {
-      /** @description Ok */
+      /** @description Array of saved queries */
       200: {
         content: {
           "application/json": components["schemas"]["Result_Array_HqlSavedQuery_.string_"];
@@ -6547,14 +6602,19 @@ export interface operations {
       };
     };
   };
+  /**
+   * Get saved query
+   * @description Get a specific saved query by ID
+   */
   GetSavedQuery: {
     parameters: {
       path: {
+        /** @description The ID of the saved query */
         queryId: string;
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description The saved query details */
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery-or-null.string_"];
@@ -6562,9 +6622,40 @@ export interface operations {
       };
     };
   };
+  /**
+   * Update saved query
+   * @description Update an existing saved query
+   */
+  UpdateSavedQuery: {
+    parameters: {
+      path: {
+        /** @description The ID of the saved query to update */
+        queryId: string;
+      };
+    };
+    /** @description The updated query details */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description The updated saved query */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Delete saved query
+   * @description Delete a saved query by ID
+   */
   DeleteSavedQuery: {
     parameters: {
       path: {
+        /** @description The ID of the saved query to delete */
         queryId: string;
       };
     };
@@ -6577,7 +6668,12 @@ export interface operations {
       };
     };
   };
+  /**
+   * Bulk delete saved queries
+   * @description Delete multiple saved queries at once
+   */
   BulkDeleteSavedQueries: {
+    /** @description Array of query IDs to delete */
     requestBody: {
       content: {
         "application/json": components["schemas"]["BulkDeleteSavedQueriesRequest"];
@@ -6592,29 +6688,19 @@ export interface operations {
       };
     };
   };
-  UpdateSavedQuery: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateSavedQueryRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
-        };
-      };
-    };
-  };
+  /**
+   * Create saved query
+   * @description Create a new saved query
+   */
   CreateSavedQuery: {
+    /** @description The saved query details */
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateSavedQueryRequest"];
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description Array containing the created saved query */
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
