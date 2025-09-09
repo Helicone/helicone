@@ -77,17 +77,13 @@ const Credits: NextPageWithLayout<void> = () => {
     <div className="flex h-screen w-full flex-col">
       <Header
         title="Credits"
-        leftActions={
-          <Badge variant="helicone-sky">
-            BETA
-          </Badge>
-        }
+        leftActions={<Badge variant="helicone-sky">BETA</Badge>}
         rightActions={
           <Link
             href="https://docs.helicone.ai/gateway/credits"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             📖 Docs
           </Link>
@@ -241,7 +237,9 @@ const Credits: NextPageWithLayout<void> = () => {
                       </Small>
                       <div className="mt-2 text-3xl font-bold">
                         {isLoading ? (
-                          <span className="text-muted-foreground">Loading...</span>
+                          <span className="text-muted-foreground">
+                            Loading...
+                          </span>
                         ) : creditError ? (
                           <span className="text-destructive">
                             Error loading balance
@@ -335,7 +333,7 @@ const Credits: NextPageWithLayout<void> = () => {
                   </div>
                 </div>
 
-{/* Recent Transactions Section */}
+                {/* Recent Transactions Section */}
                 <div className="px-6 py-8">
                   <div className="mb-6 flex items-center justify-between">
                     <Small className="font-semibold text-slate-900 dark:text-slate-100">
