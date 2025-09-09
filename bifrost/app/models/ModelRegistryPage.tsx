@@ -24,8 +24,6 @@ import { Slider } from "@/components/ui/slider";
 import { useModelFiltering } from "@/hooks/useModelFiltering";
 import { Model, SortOption } from "@/lib/filters/modelFilters";
 import { components } from "@/lib/clients/jawnTypes/public";
-import Header from "@/components/shared/Header";
-import { H1, P, Small, Muted } from "@/components/ui/typography";
 
 type ModelRegistryResponse = components["schemas"]["ModelRegistryResponse"];
 
@@ -171,25 +169,21 @@ export function ModelRegistryPage() {
   };
 
   return (
-    <div className="flex h-screen w-full flex-col">
-      <Header
-        title={
-          <div className="flex flex-col">
-            <span className="text-lg font-semibold text-foreground">Model Registry</span>
-            <Small className="text-muted-foreground">
-              {loading ? (
-                <span className="animate-pulse">Loading models...</span>
-              ) : (
-                `${totalModels} models across ${availableFilters.providers.length} providers`
-              )}
-            </Small>
-          </div>
-        }
-      />
-
-      <div className="flex flex-1 justify-center">
-        <div className="flex w-full max-w-7xl flex-col border-l border-r border-border">
-          <div className="flex-1 overflow-auto">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Model Registry
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
+            {loading ? (
+              <span className="animate-pulse">Loading models...</span>
+            ) : (
+              `${totalModels} models across ${availableFilters.providers.length} providers`
+            )}
+          </p>
+        </div>
 
         {/* Main Layout: Sidebar + Content */}
         <div className="flex gap-6">
