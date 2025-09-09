@@ -23,13 +23,13 @@ export class ClickhouseClientWrapper {
 
   constructor(env: ClickhouseEnv) {
     this.clickHouseClient = createClient({
-      host: env.CLICKHOUSE_HOST,
+      url: env.CLICKHOUSE_HOST,
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
     });
 
     this.clickHouseHqlClient = createClient({
-      host: env.CLICKHOUSE_HOST,
+      url: env.CLICKHOUSE_HOST,
       username: env.CLICKHOUSE_HQL_USER,
       password: env.CLICKHOUSE_HQL_PASSWORD,
     });
