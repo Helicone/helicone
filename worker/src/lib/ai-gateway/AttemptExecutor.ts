@@ -140,9 +140,16 @@ export class AttemptExecutor {
       const response = await forwarder(endpoint.baseUrl, escrowInfo);
 
       if (!response.ok) {
+        let text: string;
+        try {
+          text = await response.text();
+        } catch (error) {
+          text = "Failed to read response body";
+        }
+
         return err({
           type: "request_failed",
-          message: `Request failed with status ${response.status}`,
+          message: `Request failed with status ${response.status}: ${text}`,
           statusCode: response.status,
         });
       }
