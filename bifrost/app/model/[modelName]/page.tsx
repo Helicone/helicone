@@ -2,6 +2,48 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import { ModelDetailPage } from "./ModelDetailPage";
 import { Layout } from "@/app/components/Layout";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { components } from "@/lib/clients/jawnTypes/public";
+
+type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
+
+// Revalidate every hour to keep data fresh
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  try {
+    const jawnClient = getJawnClient();
+    const response = await jawnClient.GET("/v1/public/model-registry/models");
+    
+    if (response.data?.data?.models) {
+      return response.data.data.models.map((model: ModelRegistryItem) => ({
+        modelName: encodeURIComponent(model.id),
+      }));
+    }
+  } catch (error) {
+    console.error("Failed to generate static params for models:", error);
+  }
+  
+  return [];
+}
+
+async function fetchModelData(modelId: string): Promise<ModelRegistryItem | null> {
+  try {
+    const jawnClient = getJawnClient();
+    const response = await jawnClient.GET("/v1/public/model-registry/models");
+    
+    if (response.data?.data?.models) {
+      const model = response.data.data.models.find(
+        (m: ModelRegistryItem) => m.id === modelId
+      );
+      return model || null;
+    }
+  } catch (error) {
+    console.error("Failed to fetch model data:", error);
+  }
+  
+  return null;
+}
 
 export async function generateMetadata({
   params,
@@ -9,7 +51,9 @@ export async function generateMetadata({
   params: { modelName: string };
 }): Promise<Metadata> {
   const decodedModelName = decodeURIComponent(params.modelName);
-  const displayName = decodedModelName
+  const model = await fetchModelData(decodedModelName);
+  
+  const displayName = model?.name || decodedModelName
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
@@ -40,8 +84,11 @@ export default async function ModelPage({
 }: {
   params: { modelName: string };
 }) {
+  const decodedModelName = decodeURIComponent(params.modelName);
+  const model = await fetchModelData(decodedModelName);
+  
   return (
-    <Layout>
+    <Layout noNavbarMargin={true}>
       <Suspense
         fallback={
           <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto px-4 py-8">
@@ -58,7 +105,7 @@ export default async function ModelPage({
           </div>
         }
       >
-        <ModelDetailPage />
+        <ModelDetailPage initialModel={model} />
       </Suspense>
     </Layout>
   );

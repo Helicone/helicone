@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { getJawnClient } from "@/lib/clients/jawn";
-import Link from "next/link";
 import {
   Select,
   SelectContent,
@@ -169,29 +168,13 @@ export function ModelRegistryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Model Registry
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
-            {loading ? (
-              <span className="animate-pulse">Loading models...</span>
-            ) : (
-              `${totalModels} models across ${availableFilters.providers.length} providers`
-            )}
-          </p>
-        </div>
-
+    <div className="min-h-screen bg-white dark:bg-black">
+      <div className="max-w-7xl mx-auto">
         {/* Main Layout: Sidebar + Content */}
-        <div className="flex gap-6">
-          {/* Left Sidebar - Filters */}
-          <div
-            className={`w-80 flex-shrink-0 ${sidebarOpen ? "block" : "hidden"} lg:block`}
-          >
-            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+        <div className="flex">
+          {/* Left Sidebar - Filters - Sticky position */}
+          <div className={`w-80 flex-shrink-0 ${sidebarOpen ? "block" : "hidden"} lg:block`}>
+            <div className="bg-white dark:bg-gray-900 border-l border-b border-gray-200 dark:border-gray-800 sticky top-[var(--header-offset)] h-[calc(100vh-var(--header-offset))] overflow-y-auto">
               <div className="p-6">
                 {/* Provider Filter */}
                 <div className="mb-6">
@@ -230,7 +213,7 @@ export function ModelRegistryPage() {
                               }
                               setSelectedProviders(newSet);
                             }}
-                            className={`flex items-center justify-between px-2 py-1.5 text-sm rounded cursor-pointer transition-colors ${
+                            className={`flex items-center justify-between px-2 py-1.5 text-sm cursor-pointer transition-colors ${
                               isSelected
                                 ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
                                 : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -353,7 +336,7 @@ export function ModelRegistryPage() {
                               }
                               setSelectedCapabilities(newSet);
                             }}
-                            className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                            className={`flex items-center justify-between px-2 py-1.5 cursor-pointer transition-colors ${
                               isSelected
                                 ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
                                 : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -375,184 +358,185 @@ export function ModelRegistryPage() {
 
           {/* Right Content - Table */}
           <div className="flex-1 min-w-0">
-            {/* Search and Sort */}
-            <div className="mb-6">
-              <div className="flex flex-col gap-3">
-                {/* Model count */}
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Showing {filteredModels.length} of {totalModels} models
-                  </span>
-                  {/* Reset filters button - always rendered to prevent layout shift */}
-                  <button
-                    onClick={() => {
-                      setSelectedProviders(new Set());
-                      setPriceRange([0, 50]);
-                      setMinContextSize(0);
-                      setSelectedCapabilities(new Set());
-                      setSearchQuery("");
-                    }}
-                    className={`px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 rounded-lg transition-all flex items-center gap-2 ${
-                      isFiltered
-                        ? "opacity-100 pointer-events-auto"
-                        : "opacity-0 pointer-events-none"
-                    }`}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                    Reset filters
-                  </button>
-                </div>
-
-                {/* Search bar and sort */}
-                <div className="flex gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <Input
-                      placeholder="Search models..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 h-10"
-                    />
+            {/* Controls Box - Connected to sidebar and table */}
+            <div className="bg-white dark:bg-gray-900 border-l border-r border-gray-200 dark:border-gray-800">
+              <div className="p-6">
+                <div className="flex flex-col gap-4">
+                  {/* Title and model count */}
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                        Models
+                      </h1>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Showing {filteredModels.length} of {totalModels} models
+                      </span>
+                    </div>
+                    {/* Reset filters button - always rendered to prevent layout shift */}
+                    <button
+                      onClick={() => {
+                        setSelectedProviders(new Set());
+                        setPriceRange([0, 50]);
+                        setMinContextSize(0);
+                        setSelectedCapabilities(new Set());
+                        setSearchQuery("");
+                      }}
+                      className={`px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all flex items-center gap-2 ${
+                        isFiltered
+                          ? "opacity-100 pointer-events-auto"
+                          : "opacity-0 pointer-events-none"
+                      }`}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      Reset filters
+                    </button>
                   </div>
 
-                  <Select
-                    value={sortBy}
-                    onValueChange={(v) => setSortBy(v as SortOption)}
-                  >
-                    <SelectTrigger className="w-[160px] h-10">
-                      <ArrowUpDown className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Sort" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="name">Name</SelectItem>
-                      <SelectItem value="price-low">
-                        Price: Low to High
-                      </SelectItem>
-                      <SelectItem value="price-high">
-                        Price: High to Low
-                      </SelectItem>
-                      <SelectItem value="context">Context Size</SelectItem>
-                      <SelectItem value="newest">Newest First</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {/* Search bar and sort */}
+                  <div className="flex gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <Input
+                        placeholder="Search models..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9 h-10"
+                      />
+                    </div>
+
+                    <Select
+                      value={sortBy}
+                      onValueChange={(v) => setSortBy(v as SortOption)}
+                    >
+                      <SelectTrigger className="w-[160px] h-10">
+                        <ArrowUpDown className="h-4 w-4 mr-2" />
+                        <SelectValue placeholder="Sort" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="name">Name</SelectItem>
+                        <SelectItem value="price-low">
+                          Price: Low to High
+                        </SelectItem>
+                        <SelectItem value="price-high">
+                          Price: High to Low
+                        </SelectItem>
+                        <SelectItem value="context">Context Size</SelectItem>
+                        <SelectItem value="newest">Newest First</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Models Table */}
-            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+            {/* Models Table - Connected to controls box with divider */}
+            <div className="overflow-hidden bg-white dark:bg-gray-900 border-t border-l border-r border-b border-gray-200 dark:border-gray-800">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
-                  <tbody>
-                    {filteredModels.map((model) => {
-                      const minInputCost = Math.min(
-                        ...model.endpoints.map((e) => e.pricing.prompt)
-                      );
-                      const minOutputCost = Math.min(
-                        ...model.endpoints.map((e) => e.pricing.completion)
-                      );
-                      const isFree = minInputCost === 0;
+                  {filteredModels.map((model) => {
+                    const minInputCost = Math.min(
+                      ...model.endpoints.map((e) => e.pricing.prompt)
+                    );
+                    const minOutputCost = Math.min(
+                      ...model.endpoints.map((e) => e.pricing.completion)
+                    );
+                    const isFree = minInputCost === 0;
 
-                      return (
-                        <tbody key={model.id} className="group cursor-pointer">
-                          <tr
-                            className="border-t-4 border-transparent group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
-                            onClick={(e) => {
-                              if (
-                                !(e.target as HTMLElement).closest("button")
-                              ) {
-                                const currentParams = searchParams.toString();
-                                router.push(
-                                  `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ''}`
-                                );
-                              }
-                            }}
-                          >
-                            <td className="px-6 pt-6 pb-1">
-                              <div className="flex items-center gap-2">
-                                <Link
-                                  href={`/model/${encodeURIComponent(model.id)}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`}
-                                  className="text-lg font-normal text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {model.name.replace(
-                                    new RegExp(`^${model.author}:\s*`, "i"),
-                                    ""
-                                  )}
-                                </Link>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    copyModelId(model.id);
-                                  }}
-                                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
-                                  title={`Copy model ID: ${model.id}`}
-                                >
-                                  {copiedModel === model.id ? (
-                                    <Check className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                  ) : (
-                                    <Clipboard className="h-3.5 w-3.5" />
-                                  )}
-                                </button>
-                                {isFree && (
-                                  <span className="text-xs font-normal text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/40 px-2.5 py-1 rounded-full">
-                                    Free
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-
-                          <tr
-                            className="group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
-                            onClick={() => {
+                    return (
+                      <tbody key={model.id} className="group">
+                        <tr
+                          className="border-t-4 border-transparent cursor-pointer group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
+                          onClick={(e) => {
+                            if (!(e.target as HTMLElement).closest("button")) {
                               const currentParams = searchParams.toString();
                               router.push(
-                                `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ''}`
+                                `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ""}`
                               );
-                            }}
-                          >
-                            <td className="px-6 pt-1 pb-6">
-                              <div className="space-y-2">
-                                {model.description && (
-                                  <div className="text-base font-light text-gray-400 dark:text-gray-500">
-                                    {model.description.length > 150
-                                      ? `${model.description.slice(0, 150)}...`
-                                      : model.description}
-                                  </div>
+                            }
+                          }}
+                        >
+                          <td className="px-6 pt-6 pb-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg font-normal text-gray-900 dark:text-gray-100">
+                                {model.name.replace(
+                                  new RegExp(`^${model.author}:\s*`, "i"),
+                                  ""
                                 )}
-                                <div className="flex flex-wrap items-center gap-3 text-sm font-light text-gray-400 dark:text-gray-500">
-                                  <div>by {model.author}</div>
-                                  <div>•</div>
-                                  <div>
-                                    {formatContext(model.contextLength)} context
-                                  </div>
-                                  <div>•</div>
-                                  <div>
-                                    $
-                                    {minInputCost < 1
-                                      ? minInputCost.toFixed(2)
-                                      : minInputCost.toFixed(1)}
-                                    /M in, $
-                                    {minOutputCost < 1
-                                      ? minOutputCost.toFixed(2)
-                                      : minOutputCost.toFixed(1)}
-                                    /M out
-                                  </div>
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  copyModelId(model.id);
+                                }}
+                                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                title={`Copy model ID: ${model.id}`}
+                              >
+                                {copiedModel === model.id ? (
+                                  <Check className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                ) : (
+                                  <Clipboard className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                              {isFree && (
+                                <span className="text-xs font-normal text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/40 px-2 py-0.5">
+                                  Free
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+
+                        <tr
+                          className="cursor-pointer group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
+                          onClick={(e) => {
+                            if (!(e.target as HTMLElement).closest("button")) {
+                              const currentParams = searchParams.toString();
+                              router.push(
+                                `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ""}`
+                              );
+                            }
+                          }}
+                        >
+                          <td className="px-6 pt-1 pb-6">
+                            <div className="space-y-2">
+                              {model.description && (
+                                <div className="text-base font-light text-gray-400 dark:text-gray-500">
+                                  {model.description.length > 150
+                                    ? `${model.description.slice(0, 150)}...`
+                                    : model.description}
+                                </div>
+                              )}
+                              <div className="flex flex-wrap items-center gap-3 text-sm font-light text-gray-400 dark:text-gray-500">
+                                <div>by {model.author}</div>
+                                <div>•</div>
+                                <div>
+                                  {formatContext(model.contextLength)} context
+                                </div>
+                                <div>•</div>
+                                <div>
+                                  $
+                                  {minInputCost < 1
+                                    ? minInputCost.toFixed(2)
+                                    : minInputCost.toFixed(1)}
+                                  /M in, $
+                                  {minOutputCost < 1
+                                    ? minOutputCost.toFixed(2)
+                                    : minOutputCost.toFixed(1)}
+                                  /M out
                                 </div>
                               </div>
-                            </td>
-                          </tr>
+                            </div>
+                          </td>
+                        </tr>
 
-                          <tr>
-                            <td className="px-6 py-2">
-                              <div className="border-b border-gray-100 dark:border-gray-800/50 mx-12"></div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      );
-                    })}
-                  </tbody>
+                        <tr>
+                          <td className="px-6 py-2">
+                            <div className="border-b border-gray-100 dark:border-gray-800/50 mx-12"></div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    );
+                  })}
                 </table>
               </div>
             </div>
@@ -571,8 +555,8 @@ export function ModelRegistryPage() {
                   <div key={i} className="animate-pulse">
                     <div className="flex items-start space-x-4">
                       <div className="flex-1">
-                        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2"></div>
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                        <div className="h-5 bg-gray-200 dark:bg-gray-700 w-1/3 mb-2"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 w-2/3"></div>
                       </div>
                     </div>
                   </div>
