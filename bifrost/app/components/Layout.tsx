@@ -7,9 +7,11 @@ import { BLOG_CONTENT } from "../blog/page";
 export const Layout = async ({
   children,
   hideFooter,
+  noNavbarMargin,
 }: {
   children: React.ReactNode;
   hideFooter?: boolean;
+  noNavbarMargin?: boolean;
 }) => {
   const githubResponse = await fetch(
     "https://api.github.com/repos/helicone/helicone"
@@ -24,10 +26,15 @@ export const Layout = async ({
     <>
       {/* <Banner /> */}
 
-      <NavBar stars={stars} featuredBlogMetadata={featuredBlogMetadata || {
-        title: "Check out our latest blog",
-        description: "Open-source LLM observability and monitoring platform for developers",
-      }} featuredBlogFolderName={featuredBlogFolderName} />
+      <NavBar 
+        stars={stars} 
+        featuredBlogMetadata={featuredBlogMetadata || {
+          title: "Check out our latest blog",
+          description: "Open-source LLM observability and monitoring platform for developers",
+        }} 
+        featuredBlogFolderName={featuredBlogFolderName}
+        noMargin={noNavbarMargin}
+      />
       {children}
       {!hideFooter && <Footer />}
     </>
