@@ -77,27 +77,20 @@ const Credits: NextPageWithLayout<void> = () => {
     <div className="flex h-screen w-full flex-col">
       <Header
         title="Credits"
+        leftActions={
+          <Badge variant="helicone-sky">
+            BETA
+          </Badge>
+        }
         rightActions={
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs">
-              Beta
-            </Badge>
-            {hasAccess && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  refetch();
-                  refetchTransactions();
-                }}
-                disabled={isLoading || transactionsLoading}
-              >
-                <RefreshCcw
-                  className={`h-4 w-4 ${isLoading || transactionsLoading ? "animate-spin" : ""}`}
-                />
-              </Button>
-            )}
-          </div>
+          <Link
+            href="https://docs.helicone.ai/gateway/credits"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            📖 Docs
+          </Link>
         }
       />
 
@@ -147,6 +140,16 @@ const Credits: NextPageWithLayout<void> = () => {
                   <h2 className="mb-8 text-center text-2xl font-semibold text-slate-900 dark:text-slate-100">
                     Why Helicone Credits?
                   </h2>
+                  <div className="mb-8 text-center">
+                    <Link
+                      href="https://docs.helicone.ai/gateway/credits"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-md bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                    >
+                      📖 Learn about credits & pricing
+                    </Link>
+                  </div>
                   <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                     <div className="flex gap-4">
                       <div className="flex-shrink-0">
@@ -230,33 +233,50 @@ const Credits: NextPageWithLayout<void> = () => {
               /* Credits Management Experience - Show when has access */
               <div>
                 {/* Current Balance Section */}
-                <div className="border-b border-border bg-slate-100 px-6 py-8 dark:bg-slate-900">
-                  <Small className="text-muted-foreground">
-                    Current Balance
-                  </Small>
-                  <div className="mt-2 text-3xl font-bold">
-                    {isLoading ? (
-                      <span className="text-muted-foreground">Loading...</span>
-                    ) : creditError ? (
-                      <span className="text-destructive">
-                        Error loading balance
-                      </span>
-                    ) : (
-                      `$${(() => {
-                        const balance = (creditData?.balance ?? 0) / 100;
-                        if (balance % 1 === 0) {
-                          return balance.toFixed(2);
-                        }
-                        if (balance >= 100) {
-                          return balance.toFixed(4);
-                        }
-                        if (balance >= 10) {
-                          return balance.toFixed(3);
-                        }
-                        const formattedBalance = balance.toFixed(5);
-                        return formattedBalance;
-                      })()}`
-                    )}
+                <div className="border-b border-border px-6 py-8">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Small className="text-muted-foreground">
+                        Current Balance
+                      </Small>
+                      <div className="mt-2 text-3xl font-bold">
+                        {isLoading ? (
+                          <span className="text-muted-foreground">Loading...</span>
+                        ) : creditError ? (
+                          <span className="text-destructive">
+                            Error loading balance
+                          </span>
+                        ) : (
+                          `$${(() => {
+                            const balance = (creditData?.balance ?? 0) / 100;
+                            if (balance % 1 === 0) {
+                              return balance.toFixed(2);
+                            }
+                            if (balance >= 100) {
+                              return balance.toFixed(4);
+                            }
+                            if (balance >= 10) {
+                              return balance.toFixed(3);
+                            }
+                            const formattedBalance = balance.toFixed(5);
+                            return formattedBalance;
+                          })()}`
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        refetch();
+                        refetchTransactions();
+                      }}
+                      disabled={isLoading || transactionsLoading}
+                    >
+                      <RefreshCcw
+                        className={`h-4 w-4 ${isLoading || transactionsLoading ? "animate-spin" : ""}`}
+                      />
+                    </Button>
                   </div>
                 </div>
 
@@ -315,7 +335,7 @@ const Credits: NextPageWithLayout<void> = () => {
                   </div>
                 </div>
 
-                {/* Recent Transactions Section */}
+{/* Recent Transactions Section */}
                 <div className="px-6 py-8">
                   <div className="mb-6 flex items-center justify-between">
                     <Small className="font-semibold text-slate-900 dark:text-slate-100">

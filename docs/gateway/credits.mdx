@@ -1,0 +1,217 @@
+---
+title: "Credits"
+sidebarTitle: "Credits"
+description: "Pay-as-you-go LLM billing through Helicone Credits with transparent pricing and unified cost tracking"
+---
+
+Helicone Credits provide a simple, transparent way to pay for LLM usage across all providers through the AI Gateway. No subscriptions, no commitments. Just add credits and use any model with automatic cost tracking.
+
+<Info>
+**Beta**: Credits is currently in beta. [Join the waitlist](https://helicone.ai/credits) to get early access for your organization.
+</Info>
+
+## How Credits Work
+
+Credits act as a unified billing system for all your LLM usage through the AI Gateway. Whether you're using GPT-4, Claude, Gemini, or any of the 100+ supported models, costs are automatically deducted from your credit balance.
+
+<CardGroup cols={2}>
+<Card title="Unified Billing" icon="credit-card">
+  One balance for all providers and models accessed through the gateway
+</Card>
+<Card title="Transparent Pricing" icon="eye">
+  See exact costs for every model in our Model Registry
+</Card>
+<Card title="Real-time Tracking" icon="chart-line">
+  Monitor spending as it happens with detailed analytics
+</Card>
+<Card title="Team Shared" icon="users">
+  Share credits across your entire organization
+</Card>
+</CardGroup>
+
+## Supported Models & Pricing
+
+All pricing is based on our comprehensive [Model Registry](https://helicone.ai/models), which tracks real-time pricing for 100+ models across multiple providers.
+
+<Frame caption="Model Registry showing transparent pricing across all supported providers">
+  <img
+    src="/images/model-selection.webp"
+    alt="Helicone Model Registry interface showing models sorted by price across different providers"
+  />
+</Frame>
+
+### Popular Models
+
+The AI Gateway automatically routes to the most cost-effective provider for each model:
+
+| Model | Starting Price | Providers |
+|-------|----------------|-----------|
+| GPT-4o Mini | $0.15/1M tokens | OpenAI, Azure, AWS Bedrock |
+| Claude 3.5 Sonnet | $3.00/1M tokens | Anthropic, AWS Bedrock, Google Vertex |
+| Gemini 1.5 Flash | $0.075/1M tokens | Google AI, Google Vertex |
+| Llama 3.1 8B | $0.18/1M tokens | Together, Fireworks, Groq |
+
+<Note>
+Prices shown are input token costs. Output tokens and provider-specific pricing may vary. Visit [helicone.ai/models](https://helicone.ai/models) for complete, up-to-date pricing.
+</Note>
+
+## Integration Methods
+
+### BYOK (Bring Your Own Keys) - Available Now
+
+Use your existing provider API keys through the gateway:
+
+```typescript
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Your provider keys are used for the actual API calls
+// Credits track usage for unified billing and analytics
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: "Hello!" }]
+});
+```
+
+### PTB (Pass-Through Billing) - Coming Soon
+
+<Warning>
+Pass-Through Billing is not yet available. Currently, you need your own provider API keys (BYOK).
+</Warning>
+
+Use Helicone's API keys and pay only through credits:
+
+```typescript
+// Coming soon - no provider keys needed
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: "Hello!" }]
+  // Cost automatically deducted from credits
+});
+```
+
+## Cost Optimization Features
+
+### Automatic Provider Selection
+
+The gateway automatically selects the cheapest available provider for each model:
+
+1. **Cost-first routing** - Always attempts the lowest-cost provider first
+2. **Smart fallbacks** - If the cheapest fails, tries the next cheapest
+3. **Real-time pricing** - Uses up-to-date pricing from the Model Registry
+
+### Advanced Cost Tracking
+
+Credits integrate with Helicone's comprehensive cost tracking features:
+
+<CardGroup cols={2}>
+<Card title="Session Analytics" icon="layer-group" href="/features/sessions">
+  Track costs per user interaction or workflow
+</Card>
+<Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+  Segment costs by user tier, feature, or environment
+</Card>
+<Card title="Cost Alerts" icon="bell" href="/features/alerts">
+  Set spending thresholds and get notified
+</Card>
+<Card title="Detailed Reports" icon="file-text" href="/features/reports">
+  Automated cost summaries and optimization insights
+</Card>
+</CardGroup>
+
+### Caching for Cost Reduction
+
+Enable [caching](/features/advanced-usage/caching) to eliminate redundant API calls:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: "Frequently asked question" }]
+}, {
+  headers: {
+    "Helicone-Cache-Enabled": "true",
+    "Cache-Control": "max-age=3600"
+  }
+});
+```
+
+## Getting Started
+
+<Steps>
+<Step title="Join the Waitlist">
+  Request access at [helicone.ai/credits](https://helicone.ai/credits)
+</Step>
+<Step title="Add Credits">
+  Purchase credits through your dashboard once approved
+</Step>
+<Step title="Configure Gateway">
+  Set up AI Gateway with your Helicone API key
+</Step>
+<Step title="Start Building">
+  Use any model with automatic cost deduction
+</Step>
+</Steps>
+
+## Best Practices
+
+### Development vs Production
+
+Use different environments to control costs:
+
+```typescript
+headers: {
+  "Helicone-Property-Environment": process.env.NODE_ENV,
+  "Helicone-Property-UserTier": userTier
+}
+```
+
+### Monitor Unit Economics
+
+Track costs per user action to understand your business metrics:
+
+```typescript
+headers: {
+  "Helicone-Session-Id": `support-${ticketId}`,
+  "Helicone-Session-Name": "Customer Support",
+  "Helicone-Property-UserTier": "premium"
+}
+```
+
+## Frequently Asked Questions
+
+<AccordionGroup>
+<Accordion title="How are credits calculated?">
+Credits are deducted based on actual token usage and provider pricing. We use the real-time pricing from our [Model Registry](https://helicone.ai/models) to ensure accurate billing.
+</Accordion>
+
+<Accordion title="Do credits expire?">
+No, credits never expire. Add credits when you need them and use them at your own pace.
+</Accordion>
+
+<Accordion title="Can I use multiple provider keys?">
+Yes, with BYOK you can configure multiple provider keys. The gateway will intelligently route based on cost and availability.
+</Accordion>
+
+<Accordion title="What happens if I run out of credits?">
+API requests will fail with a billing error. Set up [cost alerts](/features/alerts) to get notified before you run low.
+</Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Browse All Models" icon="list" href="https://helicone.ai/models">
+  See complete pricing for 100+ models across providers
+</Card>
+<Card title="Cost Optimization Guide" icon="chart-line" href="/guides/cookbooks/cost-tracking">
+  Learn advanced strategies for reducing LLM costs
+</Card>
+<Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+  Configure intelligent routing and fallbacks
+</Card>
+<Card title="Set Up Alerts" icon="bell" href="/features/alerts">
+  Get notified about spending thresholds
+</Card>
+</CardGroup>

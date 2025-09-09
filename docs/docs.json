@@ -26,6 +26,7 @@
             "tag": "BETA",
             "pages": [
               "gateway/overview",
+              "gateway/credits",
               "gateway/provider-routing",
               {
                 "group": "Features",
