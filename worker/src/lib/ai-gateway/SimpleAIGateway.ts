@@ -138,13 +138,6 @@ export class SimpleAIGateway {
       } else {
         // Success!
         this.requestWrapper.setSuccessfulAttempt(attempt);
-        
-        console.log("Successful attempt tracked:", {
-          modelName: attempt.endpoint.providerModelId,
-          provider: attempt.endpoint.provider,
-          attemptSource: attempt.source
-        });
-        
         return result.data;
       }
     }
