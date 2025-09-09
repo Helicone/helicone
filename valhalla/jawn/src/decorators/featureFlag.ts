@@ -1,20 +1,48 @@
 import "reflect-metadata";
 import { checkFeatureFlag } from "../lib/utils/featureFlags";
 import { isError } from "../packages/common/result";
-import { createHqlError, HqlErrorCode } from "../lib/errors/HqlErrors";
 import { Controller } from "tsoa";
 import { JawnAuthenticatedRequest } from "../types/request";
 
 const FEATURE_FLAG_METADATA_KEY = Symbol("featureFlags");
 
-export interface FeatureFlagMetadata {
-  flags: string[];
-  errorCode?: HqlErrorCode;
+export interface FeatureFlagError {
+  message: string;
+  statusCode: number;
+  code?: string;
 }
 
+export interface FeatureFlagOptions {
+  errorFormatter?: (flag: string) => FeatureFlagError;
+}
+
+export interface FeatureFlagMetadata {
+  flags: string[];
+  options?: FeatureFlagOptions;
+}
+
+/**
+ * Decorator to require feature flag(s) for a controller method.
+ * 
+ * @param flag - The feature flag name to check
+ * @param options - Optional configuration for error handling
+ * 
+ * @example
+ * // Using default error format
+ * @RequireFeatureFlag("my-feature")
+ * 
+ * @example
+ * // Using custom error format for HQL
+ * @RequireFeatureFlag(HQL_FEATURE_FLAG, {
+ *   errorFormatter: (flag) => ({
+ *     message: `[HQL_FEATURE_NOT_ENABLED] Access to HQL feature is not enabled for your organization`,
+ *     statusCode: 403
+ *   })
+ * })
+ */
 export function RequireFeatureFlag(
   flag: string,
-  errorCode: HqlErrorCode = HqlErrorCode.FEATURE_NOT_ENABLED
+  options?: FeatureFlagOptions
 ): MethodDecorator {
   return function (
     target: any,
@@ -25,10 +53,12 @@ export function RequireFeatureFlag(
       FEATURE_FLAG_METADATA_KEY,
       target,
       propertyKey
-    ) || { flags: [] };
+    ) || { flags: [], options };
 
     existingMetadata.flags.push(flag);
-    existingMetadata.errorCode = errorCode;
+    if (options) {
+      existingMetadata.options = options;
+    }
 
     Reflect.defineMetadata(
       FEATURE_FLAG_METADATA_KEY,
@@ -68,16 +98,17 @@ export function RequireFeatureFlag(
         );
 
         if (isError(featureFlagResult)) {
-          const error = createHqlError(
-            metadata.errorCode || HqlErrorCode.FEATURE_NOT_ENABLED,
-            `Feature '${flagName}' is not enabled for this organization`
-          );
-          this.setStatus(error.statusCode || 403);
+          // Use custom error formatter if provided, otherwise use default
+          const errorInfo = metadata.options?.errorFormatter
+            ? metadata.options.errorFormatter(flagName)
+            : {
+                message: `Feature '${flagName}' is not enabled for this organization`,
+                statusCode: 403
+              };
           
-          const codePrefix = error.code ? `[${error.code}] ` : '';
-          const message = error.details ? `${error.message}: ${error.details}` : error.message;
+          this.setStatus(errorInfo.statusCode);
           return {
-            error: `${codePrefix}${message}`,
+            error: errorInfo.message,
             data: null,
           };
         }
@@ -90,9 +121,16 @@ export function RequireFeatureFlag(
   };
 }
 
+/**
+ * Decorator to require multiple feature flags for a controller method.
+ * All flags must be enabled for the method to execute.
+ * 
+ * @param flags - Array of feature flag names to check
+ * @param options - Optional configuration for error handling
+ */
 export function RequireFeatureFlags(
   flags: string[],
-  errorCode: HqlErrorCode = HqlErrorCode.FEATURE_NOT_ENABLED
+  options?: FeatureFlagOptions
 ): MethodDecorator {
   return function (
     target: any,
@@ -100,7 +138,7 @@ export function RequireFeatureFlags(
     descriptor: PropertyDescriptor
   ) {
     flags.forEach((flag) => {
-      RequireFeatureFlag(flag, errorCode)(target, propertyKey, descriptor);
+      RequireFeatureFlag(flag, options)(target, propertyKey, descriptor);
     });
     return descriptor;
   };
