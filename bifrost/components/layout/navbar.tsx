@@ -290,6 +290,15 @@ const mainComponents: LinkItem[] = [
     description: "Simple, transparent pricing",
     icon: <HandCoins className="size-5 navbar-icon-style" />,
   },
+  {
+    title: "Models",
+    link: {
+      href: "/models",
+      isExternal: false,
+    },
+    description: "Browse and compare AI models",
+    icon: <Scale className="size-5 navbar-icon-style" />,
+  },
 ];
 
 const additionalComponents: LinkItem[] = [
@@ -391,6 +400,15 @@ const NavBar = (props: NavBarProps) => {
                 <Link href="/pricing" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Pricing
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+
+              {/* Models */}
+              <NavigationMenuItem>
+                <Link href="/models" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Models
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
