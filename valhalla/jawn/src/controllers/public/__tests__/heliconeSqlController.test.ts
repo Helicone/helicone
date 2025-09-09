@@ -697,4 +697,82 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
       expect(result.error).toBeDefined();
     });
   });
+
+  describe("POST /helicone-sql/execute - Nested Queries and Star Expansion", () => {
+    test("should execute SELECT * without explicit limit and exclude body columns", async () => {
+      const requestBody = {
+        sql: "SELECT * FROM request_response_rmt",
+      };
+
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
+
+      expect(result.error).toBeNull();
+      expect(result.data).toBeDefined();
+      expect(Array.isArray(result.data?.rows)).toBe(true);
+
+      const rows = result.data?.rows || [];
+      // Default limit should be enforced by the server
+      expect(rows.length).toBeLessThanOrEqual(100);
+      // Body columns should not be present when using SELECT *
+      if (rows.length > 0) {
+        // Check that body columns don't exist in the result at all
+        expect('request_body' in rows[0]).toBe(false);
+        expect('response_body' in rows[0]).toBe(false);
+        // Alternative check - they should be undefined if accessed
+        expect(rows[0].request_body).toBeUndefined();
+        expect(rows[0].response_body).toBeUndefined();
+      }
+    });
+
+    test("should handle deeply nested SELECT * queries and exclude body columns", async () => {
+      const requestBody = {
+        sql: `
+          SELECT * FROM (
+            SELECT * FROM (
+              SELECT * FROM request_response_rmt
+            ) r1
+          ) r2
+          LIMIT 5
+        `,
+      };
+
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
+
+      expect(result.error).toBeNull();
+      expect(result.data).toBeDefined();
+      expect(Array.isArray(result.data?.rows)).toBe(true);
+
+      const rows = result.data?.rows || [];
+      if (rows.length > 0) {
+        // Check that body columns don't exist in the result at all
+        expect('request_body' in rows[0]).toBe(false);
+        expect('response_body' in rows[0]).toBe(false);
+        // Alternative check - they should be undefined if accessed
+        expect(rows[0].request_body).toBeUndefined();
+        expect(rows[0].response_body).toBeUndefined();
+      }
+    });
+  });
 });
