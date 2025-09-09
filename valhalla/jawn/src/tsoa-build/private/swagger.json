@@ -8490,7 +8490,7 @@
 			},
 			"url.URL": {
 				"type": "string",
-				"description": "The **`URL`** interface is used to parse, construct, normalize, and encode URL.\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)"
+				"description": "The **`URL`** interface is used to parse, construct, normalize, and encode URL.\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)\n`URL` class is a global reference for `import { URL } from 'node:url'`\nhttps://nodejs.org/api/url.html#the-whatwg-url-api"
 			},
 			"stripe.Stripe.Application": {
 				"description": "The Application object.",
@@ -46898,8 +46898,9 @@
 		"securitySchemes": {
 			"api_key": {
 				"type": "apiKey",
-				"name": "authorization",
-				"in": "header"
+				"name": "Authorization",
+				"in": "header",
+				"description": "Bearer token authentication. Format: 'Bearer YOUR_API_KEY'"
 			}
 		}
 	},

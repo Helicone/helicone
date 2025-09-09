@@ -8906,26 +8906,6 @@
 					}
 				]
 			},
-			"UpdateSavedQueryRequest": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"sql": {
-						"type": "string"
-					},
-					"id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"name",
-					"sql",
-					"id"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"ResultSuccess__tableId-string--experimentId-string__": {
 				"properties": {
 					"data": {
@@ -12034,8 +12014,9 @@
 		"securitySchemes": {
 			"api_key": {
 				"type": "apiKey",
-				"name": "authorization",
-				"in": "header"
+				"name": "Authorization",
+				"in": "header",
+				"description": "Bearer token authentication. Format: 'Bearer YOUR_API_KEY'"
 			}
 		}
 	},
@@ -18221,16 +18202,93 @@
 				"operationId": "GetModelRegistry",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Complete model registry with models and filter options",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_ModelRegistryResponse.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"models": [
+												{
+													"id": "claude-opus-4-1",
+													"name": "Anthropic: Claude Opus 4.1",
+													"author": "anthropic",
+													"contextLength": 200000,
+													"endpoints": [
+														{
+															"provider": "anthropic",
+															"providerSlug": "anthropic",
+															"supportsPtb": true,
+															"pricing": {
+																"prompt": 15,
+																"completion": 75,
+																"cacheRead": 1.5,
+																"cacheWrite": 18.75
+															}
+														}
+													],
+													"maxOutput": 32000,
+													"trainingDate": "2025-08-05",
+													"description": "Most capable Claude model with extended context",
+													"inputModalities": [
+														null
+													],
+													"outputModalities": [
+														null
+													],
+													"supportedParameters": [
+														null,
+														null,
+														null,
+														null,
+														null,
+														null,
+														null
+													]
+												}
+											],
+											"total": 150,
+											"filters": {
+												"providers": [
+													{
+														"name": "anthropic",
+														"displayName": "Anthropic"
+													},
+													{
+														"name": "openai",
+														"displayName": "OpenAI"
+													},
+													{
+														"name": "google",
+														"displayName": "Google"
+													}
+												],
+												"authors": [
+													"anthropic",
+													"openai",
+													"google",
+													"meta"
+												],
+												"capabilities": [
+													"audio",
+													"image",
+													"thinking",
+													"caching",
+													"reasoning"
+												]
+											}
+										}
+									}
 								}
 							}
 						}
 					}
 				},
+				"description": "Get all available models from the registry",
+				"summary": "Returns a comprehensive list of all AI models with their configurations, pricing, and capabilities",
 				"tags": [
 					"Model Registry"
 				],
@@ -18577,7 +18635,7 @@
 				"operationId": "GetClickHouseSchema",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Array of table schemas with columns",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -18588,10 +18646,15 @@
 					}
 				},
 				"description": "Get ClickHouse schema (tables and columns)",
+				"summary": "Get database schema",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -18600,7 +18663,7 @@
 				"operationId": "ExecuteSql",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Query results with rows and metadata",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -18610,17 +18673,25 @@
 						}
 					}
 				},
+				"description": "Execute a SQL query against ClickHouse",
+				"summary": "Execute SQL query",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
+					"description": "The SQL query to execute",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/ExecuteSqlRequest"
+								"$ref": "#/components/schemas/ExecuteSqlRequest",
+								"description": "The SQL query to execute"
 							}
 						}
 					}
@@ -18632,7 +18703,7 @@
 				"operationId": "DownloadCsv",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "URL to download the CSV file",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -18642,17 +18713,25 @@
 						}
 					}
 				},
+				"description": "Execute a SQL query and download results as CSV",
+				"summary": "Download query results as CSV",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
+					"description": "The SQL query to execute",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/ExecuteSqlRequest"
+								"$ref": "#/components/schemas/ExecuteSqlRequest",
+								"description": "The SQL query to execute"
 							}
 						}
 					}
@@ -18664,7 +18743,7 @@
 				"operationId": "GetSavedQueries",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Array of saved queries",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -18674,10 +18753,16 @@
 						}
 					}
 				},
+				"description": "Get all saved queries for the organization",
+				"summary": "List saved queries",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -18686,7 +18771,7 @@
 				"operationId": "GetSavedQuery",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "The saved query details",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -18696,12 +18781,19 @@
 						}
 					}
 				},
+				"description": "Get a specific saved query by ID",
+				"summary": "Get saved query",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [
 					{
+						"description": "The ID of the saved query",
 						"in": "path",
 						"name": "queryId",
 						"required": true,
@@ -18725,12 +18817,19 @@
 						}
 					}
 				},
+				"description": "Delete a saved query by ID",
+				"summary": "Delete saved query",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [
 					{
+						"description": "The ID of the saved query to delete",
 						"in": "path",
 						"name": "queryId",
 						"required": true,
@@ -18739,6 +18838,54 @@
 						}
 					}
 				]
+			},
+			"put": {
+				"operationId": "UpdateSavedQuery",
+				"responses": {
+					"200": {
+						"description": "The updated saved query",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update an existing saved query",
+				"summary": "Update saved query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the saved query to update",
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The updated query details",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSavedQueryRequest",
+								"description": "The updated query details"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/helicone-sql/saved-queries/bulk-delete": {
@@ -18756,17 +18903,25 @@
 						}
 					}
 				},
+				"description": "Delete multiple saved queries at once",
+				"summary": "Bulk delete saved queries",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Array of query IDs to delete",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/BulkDeleteSavedQueriesRequest"
+								"$ref": "#/components/schemas/BulkDeleteSavedQueriesRequest",
+								"description": "Array of query IDs to delete"
 							}
 						}
 					}
@@ -18778,7 +18933,7 @@
 				"operationId": "CreateSavedQuery",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Array containing the created saved query",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -18788,47 +18943,25 @@
 						}
 					}
 				},
+				"description": "Create a new saved query",
+				"summary": "Create saved query",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
+					"description": "The saved query details",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateSavedQueryRequest"
-							}
-						}
-					}
-				}
-			},
-			"put": {
-				"operationId": "UpdateSavedQuery",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_HqlSavedQuery.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"HeliconeSql"
-				],
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UpdateSavedQueryRequest"
+								"$ref": "#/components/schemas/CreateSavedQueryRequest",
+								"description": "The saved query details"
 							}
 						}
 					}

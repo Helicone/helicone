@@ -2872,16 +2872,6 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HqlSavedQuery_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "UpdateSavedQueryRequest": {
-        "dataType": "refObject",
-        "properties": {
-            "name": {"dataType":"string","required":true},
-            "sql": {"dataType":"string","required":true},
-            "id": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__tableId-string--experimentId-string__": {
         "dataType": "refObject",
         "properties": {
@@ -8947,6 +8937,7 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.get('/v1/helicone-sql/schema',
+            authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.getClickHouseSchema)),
 
@@ -8978,6 +8969,7 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.post('/v1/helicone-sql/execute',
+            authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.executeSql)),
 
@@ -9009,6 +9001,7 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.post('/v1/helicone-sql/download',
+            authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.downloadCsv)),
 
@@ -9039,6 +9032,7 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.get('/v1/helicone-sql/saved-queries',
+            authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.getSavedQueries)),
 
@@ -9070,6 +9064,7 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.get('/v1/helicone-sql/saved-query/:queryId',
+            authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.getSavedQuery)),
 
@@ -9101,6 +9096,7 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.delete('/v1/helicone-sql/saved-query/:queryId',
+            authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.deleteSavedQuery)),
 
@@ -9132,6 +9128,7 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.post('/v1/helicone-sql/saved-queries/bulk-delete',
+            authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.bulkDeleteSavedQueries)),
 
@@ -9163,6 +9160,7 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.post('/v1/helicone-sql/saved-query',
+            authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.createSavedQuery)),
 
@@ -9190,10 +9188,12 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsHeliconeSqlController_updateSavedQuery: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"UpdateSavedQueryRequest"},
+                queryId: {"in":"path","name":"queryId","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateSavedQueryRequest"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.put('/v1/helicone-sql/saved-query',
+        app.put('/v1/helicone-sql/saved-query/:queryId',
+            authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.updateSavedQuery)),
 
