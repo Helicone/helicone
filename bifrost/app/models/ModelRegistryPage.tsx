@@ -18,6 +18,7 @@ import {
   Check,
   ChevronDown,
   X,
+  Filter,
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { useModelFiltering } from "@/hooks/useModelFiltering";
@@ -168,14 +169,36 @@ export function ModelRegistryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-white dark:bg-black pt-20 lg:pt-0">
       <div>
         {/* Main Layout: Sidebar + Content */}
         <div className="flex">
-          {/* Left Sidebar - Filters - Sticky position */}
-          <div className={`w-80 flex-shrink-0 ${sidebarOpen ? "block" : "hidden"} lg:block`}>
-            <div className="bg-white dark:bg-gray-900 border-l border-b border-gray-200 dark:border-gray-800 sticky top-[var(--header-offset)] h-[calc(100vh-var(--header-offset))] overflow-y-auto">
-              <div className="p-6">
+          {/* Left Sidebar - Filters */}
+          <>
+            {/* Mobile overlay */}
+            {sidebarOpen && (
+              <div
+                className="lg:hidden fixed inset-0 bg-black/50 z-40"
+                onClick={() => setSidebarOpen(false)}
+              />
+            )}
+            
+            {/* Sidebar */}
+            <div className={`${
+              sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            } lg:translate-x-0 fixed lg:relative w-[75vw] lg:w-80 lg:flex-shrink-0 transition-transform duration-300 z-50 lg:z-auto left-0 top-0`}>
+              <div className="bg-white dark:bg-gray-900 lg:border-l lg:border-b border-r border-gray-200 dark:border-gray-800 lg:sticky lg:top-[var(--header-offset)] top-0 h-screen lg:h-[calc(100vh-var(--header-offset))] overflow-y-auto shadow-xl lg:shadow-none">
+                <div className="p-6">
+                  {/* Mobile close button */}
+                  <div className="lg:hidden flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Filters</h2>
+                    <button
+                      onClick={() => setSidebarOpen(false)}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
                 {/* Provider Filter */}
                 <div className="mb-6">
                   <button
@@ -352,15 +375,16 @@ export function ModelRegistryPage() {
                     </div>
                   )}
                 </div>
+                </div>
               </div>
             </div>
-          </div>
+          </>
 
           {/* Right Content - Table */}
-          <div className="flex-1 min-w-0 min-h-[calc(100vh-var(--header-offset))] flex flex-col">
+          <div className="flex-1 min-w-0 lg:min-h-[calc(100vh-var(--header-offset))] flex flex-col">
             {/* Controls Box - Connected to sidebar and table */}
-            <div className="bg-white dark:bg-gray-900 border-l border-r border-b border-gray-200 dark:border-gray-800 sticky top-[var(--header-offset)] z-10 shadow-sm">
-              <div className="p-6">
+            <div className="bg-white dark:bg-gray-900 border-r border-b border-gray-200 dark:border-gray-800 lg:sticky lg:top-[var(--header-offset)] z-10 lg:shadow-sm">
+              <div className="p-4 lg:p-6">
                 <div className="flex flex-col gap-4">
                   {/* Title and model count */}
                   <div className="flex justify-between items-center">
@@ -393,22 +417,57 @@ export function ModelRegistryPage() {
                   </div>
 
                   {/* Search bar and sort */}
-                  <div className="flex gap-3">
-                    <div className="relative flex-1">
+                  <div className="flex flex-col lg:flex-row gap-3">
+                    {/* Search bar */}
+                    <div className="relative lg:flex-1">
                       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                       <Input
                         placeholder="Search models..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 h-10"
+                        className="pl-9 h-10 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700"
                       />
                     </div>
 
-                    <Select
-                      value={sortBy}
-                      onValueChange={(v) => setSortBy(v as SortOption)}
-                    >
-                      <SelectTrigger className="w-[160px] h-10">
+                    {/* Filter and Sort buttons row - mobile only */}
+                    <div className="flex gap-2 lg:hidden">
+                      <button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 h-10 border border-gray-200 dark:border-gray-800 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        <Filter className="h-4 w-4" />
+                        <span>Filters</span>
+                      </button>
+                      
+                      <Select
+                        value={sortBy}
+                        onValueChange={(v) => setSortBy(v as SortOption)}
+                      >
+                        <SelectTrigger className="flex-1 h-10">
+                          <ArrowUpDown className="h-4 w-4 mr-2" />
+                          <SelectValue placeholder="Sort" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="name">Name</SelectItem>
+                          <SelectItem value="price-low">
+                            Price: Low to High
+                          </SelectItem>
+                          <SelectItem value="price-high">
+                            Price: High to Low
+                          </SelectItem>
+                          <SelectItem value="context">Context Size</SelectItem>
+                          <SelectItem value="newest">Newest First</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Sort dropdown - desktop only */}
+                    <div className="hidden lg:block">
+                      <Select
+                        value={sortBy}
+                        onValueChange={(v) => setSortBy(v as SortOption)}
+                      >
+                        <SelectTrigger className="w-[160px] h-10">
                         <ArrowUpDown className="h-4 w-4 mr-2" />
                         <SelectValue placeholder="Sort" />
                       </SelectTrigger>
@@ -424,15 +483,16 @@ export function ModelRegistryPage() {
                         <SelectItem value="newest">Newest First</SelectItem>
                       </SelectContent>
                     </Select>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Models Table - Connected to controls box with divider */}
-            <div className="flex-1 overflow-hidden bg-white dark:bg-gray-900 border-l border-r border-b border-gray-200 dark:border-gray-800">
+            <div className="flex-1 overflow-auto bg-white dark:bg-gray-900 border-r border-b border-gray-200 dark:border-gray-800">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
+                <table className="w-full">
                   {filteredModels.map((model, index) => {
                     const minInputCost = Math.min(
                       ...model.endpoints.map((e) => e.pricing.prompt)
@@ -455,7 +515,7 @@ export function ModelRegistryPage() {
                             }
                           }}
                         >
-                          <td className="px-6 pt-6 pb-1">
+                          <td className="px-4 lg:px-6 pt-6 pb-1">
                             <div className="flex items-center gap-2">
                               <span className="text-lg font-normal text-gray-900 dark:text-gray-100">
                                 {model.name.replace(
@@ -497,7 +557,7 @@ export function ModelRegistryPage() {
                             }
                           }}
                         >
-                          <td className="px-6 pt-1 pb-6">
+                          <td className="px-4 lg:px-6 pt-1 pb-6">
                             <div className="space-y-2">
                               {model.description && (
                                 <div className="text-base font-light text-gray-400 dark:text-gray-500">
@@ -506,23 +566,25 @@ export function ModelRegistryPage() {
                                     : model.description}
                                 </div>
                               )}
-                              <div className="flex flex-wrap items-center gap-3 text-sm font-light text-gray-400 dark:text-gray-500">
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm font-light text-gray-400 dark:text-gray-500">
                                 <div>by {model.author}</div>
-                                <div>•</div>
+                                <div className="hidden sm:block">•</div>
                                 <div>
                                   {formatContext(model.contextLength)} context
                                 </div>
-                                <div>•</div>
-                                <div>
-                                  $
-                                  {minInputCost < 1
-                                    ? minInputCost.toFixed(2)
-                                    : minInputCost.toFixed(1)}
-                                  /M in, $
-                                  {minOutputCost < 1
-                                    ? minOutputCost.toFixed(2)
-                                    : minOutputCost.toFixed(1)}
-                                  /M out
+                                <div className="hidden sm:block">•</div>
+                                <div className="flex flex-wrap gap-1">
+                                  <span>
+                                    ${minInputCost < 1
+                                      ? minInputCost.toFixed(2)
+                                      : minInputCost.toFixed(1)}/M in
+                                  </span>
+                                  <span className="hidden sm:inline">,</span>
+                                  <span>
+                                    ${minOutputCost < 1
+                                      ? minOutputCost.toFixed(2)
+                                      : minOutputCost.toFixed(1)}/M out
+                                  </span>
                                 </div>
                               </div>
                             </div>
