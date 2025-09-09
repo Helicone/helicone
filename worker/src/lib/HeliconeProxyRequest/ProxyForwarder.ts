@@ -508,15 +508,11 @@ async function log(
 
   // Chain response processing after readResponse
   const responseProcessingPromise = loggable
-    .readResponse()
-    .then(async (responseBody) => {
-      if (responseBody.error !== null) {
-        console.error("Error reading response", responseBody.error);
-      }
-
-      const rawResponseResult = await loggable.readRawResponse();
+    .readRawResponse()
+    .then(async (rawResponseResult) => {
       if (rawResponseResult.error !== null) {
         console.error("Error reading raw response:", rawResponseResult.error);
+        return;
       }
       
       const rawResponse = rawResponseResult.data;
@@ -540,23 +536,28 @@ async function log(
           model: attemptModel,
           provider: attemptProvider,
         });
-        // TODO: Refactor other code so we only pull response once
-        // apply breakdown totalCost to escrow    
+        // TODO: apply breakdown totalCost to escrow    
       }
 
-      const model = responseBody.data?.response.model;
-      const promptTokens = responseBody.data?.response.prompt_tokens ?? 0;
-      const completionTokens =
-        responseBody.data?.response.completion_tokens ?? 0;
+      const responseBodyResult = await loggable.parseRawResponse(rawResponse);
+      if (responseBodyResult.error !== null) {
+        console.error("Error parsing response:", responseBodyResult.error);
+        return;
+      }
+
+      const responseData = responseBodyResult.data;
+      const model = responseData.response.model;
+      const promptTokens = responseData.response.prompt_tokens ?? 0;
+      const completionTokens = responseData.response.completion_tokens ?? 0;
       const provider = proxyRequest.provider;
       const promptCacheWriteTokens =
-        responseBody.data?.response.prompt_cache_write_tokens ?? 0;
+        responseData.response.prompt_cache_write_tokens ?? 0;
       const promptCacheReadTokens =
-        responseBody.data?.response.prompt_cache_read_tokens ?? 0;
+        responseData.response.prompt_cache_read_tokens ?? 0;
       const promptAudioTokens =
-        responseBody.data?.response.prompt_audio_tokens ?? 0;
+        responseData.response.prompt_audio_tokens ?? 0;
       const completionAudioTokens =
-        responseBody.data?.response.completion_audio_tokens ?? 0;
+        responseData.response.completion_audio_tokens ?? 0;
 
       let cost;
       if (model && provider) {
@@ -576,7 +577,7 @@ async function log(
       }
 
       // Handle escrow finalization if needed
-      if (responseBody.data && proxyRequest.escrowInfo) {
+      if (responseData && proxyRequest.escrowInfo) {
         const walletId = env.WALLET.idFromName(orgData.organizationId);
         const walletStub = env.WALLET.get(walletId);
         const walletManager = new WalletManager(env, ctx, walletStub);
