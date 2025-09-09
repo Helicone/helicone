@@ -19,11 +19,9 @@ import {
 } from "../../lib/errors/HqlErrors";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
 import { type JawnAuthenticatedRequest } from "../../types/request";
-import {
-  checkFeatureFlag,
-  HQL_FEATURE_FLAG,
-} from "../../lib/utils/featureFlags";
+import { HQL_FEATURE_FLAG } from "../../lib/utils/featureFlags";
 import { HqlQueryManager } from "../../managers/HqlQueryManager";
+import { RequireFeatureFlag } from "../../decorators/featureFlag";
 
 // --- Response Types ---
 export interface ClickHouseTableSchema {
@@ -104,21 +102,11 @@ export class HeliconeSqlController extends Controller {
   }
 
   @Post("execute")
+  @RequireFeatureFlag(HQL_FEATURE_FLAG)
   public async executeSql(
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExecuteSqlResponse, string>> {
-    // Check feature flag access
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      HQL_FEATURE_FLAG
-    );
-    if (isError(featureFlagResult)) {
-      const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
-      this.setStatus(error.statusCode || 403);
-      return err(formatHqlError(error));
-    }
-
     // Validate request
     if (!requestBody.sql?.trim()) {
       const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL);
@@ -139,21 +127,11 @@ export class HeliconeSqlController extends Controller {
   }
 
   @Post("download")
+  @RequireFeatureFlag(HQL_FEATURE_FLAG)
   public async downloadCsv(
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
-    // Check feature flag access
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      HQL_FEATURE_FLAG
-    );
-    if (isError(featureFlagResult)) {
-      const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
-      this.setStatus(error.statusCode || 403);
-      return err(formatHqlError(error));
-    }
-
     // Validate request
     if (!requestBody.sql?.trim()) {
       const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL, "CSV download requires a SQL query");
