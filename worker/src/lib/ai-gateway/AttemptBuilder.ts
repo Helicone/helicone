@@ -278,38 +278,43 @@ export class AttemptBuilder {
   }
 
   parseModelString(modelString: string): Result<ModelSpec, string> {
-    const parts = modelString.split("/");
-    const modelName = parts[0];
+    const modelName = modelString;
+    const validModels = registry.getAllModelIds();
+    const isKnownModel =
+      validModels.data && validModels.data.includes(modelName as any);
 
-    // Just model name: "gpt-4"
-    if (parts.length === 1) {
-      // Check if model is known
-      const validModels = registry.getAllModelIds();
-      const isKnownModel =
-        validModels.data && validModels.data.includes(modelName as any);
-
-      // Fail fast: unknown model with no provider
-      if (!isKnownModel) {
-        return err(
-          `Unknown model: ${modelName}. Please specify a provider (e.g., ${modelName}/openai) or use a supported model. See https://helicone.ai/models`
-        );
-      }
+    if (isKnownModel) {
       return ok({ modelName });
     }
 
-    // Has provider - validate it once
-    const provider = parts[1];
-    if (!this.validateProvider(provider)) {
-      const validProviders = Object.keys(providers);
-      return err(
-        `Invalid provider: ${provider}. Valid providers: ${validProviders.join(", ")}`
-      );
+    // Right-split on the last slash to support model names containing slashes
+    const lastSlashIndex = modelString.lastIndexOf("/");
+    const lastSegment = modelString.slice(lastSlashIndex + 1);
+    const beforeLast = modelString.slice(0, lastSlashIndex);
+
+    // Case 1: last segment is the provider
+    if (this.validateProvider(lastSegment)) {
+      const modelName = beforeLast;
+      return ok({ modelName, provider: lastSegment });
     }
 
-    return ok({
-      modelName,
-      provider,
-      customUid: parts.length === 3 ? parts[2] : undefined,
-    });
+    // Case 2: treat last segment as customUid if the segment before is a valid provider
+    const secondLastSlashIndex = beforeLast.lastIndexOf("/");
+    if (secondLastSlashIndex !== -1) {
+      const maybeProvider = beforeLast.slice(secondLastSlashIndex + 1);
+      const modelName = beforeLast.slice(0, secondLastSlashIndex);
+      if (this.validateProvider(maybeProvider)) {
+        return ok({
+          modelName,
+          provider: maybeProvider,
+          customUid: lastSegment,
+        });
+      }
+    }
+
+    const validProviders = Object.keys(providers);
+    return err(
+      `Invalid provider: ${lastSegment}. Valid providers: ${validProviders.join(", ")}`
+    );
   }
 }
