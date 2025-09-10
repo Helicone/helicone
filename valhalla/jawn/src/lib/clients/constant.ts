@@ -21,7 +21,8 @@ type keySlug =
   | "key:mintlify_mcp_tool"
   | "key:slack_bot_token"
   | "key:slack_app_token"
-  | "key:slack_channel";
+  | "key:slack_channel"
+  | "key:loops";
 
 const getKey = (key: string) => {
   if (process.env.PROVIDER_KEYS) {

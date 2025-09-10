@@ -7,6 +7,106 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"ResultSuccess__success-boolean--message-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"message": {
+								"type": "string"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"message",
+							"success"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultError_string_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__success-boolean--message-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--message-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__isOnWaitlist-boolean__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"isOnWaitlist": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"isOnWaitlist"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__isOnWaitlist-boolean_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__isOnWaitlist-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"RateLimitRuleView": {
 				"properties": {
 					"id": {
@@ -66,26 +166,6 @@
 							null
 						],
 						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultError_string_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"error": {
-						"type": "string"
 					}
 				},
 				"required": [
@@ -46655,6 +46735,14 @@
 					},
 					"cost": {
 						"properties": {
+							"prompt_cache_creation_1h": {
+								"type": "number",
+								"format": "double"
+							},
+							"prompt_cache_creation_5m": {
+								"type": "number",
+								"format": "double"
+							},
 							"completion_audio_token": {
 								"type": "number",
 								"format": "double"
@@ -46810,8 +46898,9 @@
 		"securitySchemes": {
 			"api_key": {
 				"type": "apiKey",
-				"name": "authorization",
-				"in": "header"
+				"name": "Authorization",
+				"in": "header",
+				"description": "Bearer token authentication. Format: 'Bearer YOUR_API_KEY'"
 			}
 		}
 	},
@@ -46824,6 +46913,108 @@
 		"contact": {}
 	},
 	"paths": {
+		"/v1/public/waitlist/feature": {
+			"post": {
+				"operationId": "AddToWaitlist",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__success-boolean--message-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"organizationId": {
+										"type": "string"
+									},
+									"feature": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"feature",
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/waitlist/feature/status": {
+			"get": {
+				"operationId": "IsOnWaitlist",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__isOnWaitlist-boolean_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "email",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "feature",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/user-feedback": {
 			"post": {
 				"operationId": "PostUserFeedback",
@@ -47088,13 +47279,13 @@
 														"openai",
 														"bedrock",
 														"vertex",
-														"azure-openai",
+														"azure",
 														"perplexity",
 														"groq",
 														"deepseek",
 														"cohere",
 														"xai",
-														"google"
+														"google-ai-studio"
 													]
 												}
 											},
@@ -50438,7 +50629,7 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"filter": "all",
+											"filter": {},
 											"isCached": false,
 											"limit": 10,
 											"offset": 0,
@@ -50489,7 +50680,7 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"filter": "all",
+											"filter": {},
 											"isCached": false,
 											"limit": 10,
 											"offset": 0,

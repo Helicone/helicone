@@ -12,11 +12,11 @@ import { useFilterAST } from "@/filterAST/context/filterContext";
 import { Check, ChevronDown, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 
-interface SavedFiltersDropdownProps {}
+interface SavedFiltersDropdownProps { }
 
 export const SavedFiltersDropdown: React.FC<
   SavedFiltersDropdownProps
-> = ({}) => {
+> = ({ }) => {
   const [open, setOpen] = useState(false);
   const { crud, helpers, store } = useFilterAST();
 
@@ -36,7 +36,7 @@ export const SavedFiltersDropdown: React.FC<
         <Button
           variant="glass"
           size="sm"
-          className="flex items-center gap-2 text-xs"
+          className="flex shadow-sm items-center gap-2 text-xs"
         >
           <span>Saved Filters</span>
           {crud.savedFilters.length > 0 && (

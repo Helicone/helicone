@@ -183,24 +183,6 @@
 					}
 				]
 			},
-			"ResultError_any_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					},
-					"error": {}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"ResultSuccess__id-string__": {
 				"properties": {
 					"data": {
@@ -7562,87 +7544,41 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ModelEndpoint": {
-				"properties": {
-					"provider": {
-						"type": "string"
-					},
-					"providerSlug": {
-						"type": "string"
-					},
-					"pricing": {
-						"properties": {
-							"cacheWrite": {
-								"type": "number",
-								"format": "double"
-							},
-							"cacheRead": {
-								"type": "number",
-								"format": "double"
-							},
-							"thinking": {
-								"type": "number",
-								"format": "double"
-							},
-							"image": {
-								"type": "number",
-								"format": "double"
-							},
-							"video": {
-								"type": "number",
-								"format": "double"
-							},
-							"web_search": {
-								"type": "number",
-								"format": "double"
-							},
-							"audio": {
-								"type": "number",
-								"format": "double"
-							},
-							"completion": {
-								"type": "number",
-								"format": "double"
-							},
-							"prompt": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"completion",
-							"prompt"
-						],
-						"type": "object"
-					},
-					"supportsPtb": {
-						"type": "boolean"
-					}
-				},
-				"required": [
-					"provider",
-					"providerSlug",
-					"pricing"
+			"ModelProviderName": {
+				"type": "string",
+				"enum": [
+					"anthropic",
+					"openai",
+					"bedrock",
+					"vertex",
+					"azure",
+					"perplexity",
+					"groq",
+					"deepseek",
+					"cohere",
+					"xai",
+					"google-ai-studio"
 				],
-				"type": "object",
-				"additionalProperties": false
+				"nullable": false
 			},
-			"InputModality": {
+			"AuthorName": {
 				"type": "string",
 				"enum": [
-					"text",
-					"image",
-					"audio",
-					"video"
-				]
-			},
-			"OutputModality": {
-				"type": "string",
-				"enum": [
-					"text",
-					"image",
-					"audio",
-					"video"
+					"anthropic",
+					"openai",
+					"perplexity",
+					"deepseek",
+					"cohere",
+					"xai",
+					"google",
+					"meta-llama",
+					"mistralai",
+					"amazon",
+					"microsoft",
+					"nvidia",
+					"qwen",
+					"moonshotai",
+					"passthrough"
 				]
 			},
 			"StandardParameter": {
@@ -7672,7 +7608,234 @@
 					"logit_bias",
 					"logprobs",
 					"top_logprobs",
-					"structured_outputs"
+					"structured_outputs",
+					"verbosity"
+				]
+			},
+			"ModelPricing": {
+				"properties": {
+					"threshold": {
+						"type": "number",
+						"format": "double"
+					},
+					"input": {
+						"type": "number",
+						"format": "double"
+					},
+					"output": {
+						"type": "number",
+						"format": "double"
+					},
+					"image": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheMultipliers": {
+						"properties": {
+							"write1h": {
+								"type": "number",
+								"format": "double"
+							},
+							"write5m": {
+								"type": "number",
+								"format": "double"
+							},
+							"cachedInput": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"cachedInput"
+						],
+						"type": "object"
+					},
+					"cacheStoragePerHour": {
+						"type": "number",
+						"format": "double"
+					},
+					"thinking": {
+						"type": "number",
+						"format": "double"
+					},
+					"request": {
+						"type": "number",
+						"format": "double"
+					},
+					"audio": {
+						"type": "number",
+						"format": "double"
+					},
+					"video": {
+						"type": "number",
+						"format": "double"
+					},
+					"web_search": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"threshold",
+					"input",
+					"output"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Endpoint": {
+				"properties": {
+					"pricing": {
+						"items": {
+							"$ref": "#/components/schemas/ModelPricing"
+						},
+						"type": "array"
+					},
+					"contextLength": {
+						"type": "number",
+						"format": "double"
+					},
+					"maxCompletionTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"ptbEnabled": {
+						"type": "boolean"
+					},
+					"version": {
+						"type": "string"
+					},
+					"baseUrl": {
+						"type": "string"
+					},
+					"provider": {
+						"$ref": "#/components/schemas/ModelProviderName"
+					},
+					"author": {
+						"$ref": "#/components/schemas/AuthorName"
+					},
+					"providerModelId": {
+						"type": "string"
+					},
+					"supportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"pricing",
+					"contextLength",
+					"maxCompletionTokens",
+					"ptbEnabled",
+					"baseUrl",
+					"provider",
+					"author",
+					"providerModelId",
+					"supportedParameters"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SimplifiedPricing": {
+				"properties": {
+					"prompt": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion": {
+						"type": "number",
+						"format": "double"
+					},
+					"audio": {
+						"type": "number",
+						"format": "double"
+					},
+					"thinking": {
+						"type": "number",
+						"format": "double"
+					},
+					"web_search": {
+						"type": "number",
+						"format": "double"
+					},
+					"image": {
+						"type": "number",
+						"format": "double"
+					},
+					"video": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheRead": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheWrite": {
+						"type": "number",
+						"format": "double"
+					},
+					"threshold": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"prompt",
+					"completion"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelEndpoint": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"providerSlug": {
+						"type": "string"
+					},
+					"endpoint": {
+						"$ref": "#/components/schemas/Endpoint"
+					},
+					"supportsPtb": {
+						"type": "boolean"
+					},
+					"pricing": {
+						"$ref": "#/components/schemas/SimplifiedPricing"
+					},
+					"pricingTiers": {
+						"items": {
+							"$ref": "#/components/schemas/SimplifiedPricing"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"provider",
+					"providerSlug",
+					"pricing"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"InputModality": {
+				"type": "string",
+				"enum": [
+					"text",
+					"image",
+					"audio",
+					"video"
+				]
+			},
+			"OutputModality": {
+				"type": "string",
+				"enum": [
+					"text",
+					"image",
+					"audio",
+					"video"
 				]
 			},
 			"ModelRegistryItem": {
@@ -8742,26 +8905,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"UpdateSavedQueryRequest": {
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"sql": {
-						"type": "string"
-					},
-					"id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"name",
-					"sql",
-					"id"
-				],
-				"type": "object",
-				"additionalProperties": false
 			},
 			"ResultSuccess__tableId-string--experimentId-string__": {
 				"properties": {
@@ -11374,8 +11517,9 @@
 		"securitySchemes": {
 			"api_key": {
 				"type": "apiKey",
-				"name": "authorization",
-				"in": "header"
+				"name": "Authorization",
+				"in": "header",
+				"description": "Bearer token authentication. Format: 'Bearer YOUR_API_KEY'"
 			}
 		}
 	},
@@ -11488,53 +11632,6 @@
 						}
 					}
 				]
-			}
-		},
-		"/v1/public/waitlist/experiments": {
-			"post": {
-				"operationId": "AddToWaitlist",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultSuccess_unknown_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultError_any_"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Waitlist"
-				],
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"email": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"email"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
 			}
 		},
 		"/v1/vault/add": {
@@ -11833,13 +11930,13 @@
 														"openai",
 														"bedrock",
 														"vertex",
-														"azure-openai",
+														"azure",
 														"perplexity",
 														"groq",
 														"deepseek",
 														"cohere",
 														"xai",
-														"google"
+														"google-ai-studio"
 													]
 												}
 											},
@@ -13722,7 +13819,7 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"filter": "all",
+											"filter": {},
 											"isCached": false,
 											"limit": 10,
 											"offset": 0,
@@ -13773,7 +13870,7 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"filter": "all",
+											"filter": {},
 											"isCached": false,
 											"limit": 10,
 											"offset": 0,
@@ -17608,16 +17705,93 @@
 				"operationId": "GetModelRegistry",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Complete model registry with models and filter options",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_ModelRegistryResponse.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"models": [
+												{
+													"id": "claude-opus-4-1",
+													"name": "Anthropic: Claude Opus 4.1",
+													"author": "anthropic",
+													"contextLength": 200000,
+													"endpoints": [
+														{
+															"provider": "anthropic",
+															"providerSlug": "anthropic",
+															"supportsPtb": true,
+															"pricing": {
+																"prompt": 15,
+																"completion": 75,
+																"cacheRead": 1.5,
+																"cacheWrite": 18.75
+															}
+														}
+													],
+													"maxOutput": 32000,
+													"trainingDate": "2025-08-05",
+													"description": "Most capable Claude model with extended context",
+													"inputModalities": [
+														null
+													],
+													"outputModalities": [
+														null
+													],
+													"supportedParameters": [
+														null,
+														null,
+														null,
+														null,
+														null,
+														null,
+														null
+													]
+												}
+											],
+											"total": 150,
+											"filters": {
+												"providers": [
+													{
+														"name": "anthropic",
+														"displayName": "Anthropic"
+													},
+													{
+														"name": "openai",
+														"displayName": "OpenAI"
+													},
+													{
+														"name": "google",
+														"displayName": "Google"
+													}
+												],
+												"authors": [
+													"anthropic",
+													"openai",
+													"google",
+													"meta"
+												],
+												"capabilities": [
+													"audio",
+													"image",
+													"thinking",
+													"caching",
+													"reasoning"
+												]
+											}
+										}
+									}
 								}
 							}
 						}
 					}
 				},
+				"description": "Get all available models from the registry",
+				"summary": "Returns a comprehensive list of all AI models with their configurations, pricing, and capabilities",
 				"tags": [
 					"Model Registry"
 				],
@@ -17964,7 +18138,7 @@
 				"operationId": "GetClickHouseSchema",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Array of table schemas with columns",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -17975,10 +18149,15 @@
 					}
 				},
 				"description": "Get ClickHouse schema (tables and columns)",
+				"summary": "Get database schema",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -17987,7 +18166,7 @@
 				"operationId": "ExecuteSql",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Query results with rows and metadata",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -17997,17 +18176,25 @@
 						}
 					}
 				},
+				"description": "Execute a SQL query against ClickHouse",
+				"summary": "Execute SQL query",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
+					"description": "The SQL query to execute",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/ExecuteSqlRequest"
+								"$ref": "#/components/schemas/ExecuteSqlRequest",
+								"description": "The SQL query to execute"
 							}
 						}
 					}
@@ -18019,7 +18206,7 @@
 				"operationId": "DownloadCsv",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "URL to download the CSV file",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -18029,17 +18216,25 @@
 						}
 					}
 				},
+				"description": "Execute a SQL query and download results as CSV",
+				"summary": "Download query results as CSV",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
+					"description": "The SQL query to execute",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/ExecuteSqlRequest"
+								"$ref": "#/components/schemas/ExecuteSqlRequest",
+								"description": "The SQL query to execute"
 							}
 						}
 					}
@@ -18051,7 +18246,7 @@
 				"operationId": "GetSavedQueries",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Array of saved queries",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -18061,10 +18256,16 @@
 						}
 					}
 				},
+				"description": "Get all saved queries for the organization",
+				"summary": "List saved queries",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -18073,7 +18274,7 @@
 				"operationId": "GetSavedQuery",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "The saved query details",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -18083,12 +18284,19 @@
 						}
 					}
 				},
+				"description": "Get a specific saved query by ID",
+				"summary": "Get saved query",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [
 					{
+						"description": "The ID of the saved query",
 						"in": "path",
 						"name": "queryId",
 						"required": true,
@@ -18112,12 +18320,19 @@
 						}
 					}
 				},
+				"description": "Delete a saved query by ID",
+				"summary": "Delete saved query",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [
 					{
+						"description": "The ID of the saved query to delete",
 						"in": "path",
 						"name": "queryId",
 						"required": true,
@@ -18126,6 +18341,54 @@
 						}
 					}
 				]
+			},
+			"put": {
+				"operationId": "UpdateSavedQuery",
+				"responses": {
+					"200": {
+						"description": "The updated saved query",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update an existing saved query",
+				"summary": "Update saved query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the saved query to update",
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The updated query details",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSavedQueryRequest",
+								"description": "The updated query details"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/helicone-sql/saved-queries/bulk-delete": {
@@ -18143,17 +18406,25 @@
 						}
 					}
 				},
+				"description": "Delete multiple saved queries at once",
+				"summary": "Bulk delete saved queries",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
+					"description": "Array of query IDs to delete",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/BulkDeleteSavedQueriesRequest"
+								"$ref": "#/components/schemas/BulkDeleteSavedQueriesRequest",
+								"description": "Array of query IDs to delete"
 							}
 						}
 					}
@@ -18165,7 +18436,7 @@
 				"operationId": "CreateSavedQuery",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Array containing the created saved query",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -18175,47 +18446,25 @@
 						}
 					}
 				},
+				"description": "Create a new saved query",
+				"summary": "Create saved query",
 				"tags": [
 					"HeliconeSql"
 				],
-				"security": [],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
+					"description": "The saved query details",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateSavedQueryRequest"
-							}
-						}
-					}
-				}
-			},
-			"put": {
-				"operationId": "UpdateSavedQuery",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_HqlSavedQuery.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"HeliconeSql"
-				],
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UpdateSavedQueryRequest"
+								"$ref": "#/components/schemas/CreateSavedQueryRequest",
+								"description": "The saved query details"
 							}
 						}
 					}

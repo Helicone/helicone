@@ -561,8 +561,8 @@ export class LoggingHandler extends AbstractLogHandler {
               prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
               prompt_audio_tokens: usage.promptAudioTokens ?? 0,
               completion_audio_tokens: usage.completionAudioTokens ?? 0,
-              sum_tokens:
-                (usage.promptTokens ?? 0) + (usage.completionTokens ?? 0),
+              prompt_cache_write_5m: usage.promptCacheWrite5m ?? 0,
+              prompt_cache_write_1h: usage.promptCacheWrite1h ?? 0,
               multiple: COST_PRECISION_MULTIPLIER,
             })
     );

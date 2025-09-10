@@ -1,5 +1,19 @@
 import React, { useState, useEffect, useMemo } from "react";
-import ThemedTable from "@/components/shared/themed/table/themedTable";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  CellContext,
+} from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import ThemedModal from "@/components/shared/themed/themedModal";
 import { MAX_EXPORT_CSV } from "@/lib/constants";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
@@ -22,7 +36,6 @@ import { LuDownload } from "react-icons/lu";
 import { clsx } from "@/components/shared/clsx";
 import { useMutation } from "@tanstack/react-query";
 import { $JAWN_API } from "@/lib/clients/jawn";
-import { CellContext } from "@tanstack/react-table";
 import { components } from "@/lib/clients/jawnTypes/public";
 import useNotification from "@/components/shared/notification/useNotification";
 import { CircleCheckBig, CircleDashed } from "lucide-react";
@@ -43,12 +56,46 @@ function QueryResult({
   error,
   queryStats,
 }: QueryResultProps) {
-  const columns = useMemo(() => {
+  const columnKeys = useMemo(() => {
     if (!result || result.length === 0) {
       return [];
     }
     return Object.keys(result[0]);
   }, [result]);
+
+  const columnDefs = useMemo<ColumnDef<Record<string, any>>[]>(() => {
+    const indexCol: ColumnDef<Record<string, any>> = {
+      id: "__rowNum",
+      header: "#",
+      cell: (info) => info.row.index + 1,
+    };
+
+    const dynamicCols: ColumnDef<Record<string, any>>[] = columnKeys.map(
+      (col) => ({
+        header: col,
+        accessorKey: col,
+        cell: (info: CellContext<Record<string, any>, unknown>) => {
+          const value = info.getValue();
+          if (typeof value === "object" && value !== null) {
+            try {
+              return JSON.stringify(value);
+            } catch (_e) {
+              return String(value);
+            }
+          }
+          return value as any;
+        },
+      }),
+    );
+
+    return [indexCol, ...dynamicCols];
+  }, [columnKeys]);
+
+  const table = useReactTable({
+    data: result ?? [],
+    columns: columnDefs,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   if (error) {
     return (
@@ -76,36 +123,38 @@ function QueryResult({
         sql={sql}
         queryLoading={loading}
       />
-      <ThemedTable
-        id="hql-result"
-        defaultData={result}
-        defaultColumns={[
-          {
-            header: "#",
-            accessorKey: "__rowNum",
-            cell: (info) => info.row.index + 1,
-          },
-          ...columns.map((col) => ({
-            header: col,
-            accessorKey: col,
-            cell: (info: CellContext<Record<string, any>, unknown>) => {
-              const value = info.getValue();
-              if (typeof value === "object" && value !== null) {
-                return JSON.stringify(value);
-              }
-              return value;
-            },
-          })),
-        ]}
-        skeletonLoading={false}
-        dataLoading={false}
-        checkboxMode="never"
-        onRowSelect={() => {}}
-        onSelectAll={() => {}}
-        selectedIds={[]}
-        activeColumns={[]}
-        setActiveColumns={() => {}}
-      />
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.map((row) => (
+            <TableRow
+              key={row.id}
+              data-state={row.getIsSelected() && "selected"}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

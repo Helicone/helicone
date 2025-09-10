@@ -12,7 +12,7 @@ export const testAPIKey = async (apiKey: string) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      filter: "all",
+      filter: {},
       isCached: false,
       limit: 10,
       offset: 0,

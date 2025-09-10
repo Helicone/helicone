@@ -1,10 +1,10 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { ProviderName } from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { Database, Json } from "../../../supabase/database.types";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 
 export type ProviderKey = {
-  provider: ProviderName;
+  provider: ModelProviderName;
   org_id: string;
   decrypted_provider_key: string;
   /*
@@ -31,7 +31,7 @@ export class ProviderKeysStore {
     const { data, error } = await this.supabaseClient
       .from("decrypted_provider_keys_v2")
       .select(
-        "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config, cuid"
+        "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config, cuid, byok_enabled"
       )
       .eq("soft_delete", false)
       .not("decrypted_provider_key", "is", null);
@@ -55,10 +55,14 @@ export class ProviderKeysStore {
           auth_type: row.auth_type as "key" | "session_token",
           config: row.config,
           cuid: row.cuid ?? null,
+          byok_enabled: row.byok_enabled ?? null,
         };
       })
       .filter((key) => key !== null)
       .reduce<Record<string, ProviderKey[]>>((acc, key) => {
+        // this case should not happen but fixing types
+        if (!key) return acc;
+
         if (!acc[key.org_id]) {
           acc[key.org_id] = [];
         }
@@ -70,7 +74,7 @@ export class ProviderKeysStore {
   }
 
   async getProviderKeyWithFetch(
-    provider: ProviderName,
+    provider: ModelProviderName,
     orgId: string,
     keyCuid?: string
   ): Promise<ProviderKey | null> {

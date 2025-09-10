@@ -7,7 +7,7 @@ import { Result, err, isError, ok } from "../../packages/common/result";
 import { hashAuth } from "../../utils/hash";
 import { BaseManager } from "../BaseManager";
 import { DecryptedProviderKey } from "../VaultManager";
-import { ProviderName } from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 import { setProviderKeys } from "../../lib/refetchKeys";
 import { init } from "@paralleldrive/cuid2";
@@ -17,7 +17,7 @@ import {
 } from "../../controllers/public/apiKeyController";
 
 export type ProviderKey = {
-  providerName: ProviderName;
+  providerName: ModelProviderName;
   providerKey: string;
   providerSecretKey?: string;
   providerKeyName: string;
@@ -141,7 +141,7 @@ export class KeyManager extends BaseManager {
    */
   async deleteProviderKey(
     providerKeyId: string
-  ): Promise<Result<{ providerName: ProviderName | null }, string>> {
+  ): Promise<Result<{ providerName: ModelProviderName | null }, string>> {
     try {
       const providerName = await dbExecute<{ provider_name: string }>(
         `SELECT provider_name
@@ -242,7 +242,7 @@ export class KeyManager extends BaseManager {
   async getProviderKeys(): Promise<Result<ProviderKeyRow[], string>> {
     try {
       const result = await dbExecute<ProviderKeyRow>(
-        `SELECT id, org_id, provider_name, provider_key_name, created_at, soft_delete, config, byok_enabled
+        `SELECT id, org_id, provider_name, provider_key_name, created_at, soft_delete, config, cuid, byok_enabled
          FROM provider_keys
          WHERE org_id = $1
          AND soft_delete = false
@@ -312,7 +312,9 @@ export class KeyManager extends BaseManager {
   /**
    * Create a provider key
    */
-  async createProviderKey(data: CreateProviderKeyRequest): Promise<Result<{ id: string }, string>> {
+  async createProviderKey(
+    data: CreateProviderKeyRequest
+  ): Promise<Result<{ id: string }, string>> {
     try {
       const {
         providerName,
@@ -367,7 +369,13 @@ export class KeyManager extends BaseManager {
     byokEnabled?: boolean;
   }): Promise<Result<{ id: string; providerName: string }, string>> {
     try {
-      const { providerKeyId, providerKey, providerSecretKey, config, byokEnabled } = params;
+      const {
+        providerKeyId,
+        providerKey,
+        providerSecretKey,
+        config,
+        byokEnabled,
+      } = params;
 
       // Verify the key belongs to this organization
       const hasAccess = await this.hasAccessToProviderKey(providerKeyId);

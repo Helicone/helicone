@@ -1,0 +1,128 @@
+---
+title: "HQL (Helicone Query Language)"
+sidebarTitle: "HQL"
+description: "Query your Helicone analytics data directly using SQL with row-level security and built-in limits"
+---
+
+Helicone Query Language (HQL) lets you query your Helicone analytics data directly using SQL.
+
+<Note>
+HQL is currently available to selected workspaces. If you don’t see the HQL page in your dashboard, click “Request Access” from the HQL screen or contact support.
+</Note>
+
+## What you can query
+
+- **request_created_at**: timestamp of the request
+- **request_model**: model name used (e.g. `gpt-4o`)
+- **status**: HTTP status code
+- **user_id**: your application user identifier (if provided)
+- **cost** / **provider_total_cost**: cost metrics
+- **prompt_tokens**, **completion_tokens**, **total_tokens**: token usage
+- **properties**: custom properties map (e.g. `properties['Helicone-Session-Id']`)
+
+## Examples
+
+### Top costly requests (last 7 days)
+
+```sql
+SELECT 
+  request_created_at,
+  request_model,
+  response_body,
+  provider_total_cost
+FROM request_response_rmt
+WHERE request_created_at > now() - INTERVAL 7 DAY
+ORDER BY provider_total_cost DESC
+LIMIT 100
+```
+
+### Error rate (last 24 hours)
+
+```sql
+SELECT 
+  COUNTIf(status BETWEEN 400 AND 599) AS error_count,
+  COUNT() AS total_requests,
+  ROUND(error_count / total_requests, 4) AS error_rate
+FROM request_response_rmt
+WHERE request_created_at >= toDateTime64(now(), 3) - INTERVAL 24 HOUR
+```
+
+### Active users by day (last 14 days)
+
+```sql
+SELECT 
+  toDate(request_created_at) AS day,
+  COUNT(DISTINCT user_id) AS dau
+FROM request_response_rmt
+WHERE request_created_at >= toDateTime64(now(), 3) - INTERVAL 14 DAY
+GROUP BY day
+ORDER BY day
+```
+
+### Session analysis using custom properties
+
+```sql
+SELECT 
+  properties['Helicone-Session-Id'] AS session_id,
+  COUNT(*) AS requests,
+  sum(cost) AS total_cost
+FROM request_response_rmt
+WHERE request_created_at >= toDateTime64(now(), 3) - INTERVAL 7 DAY
+  AND properties['Helicone-Session-Id'] IS NOT NULL
+GROUP BY session_id
+ORDER BY total_cost DESC
+LIMIT 100
+```
+
+### Cost by model (last 30 days)
+
+```sql
+SELECT 
+  request_model,
+  sum(cost) AS total_cost,
+  COUNT() AS request_count
+FROM request_response_rmt
+WHERE request_created_at >= toDateTime64(now(), 3) - INTERVAL 30 DAY
+GROUP BY request_model
+ORDER BY total_cost DESC
+```
+
+## How to use HQL
+
+### In the Dashboard
+
+1. Go to `HQL` in the sidebar
+2. Browse tables and columns in the left panel
+3. Write your SQL in the editor
+4. Press Cmd/Ctrl+Enter to run; Cmd/Ctrl+S to save as a query
+
+Saved queries can be revisited and shared within your organization.
+
+### Via API
+
+Interactive API documentation is available at: [https://api.helicone.ai/docs/#/HeliconeSql](https://api.helicone.ai/docs/#/HeliconeSql) 
+
+### API Limits
+
+- **Query limit**: 300,000 rows maximum per query
+- **Rate limits**: 100 queries/min, 10 CSV downloads/min
+
+## Related
+
+<CardGroup cols={2}>
+<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+  Enrich requests to make querying easier and more powerful
+</Card>
+
+<Card title="Reports" icon="chart-bar" href="/features/reports">
+  Build saved charts on top of your data
+</Card>
+
+<Card title="Sessions" icon="link" href="/features/sessions">
+  Analyze multi‑turn conversations with session identifiers
+</Card>
+
+<Card title="Datasets" icon="database" href="/features/datasets">
+  Export curated data for fine‑tuning and evaluation
+</Card>
+</CardGroup>

@@ -1,25 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../supabase/database.types";
-import { tryJSONParse } from "../lib/clients/llmmapper/llmmapper";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { BaseRouter } from "./routerFactory";
 import { APIKeysStore } from "../lib/db/APIKeysStore";
-import {
-  getBody,
-  authenticate,
-  attemptModelRequestWithFallback,
-  EscrowInfo,
-} from "../lib/util/aiGateway";
-import { gatewayForwarder } from "./gatewayRouter";
-import { ProviderKeysManager } from "../lib/managers/ProviderKeysManager";
-import { ProviderKeysStore } from "../lib/db/ProviderKeysStore";
-import { isErr } from "../lib/util/results";
-import { PromptManager } from "../lib/managers/PromptManager";
-import { HeliconePromptManager } from "@helicone-package/prompts/HeliconePromptManager";
-import { PromptStore } from "../lib/db/PromptStore";
+import { APIKeysManager } from "../lib/managers/APIKeysManager";
+import { SimpleAIGateway } from "../lib/ai-gateway/SimpleAIGateway";
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
-  router.all(
+  router.post(
     "*",
     async (
       _,
@@ -28,21 +16,8 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       requestWrapper.setRequestReferrer("ai-gateway");
-      function forwarder(targetBaseUrl: string | null, escrowInfo?: EscrowInfo) {
-        return gatewayForwarder(
-          {
-            targetBaseUrl,
-            setBaseURLOverride: (url) => {
-              requestWrapper.setBaseURLOverride(url);
-            },
-            escrowInfo,
-          },
-          requestWrapper,
-          env,
-          ctx
-        );
-      }
 
+      // Authenticate first
       const isEU = requestWrapper.isEU();
       const supabaseClient = isEU
         ? createClient<Database>(
@@ -54,67 +29,46 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
             env.SUPABASE_SERVICE_ROLE_KEY
           );
 
-      const { orgId, rawAPIKey } = await authenticate(
-        requestWrapper,
-        env,
-        new APIKeysStore(supabaseClient)
+      const apiKeysManager = new APIKeysManager(
+        new APIKeysStore(supabaseClient),
+        env
       );
 
+      const rawAPIKey = requestWrapper.getRawProviderAuthHeader();
+      const hashedAPIKey = await requestWrapper.getProviderAuthHeader();
+
+      if (!hashedAPIKey) {
+        return new Response("Invalid API key", { status: 401 });
+      }
+
+      const orgId = await apiKeysManager.getOrgIdWithFetch(hashedAPIKey);
       if (!orgId || !rawAPIKey) {
         return new Response("Invalid API key", { status: 401 });
       }
-      const body = await getBody(requestWrapper);
-      const parsedBody = tryJSONParse(body ?? "{}");
-      if (!parsedBody || !parsedBody.model) {
-        return new Response("Invalid body or missing model", { status: 400 });
-      }
 
-      const models = parsedBody.model.split(",").map((m) => m.trim());
-
-      const result = await attemptModelRequestWithFallback({
-        models,
-        requestWrapper,
-        forwarder,
-        providerKeysManager: new ProviderKeysManager(
-          new ProviderKeysStore(supabaseClient),
-          env
-        ),
-        promptManager: new PromptManager(
-          new HeliconePromptManager({
-            apiKey: rawAPIKey,
-            baseUrl: env.VALHALLA_URL,
-          }),
-          new PromptStore(supabaseClient),
-          env
-        ),
+      // Create gateway with authenticated context
+      const gateway = new SimpleAIGateway(requestWrapper, env, ctx, {
         orgId,
-        parsedBody,
-        env,
-        ctx,
+        apiKey: rawAPIKey,
+        supabaseClient,
       });
 
-      if (isErr(result)) {
-        return new Response(
-          JSON.stringify({
-            "helicone-message":
-              "Helicone ran into an error servicing your request: " + result.error.message,
-            support:
-              "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
-            type: result.error.type,
-          }),
-          {
-            status: result.error.statusCode,
-            headers: {
-              "content-type": "application/json;charset=UTF-8",
-              "helicone-error": "true",
-            },
-          }
-        );
-      }
-
-      return result.data;
+      return gateway.handle();
     }
   );
+
+  // Catch-all for non-POST methods
+  router.all("*", async () => {
+    return new Response(
+      "Method not allowed. AI Gateway only accepts POST requests.",
+      {
+        status: 405,
+        headers: {
+          Allow: "POST",
+        },
+      }
+    );
+  });
 
   return router;
 };

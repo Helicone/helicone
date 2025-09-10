@@ -7,21 +7,11 @@ import {
   NoSymbolIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import {
-  FingerprintIcon,
-  KeyIcon,
-  LinkIcon,
-  Plug,
-  Webhook,
-  Coins,
-  Lock,
-} from "lucide-react";
+import { KeyIcon, LinkIcon, Plug, Webhook, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ReactNode, useMemo } from "react";
-import { useIsGovernanceEnabled } from "../organization/hooks";
+import { ReactNode } from "react";
 import AuthHeader from "@/components/shared/authHeader";
-import { useFeatureFlag } from "@/services/hooks/admin";
 
 const ORGANIZATION_TABS = [
   {
@@ -41,12 +31,6 @@ const ORGANIZATION_TABS = [
     title: "Billing",
     icon: CreditCardIcon,
     href: "/settings/billing",
-  },
-  {
-    id: "credits",
-    title: "Credits",
-    icon: Coins,
-    href: "/settings/credits",
   },
   {
     id: "reports",
@@ -106,37 +90,10 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   const router = useRouter();
   const currentPath = router.pathname;
   const org = useOrg();
-
-  const isGovernanceEnabled = useIsGovernanceEnabled();
   const isBetterAuthEnabled = process.env.NEXT_PUBLIC_BETTER_AUTH === "true";
-  const { data: hasCreditsFeatureFlag } = useFeatureFlag(
-    "credits",
-    org?.currentOrg?.id ?? "",
-  );
 
   // Add access keys for governance orgs and filter credits based on feature flag
-  const organizationTabs = useMemo(() => {
-    let tabs = [...ORGANIZATION_TABS];
-
-    // Remove credits tab if feature flag is not enabled
-    if (!hasCreditsFeatureFlag?.data) {
-      tabs = tabs.filter((tab) => tab.id !== "credits");
-    }
-
-    if (isGovernanceEnabled.data?.data?.data) {
-      return [
-        tabs[0], // General
-        {
-          id: "access-keys",
-          title: "Access Keys",
-          icon: FingerprintIcon,
-          href: "/settings/access-keys",
-        },
-        ...tabs.slice(1), // Rest of organization tabs
-      ];
-    }
-    return tabs;
-  }, [isGovernanceEnabled.data?.data?.data, hasCreditsFeatureFlag?.data]);
+  const organizationTabs = ORGANIZATION_TABS;
 
   const renderNavSection = (title: string, tabs: typeof ORGANIZATION_TABS) => (
     <div className="space-y-2">
@@ -168,7 +125,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
                       : "text-slate-500 dark:text-slate-400",
                   )}
                 />
-                {tab.title}
+                <span className="flex items-center gap-1.5">{tab.title}</span>
               </div>
             </Link>
           );

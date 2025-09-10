@@ -76,6 +76,7 @@ services:
       /bin/sh -c "
       /usr/bin/mc alias set localminio http://minio:9000 minioadmin minioadmin;
       /usr/bin/mc mb --ignore-existing localminio/request-response-storage;
+      /usr/bin/mc mb --ignore-existing localminio/hql-store;
       exit 0;
       "
 

@@ -37,10 +37,14 @@ export interface ModelRow {
     completion_token: number;
     per_image?: number;
     per_call?: number;
-    prompt_cache_write_token?: number;
+    prompt_cache_write_token?: number; // for anthropic, = 5m + 1h
     prompt_cache_read_token?: number;
     prompt_audio_token?: number;
     completion_audio_token?: number;
+
+    // anthropic cache control
+    prompt_cache_creation_5m?: number;
+    prompt_cache_creation_1h?: number;
   };
   showInPlayground?: boolean;
   targetUrl?: string;

@@ -4,11 +4,10 @@ on:
   workflow_dispatch: # Manual trigger for testing iterations!
   push:
     branches:
-      - "**" # Run on ALL branches for every push
+      - main
   pull_request:
     branches:
-      - "**" # Run on ALL branches for PRs
-    types: [opened, synchronize, reopened, ready_for_review]
+      - main
 
 jobs:
   worker-ai-gateway-tests:

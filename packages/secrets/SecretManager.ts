@@ -30,12 +30,6 @@ export class SecretManagerClass {
     secretName: string,
     fallback: string | undefined = undefined
   ): string | undefined {
-    for (const func of this.envLookupFunctions) {
-      const result = func(secretName);
-      if (result) {
-        return result;
-      }
-    }
     const result = this.resolveSecret(secretName);
     if (!result.value && fallback) {
       const fallbackResult = this.resolveSecret(fallback);
@@ -63,6 +57,12 @@ export class SecretManagerClass {
     return null;
   }
   private getSecretFromEnv(secretName: string): string | undefined {
+    for (const func of this.envLookupFunctions) {
+      const result = func(secretName);
+      if (result) {
+        return result;
+      }
+    }
     const knownDictionarySecret = this.tryKnownDictionaries(secretName);
     if (knownDictionarySecret !== null) {
       return knownDictionarySecret;
@@ -81,7 +81,7 @@ export class SecretManagerClass {
     )?.toLowerCase();
 
     // If rotation variables don't exist, fall back to original
-    if (!blueValue || !greenValue || !activeColor) {
+    if (!activeColor) {
       return {
         value: this.getSecretFromEnv(secretName),
         source: "fallback",
@@ -102,6 +102,14 @@ export class SecretManagerClass {
     }
 
     const activeValue = activeColor === "blue" ? blueValue : greenValue;
+
+    if (!activeValue) {
+      return {
+        value: this.getSecretFromEnv(secretName),
+        source: "fallback",
+        secretName,
+      };
+    }
 
     return {
       value: activeValue,

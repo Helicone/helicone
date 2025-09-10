@@ -5,7 +5,7 @@ import {
   Wallet,
 } from "../durable-objects/Wallet";
 import { SlackAlertManager } from "./SlackAlertManager";
-import { Result } from "../util/results";
+import { err, ok, Result } from "../util/results";
 import { isError } from "../../../../packages/common/result";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 
@@ -28,10 +28,11 @@ export class WalletManager {
     organizationId: string,
     proxyRequest: HeliconeProxyRequest,
     cost: number,
+    statusCode: number,
     cachedResponse?: Response
-  ): Promise<void> {
+  ): Promise<Result<void, string>> {
     if (!proxyRequest.escrowInfo) {
-      return;
+      return err("No escrow info");
     }
 
     try {
@@ -43,13 +44,18 @@ export class WalletManager {
 
       if (
         cost === 0 &&
+        statusCode >= 200 && statusCode < 300 &&
+        // anthropic, and other providers, may return a 200 status code for streams
+        // even when an error occurs in the middle of the event stream. Therefore,
+        // we cannot use those events to add the (provider, model) to the disallow list.
+        !proxyRequest.isStream &&
         (cachedResponse === undefined || cachedResponse === null)
       ) {
         // if the cost is 0 and we're not using a cached response, we need to add the request to the disallow list
         // so that we guard against abuse
         await this.walletStub.addToDisallowList(
           proxyRequest.requestId,
-          proxyRequest.provider,
+          proxyRequest.escrowInfo.endpoint.provider,
           proxyRequest.escrowInfo.model ?? "*"
         );
       }
@@ -60,11 +66,13 @@ export class WalletManager {
           proxyRequest.requestWrapper.getRawProviderAuthHeader() ?? ""
         );
       }
+      return ok(undefined);
     } catch (error) {
       console.error(
         `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}:`,
         error
       );
+      return err(`Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}: ${error}`);
     }
   }
 

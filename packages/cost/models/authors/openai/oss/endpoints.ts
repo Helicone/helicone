@@ -1,22 +1,24 @@
-import { ProviderName } from "../../../providers";
+import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { GPTOSSModelName } from "./models";
-
 export const endpoints = {
   "gpt-oss-120b:groq": {
     providerModelId: "openai/gpt-oss-120b",
     provider: "groq",
-    pricing: {
-      prompt: 0.00000015,
-      completion: 0.00000075,
-      request: 0.0,
-      image: 0.0,
-      audio: 0.0,
-      web_search: 0.0,
-      internal_reasoning: 0.0,
-    },
-    contextLength: 131000,
-    maxCompletionTokens: 131000,
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000015,
+        output: 0.00000075,
+        request: 0.0,
+        image: 0.0,
+        audio: 0.0,
+        web_search: 0.0,
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 65_536,
     supportedParameters: [
       "frequency_penalty",
       "include_reasoning",
@@ -38,7 +40,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
@@ -46,17 +48,20 @@ export const endpoints = {
   "gpt-oss-20b:groq": {
     providerModelId: "openai/gpt-oss-20b",
     provider: "groq",
-    pricing: {
-      prompt: 0.0000001,
-      completion: 0.0000005,
-      request: 0.0,
-      image: 0.0,
-      audio: 0.0,
-      web_search: 0.0,
-      internal_reasoning: 0.0,
-    },
-    contextLength: 131000,
-    maxCompletionTokens: 131000,
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000001,
+        output: 0.0000005,
+        request: 0.0,
+        image: 0.0,
+        audio: 0.0,
+        web_search: 0.0,
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 65_536,
     supportedParameters: [
       "frequency_penalty",
       "include_reasoning",
@@ -78,11 +83,11 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
   },
 } satisfies Partial<
-  Record<`${GPTOSSModelName}:${ProviderName}`, ModelProviderConfig>
+  Record<`${GPTOSSModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

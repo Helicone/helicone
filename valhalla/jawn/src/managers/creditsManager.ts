@@ -60,10 +60,16 @@ export class CreditsManager extends BaseManager {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.HELICONE_MANUAL_ACCESS_KEY}`,
+            Authorization: `Bearer ${process.env.HELICONE_MANUAL_ACCESS_KEY}`,
           },
         }
       );
+      if (!paymentsResponse.ok) {
+        return err(
+          `Error retrieving credit balance transactions: ${paymentsResponse.statusText}`
+        );
+      }
+
       const payments = await paymentsResponse.json();
 
       return ok({
@@ -115,5 +121,5 @@ export async function getAiGatewaySpend(
 
   const res = await dbQueryClickhouse<{cost: number}>(query, argsAcc);
 
-  return resultMap(res, (d) => ({ cost: d[0].cost }));
+  return resultMap(res, (d) => ({ cost: d[0].cost ?? 0 }));
 }

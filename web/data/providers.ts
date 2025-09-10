@@ -48,7 +48,7 @@ export const providers: Provider[] = [
     relevanceScore: 85,
   },
   {
-    id: "google",
+    id: "google-ai-studio",
     name: "Google AI (Gemini)",
     logoUrl: "/assets/home/providers/gemini.webp",
     description: "Configure your Gemini API Keys",

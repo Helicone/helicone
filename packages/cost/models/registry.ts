@@ -8,9 +8,13 @@ import type {
   ModelProviderConfig,
   UserEndpointConfig,
 } from "./types";
-import { buildIndexes, ModelIndexes } from "./build-indexes";
+import {
+  buildIndexes,
+  ModelIndexes,
+  ModelProviderEntry,
+} from "./build-indexes";
 import { buildEndpointUrl, buildModelId } from "./provider-helpers";
-import { ProviderName } from "./providers";
+import { ModelProviderName } from "./providers";
 import { Result, ok, err } from "../../common/result";
 import { ModelName, ModelProviderConfigId, EndpointId } from "./registry-types";
 
@@ -18,12 +22,14 @@ import { ModelName, ModelProviderConfigId, EndpointId } from "./registry-types";
 import { anthropicModels, anthropicEndpointConfig } from "./authors/anthropic";
 import { openaiModels, openaiEndpointConfig } from "./authors/openai";
 import { googleModels, googleEndpointConfig } from "./authors/google";
+import { grokModels, grokEndpointConfig } from "./authors/xai";
 
 // Combine all models
 const allModels = {
   ...anthropicModels,
   ...openaiModels,
   ...googleModels,
+  ...grokModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -31,18 +37,10 @@ const modelProviderConfigs = {
   ...anthropicEndpointConfig,
   ...openaiEndpointConfig,
   ...googleEndpointConfig,
+  ...grokEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
-
-function getModel(modelId: string): Result<ModelConfig> {
-  const model = allModels[modelId as ModelName];
-  return model ? ok(model) : err(`Model not found: ${modelId}`);
-}
-
-function getAllModels(): Result<ModelConfig[]> {
-  return ok(Object.values(allModels));
-}
 
 function getAllModelIds(): Result<ModelName[]> {
   return ok(Object.keys(allModels) as ModelName[]);
@@ -52,54 +50,28 @@ function getAllModelsWithIds(): Result<Record<ModelName, ModelConfig>> {
   return ok(allModels);
 }
 
-function getPtbEndpointById(
-  model: string,
-  provider: string,
-  endpointConfigId: string = "*"
-): Result<Endpoint> {
-  const endpointId = `${model}:${provider}:${endpointConfigId}`;
-  const endpoint = indexes.endpointIdToEndpoint.get(endpointId as EndpointId);
-  return endpoint ? ok(endpoint) : err(`Endpoint not found: ${endpointId}`);
-}
-
-function getPtbEndpoints(
-  model: string, // Model name (gpt-4o, claude-3-5-haiku, etc)
-  provider?: string, // Provider name (openai, anthropic, etc)
-  endpointConfigId?: string // Deployment/region name (us-east-1, etc)
-): Result<Endpoint[]> {
-  // Case 1: Model + Provider + EndpointConfigId - return specific endpoint as array
-  if (provider && endpointConfigId) {
-    const result = getPtbEndpointById(model, provider, endpointConfigId);
-    return result.error ? result : ok([result.data!]);
-  }
-
-  // Case 2: Model + Provider - return all endpoints for that provider
-  if (provider) {
-    return getPtbEndpointsByProvider(model, provider);
-  }
-
-  // Case 3: Model only - return all PTB endpoints
-  return getPtbEndpointsByModel(model);
-}
-
-function getPtbEndpointsByModel(model: string): Result<Endpoint[]> {
-  const endpoints = indexes.modelToPtbEndpoints.get(model as ModelName) || [];
+function getEndpointsByModel(model: string): Result<Endpoint[]> {
+  const endpoints = indexes.modelToEndpoints.get(model as ModelName) || [];
   return ok(endpoints);
 }
 
-function createFallbackEndpoint(
+function createPassthroughEndpoint(
   modelName: string,
-  provider: ProviderName,
+  provider: ModelProviderName,
   userEndpointConfig: UserEndpointConfig
 ): Result<Endpoint> {
   const endpointConfig: ModelProviderConfig = {
     providerModelId: modelName,
     ptbEnabled: false,
     provider,
-    pricing: {
-      prompt: 0,
-      completion: 0,
-    },
+    author: "passthrough",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0,
+        output: 0,
+      },
+    ],
     contextLength: 0,
     maxCompletionTokens: 0,
     supportedParameters: [],
@@ -120,7 +92,7 @@ function getPtbEndpointsByProvider(
 
 function getProviderModels(provider: string): Result<Set<ModelName>> {
   const models =
-    indexes.providerToModels.get(provider as ProviderName) || new Set();
+    indexes.providerToModels.get(provider as ModelProviderName) || new Set();
   return ok(models);
 }
 
@@ -141,6 +113,7 @@ function buildEndpoint(
   return ok({
     baseUrl: baseUrlResult.data ?? "",
     provider: endpointConfig.provider,
+    author: endpointConfig.author,
     providerModelId: modelIdResult.data ?? "",
     supportedParameters: endpointConfig.supportedParameters,
     pricing: endpointConfig.pricing,
@@ -165,41 +138,64 @@ function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {
   return ok(configs);
 }
 
-function getModelProviders(model: string): Result<Set<ProviderName>> {
+function getModelProviders(model: string): Result<Set<ModelProviderName>> {
   const providers =
     indexes.modelToProviders.get(model as ModelName) || new Set();
   return ok(providers);
 }
 
-function getPtbEndpointsWithIds(model: string, provider: string): Result<Record<string, string>> {
-  const result: Record<string, string> = {};
-  const prefix = `${model}:${provider}:`;
-  
-  indexes.endpointIdToEndpoint.forEach((endpoint, endpointId) => {
-    if (endpointId.startsWith(prefix) && endpoint.ptbEnabled) {
-      const deploymentId = endpointId.substring(prefix.length);
-      result[deploymentId] = endpoint.baseUrl;
+function getModelProviderEntriesByModel(
+  model: string
+): Result<ModelProviderEntry[]> {
+  const providerData =
+    indexes.modelToProviderData.get(model as ModelName) || [];
+  return ok(providerData);
+}
+
+function getModelProviderEntry(
+  model: string,
+  provider: string
+): Result<ModelProviderEntry | null> {
+  const configId = `${model}:${provider}` as ModelProviderConfigId;
+  const providerData = indexes.modelProviderToData.get(configId) || null;
+  return ok(providerData);
+}
+
+export const getPtbEndpoints = (model: string): Result<Endpoint[]> => {
+  const endpoints = indexes.modelToPtbEndpoints.get(model as ModelName) || [];
+  return ok(endpoints);
+};
+
+function getPtbEndpointsForProvider(
+  provider: string
+): Result<{ endpoint: Endpoint; model: ModelName }[]> {
+  const topLevelEndpoints: { endpoint: Endpoint; model: ModelName }[] = [];
+  indexes.modelToPtbEndpoints.forEach((endpoints, model) => {
+    for (const endpoint of endpoints) {
+      if (endpoint.provider === provider) {
+        topLevelEndpoints.push({
+          endpoint: endpoint,
+          model: model as ModelName,
+        });
+      }
     }
   });
-  
-  return ok(result);
+  return ok(topLevelEndpoints);
 }
 
 export const registry = {
-  getModel,
-  getAllModels,
   getAllModelIds,
   getAllModelsWithIds,
-  createFallbackEndpoint,
-  getPtbEndpoints,
-  getPtbEndpointById,
-  getPtbEndpointsByModel,
+  createPassthroughEndpoint,
   getPtbEndpointsByProvider,
-  getPtbEndpointsWithIds,
+  getPtbEndpoints,
   getProviderModels,
   buildEndpoint,
-  buildModelId,
   getModelProviderConfig,
+  getPtbEndpointsForProvider,
   getModelProviderConfigs,
   getModelProviders,
+  getEndpointsByModel,
+  getModelProviderEntriesByModel,
+  getModelProviderEntry,
 };

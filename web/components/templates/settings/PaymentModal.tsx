@@ -42,7 +42,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
   const handleSubmit = async () => {
     if (amount >= MIN_AMOUNT) {
       try {
-        await createCheckoutSession.mutateAsync(amount);
+        await createCheckoutSession.mutateAsync({ body: { amount } });
       } catch (error) {
         setNotification("Failed to start checkout. Please try again.", "error");
       }

@@ -1,4 +1,4 @@
-import { costOfPrompt } from "@helicone-package/cost";
+import { modelCost } from "@helicone-package/cost/costCalc";
 import {
   HeliconeRequestResponseToPosthog,
   PostHogEvent,
@@ -29,12 +29,17 @@ export class PostHogHandler extends AbstractLogHandler {
 
     const usage = context.usage;
 
-    const cost = this.modelCost({
+    const cost = modelCost({
       model: context.processedLog.model ?? "",
       provider: context.message.log.request.provider ?? "",
       sum_prompt_tokens: usage.promptTokens ?? 0,
+      prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
+      prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
+      prompt_audio_tokens: usage.promptAudioTokens ?? 0,
       sum_completion_tokens: usage.completionTokens ?? 0,
-      sum_tokens: (usage.promptTokens ?? 0) + (usage.completionTokens ?? 0),
+      completion_audio_tokens: usage.completionAudioTokens ?? 0,
+      prompt_cache_write_5m: usage.promptCacheWrite5m ?? 0,
+      prompt_cache_write_1h: usage.promptCacheWrite1h ?? 0,
     });
 
     context.usage.cost = cost;
@@ -120,29 +125,5 @@ export class PostHogHandler extends AbstractLogHandler {
     };
 
     return posthogLog;
-  }
-
-  modelCost(modelRow: {
-    model: string;
-    provider: string;
-    sum_prompt_tokens: number;
-    sum_completion_tokens: number;
-    sum_tokens: number;
-  }): number {
-    const model = modelRow.model;
-    const promptTokens = modelRow.sum_prompt_tokens;
-    const completionTokens = modelRow.sum_completion_tokens;
-    return (
-      costOfPrompt({
-        model,
-        promptTokens,
-        completionTokens,
-        provider: modelRow.provider,
-        promptCacheWriteTokens: 0,
-        promptCacheReadTokens: 0,
-        promptAudioTokens: 0,
-        completionAudioTokens: 0,
-      }) ?? 0
-    );
   }
 }

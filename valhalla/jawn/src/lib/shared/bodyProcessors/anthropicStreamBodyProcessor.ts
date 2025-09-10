@@ -47,6 +47,12 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
 
       try {
         const data = JSON.parse(line.replace("data:", "").trim());
+        if ("error" in data) {
+          return ok({
+            processedBody: data,
+            statusOverride: 500,
+          });
+        }
 
         // Handle input_json_delta for tool_use
         if (
@@ -130,13 +136,19 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
             usage: {
               totalTokens:
                 processedBody?.usage?.input_tokens +
-                processedBody?.usage?.output_tokens,
+                processedBody?.usage?.output_tokens +
+                processedBody?.usage?.cache_creation_input_tokens +
+                processedBody?.usage?.cache_read_input_tokens,
               promptTokens: processedBody?.usage?.input_tokens,
               promptCacheWriteTokens:
                 processedBody?.usage?.cache_creation_input_tokens,
               promptCacheReadTokens:
                 processedBody?.usage?.cache_read_input_tokens,
               completionTokens: processedBody?.usage?.output_tokens,
+              promptCacheWrite5m:
+                processedBody?.usage?.cache_creation?.ephemeral_5m_input_tokens,
+              promptCacheWrite1h:
+                processedBody?.usage?.cache_creation?.ephemeral_1h_input_tokens,
               heliconeCalculated: true,
             },
           });

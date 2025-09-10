@@ -351,9 +351,23 @@ export function ThemedTimeFilterShadCN({
                   value={date1Value}
                   onChange={(e) => {
                     setDate1Value(e.target.value);
-                    const newFrom = new Date(e.target.value);
-                    if (isValidDate(newFrom)) {
-                      handleDateChange({ ...date, from: newFrom });
+                    if (e.target.value && date?.to) {
+                      const [year, month, day] = e.target.value
+                        .split("-")
+                        .map(Number);
+                      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                        const newFromDate = new Date(year, month - 1, day);
+                        if (isValidDate(newFromDate) && date?.from) {
+                          newFromDate.setHours(
+                            date.from.getHours(),
+                            date.from.getMinutes(),
+                          );
+                          handleDateChange({ from: newFromDate, to: date.to });
+                        } else if (isValidDate(newFromDate)) {
+                          newFromDate.setHours(0, 0);
+                          handleDateChange({ from: newFromDate, to: date.to });
+                        }
+                      }
                     }
                   }}
                 />
@@ -363,13 +377,12 @@ export function ThemedTimeFilterShadCN({
                   value={time1Value}
                   onChange={(e) => {
                     setTime1Value(e.target.value);
-                    const newFrom = new Date(e.target.value);
-                    if (isValidDate(newFrom)) {
-                      let [hours, minutes] = e.target.value.split(":");
-
+                    if (date?.from && e.target.value && date?.to) {
+                      const [hours, minutes] = e.target.value.split(":");
                       if (hours && minutes) {
+                        const newFrom = new Date(date.from);
                         newFrom.setHours(Number(hours), Number(minutes));
-                        handleDateChange({ ...date, from: newFrom });
+                        handleDateChange({ from: newFrom, to: date.to });
                       }
                     }
                   }}
@@ -382,9 +395,21 @@ export function ThemedTimeFilterShadCN({
                   value={date2Value}
                   onChange={(e) => {
                     setDate2Value(e.target.value);
-                    const newTo = new Date(e.target.value);
-                    if (isValidDate(newTo) && date?.from) {
-                      handleDateChange({ ...date, to: newTo });
+                    if (e.target.value && date?.from) {
+                      const [year, month, day] = e.target.value
+                        .split("-")
+                        .map(Number);
+                      const newToDate = new Date(year, month - 1, day);
+                      if (isValidDate(newToDate) && date?.to) {
+                        newToDate.setHours(
+                          date.to.getHours(),
+                          date.to.getMinutes(),
+                        );
+                        handleDateChange({ from: date.from, to: newToDate });
+                      } else if (isValidDate(newToDate)) {
+                        newToDate.setHours(23, 59);
+                        handleDateChange({ from: date.from, to: newToDate });
+                      }
                     }
                   }}
                 />
@@ -394,13 +419,12 @@ export function ThemedTimeFilterShadCN({
                   value={time2Value}
                   onChange={(e) => {
                     setTime2Value(e.target.value);
-                    const newTo = new Date(e.target.value);
-                    if (isValidDate(newTo) && date?.from) {
-                      let [hours, minutes] = e.target.value.split(":");
-
+                    if (date?.to && e.target.value && date?.from) {
+                      const [hours, minutes] = e.target.value.split(":");
                       if (hours && minutes) {
+                        const newTo = new Date(date.to);
                         newTo.setHours(Number(hours), Number(minutes));
-                        handleDateChange({ ...date, to: newTo });
+                        handleDateChange({ from: date.from, to: newTo });
                       }
                     }
                   }}

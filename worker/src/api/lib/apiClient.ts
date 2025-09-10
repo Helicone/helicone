@@ -6,46 +6,12 @@ import { ClickhouseClientWrapper } from "../../lib/db/ClickhouseWrapper";
 import { Valhalla } from "../../lib/db/valhalla";
 import { RequestResponseStore } from "../../lib/db/RequestResponseStore";
 import { DBQueryTimer } from "../../lib/util/loggers/DBQueryTimer";
-
-class InternalResponse {
-  constructor(private client: APIClient) {}
-
-  newError(message: string, status: number): Response {
-    console.error(`Response Error: `, message);
-    return new Response(JSON.stringify({ error: message }), { status });
-  }
-
-  successJSON(data: unknown, enableCors = false): Response {
-    if (enableCors) {
-      return new Response(JSON.stringify(data), {
-        status: 200,
-        headers: {
-          "content-type": "application/json;charset=UTF-8",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PUT",
-          "Access-Control-Allow-Headers":
-            "Content-Type, helicone-jwt, helicone-org-id",
-        },
-      });
-    }
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        "content-type": "application/json;charset=UTF-8",
-      },
-    });
-  }
-
-  unauthorized(): Response {
-    return this.newError("Unauthorized", 401);
-  }
-}
+import { InternalResponse } from "./internalResponse";
 
 export class APIClient {
   public queue: RequestResponseStore;
-  public response: InternalResponse;
+  public response: typeof InternalResponse;
   db: DBWrapper;
-  private heliconeApiKeyRow?: Database["public"]["Tables"]["helicone_api_keys"]["Row"];
 
   constructor(
     private env: Env,
@@ -53,7 +19,7 @@ export class APIClient {
     private requestWrapper: RequestWrapper,
     auth: HeliconeAuth
   ) {
-    this.response = new InternalResponse(this);
+    this.response = InternalResponse;
     this.db = new DBWrapper(env, auth);
     this.queue = new RequestResponseStore(
       createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),

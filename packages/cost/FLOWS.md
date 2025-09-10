@@ -123,13 +123,13 @@ Phase 2 - PTB (sorted by cost):
 Model: gpt-4
 User Keys: {
   openai: {key: "sk-...", byok_only: false},
-  azure-openai: {key: "...", byok_only: true},
+  azure: {key: "...", byok_only: true},
   bedrock: {key: "...", byok_only: true}
 }
 
 Phase 1 - BYOK (all attempted):
 1. openai (BYOK) → Try user's OpenAI key
-2. azure-openai (BYOK) → Try user's Azure key
+2. azure (BYOK) → Try user's Azure key
 3. bedrock (BYOK) → Try user's Bedrock key
 
 Phase 2 - PTB (filtered):
