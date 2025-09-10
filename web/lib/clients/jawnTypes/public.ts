@@ -16,6 +16,18 @@ export interface paths {
   "/v1/webhooks/{webhookId}": {
     delete: operations["DeleteWebhook"];
   };
+  "/v1/public/waitlist/feature": {
+    post: operations["AddToWaitlist"];
+  };
+  "/v1/public/waitlist/feature/status": {
+    get: operations["IsOnWaitlist"];
+  };
+  "/v1/public/waitlist/feature/count": {
+    get: operations["GetWaitlistCount"];
+  };
+  "/v1/public/waitlist/feature/share": {
+    post: operations["TrackShare"];
+  };
   "/v1/vault/add": {
     post: operations["AddKey"];
   };
@@ -414,6 +426,10 @@ export interface paths {
     post: operations["GetCostsOverTime"];
   };
   "/v1/public/model-registry/models": {
+    /**
+     * Returns a comprehensive list of all AI models with their configurations, pricing, and capabilities
+     * @description Get all available models from the registry
+     */
     get: operations["GetModelRegistry"];
   };
   "/v1/public/compare/models": {
@@ -694,6 +710,45 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--message-string__": {
+      data: {
+        message: string;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__isOnWaitlist-boolean__": {
+      data: {
+        isOnWaitlist: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__count-number__": {
+      data: {
+        /** Format: double */
+        count: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string__": {
+      data: {
+        message: string;
+        /** Format: double */
+        priorityBoost?: number;
+        /** Format: double */
+        newPosition?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-string__": {
       data: {
         id: string;
@@ -4000,6 +4055,80 @@ export interface operations {
       };
     };
   };
+  AddToWaitlist: {
+    requestBody: {
+      content: {
+        "application/json": {
+          organizationId?: string;
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
+        };
+      };
+    };
+  };
+  IsOnWaitlist: {
+    parameters: {
+      query: {
+        email: string;
+        feature: string;
+        organizationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetWaitlistCount: {
+    parameters: {
+      query: {
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number_.string_"];
+        };
+      };
+    };
+  };
+  TrackShare: {
+    requestBody: {
+      content: {
+        "application/json": {
+          organizationId?: string;
+          /** @enum {string} */
+          action: "like" | "repost" | "both";
+          /** @enum {string} */
+          platform: "twitter" | "linkedin";
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string_.string_"];
+        };
+      };
+    };
+  };
   AddKey: {
     requestBody: {
       content: {
@@ -6348,9 +6477,13 @@ export interface operations {
       };
     };
   };
+  /**
+   * Returns a comprehensive list of all AI models with their configurations, pricing, and capabilities
+   * @description Get all available models from the registry
+   */
   GetModelRegistry: {
     responses: {
-      /** @description Ok */
+      /** @description Complete model registry with models and filter options */
       200: {
         content: {
           "application/json": components["schemas"]["Result_ModelRegistryResponse.string_"];

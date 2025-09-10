@@ -9,12 +9,6 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/public/waitlist/feature": {
-    post: operations["AddToWaitlist"];
-  };
-  "/v1/public/waitlist/feature/status": {
-    get: operations["IsOnWaitlist"];
-  };
   "/v1/user-feedback": {
     post: operations["PostUserFeedback"];
   };
@@ -508,28 +502,6 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    "ResultSuccess__success-boolean--message-string__": {
-      data: {
-        message: string;
-        success: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
-    };
-    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__isOnWaitlist-boolean__": {
-      data: {
-        isOnWaitlist: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
     RateLimitRuleView: {
       id: string;
       name: string;
@@ -547,6 +519,11 @@ export interface components {
       data: components["schemas"]["RateLimitRuleView"][];
       /** @enum {number|null} */
       error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
     };
     "Result_RateLimitRuleView-Array.string_": components["schemas"]["ResultSuccess_RateLimitRuleView-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_RateLimitRuleView_: {
@@ -3056,6 +3033,8 @@ Json: JsonObject;
      * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
+     * `URL` class is a global reference for `import { URL } from 'node:url'`
+     * https://nodejs.org/api/url.html#the-whatwg-url-api
      */
     "url.URL": string;
     /** @description The Application object. */
@@ -15755,42 +15734,6 @@ export type external = Record<string, never>;
 
 export interface operations {
 
-  AddToWaitlist: {
-    requestBody: {
-      content: {
-        "application/json": {
-          organizationId?: string;
-          feature: string;
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
-        };
-      };
-    };
-  };
-  IsOnWaitlist: {
-    parameters: {
-      query: {
-        email: string;
-        feature: string;
-        organizationId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
-        };
-      };
-    };
-  };
   PostUserFeedback: {
     requestBody: {
       content: {

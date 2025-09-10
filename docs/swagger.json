@@ -183,6 +183,175 @@
 					}
 				]
 			},
+			"ResultSuccess__success-boolean--message-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"message": {
+								"type": "string"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"message",
+							"success"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__success-boolean--message-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--message-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__isOnWaitlist-boolean__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"isOnWaitlist": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"isOnWaitlist"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__isOnWaitlist-boolean_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__isOnWaitlist-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__count-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"count"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__count-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__count-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"message": {
+								"type": "string"
+							},
+							"priorityBoost": {
+								"type": "number",
+								"format": "double"
+							},
+							"newPosition": {
+								"type": "number",
+								"format": "double"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"message",
+							"success"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__id-string__": {
 				"properties": {
 					"data": {
@@ -12150,6 +12319,195 @@
 				]
 			}
 		},
+		"/v1/public/waitlist/feature": {
+			"post": {
+				"operationId": "AddToWaitlist",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__success-boolean--message-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"organizationId": {
+										"type": "string"
+									},
+									"feature": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"feature",
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/waitlist/feature/status": {
+			"get": {
+				"operationId": "IsOnWaitlist",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__isOnWaitlist-boolean_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "email",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "feature",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/waitlist/feature/count": {
+			"get": {
+				"operationId": "GetWaitlistCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__count-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "feature",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/waitlist/feature/share": {
+			"post": {
+				"operationId": "TrackShare",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"organizationId": {
+										"type": "string"
+									},
+									"action": {
+										"type": "string",
+										"enum": [
+											"like",
+											"repost",
+											"both"
+										]
+									},
+									"platform": {
+										"type": "string",
+										"enum": [
+											"twitter",
+											"linkedin"
+										]
+									},
+									"feature": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"action",
+									"platform",
+									"feature",
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/vault/add": {
 			"post": {
 				"operationId": "AddKey",
@@ -18221,16 +18579,93 @@
 				"operationId": "GetModelRegistry",
 				"responses": {
 					"200": {
-						"description": "Ok",
+						"description": "Complete model registry with models and filter options",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_ModelRegistryResponse.string_"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"models": [
+												{
+													"id": "claude-opus-4-1",
+													"name": "Anthropic: Claude Opus 4.1",
+													"author": "anthropic",
+													"contextLength": 200000,
+													"endpoints": [
+														{
+															"provider": "anthropic",
+															"providerSlug": "anthropic",
+															"supportsPtb": true,
+															"pricing": {
+																"prompt": 15,
+																"completion": 75,
+																"cacheRead": 1.5,
+																"cacheWrite": 18.75
+															}
+														}
+													],
+													"maxOutput": 32000,
+													"trainingDate": "2025-08-05",
+													"description": "Most capable Claude model with extended context",
+													"inputModalities": [
+														null
+													],
+													"outputModalities": [
+														null
+													],
+													"supportedParameters": [
+														null,
+														null,
+														null,
+														null,
+														null,
+														null,
+														null
+													]
+												}
+											],
+											"total": 150,
+											"filters": {
+												"providers": [
+													{
+														"name": "anthropic",
+														"displayName": "Anthropic"
+													},
+													{
+														"name": "openai",
+														"displayName": "OpenAI"
+													},
+													{
+														"name": "google",
+														"displayName": "Google"
+													}
+												],
+												"authors": [
+													"anthropic",
+													"openai",
+													"google",
+													"meta"
+												],
+												"capabilities": [
+													"audio",
+													"image",
+													"thinking",
+													"caching",
+													"reasoning"
+												]
+											}
+										}
+									}
 								}
 							}
 						}
 					}
 				},
+				"description": "Get all available models from the registry",
+				"summary": "Returns a comprehensive list of all AI models with their configurations, pricing, and capabilities",
 				"tags": [
 					"Model Registry"
 				],
