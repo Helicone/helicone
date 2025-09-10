@@ -4,6 +4,8 @@ import type {
   AuthResult,
   ModelProviderConfig,
   UserEndpointConfig,
+  Endpoint,
+  RequestBodyContext,
 } from "../types";
 
 export class AnthropicProvider extends BaseProvider {
@@ -24,16 +26,22 @@ export class AnthropicProvider extends BaseProvider {
     if (userConfig.gatewayMapping === "NO_MAPPING") {
       return "https://api.anthropic.com/v1/messages";
     }
-    return "https://api.anthropic.com/v1/chat/completions";
+    return "https://api.anthropic.com/v1/messages";
   }
 
   authenticate(context: AuthContext): AuthResult {
     const headers: Record<string, string> = {};
-    if (context.bodyMapping === "NO_MAPPING") {
-      headers["x-api-key"] = context.apiKey || "";
-    } else {
-      headers["Authorization"] = `Bearer ${context.apiKey || ""}`;
-    }
+    headers["x-api-key"] = context.apiKey || "";
+    headers["anthropic-version"] = "2023-06-01";
     return { headers };
+  }
+
+  buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
+    const anthropicBody = context.toAnthropic(context.parsedBody);
+    const updatedBody = {
+      ...anthropicBody,
+      // anthropic_version: "2023-06-01",
+    };
+    return JSON.stringify(updatedBody);
   }
 }

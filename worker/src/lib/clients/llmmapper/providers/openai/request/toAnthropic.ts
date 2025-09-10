@@ -55,6 +55,11 @@ function extractSystemMessage(messages: OpenAIRequestBody["messages"]): {
 }
 
 function mapModel(model: string): string {
+  if (model.includes('claude-3.5-haiku')) {
+    return 'claude-3-5-haiku-20241022';
+  } else if (model.includes('claude-3.5-sonnet')) {
+    return 'claude-3-5-sonnet-latest';
+  }
   return model;
 }
 
