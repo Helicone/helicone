@@ -14,7 +14,24 @@ export interface AntRequestBody {
   top_k?: number;
   stop_sequences?: string[];
   stream?: boolean;
+  tools?: AnthropicTool[];
+  tool_choice?: AnthropicToolChoice;
 }
+
+export interface AnthropicTool {
+  name: string;
+  description: string;
+  input_schema: {
+    type: "object";
+    properties: Record<string, any>;
+    required?: string[];
+  };
+}
+
+export type AnthropicToolChoice = 
+  | { type: "auto" }
+  | { type: "any" }
+  | { type: "tool"; name: string };
 
 export interface ContentBlock {
   type: "text" | "image";

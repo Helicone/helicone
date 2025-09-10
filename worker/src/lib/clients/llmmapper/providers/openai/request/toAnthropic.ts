@@ -1,4 +1,4 @@
-import { AntRequestBody, ContentBlock } from "../../anthropic/request/types";
+import { AntRequestBody, ContentBlock, AnthropicTool, AnthropicToolChoice } from "../../anthropic/request/types";
 import { OpenAIRequestBody } from "./types";
 
 export function toAnthropic(openAIBody: OpenAIRequestBody): AntRequestBody {
@@ -30,8 +30,19 @@ export function toAnthropic(openAIBody: OpenAIRequestBody): AntRequestBody {
     antBody.metadata = { user_id: openAIBody.user };
   }
 
+  // Map tools from OpenAI format to Anthropic format
+  if (openAIBody.tools) {
+    antBody.tools = mapTools(openAIBody.tools);
+  }
+
+  // Map tool_choice from OpenAI format to Anthropic format
+  if (openAIBody.tool_choice) {
+    antBody.tool_choice = mapToolChoice(openAIBody.tool_choice);
+  }
+
+  // Legacy function_call/functions not supported
   if (openAIBody.function_call || openAIBody.functions) {
-    throw new Error("Function calling and tools are not supported");
+    throw new Error("Legacy function_call and functions are not supported. Use tools instead.");
   }
 
   if (openAIBody.logit_bias) {
@@ -109,4 +120,57 @@ function mapMessages(
 
     return antMessage;
   });
+}
+
+function mapTools(tools: OpenAIRequestBody["tools"]): AnthropicTool[] {
+  if (!tools) return [];
+  
+  return tools.map((tool) => {
+    if (tool.type !== "function") {
+      throw new Error(`Unsupported tool type: ${tool.type}`);
+    }
+
+    const inputSchema = tool.function.parameters as any || {
+      type: "object",
+      properties: {},
+    };
+
+    return {
+      name: tool.function.name,
+      description: tool.function.description || "",
+      input_schema: {
+        type: "object" as const,
+        properties: inputSchema.properties || {},
+        required: inputSchema.required,
+      },
+    };
+  });
+}
+
+function mapToolChoice(toolChoice: OpenAIRequestBody["tool_choice"]): AnthropicToolChoice {
+  if (!toolChoice) {
+    return { type: "auto" };
+  }
+
+  if (typeof toolChoice === "string") {
+    switch (toolChoice) {
+      case "auto":
+        return { type: "auto" };
+      case "none":
+        // Anthropic doesn't have "none", so we'll omit tools entirely
+        // This should be handled at a higher level
+        return { type: "auto" };
+      default:
+        throw new Error(`Unsupported tool_choice string: ${toolChoice}`);
+    }
+  }
+
+  if (typeof toolChoice === "object" && toolChoice.type === "function") {
+    return {
+      type: "tool",
+      name: toolChoice.function.name,
+    };
+  }
+
+  throw new Error("Unsupported tool_choice format");
 }

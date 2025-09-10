@@ -11,6 +11,9 @@ import { gatewayForwarder } from "../../routers/gatewayRouter";
 import { AttemptBuilder } from "./AttemptBuilder";
 import { AttemptExecutor } from "./AttemptExecutor";
 import { Attempt, DisallowListEntry, EscrowInfo } from "./types";
+import { ant2oaiNonStream } from "../clients/llmmapper/router/ant2oai/nonStream";
+import { ant2oaiStreamResponse } from "../clients/llmmapper/router/ant2oai/stream";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
 export interface AuthContext {
   orgId: string;
@@ -138,7 +141,19 @@ export class SimpleAIGateway {
       } else {
         // Success!
         this.requestWrapper.setSuccessfulAttempt(attempt);
-        return result.data;
+        
+        const mappedResponse = await this.mapResponse(
+          attempt,
+          result.data,
+          this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping
+        );
+        
+        if (isErr(mappedResponse)) {
+          console.error("Failed to map response:", mappedResponse.error);
+          return result.data;
+        }
+        
+        return mappedResponse.data;
       }
     }
 
@@ -274,6 +289,66 @@ export class SimpleAIGateway {
           entry.model === attempt.endpoint.providerModelId) ||
         (entry.provider === attempt.endpoint.provider && entry.model === "*")
     );
+  }
+
+  private determineResponseFormat(
+    provider: ModelProviderName,
+    modelId: string,
+    bodyMapping?: "OPENAI" | "NO_MAPPING"
+  ): "ANTHROPIC" | "OPENAI" { // TODO: make enum type when there's more map formats
+    if (bodyMapping !== "OPENAI") {
+      return "OPENAI";
+    }
+
+    if (
+      provider === "anthropic" ||
+      (provider === "bedrock" && modelId.includes("claude-"))
+    ) {
+      return "ANTHROPIC";
+    }
+
+    return "OPENAI";
+  }
+
+  private async mapResponse(
+    attempt: Attempt,
+    response: Response,
+    bodyMapping?: "OPENAI" | "NO_MAPPING"
+  ): Promise<Result<Response, string>> {
+    const mappingType = this.determineResponseFormat(
+      attempt.endpoint.provider,
+      attempt.endpoint.providerModelId,
+      bodyMapping
+    );
+    
+    if (mappingType === "OPENAI") {
+      return ok(response);
+    }
+
+    // clone to preserve original for logging
+    const clonedResponse = response.clone();
+    
+    try {
+      if (mappingType === "ANTHROPIC") {
+        const contentType = clonedResponse.headers.get("content-type");
+        const isStream = contentType?.includes("text/event-stream");
+
+        if (isStream) {
+          const mappedResponse = ant2oaiStreamResponse(clonedResponse);
+          return ok(mappedResponse);
+        } else {
+          const mappedResponse = await ant2oaiNonStream(clonedResponse);
+          return ok(mappedResponse);
+        }
+      }
+
+      return ok(response);
+    } catch (error) {
+      console.error("Failed to map response:", error);
+      return err(
+        error instanceof Error ? error.message : "Failed to map response"
+      );
+    }
   }
 
   private async createErrorResponse(
