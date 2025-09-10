@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { useState } from "react";
 import { ImageModal } from "../requests/components/chatComponent/single/images/ImageModal";
+import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 
@@ -13,7 +14,9 @@ const ReactMarkdown = dynamic(() => import("react-markdown"), {
   loading: () => <div className="h-4 w-full animate-pulse rounded bg-muted" />,
 });
 
-type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
+type Message = NonNullable<OpenAIChatRequest["messages"]>[0] & {
+  name?: string; // Team member name from Slack
+};
 
 interface MessageRendererProps {
   message: Message;
@@ -46,7 +49,7 @@ const MessageRenderer = ({
   if (message.role === "user") {
     return (
       <>
-        <div className="w-full">
+        <div className="flex w-full justify-end">
           <div className="w-full rounded-lg border border-blue-200 bg-blue-100 px-2.5 py-1 text-foreground dark:border-blue-950 dark:bg-blue-900/20">
             {typeof message.content === "string" ? (
               <ReactMarkdown
@@ -120,14 +123,33 @@ const MessageRenderer = ({
   }
 
   if (message.role === "assistant") {
+    const isHumanResponse = !!message.name;
     const isFirstMessage = messageIndex === 0;
     const isQuickstartPage = router.pathname === "/quickstart";
     const showQuickstartButton =
       isFirstMessage && isQuickstartPage && onQuickstartHelp;
 
     return (
-      <div className="w-full">
-        <div className="w-full text-sm text-foreground">
+      <div
+        className={`w-full ${isHumanResponse ? "flex flex-col items-start" : ""}`}
+      >
+        {isHumanResponse && (
+          <div className="mb-2 flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-purple-500">
+              <User className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-xs font-medium text-purple-700 dark:text-purple-400">
+              {message.name} from Helicone Support
+            </span>
+          </div>
+        )}
+        <div
+          className={`text-sm text-foreground ${
+            isHumanResponse
+              ? "max-w-[80%] rounded-lg border border-purple-200 bg-purple-50 px-2.5 py-1.5 dark:border-purple-800 dark:bg-purple-950/30"
+              : "w-full"
+          }`}
+        >
           {typeof message.content === "string" && (
             <ReactMarkdown
               components={markdownComponents}
