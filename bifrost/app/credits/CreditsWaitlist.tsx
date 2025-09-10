@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
 
@@ -25,7 +25,19 @@ export function CreditsWaitlistForm({
   const [pendingShareTwitter, setPendingShareTwitter] = useState(false);
   const [pendingShareLinkedIn, setPendingShareLinkedIn] = useState(false);
   
+  // Ref to store interval ID for cleanup
+  const windowCheckInterval = useRef<NodeJS.Timeout>();
+  
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.helicone.ai";
+  
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (windowCheckInterval.current) {
+        clearInterval(windowCheckInterval.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +101,12 @@ export function CreditsWaitlistForm({
       return;
     }
 
+    // Clear any existing interval
+    if (windowCheckInterval.current) {
+      clearInterval(windowCheckInterval.current);
+      windowCheckInterval.current = undefined;
+    }
+
     // Open the share link in a popup
     let shareWindow;
     if (platform === "twitter") {
@@ -107,9 +125,13 @@ export function CreditsWaitlistForm({
       const checkClosed = setInterval(() => {
         if (shareWindow.closed) {
           clearInterval(checkClosed);
+          windowCheckInterval.current = undefined;
           // Window closed, keep pending state to show confirmation
         }
       }, 500);
+      
+      // Store the interval ID for cleanup
+      windowCheckInterval.current = checkClosed;
     }
   };
 

@@ -50,23 +50,6 @@ export default function WaitlistPage() {
         {/* Hero Section - contained width */}
         <div className="max-w-6xl mx-auto p-4 pt-4">
           <Col className="items-center gap-4">
-            <span className="block sm:hidden">
-              <Image
-                src="/static/pricing/bouncing-cube.webp"
-                alt="bouncing-cube"
-                width={100}
-                height={50}
-              />
-            </span>
-            <span className="hidden sm:block">
-              <Image
-                src="/static/pricing/bouncing-cube.webp"
-                alt="bouncing-cube"
-                width={200}
-                height={100}
-              />
-            </span>
-
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-3xl md:pt-4 text-center text-accent-foreground">
               One balance. Every LLM provider.
               <br />
@@ -77,6 +60,22 @@ export default function WaitlistPage() {
               Stop juggling API keys and invoices. Fund once, use everywhere.
               Full observability included at exact provider prices.
             </p>
+
+            {/* Launch Video */}
+            <div className="w-full max-w-3xl mt-6">
+              <video
+                src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Helicone_PassThrough_Full.mp4"
+                className="w-full rounded-xl border border-slate-200 shadow-lg"
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls
+                preload="metadata"
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
 
             {/* Waitlist Form */}
             <div className="w-full max-w-md mt-8 mx-auto" id="waitlist-form">
