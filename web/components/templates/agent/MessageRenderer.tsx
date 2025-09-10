@@ -51,7 +51,6 @@ const MessageRenderer = ({
       <>
         <div className="flex w-full justify-end">
           <div className="w-full rounded-lg border border-blue-200 bg-blue-100 px-2.5 py-1 text-foreground dark:border-blue-950 dark:bg-blue-900/20">
-
             {typeof message.content === "string" ? (
               <ReactMarkdown
                 components={markdownComponents}

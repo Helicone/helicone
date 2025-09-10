@@ -51,6 +51,8 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     messages,
     updateCurrentSessionMessages,
     createNewSession,
+    escalateSession,
+    currentSession,
     agentState,
     setAgentState,
   } = useHeliconeAgent();
@@ -516,7 +518,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                 </span>
               </div>
               <p className="mt-0.5 text-xs text-green-700 dark:text-green-300">
-                Connected to our support team. They'll respond here shortly.
+                Connected to our support team. They&apos;ll respond here shortly.
               </p>
             </div>
           </div>
