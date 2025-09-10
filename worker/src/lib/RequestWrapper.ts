@@ -18,6 +18,7 @@ import { parseJSXObject } from "@helicone/prompts";
 import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
+import { Attempt } from "./ai-gateway/types";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -64,6 +65,8 @@ export class RequestWrapper {
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
+
+  private gatewayAttempt?: Attempt;
 
   /*
   We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
@@ -634,6 +637,14 @@ export class RequestWrapper {
 
   setBody(body: string): void {
     this.cachedText = body;
+  }
+
+  setSuccessfulAttempt(attempt: Attempt): void {
+    this.gatewayAttempt = attempt;
+  }
+
+  getSuccessfulAttempt(): Attempt | undefined {
+    return this.gatewayAttempt;
   }
 }
 
