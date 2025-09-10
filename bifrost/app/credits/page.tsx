@@ -26,5 +26,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <WaitlistPage />;
+  return (
+    <div className="container mx-auto">
+      <WaitlistPage />
+    </div>
+  );
 }
