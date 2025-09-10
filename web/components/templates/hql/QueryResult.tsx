@@ -170,22 +170,90 @@ const StatusBar = ({
   queryLoading: boolean;
 }) => {
   const [progress, setProgress] = useState(0);
+  const [startTimeMs, setStartTimeMs] = useState<number | null>(null);
+  const [expectedMs, setExpectedMs] = useState<number | null>(null);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (queryLoading) {
-      setProgress(10);
-      interval = setInterval(() => {
-        setProgress((prev) => (prev < 90 ? prev + 10 : prev));
-      }, 200);
-    } else if (!queryLoading && progress > 0) {
-      setProgress(100);
-      setTimeout(() => setProgress(0), 500);
+  // Helpers: persist and retrieve historical durations by normalized SQL
+  const normalizeSql = (s: string) =>
+    s
+      .replace(/--.*$/gm, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  const historyKey = (s: string) => `hql:durations:${normalizeSql(s)}`;
+  const getDurations = (s: string): number[] => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(historyKey(s));
+      if (!raw) return [];
+      const arr = JSON.parse(raw) as number[];
+      return Array.isArray(arr) ? arr.filter((n) => Number.isFinite(n)) : [];
+    } catch {
+      return [];
     }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
+  };
+  const setDurations = (s: string, arr: number[]) => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(historyKey(s), JSON.stringify(arr.slice(-10)));
+    } catch {}
+  };
+  const estimateExpectedMs = (s: string): number | null => {
+    const list = getDurations(s);
+    if (list.length === 0) return null;
+    const sorted = [...list].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    const median =
+      sorted.length % 2 === 0
+        ? (sorted[mid - 1] + sorted[mid]) / 2
+        : sorted[mid];
+    // Clamp to reasonable bounds to avoid absurd ETAs
+    return Math.min(Math.max(median, 800), 30000);
+  };
+  const humanizeMs = (ms: number) => {
+    if (ms < 1000) return `${ms} ms`;
+    return `${(ms / 1000).toFixed(ms < 5000 ? 1 : 0)} s`;
+  };
+
+  // Start timing and compute expected duration when a query begins
+  useEffect(() => {
+    if (queryLoading) {
+      setStartTimeMs(Date.now());
+      const estimated = estimateExpectedMs(sql) ?? 2500; // default fallback
+      setExpectedMs(estimated);
+      setProgress(5);
+    }
+  }, [queryLoading, sql]);
+
+  // Update progress based on elapsed/expected while loading
+  useEffect(() => {
+    if (!queryLoading || startTimeMs == null) return;
+    const expected = expectedMs ?? 2500;
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTimeMs;
+      const pct = Math.min(99, Math.max(5, Math.floor((elapsed / expected) * 100)));
+      setProgress(pct);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [queryLoading, startTimeMs, expectedMs]);
+
+  // When finished, complete bar and persist actual duration
+  useEffect(() => {
+    if (!queryLoading && startTimeMs != null) {
+      setProgress(100);
+      const actual = elapsedMilliseconds || Math.max(0, Date.now() - startTimeMs);
+      if (actual > 0) {
+        const list = getDurations(sql);
+        list.push(actual);
+        setDurations(sql, list);
+      }
+      const timeout = setTimeout(() => setProgress(0), 500);
+      return () => clearTimeout(timeout);
+    }
   }, [queryLoading]);
+
+  const elapsedNow = queryLoading && startTimeMs != null ? Date.now() - startTimeMs : elapsedMilliseconds;
+  const etaMs = queryLoading && expectedMs != null && startTimeMs != null ? Math.max(0, expectedMs - (Date.now() - startTimeMs)) : null;
 
   return (
     <div className="flex items-center justify-between border-b border-tremor-brand-subtle bg-background px-4 py-1">
@@ -202,7 +270,10 @@ const StatusBar = ({
           ) : (
             <CircleCheckBig className="mr-2 h-5 w-5 text-green-500" />
           )}
-          Elapsed: {queryLoading ? "?" : elapsedMilliseconds} ms
+          Elapsed: {humanizeMs(elapsedNow || 0)}
+          {queryLoading && etaMs != null && (
+            <span className="ml-3">ETA: {humanizeMs(etaMs)}</span>
+          )}
         </span>
         <span>
           Read: {queryLoading ? "?" : rowCount} rows (
