@@ -257,92 +257,98 @@ export class HeliconeSqlManager {
   private async enrichResultsWithS3Bodies(
     rows: Record<string, any>[]
   ): Promise<Record<string, any>[]> {
-    // If no rows, return as is
+    // Early return for edge cases
     if (!rows || rows.length === 0) {
       return rows;
     }
 
     // Check if rows have request_id field
-    const hasRequestId = rows[0].hasOwnProperty('request_id');
-    if (!hasRequestId) {
+    if (!rows[0].hasOwnProperty('request_id')) {
       return rows;
     }
 
-    // Process rows in parallel with a concurrency limit
+    // Process rows in batches for better performance
     const BATCH_SIZE = 10;
     const enrichedRows: Record<string, any>[] = [];
     
     for (let i = 0; i < rows.length; i += BATCH_SIZE) {
       const batch = rows.slice(i, i + BATCH_SIZE);
-      
       const enrichedBatch = await Promise.all(
-        batch.map(async (row) => {
-          try {
-            const requestId = row.request_id;
-            const cacheReferenceId = row.cache_reference_id;
-            
-            // Determine which request ID to use for S3
-            const requestIdForS3 = 
-              cacheReferenceId && cacheReferenceId !== DEFAULT_UUID
-                ? cacheReferenceId
-                : requestId;
-            
-            // Get signed URL for the request/response body
-            const signedUrlResult = await this.s3Client.getRequestResponseBodySignedUrl(
-              this.authParams.organizationId,
-              requestIdForS3
-            );
-            
-            if (signedUrlResult.error || !signedUrlResult.data) {
-              // If no S3 data, return row with empty bodies
-              return {
-                ...row,
-                request_body: null,
-                response_body: null,
-              };
-            }
-            
-            // Fetch the actual content from S3
-            try {
-              const response = await fetch(signedUrlResult.data);
-              if (!response.ok) {
-                return {
-                  ...row,
-                  request_body: null,
-                  response_body: null,
-                };
-              }
-              
-              const bodyData = await response.json();
-              
-              return {
-                ...row,
-                request_body: bodyData?.request || null,
-                response_body: bodyData?.response || null,
-              };
-            } catch (fetchError) {
-              console.error(`Failed to fetch S3 content for request ${requestId}:`, fetchError);
-              return {
-                ...row,
-                request_body: null,
-                response_body: null,
-              };
-            }
-          } catch (error) {
-            console.error(`Failed to enrich row with S3 bodies:`, error);
-            return {
-              ...row,
-              request_body: null,
-              response_body: null,
-            };
-          }
-        })
+        batch.map(row => this.fetchRowBodiesFromS3(row))
       );
-      
       enrichedRows.push(...enrichedBatch);
     }
     
     return enrichedRows;
+  }
+
+  private getRequestIdForS3(requestId: string, cacheReferenceId?: string): string {
+    // Use cache reference ID if it exists and is not the default UUID
+    if (cacheReferenceId && cacheReferenceId !== DEFAULT_UUID) {
+      return cacheReferenceId;
+    }
+    return requestId;
+  }
+
+  private async fetchRowBodiesFromS3(
+    row: Record<string, any>
+  ): Promise<Record<string, any>> {
+    try {
+      const requestId = row.request_id;
+      const requestIdForS3 = this.getRequestIdForS3(requestId, row.cache_reference_id);
+      
+      // Get signed URL for the request/response body
+      const signedUrlResult = await this.s3Client.getRequestResponseBodySignedUrl(
+        this.authParams.organizationId,
+        requestIdForS3
+      );
+      
+      if (signedUrlResult.error || !signedUrlResult.data) {
+        return this.createRowWithNullBodies(row);
+      }
+      
+      // Fetch and parse the body data from S3
+      const bodyData = await this.fetchBodyFromS3Url(signedUrlResult.data);
+      
+      if (!bodyData) {
+        console.error(`Failed to fetch S3 content for request ${requestId}`);
+        return this.createRowWithNullBodies(row);
+      }
+      
+      return {
+        ...row,
+        request_body: bodyData.request || null,
+        response_body: bodyData.response || null,
+      };
+    } catch (error) {
+      console.error(`Failed to enrich row with S3 bodies:`, error);
+      return this.createRowWithNullBodies(row);
+    }
+  }
+
+  private async fetchBodyFromS3Url(
+    signedUrl: string
+  ): Promise<{ request: any; response: any } | null> {
+    try {
+      const response = await fetch(signedUrl);
+      
+      if (!response.ok) {
+        return null;
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error(`Failed to fetch from S3 URL:`, error);
+      return null;
+    }
+  }
+
+  private createRowWithNullBodies(row: Record<string, any>): Record<string, any> {
+    return {
+      ...row,
+      request_body: null,
+      response_body: null,
+    };
   }
 
   async downloadCsv(sql: string): Promise<Result<string, HqlError>> {
