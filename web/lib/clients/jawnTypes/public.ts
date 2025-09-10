@@ -710,15 +710,16 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--message-string__": {
+    "ResultSuccess__success-boolean--position_63_-number__": {
       data: {
-        message: string;
+        /** Format: double */
+        position?: number;
         success: boolean;
       };
       /** @enum {number|null} */
       error: null;
     };
-    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
+    "Result__success-boolean--position_63_-number_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__isOnWaitlist-boolean__": {
       data: {
         isOnWaitlist: boolean;
@@ -736,11 +737,9 @@ export interface components {
       error: null;
     };
     "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string__": {
+    "ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
       data: {
         message: string;
-        /** Format: double */
-        priorityBoost?: number;
         /** Format: double */
         newPosition?: number;
         success: boolean;
@@ -748,7 +747,7 @@ export interface components {
       /** @enum {number|null} */
       error: null;
     };
-    "Result__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string__"] | components["schemas"]["ResultError_string_"];
+    "Result__success-boolean--newPosition_63_-number--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--newPosition_63_-number--message-string__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-string__": {
       data: {
         id: string;
@@ -4059,7 +4058,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          organizationId?: string;
           feature: string;
           email: string;
         };
@@ -4069,7 +4067,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
+          "application/json": components["schemas"]["Result__success-boolean--position_63_-number_.string_"];
         };
       };
     };
@@ -4079,7 +4077,6 @@ export interface operations {
       query: {
         email: string;
         feature: string;
-        organizationId: string;
       };
     };
     responses: {
@@ -4110,9 +4107,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          organizationId?: string;
-          /** @enum {string} */
-          action: "like" | "repost" | "both";
           /** @enum {string} */
           platform: "twitter" | "linkedin";
           feature: string;
@@ -4124,7 +4118,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string_.string_"];
+          "application/json": components["schemas"]["Result__success-boolean--newPosition_63_-number--message-string_.string_"];
         };
       };
     };

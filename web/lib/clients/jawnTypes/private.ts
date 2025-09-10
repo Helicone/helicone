@@ -9,6 +9,15 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/waitlist/feature": {
+    post: operations["AddToWaitlist"];
+  };
+  "/v1/waitlist/feature/status": {
+    get: operations["IsOnWaitlist"];
+  };
+  "/v1/waitlist/feature/count": {
+    get: operations["GetWaitlistCount"];
+  };
   "/v1/user-feedback": {
     post: operations["PostUserFeedback"];
   };
@@ -502,6 +511,38 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    "ResultSuccess__success-boolean--position_63_-number__": {
+      data: {
+        /** Format: double */
+        position?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result__success-boolean--position_63_-number_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__isOnWaitlist-boolean__": {
+      data: {
+        isOnWaitlist: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__count-number__": {
+      data: {
+        /** Format: double */
+        count: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
     RateLimitRuleView: {
       id: string;
       name: string;
@@ -519,11 +560,6 @@ export interface components {
       data: components["schemas"]["RateLimitRuleView"][];
       /** @enum {number|null} */
       error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
     };
     "Result_RateLimitRuleView-Array.string_": components["schemas"]["ResultSuccess_RateLimitRuleView-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_RateLimitRuleView_: {
@@ -15734,6 +15770,57 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  AddToWaitlist: {
+    requestBody: {
+      content: {
+        "application/json": {
+          organizationId?: string;
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--position_63_-number_.string_"];
+        };
+      };
+    };
+  };
+  IsOnWaitlist: {
+    parameters: {
+      query: {
+        email: string;
+        feature: string;
+        organizationId?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetWaitlistCount: {
+    parameters: {
+      query: {
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number_.string_"];
+        };
+      };
+    };
+  };
   PostUserFeedback: {
     requestBody: {
       content: {

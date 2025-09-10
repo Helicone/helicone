@@ -151,18 +151,18 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_null_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess__success-boolean--message-string__": {
+    "ResultSuccess__success-boolean--position_63_-number__": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string","required":true},"success":{"dataType":"boolean","required":true}},"required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"position":{"dataType":"double"},"success":{"dataType":"boolean","required":true}},"required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result__success-boolean--message-string_.string_": {
+    "Result__success-boolean--position_63_-number_.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__success-boolean--message-string__"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__success-boolean--position_63_-number__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__isOnWaitlist-boolean__": {
@@ -193,18 +193,18 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__count-number__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string__": {
+    "ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string","required":true},"priorityBoost":{"dataType":"double"},"newPosition":{"dataType":"double"},"success":{"dataType":"boolean","required":true}},"required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string","required":true},"newPosition":{"dataType":"double"},"success":{"dataType":"boolean","required":true}},"required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string_.string_": {
+    "Result__success-boolean--newPosition_63_-number--message-string_.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string__"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__success-boolean--newPosition_63_-number--message-string__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__id-string__": {
@@ -4125,8 +4125,7 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsWaitListController_addToWaitlist: Record<string, TsoaRoute.ParameterSchema> = {
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"organizationId":{"dataType":"string"},"feature":{"dataType":"string","required":true},"email":{"dataType":"string","required":true}}},
-                request: {"in":"request","name":"request","dataType":"object"},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"feature":{"dataType":"string","required":true},"email":{"dataType":"string","required":true}}},
         };
         app.post('/v1/public/waitlist/feature',
             ...(fetchMiddlewares<RequestHandler>(WaitListController)),
@@ -4158,8 +4157,6 @@ export function RegisterRoutes(app: Router) {
         const argsWaitListController_isOnWaitlist: Record<string, TsoaRoute.ParameterSchema> = {
                 email: {"in":"query","name":"email","required":true,"dataType":"string"},
                 feature: {"in":"query","name":"feature","required":true,"dataType":"string"},
-                organizationId: {"in":"query","name":"organizationId","required":true,"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"undefined"}]},
-                request: {"in":"request","name":"request","dataType":"object"},
         };
         app.get('/v1/public/waitlist/feature/status',
             ...(fetchMiddlewares<RequestHandler>(WaitListController)),
@@ -4190,7 +4187,6 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsWaitListController_getWaitlistCount: Record<string, TsoaRoute.ParameterSchema> = {
                 feature: {"in":"query","name":"feature","required":true,"dataType":"string"},
-                request: {"in":"request","name":"request","dataType":"object"},
         };
         app.get('/v1/public/waitlist/feature/count',
             ...(fetchMiddlewares<RequestHandler>(WaitListController)),
@@ -4220,8 +4216,7 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsWaitListController_trackShare: Record<string, TsoaRoute.ParameterSchema> = {
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"organizationId":{"dataType":"string"},"action":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["like"]},{"dataType":"enum","enums":["repost"]},{"dataType":"enum","enums":["both"]}],"required":true},"platform":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["twitter"]},{"dataType":"enum","enums":["linkedin"]}],"required":true},"feature":{"dataType":"string","required":true},"email":{"dataType":"string","required":true}}},
-                request: {"in":"request","name":"request","dataType":"object"},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"platform":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["twitter"]},{"dataType":"enum","enums":["linkedin"]}],"required":true},"feature":{"dataType":"string","required":true},"email":{"dataType":"string","required":true}}},
         };
         app.post('/v1/public/waitlist/feature/share',
             ...(fetchMiddlewares<RequestHandler>(WaitListController)),

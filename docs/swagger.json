@@ -183,19 +183,19 @@
 					}
 				]
 			},
-			"ResultSuccess__success-boolean--message-string__": {
+			"ResultSuccess__success-boolean--position_63_-number__": {
 				"properties": {
 					"data": {
 						"properties": {
-							"message": {
-								"type": "string"
+							"position": {
+								"type": "number",
+								"format": "double"
 							},
 							"success": {
 								"type": "boolean"
 							}
 						},
 						"required": [
-							"message",
 							"success"
 						],
 						"type": "object"
@@ -215,10 +215,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__success-boolean--message-string_.string_": {
+			"Result__success-boolean--position_63_-number_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__success-boolean--message-string__"
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--position_63_-number__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -302,16 +302,12 @@
 					}
 				]
 			},
-			"ResultSuccess__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string__": {
+			"ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
 				"properties": {
 					"data": {
 						"properties": {
 							"message": {
 								"type": "string"
-							},
-							"priorityBoost": {
-								"type": "number",
-								"format": "double"
 							},
 							"newPosition": {
 								"type": "number",
@@ -342,10 +338,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string_.string_": {
+			"Result__success-boolean--newPosition_63_-number--message-string_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string__"
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--newPosition_63_-number--message-string__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -12328,7 +12324,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__success-boolean--message-string_.string_"
+									"$ref": "#/components/schemas/Result__success-boolean--position_63_-number_.string_"
 								}
 							}
 						}
@@ -12345,9 +12341,6 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"organizationId": {
-										"type": "string"
-									},
 									"feature": {
 										"type": "string"
 									},
@@ -12401,14 +12394,6 @@
 						"schema": {
 							"type": "string"
 						}
-					},
-					{
-						"in": "query",
-						"name": "organizationId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
 					}
 				]
 			}
@@ -12453,7 +12438,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__success-boolean--newPosition_63_-number--priorityBoost_63_-number--message-string_.string_"
+									"$ref": "#/components/schemas/Result__success-boolean--newPosition_63_-number--message-string_.string_"
 								}
 							}
 						}
@@ -12470,17 +12455,6 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"organizationId": {
-										"type": "string"
-									},
-									"action": {
-										"type": "string",
-										"enum": [
-											"like",
-											"repost",
-											"both"
-										]
-									},
 									"platform": {
 										"type": "string",
 										"enum": [
@@ -12496,7 +12470,6 @@
 									}
 								},
 								"required": [
-									"action",
 									"platform",
 									"feature",
 									"email"
