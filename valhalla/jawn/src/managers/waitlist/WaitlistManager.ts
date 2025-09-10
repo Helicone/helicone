@@ -30,11 +30,11 @@ export class WaitlistManager {
 
     try {
       const { error: dbError, data } = await dbExecute<{ position: string }>(
-        `INSERT INTO feature_waitlist (email, feature, organization_id, original_position) 
-         VALUES ($1, $2, $3, (SELECT COUNT(*) + 1 FROM feature_waitlist WHERE feature = $2))
+        `INSERT INTO feature_waitlist (email, feature, organization_id, original_position, is_customer) 
+         VALUES ($1, $2, $3, (SELECT COUNT(*) + 1 FROM feature_waitlist WHERE feature = $2), $4)
          ON CONFLICT (email, feature) DO NOTHING
          RETURNING original_position as position`,
-        [email, feature, organizationId || null]
+        [email, feature, organizationId || null, !!organizationId]
       );
 
       if (dbError) {
