@@ -14,6 +14,8 @@ import {
 import { AST, Parser } from "node-sql-parser";
 import { HqlStore } from "../lib/stores/HqlStore";
 import { z } from "zod";
+import { S3Client } from "../lib/shared/db/s3Client";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 export const CLICKHOUSE_TABLES = ["request_response_rmt"];
 const MAX_LIMIT = 300000;
@@ -116,9 +118,17 @@ function normalizeAst(ast: AST | AST[]): AST[] {
 
 export class HeliconeSqlManager {
   private readonly hqlStore: HqlStore;
+  private readonly s3Client: S3Client;
 
   constructor(private readonly authParams: AuthParams) {
     this.hqlStore = new HqlStore();
+    this.s3Client = new S3Client(
+      process.env.S3_ACCESS_KEY || undefined,
+      process.env.S3_SECRET_KEY || undefined,
+      process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+      process.env.S3_BUCKET_NAME ?? "",
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    );
   }
 
   async getClickhouseSchema(): Promise<
@@ -225,11 +235,15 @@ export class HeliconeSqlManager {
         return hqlError(errorCode, errorString);
       }
 
+      // Enrich results with S3 bodies if request_body or response_body columns are present
+      const rows = result.data ?? [];
+      const enrichedRows = await this.enrichResultsWithS3Bodies(rows);
+
       return ok({
-        rows: result.data ?? [],
+        rows: enrichedRows,
         elapsedMilliseconds,
-        size: Buffer.byteLength(JSON.stringify(result.data), "utf8"),
-        rowCount: result.data?.length ?? 0,
+        size: Buffer.byteLength(JSON.stringify(enrichedRows), "utf8"),
+        rowCount: enrichedRows.length,
       });
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : String(e);
@@ -238,6 +252,97 @@ export class HeliconeSqlManager {
         errorMessage
       );
     }
+  }
+
+  private async enrichResultsWithS3Bodies(
+    rows: Record<string, any>[]
+  ): Promise<Record<string, any>[]> {
+    // If no rows, return as is
+    if (!rows || rows.length === 0) {
+      return rows;
+    }
+
+    // Check if rows have request_id field
+    const hasRequestId = rows[0].hasOwnProperty('request_id');
+    if (!hasRequestId) {
+      return rows;
+    }
+
+    // Process rows in parallel with a concurrency limit
+    const BATCH_SIZE = 10;
+    const enrichedRows: Record<string, any>[] = [];
+    
+    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+      const batch = rows.slice(i, i + BATCH_SIZE);
+      
+      const enrichedBatch = await Promise.all(
+        batch.map(async (row) => {
+          try {
+            const requestId = row.request_id;
+            const cacheReferenceId = row.cache_reference_id;
+            
+            // Determine which request ID to use for S3
+            const requestIdForS3 = 
+              cacheReferenceId && cacheReferenceId !== DEFAULT_UUID
+                ? cacheReferenceId
+                : requestId;
+            
+            // Get signed URL for the request/response body
+            const signedUrlResult = await this.s3Client.getRequestResponseBodySignedUrl(
+              this.authParams.organizationId,
+              requestIdForS3
+            );
+            
+            if (signedUrlResult.error || !signedUrlResult.data) {
+              // If no S3 data, return row with empty bodies
+              return {
+                ...row,
+                request_body: null,
+                response_body: null,
+              };
+            }
+            
+            // Fetch the actual content from S3
+            try {
+              const response = await fetch(signedUrlResult.data);
+              if (!response.ok) {
+                return {
+                  ...row,
+                  request_body: null,
+                  response_body: null,
+                };
+              }
+              
+              const bodyData = await response.json();
+              
+              return {
+                ...row,
+                request_body: bodyData?.request || null,
+                response_body: bodyData?.response || null,
+              };
+            } catch (fetchError) {
+              console.error(`Failed to fetch S3 content for request ${requestId}:`, fetchError);
+              return {
+                ...row,
+                request_body: null,
+                response_body: null,
+              };
+            }
+          } catch (error) {
+            console.error(`Failed to enrich row with S3 bodies:`, error);
+            return {
+              ...row,
+              request_body: null,
+              response_body: null,
+            };
+          }
+        })
+      );
+      
+      enrichedRows.push(...enrichedBatch);
+    }
+    
+    return enrichedRows;
   }
 
   async downloadCsv(sql: string): Promise<Result<string, HqlError>> {
