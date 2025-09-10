@@ -3,8 +3,7 @@ import { StripeSync } from "@supabase/stripe-sync-engine";
 
 // Load secrets from environment variables
 const databaseUrl = process.env.DATABASE_URL!;
-const stripeWebhookSecret =
-  "whsec_24078c8ecdd038a87a17efcf0f97a595e647719794af31dbf731093d3c15c636";
+const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SYNC_SECRET!;
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY!;
 
 // Initialize StripeSync
