@@ -27,8 +27,8 @@ import {
 } from "./constants";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
-import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { useTheme } from "next-themes";
+import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
 
 function HQLPage() {
   const organization = useOrg();
@@ -302,12 +302,17 @@ function HQLPage() {
 
   if (hasAccessToHQL?.data === false) {
     return (
-      <EmptyStateCard
-        feature="hql"
-        onPrimaryClick={() => {
-          window.open("https://forms.gle/YXYkFz9Zaa7fWF2v7", "_blank");
-        }}
-      />
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-slate-900">
+          <FeatureWaitlist
+            feature="hql"
+            title="Get Early Access"
+            description="Be the first to know when HQL launches for your organization."
+            organizationId={organization?.currentOrg?.id}
+            variant="flat"
+          />
+        </div>
+      </div>
     );
   }
 
