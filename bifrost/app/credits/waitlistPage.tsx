@@ -12,11 +12,19 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { createHighlighter } from "shiki";
+
+// Create a singleton highlighter instance
+const highlighterPromise = createHighlighter({
+  themes: ["github-dark"],
+  langs: ["javascript"],
+});
 
 export default function WaitlistPage() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
+  const [highlightedCode, setHighlightedCode] = useState<string>("");
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.helicone.ai";
-  
+
   // Fetch count once at the page level
   useEffect(() => {
     const fetchCount = async () => {
@@ -43,7 +51,34 @@ export default function WaitlistPage() {
     };
     fetchCount();
   }, [apiUrl]);
-  
+
+  // Initialize syntax highlighting
+  useEffect(() => {
+    const initHighlighter = async () => {
+      const highlighter = await highlighterPromise;
+      const code = `import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Works with any model from any provider
+const response = await client.chat.completions.create({
+  model: "o3", // or claude-opus-4, gemini-2.5-pro, grok-4, llama-3.3-70b...
+  messages: [{ role: "user", content: "Hello!" }]
+});`;
+      
+      const html = highlighter.codeToHtml(code, {
+        lang: "javascript",
+        theme: "github-dark",
+      });
+      setHighlightedCode(html);
+    };
+    
+    initHighlighter();
+  }, []);
+
   return (
     <div className="bg-background text-slate-700 antialiased">
       <div className="flex flex-col">
@@ -51,15 +86,23 @@ export default function WaitlistPage() {
         <div className="max-w-6xl mx-auto p-4 pt-4">
           <Col className="items-center gap-4">
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-3xl md:pt-4 text-center text-accent-foreground">
-              One balance. Every LLM provider.
+              One bill. Every LLM provider.
               <br />
-              <span className="text-brand">Zero markup.</span>
+              <span className="text-brand">$0 fees</span>
             </h1>
 
             <p className="md:mt-4 w-full text-md sm:text-lg leading-7 max-w-2xl text-center text-muted-foreground">
               Stop juggling API keys and invoices. Fund once, use everywhere.
-              Full observability included at exact provider prices.
+              Full observability included <span className="bg-sky-200 text-sky-900 font-medium px-1.5 py-0.5 rounded">at exact provider prices.</span>
             </p>
+
+            {/* Waitlist Form - Compact horizontal version */}
+            <div className="w-full max-w-2xl mt-6 mx-auto" id="waitlist-form">
+              <CreditsWaitlistForm
+                variant="inline"
+                initialCount={waitlistCount}
+              />
+            </div>
 
             {/* Launch Video */}
             <div className="w-full max-w-3xl mt-6">
@@ -75,11 +118,6 @@ export default function WaitlistPage() {
               >
                 Your browser does not support the video tag.
               </video>
-            </div>
-
-            {/* Waitlist Form */}
-            <div className="w-full max-w-md mt-8 mx-auto" id="waitlist-form">
-              <CreditsWaitlistForm variant="card" initialCount={waitlistCount} />
             </div>
           </Col>
         </div>
@@ -124,45 +162,62 @@ export default function WaitlistPage() {
                   </h3>
                 </div>
                 <p className="text-base text-slate-600">
-                  Claude down on Anthropic? We route to Bedrock or GCP. Same model, different provider.
+                  Claude down on Anthropic? We route to Bedrock or GCP. Same
+                  model, different provider.
                 </p>
+                <Link
+                  href="https://docs.helicone.ai/gateway/provider-routing"
+                  target="_blank"
+                  className="flex items-center gap-2 text-brand font-medium hover:underline text-sm"
+                >
+                  Learn about provider routing
+                  <ArrowUpRight className="w-3 h-3" />
+                </Link>
               </div>
             </div>
 
-            {/* Real-time Analytics Card */}
+            {/* Full Observability Suite Card */}
             <div className="col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
-                  <p className="text-sm text-slate-500">Monitoring</p>
+                  <p className="text-sm text-slate-500">Included free</p>
                   <h3 className="text-xl font-semibold text-black">
-                    Real-time analytics
+                    Full observability suite
                   </h3>
                 </div>
                 <p className="text-base text-slate-600">
-                  Track usage, costs, and performance metrics as they happen.
+                  Complete Helicone platform included. Analytics, debugging, monitoring, caching, and more.
                 </p>
+                <Link
+                  href="https://docs.helicone.ai/getting-started/platform-overview"
+                  target="_blank"
+                  className="flex items-center gap-2 text-brand font-medium hover:underline text-sm"
+                >
+                  Explore platform features
+                  <ArrowUpRight className="w-3 h-3" />
+                </Link>
               </div>
             </div>
 
-            {/* Team Management Card */}
+            {/* Smart Routing Card */}
             <div className="col-span-1 md:col-span-4 px-6 pt-6 pb-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-6">
               <div className="flex flex-col gap-2">
-                <p className="text-sm text-slate-500">Collaboration</p>
+                <p className="text-sm text-slate-500">Always the best price</p>
                 <h3 className="text-xl sm:text-2xl font-semibold text-black">
-                  Built for teams
+                  Intelligent routing
                 </h3>
               </div>
               <p className="text-base sm:text-lg text-slate-600">
-                Share credits across your organization with granular access
-                controls, spending limits, and detailed audit logs. One balance,
-                complete visibility.
+                Automatically routes to the cheapest provider first. Instant 
+                failover on rate limits, timeouts, and errors. Zero-config 
+                reliability across 100+ models.
               </p>
               <Link
-                href="https://docs.helicone.ai/features/organizations"
+                href="https://docs.helicone.ai/gateway/overview"
                 target="_blank"
                 className="flex items-center gap-2 text-brand font-medium hover:underline"
               >
-                Learn about team features
+                Gateway technical docs
                 <ArrowUpRight className="w-4 h-4" />
               </Link>
             </div>
@@ -205,11 +260,18 @@ export default function WaitlistPage() {
                   <h3 className="font-semibold text-2xl sm:text-3xl mb-3 text-black">
                     Ship faster with unified API
                   </h3>
-                  <p className="text-lg text-slate-600 leading-relaxed">
+                  <p className="text-lg text-slate-600 leading-relaxed mb-4">
                     One endpoint for all providers. Automatic failover, load
                     balancing, and response caching. Switch models without
                     changing code.
                   </p>
+                  {/* Code snippet */}
+                  <div className="bg-[#24292e] rounded-lg overflow-hidden max-w-2xl">
+                    <div
+                      className="p-4 overflow-x-auto text-sm"
+                      dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -254,10 +316,10 @@ export default function WaitlistPage() {
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
                     You add credits to your account, and we deduct the exact
-                    provider cost for each API call. No markups, no platform
-                    fees — you pay exactly what OpenAI, Anthropic, Google, and
-                    others charge. Your credits work across all supported
-                    providers from a single balance.
+                    provider cost for each API call. You pay exactly what the
+                    providers charge plus the Stripe transaction fee. We charge
+                    nothing extra — no markups, no platform fees. Your credits
+                    work across all supported providers from a single balance.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -268,8 +330,12 @@ export default function WaitlistPage() {
                   <AccordionContent className="text-muted-foreground">
                     Credits work with 100+ models across all major providers
                     including OpenAI, Anthropic, Google, Meta, Mistral, Cohere,
-                    AWS Bedrock, Azure, and many more. You access everything
-                    through our unified API — one integration for all providers.
+                    AWS Bedrock, Azure, and many more. View the full list at{" "}
+                    <Link href="https://www.helicone.ai/models" target="_blank" className="text-brand underline">
+                      helicone.ai/models
+                    </Link>
+                    . We're adding new models every day — one integration for
+                    all providers.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -281,8 +347,9 @@ export default function WaitlistPage() {
                     Yes! You get Helicone's full observability platform at no
                     extra cost. This includes real-time monitoring, detailed
                     analytics, debugging tools, alerting, caching, and more.
-                    There are no hidden fees or usage limits on observability
-                    features.
+                    We can offer this because we negotiate lower rates with
+                    providers — the difference covers our platform costs while
+                    you still pay standard provider prices.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -291,23 +358,23 @@ export default function WaitlistPage() {
                     What's the minimum credit purchase?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    We're still finalizing the details, but we plan to have a
-                    low minimum to make it accessible for everyone — from indie
-                    developers to enterprises. Credits never expire, so you can
-                    add what you need and use them at your own pace.
+                    The minimum credit purchase is $5. Credits never expire, so
+                    you can add what you need and use them at your own pace.
+                    This low minimum makes it accessible for everyone — from
+                    indie developers to enterprises.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-5">
                   <AccordionTrigger className="font-medium text-left">
-                    How do credits compare to direct provider billing?
+                    Can I bring my own API keys (BYOK)?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    With credits, you get the same provider pricing but with
-                    major advantages: unified billing across all providers, no
-                    need to manage multiple API keys and invoices, automatic
-                    failover between providers, and full observability included.
-                    It's simpler, more reliable, and costs the same.
+                    Yes! If you prefer to use your own API keys, we offer BYOK
+                    with a 3% platform fee. This includes access to Helicone's
+                    full observability platform — monitoring, analytics,
+                    debugging, caching, and all other features. You get the
+                    same powerful tools whether you use Credits or BYOK.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -316,10 +383,10 @@ export default function WaitlistPage() {
                     When will Credits be available?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    We're launching Credits soon! Join the waitlist to be among
-                    the first to get access. We'll notify you as soon as it's
-                    available for your organization. Early access users may
-                    receive special benefits and pricing.
+                    We're already working with beta partners and continuously
+                    adding more to the beta program. Join the waitlist to be
+                    next in line for access. We'll notify you as soon as
+                    Credits is available for your organization.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -334,10 +401,16 @@ export default function WaitlistPage() {
               Done juggling API keys and invoices?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              One integration for 100+ models. Zero markup. Full observability included.
+              One integration for 100+ models. Full observability included{" "}
+              <span className="bg-sky-200 text-sky-900 font-medium px-1.5 py-0.5 rounded">
+                at exact provider prices.
+              </span>
             </p>
             <div className="max-w-md mx-auto">
-              <CreditsWaitlistForm variant="card" initialCount={waitlistCount} />
+              <CreditsWaitlistForm
+                variant="card"
+                initialCount={waitlistCount}
+              />
             </div>
           </div>
         </div>
