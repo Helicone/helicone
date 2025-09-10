@@ -6252,6 +6252,15 @@
   dependencies:
     "@supabase/node-fetch" "^2.6.14"
 
+"@supabase/stripe-sync-engine@^0.41.0":
+  version "0.41.0"
+  resolved "https://registry.yarnpkg.com/@supabase/stripe-sync-engine/-/stripe-sync-engine-0.41.0.tgz#6c7aad24a3fd21ffab25be634cd0c0c827ace7be"
+  integrity sha512-tYI4WQ4Sywl6Tj1TrKWpV8/AHYy/VP1upydmkQQTyzII4mFJAl0iT0HePdUp45rm2HxkaTFMSP2ta43MZRN3IQ==
+  dependencies:
+    pg "^8.16.0"
+    pg-node-migrations "0.0.8"
+    yesql "^7.0.0"
+
 "@supabase/supabase-js@^2.1.1", "@supabase/supabase-js@^2.45.6":
   version "2.55.0"
   resolved "https://registry.yarnpkg.com/@supabase/supabase-js/-/supabase-js-2.55.0.tgz#dda68409d46f6459d8a87fca9653e0c60b0c02f8"
@@ -15234,6 +15243,14 @@ pg-minify@1.8.0:
   resolved "https://registry.yarnpkg.com/pg-minify/-/pg-minify-1.8.0.tgz#c736f762fb987ab21e784554b7724f05397708d1"
   integrity sha512-jO/oJOununpx8DzKgvSsWm61P8JjwXlaxSlbbfTBo1nvSWoo/+I6qZYaSN96jm/KDwa5d+JMQwPGgcP6HXDRow==
 
+pg-node-migrations@0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/pg-node-migrations/-/pg-node-migrations-0.0.8.tgz#e7014e877fe976bccfd6f6137fdef6bd39acee03"
+  integrity sha512-44cMl9umOmCv0hzZyEcvjEq8Bm8u7mrzggZ06qXTJVSsMMB4j2OsjG+rSp+uzeKWyP2Vu0K9Ye2wKtjFUJwrdw==
+  dependencies:
+    pg "^8.6.0"
+    sql-template-strings "^2.2.2"
+
 pg-pool@^3.10.1:
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/pg-pool/-/pg-pool-3.10.1.tgz#481047c720be2d624792100cac1816f8850d31b2"
@@ -15265,7 +15282,7 @@ pg-types@2.2.0, pg-types@^2.2.0:
     postgres-date "~1.0.4"
     postgres-interval "^1.1.0"
 
-pg@8.16.3, pg@^8.11.3, pg@^8.9.0:
+pg@8.16.3, pg@^8.11.3, pg@^8.16.0, pg@^8.6.0, pg@^8.9.0:
   version "8.16.3"
   resolved "https://registry.yarnpkg.com/pg/-/pg-8.16.3.tgz#160741d0b44fdf64680e45374b06d632e86c99fd"
   integrity sha512-enxc1h0jA/aq5oSDMvqyW3q89ra6XIIDZgCX9vkMrnz5DFTw/Ny3Li2lFQ+pt3L6MCgm/5o2o8HW9hiJji+xvw==
@@ -17068,6 +17085,11 @@ sql-query-identifier@^2.8.0:
   resolved "https://registry.yarnpkg.com/sql-query-identifier/-/sql-query-identifier-2.8.0.tgz#af6e62594d784194b86c87bddc95e5f084223b47"
   integrity sha512-5cfaQCq80pRtLulP0nxw1j8W7m2ytUrbbQNrjszV26D8gTly7FUO3bWwMu6rwF3chY30Xv9Rb/CEzAQhDJ1YgA==
 
+sql-template-strings@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/sql-template-strings/-/sql-template-strings-2.2.2.tgz#3f11508a25addfce217a3042a9d300c3193b96ff"
+  integrity sha512-UXhXR2869FQaD+GMly8jAMCRZ94nU5KcrFetZfWEMd+LVVG6y0ExgHAhatEcKZ/wk8YcKPdi+hiD2wm75lq3/Q==
+
 stable-hash@^0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/stable-hash/-/stable-hash-0.0.5.tgz#94e8837aaeac5b4d0f631d2972adef2924b40269"
@@ -18837,6 +18859,11 @@ yarn@^1.22.22:
   version "1.22.22"
   resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.22.22.tgz#ac34549e6aa8e7ead463a7407e1c7390f61a6610"
   integrity sha512-prL3kGtyG7o9Z9Sv8IPfBNrWTDmXB4Qbes8A9rEzt6wkJV8mUvoirjU0Mp3GGAU06Y0XQyA3/2/RQFVuK7MTfg==
+
+yesql@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/yesql/-/yesql-7.0.0.tgz#7d17a73e11d6c9469c411c7be8cbff85c9ba3c27"
+  integrity sha512-sosfr7agy4ibLM7BvXBkM6BpBmKMGuBO8DUYQEuey+QqaqrgW+2bsSg6D050ocBYIz0PuHxUyehyzEztZTU4pw==
 
 yn@3.1.1:
   version "3.1.1"

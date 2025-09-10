@@ -1249,8 +1249,8 @@ WHERE (${builtFilter.filter})`,
 
         const checkoutResult = await this.stripe.checkout.sessions.create({
           customer: customerId.data,
-          success_url: `${origin}/settings/credits`,
-          cancel_url: `${origin}/settings/credits`,
+          success_url: `${origin}/credits`,
+          cancel_url: `${origin}/credits`,
           mode: "payment",
           line_items: [{
             price_data: {
