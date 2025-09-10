@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import WaitlistPage from "./waitlistPage";
-import { Layout } from "../components/Layout";
 
 export const metadata: Metadata = {
   title: "Join the Waitlist | Helicone Credits - $0 Surcharge LLM Billing",
@@ -27,9 +26,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <Layout>
-      <WaitlistPage />
-    </Layout>
-  );
+  return <WaitlistPage />;
 }

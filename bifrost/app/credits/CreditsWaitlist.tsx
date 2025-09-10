@@ -268,7 +268,7 @@ export function CreditsWaitlistForm({
           // Both platforms shared
           hasSharedTwitter && hasSharedLinkedIn && (
             <p className="text-sm text-slate-600">
-              Thanks for sharing! You've maximized your position boost.
+              Thanks for sharing! You&apos;ve maximized your position boost.
             </p>
           )
         )}

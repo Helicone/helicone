@@ -342,7 +342,7 @@ const response = await client.chat.completions.create({
                     >
                       helicone.ai/models
                     </Link>
-                    . We're adding new models every day — one integration for
+                    . We&apos;re adding new models every day — one integration for
                     all providers.
                   </AccordionContent>
                 </AccordionItem>
@@ -352,7 +352,7 @@ const response = await client.chat.completions.create({
                     Is observability really included for free?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    Yes! You get Helicone's full observability platform at no
+                    Yes! You get Helicone&apos;s full observability platform at no
                     extra cost. This includes real-time monitoring, detailed
                     analytics, debugging tools, alerting, caching, and more. We
                     can offer this because we negotiate lower rates with
@@ -363,7 +363,7 @@ const response = await client.chat.completions.create({
 
                 <AccordionItem value="item-4">
                   <AccordionTrigger className="font-medium text-left">
-                    What's the minimum credit purchase?
+                    What&apos;s the minimum credit purchase?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
                     The minimum credit purchase is $5. Credits never expire, so
@@ -379,7 +379,7 @@ const response = await client.chat.completions.create({
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
                     Yes! If you prefer to use your own API keys, we offer BYOK
-                    with a 3% platform fee. This includes access to Helicone's
+                    with a 3% platform fee. This includes access to Helicone&apos;s
                     full observability platform — monitoring, analytics,
                     debugging, caching, and all other features. You get the same
                     powerful tools whether you use Credits or BYOK.
@@ -391,9 +391,9 @@ const response = await client.chat.completions.create({
                     When will Credits be available?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    We're already working with beta partners and continuously
+                    We&apos;re already working with beta partners and continuously
                     adding more to the beta program. Join the waitlist to be
-                    next in line for access. We'll notify you as soon as Credits
+                    next in line for access. We&apos;ll notify you as soon as Credits
                     is available for your organization.
                   </AccordionContent>
                 </AccordionItem>
