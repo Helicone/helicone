@@ -618,6 +618,12 @@ function getAPIRouterV1(
 
       if (handleError) {
         console.error("Error handling webhook event:", handleError);
+        
+        // Check if error is related to insufficient balance (refund exceeds effective balance)
+        if (handleError.includes("Refund amount exceeds effective balance")) {
+          return new Response(handleError, { status: 400 });
+        }
+        
         return new Response("", { status: 500 });
       }
 

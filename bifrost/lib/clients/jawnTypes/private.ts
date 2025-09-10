@@ -706,6 +706,25 @@ export interface components {
         completion_token: number;
       };
     };
+    PaymentIntentRecord: {
+      id: string;
+      /** Format: double */
+      amount: number;
+      /** Format: double */
+      created: number;
+      status: string;
+      isRefunded?: boolean;
+      /** Format: double */
+      refundedAmount?: number;
+      refundIds?: string[];
+    };
+    StripePaymentIntentsResponse: {
+      data: components["schemas"]["PaymentIntentRecord"][];
+      has_more: boolean;
+      next_page: string | null;
+      /** Format: double */
+      count: number;
+    };
 Json: JsonObject;
     "ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_": {
       data: (({
@@ -16348,7 +16367,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["StripePaymentIntentsResponse"];
         };
       };
     };
