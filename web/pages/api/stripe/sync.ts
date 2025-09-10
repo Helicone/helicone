@@ -1,0 +1,57 @@
+import { NextApiRequest, NextApiResponse } from "next";
+import { StripeSync } from "@supabase/stripe-sync-engine";
+
+// Load secrets from environment variables
+const databaseUrl = process.env.DATABASE_URL!;
+const stripeWebhookSecret =
+  "whsec_24078c8ecdd038a87a17efcf0f97a595e647719794af31dbf731093d3c15c636";
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY!;
+
+// Initialize StripeSync
+const stripeSync = new StripeSync({
+  databaseUrl,
+  stripeWebhookSecret,
+  stripeSecretKey,
+  backfillRelatedEntities: false,
+  autoExpandLists: true,
+});
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  try {
+    // TODO: Uncomment and run once locally when pointing to production
+    // await stripeSync.syncBackfill({
+    //   object: "subscription",
+    //   created: { gte: 1643872333 }, // Unix timestamp
+    // });
+    // await stripeSync.syncBackfill({
+    //   object: "customer",
+    //   created: { gte: 1643872333 }, // Unix timestamp
+    // });
+    const stripeSignature = req.headers["stripe-signature"] as string;
+
+    if (!stripeSignature) {
+      return res.status(400).json({ error: "Missing stripe-signature header" });
+    }
+
+    // Read the raw body since we disabled bodyParser
+    const chunks = [];
+    for await (const chunk of req) {
+      chunks.push(chunk);
+    }
+    const rawBody = Buffer.concat(chunks).toString();
+
+    await stripeSync.processWebhook(rawBody, stripeSignature);
+
+    res.status(200).json({ received: true });
+  } catch (error) {
+    console.error("Stripe webhook error:", error);
+    res.status(400).json({ error: "Webhook processing failed" });
+  }
+};
+
+export default handler;
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
