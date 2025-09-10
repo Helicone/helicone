@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import WaitlistPage from "./waitlistPage";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Join the Waitlist | Helicone Credits - $0 Surcharge LLM Billing",
@@ -28,7 +29,15 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="container mx-auto">
-      <WaitlistPage />
+      <Suspense
+        fallback={
+          <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto">
+            Loading...
+          </div>
+        }
+      >
+        <WaitlistPage />
+      </Suspense>
     </div>
   );
 }
