@@ -1,14 +1,16 @@
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { $JAWN_API } from "../../lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
-import type Stripe from "stripe";
 
 // Types matching the backend
 export interface PurchasedCredits {
-  id: string;
+  id: string; // Always the payment intent ID
   createdAt: number;
   credits: number;
-  status?: Stripe.PaymentIntent.Status;
+  status?: string;
+  isRefunded?: boolean;
+  refundedAmount?: number;
+  refundIds?: string[];
 }
 
 export interface PaginatedPurchasedCredits {
@@ -42,9 +44,20 @@ export const useCredits = () => {
   };
 };
 
+// Interface for the payment intent record from backend
+interface PaymentIntentRecord {
+  id: string; // Always the payment intent ID
+  amount: number;
+  created: number;
+  status: string;
+  isRefunded?: boolean;
+  refundedAmount?: number;
+  refundIds?: string[];
+}
+
 // Interface for the Stripe API response
 interface StripePaymentIntentsResponse {
-  data: Stripe.PaymentIntent[];
+  data: PaymentIntentRecord[];
   has_more: boolean;
   next_page: string | null;
   count: number;
@@ -81,10 +94,13 @@ export const useCreditTransactions = (params?: {
         
         // Transform Stripe payment intents to our format
         const purchases: PurchasedCredits[] = (data.data || []).map((intent) => ({
-          id: intent.id,
+          id: intent.id, // Always the payment intent ID
           createdAt: intent.created * 1000, // Convert from seconds to milliseconds
           credits: intent.amount || 0, // Amount is in cents
           status: intent.status,
+          isRefunded: intent.isRefunded,
+          refundedAmount: intent.refundedAmount,
+          refundIds: intent.refundIds,
         }));
 
         return {

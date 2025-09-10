@@ -728,6 +728,74 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"PaymentIntentRecord": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"created": {
+						"type": "number",
+						"format": "double"
+					},
+					"status": {
+						"type": "string"
+					},
+					"isRefunded": {
+						"type": "boolean"
+					},
+					"refundedAmount": {
+						"type": "number",
+						"format": "double"
+					},
+					"refundIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"amount",
+					"created",
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"StripePaymentIntentsResponse": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PaymentIntentRecord"
+						},
+						"type": "array"
+					},
+					"has_more": {
+						"type": "boolean"
+					},
+					"next_page": {
+						"type": "string",
+						"nullable": true
+					},
+					"count": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"has_more",
+					"next_page",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Json": {
 				"anyOf": [
 					{
@@ -48554,7 +48622,9 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"$ref": "#/components/schemas/StripePaymentIntentsResponse"
+								}
 							}
 						}
 					}

@@ -47,8 +47,18 @@ export interface SearchPaymentIntentsRequest {
   page?: string;
 }
 
+export interface PaymentIntentRecord {
+  id: string; // Always the payment intent ID
+  amount: number;
+  created: number;
+  status: string;
+  isRefunded?: boolean;
+  refundedAmount?: number;
+  refundIds?: string[];
+}
+
 export interface StripePaymentIntentsResponse {
-  data: Stripe.PaymentIntent[];
+  data: PaymentIntentRecord[];
   has_more: boolean;
   next_page: string | null;
   count: number;
@@ -387,7 +397,7 @@ export class StripeController extends Controller {
     @Query() search_kind: string,
     @Query() limit?: number,
     @Query() page?: string
-  ): Promise<any> {
+  ): Promise<StripePaymentIntentsResponse> {
     // Check if search_kind is valid
     if (!Object.values(PaymentIntentSearchKind).includes(search_kind as PaymentIntentSearchKind)) {
       this.setStatus(400);
