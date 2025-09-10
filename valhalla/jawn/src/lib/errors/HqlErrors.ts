@@ -38,6 +38,7 @@ export enum HqlErrorCode {
   // Export Errors
   CSV_UPLOAD_FAILED = "HQL_CSV_UPLOAD_FAILED",
   CSV_URL_NOT_RETURNED = "HQL_CSV_URL_NOT_RETURNED",
+  CSV_DOWNLOAD_LIMIT_EXCEEDED = "HQL_CSV_DOWNLOAD_LIMIT_EXCEEDED",
   
   // Feature Access Errors
   FEATURE_NOT_ENABLED = "HQL_FEATURE_NOT_ENABLED",
@@ -79,6 +80,7 @@ export const HqlErrorMessages: Record<HqlErrorCode, string> = {
   
   [HqlErrorCode.CSV_UPLOAD_FAILED]: "Failed to upload CSV",
   [HqlErrorCode.CSV_URL_NOT_RETURNED]: "CSV upload succeeded but no URL was returned",
+  [HqlErrorCode.CSV_DOWNLOAD_LIMIT_EXCEEDED]: "Query result exceeds maximum download limit (300,000 rows). Please add filters or LIMIT clause to reduce the data.",
   
   [HqlErrorCode.FEATURE_NOT_ENABLED]: "Access to HQL feature is not enabled for your organization",
   
@@ -112,6 +114,7 @@ export const StatusCodeMap: Partial<Record<HqlErrorCode, number>> = {
   [HqlErrorCode.SCHEMA_FETCH_FAILED]: 500,
   [HqlErrorCode.CSV_UPLOAD_FAILED]: 500,
   [HqlErrorCode.CSV_URL_NOT_RETURNED]: 500,
+  [HqlErrorCode.CSV_DOWNLOAD_LIMIT_EXCEEDED]: 400,
   [HqlErrorCode.UNEXPECTED_ERROR]: 500,
 };
 

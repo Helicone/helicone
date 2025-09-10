@@ -241,6 +241,7 @@ export class HeliconeSqlManager {
   }
 
   async downloadCsv(sql: string): Promise<Result<string, HqlError>> {
+    // Execute the query with MAX_LIMIT
     const result = await this.executeSql(sql, MAX_LIMIT);
     if (isError(result)) {
       return result;
@@ -248,6 +249,14 @@ export class HeliconeSqlManager {
 
     if (!result.data?.rows?.length) {
       return hqlError(HqlErrorCode.NO_DATA_RETURNED);
+    }
+
+    // Check if we hit the MAX_LIMIT (which means there might be more rows)
+    if (result.data.rowCount === MAX_LIMIT) {
+      return hqlError(
+        HqlErrorCode.CSV_DOWNLOAD_LIMIT_EXCEEDED,
+        `Query result exceeds the maximum download limit of ${MAX_LIMIT.toLocaleString()} rows. Please add filters or a LIMIT clause to reduce the data.`
+      );
     }
 
     // Generate filename with timestamp
