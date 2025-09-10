@@ -1359,8 +1359,9 @@ WHERE (${builtFilter.filter})`,
       // Build query based on search kind
       switch (searchKind) {
         case PaymentIntentSearchKind.CREDIT_PURCHASES:
-          const productId = process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT;
-          
+          const settingsManager = new SettingsManager();
+          const stripeProductSettings = await settingsManager.getSetting("stripe:products");
+          const productId = stripeProductSettings?.cloudGatewayTokenUsageProduct;
           if (!productId) {
             console.error(
               "[Stripe API] STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT not configured"
