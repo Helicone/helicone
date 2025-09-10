@@ -46,6 +46,7 @@ export interface ClickHouseTableColumn {
   ttl_expression?: string;
 }
 
+// TODO DRY these interfaces
 export interface ExecuteSqlRequest {
   sql: string;
 }

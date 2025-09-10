@@ -1,45 +1,91 @@
 import "reflect-metadata";
 import { checkFeatureFlag } from "../lib/utils/featureFlags";
-import { isError } from "../packages/common/result";
+import { isError, Result, err } from "../packages/common/result";
 import { Controller } from "tsoa";
 import { JawnAuthenticatedRequest } from "../types/request";
 
 const FEATURE_FLAG_METADATA_KEY = Symbol("featureFlags");
 
 /**
+ * Base constraint for error types - can be string enums, string literals, or any serializable type
+ */
+export type ErrorType = string | number | symbol;
+
+/**
  * Generic error formatter type that can work with any error system
  */
-export type ErrorFormatter<T = any> = (flag: string) => {
+export type ErrorFormatter<TError extends ErrorType = string> = (flag: string) => {
   message: string;
   statusCode: number;
-  error?: T;
+  error?: TError;
 };
 
 /**
  * Options for feature flag decorator with generic error type
  */
-export interface FeatureFlagOptions<T = any> {
-  errorFormatter?: ErrorFormatter<T>;
+export interface FeatureFlagOptions<TError extends ErrorType = string> {
+  errorFormatter?: ErrorFormatter<TError>;
 }
 
 /**
  * Metadata stored for feature flags
  */
-export interface FeatureFlagMetadata<T = any> {
+export interface FeatureFlagMetadata<TError extends ErrorType = string> {
   flags: string[];
-  options?: FeatureFlagOptions<T>;
+  options?: FeatureFlagOptions<TError>;
 }
 
-export function RequireFeatureFlag<T = any>(
+/**
+ * Type for controller methods that can be decorated
+ * These methods take JawnAuthenticatedRequest and return Result
+ */
+type ControllerMethod = (
+  this: Controller,
+  ...args: any[]  // Could include @Body, @Request, @Query params etc.
+) => Promise<Result<any, string>>;
+
+/**
+ * Generic decorator to require feature flag(s) for a controller method.
+ * Can be used with any error system by providing a custom error formatter.
+ * 
+ * @param flag - The feature flag name to check
+ * @param options - Optional configuration for error handling
+ * 
+ * @example
+ * // Using default error format
+ * @RequireFeatureFlag("my-feature")
+ * 
+ * @example
+ * // Using with HQL error system (strongly typed)
+ * @RequireFeatureFlag<HqlErrorCode>(HQL_FEATURE_FLAG, {
+ *   errorFormatter: (flag) => ({
+ *     message: `[${HqlErrorCode.FEATURE_NOT_ENABLED}] Feature not enabled`,
+ *     statusCode: 403,
+ *     error: HqlErrorCode.FEATURE_NOT_ENABLED
+ *   })
+ * })
+ * 
+ * @example
+ * // Using with string literal types
+ * type MyError = "FEATURE_DISABLED" | "NOT_AVAILABLE";
+ * @RequireFeatureFlag<MyError>("my-feature", {
+ *   errorFormatter: (flag) => ({
+ *     message: `Feature ${flag} is disabled`,
+ *     statusCode: 403,
+ *     error: "FEATURE_DISABLED"
+ *   })
+ * })
+ */
+export function RequireFeatureFlag<TError extends ErrorType = string>(
   flag: string,
-  options?: FeatureFlagOptions<T>
+  options?: FeatureFlagOptions<TError>
 ): MethodDecorator {
   return function (
-    target: any,
+    target: object,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor
-  ) {
-    const existingMetadata: FeatureFlagMetadata<T> = Reflect.getMetadata(
+  ): PropertyDescriptor {
+    const existingMetadata: FeatureFlagMetadata<TError> = Reflect.getMetadata(
       FEATURE_FLAG_METADATA_KEY,
       target,
       propertyKey
@@ -57,25 +103,26 @@ export function RequireFeatureFlag<T = any>(
       propertyKey
     );
 
-    const originalMethod = descriptor.value;
+    const originalMethod = descriptor.value as ControllerMethod;
 
     descriptor.value = async function (
       this: Controller,
       ...args: any[]
-    ) {
+    ): Promise<Result<any, string>> {
+      // Find the JawnAuthenticatedRequest in the arguments
       const request = args.find(
-        (arg) => arg && typeof arg === "object" && "authParams" in arg
-      ) as JawnAuthenticatedRequest | undefined;
+        (arg): arg is JawnAuthenticatedRequest => 
+          arg !== null && 
+          typeof arg === "object" && 
+          "authParams" in arg
+      );
 
       if (!request?.authParams?.organizationId) {
         this.setStatus(401);
-        return {
-          error: "Authentication required",
-          data: null,
-        };
+        return err("Authentication required");
       }
 
-      const metadata: FeatureFlagMetadata<T> = Reflect.getMetadata(
+      const metadata: FeatureFlagMetadata<TError> = Reflect.getMetadata(
         FEATURE_FLAG_METADATA_KEY,
         target,
         propertyKey
@@ -97,10 +144,7 @@ export function RequireFeatureFlag<T = any>(
               };
           
           this.setStatus(errorInfo.statusCode);
-          return {
-            error: errorInfo.message,
-            data: null,
-          };
+          return err(errorInfo.message);
         }
       }
 
@@ -123,17 +167,17 @@ export function RequireFeatureFlag<T = any>(
  *   errorFormatter: (flag) => ({ ... })
  * })
  */
-export function RequireFeatureFlags<T = any>(
+export function RequireFeatureFlags<TError extends ErrorType = string>(
   flags: string[],
-  options?: FeatureFlagOptions<T>
+  options?: FeatureFlagOptions<TError>
 ): MethodDecorator {
   return function (
-    target: any,
+    target: object,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor
-  ) {
+  ): PropertyDescriptor {
     flags.forEach((flag) => {
-      RequireFeatureFlag<T>(flag, options)(target, propertyKey, descriptor);
+      RequireFeatureFlag<TError>(flag, options)(target, propertyKey, descriptor);
     });
     return descriptor;
   };
@@ -149,11 +193,11 @@ export function RequireFeatureFlags<T = any>(
  *   403
  * );
  */
-export function createErrorFormatter<T>(
-  errorSelector: (flag: string) => T,
-  messageFormatter: (error: T, flag: string) => string,
+export function createErrorFormatter<TError extends ErrorType>(
+  errorSelector: (flag: string) => TError,
+  messageFormatter: (error: TError, flag: string) => string,
   statusCode: number = 403
-): ErrorFormatter<T> {
+): ErrorFormatter<TError> {
   return (flag: string) => {
     const error = errorSelector(flag);
     return {
@@ -164,9 +208,12 @@ export function createErrorFormatter<T>(
   };
 }
 
-export function getFeatureFlagMetadata<T = any>(
-  target: any,
+/**
+ * Retrieves feature flag metadata from a decorated method
+ */
+export function getFeatureFlagMetadata<TError extends ErrorType = string>(
+  target: object,
   propertyKey: string | symbol
-): FeatureFlagMetadata<T> | undefined {
+): FeatureFlagMetadata<TError> | undefined {
   return Reflect.getMetadata(FEATURE_FLAG_METADATA_KEY, target, propertyKey);
 }
