@@ -7,6 +7,8 @@ import { AuthParams } from "../../packages/common/auth/types";
 const SUPPORTED_FEATURES = ["credits"] as const;
 export type SupportedFeature = (typeof SUPPORTED_FEATURES)[number];
 
+const LEGACY_WAITLIST_OFFSET = 370;
+
 export class WaitlistManager {
   public static isSupportedFeature(feature: string): feature is SupportedFeature {
     return SUPPORTED_FEATURES.includes(feature as SupportedFeature);
@@ -16,18 +18,22 @@ export class WaitlistManager {
     email: string,
     feature: string,
     organizationId?: string
-  ): Promise<Result<{ success: boolean; position?: number }, string>> {
+  ): Promise<Result<{ 
+    success: boolean; 
+    position?: number;
+    alreadyOnList?: boolean;
+    sharedPlatforms?: string[];
+  }, string>> {
     if (!WaitlistManager.isSupportedFeature(feature)) {
       return err(`Unsupported feature: ${feature}`);
     }
 
     try {
       const { error: dbError, data } = await dbExecute<{ position: string }>(
-        `INSERT INTO feature_waitlist (email, feature, organization_id) 
-         VALUES ($1, $2, $3)
+        `INSERT INTO feature_waitlist (email, feature, organization_id, original_position) 
+         VALUES ($1, $2, $3, (SELECT COUNT(*) + 1 FROM feature_waitlist WHERE feature = $2))
          ON CONFLICT (email, feature) DO NOTHING
-         RETURNING 
-           (SELECT COUNT(*) FROM feature_waitlist WHERE feature = $2) as position`,
+         RETURNING original_position as position`,
         [email, feature, organizationId || null]
       );
 
@@ -38,8 +44,37 @@ export class WaitlistManager {
         console.error(`Error adding to waitlist: ${dbError}`);
         return err("Failed to add to waitlist");
       }
+      
+      // Check if user was actually added (data exists) or if they were already on the list
+      if (!data || data.length === 0) {
+        // User is already on waitlist, get their current position and share status
+        const existingResult = await dbExecute<{ 
+          position: string;
+          metadata: { shared_platforms?: string[] };
+        }>(
+          `SELECT 
+            original_position as position,
+            metadata
+          FROM feature_waitlist
+          WHERE email = $1 AND feature = $2`,
+          [email, feature]
+        );
 
-      const position = data?.[0]?.position;
+        if (existingResult.data && existingResult.data.length > 0) {
+          const userInfo = existingResult.data[0];
+          const adjustedPosition = parseInt(userInfo.position) + LEGACY_WAITLIST_OFFSET;
+          return ok({
+            success: false,
+            alreadyOnList: true,
+            position: adjustedPosition,
+            sharedPlatforms: userInfo.metadata?.shared_platforms || []
+          });
+        }
+        
+        return err("already_on_waitlist");
+      }
+
+      const position = data?.[0]?.position || "1";
 
       // Update Loops contact
       try {
@@ -64,9 +99,10 @@ export class WaitlistManager {
         console.error("Error updating Loops contact:", loopsError);
       }
 
+      const adjustedPosition = position ? parseInt(position) + LEGACY_WAITLIST_OFFSET : undefined;
       return ok({
         success: true,
-        position: position ? parseInt(position) : undefined,
+        position: adjustedPosition,
       });
     } catch (error: any) {
       console.error(`Failed to add to waitlist: ${error.message || error}`);
@@ -121,8 +157,9 @@ export class WaitlistManager {
         return err("Failed to get waitlist count");
       }
 
-      const count = result.data?.[0]?.count || "0";
-      return ok({ count: parseInt(count) });
+      const actualCount = parseInt(result.data?.[0]?.count || "0");
+      const adjustedCount = actualCount + LEGACY_WAITLIST_OFFSET;
+      return ok({ count: adjustedCount });
     } catch (error: any) {
       console.error(`Failed to get waitlist count: ${error.message || error}`);
       return err("Failed to get waitlist count");
@@ -189,11 +226,12 @@ export class WaitlistManager {
       }
 
       const newPosition = updateResult.data[0].new_position;
+      const adjustedNewPosition = newPosition ? parseInt(newPosition) + LEGACY_WAITLIST_OFFSET : undefined;
 
       return ok({
         success: true,
-        newPosition: newPosition ? parseInt(newPosition) : undefined,
-        message: `You moved up ${boostAmount} spots!`
+        newPosition: adjustedNewPosition,
+        message: adjustedNewPosition ? `New position: #${adjustedNewPosition}` : `You moved up!`
       });
     } catch (error: any) {
       console.error(`Failed to track share: ${error.message || error}`);

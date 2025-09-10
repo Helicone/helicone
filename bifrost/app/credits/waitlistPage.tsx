@@ -40,13 +40,13 @@ export default function WaitlistPage() {
         if (response.ok) {
           const result = await response.json();
           const count = result.data?.count || 0;
-          setWaitlistCount(count > 0 ? count : 100); // Show at least 100
+          setWaitlistCount(count > 0 ? count : 370);
         } else {
-          setWaitlistCount(100);
+          setWaitlistCount(370);
         }
       } catch (err) {
         console.error("Error fetching waitlist count:", err);
-        setWaitlistCount(100);
+        setWaitlistCount(370);
       }
     };
     fetchCount();
@@ -68,14 +68,14 @@ const response = await client.chat.completions.create({
   model: "o3", // or claude-opus-4, gemini-2.5-pro, grok-4, llama-3.3-70b...
   messages: [{ role: "user", content: "Hello!" }]
 });`;
-      
+
       const html = highlighter.codeToHtml(code, {
         lang: "javascript",
         theme: "github-dark",
       });
       setHighlightedCode(html);
     };
-    
+
     initHighlighter();
   }, []);
 
@@ -93,7 +93,10 @@ const response = await client.chat.completions.create({
 
             <p className="md:mt-4 w-full text-md sm:text-lg leading-7 max-w-2xl text-center text-muted-foreground">
               Stop juggling API keys and invoices. Fund once, use everywhere.
-              Full observability included <span className="bg-sky-200 text-sky-900 font-medium px-1.5 py-0.5 rounded">at exact provider prices.</span>
+              Full observability included{" "}
+              <span className="bg-sky-200 text-sky-900 font-medium px-1.5 py-0.5 rounded">
+                at exact provider prices.
+              </span>
             </p>
 
             {/* Waitlist Form - Compact horizontal version */}
@@ -186,7 +189,8 @@ const response = await client.chat.completions.create({
                   </h3>
                 </div>
                 <p className="text-base text-slate-600">
-                  Complete Helicone platform included. Analytics, debugging, monitoring, caching, and more.
+                  Complete Helicone platform included. Analytics, debugging,
+                  monitoring, caching, and more.
                 </p>
                 <Link
                   href="https://docs.helicone.ai/getting-started/platform-overview"
@@ -208,8 +212,8 @@ const response = await client.chat.completions.create({
                 </h3>
               </div>
               <p className="text-base sm:text-lg text-slate-600">
-                Automatically routes to the cheapest provider first. Instant 
-                failover on rate limits, timeouts, and errors. Zero-config 
+                Automatically routes to the cheapest provider first. Instant
+                failover on rate limits, timeouts, and errors. Zero-config
                 reliability across 100+ models.
               </p>
               <Link
@@ -331,7 +335,11 @@ const response = await client.chat.completions.create({
                     Credits work with 100+ models across all major providers
                     including OpenAI, Anthropic, Google, Meta, Mistral, Cohere,
                     AWS Bedrock, Azure, and many more. View the full list at{" "}
-                    <Link href="https://www.helicone.ai/models" target="_blank" className="text-brand underline">
+                    <Link
+                      href="https://www.helicone.ai/models"
+                      target="_blank"
+                      className="text-brand underline"
+                    >
                       helicone.ai/models
                     </Link>
                     . We're adding new models every day — one integration for
@@ -346,8 +354,8 @@ const response = await client.chat.completions.create({
                   <AccordionContent className="text-muted-foreground">
                     Yes! You get Helicone's full observability platform at no
                     extra cost. This includes real-time monitoring, detailed
-                    analytics, debugging tools, alerting, caching, and more.
-                    We can offer this because we negotiate lower rates with
+                    analytics, debugging tools, alerting, caching, and more. We
+                    can offer this because we negotiate lower rates with
                     providers — the difference covers our platform costs while
                     you still pay standard provider prices.
                   </AccordionContent>
@@ -373,8 +381,8 @@ const response = await client.chat.completions.create({
                     Yes! If you prefer to use your own API keys, we offer BYOK
                     with a 3% platform fee. This includes access to Helicone's
                     full observability platform — monitoring, analytics,
-                    debugging, caching, and all other features. You get the
-                    same powerful tools whether you use Credits or BYOK.
+                    debugging, caching, and all other features. You get the same
+                    powerful tools whether you use Credits or BYOK.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -385,8 +393,8 @@ const response = await client.chat.completions.create({
                   <AccordionContent className="text-muted-foreground">
                     We're already working with beta partners and continuously
                     adding more to the beta program. Join the waitlist to be
-                    next in line for access. We'll notify you as soon as
-                    Credits is available for your organization.
+                    next in line for access. We'll notify you as soon as Credits
+                    is available for your organization.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

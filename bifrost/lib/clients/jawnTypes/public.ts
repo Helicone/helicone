@@ -710,8 +710,10 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--position_63_-number__": {
+    "ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
       data: {
+        sharedPlatforms?: string[];
+        alreadyOnList?: boolean;
         /** Format: double */
         position?: number;
         success: boolean;
@@ -719,7 +721,7 @@ export interface components {
       /** @enum {number|null} */
       error: null;
     };
-    "Result__success-boolean--position_63_-number_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number__"] | components["schemas"]["ResultError_string_"];
+    "Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__isOnWaitlist-boolean__": {
       data: {
         isOnWaitlist: boolean;
@@ -4067,7 +4069,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__success-boolean--position_63_-number_.string_"];
+          "application/json": components["schemas"]["Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"];
         };
       };
     };

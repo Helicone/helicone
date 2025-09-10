@@ -20,7 +20,12 @@ export class WaitListController extends Controller {
       email: string;
       feature: string;
     }
-  ): Promise<Result<{ success: boolean; position?: number }, string>> {
+  ): Promise<Result<{ 
+    success: boolean; 
+    position?: number;
+    alreadyOnList?: boolean;
+    sharedPlatforms?: string[];
+  }, string>> {
     const manager = new WaitlistManager();
     const result = await manager.addToWaitlist(body.email, body.feature);
 
@@ -35,6 +40,7 @@ export class WaitListController extends Controller {
       return result;
     }
 
+    // Return 200 for both new additions and existing users
     this.setStatus(200);
     return result;
   }

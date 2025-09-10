@@ -183,10 +183,19 @@
 					}
 				]
 			},
-			"ResultSuccess__success-boolean--position_63_-number__": {
+			"ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
 				"properties": {
 					"data": {
 						"properties": {
+							"sharedPlatforms": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"alreadyOnList": {
+								"type": "boolean"
+							},
 							"position": {
 								"type": "number",
 								"format": "double"
@@ -215,10 +224,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__success-boolean--position_63_-number_.string_": {
+			"Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__success-boolean--position_63_-number__"
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -12324,7 +12333,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__success-boolean--position_63_-number_.string_"
+									"$ref": "#/components/schemas/Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"
 								}
 							}
 						}

@@ -24,9 +24,18 @@ export function CreditsWaitlistForm({
   const [hasSharedLinkedIn, setHasSharedLinkedIn] = useState(false);
   const [pendingShareTwitter, setPendingShareTwitter] = useState(false);
   const [pendingShareLinkedIn, setPendingShareLinkedIn] = useState(false);
+  const [isReturningUser, setIsReturningUser] = useState(false);
   
   // Ref to store interval ID for cleanup
   const windowCheckInterval = useRef<NodeJS.Timeout>();
+  
+  // Load email from localStorage on mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('waitlist_email');
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+  }, []);
   
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.helicone.ai";
   
@@ -81,10 +90,28 @@ export function CreditsWaitlistForm({
           setError("Failed to join waitlist. Please try again.");
         }
       } else {
-        if (result.data?.position) {
+        // Save email to localStorage on successful submission
+        localStorage.setItem('waitlist_email', email);
+        
+        // Check if user was already on the list
+        if (result.data?.alreadyOnList) {
+          setIsReturningUser(true);
           setPosition(result.data.position);
+          // Set which platforms they've already shared
+          if (result.data.sharedPlatforms?.includes("twitter")) {
+            setHasSharedTwitter(true);
+          }
+          if (result.data.sharedPlatforms?.includes("linkedin")) {
+            setHasSharedLinkedIn(true);
+          }
+          setIsSuccess(true);
+        } else {
+          // New user added to waitlist
+          if (result.data?.position) {
+            setPosition(result.data.position);
+          }
+          setIsSuccess(true);
         }
-        setIsSuccess(true);
       }
     } catch (err) {
       console.error("Error joining waitlist:", err);
@@ -159,7 +186,6 @@ export function CreditsWaitlistForm({
             email,
             feature: "credits",
             platform,
-            action: "repost", // Just use repost for 10 points
           }),
         }
       );
@@ -190,15 +216,22 @@ export function CreditsWaitlistForm({
         <div className="flex items-center justify-center gap-2">
           <CheckIcon className="h-5 w-5 text-brand flex-shrink-0" />
           <p className="text-sm text-slate-700">
-            <span className="font-semibold">Success! You're #{position?.toLocaleString() || "100"} in line</span>
+            <span className="font-semibold">
+              {isReturningUser 
+                ? `You're already on the waitlist! You're #${position?.toLocaleString()} in line`
+                : `Success! You're #${position?.toLocaleString()} in line`}
+            </span>
           </p>
         </div>
         {/* Share section */}
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-sm text-slate-600">
-            Share on social to move up the waitlist faster
-          </p>
-          <div className="flex gap-2">
+        {(!hasSharedTwitter || !hasSharedLinkedIn) ? (
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-sm text-slate-600">
+              {isReturningUser && (hasSharedTwitter || hasSharedLinkedIn)
+                ? "Share on more platforms to move up faster"
+                : "Share on social to move up the waitlist faster"}
+            </p>
+            <div className="flex gap-2">
             <button
               onClick={() => openShareWindow("twitter")}
               disabled={hasSharedTwitter || pendingShareTwitter}
@@ -230,7 +263,15 @@ export function CreditsWaitlistForm({
                "Share LinkedIn"}
             </button>
           </div>
-        </div>
+          </div>
+        ) : (
+          // Both platforms shared
+          hasSharedTwitter && hasSharedLinkedIn && (
+            <p className="text-sm text-slate-600">
+              Thanks for sharing! You've maximized your position boost.
+            </p>
+          )
+        )}
         
         {/* Compact confirmation UI */}
         {(pendingShareTwitter || pendingShareLinkedIn) && (
