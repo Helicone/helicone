@@ -157,6 +157,10 @@ function HQLPage() {
         rules: [],
         colors: {
           "editor.background": "#00000000",
+          "minimap.background": "#1e1e1e",
+          "minimapSlider.background": "#79797933",
+          "minimapSlider.hoverBackground": "#79797944",
+          "minimapSlider.activeBackground": "#79797955",
         },
       });
       mono.editor.defineTheme("custom-light", {
@@ -165,6 +169,10 @@ function HQLPage() {
         rules: [],
         colors: {
           "editor.background": "#00000000",
+          "minimap.background": "#ffffff",
+          "minimapSlider.background": "#64646433",
+          "minimapSlider.hoverBackground": "#64646444",
+          "minimapSlider.activeBackground": "#64646455",
         },
       });
     } catch (e) {
@@ -353,7 +361,7 @@ function HQLPage() {
               <Editor
                 defaultLanguage="sql"
                 defaultValue={currentQuery.sql}
-                theme={currentTheme === "dark" ? "vs-dark" : "vs"}
+                theme={currentTheme === "dark" ? "custom-dark" : "custom-light"}
                 options={{
                   minimap: {
                     enabled: true,
