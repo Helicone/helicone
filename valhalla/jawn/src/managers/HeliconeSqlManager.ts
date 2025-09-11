@@ -161,116 +161,152 @@ export class HeliconeSqlManager {
     this.hqlStore = new HqlStore();
   }
 
-  async getClickhouseSchema(): Promise<
-    Result<ClickHouseTableSchema[], HqlError>
-  > {
+  /* ---------------------------- Helper Functions --------------------------- */
+  private parseSqlOrError(sql: string): Result<AST | AST[], HqlError> {
     try {
-      const schemaPromises = CLICKHOUSE_TABLES.map(async (table_name) => {
-        const columns = await clickhouseDb.dbQuery<ClickHouseTableRow>(
-          `DESCRIBE TABLE ${table_name}`,
-          [],
-          describeRowSchema
-        );
-
-        if (isError(columns)) {
-          throw new Error(`Failed to describe table ${table_name}: ${columns.error}`);
-        }
-
-        return {
-          table_name,
-          columns:
-            columns.data
-              ?.map((col: ClickHouseTableRow) => ({
-                name: col.name,
-                type: col.type,
-                default_type: col.default_type,
-                default_expression: col.default_expression,
-                comment: col.comment,
-                codec_expression: col.codec_expression,
-                ttl_expression: col.ttl_expression,
-              }))
-              .filter((col) => col.name !== "organization_id") ?? [],
-        };
-      });
-      
-      const schema = await Promise.all(schemaPromises);
-      return ok(schema);
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : String(e);
+      const ast = parser.astify(sql, { database: "Postgresql" });
+      return ok(ast);
+    } catch (parseError) {
       return hqlError(
-        HqlErrorCode.SCHEMA_FETCH_FAILED,
-        errorMessage
+        HqlErrorCode.SYNTAX_ERROR,
+        parseError instanceof Error ? parseError.message : String(parseError)
       );
     }
   }
 
-  // Check for SQL injection by only always executing the first sql statement
-  // Validate sql by only allowing select statements and tables in CLICKHOUSE_TABLES
-  // Add limit check
-  // Execute it
+  private firstStatement(ast: AST | AST[]): AST {
+    return normalizeAst(ast)[0];
+  }
+
+  private addLimitOrError(ast: AST, limit: number): Result<AST, HqlError> {
+    try {
+      const limited = addLimit(ast, limit);
+      return ok(limited);
+    } catch (limitError) {
+      const msg = (limitError as any)?.message ?? String(limitError);
+      return hqlError(HqlErrorCode.SYNTAX_ERROR, `Failed to apply limit: ${msg}`);
+    }
+  }
+
+  private toPostgresSql(ast: AST): string {
+    return parser.sqlify(ast, { database: "Postgresql" });
+  }
+
+  private validateSqlOrError(sql: string): Result<null, HqlError> {
+    return validateSql(sql);
+  }
+
+  private async executeRows(
+    sql: string
+  ): Promise<Result<Record<string, any>[], HqlError>> {
+    const result = await clickhouseDb.hqlQueryWithContext<Record<string, any>[]>({
+      query: sql,
+      organizationId: this.authParams.organizationId,
+      parameters: [],
+    });
+
+    if (isError(result)) {
+      const errorString = String(result.error);
+      const errorCode = parseClickhouseError(errorString);
+      return hqlError(errorCode, errorString);
+    }
+
+    return ok(result.data ?? []);
+  }
+
+  private buildFilename(): string {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    return `hql-export-${timestamp}.csv`;
+  }
+
+  private async uploadCsvRows(
+    rows: Record<string, any>[]
+  ): Promise<Result<string, HqlError>> {
+    const filename = this.buildFilename();
+    const uploadResult = await this.hqlStore.uploadCsv(
+      filename,
+      this.authParams.organizationId,
+      rows
+    );
+
+    if (isError(uploadResult)) {
+      const uploadErr = (uploadResult as any).error as string;
+      return hqlError(HqlErrorCode.CSV_UPLOAD_FAILED, uploadErr);
+    }
+
+    if (!uploadResult.data) {
+      return hqlError(HqlErrorCode.CSV_URL_NOT_RETURNED);
+    }
+
+    return ok(uploadResult.data as string);
+  }
+
+  private removeLimitFromSelectAst(ast: AST): AST {
+    const clone: any = { ...ast };
+    if (clone.type === "select" && Object.prototype.hasOwnProperty.call(clone, "limit")) {
+      delete clone.limit;
+    }
+    return clone as AST;
+  }
+
+  private async countRowsForNormalizedSelect(
+    normalizedAst: AST
+  ): Promise<Result<number, HqlError>> {
+    const countAst = this.removeLimitFromSelectAst(normalizedAst);
+    const baseSql = this.toPostgresSql(countAst);
+
+    const validatedBaseSql = this.validateSqlOrError(baseSql);
+    if (isError(validatedBaseSql)) {
+      return validatedBaseSql;
+    }
+
+    const countSql = `SELECT COUNT(*) as row_count FROM (${baseSql}) as count_query`;
+    const countResult = await clickhouseDb.hqlQueryWithContext<{ row_count: number }>({
+      query: countSql,
+      organizationId: this.authParams.organizationId,
+      parameters: [],
+    });
+
+    if (isError(countResult)) {
+      const errorString = String(countResult.error);
+      const errorCode = parseClickhouseError(errorString);
+      return hqlError(errorCode, errorString);
+    }
+
+    const rowCount = Number(countResult.data?.[0]?.row_count) || 0;
+    return ok(rowCount);
+  }
+
   async executeSql(
     sql: string,
     limit: number = 100
   ): Promise<Result<ExecuteSqlResponse, HqlError>> {
     try {
-      // Parse SQL to validate and add limit
-      let ast;
-      try {
-        ast = parser.astify(sql, { database: "Postgresql" });
-      } catch (parseError) {
-        return hqlError(
-          HqlErrorCode.SYNTAX_ERROR,
-          parseError instanceof Error ? parseError.message : String(parseError)
-        );
-      }
-      
-      // Always get first statement to prevent SQL injection
-      const normalizedAst = normalizeAst(ast)[0];
-      
+      // Parse and normalize
+      const astResult = this.parseSqlOrError(sql);
+      if (isError(astResult)) return astResult;
+      const normalizedAst = this.firstStatement(astResult.data);
+
       // Add limit to prevent excessive data retrieval
-      let limitedAst;
-      try {
-        limitedAst = addLimit(normalizedAst, limit);
-      } catch (limitError) {
-        const msg = limitError instanceof Error ? limitError.message : String(limitError);
-        return hqlError(
-          HqlErrorCode.SYNTAX_ERROR,
-          `Failed to apply limit: ${msg}`
-        );
-      }
-      
-      const firstSql = parser.sqlify(limitedAst, { database: "Postgresql" });
+      const limitedAstResult = this.addLimitOrError(normalizedAst, limit);
+      if (isError(limitedAstResult)) return limitedAstResult;
+      const firstSql = this.toPostgresSql(limitedAstResult.data);
 
       // Validate SQL for security
-      const validatedSql = validateSql(firstSql);
-      if (isError(validatedSql)) {
-        return validatedSql;
-      }
+      const validatedSql = this.validateSqlOrError(firstSql);
+      if (isError(validatedSql)) return validatedSql;
 
       const start = Date.now();
-
-      // Execute query with organization context for row-level security
-      const result = await clickhouseDb.hqlQueryWithContext<
-        ExecuteSqlResponse["rows"]
-      >({
-        query: firstSql,
-        organizationId: this.authParams.organizationId,
-        parameters: [],
-      });
-
+      const rowsResult = await this.executeRows(firstSql);
       const elapsedMilliseconds = Date.now() - start;
 
-      if (isError(result)) {
-        const errorString = String(result.error);
-        const errorCode = parseClickhouseError(errorString);
-        return hqlError(errorCode, errorString);
-      }
+      if (isError(rowsResult)) return rowsResult;
 
       return ok({
-        rows: result.data ?? [],
+        rows: rowsResult.data,
         elapsedMilliseconds,
-        size: Buffer.byteLength(JSON.stringify(result.data), "utf8"),
-        rowCount: result.data?.length ?? 0,
+        size: Buffer.byteLength(JSON.stringify(rowsResult.data), "utf8"),
+        rowCount: rowsResult.data.length,
       });
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : String(e);
@@ -282,236 +318,53 @@ export class HeliconeSqlManager {
   }
 
   async downloadCsv(sql: string): Promise<Result<string, HqlError>> {
-    // TODO Break the below into smaller functions
     try {
       // Parse SQL to check if it already has a limit
-      let ast;
-      try {
-        ast = parser.astify(sql, { database: "Postgresql" });
-      } catch (parseError) {
-        return hqlError(
-          HqlErrorCode.SYNTAX_ERROR,
-          parseError instanceof Error ? parseError.message : String(parseError)
-        );
-      }
-      
-      // Get first statement
-      const normalizedAst = normalizeAst(ast)[0];
-      
+      const astResult = this.parseSqlOrError(sql);
+      if (isError(astResult)) return astResult;
+      const normalizedAst = this.firstStatement(astResult.data);
+
       // Check if the user's query explicitly requests more than MAX_LIMIT rows
       const requestedLimitCount = getRequestedLimitCountFromAstOrSql(normalizedAst, sql);
       if (requestedLimitCount !== null && requestedLimitCount > MAX_LIMIT) {
         return hqlError(HqlErrorCode.CSV_DOWNLOAD_LIMIT_EXCEEDED);
       }
-      
-      // If user provided a LIMIT within bounds, skip expensive global count and allow export up to MAX_LIMIT
+
+      // If user provided a LIMIT within bounds, skip expensive count and export directly (capped server-side)
       if (normalizedAst.type === "select" && requestedLimitCount !== null) {
-        // Validate the original SQL for security
-        const validatedSql = validateSql(sql);
-        if (isError(validatedSql)) {
-          return validatedSql;
-        }
+        const validatedSql = this.validateSqlOrError(sql);
+        if (isError(validatedSql)) return validatedSql;
 
-        // Enforce server-side cap while preserving user's smaller LIMIT
-        let limitedAst;
-        try {
-          limitedAst = addLimit(normalizedAst, MAX_LIMIT);
-        } catch (limitError) {
-          return hqlError(
-            HqlErrorCode.SYNTAX_ERROR,
-            `Failed to apply limit: ${limitError instanceof Error ? limitError.message : String(limitError)}`
-          );
-        }
+        const limitedAstResult = this.addLimitOrError(normalizedAst, MAX_LIMIT);
+        if (isError(limitedAstResult)) return limitedAstResult;
+        const limitedSql = this.toPostgresSql(limitedAstResult.data);
 
-        const limitedSql = parser.sqlify(limitedAst, { database: "Postgresql" });
+        const rowsResult = await this.executeRows(limitedSql);
+        if (isError(rowsResult)) return rowsResult;
+        if (!rowsResult.data.length) return hqlError(HqlErrorCode.NO_DATA_RETURNED);
 
-        const result = await clickhouseDb.hqlQueryWithContext<Record<string, any>[]>({
-          query: limitedSql,
-          organizationId: this.authParams.organizationId,
-          parameters: [],
-        });
-
-        if (isError(result)) {
-          const errorString = String(result.error);
-          const errorCode = parseClickhouseError(errorString);
-          return hqlError(errorCode, errorString);
-        }
-
-        if (!result.data?.length) {
-          return hqlError(HqlErrorCode.NO_DATA_RETURNED);
-        }
-
-        // Generate filename with timestamp
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `hql-export-${timestamp}.csv`;
-
-        const uploadResult = await this.hqlStore.uploadCsv(
-          filename,
-          this.authParams.organizationId,
-          result.data
-        );
-
-        if (isError(uploadResult)) {
-          return hqlError(
-            HqlErrorCode.CSV_UPLOAD_FAILED,
-            uploadResult.error
-          );
-        }
-
-        if (!uploadResult.data) {
-          return hqlError(HqlErrorCode.CSV_URL_NOT_RETURNED);
-        }
-
-        return ok(uploadResult.data);
+        return this.uploadCsvRows(rowsResult.data);
       }
 
-      // No user LIMIT: perform a bounded count and enforce MAX_LIMIT to prevent massive exports
-      {
-        // Remove any existing LIMIT clause for the count query
-        const countAst = { ...normalizedAst } as any;
-        if (countAst.type === "select" && Object.prototype.hasOwnProperty.call(countAst, "limit")) {
-          delete countAst.limit;
-        }
+      // No user LIMIT: perform count and enforce MAX_LIMIT
+      const rowCountResult = await this.countRowsForNormalizedSelect(normalizedAst);
+      if (isError(rowCountResult)) return rowCountResult;
+      const rowCount = rowCountResult.data;
 
-        const baseSql = parser.sqlify(countAst, { database: "Postgresql" });
+      if (rowCount > MAX_LIMIT) return hqlError(HqlErrorCode.CSV_DOWNLOAD_LIMIT_EXCEEDED);
+      if (rowCount === 0) return hqlError(HqlErrorCode.NO_DATA_RETURNED);
 
-        // Validate the base SQL for security
-        const validatedBaseSql = validateSql(baseSql);
-        if (isError(validatedBaseSql)) {
-          return validatedBaseSql;
-        }
+      const limitedAstResult = this.addLimitOrError(normalizedAst, MAX_LIMIT);
+      if (isError(limitedAstResult)) return limitedAstResult;
+      const limitedSql = this.toPostgresSql(limitedAstResult.data);
 
-        // Create a count query to check the total number of rows
-        const countSql = `SELECT COUNT(*) as row_count FROM (${baseSql}) as count_query`;
+      const rowsResult = await this.executeRows(limitedSql);
+      if (isError(rowsResult)) return rowsResult;
+      if (!rowsResult.data.length) return hqlError(HqlErrorCode.NO_DATA_RETURNED);
 
-        // Execute the count query
-        const countResult = await clickhouseDb.hqlQueryWithContext<{ row_count: number }>({
-          query: countSql,
-          organizationId: this.authParams.organizationId,
-          parameters: [],
-        });
-
-        if (isError(countResult)) {
-          const errorString = String(countResult.error);
-          const errorCode = parseClickhouseError(errorString);
-          return hqlError(errorCode, errorString);
-        }
-
-        const rowCount = Number(countResult.data?.[0]?.row_count) || 0;
-
-        if (rowCount > MAX_LIMIT) {
-          return hqlError(HqlErrorCode.CSV_DOWNLOAD_LIMIT_EXCEEDED);
-        }
-
-        if (rowCount === 0) {
-          return hqlError(HqlErrorCode.NO_DATA_RETURNED);
-        }
-
-        // Execute the actual query with server-side cap
-        let limitedAst;
-        try {
-          limitedAst = addLimit(normalizedAst, MAX_LIMIT);
-        } catch (limitError) {
-          return hqlError(
-            HqlErrorCode.SYNTAX_ERROR,
-            `Failed to apply limit: ${limitError instanceof Error ? limitError.message : String(limitError)}`
-          );
-        }
-
-        const limitedSql = parser.sqlify(limitedAst, { database: "Postgresql" });
-
-        const result = await clickhouseDb.hqlQueryWithContext<Record<string, any>[]>({
-          query: limitedSql,
-          organizationId: this.authParams.organizationId,
-          parameters: [],
-        });
-
-        if (isError(result)) {
-          const errorString = String(result.error);
-          const errorCode = parseClickhouseError(errorString);
-          return hqlError(errorCode, errorString);
-        }
-
-        if (!result.data?.length) {
-          return hqlError(HqlErrorCode.NO_DATA_RETURNED);
-        }
-
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `hql-export-${timestamp}.csv`;
-
-        const uploadResult = await this.hqlStore.uploadCsv(
-          filename,
-          this.authParams.organizationId,
-          result.data
-        );
-
-        if (isError(uploadResult)) {
-          return hqlError(
-            HqlErrorCode.CSV_UPLOAD_FAILED,
-            uploadResult.error
-          );
-        }
-
-        if (!uploadResult.data) {
-          return hqlError(HqlErrorCode.CSV_URL_NOT_RETURNED);
-        }
-
-        return ok(uploadResult.data);
-      }
-
-      // Should never reach here because both branches above return
-      // Add a final safe guard executing limited query
-      let finalAst;
-      try {
-        finalAst = addLimit(normalizedAst, MAX_LIMIT);
-      } catch (limitError) {
-        const msg1 = (limitError as any)?.message ?? String(limitError);
-        return hqlError(
-          HqlErrorCode.SYNTAX_ERROR,
-          `Failed to apply limit: ${msg1}`
-        );
-      }
-
-      const finalSql = parser.sqlify(finalAst, { database: "Postgresql" });
-      const finalResult = await clickhouseDb.hqlQueryWithContext<Record<string, any>[]>({
-        query: finalSql,
-        organizationId: this.authParams.organizationId,
-        parameters: [],
-      });
-
-      if (isError(finalResult)) {
-        const errorString = String(finalResult.error);
-        const errorCode = parseClickhouseError(errorString);
-        return hqlError(errorCode, errorString);
-      }
-
-      if (!finalResult.data?.length) {
-        return hqlError(HqlErrorCode.NO_DATA_RETURNED);
-      }
-
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `hql-export-${timestamp}.csv`;
-      const uploadResult = await this.hqlStore.uploadCsv(
-        filename,
-        this.authParams.organizationId,
-        finalResult.data ?? []
-      );
-
-      if (isError(uploadResult)) {
-        const uploadErr = (uploadResult as any).error as string;
-        return hqlError(
-          HqlErrorCode.CSV_UPLOAD_FAILED,
-          uploadErr
-        );
-      }
-
-      if (!uploadResult.data) {
-        return hqlError(HqlErrorCode.CSV_URL_NOT_RETURNED);
-      }
-
-      return ok(uploadResult.data as string);
+      return this.uploadCsvRows(rowsResult.data);
     } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : String(e); // TODO Have a cleaner way of defining the error message
+      const errorMessage = e instanceof Error ? e.message : String(e);
       return hqlError(
         HqlErrorCode.UNEXPECTED_ERROR,
         errorMessage
