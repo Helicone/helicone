@@ -676,8 +676,8 @@ function getAPIRouterV1(
 
       try {
         // Parse pagination parameters
-        const pageNum = page ? parseInt(page as string) : 0;
-        const pageSizeNum = pageSize ? parseInt(pageSize as string) : 50;
+        const pageNum = Math.max(0, page ? parseInt(page as string) : 0);
+        const pageSizeNum = Math.min(Math.max(1, pageSize ? parseInt(pageSize as string) : 50), 1000);
 
         // Get table data from the wallet durable object
         const tableData = await walletStub.getTableData(tableName, pageNum, pageSizeNum);
