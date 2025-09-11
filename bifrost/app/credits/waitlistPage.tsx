@@ -11,13 +11,6 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { createHighlighter } from "shiki";
-
-// Create a singleton highlighter instance
-const highlighterPromise = createHighlighter({
-  themes: ["github-dark"],
-  langs: ["javascript"],
-});
 
 export default function WaitlistPage() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
@@ -51,10 +44,24 @@ export default function WaitlistPage() {
     fetchCount();
   }, [apiUrl]);
 
-  // Highlight code snippet with Shiki
+  // Highlight code with Shiki
   useEffect(() => {
+    let mounted = true;
+    
     const highlightCode = async () => {
-      const codeSnippet = `import { OpenAI } from "openai";
+      try {
+        const { createHighlighter } = await import("shiki");
+        
+        if (!mounted) return;
+        
+        const highlighter = await createHighlighter({
+          themes: ["github-dark"],
+          langs: ["javascript"],
+        });
+
+        if (!mounted) return;
+
+        const code = `import { OpenAI } from "openai";
 
 const client = new OpenAI({
   baseURL: "https://ai-gateway.helicone.ai",
@@ -67,17 +74,24 @@ const response = await client.chat.completions.create({
   messages: [{ role: "user", content: "Hello!" }]
 });`;
 
-      const highlighter = await highlighterPromise;
+        const html = highlighter.codeToHtml(code, {
+          lang: "javascript",
+          theme: "github-dark",
+        });
 
-      const html = highlighter.codeToHtml(codeSnippet, {
-        lang: "javascript",
-        theme: "github-dark",
-      });
-
-      setHighlightedCode(html);
+        if (mounted) {
+          setHighlightedCode(html);
+        }
+      } catch (error) {
+        console.error("Failed to highlight code:", error);
+      }
     };
 
     highlightCode();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return (
@@ -272,14 +286,25 @@ const response = await client.chat.completions.create({
                   </p>
                   {/* Code snippet */}
                   {highlightedCode ? (
-                    <div
+                    <div 
                       className="rounded-lg overflow-hidden max-w-2xl [&_pre]:!m-0 [&_pre]:!p-4"
                       dangerouslySetInnerHTML={{ __html: highlightedCode }}
                     />
                   ) : (
                     <div className="bg-[#24292e] rounded-lg overflow-hidden max-w-2xl">
-                      <pre className="p-4 overflow-x-auto text-sm text-gray-300">
-                        <code>Loading...</code>
+                      <pre className="p-4 overflow-x-auto text-sm text-gray-300 font-mono">
+                        <code>{`import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Works with any model from any provider
+const response = await client.chat.completions.create({
+  model: "o3", // or claude-opus-4, gemini-2.5-pro, grok-4, llama-3.3-70b...
+  messages: [{ role: "user", content: "Hello!" }]
+});`}</code>
                       </pre>
                     </div>
                   )}
@@ -330,7 +355,7 @@ const response = await client.chat.completions.create({
                     You add credits to your account, and we deduct the exact
                     provider cost for each API call.{" "}
                     <strong>No Helicone AI Gateway fees</strong> — you only pay
-                    the provider's list price plus standard payment processing
+                    the provider&apos;s list price plus standard payment processing
                     fees (2.9% + $0.30 per transaction). No markups, no platform
                     fees, no surprises. Your credits work across all supported
                     providers from a single balance.
