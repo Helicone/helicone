@@ -122,8 +122,7 @@ export class AdminController extends Controller {
 
     // Get ClickHouse spending for these organizations
     const orgIds = paymentsResult.data.map((org) => org.org_id);
-    console.log("COST_PRECISION_MULTIPLIER:", COST_PRECISION_MULTIPLIER);
-    console.log("Querying ClickHouse for orgIds:", orgIds);
+    const orgIds = paymentsResult.data.map((org) => org.org_id);
     const clickhouseSpendResult = await clickhouseDb.dbQuery<{
       organization_id: string;
       total_cost: number;
