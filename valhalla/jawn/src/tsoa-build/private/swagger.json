@@ -7,19 +7,19 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"ResultSuccess__success-boolean--message-string__": {
+			"ResultSuccess__success-boolean--position_63_-number__": {
 				"properties": {
 					"data": {
 						"properties": {
-							"message": {
-								"type": "string"
+							"position": {
+								"type": "number",
+								"format": "double"
 							},
 							"success": {
 								"type": "boolean"
 							}
 						},
 						"required": [
-							"message",
 							"success"
 						],
 						"type": "object"
@@ -59,10 +59,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__success-boolean--message-string_.string_": {
+			"Result__success-boolean--position_63_-number_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__success-boolean--message-string__"
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--position_63_-number__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -101,6 +101,45 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__isOnWaitlist-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__count-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"count"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__count-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__count-number__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -46913,7 +46952,7 @@
 		"contact": {}
 	},
 	"paths": {
-		"/v1/public/waitlist/feature": {
+		"/v1/waitlist/feature": {
 			"post": {
 				"operationId": "AddToWaitlist",
 				"responses": {
@@ -46922,7 +46961,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__success-boolean--message-string_.string_"
+									"$ref": "#/components/schemas/Result__success-boolean--position_63_-number_.string_"
 								}
 							}
 						}
@@ -46964,7 +47003,7 @@
 				}
 			}
 		},
-		"/v1/public/waitlist/feature/status": {
+		"/v1/waitlist/feature/status": {
 			"get": {
 				"operationId": "IsOnWaitlist",
 				"responses": {
@@ -47007,6 +47046,41 @@
 					{
 						"in": "query",
 						"name": "organizationId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/waitlist/feature/count": {
+			"get": {
+				"operationId": "GetWaitlistCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__count-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "feature",
 						"required": true,
 						"schema": {
 							"type": "string"

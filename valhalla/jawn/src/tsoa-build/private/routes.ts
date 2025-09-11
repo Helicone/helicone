@@ -57,10 +57,10 @@ const expressAuthenticationRecasted = expressAuthentication as (req: ExRequest, 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "ResultSuccess__success-boolean--message-string__": {
+    "ResultSuccess__success-boolean--position_63_-number__": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string","required":true},"success":{"dataType":"boolean","required":true}},"required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"position":{"dataType":"double"},"success":{"dataType":"boolean","required":true}},"required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
@@ -75,9 +75,9 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result__success-boolean--message-string_.string_": {
+    "Result__success-boolean--position_63_-number_.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__success-boolean--message-string__"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__success-boolean--position_63_-number__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__isOnWaitlist-boolean__": {
@@ -92,6 +92,20 @@ const models: TsoaRoute.Models = {
     "Result__isOnWaitlist-boolean_.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__isOnWaitlist-boolean__"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__count-number__": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"count":{"dataType":"double","required":true}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__count-number_.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__count-number__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "RateLimitRuleView": {
@@ -14276,7 +14290,7 @@ export function RegisterRoutes(app: Router) {
                 body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"organizationId":{"dataType":"string"},"feature":{"dataType":"string","required":true},"email":{"dataType":"string","required":true}}},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.post('/v1/public/waitlist/feature',
+        app.post('/v1/waitlist/feature',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WaitListController)),
             ...(fetchMiddlewares<RequestHandler>(WaitListController.prototype.addToWaitlist)),
@@ -14307,10 +14321,10 @@ export function RegisterRoutes(app: Router) {
         const argsWaitListController_isOnWaitlist: Record<string, TsoaRoute.ParameterSchema> = {
                 email: {"in":"query","name":"email","required":true,"dataType":"string"},
                 feature: {"in":"query","name":"feature","required":true,"dataType":"string"},
-                organizationId: {"in":"query","name":"organizationId","required":true,"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"undefined"}]},
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                organizationId: {"in":"query","name":"organizationId","dataType":"string"},
+                request: {"in":"request","name":"request","dataType":"object"},
         };
-        app.get('/v1/public/waitlist/feature/status',
+        app.get('/v1/waitlist/feature/status',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(WaitListController)),
             ...(fetchMiddlewares<RequestHandler>(WaitListController.prototype.isOnWaitlist)),
@@ -14327,6 +14341,37 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'isOnWaitlist',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsWaitListController_getWaitlistCount: Record<string, TsoaRoute.ParameterSchema> = {
+                feature: {"in":"query","name":"feature","required":true,"dataType":"string"},
+        };
+        app.get('/v1/waitlist/feature/count',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(WaitListController)),
+            ...(fetchMiddlewares<RequestHandler>(WaitListController.prototype.getWaitlistCount)),
+
+            async function WaitListController_getWaitlistCount(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsWaitListController_getWaitlistCount, request, response });
+
+                const controller = new WaitListController();
+
+              await templateService.apiHandler({
+                methodName: 'getWaitlistCount',
                 controller,
                 response,
                 next,

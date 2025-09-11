@@ -183,6 +183,180 @@
 					}
 				]
 			},
+			"ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"sharedPlatforms": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"alreadyOnList": {
+								"type": "boolean"
+							},
+							"position": {
+								"type": "number",
+								"format": "double"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"success"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__isOnWaitlist-boolean__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"isOnWaitlist": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"isOnWaitlist"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__isOnWaitlist-boolean_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__isOnWaitlist-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__count-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"count"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__count-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__count-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"message": {
+								"type": "string"
+							},
+							"newPosition": {
+								"type": "number",
+								"format": "double"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"message",
+							"success"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__success-boolean--newPosition_63_-number--message-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--newPosition_63_-number--message-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__id-string__": {
 				"properties": {
 					"data": {
@@ -11632,6 +11806,172 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/public/waitlist/feature": {
+			"post": {
+				"operationId": "AddToWaitlist",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"feature": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"feature",
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/waitlist/feature/status": {
+			"get": {
+				"operationId": "IsOnWaitlist",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__isOnWaitlist-boolean_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "email",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "feature",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/waitlist/feature/count": {
+			"get": {
+				"operationId": "GetWaitlistCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__count-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "feature",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/waitlist/feature/share": {
+			"post": {
+				"operationId": "TrackShare",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__success-boolean--newPosition_63_-number--message-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"platform": {
+										"type": "string",
+										"enum": [
+											"twitter",
+											"linkedin"
+										]
+									},
+									"feature": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"platform",
+									"feature",
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/vault/add": {

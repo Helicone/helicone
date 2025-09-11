@@ -16,6 +16,18 @@ export interface paths {
   "/v1/webhooks/{webhookId}": {
     delete: operations["DeleteWebhook"];
   };
+  "/v1/public/waitlist/feature": {
+    post: operations["AddToWaitlist"];
+  };
+  "/v1/public/waitlist/feature/status": {
+    get: operations["IsOnWaitlist"];
+  };
+  "/v1/public/waitlist/feature/count": {
+    get: operations["GetWaitlistCount"];
+  };
+  "/v1/public/waitlist/feature/share": {
+    post: operations["TrackShare"];
+  };
   "/v1/vault/add": {
     post: operations["AddKey"];
   };
@@ -739,6 +751,46 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
+      data: {
+        sharedPlatforms?: string[];
+        alreadyOnList?: boolean;
+        /** Format: double */
+        position?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__isOnWaitlist-boolean__": {
+      data: {
+        isOnWaitlist: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__count-number__": {
+      data: {
+        /** Format: double */
+        count: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
+      data: {
+        message: string;
+        /** Format: double */
+        newPosition?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--newPosition_63_-number--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--newPosition_63_-number--message-string__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-string__": {
       data: {
         id: string;
@@ -3815,6 +3867,75 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  AddToWaitlist: {
+    requestBody: {
+      content: {
+        "application/json": {
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"];
+        };
+      };
+    };
+  };
+  IsOnWaitlist: {
+    parameters: {
+      query: {
+        email: string;
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetWaitlistCount: {
+    parameters: {
+      query: {
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number_.string_"];
+        };
+      };
+    };
+  };
+  TrackShare: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          platform: "twitter" | "linkedin";
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--newPosition_63_-number--message-string_.string_"];
         };
       };
     };

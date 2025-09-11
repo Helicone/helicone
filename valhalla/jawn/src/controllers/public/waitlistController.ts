@@ -4,18 +4,14 @@ import {
   Get,
   Post,
   Query,
-  Request,
   Route,
-  Security,
   Tags,
 } from "tsoa";
-import { err, Result } from "../../packages/common/result";
-import { type JawnAuthenticatedRequest } from "../../types/request";
+import { Result } from "../../packages/common/result";
 import { WaitlistManager } from "../../managers/waitlist/WaitlistManager";
 
-@Route("v1/waitlist")
+@Route("v1/public/waitlist")
 @Tags("Waitlist")
-@Security("api_key")
 export class WaitListController extends Controller {
   @Post("/feature")
   public async addToWaitlist(
@@ -23,16 +19,16 @@ export class WaitListController extends Controller {
     body: {
       email: string;
       feature: string;
-      organizationId?: string;
-    },
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{ success: boolean; position?: number }, string>> {
+    }
+  ): Promise<Result<{ 
+    success: boolean; 
+    position?: number;
+    alreadyOnList?: boolean;
+    sharedPlatforms?: string[];
+  }, string>> {
     const manager = new WaitlistManager();
-    const organizationId =
-      body.organizationId || request.authParams.organizationId;
+    const result = await manager.addToWaitlist(body.email, body.feature);
 
-    const result = await manager.addToWaitlist(body.email, body.feature, organizationId);
-    
     if (result.error) {
       if (result.error === "already_on_waitlist") {
         this.setStatus(409);
@@ -44,6 +40,7 @@ export class WaitListController extends Controller {
       return result;
     }
 
+    // Return 200 for both new additions and existing users
     this.setStatus(200);
     return result;
   }
@@ -51,9 +48,7 @@ export class WaitListController extends Controller {
   @Get("/feature/status")
   public async isOnWaitlist(
     @Query() email: string,
-    @Query() feature: string,
-    @Query() organizationId?: string,
-    @Request() request?: JawnAuthenticatedRequest
+    @Query() feature: string
   ): Promise<Result<{ isOnWaitlist: boolean }, string>> {
     const manager = new WaitlistManager();
     const result = await manager.isOnWaitlist(email, feature);
@@ -80,6 +75,39 @@ export class WaitListController extends Controller {
 
     if (result.error) {
       if (result.error.startsWith("Unsupported feature")) {
+        this.setStatus(400);
+      } else {
+        this.setStatus(500);
+      }
+      return result;
+    }
+
+    this.setStatus(200);
+    return result;
+  }
+
+  @Post("/feature/share")
+  public async trackShare(
+    @Body()
+    body: {
+      email: string;
+      feature: string;
+      platform: "twitter" | "linkedin";
+    }
+  ): Promise<Result<{ 
+    success: boolean; 
+    newPosition?: number;
+    message: string;
+  }, string>> {
+    const manager = new WaitlistManager();
+    const result = await manager.trackShare(body.email, body.feature, body.platform);
+
+    if (result.error) {
+      if (result.error === "Already shared on this platform") {
+        this.setStatus(409);
+      } else if (result.error === "Not found on waitlist") {
+        this.setStatus(404);
+      } else if (result.error.startsWith("Unsupported feature")) {
         this.setStatus(400);
       } else {
         this.setStatus(500);
