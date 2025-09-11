@@ -11,9 +11,17 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { createHighlighter } from "shiki";
+
+// Create a singleton highlighter instance
+const highlighterPromise = createHighlighter({
+  themes: ["github-dark"],
+  langs: ["javascript"],
+});
 
 export default function WaitlistPage() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
+  const [highlightedCode, setHighlightedCode] = useState<string>("");
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.helicone.ai";
 
   // Fetch count once at the page level
@@ -42,6 +50,35 @@ export default function WaitlistPage() {
     };
     fetchCount();
   }, [apiUrl]);
+
+  // Highlight code snippet with Shiki
+  useEffect(() => {
+    const highlightCode = async () => {
+      const codeSnippet = `import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Works with any model from any provider
+const response = await client.chat.completions.create({
+  model: "o3", // or claude-opus-4, gemini-2.5-pro, grok-4, llama-3.3-70b...
+  messages: [{ role: "user", content: "Hello!" }]
+});`;
+
+      const highlighter = await highlighterPromise;
+
+      const html = highlighter.codeToHtml(codeSnippet, {
+        lang: "javascript",
+        theme: "github-dark",
+      });
+
+      setHighlightedCode(html);
+    };
+
+    highlightCode();
+  }, []);
 
   return (
     <div className="bg-background text-slate-700 antialiased">
@@ -234,22 +271,18 @@ export default function WaitlistPage() {
                     changing code.
                   </p>
                   {/* Code snippet */}
-                  <div className="bg-[#24292e] rounded-lg overflow-hidden max-w-2xl">
-                    <pre className="p-4 overflow-x-auto text-sm text-gray-300">
-                      <code>{`import { OpenAI } from "openai";
-
-const client = new OpenAI({
-  baseURL: "https://ai-gateway.helicone.ai",
-  apiKey: process.env.HELICONE_API_KEY,
-});
-
-// Works with any model from any provider
-const response = await client.chat.completions.create({
-  model: "o3", // or claude-opus-4, gemini-2.5-pro, grok-4, llama-3.3-70b...
-  messages: [{ role: "user", content: "Hello!" }]
-});`}</code>
-                    </pre>
-                  </div>
+                  {highlightedCode ? (
+                    <div
+                      className="rounded-lg overflow-hidden max-w-2xl [&_pre]:!m-0 [&_pre]:!p-4"
+                      dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                    />
+                  ) : (
+                    <div className="bg-[#24292e] rounded-lg overflow-hidden max-w-2xl">
+                      <pre className="p-4 overflow-x-auto text-sm text-gray-300">
+                        <code>Loading...</code>
+                      </pre>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -263,8 +296,8 @@ const response = await client.chat.completions.create({
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-2xl sm:text-3xl mb-3 text-black">
-                    <span className="text-brand">0% markup</span>,
-                    observability included
+                    <span className="text-brand">0% markup</span>, observability
+                    included
                   </h3>
                   <p className="text-lg text-slate-600 leading-relaxed">
                     Monitor usage, debug errors, analyze performance. Set
@@ -295,11 +328,12 @@ const response = await client.chat.completions.create({
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
                     You add credits to your account, and we deduct the exact
-                    provider cost for each API call. <strong>No Helicone AI Gateway fees</strong> — 
-                    you only pay the provider's list price plus standard payment 
-                    processing fees (2.9% + $0.30 per transaction). No markups, 
-                    no platform fees, no surprises. Your credits work across all 
-                    supported providers from a single balance.
+                    provider cost for each API call.{" "}
+                    <strong>No Helicone AI Gateway fees</strong> — you only pay
+                    the provider's list price plus standard payment processing
+                    fees (2.9% + $0.30 per transaction). No markups, no platform
+                    fees, no surprises. Your credits work across all supported
+                    providers from a single balance.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -377,9 +411,8 @@ const response = await client.chat.completions.create({
             </div>
           </div>
         </div>
-
       </div>
-      
+
       {/* Bottom CTA - full width background */}
       <div className="w-full bg-sky-50 dark:bg-sky-950 py-16 -mx-[50vw] relative left-[50%] right-[50%] w-[100vw]">
         <div className="max-w-6xl mx-auto px-4 text-center">
@@ -393,10 +426,7 @@ const response = await client.chat.completions.create({
             </span>
           </p>
           <div className="max-w-md mx-auto">
-            <CreditsWaitlistForm
-              variant="card"
-              initialCount={waitlistCount}
-            />
+            <CreditsWaitlistForm variant="card" initialCount={waitlistCount} />
           </div>
         </div>
       </div>
