@@ -25,20 +25,20 @@ export function CreditsWaitlistForm({
   const [pendingShareTwitter, setPendingShareTwitter] = useState(false);
   const [pendingShareLinkedIn, setPendingShareLinkedIn] = useState(false);
   const [isReturningUser, setIsReturningUser] = useState(false);
-  
+
   // Ref to store interval ID for cleanup
   const windowCheckInterval = useRef<NodeJS.Timeout>();
-  
+
   // Load email from localStorage on mount
   useEffect(() => {
-    const savedEmail = localStorage.getItem('waitlist_email');
+    const savedEmail = localStorage.getItem("waitlist_email");
     if (savedEmail) {
       setEmail(savedEmail);
     }
   }, []);
-  
+
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.helicone.ai";
-  
+
   // Cleanup interval on unmount
   useEffect(() => {
     return () => {
@@ -66,20 +66,17 @@ export function CreditsWaitlistForm({
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `${apiUrl}/v1/public/waitlist/feature`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer undefined",
-          },
-          body: JSON.stringify({
-            email,
-            feature: "credits",
-          }),
-        }
-      );
+      const response = await fetch(`${apiUrl}/v1/public/waitlist/feature`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer undefined",
+        },
+        body: JSON.stringify({
+          email,
+          feature: "credits",
+        }),
+      });
 
       const result = await response.json();
 
@@ -91,8 +88,8 @@ export function CreditsWaitlistForm({
         }
       } else {
         // Save email to localStorage on successful submission
-        localStorage.setItem('waitlist_email', email);
-        
+        localStorage.setItem("waitlist_email", email);
+
         // Check if user was already on the list
         if (result.data?.alreadyOnList) {
           setIsReturningUser(true);
@@ -123,8 +120,10 @@ export function CreditsWaitlistForm({
 
   const openShareWindow = (platform: "twitter" | "linkedin") => {
     // Don't allow multiple shares on same platform
-    if ((platform === "twitter" && (hasSharedTwitter || pendingShareTwitter)) || 
-        (platform === "linkedin" && (hasSharedLinkedIn || pendingShareLinkedIn))) {
+    if (
+      (platform === "twitter" && (hasSharedTwitter || pendingShareTwitter)) ||
+      (platform === "linkedin" && (hasSharedLinkedIn || pendingShareLinkedIn))
+    ) {
       return;
     }
 
@@ -137,13 +136,21 @@ export function CreditsWaitlistForm({
     // Open the share link in a popup
     let shareWindow;
     if (platform === "twitter") {
-      const tweetUrl = `https://x.com/coleywoleyyy/status/1965525511071039632`;
-      shareWindow = window.open(tweetUrl, "twitter-share", "width=600,height=700,left=200,top=100");
+      const tweetUrl = `https://x.com/justinstorre/status/1966175044821987542`;
+      shareWindow = window.open(
+        tweetUrl,
+        "twitter-share",
+        "width=600,height=700,left=200,top=100"
+      );
       setPendingShareTwitter(true);
     } else {
       // For LinkedIn, open in a popup
       const linkedinUrl = `https://www.linkedin.com/posts/colegottdank_the-helicone-yc-w23-team-goes-to-topgolf-activity-7365872991773069312-7koL`;
-      shareWindow = window.open(linkedinUrl, "linkedin-share", "width=700,height=700,left=200,top=100");
+      shareWindow = window.open(
+        linkedinUrl,
+        "linkedin-share",
+        "width=700,height=700,left=200,top=100"
+      );
       setPendingShareLinkedIn(true);
     }
 
@@ -156,7 +163,7 @@ export function CreditsWaitlistForm({
           // Window closed, keep pending state to show confirmation
         }
       }, 500);
-      
+
       // Store the interval ID for cleanup
       windowCheckInterval.current = checkClosed;
     }
@@ -217,14 +224,14 @@ export function CreditsWaitlistForm({
           <CheckIcon className="h-5 w-5 text-brand flex-shrink-0" />
           <p className="text-sm text-slate-700">
             <span className="font-semibold">
-              {isReturningUser 
+              {isReturningUser
                 ? `You're already on the waitlist! You're #${position?.toLocaleString()} in line`
                 : `Success! You're #${position?.toLocaleString()} in line`}
             </span>
           </p>
         </div>
         {/* Share section */}
-        {(!hasSharedTwitter || !hasSharedLinkedIn) ? (
+        {!hasSharedTwitter || !hasSharedLinkedIn ? (
           <div className="flex flex-col items-center gap-2">
             <p className="text-sm text-slate-600">
               {isReturningUser && (hasSharedTwitter || hasSharedLinkedIn)
@@ -232,61 +239,68 @@ export function CreditsWaitlistForm({
                 : "Share on social to move up the waitlist faster"}
             </p>
             <div className="flex gap-2">
-            <button
-              onClick={() => openShareWindow("twitter")}
-              disabled={hasSharedTwitter || pendingShareTwitter}
-              className={`px-4 h-[42px] rounded-lg text-sm font-medium transition-colors ${
-                hasSharedTwitter
-                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              <button
+                onClick={() => openShareWindow("twitter")}
+                disabled={hasSharedTwitter || pendingShareTwitter}
+                className={`px-4 h-[42px] rounded-lg text-sm font-medium transition-colors ${
+                  hasSharedTwitter
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : pendingShareTwitter
+                      ? "bg-gray-100 text-gray-600"
+                      : "bg-black text-white hover:bg-gray-800"
+                }`}
+              >
+                {hasSharedTwitter
+                  ? "✓ X"
                   : pendingShareTwitter
-                  ? "bg-gray-100 text-gray-600"
-                  : "bg-black text-white hover:bg-gray-800"
-              }`}
-            >
-              {hasSharedTwitter ? "✓ X" : 
-               pendingShareTwitter ? "..." : 
-               "Share X"}
-            </button>
-            <button
-              onClick={() => openShareWindow("linkedin")}
-              disabled={hasSharedLinkedIn || pendingShareLinkedIn}
-              className={`px-4 h-[42px] rounded-lg text-sm font-medium transition-colors ${
-                hasSharedLinkedIn
-                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    ? "..."
+                    : "Share X"}
+              </button>
+              <button
+                onClick={() => openShareWindow("linkedin")}
+                disabled={hasSharedLinkedIn || pendingShareLinkedIn}
+                className={`px-4 h-[42px] rounded-lg text-sm font-medium transition-colors ${
+                  hasSharedLinkedIn
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : pendingShareLinkedIn
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+              >
+                {hasSharedLinkedIn
+                  ? "✓ LinkedIn"
                   : pendingShareLinkedIn
-                  ? "bg-blue-100 text-blue-600"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-            >
-              {hasSharedLinkedIn ? "✓ LinkedIn" : 
-               pendingShareLinkedIn ? "..." : 
-               "Share LinkedIn"}
-            </button>
-          </div>
+                    ? "..."
+                    : "Share LinkedIn"}
+              </button>
+            </div>
           </div>
         ) : (
           // Both platforms shared
-          hasSharedTwitter && hasSharedLinkedIn && (
+          hasSharedTwitter &&
+          hasSharedLinkedIn && (
             <p className="text-sm text-slate-600">
               Thanks for sharing! You&apos;ve maximized your position boost.
             </p>
           )
         )}
-        
+
         {/* Compact confirmation UI */}
         {(pendingShareTwitter || pendingShareLinkedIn) && (
           <div className="flex items-center gap-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
-            <p className="text-sm text-amber-900">
-              Did you share?
-            </p>
+            <p className="text-sm text-amber-900">Did you share?</p>
             <button
-              onClick={() => confirmShare(pendingShareTwitter ? "twitter" : "linkedin")}
+              onClick={() =>
+                confirmShare(pendingShareTwitter ? "twitter" : "linkedin")
+              }
               className="px-3 py-1 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700"
             >
               Yes ✓
             </button>
             <button
-              onClick={() => cancelShare(pendingShareTwitter ? "twitter" : "linkedin")}
+              onClick={() =>
+                cancelShare(pendingShareTwitter ? "twitter" : "linkedin")
+              }
               className="px-3 py-1 bg-white border border-slate-300 text-slate-600 rounded text-xs hover:bg-slate-50"
             >
               Not yet
@@ -299,14 +313,19 @@ export function CreditsWaitlistForm({
 
   if (variant === "card") {
     return (
-      <div className={`rounded-xl border border-slate-200 bg-white p-6 shadow-sm text-center ${className}`}>
+      <div
+        className={`rounded-xl border border-slate-200 bg-white p-6 shadow-sm text-center ${className}`}
+      >
         <h3 className="mb-2 text-lg font-semibold text-slate-900">
           Join the Waitlist
         </h3>
         <p className="mb-4 text-sm text-slate-600">
           {initialCount && initialCount > 0 ? (
             <>
-              <span className="font-semibold text-brand">{initialCount.toLocaleString()}+ people</span> are already waiting.
+              <span className="font-semibold text-brand">
+                {initialCount.toLocaleString()}+ people
+              </span>{" "}
+              are already waiting.
               <br />
               Be next in line for beta access.
             </>
@@ -344,7 +363,10 @@ export function CreditsWaitlistForm({
         <p className="text-sm text-slate-600 h-5">
           {initialCount && initialCount > 0 ? (
             <>
-              <span className="font-semibold text-brand">{initialCount.toLocaleString()}+ people</span> already waiting
+              <span className="font-semibold text-brand">
+                {initialCount.toLocaleString()}+ people
+              </span>{" "}
+              already waiting
             </>
           ) : (
             <span>&nbsp;</span>
@@ -371,11 +393,7 @@ export function CreditsWaitlistForm({
             {isLoading ? "Joining..." : "Join Waitlist"}
           </Button>
         </form>
-        {error && (
-          <p className="text-sm text-red-600">
-            {error}
-          </p>
-        )}
+        {error && <p className="text-sm text-red-600">{error}</p>}
       </div>
     </div>
   );
