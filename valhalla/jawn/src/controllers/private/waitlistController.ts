@@ -9,7 +9,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { err, Result } from "../../packages/common/result";
+import { Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { WaitlistManager } from "../../managers/waitlist/WaitlistManager";
 
@@ -31,8 +31,12 @@ export class WaitListController extends Controller {
     const organizationId =
       body.organizationId || request.authParams.organizationId;
 
-    const result = await manager.addToWaitlist(body.email, body.feature, organizationId);
-    
+    const result = await manager.addToWaitlist(
+      body.email,
+      body.feature,
+      organizationId
+    );
+
     if (result.error) {
       if (result.error === "already_on_waitlist") {
         this.setStatus(409);

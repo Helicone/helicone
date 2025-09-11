@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 
 export default function WaitlistPage() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
+  const [highlightedCode, setHighlightedCode] = useState<string>("");
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.helicone.ai";
 
   // Fetch count once at the page level
@@ -43,6 +44,56 @@ export default function WaitlistPage() {
     fetchCount();
   }, [apiUrl]);
 
+  // Highlight code with Shiki
+  useEffect(() => {
+    let mounted = true;
+    
+    const highlightCode = async () => {
+      try {
+        const { createHighlighter } = await import("shiki");
+        
+        if (!mounted) return;
+        
+        const highlighter = await createHighlighter({
+          themes: ["github-dark"],
+          langs: ["javascript"],
+        });
+
+        if (!mounted) return;
+
+        const code = `import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Works with any model from any provider
+const response = await client.chat.completions.create({
+  model: "o3", // or claude-opus-4, gemini-2.5-pro, grok-4, llama-3.3-70b...
+  messages: [{ role: "user", content: "Hello!" }]
+});`;
+
+        const html = highlighter.codeToHtml(code, {
+          lang: "javascript",
+          theme: "github-dark",
+        });
+
+        if (mounted) {
+          setHighlightedCode(html);
+        }
+      } catch (error) {
+        console.error("Failed to highlight code:", error);
+      }
+    };
+
+    highlightCode();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <div className="bg-background text-slate-700 antialiased">
       <div className="flex flex-col">
@@ -52,7 +103,7 @@ export default function WaitlistPage() {
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-3xl md:pt-4 text-center text-accent-foreground">
               One bill. Every LLM provider.
               <br />
-              <span className="text-brand">$0 fees</span>
+              <span className="text-brand">0% markup</span>
             </h1>
 
             <p className="md:mt-4 w-full text-md sm:text-lg leading-7 max-w-2xl text-center text-muted-foreground">
@@ -234,9 +285,15 @@ export default function WaitlistPage() {
                     changing code.
                   </p>
                   {/* Code snippet */}
-                  <div className="bg-[#24292e] rounded-lg overflow-hidden max-w-2xl">
-                    <pre className="p-4 overflow-x-auto text-sm text-gray-300">
-                      <code>{`import { OpenAI } from "openai";
+                  {highlightedCode ? (
+                    <div 
+                      className="rounded-lg overflow-hidden max-w-2xl [&_pre]:!m-0 [&_pre]:!p-4"
+                      dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                    />
+                  ) : (
+                    <div className="bg-[#24292e] rounded-lg overflow-hidden max-w-2xl">
+                      <pre className="p-4 overflow-x-auto text-sm text-gray-300 font-mono">
+                        <code>{`import { OpenAI } from "openai";
 
 const client = new OpenAI({
   baseURL: "https://ai-gateway.helicone.ai",
@@ -248,8 +305,9 @@ const response = await client.chat.completions.create({
   model: "o3", // or claude-opus-4, gemini-2.5-pro, grok-4, llama-3.3-70b...
   messages: [{ role: "user", content: "Hello!" }]
 });`}</code>
-                    </pre>
-                  </div>
+                      </pre>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -263,13 +321,14 @@ const response = await client.chat.completions.create({
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-2xl sm:text-3xl mb-3 text-black">
-                    <span className="text-brand">$0 platform fees</span>,
-                    observability included
+                    <span className="text-brand">0% markup</span>, observability
+                    included
                   </h3>
                   <p className="text-lg text-slate-600 leading-relaxed">
                     Monitor usage, debug errors, analyze performance. Set
                     spending limits, share credits with your team. Everything
-                    you need to scale — at provider prices.
+                    you need to scale — at exact provider prices. Only standard
+                    payment processing fees apply.
                   </p>
                 </div>
               </div>
@@ -294,10 +353,12 @@ const response = await client.chat.completions.create({
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
                     You add credits to your account, and we deduct the exact
-                    provider cost for each API call. You pay exactly what the
-                    providers charge plus the Stripe transaction fee. We charge
-                    nothing extra — no markups, no platform fees. Your credits
-                    work across all supported providers from a single balance.
+                    provider cost for each API call.{" "}
+                    <strong>No Helicone AI Gateway fees</strong> — you only pay
+                    the provider&apos;s list price plus standard payment processing
+                    fees (2.9% + $0.30 per transaction). No markups, no platform
+                    fees, no surprises. Your credits work across all supported
+                    providers from a single balance.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -375,9 +436,8 @@ const response = await client.chat.completions.create({
             </div>
           </div>
         </div>
-
       </div>
-      
+
       {/* Bottom CTA - full width background */}
       <div className="w-full bg-sky-50 dark:bg-sky-950 py-16 -mx-[50vw] relative left-[50%] right-[50%] w-[100vw]">
         <div className="max-w-6xl mx-auto px-4 text-center">
@@ -391,10 +451,7 @@ const response = await client.chat.completions.create({
             </span>
           </p>
           <div className="max-w-md mx-auto">
-            <CreditsWaitlistForm
-              variant="card"
-              initialCount={waitlistCount}
-            />
+            <CreditsWaitlistForm variant="card" initialCount={waitlistCount} />
           </div>
         </div>
       </div>
