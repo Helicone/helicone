@@ -1,126 +1,204 @@
-import { SELF } from "cloudflare:test";
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, beforeEach, vi } from "vitest";
 import "../setup";
-import {
-  setupTestEnvironment,
-  cleanupTestEnvironment,
-  mockXAIEndpoint,
-  createAIGatewayRequest,
-} from "../test-utils";
+import { runGatewayTest } from "./test-framework";
+
+const xaiAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
 
 describe("xAI Registry Tests", () => {
   beforeEach(() => {
-    setupTestEnvironment();
-  });
-
-  afterEach(() => {
-    cleanupTestEnvironment();
+    // Clear all mocks between tests
+    vi.clearAllMocks();
   });
 
   describe("BYOK Tests - xAI Grok Models", () => {
-    // Note: xAI models only have the 'xai' provider
-
-    // Grok Code Fast 1 Tests
     describe("grok-code-fast-1", () => {
-      it("should handle xai provider", async () => {
-        mockXAIEndpoint("grok-code-fast-1");
+      it("should handle xai provider", () =>
+        runGatewayTest({
+          model: "grok-code-fast-1/xai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "success",
+                model: "grok-code-fast-1",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("grok-code-fast-1/xai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select xai provider when none specified", async () => {
-        mockXAIEndpoint("grok-code-fast-1");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("grok-code-fast-1")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select xai provider when none specified", () =>
+        runGatewayTest({
+          model: "grok-code-fast-1",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "success",
+                model: "grok-code-fast-1",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // Grok 4 Tests
     describe("grok-4-0709", () => {
-      it("should handle xai provider", async () => {
-        mockXAIEndpoint("grok-4-0709");
+      it("should handle xai provider", () =>
+        runGatewayTest({
+          model: "grok-4-0709/xai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "success",
+                model: "grok-4-0709",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("grok-4-0709/xai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select xai provider when none specified", async () => {
-        mockXAIEndpoint("grok-4-0709");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("grok-4-0709")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select xai provider when none specified", () =>
+        runGatewayTest({
+          model: "grok-4-0709",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "success",
+                model: "grok-4-0709",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // Grok 3 Tests
     describe("grok-3", () => {
-      it("should handle xai provider", async () => {
-        mockXAIEndpoint("grok-3");
+      it("should handle xai provider", () =>
+        runGatewayTest({
+          model: "grok-3/xai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "success",
+                model: "grok-3",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("grok-3/xai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select xai provider when none specified", async () => {
-        mockXAIEndpoint("grok-3");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("grok-3")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select xai provider when none specified", () =>
+        runGatewayTest({
+          model: "grok-3",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "success",
+                model: "grok-3",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // Grok 3 Mini Tests
     describe("grok-3-mini", () => {
-      it("should handle xai provider", async () => {
-        mockXAIEndpoint("grok-3-mini");
+      it("should handle xai provider", () =>
+        runGatewayTest({
+          model: "grok-3-mini/xai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "success",
+                model: "grok-3-mini",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("grok-3-mini/xai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select xai provider when none specified", async () => {
-        mockXAIEndpoint("grok-3-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("grok-3-mini")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select xai provider when none specified", () =>
+        runGatewayTest({
+          model: "grok-3-mini",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "success",
+                model: "grok-3-mini",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // Note: Since xAI models only have one provider, fallback tests aren't needed
-    // as there's nothing to fallback to
+    describe("Error scenarios", () => {
+      it("should handle xAI provider failure", () =>
+        runGatewayTest({
+          model: "grok-3/xai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "xAI service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from xAI", () =>
+        runGatewayTest({
+          model: "grok-3/xai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle authentication failure", () =>
+        runGatewayTest({
+          model: "grok-3/xai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.x.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+    });
   });
 });

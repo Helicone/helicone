@@ -34,7 +34,9 @@ import {
 } from "./ProxyRequestHandler";
 import { WalletManager } from "../managers/WalletManager";
 import { costOfPrompt } from "@helicone-package/cost";
+import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { EscrowInfo } from "../ai-gateway/types";
+import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -110,6 +112,7 @@ export async function proxyForwarder(
                 env,
                 ctx,
                 rateLimited,
+                response.status,
                 "false", // S3_ENABLED
                 cachedResponse,
                 cacheSettings
@@ -232,6 +235,7 @@ export async function proxyForwarder(
             env,
             ctx,
             rateLimited,
+            response.status,
             undefined,
             undefined,
             undefined
@@ -302,6 +306,7 @@ export async function proxyForwarder(
           env,
           ctx,
           rateLimited,
+          moderationRes.response?.status ?? 500,
           undefined,
           undefined,
           undefined
@@ -397,6 +402,7 @@ export async function proxyForwarder(
         env,
         ctx,
         rateLimited,
+        response.status,
         undefined,
         undefined,
         undefined
@@ -442,6 +448,7 @@ async function log(
   env: Env,
   ctx: ExecutionContext,
   rateLimited: boolean,
+  statusCode: number,
   S3_ENABLED?: Env["S3_ENABLED"],
   cachedResponse?: Response,
   cacheSettings?: CacheSettings
@@ -506,25 +513,56 @@ async function log(
 
   // Chain response processing after readResponse
   const responseProcessingPromise = loggable
-    .readResponse()
-    .then(async (responseBody) => {
-      if (responseBody.error !== null) {
-        console.error("Error reading response", responseBody.error);
+    .readRawResponse()
+    .then(async (rawResponseResult) => {
+      if (rawResponseResult.error !== null) {
+        console.error("Error reading raw response:", rawResponseResult.error);
+        return;
+      }
+      
+      const rawResponse = rawResponseResult.data;
+      const successfulAttempt = proxyRequest.requestWrapper.getSuccessfulAttempt();
+      if (rawResponse && successfulAttempt) {
+        const attemptModel = successfulAttempt.endpoint.providerModelId;
+        const attemptProvider = successfulAttempt.endpoint.provider;
+
+        const usageProcessor = getUsageProcessor(attemptProvider);
+        const usage = await usageProcessor.parse({
+          responseBody: rawResponse,
+          isStream: proxyRequest.isStream,
+        });
+
+        if (usage.error !== null) {
+          throw new Error(`Error parsing usage for provider ${attemptProvider}: ${usage.error}`);
+        }
+
+        const breakdown = modelCostBreakdownFromRegistry({
+          modelUsage: usage.data,
+          model: attemptModel,
+          provider: attemptProvider,
+        });
+        // TODO: apply breakdown totalCost to escrow    
       }
 
-      const model = responseBody.data?.response.model;
-      const promptTokens = responseBody.data?.response.prompt_tokens ?? 0;
-      const completionTokens =
-        responseBody.data?.response.completion_tokens ?? 0;
+      const responseBodyResult = await loggable.parseRawResponse(rawResponse);
+      if (responseBodyResult.error !== null) {
+        console.error("Error parsing response:", responseBodyResult.error);
+        return;
+      }
+
+      const responseData = responseBodyResult.data;
+      const model = responseData.response.model;
+      const promptTokens = responseData.response.prompt_tokens ?? 0;
+      const completionTokens = responseData.response.completion_tokens ?? 0;
       const provider = proxyRequest.provider;
       const promptCacheWriteTokens =
-        responseBody.data?.response.prompt_cache_write_tokens ?? 0;
+        responseData.response.prompt_cache_write_tokens ?? 0;
       const promptCacheReadTokens =
-        responseBody.data?.response.prompt_cache_read_tokens ?? 0;
+        responseData.response.prompt_cache_read_tokens ?? 0;
       const promptAudioTokens =
-        responseBody.data?.response.prompt_audio_tokens ?? 0;
+        responseData.response.prompt_audio_tokens ?? 0;
       const completionAudioTokens =
-        responseBody.data?.response.completion_audio_tokens ?? 0;
+        responseData.response.completion_audio_tokens ?? 0;
 
       let cost;
       if (model && provider) {
@@ -544,7 +582,7 @@ async function log(
       }
 
       // Handle escrow finalization if needed
-      if (responseBody.data && proxyRequest.escrowInfo) {
+      if (responseData && proxyRequest.escrowInfo) {
         const walletId = env.WALLET.idFromName(orgData.organizationId);
         const walletStub = env.WALLET.get(walletId);
         const walletManager = new WalletManager(env, ctx, walletStub);
@@ -553,6 +591,7 @@ async function log(
             orgData.organizationId,
             proxyRequest,
             cost,
+            statusCode,
             cachedResponse
           );
         if (escrowFinalizationResult.error !== null) {

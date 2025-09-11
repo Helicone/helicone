@@ -9,11 +9,14 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/public/waitlist/feature": {
+  "/v1/waitlist/feature": {
     post: operations["AddToWaitlist"];
   };
-  "/v1/public/waitlist/feature/status": {
+  "/v1/waitlist/feature/status": {
     get: operations["IsOnWaitlist"];
+  };
+  "/v1/waitlist/feature/count": {
+    get: operations["GetWaitlistCount"];
   };
   "/v1/user-feedback": {
     post: operations["PostUserFeedback"];
@@ -96,6 +99,9 @@ export interface paths {
   };
   "/v1/stripe/subscription/migrate-to-pro": {
     post: operations["MigrateToPro"];
+  };
+  "/v1/stripe/payment-intents/search": {
+    get: operations["SearchPaymentIntents"];
   };
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
@@ -508,9 +514,10 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    "ResultSuccess__success-boolean--message-string__": {
+    "ResultSuccess__success-boolean--position_63_-number__": {
       data: {
-        message: string;
+        /** Format: double */
+        position?: number;
         success: boolean;
       };
       /** @enum {number|null} */
@@ -521,7 +528,7 @@ export interface components {
       data: null;
       error: string;
     };
-    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
+    "Result__success-boolean--position_63_-number_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__isOnWaitlist-boolean__": {
       data: {
         isOnWaitlist: boolean;
@@ -530,6 +537,15 @@ export interface components {
       error: null;
     };
     "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__count-number__": {
+      data: {
+        /** Format: double */
+        count: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
     RateLimitRuleView: {
       id: string;
       name: string;
@@ -3056,6 +3072,8 @@ Json: JsonObject;
      * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
+     * `URL` class is a global reference for `import { URL } from 'node:url'`
+     * https://nodejs.org/api/url.html#the-whatwg-url-api
      */
     "url.URL": string;
     /** @description The Application object. */
@@ -15769,7 +15787,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
+          "application/json": components["schemas"]["Result__success-boolean--position_63_-number_.string_"];
         };
       };
     };
@@ -15779,7 +15797,7 @@ export interface operations {
       query: {
         email: string;
         feature: string;
-        organizationId: string;
+        organizationId?: string;
       };
     };
     responses: {
@@ -15787,6 +15805,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetWaitlistCount: {
+    parameters: {
+      query: {
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number_.string_"];
         };
       };
     };
@@ -16300,6 +16333,23 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  SearchPaymentIntents: {
+    parameters: {
+      query: {
+        search_kind: string;
+        limit?: number;
+        page?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
       };
     };
   };

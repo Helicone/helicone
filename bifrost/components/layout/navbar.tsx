@@ -40,6 +40,7 @@ interface NavBarProps {
   stars?: number;
   featuredBlogMetadata: BlogStructureMetaData;
   featuredBlogFolderName?: string;
+  noMargin?: boolean;
 }
 
 const MobileHeader = (props: {
@@ -289,6 +290,15 @@ const mainComponents: LinkItem[] = [
     description: "Simple, transparent pricing",
     icon: <HandCoins className="size-5 navbar-icon-style" />,
   },
+  {
+    title: "Models",
+    link: {
+      href: "/models",
+      isExternal: false,
+    },
+    description: "Browse and compare AI models",
+    icon: <Scale className="size-5 navbar-icon-style" />,
+  },
 ];
 
 const additionalComponents: LinkItem[] = [
@@ -337,7 +347,7 @@ const NavBar = (props: NavBarProps) => {
   return (
     <div
       ref={headerRef}
-      className="bg-background top-0 sticky z-30 border-b border-border mb-10"
+      className={`bg-background top-0 sticky z-30 border-b border-border ${props.noMargin ? "" : "mb-10"}`}
     >
       <MobileNav />
 
@@ -390,6 +400,15 @@ const NavBar = (props: NavBarProps) => {
                 <Link href="/pricing" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Pricing
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+
+              {/* Models */}
+              <NavigationMenuItem>
+                <Link href="/models" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Models
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>

@@ -9,6 +9,7 @@ import {
   Put,
   Path,
   Delete,
+  Security,
 } from "tsoa";
 import { err, ok, Result, isError } from "../../packages/common/result";
 import { 
@@ -50,10 +51,6 @@ export interface CreateSavedQueryRequest {
   sql: string;
 }
 
-export interface UpdateSavedQueryRequest extends CreateSavedQueryRequest {
-  id: string;
-}
-
 export interface BulkDeleteSavedQueriesRequest {
   ids: string[];
 }
@@ -87,7 +84,10 @@ function formatHqlError(error: HqlError): string {
 export class HeliconeSqlController extends Controller {
   /**
    * Get ClickHouse schema (tables and columns)
+   * @summary Get database schema
+   * @returns {ClickHouseTableSchema[]} Array of table schemas with columns
    */
+  @Security("api_key")
   @Get("schema")
   public async getClickHouseSchema(
     @Request() request: JawnAuthenticatedRequest
@@ -103,6 +103,13 @@ export class HeliconeSqlController extends Controller {
     return ok(result.data);
   }
 
+  /**
+   * Execute a SQL query against ClickHouse
+   * @summary Execute SQL query
+   * @param requestBody The SQL query to execute
+   * @returns {ExecuteSqlResponse} Query results with rows and metadata
+   */
+  @Security("api_key")
   @Post("execute")
   public async executeSql(
     @Body() requestBody: ExecuteSqlRequest,
@@ -138,6 +145,13 @@ export class HeliconeSqlController extends Controller {
     return ok(result.data);
   }
 
+  /**
+   * Execute a SQL query and download results as CSV
+   * @summary Download query results as CSV
+   * @param requestBody The SQL query to execute
+   * @returns {string} URL to download the CSV file
+   */
+  @Security("api_key")
   @Post("download")
   public async downloadCsv(
     @Body() requestBody: ExecuteSqlRequest,
@@ -173,6 +187,12 @@ export class HeliconeSqlController extends Controller {
     return ok(result.data);
   }
 
+  /**
+   * Get all saved queries for the organization
+   * @summary List saved queries
+   * @returns {HqlSavedQuery[]} Array of saved queries
+   */
+  @Security("api_key")
   @Get("saved-queries")
   public async getSavedQueries(
     @Request() request: JawnAuthenticatedRequest
@@ -189,6 +209,13 @@ export class HeliconeSqlController extends Controller {
     return ok(res.data || []);
   }
 
+  /**
+   * Get a specific saved query by ID
+   * @summary Get saved query
+   * @param queryId The ID of the saved query
+   * @returns {HqlSavedQuery} The saved query details
+   */
+  @Security("api_key")
   @Get("saved-query/{queryId}")
   public async getSavedQuery(
     @Path() queryId: string,
@@ -206,6 +233,12 @@ export class HeliconeSqlController extends Controller {
     return ok(result.data);
   }
 
+  /**
+   * Delete a saved query by ID
+   * @summary Delete saved query
+   * @param queryId The ID of the saved query to delete
+   */
+  @Security("api_key")
   @Delete("saved-query/{queryId}")
   public async deleteSavedQuery(
     @Path() queryId: string,
@@ -223,21 +256,34 @@ export class HeliconeSqlController extends Controller {
     return ok(undefined);
   }
 
+  /**
+   * Delete multiple saved queries at once
+   * @summary Bulk delete saved queries
+   * @param requestBody Array of query IDs to delete
+   */
+  @Security("api_key")
   @Post("saved-queries/bulk-delete")
   public async bulkDeleteSavedQueries(
     @Body() requestBody: BulkDeleteSavedQueriesRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<void, string>> {
-    const heliconeSqlManager = new HqlQueryManager(request.authParams);
-    const result = await heliconeSqlManager.bulkDeleteSavedQueries(requestBody.ids);
-    if (result.error) {
-      this.setStatus(500);
-      return err(result.error);
+    const hqlQueryManager = new HqlQueryManager(request.authParams);
+    const result = await hqlQueryManager.bulkDeleteSavedQueries(requestBody.ids);
+    if (isError(result)) {
+      this.setStatus(result.error.statusCode || 500);
+      return err(formatHqlError(result.error));
     }
     this.setStatus(200);
     return ok(undefined);
   }
 
+  /**
+   * Create a new saved query
+   * @summary Create saved query
+   * @param requestBody The saved query details
+   * @returns {HqlSavedQuery[]} Array containing the created saved query
+   */
+  @Security("api_key")
   @Post("saved-query")
   public async createSavedQuery(
     @Body() requestBody: CreateSavedQueryRequest,
@@ -255,13 +301,25 @@ export class HeliconeSqlController extends Controller {
     return ok(result.data);
   }
 
-  @Put("saved-query")
+  /**
+   * Update an existing saved query
+   * @summary Update saved query
+   * @param queryId The ID of the saved query to update
+   * @param requestBody The updated query details
+   * @returns {HqlSavedQuery} The updated saved query
+   */
+  @Security("api_key")
+  @Put("saved-query/{queryId}")
   public async updateSavedQuery(
-    @Body() requestBody: UpdateSavedQueryRequest,
+    @Path() queryId: string,
+    @Body() requestBody: CreateSavedQueryRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HqlSavedQuery, string>> {
     const hqlQueryManager = new HqlQueryManager(request.authParams);
-    const result = await hqlQueryManager.updateSavedQuery(requestBody);
+    const result = await hqlQueryManager.updateSavedQuery({
+      id: queryId,
+      ...requestBody
+    });
     
     if (isError(result)) {
       this.setStatus(result.error.statusCode || 500);

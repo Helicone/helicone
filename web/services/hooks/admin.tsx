@@ -274,6 +274,9 @@ const useFeatureFlag = (feature: string, orgId: string) => {
         orgId,
       },
     },
+    {
+      enabled: Boolean(orgId),
+    },
   );
   return {
     data,

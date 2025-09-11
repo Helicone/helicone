@@ -10,7 +10,7 @@ import { errorForwarder } from "../HeliconeProxyRequest/ErrorForwarder";
 import { gatewayForwarder } from "../../routers/gatewayRouter";
 import { AttemptBuilder } from "./AttemptBuilder";
 import { AttemptExecutor } from "./AttemptExecutor";
-import { DisallowListEntry, EscrowInfo } from "./types";
+import { Attempt, DisallowListEntry, EscrowInfo } from "./types";
 
 export interface AuthContext {
   orgId: string;
@@ -137,6 +137,7 @@ export class SimpleAIGateway {
         // Continue to next attempt
       } else {
         // Success!
+        this.requestWrapper.setSuccessfulAttempt(attempt);
         return result.data;
       }
     }
@@ -264,7 +265,7 @@ export class SimpleAIGateway {
   }
 
   private isDisallowed(
-    attempt: any,
+    attempt: Attempt,
     disallowList: DisallowListEntry[]
   ): boolean {
     return disallowList.some(

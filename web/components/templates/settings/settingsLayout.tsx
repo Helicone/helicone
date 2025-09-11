@@ -7,7 +7,7 @@ import {
   NoSymbolIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import { KeyIcon, LinkIcon, Plug, Webhook, Coins, Lock } from "lucide-react";
+import { KeyIcon, LinkIcon, Plug, Webhook, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
@@ -31,12 +31,6 @@ const ORGANIZATION_TABS = [
     title: "Billing",
     icon: CreditCardIcon,
     href: "/settings/billing",
-  },
-  {
-    id: "credits",
-    title: "Credits",
-    icon: Coins,
-    href: "/settings/credits",
   },
   {
     id: "reports",
@@ -131,14 +125,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
                       : "text-slate-500 dark:text-slate-400",
                   )}
                 />
-                <span className="flex items-center gap-1.5">
-                  {tab.title}
-                  {tab.id === "credits" && (
-                    <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-                      Beta
-                    </span>
-                  )}
-                </span>
+                <span className="flex items-center gap-1.5">{tab.title}</span>
               </div>
             </Link>
           );

@@ -47,20 +47,29 @@ const formatContext = (tokens: number) => {
 
 const parameterLabels = PARAMETER_LABELS as Record<StandardParameter, string>;
 
-export function ModelDetailPage() {
+interface ModelDetailPageProps {
+  initialModel: Model | null;
+}
+
+export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const modelName = params.modelName as string;
   const decodedModelName = decodeURIComponent(modelName);
 
-  const [model, setModel] = useState<Model | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [model, setModel] = useState<Model | null>(initialModel);
+  const [loading, setLoading] = useState(!initialModel);
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
   const jawnClient = useJawnClient();
 
   useEffect(() => {
+    // Skip fetching if we have initial data from SSG
+    if (initialModel) {
+      return;
+    }
+
     async function loadModel() {
       try {
         const response = await jawnClient.GET(
@@ -86,7 +95,7 @@ export function ModelDetailPage() {
     }
 
     loadModel();
-  }, [decodedModelName]);
+  }, [decodedModelName, initialModel, jawnClient]);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -144,27 +153,13 @@ export function ModelDetailPage() {
     ""
   );
 
-  const cheapestEndpoint = model.endpoints.reduce((min, ep) => {
-    // Use base pricing or first tier for comparison
-    const epPricing = ep.pricingTiers && ep.pricingTiers.length > 0 
-      ? ep.pricingTiers[0] 
-      : ep.pricing;
-    const minPricing = min.pricingTiers && min.pricingTiers.length > 0
-      ? min.pricingTiers[0]
-      : min.pricing;
-
-    if (!epPricing || !minPricing) return min;
-
-    const epCost = (epPricing.prompt + epPricing.completion) / 2;
-    const minCost = (minPricing.prompt + minPricing.completion) / 2;
-    return epCost < minCost ? ep : min;
-  });
+  const firstEndpoint = model.endpoints[0];
 
   const capabilities: { key: string; label: string; cost?: string }[] = [];
   // Use first pricing tier for capabilities or base pricing
-  const basePricing = cheapestEndpoint.pricingTiers && cheapestEndpoint.pricingTiers.length > 0
-    ? cheapestEndpoint.pricingTiers[0]
-    : cheapestEndpoint.pricing;
+  const basePricing = firstEndpoint.pricingTiers && firstEndpoint.pricingTiers.length > 0
+    ? firstEndpoint.pricingTiers[0]
+    : firstEndpoint.pricing;
 
   if (basePricing && basePricing.audio && basePricing.audio > 0) {
     capabilities.push({
@@ -328,35 +323,20 @@ export function ModelDetailPage() {
                           return aAvg - bAvg;
                         })
                         .map((endpoint) => {
-                          const isCheapest = endpoint === cheapestEndpoint;
                           // Check for pricing tiers
                           const pricingArray = endpoint.pricingTiers;
                           const hasTiers =
                             pricingArray && pricingArray.length > 0;
 
                           return (
-                            <TableRow
-                              key={endpoint.provider}
-                              className={
-                                isCheapest
-                                  ? "bg-green-50 dark:bg-green-950/10"
-                                  : ""
-                              }
-                            >
+                            <TableRow key={endpoint.provider}>
                               <TableCell className="font-medium">
-                                <div className="flex items-center gap-2">
-                                  <Link
-                                    href={`/providers/${endpoint.providerSlug}`}
-                                    className="hover:underline"
-                                  >
-                                    {endpoint.provider}
-                                  </Link>
-                                  {isCheapest && (
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200">
-                                      Cheapest
-                                    </span>
-                                  )}
-                                </div>
+                                <Link
+                                  href={`/providers/${endpoint.providerSlug}`}
+                                  className="hover:underline"
+                                >
+                                  {endpoint.provider}
+                                </Link>
                               </TableCell>
                               <TableCell className="font-mono text-sm">
                                 {formatContext(model.contextLength)}

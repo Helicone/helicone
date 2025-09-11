@@ -3,6 +3,8 @@ import {
   LLMUsage,
   UpgradeToProRequest,
   UpgradeToTeamBundleRequest,
+  StripePaymentIntentsResponse,
+  PaymentIntentSearchKind,
 } from "../../controllers/public/stripeController";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { Database } from "../../lib/db/database.types";
@@ -1247,8 +1249,8 @@ WHERE (${builtFilter.filter})`,
 
         const checkoutResult = await this.stripe.checkout.sessions.create({
           customer: customerId.data,
-          success_url: `${origin}/settings/credits`,
-          cancel_url: `${origin}/settings/credits`,
+          success_url: `${origin}/credits`,
+          cancel_url: `${origin}/credits`,
           mode: "payment",
           line_items: [{
             price_data: {
@@ -1343,6 +1345,59 @@ WHERE (${builtFilter.filter})`,
       return ok(proUsersItem?.quantity ?? 0);
     } catch (error: any) {
       return err(`Error retrieving purchased seats: ${error.message}`);
+    }
+  }
+
+  public async searchPaymentIntents(
+    searchKind: PaymentIntentSearchKind,
+    limit: number = 10,
+    page?: string
+  ): Promise<Result<StripePaymentIntentsResponse, string>> {
+    try {
+      let query: string;
+
+      // Build query based on search kind
+      switch (searchKind) {
+        case PaymentIntentSearchKind.CREDIT_PURCHASES:
+          const settingsManager = new SettingsManager();
+          const stripeProductSettings = await settingsManager.getSetting("stripe:products");
+          const productId = stripeProductSettings?.cloudGatewayTokenUsageProduct;
+          if (!productId) {
+            console.error(
+              "[Stripe API] STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT not configured"
+            );
+            return err("Stripe product ID not configured");
+          }
+          
+          query = `metadata['productId']:'${productId}' AND metadata['orgId']:'${this.authParams.organizationId}'`;
+          break;
+          
+        default:
+          return err(`Unsupported search kind: ${searchKind}`);
+      }
+
+      // Search payment intents using Stripe API
+      const searchParams: any = {
+        query,
+        limit,
+      };
+
+      // Add page parameter if provided (Stripe uses page token for search pagination)
+      if (page) {
+        searchParams.page = page;
+      }
+
+      const paymentIntents = await this.stripe.paymentIntents.search(searchParams);
+
+      return ok({
+        data: paymentIntents.data,
+        has_more: paymentIntents.has_more,
+        next_page: paymentIntents.next_page || null,
+        count: paymentIntents.data.length,
+      });
+    } catch (error: any) {
+      console.error("Error searching payment intents:", error);
+      return err("Failed to search payment intents");
     }
   }
 }

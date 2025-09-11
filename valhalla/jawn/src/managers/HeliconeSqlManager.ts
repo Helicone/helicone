@@ -220,8 +220,9 @@ export class HeliconeSqlManager {
       const elapsedMilliseconds = Date.now() - start;
 
       if (isError(result)) {
-        const errorCode = parseClickhouseError(result.error);
-        return hqlError(errorCode, result.error);
+        const errorString = String(result.error);
+        const errorCode = parseClickhouseError(errorString);
+        return hqlError(errorCode, errorString);
       }
 
       return ok({
