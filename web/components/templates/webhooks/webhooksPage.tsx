@@ -11,9 +11,6 @@ import useNotification from "../../shared/notification/useNotification";
 import { logger } from "@/lib/telemetry/logger";
 import { getUSDateFromString } from "../../shared/utils/utils";
 import AddWebhookForm from "./addWebhookForm";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 // Import ShadcnUI components
@@ -90,8 +87,6 @@ const WebhooksPage = (props: WebhooksPageProps) => {
   });
 
   const webhookCount = webhooks?.data?.data?.length || 0;
-
-  const { freeLimit, canCreate } = useFeatureLimit("webhooks", webhookCount);
 
   const createWebhook = useMutation({
     mutationFn: async (data: {
@@ -220,14 +215,6 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           title={<div className="ml-8 flex items-center gap-2">Webhooks</div>}
         />
 
-        {!canCreate && (
-          <FreeTierLimitBanner
-            feature="webhooks"
-            itemCount={webhookCount}
-            freeLimit={freeLimit}
-          />
-        )}
-
         <div className="mx-8 mb-2 flex items-center justify-between">
           <Button
             variant="ghost"
@@ -247,32 +234,15 @@ const WebhooksPage = (props: WebhooksPageProps) => {
           </Button>
           <Dialog open={addWebhookOpen} onOpenChange={setAddWebhookOpen}>
             <DialogTrigger asChild>
-              {webhookCount < freeLimit ? (
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="flex items-center gap-1"
-                  onClick={handleAddWebhook}
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  Add Webhook
-                </Button>
-              ) : (
-                <FreeTierLimitWrapper
-                  key={`webhook-limit-${webhookCount}`}
-                  feature="webhooks"
-                  itemCount={webhookCount}
-                >
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="flex items-center gap-1"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    Add Webhook
-                  </Button>
-                </FreeTierLimitWrapper>
-              )}
+              <Button
+                variant="default"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={handleAddWebhook}
+              >
+                <PlusIcon className="h-4 w-4" />
+                Add Webhook
+              </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <AddWebhookForm
