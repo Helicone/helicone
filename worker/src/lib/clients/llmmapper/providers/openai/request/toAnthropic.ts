@@ -1,8 +1,8 @@
-import { AntRequestBody, ContentBlock, AnthropicTool, AnthropicToolChoice } from "../../anthropic/request/types";
-import { OpenAIRequestBody } from "./types";
+import { AnthropicRequestBody, AnthropicContentBlock, AnthropicTool, AnthropicToolChoice } from "../../../types";
+import { OpenAIRequestBody } from "../../../types";
 
-export function toAnthropic(openAIBody: OpenAIRequestBody): AntRequestBody {
-  const antBody: AntRequestBody = {
+export function toAnthropic(openAIBody: OpenAIRequestBody): AnthropicRequestBody {
+  const antBody: AnthropicRequestBody = {
     model: mapModel(openAIBody.model),
     messages: [],
     max_tokens: openAIBody.max_tokens ?? 1024,
@@ -78,8 +78,8 @@ function mapModel(model: string): string {
 
 function mapMessages(
   messages: OpenAIRequestBody["messages"]
-): AntRequestBody["messages"] {
-  return messages.map((message): AntRequestBody["messages"][0] => {
+): AnthropicRequestBody["messages"] {
+  return messages.map((message): AnthropicRequestBody["messages"][0] => {
     if (message.role === "function") {
       throw new Error("Function messages are not supported");
     }
@@ -97,13 +97,13 @@ function mapMessages(
       };
     }
 
-    const antMessage: AntRequestBody["messages"][0] = {
+    const antMessage: AnthropicRequestBody["messages"][0] = {
       role: message.role as "user" | "assistant",
       content: "n/a",
     };
 
     if (message.role === "assistant" && message.tool_calls) {
-      const contentBlocks: ContentBlock[] = [];
+      const contentBlocks: AnthropicContentBlock[] = [];
       
       if (message.content && typeof message.content === "string") {
         contentBlocks.push({
@@ -134,7 +134,7 @@ function mapMessages(
         antMessage.content = message.content;
       }
     } else if (Array.isArray(message.content)) {
-      antMessage.content = message.content.map((item): ContentBlock => {
+      antMessage.content = message.content.map((item): AnthropicContentBlock => {
         if (item.type === "text") {
           return { type: "text", text: item.text || "" };
         } else if (item.type === "image_url" && item.image_url) {

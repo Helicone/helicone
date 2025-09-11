@@ -11,8 +11,8 @@ import { gatewayForwarder } from "../../routers/gatewayRouter";
 import { AttemptBuilder } from "./AttemptBuilder";
 import { AttemptExecutor } from "./AttemptExecutor";
 import { Attempt, DisallowListEntry, EscrowInfo } from "./types";
-import { ant2oaiNonStream } from "../clients/llmmapper/router/ant2oai/nonStream";
-import { ant2oaiStreamResponse } from "../clients/llmmapper/router/ant2oai/stream";
+import { oai2antResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
+import { oai2antStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
 export interface AuthContext {
@@ -334,10 +334,10 @@ export class SimpleAIGateway {
         const isStream = contentType?.includes("text/event-stream");
 
         if (isStream) {
-          const mappedResponse = ant2oaiStreamResponse(clonedResponse);
+          const mappedResponse = oai2antStreamResponse(clonedResponse);
           return ok(mappedResponse);
         } else {
-          const mappedResponse = await ant2oaiNonStream(clonedResponse);
+          const mappedResponse = await oai2antResponse(clonedResponse);
           return ok(mappedResponse);
         }
       }

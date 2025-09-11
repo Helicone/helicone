@@ -1,8 +1,8 @@
-import { OpenAIResponseBody, Choice, ToolCall } from "../../openai/response/types";
-import { AntResponseBody, ContentBlock } from "./types";
+import { OpenAIResponseBody, OpenAIChoice, OpenAIToolCall } from "../../../types";
+import { AnthropicResponseBody, AnthropicContentBlock } from "../../../types";
 
 // Anthropic Response Body -> OpenAI Response Body
-export function toOpenAI(response: AntResponseBody): OpenAIResponseBody {
+export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
   const textBlocks = response.content.filter(block => block.type === "text");
   const toolUseBlocks = response.content.filter(block => block.type === "tool_use");
   
@@ -10,7 +10,7 @@ export function toOpenAI(response: AntResponseBody): OpenAIResponseBody {
     .map((block) => blockToString(block))
     .join("");
 
-  const tool_calls: ToolCall[] = toolUseBlocks
+  const tool_calls: OpenAIToolCall[] = toolUseBlocks
     .filter(block => block.type === "tool_use" && block.id && block.name)
     .map(block => ({
       id: block.id!,
@@ -21,7 +21,7 @@ export function toOpenAI(response: AntResponseBody): OpenAIResponseBody {
       }
     }));
 
-  const choice: Choice = {
+  const choice: OpenAIChoice = {
     index: 0,
     message: {
       role: "assistant",
@@ -36,7 +36,7 @@ export function toOpenAI(response: AntResponseBody): OpenAIResponseBody {
   return {
     id: response.id,
     object: "chat.completion",
-    created: Math.floor(Date.now() / 1000), // current timestamp in seconds
+    created: Math.floor(Date.now() / 1000), // Current timestamp in seconds
     model: response.model,
     choices: [choice],
     usage: {
@@ -59,21 +59,27 @@ export function toOpenAI(response: AntResponseBody): OpenAIResponseBody {
   };
 }
 
-function blockToString(block: ContentBlock): string {
+function blockToString(block: AnthropicContentBlock): string {
   if (block.type === "text") {
     return block.text || "";
-  } // thinking not handled in OpenAI format in most cases, TODO (?)
+  } else if (block.type === "thinking" && block.thinking) {
+    // OpenAI reasoning is not on chat completions API AFAIK
+    return "";
+  }
   return "";
 }
 
 function mapStopReason(
-  reason: AntResponseBody["stop_reason"]
-): Choice["finish_reason"] {
+  reason: AnthropicResponseBody["stop_reason"]
+): OpenAIChoice["finish_reason"] {
   switch (reason) {
+    case "end_turn":
+    case "stop_sequence":
+      return "stop";
     case "max_tokens":
       return "length";
     case "tool_use":
-      return "function_call";
+      return "tool_calls";
     default:
       return "stop";
   }

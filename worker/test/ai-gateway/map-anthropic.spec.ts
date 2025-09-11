@@ -1,14 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { toOpenAI } from '../../src/lib/clients/llmmapper/providers/anthropic/response/toOpenai';
-import { AntResponseBody } from '../../src/lib/clients/llmmapper/providers/anthropic/response/types';
+import { AnthropicResponseBody } from '../../src/lib/clients/llmmapper/types';
 import { toAnthropic } from '../../src/lib/clients/llmmapper/providers/openai/request/toAnthropic';
-import { OpenAIRequestBody } from '../../src/lib/clients/llmmapper/providers/openai/request/types';
+import { OpenAIRequestBody } from '../../src/lib/clients/llmmapper/types';
+import { AnthropicToOpenAIStreamConverter } from '../../src/lib/clients/llmmapper/providers/anthropic/streamedResponse/toOpenai';
+import { AnthropicStreamEvent } from '../../src/lib/clients/llmmapper/types';
 
 describe('Anthropic to OpenAI Response Mapper', () => {
   // ANTHROPIC NON-STREAM RESPONSE -> OPENAI RESPONSE
   describe('toOpenAI', () => {
     it('should convert basic text response', () => {
-      const anthropicResponse: AntResponseBody = {
+      const anthropicResponse: AnthropicResponseBody = {
         id: 'msg_01ABC123',
         type: 'message',
         role: 'assistant',
@@ -36,7 +38,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should convert response with tool calls', () => {
-      const anthropicResponse: AntResponseBody = {
+      const anthropicResponse: AnthropicResponseBody = {
         id: 'msg_01P37SV1XSyfxDaMsoqTLkU5',
         type: 'message',
         role: 'assistant',
@@ -73,11 +75,11 @@ describe('Anthropic to OpenAI Response Mapper', () => {
           arguments: '{"expression":"50 + 50"}'
         }
       });
-      expect(result.choices[0].finish_reason).toBe('function_call');
+      expect(result.choices[0].finish_reason).toBe('tool_calls');
     });
 
     it('should handle cached tokens', () => {
-      const anthropicResponse: AntResponseBody = {
+      const anthropicResponse: AnthropicResponseBody = {
         id: 'msg_cached',
         type: 'message',
         role: 'assistant',
@@ -291,4 +293,365 @@ describe('Anthropic to OpenAI Response Mapper', () => {
   });
 
   // ANTHROPIC STREAM RESPONSE -> OPENAI STREAM RESPONSE
+  describe('AnthropicToOpenAIStreamConverter', () => {
+    it('should convert basic text streaming', () => {
+      const converter = new AnthropicToOpenAIStreamConverter();
+      const allChunks: any[] = [];
+
+      // message_start event
+      const messageStart: AnthropicStreamEvent = {
+        type: 'message_start',
+        message: {
+          id: 'msg_01ABC123',
+          type: 'message',
+          role: 'assistant',
+          model: 'claude-3-5-sonnet-20241022',
+          content: [],
+          stop_reason: null,
+          stop_sequence: null,
+          usage: {
+            input_tokens: 10,
+            output_tokens: 0,
+            cache_creation_input_tokens: 0,
+            cache_read_input_tokens: 0,
+            cache_creation: {
+              ephemeral_5m_input_tokens: 0,
+              ephemeral_1h_input_tokens: 0
+            }
+          }
+        }
+      };
+
+      allChunks.push(...converter.convert(messageStart));
+
+      // content_block_start
+      const blockStart: AnthropicStreamEvent = {
+        type: 'content_block_start',
+        index: 0,
+        content_block: {
+          type: 'text',
+          text: ''
+        }
+      };
+
+      allChunks.push(...converter.convert(blockStart));
+
+      // content_block_delta
+      const textDelta: AnthropicStreamEvent = {
+        type: 'content_block_delta',
+        index: 0,
+        delta: {
+          type: 'text_delta',
+          text: 'Hello world'
+        }
+      };
+
+      allChunks.push(...converter.convert(textDelta));
+
+      // content_block_stop
+      const blockStop: AnthropicStreamEvent = {
+        type: 'content_block_stop',
+        index: 0
+      };
+
+      allChunks.push(...converter.convert(blockStop));
+
+      // message_delta
+      const messageDelta: AnthropicStreamEvent = {
+        type: 'message_delta',
+        delta: {
+          stop_reason: 'end_turn',
+          stop_sequence: null
+        },
+        usage: {
+          input_tokens: 10,
+          output_tokens: 5,
+          cache_creation_input_tokens: 0,
+          cache_read_input_tokens: 0
+        }
+      };
+
+      allChunks.push(...converter.convert(messageDelta));
+
+      // message_stop
+      const messageStop: AnthropicStreamEvent = {
+        type: 'message_stop'
+      };
+
+      allChunks.push(...converter.convert(messageStop));
+
+      // Verify the sequence matches OpenAI format
+      expect(allChunks).toHaveLength(4);
+
+      // First chunk: role + empty content
+      expect(allChunks[0].choices[0].delta).toEqual({
+        role: 'assistant',
+        content: ''
+      });
+      expect(allChunks[0].choices[0].finish_reason).toBeNull();
+
+      // Second chunk: text content
+      expect(allChunks[1].choices[0].delta).toEqual({
+        content: 'Hello world'
+      });
+      expect(allChunks[1].choices[0].finish_reason).toBeNull();
+
+      // Third chunk: finish_reason
+      expect(allChunks[2].choices[0].delta).toEqual({});
+      expect(allChunks[2].choices[0].finish_reason).toBe('stop');
+
+      // Fourth chunk: usage with empty choices
+      expect(allChunks[3].choices).toEqual([]);
+      expect(allChunks[3].usage).toEqual({
+        prompt_tokens: 10,
+        completion_tokens: 5,
+        total_tokens: 15,
+        completion_tokens_details: {
+          reasoning_tokens: 0,
+          audio_tokens: 0,
+          accepted_prediction_tokens: 0,
+          rejected_prediction_tokens: 0,
+        }
+      });
+    });
+
+    it('should convert tool call streaming correctly', () => {
+      const converter = new AnthropicToOpenAIStreamConverter();
+      const allChunks: any[] = [];
+
+      // message_start
+      const messageStart: AnthropicStreamEvent = {
+        type: 'message_start',
+        message: {
+          id: 'msg_016AzhNQ54DpGUeYBsUAqfGo',
+          type: 'message',
+          role: 'assistant',
+          model: 'claude-3-5-sonnet-20241022',
+          content: [],
+          stop_reason: null,
+          stop_sequence: null,
+          usage: {
+            input_tokens: 387,
+            cache_creation_input_tokens: 0,
+            cache_read_input_tokens: 0,
+            cache_creation: {
+              ephemeral_5m_input_tokens: 0,
+              ephemeral_1h_input_tokens: 0
+            },
+            output_tokens: 1
+          }
+        }
+      };
+
+      allChunks.push(...converter.convert(messageStart));
+
+      // Text content first
+      const textBlockStart: AnthropicStreamEvent = {
+        type: 'content_block_start',
+        index: 0,
+        content_block: {
+          type: 'text',
+          text: ''
+        }
+      };
+
+      allChunks.push(...converter.convert(textBlockStart));
+
+      const textDelta: AnthropicStreamEvent = {
+        type: 'content_block_delta',
+        index: 0,
+        delta: {
+          type: 'text_delta',
+          text: "I'll help you calculate 50+50 using the calculate function."
+        }
+      };
+
+      allChunks.push(...converter.convert(textDelta));
+
+      const textBlockStop: AnthropicStreamEvent = {
+        type: 'content_block_stop',
+        index: 0
+      };
+
+      allChunks.push(...converter.convert(textBlockStop));
+
+      // Tool call content
+      const toolBlockStart: AnthropicStreamEvent = {
+        type: 'content_block_start',
+        index: 1,
+        content_block: {
+          type: 'tool_use',
+          id: 'toolu_01GGxNAsyPbYV9WmqKufo7xr',
+          name: 'calculate',
+          input: {}
+        }
+      };
+
+      allChunks.push(...converter.convert(toolBlockStart));
+
+      // Multiple JSON deltas
+      const jsonDelta1: AnthropicStreamEvent = {
+        type: 'content_block_delta',
+        index: 1,
+        delta: {
+          type: 'input_json_delta',
+          partial_json: '{"expression":'
+        }
+      };
+
+      allChunks.push(...converter.convert(jsonDelta1));
+
+      const jsonDelta2: AnthropicStreamEvent = {
+        type: 'content_block_delta',
+        index: 1,
+        delta: {
+          type: 'input_json_delta',
+          partial_json: ' "50+50"}'
+        }
+      };
+
+      allChunks.push(...converter.convert(jsonDelta2));
+
+      const toolBlockStop: AnthropicStreamEvent = {
+        type: 'content_block_stop',
+        index: 1
+      };
+
+      allChunks.push(...converter.convert(toolBlockStop));
+
+      // message_delta
+      const messageDelta: AnthropicStreamEvent = {
+        type: 'message_delta',
+        delta: {
+          stop_reason: 'tool_use',
+          stop_sequence: null
+        },
+        usage: {
+          input_tokens: 387,
+          cache_creation_input_tokens: 0,
+          cache_read_input_tokens: 0,
+          output_tokens: 69
+        }
+      };
+
+      allChunks.push(...converter.convert(messageDelta));
+
+      // message_stop
+      const messageStop: AnthropicStreamEvent = {
+        type: 'message_stop'
+      };
+
+      allChunks.push(...converter.convert(messageStop));
+
+      // Verify the sequence
+      expect(allChunks.length).toBeGreaterThan(5);
+
+      // First chunk: role
+      expect(allChunks[0].choices[0].delta).toEqual({
+        role: 'assistant',
+        content: ''
+      });
+
+      // Second chunk: text content
+      expect(allChunks[1].choices[0].delta).toEqual({
+        content: "I'll help you calculate 50+50 using the calculate function."
+      });
+
+      // Third chunk: tool call start (should have id and name)
+      expect(allChunks[2].choices[0].delta.tool_calls).toHaveLength(1);
+      expect(allChunks[2].choices[0].delta.tool_calls[0]).toEqual({
+        index: 0,
+        id: 'toolu_01GGxNAsyPbYV9WmqKufo7xr',
+        type: 'function',
+        function: {
+          name: 'calculate',
+          arguments: ''
+        }
+      });
+
+      // Fourth chunk: first JSON delta
+      expect(allChunks[3].choices[0].delta.tool_calls[0]).toEqual({
+        index: 0,
+        id: 'toolu_01GGxNAsyPbYV9WmqKufo7xr',
+        type: 'function',
+        function: {
+          arguments: '{"expression":'
+        }
+      });
+
+      // Fifth chunk: second JSON delta
+      expect(allChunks[4].choices[0].delta.tool_calls[0]).toEqual({
+        index: 0,
+        id: 'toolu_01GGxNAsyPbYV9WmqKufo7xr',
+        type: 'function',
+        function: {
+          arguments: ' "50+50"}'
+        }
+      });
+
+      // Second to last chunk: finish_reason
+      expect(allChunks[allChunks.length - 2].choices[0].finish_reason).toBe('tool_calls');
+
+      // Last chunk: usage
+      expect(allChunks[allChunks.length - 1].choices).toEqual([]);
+      expect(allChunks[allChunks.length - 1].usage).toBeDefined();
+    });
+
+    it('should handle cached tokens in streaming', () => {
+      const converter = new AnthropicToOpenAIStreamConverter();
+
+      const messageDelta: AnthropicStreamEvent = {
+        type: 'message_delta',
+        delta: {
+          stop_reason: 'end_turn',
+          stop_sequence: null
+        },
+        usage: {
+          input_tokens: 100,
+          output_tokens: 20,
+          cache_creation_input_tokens: 50,
+          cache_read_input_tokens: 30
+        }
+      };
+
+      const chunks = converter.convert(messageDelta);
+      expect(chunks).toHaveLength(1);
+
+      const messageStop: AnthropicStreamEvent = {
+        type: 'message_stop'
+      };
+
+      const finalChunks = converter.convert(messageStop);
+      expect(finalChunks[0].usage?.prompt_tokens_details?.cached_tokens).toBe(30);
+    });
+
+    it('should map stop reasons correctly', () => {
+      const converter = new AnthropicToOpenAIStreamConverter();
+
+      const testCases = [
+        { anthropic: 'end_turn', openai: 'stop' },
+        { anthropic: 'max_tokens', openai: 'length' },
+        { anthropic: 'tool_use', openai: 'tool_calls' }
+      ];
+
+      testCases.forEach(({ anthropic, openai }) => {
+        const messageDelta: AnthropicStreamEvent = {
+          type: 'message_delta',
+          delta: {
+            stop_reason: anthropic,
+            stop_sequence: null
+          },
+          usage: {
+            input_tokens: 10,
+            output_tokens: 5,
+            cache_creation_input_tokens: 0,
+            cache_read_input_tokens: 0
+          }
+        };
+
+        const chunks = converter.convert(messageDelta);
+        expect(chunks[0].choices[0].finish_reason).toBe(openai);
+      });
+    });
+  });
 });
