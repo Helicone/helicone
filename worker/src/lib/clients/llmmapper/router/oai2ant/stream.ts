@@ -2,10 +2,6 @@ import { AnthropicToOpenAIStreamConverter } from "../../providers/anthropic/stre
 import { toAnthropic } from "../../providers/openai/request/toAnthropic";
 import { OpenAIRequestBody } from "../../types";
 
-const ENDING_MESSAGE = `data: {"id":"chatcmpl-A4kEtQWA8g4OlOYtKaDdBKLWdhrBx","object":"chat.completion.chunk","created":1725694419,"model":"gpt-4o-2024-05-13","system_fingerprint":"fp_25624ae3a5","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}]}
-data: [DONE]
-`;
-
 // transform the readable stream from Anthropic SSE to OpenAI SSE format
 export function oai2antStream(
   stream: ReadableStream<Uint8Array>
