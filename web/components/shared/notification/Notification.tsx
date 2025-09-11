@@ -100,7 +100,7 @@ const Notification = () => {
       leave="transition-opacity duration-150"
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
-      className="pointer-events-none fixed inset-x-0 top-0 z-50 pt-6"
+      className="fixed inset-x-0 top-0 z-50 pt-6"
     >
       <div className="fixed inset-x-0 bottom-0 z-50 pb-8 pt-0 sm:top-0 sm:pb-0 sm:pt-6">
         <div className="mx-auto w-full px-2 sm:max-w-[33vw] sm:px-6 lg:px-8">
@@ -112,7 +112,7 @@ const Notification = () => {
             )}
           >
             <div className="flex flex-wrap items-center justify-between">
-              <div className="flex w-0 flex-1 items-center">
+              <div className="pointer-events-none flex w-0 flex-1 items-center">
                 <span className="flex rounded-lg p-2">{variantIcon()}</span>
                 <p
                   className={clsx(
