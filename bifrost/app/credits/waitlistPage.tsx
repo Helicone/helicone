@@ -376,24 +376,25 @@ const response = await client.chat.completions.create({
           </div>
         </div>
 
-        {/* Bottom CTA - full width background */}
-        <div className="w-full bg-slate-50 dark:bg-slate-900 py-16">
-          <div className="max-w-6xl mx-auto px-4 text-center">
-            <h2 className="text-2xl sm:text-3xl font-semibold mb-4 text-slate-900">
-              Done juggling API keys and invoices?
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              One integration for 100+ models. Full observability included{" "}
-              <span className="bg-sky-200 text-sky-900 font-medium px-1.5 py-0.5 rounded">
-                at exact provider prices.
-              </span>
-            </p>
-            <div className="max-w-md mx-auto">
-              <CreditsWaitlistForm
-                variant="card"
-                initialCount={waitlistCount}
-              />
-            </div>
+      </div>
+      
+      {/* Bottom CTA - full width background */}
+      <div className="w-full bg-sky-50 dark:bg-sky-950 py-16 -mx-[50vw] relative left-[50%] right-[50%] w-[100vw]">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <h2 className="text-2xl sm:text-3xl font-semibold mb-4 text-slate-900">
+            Done juggling API keys and invoices?
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8">
+            One integration for 100+ models. Full observability included{" "}
+            <span className="bg-sky-200 text-sky-900 font-medium px-1.5 py-0.5 rounded">
+              at exact provider prices.
+            </span>
+          </p>
+          <div className="max-w-md mx-auto">
+            <CreditsWaitlistForm
+              variant="card"
+              initialCount={waitlistCount}
+            />
           </div>
         </div>
       </div>
