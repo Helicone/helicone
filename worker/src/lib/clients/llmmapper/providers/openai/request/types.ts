@@ -1,7 +1,7 @@
 export interface OpenAIRequestBody {
   model: string;
   messages: {
-    role: "system" | "user" | "assistant" | "function";
+    role: "system" | "user" | "assistant" | "function" | "tool";
     content:
       | string
       | null
@@ -18,6 +18,15 @@ export interface OpenAIRequestBody {
       name: string;
       arguments: string;
     };
+    tool_calls?: {
+      id: string;
+      type: "function";
+      function: {
+        name: string;
+        arguments: string;
+      };
+    }[];
+    tool_call_id?: string;
   }[];
   functions?: {
     name: string;

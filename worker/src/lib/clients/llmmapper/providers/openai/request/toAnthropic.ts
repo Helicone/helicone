@@ -70,6 +70,8 @@ function mapModel(model: string): string {
     return 'claude-3-5-haiku-20241022';
   } else if (model.includes('claude-3.5-sonnet')) {
     return 'claude-3-5-sonnet-latest';
+  } else if (model.includes('claude-3.7-sonnet')) {
+    return 'claude-3-7-sonnet-20250219';
   }
   return model;
 }
@@ -82,10 +84,48 @@ function mapMessages(
       throw new Error("Function messages are not supported");
     }
 
+    if (message.role === "tool") {
+      return {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: message.tool_call_id,
+            content: typeof message.content === "string" ? message.content : "",
+          },
+        ],
+      };
+    }
+
     const antMessage: AntRequestBody["messages"][0] = {
       role: message.role as "user" | "assistant",
       content: "n/a",
     };
+
+    if (message.role === "assistant" && message.tool_calls) {
+      const contentBlocks: ContentBlock[] = [];
+      
+      if (message.content && typeof message.content === "string") {
+        contentBlocks.push({
+          type: "text",
+          text: message.content,
+        });
+      }
+      
+      message.tool_calls.forEach((toolCall) => {
+        if (toolCall.type === "function") {
+          contentBlocks.push({
+            type: "tool_use",
+            id: toolCall.id,
+            name: toolCall.function.name,
+            input: JSON.parse(toolCall.function.arguments || "{}"),
+          });
+        }
+      });
+      
+      antMessage.content = contentBlocks;
+      return antMessage;
+    }
 
     if (typeof message.content === "string") {
       if (message.content.length === 0) {
@@ -157,8 +197,6 @@ function mapToolChoice(toolChoice: OpenAIRequestBody["tool_choice"]): AnthropicT
       case "auto":
         return { type: "auto" };
       case "none":
-        // Anthropic doesn't have "none", so we'll omit tools entirely
-        // This should be handled at a higher level
         return { type: "auto" };
       default:
         throw new Error(`Unsupported tool_choice string: ${toolChoice}`);

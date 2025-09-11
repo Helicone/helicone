@@ -34,11 +34,18 @@ export type AnthropicToolChoice =
   | { type: "tool"; name: string };
 
 export interface ContentBlock {
-  type: "text" | "image";
+  type: "text" | "image" | "tool_use" | "tool_result";
   text?: string;
   source?: {
     type: "base64" | "url";
     media_type: string;
     data: string;
   };
+  // tool_use fields
+  id?: string;
+  name?: string;
+  input?: Record<string, any>;
+  // tool_result fields
+  tool_use_id?: string;
+  content?: string;
 }
