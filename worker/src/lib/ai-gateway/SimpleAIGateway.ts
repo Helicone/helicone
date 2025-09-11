@@ -137,6 +137,7 @@ export class SimpleAIGateway {
         // Continue to next attempt
       } else {
         // Success!
+        this.requestWrapper.setSuccessfulAttempt(attempt);
         return result.data;
       }
     }

@@ -348,6 +348,9 @@ export interface paths {
   "/v1/stripe/subscription/migrate-to-pro": {
     post: operations["MigrateToPro"];
   };
+  "/v1/stripe/payment-intents/search": {
+    get: operations["SearchPaymentIntents"];
+  };
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
   };
@@ -459,27 +462,62 @@ export interface paths {
     get: operations["GetSlackChannels"];
   };
   "/v1/helicone-sql/schema": {
-    /** @description Get ClickHouse schema (tables and columns) */
+    /**
+     * Get database schema
+     * @description Get ClickHouse schema (tables and columns)
+     */
     get: operations["GetClickHouseSchema"];
   };
   "/v1/helicone-sql/execute": {
+    /**
+     * Execute SQL query
+     * @description Execute a SQL query against ClickHouse
+     */
     post: operations["ExecuteSql"];
   };
   "/v1/helicone-sql/download": {
+    /**
+     * Download query results as CSV
+     * @description Execute a SQL query and download results as CSV
+     */
     post: operations["DownloadCsv"];
   };
   "/v1/helicone-sql/saved-queries": {
+    /**
+     * List saved queries
+     * @description Get all saved queries for the organization
+     */
     get: operations["GetSavedQueries"];
   };
   "/v1/helicone-sql/saved-query/{queryId}": {
+    /**
+     * Get saved query
+     * @description Get a specific saved query by ID
+     */
     get: operations["GetSavedQuery"];
+    /**
+     * Update saved query
+     * @description Update an existing saved query
+     */
+    put: operations["UpdateSavedQuery"];
+    /**
+     * Delete saved query
+     * @description Delete a saved query by ID
+     */
     delete: operations["DeleteSavedQuery"];
   };
   "/v1/helicone-sql/saved-queries/bulk-delete": {
+    /**
+     * Bulk delete saved queries
+     * @description Delete multiple saved queries at once
+     */
     post: operations["BulkDeleteSavedQueries"];
   };
   "/v1/helicone-sql/saved-query": {
-    put: operations["UpdateSavedQuery"];
+    /**
+     * Create saved query
+     * @description Create a new saved query
+     */
     post: operations["CreateSavedQuery"];
   };
   "/v1/experiment/new-empty": {
@@ -653,6 +691,9 @@ export interface paths {
   };
   "/v1/agent/thread/{sessionId}/escalate": {
     post: operations["EscalateThread"];
+  };
+  "/v1/agent/thread/create-and-escalate": {
+    post: operations["CreateAndEscalateThread"];
   };
   "/v1/agent/threads": {
     get: operations["GetAllThreads"];
@@ -3140,11 +3181,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_HqlSavedQuery.string_": components["schemas"]["ResultSuccess_HqlSavedQuery_"] | components["schemas"]["ResultError_string_"];
-    UpdateSavedQueryRequest: {
-      name: string;
-      sql: string;
-      id: string;
-    };
     "ResultSuccess__tableId-string--experimentId-string__": {
       data: {
         experimentId: string;
@@ -3750,227 +3786,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_InAppThread.string_": components["schemas"]["ResultSuccess_InAppThread_"] | components["schemas"]["ResultError_string_"];
-    /**
-     * @description Learn about
-     * [text inputs](https://platform.openai.com/docs/guides/text-generation).
-     */
-    ChatCompletionContentPartText: {
-      /** @description The text content. */
-      text: string;
-      /**
-       * @description The type of the content part.
-       * @enum {string}
-       */
-      type: "text";
-    };
-    /**
-     * @description Developer-provided instructions that the model should follow, regardless of
-     * messages sent by the user. With o1 models and newer, `developer` messages
-     * replace the previous `system` messages.
-     */
-    ChatCompletionDeveloperMessageParam: {
-      /** @description The contents of the developer message. */
-      content: string | components["schemas"]["ChatCompletionContentPartText"][];
-      /**
-       * @description The role of the messages author, in this case `developer`.
-       * @enum {string}
-       */
-      role: "developer";
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-    };
-    /**
-     * @description Developer-provided instructions that the model should follow, regardless of
-     * messages sent by the user. With o1 models and newer, use `developer` messages
-     * for this purpose instead.
-     */
-    ChatCompletionSystemMessageParam: {
-      /** @description The contents of the system message. */
-      content: string | components["schemas"]["ChatCompletionContentPartText"][];
-      /**
-       * @description The role of the messages author, in this case `system`.
-       * @enum {string}
-       */
-      role: "system";
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-    };
-    "ChatCompletionContentPartImage.ImageURL": {
-      /** @description Either a URL of the image or the base64 encoded image data. */
-      url: string;
-      /**
-       * @description Specifies the detail level of the image. Learn more in the
-       * [Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding).
-       * @enum {string}
-       */
-      detail?: "auto" | "low" | "high";
-    };
-    /** @description Learn about [image inputs](https://platform.openai.com/docs/guides/vision). */
-    ChatCompletionContentPartImage: {
-      image_url: components["schemas"]["ChatCompletionContentPartImage.ImageURL"];
-      /**
-       * @description The type of the content part.
-       * @enum {string}
-       */
-      type: "image_url";
-    };
-    "ChatCompletionContentPartInputAudio.InputAudio": {
-      /** @description Base64 encoded audio data. */
-      data: string;
-      /**
-       * @description The format of the encoded audio data. Currently supports "wav" and "mp3".
-       * @enum {string}
-       */
-      format: "wav" | "mp3";
-    };
-    /** @description Learn about [audio inputs](https://platform.openai.com/docs/guides/audio). */
-    ChatCompletionContentPartInputAudio: {
-      input_audio: components["schemas"]["ChatCompletionContentPartInputAudio.InputAudio"];
-      /**
-       * @description The type of the content part. Always `input_audio`.
-       * @enum {string}
-       */
-      type: "input_audio";
-    };
-    "ChatCompletionContentPart.File.File": {
-      /**
-       * @description The base64 encoded file data, used when passing the file to the model as a
-       * string.
-       */
-      file_data?: string;
-      /** @description The ID of an uploaded file to use as input. */
-      file_id?: string;
-      /** @description The name of the file, used when passing the file to the model as a string. */
-      filename?: string;
-    };
-    /**
-     * @description Learn about [file inputs](https://platform.openai.com/docs/guides/text) for text
-     * generation.
-     */
-    "ChatCompletionContentPart.File": {
-      file: components["schemas"]["ChatCompletionContentPart.File.File"];
-      /**
-       * @description The type of the content part. Always `file`.
-       * @enum {string}
-       */
-      type: "file";
-    };
-    /**
-     * @description Learn about
-     * [text inputs](https://platform.openai.com/docs/guides/text-generation).
-     */
-    ChatCompletionContentPart: components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartImage"] | components["schemas"]["ChatCompletionContentPartInputAudio"] | components["schemas"]["ChatCompletionContentPart.File"];
-    /**
-     * @description Messages sent by an end user, containing prompts or additional context
-     * information.
-     */
-    ChatCompletionUserMessageParam: {
-      /** @description The contents of the user message. */
-      content: string | components["schemas"]["ChatCompletionContentPart"][];
-      /**
-       * @description The role of the messages author, in this case `user`.
-       * @enum {string}
-       */
-      role: "user";
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-    };
-    /**
-     * @description Data about a previous audio response from the model.
-     * [Learn more](https://platform.openai.com/docs/guides/audio).
-     */
-    "ChatCompletionAssistantMessageParam.Audio": {
-      /** @description Unique identifier for a previous audio response from the model. */
-      id: string;
-    };
-    ChatCompletionContentPartRefusal: {
-      /** @description The refusal message generated by the model. */
-      refusal: string;
-      /**
-       * @description The type of the content part.
-       * @enum {string}
-       */
-      type: "refusal";
-    };
-    /** @deprecated */
-    "ChatCompletionAssistantMessageParam.FunctionCall": {
-      /**
-       * @description The arguments to call the function with, as generated by the model in JSON
-       * format. Note that the model does not always generate valid JSON, and may
-       * hallucinate parameters not defined by your function schema. Validate the
-       * arguments in your code before calling your function.
-       */
-      arguments: string;
-      /** @description The name of the function to call. */
-      name: string;
-    };
-    /** @description Messages sent by the model in response to user messages. */
-    ChatCompletionAssistantMessageParam: {
-      /**
-       * @description The role of the messages author, in this case `assistant`.
-       * @enum {string}
-       */
-      role: "assistant";
-      /**
-       * @description Data about a previous audio response from the model.
-       * [Learn more](https://platform.openai.com/docs/guides/audio).
-       */
-      audio?: components["schemas"]["ChatCompletionAssistantMessageParam.Audio"] | null;
-      /**
-       * @description The contents of the assistant message. Required unless `tool_calls` or
-       * `function_call` is specified.
-       */
-      content?: (string | ((components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartRefusal"])[])) | null;
-      /** @deprecated */
-      function_call?: components["schemas"]["ChatCompletionAssistantMessageParam.FunctionCall"] | null;
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-      /** @description The refusal message by the assistant. */
-      refusal?: string | null;
-      /** @description The tool calls generated by the model, such as function calls. */
-      tool_calls?: components["schemas"]["ChatCompletionMessageToolCall"][];
-    };
-    ChatCompletionToolMessageParam: {
-      /** @description The contents of the tool message. */
-      content: string | components["schemas"]["ChatCompletionContentPartText"][];
-      /**
-       * @description The role of the messages author, in this case `tool`.
-       * @enum {string}
-       */
-      role: "tool";
-      /** @description Tool call that this message is responding to. */
-      tool_call_id: string;
-    };
-    /** @deprecated */
-    ChatCompletionFunctionMessageParam: {
-      /** @description The contents of the function message. */
-      content: string | null;
-      /** @description The name of the function to call. */
-      name: string;
-      /**
-       * @description The role of the messages author, in this case `function`.
-       * @enum {string}
-       */
-      role: "function";
-    };
-    /**
-     * @description Developer-provided instructions that the model should follow, regardless of
-     * messages sent by the user. With o1 models and newer, `developer` messages
-     * replace the previous `system` messages.
-     */
-    ChatCompletionMessageParam: components["schemas"]["ChatCompletionDeveloperMessageParam"] | components["schemas"]["ChatCompletionSystemMessageParam"] | components["schemas"]["ChatCompletionUserMessageParam"] | components["schemas"]["ChatCompletionAssistantMessageParam"] | components["schemas"]["ChatCompletionToolMessageParam"] | components["schemas"]["ChatCompletionFunctionMessageParam"];
     "ResultSuccess__success-boolean__": {
       data: {
         success: boolean;
@@ -6051,6 +5866,23 @@ export interface operations {
       };
     };
   };
+  SearchPaymentIntents: {
+    parameters: {
+      query: {
+        search_kind: string;
+        limit?: number;
+        page?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
+      };
+    };
+  };
   GetSubscription: {
     responses: {
       /** @description Ok */
@@ -6625,10 +6457,13 @@ export interface operations {
       };
     };
   };
-  /** @description Get ClickHouse schema (tables and columns) */
+  /**
+   * Get database schema
+   * @description Get ClickHouse schema (tables and columns)
+   */
   GetClickHouseSchema: {
     responses: {
-      /** @description Ok */
+      /** @description Array of table schemas with columns */
       200: {
         content: {
           "application/json": components["schemas"]["Result_ClickHouseTableSchema-Array.string_"];
@@ -6636,14 +6471,19 @@ export interface operations {
       };
     };
   };
+  /**
+   * Execute SQL query
+   * @description Execute a SQL query against ClickHouse
+   */
   ExecuteSql: {
+    /** @description The SQL query to execute */
     requestBody: {
       content: {
         "application/json": components["schemas"]["ExecuteSqlRequest"];
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description Query results with rows and metadata */
       200: {
         content: {
           "application/json": components["schemas"]["Result_ExecuteSqlResponse.string_"];
@@ -6651,14 +6491,19 @@ export interface operations {
       };
     };
   };
+  /**
+   * Download query results as CSV
+   * @description Execute a SQL query and download results as CSV
+   */
   DownloadCsv: {
+    /** @description The SQL query to execute */
     requestBody: {
       content: {
         "application/json": components["schemas"]["ExecuteSqlRequest"];
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description URL to download the CSV file */
       200: {
         content: {
           "application/json": components["schemas"]["Result_string.string_"];
@@ -6666,9 +6511,13 @@ export interface operations {
       };
     };
   };
+  /**
+   * List saved queries
+   * @description Get all saved queries for the organization
+   */
   GetSavedQueries: {
     responses: {
-      /** @description Ok */
+      /** @description Array of saved queries */
       200: {
         content: {
           "application/json": components["schemas"]["Result_Array_HqlSavedQuery_.string_"];
@@ -6676,14 +6525,19 @@ export interface operations {
       };
     };
   };
+  /**
+   * Get saved query
+   * @description Get a specific saved query by ID
+   */
   GetSavedQuery: {
     parameters: {
       path: {
+        /** @description The ID of the saved query */
         queryId: string;
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description The saved query details */
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery-or-null.string_"];
@@ -6691,9 +6545,40 @@ export interface operations {
       };
     };
   };
+  /**
+   * Update saved query
+   * @description Update an existing saved query
+   */
+  UpdateSavedQuery: {
+    parameters: {
+      path: {
+        /** @description The ID of the saved query to update */
+        queryId: string;
+      };
+    };
+    /** @description The updated query details */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description The updated saved query */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Delete saved query
+   * @description Delete a saved query by ID
+   */
   DeleteSavedQuery: {
     parameters: {
       path: {
+        /** @description The ID of the saved query to delete */
         queryId: string;
       };
     };
@@ -6706,7 +6591,12 @@ export interface operations {
       };
     };
   };
+  /**
+   * Bulk delete saved queries
+   * @description Delete multiple saved queries at once
+   */
   BulkDeleteSavedQueries: {
+    /** @description Array of query IDs to delete */
     requestBody: {
       content: {
         "application/json": components["schemas"]["BulkDeleteSavedQueriesRequest"];
@@ -6721,29 +6611,19 @@ export interface operations {
       };
     };
   };
-  UpdateSavedQuery: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateSavedQueryRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
-        };
-      };
-    };
-  };
+  /**
+   * Create saved query
+   * @description Create a new saved query
+   */
   CreateSavedQuery: {
+    /** @description The saved query details */
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateSavedQueryRequest"];
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description Array containing the created saved query */
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
@@ -7685,7 +7565,7 @@ export interface operations {
             posthogSession?: string;
             [key: string]: unknown;
           };
-          messages: components["schemas"]["ChatCompletionMessageParam"][];
+          messages: unknown[];
         };
       };
     };
@@ -7734,6 +7614,16 @@ export interface operations {
         sessionId: string;
       };
     };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  CreateAndEscalateThread: {
     responses: {
       /** @description Ok */
       200: {

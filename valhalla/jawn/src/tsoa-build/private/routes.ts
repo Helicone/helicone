@@ -15397,6 +15397,40 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsStripeController_searchPaymentIntents: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                search_kind: {"in":"query","name":"search_kind","required":true,"dataType":"string"},
+                limit: {"in":"query","name":"limit","dataType":"double"},
+                page: {"in":"query","name":"page","dataType":"string"},
+        };
+        app.get('/v1/stripe/payment-intents/search',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.searchPaymentIntents)),
+
+            async function StripeController_searchPaymentIntents(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsStripeController_searchPaymentIntents, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'searchPaymentIntents',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsStripeController_getSubscription: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };

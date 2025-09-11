@@ -100,6 +100,9 @@ export interface paths {
   "/v1/stripe/subscription/migrate-to-pro": {
     post: operations["MigrateToPro"];
   };
+  "/v1/stripe/payment-intents/search": {
+    get: operations["SearchPaymentIntents"];
+  };
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
   };
@@ -16330,6 +16333,23 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  SearchPaymentIntents: {
+    parameters: {
+      query: {
+        search_kind: string;
+        limit?: number;
+        page?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
       };
     };
   };
