@@ -29,6 +29,7 @@ import {
 
 import { err, ok, Result } from "../../packages/common/result";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import { ENVIRONMENT } from "../../lib/clients/constant";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -178,6 +179,7 @@ export class AdminController extends Controller {
         totalCreditsIssued,
         totalCreditsSpent,
       },
+      isProduction: ENVIRONMENT === "production",
     });
   }
 

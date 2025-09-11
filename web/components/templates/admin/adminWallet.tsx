@@ -25,6 +25,7 @@ import {
   DollarSign,
   TrendingUp,
   AlertCircle,
+  ExternalLink,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
@@ -44,6 +45,7 @@ interface DashboardData {
     totalCreditsIssued: number;
     totalCreditsSpent: number;
   };
+  isProduction: boolean;
 }
 
 interface WalletState {
@@ -326,13 +328,30 @@ export default function AdminWallet() {
                           : "N/A"}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleOrgClick(org.orgId)}
-                        >
-                          View Details
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleOrgClick(org.orgId)}
+                          >
+                            View Details
+                          </Button>
+                          {org.stripeCustomerId && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const stripeUrl = dashboardData?.isProduction
+                                  ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
+                                  : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
+                                window.open(stripeUrl, "_blank");
+                              }}
+                            >
+                              <ExternalLink className="h-3 w-3 mr-1" />
+                              Stripe
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
