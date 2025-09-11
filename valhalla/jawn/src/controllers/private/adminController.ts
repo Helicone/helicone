@@ -137,7 +137,7 @@ export class AdminController extends Controller {
       `,
       []
     );
-    console.log("ClickHouse spend result:", clickhouseSpendResult);
+    const clickhouseSpendMap = new Map<string, number>();
 
     const clickhouseSpendMap = new Map<string, number>();
     if (!clickhouseSpendResult.error && clickhouseSpendResult.data) {
