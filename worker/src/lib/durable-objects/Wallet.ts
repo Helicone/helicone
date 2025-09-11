@@ -357,6 +357,20 @@ export class Wallet extends DurableObject<Env> {
   }
 
   getTableData(tableName: string, page: number, pageSize: number): { data: any[], total: number } {
+    // Whitelist of allowed table names to prevent SQL injection
+    const allowedTables = [
+      'processed_webhook_events',
+      'disallow_list', 
+      'escrows',
+      'credit_purchases',
+      'aggregated_debits',
+      'alert_state'
+    ];
+    
+    if (!allowedTables.includes(tableName)) {
+      throw new Error(`Invalid table name: ${tableName}`);
+    }
+
     return this.ctx.storage.transactionSync(() => {
       // Get total count first
       const countResult = this.ctx.storage.sql
