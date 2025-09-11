@@ -1,4 +1,5 @@
 import { TimeIncrement } from "./fetchTimeData";
+import { formatTimeValue } from "@/components/shared/utils/smartNumberFormat";
 
 export type TimeInterval = "3m" | "1m" | "7d" | "24h" | "1h" | "all" | "custom";
 
@@ -121,4 +122,11 @@ export function formatTimeSaved(ms: number): string {
   } else {
     return `${(ms / (1000 * 60 * 60 * 24 * 365)).toFixed(3)} y`;
   }
+}
+
+export function formatMs(ms: number): string {
+  if (isNaN(ms)) {
+    return "N/A";
+  }
+  return formatTimeValue(ms);
 }
