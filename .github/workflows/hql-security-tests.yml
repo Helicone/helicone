@@ -24,7 +24,6 @@ on:
 
 jobs:
   hql-security-tests:
-  hql-security-tests:
     name: Run HQL Security Tests
     defaults:
       run:
