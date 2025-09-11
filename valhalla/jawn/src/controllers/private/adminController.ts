@@ -153,7 +153,7 @@ export class AdminController extends Controller {
       stripeCustomerId: org.stripe_customer_id,
       totalPayments: org.total_amount_received / 100, // Convert cents to dollars
       clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-      lastPaymentDate: org.last_payment_date,
+      lastPaymentDate: org.last_payment_date ? org.last_payment_date * 1000 : null, // Convert seconds to milliseconds
       tier: org.tier || "free",
     }));
 
@@ -1625,7 +1625,7 @@ export class AdminController extends Controller {
 
     // Get the wallet state from the worker API using admin credentials
     const workerApiUrl =
-      process.env.WORKER_API_URL || "https://api.helicone.ai";
+      process.env.HELICONE_WORKER_API || process.env.WORKER_API_URL || "https://api.helicone.ai";
     const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
 
     if (!adminAccessKey) {
@@ -1635,7 +1635,7 @@ export class AdminController extends Controller {
     try {
       // Use the admin endpoint that can query any org's wallet
       const response = await fetch(
-        `${workerApiUrl}/v1/admin/wallet/${orgId}/state`,
+        `${workerApiUrl}/admin/wallet/${orgId}/state`,
         {
           method: "GET",
           headers: {

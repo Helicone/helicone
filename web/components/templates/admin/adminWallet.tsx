@@ -84,11 +84,18 @@ export default function AdminWallet() {
     queryKey: ["admin-wallet-details", selectedOrg],
     queryFn: async () => {
       if (!selectedOrg) throw new Error("No org selected");
-      const response = await jawn.POST(`/v1/admin/wallet/${selectedOrg}`);
+      console.log("Fetching wallet details for org:", selectedOrg);
+      const response = await jawn.POST(`/v1/admin/wallet/${selectedOrg}`, {});
+      console.log("Wallet details API response:", response);
+      console.log("Wallet response data:", response.data);
+      console.log("Wallet response error:", response.error);
       if (response.error || !response.data) {
-        throw new Error("Failed to fetch wallet details");
+        throw new Error(`Failed to fetch wallet details: ${response.error || "No data"}`);
       }
-      return response.data as WalletState;
+      // Handle nested data structure like dashboard endpoint
+      const actualWalletData = (response.data as any).data || response.data;
+      console.log("Actual wallet data:", actualWalletData);
+      return actualWalletData as WalletState;
     },
     enabled: !!selectedOrg && walletDetailsOpen,
   });
@@ -195,15 +202,15 @@ export default function AdminWallet() {
                   <TableHead>Tier</TableHead>
                   <TableHead>Total Payments</TableHead>
                   <TableHead>Total Spent (ClickHouse)</TableHead>
-                  <TableHead>Discrepancy</TableHead>
+                  <TableHead>Balance</TableHead>
                   <TableHead>Last Payment</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredOrgs?.map((org) => {
-                  const discrepancy = org.totalPayments - org.clickhouseTotalSpend;
-                  const hasDiscrepancy = Math.abs(discrepancy) > 0.1;
+                  const balance = org.totalPayments - org.clickhouseTotalSpend;
+                  const isNegativeBalance = balance < 0;
                   
                   return (
                     <TableRow key={org.orgId}>
@@ -223,8 +230,8 @@ export default function AdminWallet() {
                       <TableCell>{formatCurrency(org.totalPayments)}</TableCell>
                       <TableCell>{formatCurrency(org.clickhouseTotalSpend)}</TableCell>
                       <TableCell>
-                        <span className={hasDiscrepancy ? "text-red-600 font-medium" : ""}>
-                          {formatCurrency(discrepancy)}
+                        <span className={isNegativeBalance ? "text-red-600 font-medium" : ""}>
+                          {formatCurrency(balance)}
                         </span>
                       </TableCell>
                       <TableCell>
