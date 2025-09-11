@@ -16,7 +16,7 @@ const Banner = () => {
             Helicone AI Gateway
           </Link>
           , now on the cloud with passthrough billing. Access 100+ models with 1
-          API.
+          API and 0% markup.
         </p>
       </div>
     </div>
