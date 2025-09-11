@@ -27,7 +27,11 @@ import {
   AlertCircle,
   ExternalLink,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
+
+const formatCurrency = (amount: number) => {
+  return remoteFormatCurrency(amount, "USD", 6);
+}
 
 interface DashboardData {
   organizations: Array<{
@@ -88,7 +92,7 @@ export default function AdminWallet() {
     queryKey: ["admin-wallet-dashboard"],
     queryFn: async () => {
       console.log("Fetching dashboard data...");
-      const response = await jawn.POST("/v1/admin/gateway/dashboard_data");
+      const response = await jawn.POST("/v1/admin/gateway/dashboard_data", {}) as any;
       console.log("Dashboard API response:", response);
       console.log("Response data:", response.data);
       console.log("Response error:", response.error);
@@ -116,7 +120,7 @@ export default function AdminWallet() {
       queryFn: async () => {
         if (!selectedOrg) throw new Error("No org selected");
         console.log("Fetching wallet details for org:", selectedOrg);
-        const response = await jawn.POST(`/v1/admin/wallet/${selectedOrg}`, {});
+        const response = await (jawn as any).POST(`/v1/admin/wallet/${selectedOrg}`, {});
         console.log("Wallet details API response:", response);
         console.log("Wallet response data:", response.data);
         console.log("Wallet response error:", response.error);
@@ -145,7 +149,7 @@ export default function AdminWallet() {
         "table:",
         selectedTable,
       );
-      const response = await jawn.POST(
+      const response = await (jawn as any).POST(
         `/v1/admin/wallet/${selectedOrg}/tables/${selectedTable}?page=${tablePage}&pageSize=50`,
         {},
       );

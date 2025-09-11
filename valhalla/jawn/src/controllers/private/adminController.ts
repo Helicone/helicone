@@ -122,7 +122,7 @@ export class AdminController extends Controller {
 
     // Get ClickHouse spending for these organizations
     const orgIds = paymentsResult.data.map((org) => org.org_id);
-    const orgIds = paymentsResult.data.map((org) => org.org_id);
+
     const clickhouseSpendResult = await clickhouseDb.dbQuery<{
       organization_id: string;
       total_cost: number;
@@ -136,7 +136,6 @@ export class AdminController extends Controller {
       `,
       []
     );
-    const clickhouseSpendMap = new Map<string, number>();
 
     const clickhouseSpendMap = new Map<string, number>();
     if (!clickhouseSpendResult.error && clickhouseSpendResult.data) {
@@ -156,7 +155,9 @@ export class AdminController extends Controller {
       stripeCustomerId: org.stripe_customer_id,
       totalPayments: org.total_amount_received / 100, // Convert cents to dollars
       clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-      lastPaymentDate: org.last_payment_date ? Number(org.last_payment_date) * 1000 : null, // Convert seconds to milliseconds
+      lastPaymentDate: org.last_payment_date
+        ? Number(org.last_payment_date) * 1000
+        : null, // Convert seconds to milliseconds
       tier: org.tier || "free",
       ownerEmail: org.owner_email || "Unknown",
     }));
@@ -1630,7 +1631,9 @@ export class AdminController extends Controller {
 
     // Get the wallet state from the worker API using admin credentials
     const workerApiUrl =
-      process.env.HELICONE_WORKER_API || process.env.WORKER_API_URL || "https://api.helicone.ai";
+      process.env.HELICONE_WORKER_API ||
+      process.env.WORKER_API_URL ||
+      "https://api.helicone.ai";
     const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
 
     if (!adminAccessKey) {
@@ -1687,7 +1690,9 @@ export class AdminController extends Controller {
 
     // Get table data from the worker API using admin credentials
     const workerApiUrl =
-      process.env.HELICONE_WORKER_API || process.env.WORKER_API_URL || "https://api.helicone.ai";
+      process.env.HELICONE_WORKER_API ||
+      process.env.WORKER_API_URL ||
+      "https://api.helicone.ai";
     const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
 
     if (!adminAccessKey) {
@@ -1697,9 +1702,9 @@ export class AdminController extends Controller {
     try {
       // Build query params for pagination
       const params = new URLSearchParams();
-      if (page !== undefined) params.set('page', page.toString());
-      if (pageSize !== undefined) params.set('pageSize', pageSize.toString());
-      
+      if (page !== undefined) params.set("page", page.toString());
+      if (pageSize !== undefined) params.set("pageSize", pageSize.toString());
+
       // Use the admin endpoint that can query any org's table data
       const response = await fetch(
         `${workerApiUrl}/admin/wallet/${orgId}/tables/${tableName}?${params.toString()}`,
