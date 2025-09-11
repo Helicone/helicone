@@ -92,9 +92,10 @@ export class ClickhouseClientWrapper {
     } catch (err) {
       console.error("Error executing Clickhouse query: ", query, parameters);
       console.error(err);
+      const message = err instanceof Error ? err.message : JSON.stringify(err); // TODO Have a cleaner way of defining the error message
       return {
         data: null,
-        error: JSON.stringify(err),
+        error: message,
       };
     }
   }
@@ -153,9 +154,10 @@ export class ClickhouseClientWrapper {
         parameters
       );
       console.error(err);
+      const message = err instanceof Error ? err.message : JSON.stringify(err); // TODO Have a cleaner way of defining the error message
       return {
         data: null,
-        error: JSON.stringify(err),
+        error: message,
       };
     }
   }

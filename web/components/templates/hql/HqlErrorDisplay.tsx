@@ -174,6 +174,18 @@ const ERROR_DISPLAY_MAP: Record<
     severity: "error",
     icon: XCircle,
   },
+  // TODO Avoid hard-coding the limit (use an enum)
+  [HqlErrorCode.CSV_DOWNLOAD_LIMIT_EXCEEDED]: {
+    title: "Download Limit Exceeded",
+    severity: "warning",
+    icon: AlertTriangle,
+    suggestions: [
+      "Maximum export limit is 300,000 rows",
+      "Add filters to reduce the number of rows",
+      "Use a LIMIT clause in your query",
+      "Consider using the API for larger exports",
+    ],
+  },
 
   // Feature Access Errors
   [HqlErrorCode.FEATURE_NOT_ENABLED]: {

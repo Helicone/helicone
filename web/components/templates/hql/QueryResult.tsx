@@ -41,6 +41,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { CircleCheckBig, CircleDashed } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { HqlErrorDisplay } from "./HqlErrorDisplay";
+import { parseHqlError } from "@/lib/api/hql/errorTypes";
 
 interface QueryResultProps {
   sql: string;
@@ -229,6 +230,15 @@ function ExportButton({ sql }: ExportButtonProps) {
       const response = await $JAWN_API.POST("/v1/helicone-sql/download", {
         body: { sql },
       });
+      // Throw to trigger onError when backend returns an error/status >= 400
+      const respAny = response as any;
+      if (respAny?.error) {
+        const message =
+          typeof respAny.error === "string"
+            ? respAny.error
+            : respAny.error?.error || "Bad Request";
+        throw new Error(message);
+      }
       return response;
     },
     onSuccess: (data) => {
@@ -241,11 +251,33 @@ function ExportButton({ sql }: ExportButtonProps) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+      } else if ((data as any)?.error) {
+        // Safety net: if we somehow didn't throw above
+        const message =
+          typeof (data as any).error === "string"
+            ? (data as any).error
+            : (data as any).error?.error || "Failed to export CSV";
+        const hqlError = parseHqlError(message);
+        notify.setNotification(hqlError.message || message, "error");
       }
     },
-    onError: () => {
+    // TODO Strongly type this
+    onError: (error: any) => {
       setDownloadingCSV(false);
-      notify.setNotification("Failed to export CSV", "error");
+      
+      // The error message is typically in error.message for openapi-fetch
+      const errorMessage = error?.message || "Failed to export CSV";
+      const hqlError = parseHqlError(errorMessage);
+      
+      // Show specific error message based on error code
+      if (hqlError.code === "HQL_CSV_DOWNLOAD_LIMIT_EXCEEDED") {
+        notify.setNotification(
+          "Export limit exceeded: Maximum 300,000 rows. Please add filters or LIMIT clause to reduce the data.",
+          "error"
+        );
+      } else {
+        notify.setNotification(hqlError.message || "Failed to export CSV", "error");
+      }
     },
   });
 
@@ -317,7 +349,10 @@ function ExportButton({ sql }: ExportButtonProps) {
             </Button>
             <Button
               className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
-              onClick={() => download(sql)}
+              onClick={() => {
+                setDownloadingCSV(true);
+                download(sql);
+              }}
             >
               {downloadingCSV ? (
                 <>
