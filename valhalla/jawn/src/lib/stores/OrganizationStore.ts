@@ -333,14 +333,14 @@ export class OrganizationStore extends BaseStore {
     let query;
     if (process.env.NEXT_PUBLIC_BETTER_AUTH === "true") {
       query = `
-      select pu.email, member, org_role from organization_member om 
+      select pu.email, member, org_role, created_at from organization_member om 
         left join auth.users u on u.id = om.member
         left join public.user pu on pu.auth_user_id = u.id
         where om.organization = $1
     `;
     } else {
       query = `
-      select u.email, member, org_role from organization_member om 
+      select u.email, member, org_role, om.created_at from organization_member om 
         left join auth.users u on u.id = om.member
         where om.organization = $1
       `;
@@ -350,6 +350,7 @@ export class OrganizationStore extends BaseStore {
       email: string;
       member: string;
       org_role: string;
+      created_at: string;
     }>(query, [organizationId]);
   }
 
@@ -386,6 +387,21 @@ export class OrganizationStore extends BaseStore {
       return err(result.error ?? "No access to org");
     }
     return ok(result.data);
+  }
+
+  async isUserOwner(organizationId: string, userId: string): Promise<boolean> {
+    const query = `
+      select * from organization_member om
+      where om.organization = $1 and om.member = $2 and om.org_role = 'owner'
+    `;
+    const result = await dbExecute<{ org_role: string }>(query, [
+      organizationId,
+      userId,
+    ]);
+    if (result.error || !result.data || result.data.length === 0) {
+      return false;
+    }
+    return result.data[0].org_role === "owner";
   }
 
   async removeMemberFromOrganization(
@@ -472,6 +488,76 @@ export class OrganizationStore extends BaseStore {
 
       if (updateResult.error) {
         return err(updateResult.error);
+      }
+
+      return ok(null);
+    } catch (error) {
+      return err(String(error));
+    }
+  }
+
+  async updateOrganizationOwner(
+    organizationId: string,
+    userId: string,
+    memberId: string
+  ): Promise<Result<null, string>> {
+    try {
+      // Check if organization exists and user has access
+      const orgResult = await dbExecute<{ id: string; owner: string }>(
+        `SELECT id, owner
+         FROM organization
+         WHERE id = $1
+         LIMIT 1`,
+        [organizationId]
+      );
+
+      if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
+        return err("Organization not found");
+      }
+
+      const org = orgResult.data[0];
+
+      const isOwner = org.owner === userId;
+
+      if (!isOwner) {
+        return err("Unauthorized");
+      }
+
+      // Update the organization owner
+      const updateResult = await dbExecute(
+        `UPDATE organization_member
+         SET org_role = $1
+         WHERE member = $2
+         AND organization = $3`,
+        ["owner", memberId, organizationId]
+      );
+
+      if (updateResult.error) {
+        return err(updateResult.error);
+      }
+
+      // change current owner to admin
+      const updateAdminResult = await dbExecute(
+        `UPDATE organization_member
+         SET org_role = $1
+         WHERE member = $2
+         AND organization = $3`,
+        ["admin", userId, organizationId]
+      );
+
+      if (updateAdminResult.error) {
+        return err(updateAdminResult.error);
+      }
+
+      // Update the organization owner
+      const updateOwnerResult = await dbExecute(
+        `UPDATE organization
+         SET owner = $1
+         WHERE id = $2`,
+        [memberId, organizationId]
+      );
+      if (updateOwnerResult.error) {
+        return err(updateOwnerResult.error);
       }
 
       return ok(null);

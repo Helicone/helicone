@@ -100,6 +100,7 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
                 orgId={org.id}
                 refetch={refetch}
                 isUserAdmin={isUserAdmin}
+                isUserOwner={isOwner}
                 refreshOrgs={onLeaveSuccess}
               />
             ))}

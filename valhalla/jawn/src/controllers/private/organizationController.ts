@@ -232,15 +232,15 @@ export class OrganizationController extends Controller {
     }
 
     // Check if user is already a member
-    const members = await organizationManager.getOrganizationMembers(
-      organizationId
-    );
+    const members =
+      await organizationManager.getOrganizationMembers(organizationId);
     if (members.error) {
       return err(`Error checking existing members: ${members.error}`);
     }
 
     const isExistingMember = members.data?.some(
-      (member) => member.email?.toLowerCase() === requestBody.email.toLowerCase()
+      (member) =>
+        member.email?.toLowerCase() === requestBody.email.toLowerCase()
     );
 
     if (isExistingMember) {
@@ -400,9 +400,8 @@ export class OrganizationController extends Controller {
   ): Promise<Result<OrganizationMember[], string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
-    const result = await organizationManager.getOrganizationMembers(
-      organizationId
-    );
+    const result =
+      await organizationManager.getOrganizationMembers(organizationId);
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error ?? "Error getting organization members");
@@ -435,6 +434,28 @@ export class OrganizationController extends Controller {
     }
   }
 
+  @Post("/{organizationId}/update_owner")
+  public async updateOrganizationOwner(
+    @Body()
+    requestBody: { memberId: string },
+    @Path() organizationId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    const result = await organizationManager.updateOwner(
+      organizationId,
+      requestBody.memberId
+    );
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Error updating organization owner");
+    } else {
+      this.setStatus(201);
+      return ok(null);
+    }
+  }
+
   @Get("/{organizationId}/owner")
   public async getOrganizationOwner(
     @Path() organizationId: string,
@@ -442,9 +463,8 @@ export class OrganizationController extends Controller {
   ): Promise<Result<OrganizationOwner[], string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
-    const result = await organizationManager.getOrganizationOwner(
-      organizationId
-    );
+    const result =
+      await organizationManager.getOrganizationOwner(organizationId);
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error ?? "Error getting organization owner");
