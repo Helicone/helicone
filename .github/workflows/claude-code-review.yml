@@ -2,47 +2,31 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
-    # Optional: Only run on specific file changes
-#     paths:
-#   - "src/**/*.ts"
-#   - "src/**/*.tsx"
-#   - "src/**/*.js"
-#   - "src/**/*.jsx"
+    types: [opened, synchronize, reopened, labeled]
+    branches:
+      - main
+      - staging
+      - production
+
+  issue_comment:
+    types: [created]
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-
+    name: claude-review
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-      issues: read
-      id-token: write
-
+    if: |
+      (github.event_name == 'pull_request' && !contains(github.event.pull_request.title, '[WIP]')) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '@claude'))
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@beta
         with:
-          fetch-depth: 1
-
-      - name: Run Claude Code Review
-        id: claude-review
-        uses: anthropics/claude-code-action@beta
-        with:
+          # Required: Claude Code OAuth token
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
-          # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4.1)
-          # model: "claude-opus-4-1-20250805"
-
-          # Direct prompt for automated review (no @claude mention needed)
+          # Optional: Direct prompt to Claude
           direct_prompt: |
-
             Put long feedback in a collapsible section. (<details>...</details>)
             Please review this pull request and provide feedback on:
             - Code quality and best practices
@@ -62,16 +46,10 @@ jobs:
 
             Add a summary of the feedback. Highlight the most important feedback, like the most important bugs, or the most important performance improvements.
 
-          # Optional: Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
+          # Optional: Use a sticky comment for Claude's feedback
           use_sticky_comment: true
 
-          # Optional: Different prompts for different authors
-          # direct_prompt: |
-          #   ${{ github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR' &&
-          #   'Welcome! Please review this PR from a first-time contributor. Be encouraging and provide detailed explanations for any suggestions.' ||
-          #   'Please provide a thorough code review focusing on our coding standards and best practices.' }}
-
-          # Optional: Add specific tools for running tests or linting
+          # Optional: Allow specific tools for Claude to use
           allowed_tools: "Bash(yarn build),Bash(yarn test),Bash(yarn lint)"
 
           # Optional: Allow specific bots to trigger this workflow
@@ -80,3 +58,28 @@ jobs:
           # Optional: Skip review for certain conditions
           if: |
             !contains(github.event.pull_request.title, '[WIP]')
+
+          # Optional: Trigger phrase for comment-based reviews
+          trigger_phrase: "@claude"
+
+          # Optional: Trigger on label
+          label_trigger: "claude"
+
+          # Optional: Branch prefix for Claude's PRs
+          branch_prefix: "claude/"
+
+          # Optional: Mode (tag, comment, or pr)
+          mode: "tag"
+
+          # Optional: Use AWS Bedrock for Claude
+          use_bedrock: false
+
+          # Optional: Use Google Vertex AI for Claude
+          use_vertex: false
+
+          # Optional: Timeout in minutes
+          timeout_minutes: 30
+
+          # Optional: Use commit signing for Claude's commits
+          use_commit_signing: false
+
