@@ -15,6 +15,11 @@ jobs:
   claude-review:
     name: claude-review
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
     if: |
       (github.event_name == 'pull_request' && !contains(github.event.pull_request.title, '[WIP]')) ||
       (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '@claude'))
