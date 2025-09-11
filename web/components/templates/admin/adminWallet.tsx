@@ -19,7 +19,13 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { Loader2, Search, DollarSign, TrendingUp, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  Search,
+  DollarSign,
+  TrendingUp,
+  AlertCircle,
+} from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 interface DashboardData {
@@ -72,7 +78,11 @@ export default function AdminWallet() {
   const [tablePage, setTablePage] = useState(0);
 
   // Fetch dashboard data
-  const { data: dashboardData, isLoading: dashboardLoading, error: dashboardError } = useQuery<DashboardData>({
+  const {
+    data: dashboardData,
+    isLoading: dashboardLoading,
+    error: dashboardError,
+  } = useQuery<DashboardData>({
     queryKey: ["admin-wallet-dashboard"],
     queryFn: async () => {
       console.log("Fetching dashboard data...");
@@ -81,9 +91,14 @@ export default function AdminWallet() {
       console.log("Response data:", response.data);
       console.log("Response error:", response.error);
       console.log("Response data type:", typeof response.data);
-      console.log("Response data keys:", response.data ? Object.keys(response.data) : "No data");
+      console.log(
+        "Response data keys:",
+        response.data ? Object.keys(response.data) : "No data",
+      );
       if (response.error || !response.data) {
-        throw new Error(`Failed to fetch dashboard data: ${response.error || "No data"}`);
+        throw new Error(
+          `Failed to fetch dashboard data: ${response.error || "No data"}`,
+        );
       }
       // The jawn client returns {data: actualData, error: null}, so we need response.data.data
       const actualData = response.data.data || response.data;
@@ -93,36 +108,50 @@ export default function AdminWallet() {
   });
 
   // Fetch wallet details (lazy loaded when org is selected)
-  const { data: walletDetails, isLoading: walletLoading } = useQuery<WalletState>({
-    queryKey: ["admin-wallet-details", selectedOrg],
-    queryFn: async () => {
-      if (!selectedOrg) throw new Error("No org selected");
-      console.log("Fetching wallet details for org:", selectedOrg);
-      const response = await jawn.POST(`/v1/admin/wallet/${selectedOrg}`, {});
-      console.log("Wallet details API response:", response);
-      console.log("Wallet response data:", response.data);
-      console.log("Wallet response error:", response.error);
-      if (response.error || !response.data) {
-        throw new Error(`Failed to fetch wallet details: ${response.error || "No data"}`);
-      }
-      // Handle nested data structure like dashboard endpoint
-      const actualWalletData = (response.data as any).data || response.data;
-      console.log("Actual wallet data:", actualWalletData);
-      return actualWalletData as WalletState;
-    },
-    enabled: !!selectedOrg && walletDetailsOpen,
-  });
+  const { data: walletDetails, isLoading: walletLoading } =
+    useQuery<WalletState>({
+      queryKey: ["admin-wallet-details", selectedOrg],
+      queryFn: async () => {
+        if (!selectedOrg) throw new Error("No org selected");
+        console.log("Fetching wallet details for org:", selectedOrg);
+        const response = await jawn.POST(`/v1/admin/wallet/${selectedOrg}`, {});
+        console.log("Wallet details API response:", response);
+        console.log("Wallet response data:", response.data);
+        console.log("Wallet response error:", response.error);
+        if (response.error || !response.data) {
+          throw new Error(
+            `Failed to fetch wallet details: ${response.error || "No data"}`,
+          );
+        }
+        // Handle nested data structure like dashboard endpoint
+        const actualWalletData = (response.data as any).data || response.data;
+        console.log("Actual wallet data:", actualWalletData);
+        return actualWalletData as WalletState;
+      },
+      enabled: !!selectedOrg && walletDetailsOpen,
+    });
 
   // Fetch table data (lazy loaded when table is selected)
   const { data: tableData, isLoading: tableLoading } = useQuery<TableData>({
     queryKey: ["admin-wallet-table", selectedOrg, selectedTable, tablePage],
     queryFn: async () => {
-      if (!selectedOrg || !selectedTable) throw new Error("No org or table selected");
-      console.log("Fetching table data for org:", selectedOrg, "table:", selectedTable);
-      const response = await jawn.POST(`/v1/admin/wallet/${selectedOrg}/tables/${selectedTable}?page=${tablePage}&pageSize=50`, {});
+      if (!selectedOrg || !selectedTable)
+        throw new Error("No org or table selected");
+      console.log(
+        "Fetching table data for org:",
+        selectedOrg,
+        "table:",
+        selectedTable,
+      );
+      const response = await jawn.POST(
+        `/v1/admin/wallet/${selectedOrg}/tables/${selectedTable}?page=${tablePage}&pageSize=50`,
+        {},
+      );
       console.log("Table data API response:", response);
       if (response.error || !response.data) {
-        throw new Error(`Failed to fetch table data: ${response.error || "No data"}`);
+        throw new Error(
+          `Failed to fetch table data: ${response.error || "No data"}`,
+        );
       }
       const actualTableData = (response.data as any).data || response.data;
       console.log("Actual table data:", actualTableData);
@@ -131,13 +160,16 @@ export default function AdminWallet() {
     enabled: !!selectedOrg && !!selectedTable && walletDetailsOpen,
   });
 
-  const filteredOrgs = dashboardData?.organizations?.filter(
-    (org) =>
-      org.orgName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      org.orgId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      org.stripeCustomerId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      org.ownerEmail?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredOrgs =
+    dashboardData?.organizations?.filter(
+      (org) =>
+        org.orgName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        org.orgId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        org.stripeCustomerId
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        org.ownerEmail?.toLowerCase().includes(searchTerm.toLowerCase()),
+    ) || [];
 
   const handleOrgClick = (orgId: string) => {
     setSelectedOrg(orgId);
@@ -154,7 +186,7 @@ export default function AdminWallet() {
 
   if (dashboardLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex h-96 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
@@ -162,11 +194,13 @@ export default function AdminWallet() {
 
   if (dashboardError) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+          <AlertCircle className="mx-auto mb-2 h-8 w-8 text-red-500" />
           <p className="text-red-600">Error loading dashboard data</p>
-          <p className="text-sm text-muted-foreground">{dashboardError.message}</p>
+          <p className="text-sm text-muted-foreground">
+            {dashboardError.message}
+          </p>
         </div>
       </div>
     );
@@ -175,7 +209,7 @@ export default function AdminWallet() {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -223,7 +257,7 @@ export default function AdminWallet() {
           <CardTitle>Organizations with Pass-Through Billing</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center space-x-2 mb-4">
+          <div className="mb-4 flex items-center space-x-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
@@ -252,7 +286,7 @@ export default function AdminWallet() {
                 {filteredOrgs?.map((org) => {
                   const balance = org.totalPayments - org.clickhouseTotalSpend;
                   const isNegativeBalance = balance < 0;
-                  
+
                   return (
                     <TableRow key={org.orgId}>
                       <TableCell>
@@ -269,14 +303,20 @@ export default function AdminWallet() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
                           {org.tier}
                         </span>
                       </TableCell>
                       <TableCell>{formatCurrency(org.totalPayments)}</TableCell>
-                      <TableCell>{formatCurrency(org.clickhouseTotalSpend)}</TableCell>
                       <TableCell>
-                        <span className={isNegativeBalance ? "text-red-600 font-medium" : ""}>
+                        {formatCurrency(org.clickhouseTotalSpend)}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={
+                            isNegativeBalance ? "font-medium text-red-600" : ""
+                          }
+                        >
                           {formatCurrency(balance)}
                         </span>
                       </TableCell>
@@ -305,15 +345,13 @@ export default function AdminWallet() {
 
       {/* Wallet Details Dialog */}
       <Dialog open={walletDetailsOpen} onOpenChange={setWalletDetailsOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              Wallet Details - {selectedOrg}
-            </DialogTitle>
+            <DialogTitle>Wallet Details - {selectedOrg}</DialogTitle>
           </DialogHeader>
-          
+
           {walletLoading ? (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex h-64 items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : walletDetails ? (
@@ -324,7 +362,7 @@ export default function AdminWallet() {
                 <TabsTrigger value="disallow">Disallow List</TabsTrigger>
                 <TabsTrigger value="tables">Raw Tables</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="overview" className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <Card>
@@ -339,7 +377,9 @@ export default function AdminWallet() {
                   </Card>
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-sm">Effective Balance</CardTitle>
+                      <CardTitle className="text-sm">
+                        Effective Balance
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
@@ -369,7 +409,7 @@ export default function AdminWallet() {
                   </Card>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="escrows">
                 <Card>
                   <CardHeader>
@@ -382,7 +422,7 @@ export default function AdminWallet() {
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="disallow">
                 <Card>
                   <CardHeader>
@@ -411,12 +451,14 @@ export default function AdminWallet() {
                         </TableBody>
                       </Table>
                     ) : (
-                      <p className="text-muted-foreground">No entries in disallow list</p>
+                      <p className="text-muted-foreground">
+                        No entries in disallow list
+                      </p>
                     )}
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="tables">
                 <div className="space-y-4">
                   <Card>
@@ -424,14 +466,24 @@ export default function AdminWallet() {
                       <CardTitle>Raw Table Inspection</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-muted-foreground mb-4">
-                        Select a table to inspect raw data from the wallet durable object:
+                      <p className="mb-4 text-muted-foreground">
+                        Select a table to inspect raw data from the wallet
+                        durable object:
                       </p>
-                      <div className="flex gap-2 flex-wrap">
-                        {["credit_purchases", "aggregated_debits", "escrows", "processed_webhook_events"].map((tableName) => (
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "credit_purchases",
+                          "aggregated_debits",
+                          "escrows",
+                          "processed_webhook_events",
+                        ].map((tableName) => (
                           <Button
                             key={tableName}
-                            variant={selectedTable === tableName ? "default" : "outline"}
+                            variant={
+                              selectedTable === tableName
+                                ? "default"
+                                : "outline"
+                            }
                             size="sm"
                             onClick={() => handleTableClick(tableName)}
                           >
@@ -456,31 +508,39 @@ export default function AdminWallet() {
                         ) : tableData ? (
                           <div>
                             {tableData.message ? (
-                              <div className="text-center py-8">
-                                <p className="text-muted-foreground">{tableData.message}</p>
+                              <div className="py-8 text-center">
+                                <p className="text-muted-foreground">
+                                  {tableData.message}
+                                </p>
                               </div>
                             ) : (
                               <div>
                                 <div className="mb-4 text-sm text-muted-foreground">
-                                  Total records: {tableData.total} | Page: {tableData.page + 1} | Page size: {tableData.pageSize}
+                                  Total records: {tableData.total} | Page:{" "}
+                                  {tableData.page + 1} | Page size:{" "}
+                                  {tableData.pageSize}
                                 </div>
                                 {tableData.data.length > 0 ? (
-                                  <div className="border rounded-lg overflow-hidden">
-                                    <pre className="p-4 text-xs bg-muted overflow-auto max-h-96">
+                                  <div className="overflow-hidden rounded-lg border">
+                                    <pre className="max-h-96 overflow-auto bg-muted p-4 text-xs">
                                       {JSON.stringify(tableData.data, null, 2)}
                                     </pre>
                                   </div>
                                 ) : (
-                                  <div className="text-center py-8">
-                                    <p className="text-muted-foreground">No data found in this table</p>
+                                  <div className="py-8 text-center">
+                                    <p className="text-muted-foreground">
+                                      No data found in this table
+                                    </p>
                                   </div>
                                 )}
                                 {tableData.total > tableData.pageSize && (
-                                  <div className="flex justify-center gap-2 mt-4">
+                                  <div className="mt-4 flex justify-center gap-2">
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => setTablePage(Math.max(0, tablePage - 1))}
+                                      onClick={() =>
+                                        setTablePage(Math.max(0, tablePage - 1))
+                                      }
                                       disabled={tablePage === 0}
                                     >
                                       Previous
@@ -488,8 +548,13 @@ export default function AdminWallet() {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => setTablePage(tablePage + 1)}
-                                      disabled={(tablePage + 1) * tableData.pageSize >= tableData.total}
+                                      onClick={() =>
+                                        setTablePage(tablePage + 1)
+                                      }
+                                      disabled={
+                                        (tablePage + 1) * tableData.pageSize >=
+                                        tableData.total
+                                      }
                                     >
                                       Next
                                     </Button>
@@ -499,8 +564,10 @@ export default function AdminWallet() {
                             )}
                           </div>
                         ) : (
-                          <div className="text-center py-8">
-                            <p className="text-muted-foreground">Failed to load table data</p>
+                          <div className="py-8 text-center">
+                            <p className="text-muted-foreground">
+                              Failed to load table data
+                            </p>
                           </div>
                         )}
                       </CardContent>
