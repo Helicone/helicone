@@ -75,7 +75,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
           arguments: '{"expression":"50 + 50"}'
         }
       });
-      expect(result.choices[0].finish_reason).toBe('function_call');
+      expect(result.choices[0].finish_reason).toBe('tool_calls');
     });
 
     it('should handle cached tokens', () => {

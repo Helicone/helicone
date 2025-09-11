@@ -36,7 +36,7 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
   return {
     id: response.id,
     object: "chat.completion",
-    created: Math.floor(Date.now() / 1000), // current timestamp in seconds
+    created: Math.floor(Date.now() / 1000), // Current timestamp in seconds
     model: response.model,
     choices: [choice],
     usage: {
@@ -73,10 +73,13 @@ function mapStopReason(
   reason: AnthropicResponseBody["stop_reason"]
 ): OpenAIChoice["finish_reason"] {
   switch (reason) {
+    case "end_turn":
+    case "stop_sequence":
+      return "stop";
     case "max_tokens":
       return "length";
     case "tool_use":
-      return "function_call";
+      return "tool_calls";
     default:
       return "stop";
   }
