@@ -63,7 +63,6 @@
     "remark-gfm": "^4.0.0",
     "remark-toc": "^9.0.0",
     "rss": "^1.2.2",
-    "shiki": "^3.12.2",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7"
   },

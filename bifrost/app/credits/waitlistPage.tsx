@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { CreditsWaitlistForm } from "./CreditsWaitlist";
 import { Col } from "@/components/common/col";
 import { ArrowUpRight } from "lucide-react";
@@ -12,17 +11,9 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { createHighlighter } from "shiki";
-
-// Create a singleton highlighter instance
-const highlighterPromise = createHighlighter({
-  themes: ["github-dark"],
-  langs: ["javascript"],
-});
 
 export default function WaitlistPage() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
-  const [highlightedCode, setHighlightedCode] = useState<string>("");
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.helicone.ai";
 
   // Fetch count once at the page level
@@ -52,32 +43,6 @@ export default function WaitlistPage() {
     fetchCount();
   }, [apiUrl]);
 
-  // Initialize syntax highlighting
-  useEffect(() => {
-    const initHighlighter = async () => {
-      const highlighter = await highlighterPromise;
-      const code = `import { OpenAI } from "openai";
-
-const client = new OpenAI({
-  baseURL: "https://ai-gateway.helicone.ai",
-  apiKey: process.env.HELICONE_API_KEY,
-});
-
-// Works with any model from any provider
-const response = await client.chat.completions.create({
-  model: "o3", // or claude-opus-4, gemini-2.5-pro, grok-4, llama-3.3-70b...
-  messages: [{ role: "user", content: "Hello!" }]
-});`;
-
-      const html = highlighter.codeToHtml(code, {
-        lang: "javascript",
-        theme: "github-dark",
-      });
-      setHighlightedCode(html);
-    };
-
-    initHighlighter();
-  }, []);
 
   return (
     <div className="bg-background text-slate-700 antialiased">
@@ -271,10 +236,20 @@ const response = await client.chat.completions.create({
                   </p>
                   {/* Code snippet */}
                   <div className="bg-[#24292e] rounded-lg overflow-hidden max-w-2xl">
-                    <div
-                      className="p-4 overflow-x-auto text-sm"
-                      dangerouslySetInnerHTML={{ __html: highlightedCode }}
-                    />
+                    <pre className="p-4 overflow-x-auto text-sm text-gray-300">
+                      <code>{`import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Works with any model from any provider
+const response = await client.chat.completions.create({
+  model: "o3", // or claude-opus-4, gemini-2.5-pro, grok-4, llama-3.3-70b...
+  messages: [{ role: "user", content: "Hello!" }]
+});`}</code>
+                    </pre>
                   </div>
                 </div>
               </div>
@@ -342,8 +317,8 @@ const response = await client.chat.completions.create({
                     >
                       helicone.ai/models
                     </Link>
-                    . We&apos;re adding new models every day — one integration for
-                    all providers.
+                    . We&apos;re adding new models every day — one integration
+                    for all providers.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -352,8 +327,8 @@ const response = await client.chat.completions.create({
                     Is observability really included for free?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    Yes! You get Helicone&apos;s full observability platform at no
-                    extra cost. This includes real-time monitoring, detailed
+                    Yes! You get Helicone&apos;s full observability platform at
+                    no extra cost. This includes real-time monitoring, detailed
                     analytics, debugging tools, alerting, caching, and more. We
                     can offer this because we negotiate lower rates with
                     providers — the difference covers our platform costs while
@@ -379,10 +354,10 @@ const response = await client.chat.completions.create({
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
                     Yes! If you prefer to use your own API keys, we offer BYOK
-                    with a 3% platform fee. This includes access to Helicone&apos;s
-                    full observability platform — monitoring, analytics,
-                    debugging, caching, and all other features. You get the same
-                    powerful tools whether you use Credits or BYOK.
+                    with a 3% platform fee. This includes access to
+                    Helicone&apos;s full observability platform — monitoring,
+                    analytics, debugging, caching, and all other features. You
+                    get the same powerful tools whether you use Credits or BYOK.
                   </AccordionContent>
                 </AccordionItem>
 
@@ -391,10 +366,10 @@ const response = await client.chat.completions.create({
                     When will Credits be available?
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
-                    We&apos;re already working with beta partners and continuously
-                    adding more to the beta program. Join the waitlist to be
-                    next in line for access. We&apos;ll notify you as soon as Credits
-                    is available for your organization.
+                    We&apos;re already working with beta partners and
+                    continuously adding more to the beta program. Join the
+                    waitlist to be next in line for access. We&apos;ll notify
+                    you as soon as Credits is available for your organization.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
