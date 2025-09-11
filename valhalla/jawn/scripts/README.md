@@ -1,1 +1,1 @@
-To seed: yarn seed:clickhouse --count=500
+npx ts-node scripts/seed-clickhouse.ts --count=2000 --orgId=12345678-1234-1234-1234-123456789abc
