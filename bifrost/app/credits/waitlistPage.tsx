@@ -52,7 +52,7 @@ export default function WaitlistPage() {
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-3xl md:pt-4 text-center text-accent-foreground">
               One bill. Every LLM provider.
               <br />
-              <span className="text-brand">$0 fees</span>
+              <span className="text-brand">0% markup</span>
             </h1>
 
             <p className="md:mt-4 w-full text-md sm:text-lg leading-7 max-w-2xl text-center text-muted-foreground">
@@ -263,13 +263,14 @@ const response = await client.chat.completions.create({
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-2xl sm:text-3xl mb-3 text-black">
-                    <span className="text-brand">$0 platform fees</span>,
+                    <span className="text-brand">0% markup</span>,
                     observability included
                   </h3>
                   <p className="text-lg text-slate-600 leading-relaxed">
                     Monitor usage, debug errors, analyze performance. Set
                     spending limits, share credits with your team. Everything
-                    you need to scale — at provider prices.
+                    you need to scale — at exact provider prices. Only standard
+                    payment processing fees apply.
                   </p>
                 </div>
               </div>
@@ -294,10 +295,11 @@ const response = await client.chat.completions.create({
                   </AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">
                     You add credits to your account, and we deduct the exact
-                    provider cost for each API call. You pay exactly what the
-                    providers charge plus the Stripe transaction fee. We charge
-                    nothing extra — no markups, no platform fees. Your credits
-                    work across all supported providers from a single balance.
+                    provider cost for each API call. <strong>No Helicone AI Gateway fees</strong> — 
+                    you only pay the provider's list price plus standard payment 
+                    processing fees (2.9% + $0.30 per transaction). No markups, 
+                    no platform fees, no surprises. Your credits work across all 
+                    supported providers from a single balance.
                   </AccordionContent>
                 </AccordionItem>
 
