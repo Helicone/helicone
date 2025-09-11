@@ -1,31 +1,60 @@
-import { OpenAIResponseBody, Choice } from "../../openai/response/types";
+import { OpenAIResponseBody, Choice, ToolCall } from "../../openai/response/types";
 import { AntResponseBody, ContentBlock } from "./types";
 
+// Anthropic Response Body -> OpenAI Response Body
 export function toOpenAI(response: AntResponseBody): OpenAIResponseBody {
-  const content = response.content
+  const textBlocks = response.content.filter(block => block.type === "text");
+  const toolUseBlocks = response.content.filter(block => block.type === "tool_use");
+  
+  const content = textBlocks
     .map((block) => blockToString(block))
     .join("");
+
+  const tool_calls: ToolCall[] = toolUseBlocks
+    .filter(block => block.type === "tool_use" && block.id && block.name)
+    .map(block => ({
+      id: block.id!,
+      type: "function",
+      function: {
+        name: block.name!,
+        arguments: JSON.stringify(block.input || {})
+      }
+    }));
 
   const choice: Choice = {
     index: 0,
     message: {
       role: "assistant",
-      content: content,
+      content: content || null,
+      ...(tool_calls.length > 0 && { tool_calls })
     },
     finish_reason: mapStopReason(response.stop_reason),
     logprobs: null,
   };
 
+  const cachedTokens = response.usage.cache_read_input_tokens ?? 0;
   return {
     id: response.id,
     object: "chat.completion",
-    created: Math.floor(Date.now() / 1000), // Current timestamp in seconds
+    created: Math.floor(Date.now() / 1000), // current timestamp in seconds
     model: response.model,
     choices: [choice],
     usage: {
       prompt_tokens: response.usage.input_tokens,
       completion_tokens: response.usage.output_tokens,
       total_tokens: response.usage.input_tokens + response.usage.output_tokens,
+      ...(cachedTokens > 0 && {
+        prompt_tokens_details: {
+          cached_tokens: cachedTokens,
+          audio_tokens: 0,
+        }
+      }),
+      completion_tokens_details: {
+        reasoning_tokens: 0,
+        audio_tokens: 0,
+        accepted_prediction_tokens: 0,
+        rejected_prediction_tokens: 0,
+      },
     },
   };
 }
@@ -33,9 +62,7 @@ export function toOpenAI(response: AntResponseBody): OpenAIResponseBody {
 function blockToString(block: ContentBlock): string {
   if (block.type === "text") {
     return block.text || "";
-  } else if (block.type === "tool_use") {
-    return `Tool used: ${block.name}\nInput: ${JSON.stringify(block.input)}\n`;
-  }
+  } // thinking not handled in OpenAI format in most cases, TODO (?)
   return "";
 }
 
@@ -43,14 +70,11 @@ function mapStopReason(
   reason: AntResponseBody["stop_reason"]
 ): Choice["finish_reason"] {
   switch (reason) {
-    case "end_turn":
-    case "stop_sequence":
-      return "stop";
     case "max_tokens":
       return "length";
     case "tool_use":
-      return "tool_calls";
+      return "function_call";
     default:
-      return null;
+      return "stop";
   }
 }

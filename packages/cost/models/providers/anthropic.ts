@@ -40,10 +40,6 @@ export class AnthropicProvider extends BaseProvider {
       return JSON.stringify(context.parsedBody); // return without mapping
     }
     const anthropicBody = context.toAnthropic(context.parsedBody);
-    const updatedBody = {
-      ...anthropicBody,
-      // anthropic_version: "2023-06-01",
-    };
-    return JSON.stringify(updatedBody);
+    return JSON.stringify(anthropicBody);
   }
 }
