@@ -575,6 +575,55 @@ function getAPIRouterV1(
     }
   );
 
+  // Admin endpoint to get wallet state for any org
+  router.get(
+    "/admin/wallet/:orgId/state",
+    async (
+      { params: { orgId } },
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      const authHeader = requestWrapper.headers.get("Authorization");
+      if (!authHeader) {
+        return InternalResponse.unauthorized();
+      }
+
+      const providedToken = authHeader.replace("Bearer ", "");
+      const expectedToken = env.HELICONE_MANUAL_ACCESS_KEY;
+
+      if (!expectedToken) {
+        console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
+        return InternalResponse.newError("Server configuration error", 500);
+      }
+
+      const providedBuffer = Buffer.from(providedToken);
+      const expectedBuffer = Buffer.from(expectedToken);
+
+      // Check length first to avoid timingSafeEqual error
+      if (providedBuffer.length !== expectedBuffer.length) {
+        return InternalResponse.unauthorized();
+      }
+
+      if (!timingSafeEqual(providedBuffer, expectedBuffer)) {
+        return InternalResponse.unauthorized();
+      }
+
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      try {
+        const state = await walletStub.getWalletState(orgId);
+        return InternalResponse.successJSON(state);
+      } catch (e) {
+        return InternalResponse.newError(
+          e instanceof Error ? e.message : "Failed to fetch wallet state",
+          500
+        );
+      }
+    }
+  );
+
   // Stripe Webhook Handler
   router.post(
     "/stripe/webhook",

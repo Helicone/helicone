@@ -8468,6 +8468,7 @@
 			"SettingName": {
 				"type": "string",
 				"enum": [
+					"stripe:products",
 					"kafka:dlq",
 					"kafka:log",
 					"kafka:score",
@@ -8483,8 +8484,7 @@
 					"sqs:request-response-logs",
 					"sqs:helicone-scores",
 					"sqs:request-response-logs-dlq",
-					"sqs:helicone-scores-dlq",
-					"stripe:products"
+					"sqs:helicone-scores-dlq"
 				],
 				"nullable": false
 			},
@@ -53502,6 +53502,39 @@
 				"parameters": []
 			}
 		},
+		"/v1/admin/gateway/dashboard_data": {
+			"post": {
+				"operationId": "StripeSync",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/admin/has-feature-flag": {
 			"post": {
 				"operationId": "HasFeatureFlag",
@@ -55102,6 +55135,116 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/admin/wallet/{orgId}": {
+			"post": {
+				"operationId": "GetWalletDetails",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_any_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/{orgId}/tables/{tableName}": {
+			"post": {
+				"operationId": "GetWalletTableData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "tableName",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
 			}
 		},
 		"/v1/audio/convert-to-wav": {

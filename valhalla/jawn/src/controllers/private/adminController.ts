@@ -17,7 +17,7 @@ import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import type { JawnAuthenticatedRequest } from "../../types/request";
-import { Setting } from "../../utils/settings";
+import { Setting, SettingsManager } from "../../utils/settings";
 import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
@@ -28,6 +28,7 @@ import {
 } from "@helicone-package/cost";
 
 import { err, ok, Result } from "../../packages/common/result";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -56,6 +57,126 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
+  @Post("/gateway/dashboard_data")
+  public async stripeSync(@Request() request: JawnAuthenticatedRequest) {
+    await authCheckThrow(request.authParams.userId);
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    if (
+      !stripeProductSettings ||
+      !stripeProductSettings.cloudGatewayTokenUsageProduct
+    ) {
+      return err("stripe:products setting is not configured");
+    }
+    const tokenUsageProductId =
+      stripeProductSettings.cloudGatewayTokenUsageProduct;
+
+    // Get organizations with payments
+    const paymentsResult = await dbExecute<{
+      org_id: string;
+      org_name: string;
+      stripe_customer_id: string;
+      tier: string;
+      total_amount_received: number;
+      last_payment_date: string;
+    }>(
+      `
+      SELECT 
+        organization.id as org_id,
+        organization.name as org_name,
+        organization.stripe_customer_id,
+        organization.tier,
+        SUM(stripe.payment_intents.amount_received) as total_amount_received,
+        MAX(stripe.payment_intents.created) as last_payment_date
+      FROM stripe.payment_intents 
+      LEFT JOIN organization ON organization.stripe_customer_id = stripe.payment_intents.customer
+      WHERE stripe.payment_intents.metadata->>'productId' = $1
+        AND stripe.payment_intents.status = 'succeeded'
+        AND organization.id IS NOT NULL
+      GROUP BY organization.id, organization.name, organization.stripe_customer_id, organization.tier
+      ORDER BY total_amount_received DESC
+      LIMIT 1000
+      `,
+      [tokenUsageProductId]
+    );
+
+    if (paymentsResult.error) {
+      return err(paymentsResult.error);
+    }
+
+    if (!paymentsResult.data || paymentsResult.data.length === 0) {
+      return ok({
+        organizations: [],
+        summary: {
+          totalOrgsWithCredits: 0,
+          totalCreditsIssued: 0,
+          totalCreditsSpent: 0,
+        },
+      });
+    }
+
+    // Get ClickHouse spending for these organizations
+    const orgIds = paymentsResult.data.map((org) => org.org_id);
+    console.log("COST_PRECISION_MULTIPLIER:", COST_PRECISION_MULTIPLIER);
+    console.log("Querying ClickHouse for orgIds:", orgIds);
+    const clickhouseSpendResult = await clickhouseDb.dbQuery<{
+      organization_id: string;
+      total_cost: number;
+    }>(
+      `
+      SELECT 
+        organization_id,
+        SUM(cost) as total_cost
+      FROM request_response_rmt
+      GROUP BY organization_id
+      `,
+      []
+    );
+    console.log("ClickHouse spend result:", clickhouseSpendResult);
+
+    const clickhouseSpendMap = new Map<string, number>();
+    if (!clickhouseSpendResult.error && clickhouseSpendResult.data) {
+      clickhouseSpendResult.data.forEach((row) => {
+        // Divide by precision multiplier to get dollars
+        clickhouseSpendMap.set(
+          row.organization_id,
+          Number(row.total_cost) / COST_PRECISION_MULTIPLIER
+        );
+      });
+    }
+
+    // Combine the data
+    const organizations = paymentsResult.data.map((org) => ({
+      orgId: org.org_id,
+      orgName: org.org_name || "Unknown",
+      stripeCustomerId: org.stripe_customer_id,
+      totalPayments: org.total_amount_received / 100, // Convert cents to dollars
+      clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
+      lastPaymentDate: org.last_payment_date,
+      tier: org.tier || "free",
+    }));
+
+    // Calculate summary
+    const totalCreditsIssued = organizations.reduce(
+      (sum, org) => sum + org.totalPayments,
+      0
+    );
+    const totalCreditsSpent = organizations.reduce(
+      (sum, org) => sum + org.clickhouseTotalSpend,
+      0
+    );
+
+    return ok({
+      organizations,
+      summary: {
+        totalOrgsWithCredits: organizations.length,
+        totalCreditsIssued,
+        totalCreditsSpent,
+      },
+    });
+  }
+
   @Post("/has-feature-flag")
   public async hasFeatureFlag(
     @Request() request: JawnAuthenticatedRequest,
@@ -1493,5 +1614,82 @@ export class AdminController extends Controller {
     }
 
     return { query };
+  }
+
+  @Post("/wallet/{orgId}")
+  public async getWalletDetails(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    // Get the wallet state from the worker API using admin credentials
+    const workerApiUrl =
+      process.env.WORKER_API_URL || "https://api.helicone.ai";
+    const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
+
+    if (!adminAccessKey) {
+      return err("Admin access key not configured");
+    }
+
+    try {
+      // Use the admin endpoint that can query any org's wallet
+      const response = await fetch(
+        `${workerApiUrl}/v1/admin/wallet/${orgId}/state`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${adminAccessKey}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return err(`Failed to fetch wallet state: ${errorText}`);
+      }
+
+      const walletState = await response.json();
+      return ok(walletState);
+    } catch (error) {
+      console.error("Error fetching wallet state:", error);
+      return err(`Error fetching wallet state: ${error}`);
+    }
+  }
+
+  @Post("/wallet/{orgId}/tables/{tableName}")
+  public async getWalletTableData(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Path() tableName: string,
+    @Query() page?: number,
+    @Query() pageSize?: number
+  ) {
+    await authCheckThrow(request.authParams.userId);
+
+    // Validate table name to prevent injection
+    const allowedTables = [
+      "credit_purchases",
+      "aggregated_debits",
+      "escrows",
+      "disallow_list",
+      "processed_webhook_events",
+    ];
+
+    if (!allowedTables.includes(tableName)) {
+      return err(`Invalid table name: ${tableName}`);
+    }
+
+    // This would need to be implemented in the worker with a new endpoint
+    // For now, return a placeholder
+    return ok({
+      tableName,
+      orgId,
+      page: page || 0,
+      pageSize: pageSize || 50,
+      data: [],
+      total: 0,
+      message: "Table inspection endpoint to be implemented in worker",
+    });
   }
 }
