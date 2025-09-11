@@ -145,7 +145,7 @@ export function CreditsWaitlistForm({
       setPendingShareTwitter(true);
     } else {
       // For LinkedIn, open in a popup
-      const linkedinUrl = `https://www.linkedin.com/posts/colegottdank_the-helicone-yc-w23-team-goes-to-topgolf-activity-7365872991773069312-7koL`;
+      const linkedinUrl = `https://www.linkedin.com/posts/colegottdank_big-milestone-today-were-launching-the-activity-7371945910156599296-xI9G?utm_source=share&utm_medium=member_desktop&rcm=ACoAACIwhXUB416rA0qAPH4wNyxkkmM_YxHY4y0`;
       shareWindow = window.open(
         linkedinUrl,
         "linkedin-share",
