@@ -43,7 +43,6 @@ export default function WaitlistPage() {
     fetchCount();
   }, [apiUrl]);
 
-
   return (
     <div className="bg-background text-slate-700 antialiased">
       <div className="flex flex-col">
@@ -75,7 +74,7 @@ export default function WaitlistPage() {
             {/* Launch Video */}
             <div className="w-full max-w-3xl mt-6">
               <video
-                src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Helicone_PassThrough_Full.mp4"
+                src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Helicone_PassThrough_Final+(1).mp4"
                 className="w-full rounded-xl border border-slate-200 shadow-lg"
                 autoPlay
                 muted
