@@ -80,6 +80,7 @@ export class AdminController extends Controller {
       tier: string;
       total_amount_received: number;
       last_payment_date: string;
+      owner_email: string;
     }>(
       `
       SELECT 
@@ -88,13 +89,15 @@ export class AdminController extends Controller {
         organization.stripe_customer_id,
         organization.tier,
         SUM(stripe.payment_intents.amount_received) as total_amount_received,
-        MAX(stripe.payment_intents.created) as last_payment_date
+        MAX(stripe.payment_intents.created) as last_payment_date,
+        auth.users.email as owner_email
       FROM stripe.payment_intents 
       LEFT JOIN organization ON organization.stripe_customer_id = stripe.payment_intents.customer
+      LEFT JOIN auth.users ON organization.owner = auth.users.id
       WHERE stripe.payment_intents.metadata->>'productId' = $1
         AND stripe.payment_intents.status = 'succeeded'
         AND organization.id IS NOT NULL
-      GROUP BY organization.id, organization.name, organization.stripe_customer_id, organization.tier
+      GROUP BY organization.id, organization.name, organization.stripe_customer_id, organization.tier, auth.users.email
       ORDER BY total_amount_received DESC
       LIMIT 1000
       `,
@@ -153,8 +156,9 @@ export class AdminController extends Controller {
       stripeCustomerId: org.stripe_customer_id,
       totalPayments: org.total_amount_received / 100, // Convert cents to dollars
       clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-      lastPaymentDate: org.last_payment_date ? org.last_payment_date * 1000 : null, // Convert seconds to milliseconds
+      lastPaymentDate: org.last_payment_date ? Number(org.last_payment_date) * 1000 : null, // Convert seconds to milliseconds
       tier: org.tier || "free",
+      ownerEmail: org.owner_email || "Unknown",
     }));
 
     // Calculate summary
@@ -1680,16 +1684,42 @@ export class AdminController extends Controller {
       return err(`Invalid table name: ${tableName}`);
     }
 
-    // This would need to be implemented in the worker with a new endpoint
-    // For now, return a placeholder
-    return ok({
-      tableName,
-      orgId,
-      page: page || 0,
-      pageSize: pageSize || 50,
-      data: [],
-      total: 0,
-      message: "Table inspection endpoint to be implemented in worker",
-    });
+    // Get table data from the worker API using admin credentials
+    const workerApiUrl =
+      process.env.HELICONE_WORKER_API || process.env.WORKER_API_URL || "https://api.helicone.ai";
+    const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
+
+    if (!adminAccessKey) {
+      return err("Admin access key not configured");
+    }
+
+    try {
+      // Build query params for pagination
+      const params = new URLSearchParams();
+      if (page !== undefined) params.set('page', page.toString());
+      if (pageSize !== undefined) params.set('pageSize', pageSize.toString());
+      
+      // Use the admin endpoint that can query any org's table data
+      const response = await fetch(
+        `${workerApiUrl}/admin/wallet/${orgId}/tables/${tableName}?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${adminAccessKey}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return err(`Failed to fetch table data: ${errorText}`);
+      }
+
+      const tableData = await response.json();
+      return ok(tableData);
+    } catch (error) {
+      console.error("Error fetching table data:", error);
+      return err(`Error fetching table data: ${error}`);
+    }
   }
 }

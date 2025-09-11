@@ -31,6 +31,7 @@ interface DashboardData {
     clickhouseTotalSpend: number;
     lastPaymentDate: string;
     tier: string;
+    ownerEmail: string;
   }>;
   summary: {
     totalOrgsWithCredits: number;
@@ -52,11 +53,23 @@ interface WalletState {
   }>;
 }
 
+interface TableData {
+  tableName: string;
+  orgId: string;
+  page: number;
+  pageSize: number;
+  data: any[];
+  total: number;
+  message?: string;
+}
+
 export default function AdminWallet() {
   const jawn = useJawnClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const [walletDetailsOpen, setWalletDetailsOpen] = useState(false);
+  const [selectedTable, setSelectedTable] = useState<string | null>(null);
+  const [tablePage, setTablePage] = useState(0);
 
   // Fetch dashboard data
   const { data: dashboardData, isLoading: dashboardLoading, error: dashboardError } = useQuery<DashboardData>({
@@ -100,16 +113,43 @@ export default function AdminWallet() {
     enabled: !!selectedOrg && walletDetailsOpen,
   });
 
+  // Fetch table data (lazy loaded when table is selected)
+  const { data: tableData, isLoading: tableLoading } = useQuery<TableData>({
+    queryKey: ["admin-wallet-table", selectedOrg, selectedTable, tablePage],
+    queryFn: async () => {
+      if (!selectedOrg || !selectedTable) throw new Error("No org or table selected");
+      console.log("Fetching table data for org:", selectedOrg, "table:", selectedTable);
+      const response = await jawn.POST(`/v1/admin/wallet/${selectedOrg}/tables/${selectedTable}?page=${tablePage}&pageSize=50`, {});
+      console.log("Table data API response:", response);
+      if (response.error || !response.data) {
+        throw new Error(`Failed to fetch table data: ${response.error || "No data"}`);
+      }
+      const actualTableData = (response.data as any).data || response.data;
+      console.log("Actual table data:", actualTableData);
+      return actualTableData as TableData;
+    },
+    enabled: !!selectedOrg && !!selectedTable && walletDetailsOpen,
+  });
+
   const filteredOrgs = dashboardData?.organizations?.filter(
     (org) =>
       org.orgName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       org.orgId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      org.stripeCustomerId?.toLowerCase().includes(searchTerm.toLowerCase())
+      org.stripeCustomerId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.ownerEmail?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   const handleOrgClick = (orgId: string) => {
     setSelectedOrg(orgId);
     setWalletDetailsOpen(true);
+    // Reset table selection when switching orgs
+    setSelectedTable(null);
+    setTablePage(0);
+  };
+
+  const handleTableClick = (tableName: string) => {
+    setSelectedTable(tableName);
+    setTablePage(0); // Reset to first page when switching tables
   };
 
   if (dashboardLoading) {
@@ -186,7 +226,7 @@ export default function AdminWallet() {
           <div className="flex items-center space-x-2 mb-4">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by org name, ID, or Stripe customer ID..."
+              placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-md"
@@ -199,6 +239,7 @@ export default function AdminWallet() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Organization</TableHead>
+                  <TableHead>Owner</TableHead>
                   <TableHead>Tier</TableHead>
                   <TableHead>Total Payments</TableHead>
                   <TableHead>Total Spent (ClickHouse)</TableHead>
@@ -220,6 +261,11 @@ export default function AdminWallet() {
                           <div className="text-sm text-muted-foreground">
                             {org.orgId}
                           </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-muted-foreground">
+                          {org.ownerEmail}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -372,30 +418,95 @@ export default function AdminWallet() {
               </TabsContent>
               
               <TabsContent value="tables">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Raw Table Inspection</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground mb-4">
-                      Select a table to inspect raw data from the wallet durable object:
-                    </p>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        credit_purchases
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        aggregated_debits
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        escrows
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        processed_webhook_events
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Raw Table Inspection</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground mb-4">
+                        Select a table to inspect raw data from the wallet durable object:
+                      </p>
+                      <div className="flex gap-2 flex-wrap">
+                        {["credit_purchases", "aggregated_debits", "escrows", "processed_webhook_events"].map((tableName) => (
+                          <Button
+                            key={tableName}
+                            variant={selectedTable === tableName ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleTableClick(tableName)}
+                          >
+                            {tableName}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {selectedTable && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Table: {selectedTable}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {tableLoading ? (
+                          <div className="flex items-center justify-center py-8">
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                            <span className="ml-2">Loading table data...</span>
+                          </div>
+                        ) : tableData ? (
+                          <div>
+                            {tableData.message ? (
+                              <div className="text-center py-8">
+                                <p className="text-muted-foreground">{tableData.message}</p>
+                              </div>
+                            ) : (
+                              <div>
+                                <div className="mb-4 text-sm text-muted-foreground">
+                                  Total records: {tableData.total} | Page: {tableData.page + 1} | Page size: {tableData.pageSize}
+                                </div>
+                                {tableData.data.length > 0 ? (
+                                  <div className="border rounded-lg overflow-hidden">
+                                    <pre className="p-4 text-xs bg-muted overflow-auto max-h-96">
+                                      {JSON.stringify(tableData.data, null, 2)}
+                                    </pre>
+                                  </div>
+                                ) : (
+                                  <div className="text-center py-8">
+                                    <p className="text-muted-foreground">No data found in this table</p>
+                                  </div>
+                                )}
+                                {tableData.total > tableData.pageSize && (
+                                  <div className="flex justify-center gap-2 mt-4">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setTablePage(Math.max(0, tablePage - 1))}
+                                      disabled={tablePage === 0}
+                                    >
+                                      Previous
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setTablePage(tablePage + 1)}
+                                      disabled={(tablePage + 1) * tableData.pageSize >= tableData.total}
+                                    >
+                                      Next
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <p className="text-muted-foreground">Failed to load table data</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </TabsContent>
             </Tabs>
           ) : (
