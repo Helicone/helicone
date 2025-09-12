@@ -101,6 +101,13 @@ export class ReadableInterceptor {
     return readable;
   }
 
+  /**
+   * Get the total bytes received so far
+   */
+  getTotalResponseBytes(): number {
+    return this.totalResponseBytes;
+  }
+
   async waitForStream(): Promise<CompletedStream> {
     const startTime = Date.now();
 

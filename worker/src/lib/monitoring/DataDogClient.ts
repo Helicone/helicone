@@ -19,7 +19,7 @@ export class DataDogClient {
   constructor(config: DataDogConfig) {
     this.config = {
       sampleRate: 0.1,
-      ...config
+      ...config,
     };
   }
 
@@ -39,15 +39,15 @@ export class DataDogClient {
     try {
       const previousBytes = GLOBAL_MEMORY_ALLOCATIONS.get(key) || 0;
       const delta = bytes - previousBytes;
-      
+
       GLOBAL_MEMORY_ALLOCATIONS.set(key, bytes);
       GLOBAL_TOTAL_BYTES += delta;
-      
+
       // Track peak memory
       if (GLOBAL_TOTAL_BYTES > GLOBAL_PEAK_BYTES) {
         GLOBAL_PEAK_BYTES = GLOBAL_TOTAL_BYTES;
       }
-      
+
       // Send metrics immediately if we have context
       if (this.ctx && this.config.enabled) {
         this.sendMemoryMetrics(this.ctx);
@@ -57,7 +57,6 @@ export class DataDogClient {
     }
   }
 
-  
   /**
    * Increment request counter
    */
@@ -77,33 +76,33 @@ export class DataDogClient {
       const globalTotalMB = GLOBAL_TOTAL_BYTES / (1024 * 1024);
       const globalPeakMB = GLOBAL_PEAK_BYTES / (1024 * 1024);
       const uptimeMinutes = (Date.now() - ISOLATE_START_TIME) / 60000;
-      
+
       const metrics = [
         // Global cumulative memory
         this.sendDistributionMetric(
           timestamp,
           globalTotalMB,
-          'worker.memory.cumulative_mb',
+          "worker.memory.cumulative_mb",
           [`requests:${GLOBAL_REQUEST_COUNT}`]
         ),
-        
+
         // Peak memory
         this.sendDistributionMetric(
           timestamp,
           globalPeakMB,
-          'worker.memory.peak_mb',
+          "worker.memory.peak_mb",
           [`requests:${GLOBAL_REQUEST_COUNT}`]
         ),
-        
+
         // Request count
         this.sendDistributionMetric(
           timestamp,
           GLOBAL_REQUEST_COUNT,
-          'worker.memory.request_count',
+          "worker.memory.request_count",
           [`uptime_minutes:${uptimeMinutes.toFixed(1)}`]
-        )
+        ),
       ];
-      
+
       ctx.waitUntil(Promise.all(metrics));
     } catch (error) {
       // Silently fail - monitoring must never break the app
@@ -121,26 +120,29 @@ export class DataDogClient {
   ): Promise<void> {
     try {
       const distribution = {
-        series: [{
-          metric: metricName,
-          points: [[timestamp, [value]]],
-          host: 'cloudflare_worker',
-          tags
-        }]
+        series: [
+          {
+            metric: metricName,
+            points: [[timestamp, [value]]],
+            host: "cloudflare_worker",
+            tags,
+          },
+        ],
       };
 
-      await fetch(
+      const response = await fetch(
         `${this.config.endpoint}/v1/distribution_points`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'DD-API-KEY': this.config.apiKey
+            "Content-Type": "application/json",
+            "DD-API-KEY": this.config.apiKey,
           },
-          body: JSON.stringify(distribution)
+          body: JSON.stringify(distribution),
         }
       );
     } catch (e) {
+      console.error("[DataDog] Error in sendDistributionMetric:", e);
       // Silently fail - monitoring must never break the app
     }
   }
@@ -166,7 +168,6 @@ export class DataDogClient {
       return 0;
     }
   }
-
 }
 
 // Singleton instance for entire worker lifetime (NOT per request)
@@ -176,12 +177,12 @@ export function getDataDogClient(env: Env): DataDogClient {
   if (!dataDogClient) {
     dataDogClient = new DataDogClient({
       enabled: (env.DATADOG_ENABLED ?? "false") === "true",
-      apiKey: env.DATADOG_API_KEY || '',
-      endpoint: env.DATADOG_ENDPOINT || '',
-      sampleRate: 0.1
+      apiKey: env.DATADOG_API_KEY || "",
+      endpoint: env.DATADOG_ENDPOINT || "",
+      sampleRate: 1.0,
     });
   }
-  
+
   return dataDogClient;
 }
 
@@ -192,6 +193,6 @@ export function getGlobalMemoryStats() {
     peakMB: (GLOBAL_PEAK_BYTES / (1024 * 1024)).toFixed(2),
     requestCount: GLOBAL_REQUEST_COUNT,
     uptimeMinutes: ((Date.now() - ISOLATE_START_TIME) / 60000).toFixed(1),
-    allocationsCount: GLOBAL_MEMORY_ALLOCATIONS.size
+    allocationsCount: GLOBAL_MEMORY_ALLOCATIONS.size,
   };
 }
