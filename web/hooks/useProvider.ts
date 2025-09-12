@@ -72,10 +72,6 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
       if (config !== undefined) body.config = config;
       if (byokEnabled !== undefined) body.byokEnabled = byokEnabled;
 
-      // Debug log to see what we're sending
-      console.log("Updating provider key with body:", body);
-      console.log("Raw params:", { key, secretKey, config, byokEnabled });
-
       return jawnClient.PATCH("/v1/api-keys/provider-key/{providerKeyId}", {
         params: {
           path: {
