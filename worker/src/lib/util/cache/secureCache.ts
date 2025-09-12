@@ -143,12 +143,14 @@ async function storeInCacheWithHmac({
   env,
   hmac_key,
   expirationTtl,
+  useMemoryCache = true,
 }: {
   key: string;
   value: string;
   env: SecureCacheEnv;
   hmac_key: 1 | 2;
   expirationTtl?: number;
+  useMemoryCache?: boolean;
 }): Promise<void> {
   const encrypted = await encrypt(value, env, hmac_key);
   const hashedKey = await hashWithHmac(key, hmac_key);
@@ -165,14 +167,17 @@ async function storeInCacheWithHmac({
   } catch (e) {
     console.error("Error storing in cache", e);
   }
-  InMemoryCache.getInstance<string>().set(hashedKey, JSON.stringify(encrypted));
+  if (useMemoryCache) {
+    InMemoryCache.getInstance<string>().set(hashedKey, JSON.stringify(encrypted));
+  }
 }
 
 export async function storeInCache(
   key: string,
   value: string,
   env: SecureCacheEnv,
-  expirationTtl?: number
+  expirationTtl?: number,
+  useMemoryCache: boolean = true
 ): Promise<void> {
   await Promise.all([
     storeInCacheWithHmac({
@@ -181,6 +186,7 @@ export async function storeInCache(
       env,
       hmac_key: 1,
       expirationTtl,
+      useMemoryCache,
     }),
     await storeInCacheWithHmac({
       key,
@@ -188,6 +194,7 @@ export async function storeInCache(
       env,
       hmac_key: 2,
       expirationTtl,
+      useMemoryCache,
     }),
   ]);
 }
@@ -278,7 +285,8 @@ export async function getAndStoreInCache<T, K>(
   key: string,
   env: SecureCacheEnv,
   fn: () => Promise<Result<T, K>>,
-  expirationTtl?: number
+  expirationTtl?: number,
+  useMemoryCache: boolean = true
 ): Promise<Result<T, K>> {
   const cached = await getFromCache({
     key,
@@ -306,11 +314,12 @@ export async function getAndStoreInCache<T, K>(
       key,
       JSON.stringify({ _helicone_cached_string: value.data }),
       env,
-      expirationTtl
+      expirationTtl,
+      useMemoryCache
     );
     return value;
   } else {
-    await storeInCache(key, JSON.stringify(value.data), env, expirationTtl);
+    await storeInCache(key, JSON.stringify(value.data), env, expirationTtl, useMemoryCache);
   }
   return value;
 }
