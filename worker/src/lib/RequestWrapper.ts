@@ -307,12 +307,6 @@ export class RequestWrapper {
     return this.cachedText;
   }
 
-  getDataDogClient(): DataDogClient | undefined {
-    return (this.env.DATADOG_ENABLED ?? "false") === "true" 
-      ? getDataDogClient(this.env)
-      : undefined;
-  }
-
   shouldFormatPrompt(): boolean {
     return (
       this.promptSettings.promptMode === "production" ||
