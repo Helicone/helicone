@@ -226,6 +226,7 @@ export class RequestWrapper {
   }
 
   async getRawText(): Promise<string> {
+    logObjectMemoryUsage(this.request.body, "RequestWrapper.getRawText");
     if (this.cachedText) {
       return this.cachedText;
     }
@@ -578,4 +579,7 @@ export async function getProviderKeyFromProxy(
     proxyKeyId: storedProxyKey.data?.[0]?.id ?? "",
     organizationId: storedProxyKey.data?.[0]?.org_id ?? "",
   });
+}
+function logObjectMemoryUsage(body: any, arg1: string) {
+  throw new Error("Function not implemented.");
 }
