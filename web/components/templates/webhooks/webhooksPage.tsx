@@ -423,7 +423,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
                           </>
                         ) : (
                           <>
-                            <BeakerIcon className="h-4 w-4 mr-1" />
+                            <BeakerIcon className="mr-1 h-4 w-4" />
                             Test
                           </>
                         )}
