@@ -68,7 +68,6 @@ export class RequestWrapper {
   private bodyKeyOverride: object | null = null;
 
   private gatewayAttempt?: Attempt;
-  private dataDogClient?: DataDogClient;
 
   /*
   We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
@@ -156,11 +155,10 @@ export class RequestWrapper {
     this.prompt2025Settings = {}; // initialized later, if a prompt is used.
     this.injectPromptProperties();
 
-    // Get DataDog client singleton (persists across all requests)
+    // Increment request counter for each new request
     if ((env.DATADOG_ENABLED ?? "false") === "true") {
-      this.dataDogClient = getDataDogClient(env);
-      // Increment request counter for each new request
-      this.dataDogClient.incrementRequestCount();
+      const dataDogClient = getDataDogClient(env);
+      dataDogClient.incrementRequestCount();
     }
     this.baseURLOverride = null;
     this.cf = request.cf;
@@ -297,9 +295,10 @@ export class RequestWrapper {
     this.cachedText = await this.request.text();
 
     try {
-      if (this.dataDogClient) {
+      if ((this.env.DATADOG_ENABLED ?? "false") === "true") {
+        const dataDogClient = getDataDogClient(this.env);
         const sizeBytes = DataDogClient.estimateStringSize(this.cachedText);
-        this.dataDogClient.trackMemory("request-body", sizeBytes);
+        dataDogClient.trackMemory("request-body", sizeBytes);
       }
     } catch (e) {
       // Silently catch - never let monitoring break the request
@@ -309,7 +308,9 @@ export class RequestWrapper {
   }
 
   getDataDogClient(): DataDogClient | undefined {
-    return this.dataDogClient;
+    return (this.env.DATADOG_ENABLED ?? "false") === "true" 
+      ? getDataDogClient(this.env)
+      : undefined;
   }
 
   shouldFormatPrompt(): boolean {
