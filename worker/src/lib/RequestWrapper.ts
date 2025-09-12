@@ -19,6 +19,7 @@ import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
+import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -67,6 +68,7 @@ export class RequestWrapper {
   private bodyKeyOverride: object | null = null;
 
   private gatewayAttempt?: Attempt;
+  private dataDogClient?: DataDogClient;
 
   /*
   We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
@@ -153,6 +155,13 @@ export class RequestWrapper {
     this.promptSettings = this.getPromptSettings();
     this.prompt2025Settings = {}; // initialized later, if a prompt is used.
     this.injectPromptProperties();
+
+    // Get DataDog client singleton (persists across all requests)
+    if ((env.DATADOG_ENABLED ?? "false") === "true") {
+      this.dataDogClient = getDataDogClient(env);
+      // Increment request counter for each new request
+      this.dataDogClient.incrementRequestCount();
+    }
     this.baseURLOverride = null;
     this.cf = request.cf;
   }
@@ -284,8 +293,23 @@ export class RequestWrapper {
     if (this.cachedText) {
       return this.cachedText;
     }
+
     this.cachedText = await this.request.text();
+
+    try {
+      if (this.dataDogClient) {
+        const sizeBytes = DataDogClient.estimateStringSize(this.cachedText);
+        this.dataDogClient.trackMemory("request-body", sizeBytes);
+      }
+    } catch (e) {
+      // Silently catch - never let monitoring break the request
+    }
+
     return this.cachedText;
+  }
+
+  getDataDogClient(): DataDogClient | undefined {
+    return this.dataDogClient;
   }
 
   shouldFormatPrompt(): boolean {
