@@ -14,6 +14,7 @@ export class ReadableInterceptor {
   private decoder = new TextDecoder("utf-8");
   private firstChunkTimeUnix: number | null = null;
   stream: ReadableStream;
+  private totalResponseBytes = 0;
 
   constructor(
     stream: ReadableStream,
@@ -46,7 +47,15 @@ export class ReadableInterceptor {
         this.firstChunkTimeUnix = Date.now();
       }
 
-      this.responseBody.push(this.decoder.decode(chunk, { stream: true }));
+      const decodedChunk = this.decoder.decode(chunk, { stream: true });
+      this.responseBody.push(decodedChunk);
+
+      // OBSERVATIONAL ONLY - Track memory usage without affecting flow
+      try {
+        this.totalResponseBytes += chunk.byteLength;
+      } catch (e) {
+        // Silently catch - never let monitoring break the stream
+      }
     };
 
     const reader = stream.getReader();
