@@ -25,6 +25,7 @@ import {
   HQL_FEATURE_FLAG,
 } from "../../lib/utils/featureFlags";
 import { HqlQueryManager } from "../../managers/HqlQueryManager";
+import { Trace } from "../../utils/traceDecorator";
 
 // --- Response Types ---
 export interface ClickHouseTableSchema {
@@ -89,6 +90,7 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Get("schema")
+  @Trace("hql.controller.getClickHouseSchema")
   public async getClickHouseSchema(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ClickHouseTableSchema[], string>> {
@@ -111,6 +113,7 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Post("execute")
+  @Trace("hql.controller.executeSql")
   public async executeSql(
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
@@ -153,6 +156,7 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Post("download")
+  @Trace("hql.controller.downloadCsv")
   public async downloadCsv(
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
@@ -194,6 +198,7 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Get("saved-queries")
+  @Trace("hql.controller.getSavedQueries")
   public async getSavedQueries(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Array<HqlSavedQuery>, string>> {
@@ -217,6 +222,7 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Get("saved-query/{queryId}")
+  @Trace("hql.controller.getSavedQuery")
   public async getSavedQuery(
     @Path() queryId: string,
     @Request() request: JawnAuthenticatedRequest
@@ -240,6 +246,7 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Delete("saved-query/{queryId}")
+  @Trace("hql.controller.deleteSavedQuery")
   public async deleteSavedQuery(
     @Path() queryId: string,
     @Request() request: JawnAuthenticatedRequest
@@ -263,6 +270,7 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Post("saved-queries/bulk-delete")
+  @Trace("hql.controller.bulkDeleteSavedQueries")
   public async bulkDeleteSavedQueries(
     @Body() requestBody: BulkDeleteSavedQueriesRequest,
     @Request() request: JawnAuthenticatedRequest
@@ -285,6 +293,7 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Post("saved-query")
+  @Trace("hql.controller.createSavedQuery")
   public async createSavedQuery(
     @Body() requestBody: CreateSavedQueryRequest,
     @Request() request: JawnAuthenticatedRequest
@@ -310,6 +319,7 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Put("saved-query/{queryId}")
+  @Trace("hql.controller.updateSavedQuery")
   public async updateSavedQuery(
     @Path() queryId: string,
     @Body() requestBody: CreateSavedQueryRequest,
