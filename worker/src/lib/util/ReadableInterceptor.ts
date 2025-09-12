@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { DataDogClient } from "../monitoring/DataDogClient";
 
 export interface CompletedStream {
   body: string[];
@@ -19,6 +20,7 @@ export class ReadableInterceptor {
   constructor(
     stream: ReadableStream,
     private isStream: boolean,
+    private dataDogClient?: DataDogClient,
     private chunkEventName = "done",
     private chunkTimeoutMs = 30 * 60 * 1000 // Default to 30 minutes
   ) {
@@ -34,6 +36,15 @@ export class ReadableInterceptor {
 
   private interceptStream(stream: ReadableStream): ReadableStream {
     const onDone = (reason: "cancel" | "done") => {
+      // Track final response size to DataDog
+      try {
+        if (this.dataDogClient && this.totalResponseBytes > 0) {
+          this.dataDogClient.trackMemory("response-body", this.totalResponseBytes);
+        }
+      } catch (e) {
+        // Silently catch - never let monitoring break the stream
+      }
+      
       this.chunkEmitter.emit(this.chunkEventName, {
         body: this.responseBody,
         reason,

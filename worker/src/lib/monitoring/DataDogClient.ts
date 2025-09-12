@@ -14,6 +14,7 @@ export interface DataDogConfig {
 
 export class DataDogClient {
   private config: DataDogConfig;
+  private ctx?: ExecutionContext;
 
   constructor(config: DataDogConfig) {
     this.config = {
@@ -23,7 +24,15 @@ export class DataDogClient {
   }
 
   /**
+   * Set the ExecutionContext for sending metrics
+   */
+  setContext(ctx: ExecutionContext): void {
+    this.ctx = ctx;
+  }
+
+  /**
    * Track memory allocation globally across worker lifetime
+   * Automatically sends metrics to DataDog if context is available
    * OBSERVATIONAL ONLY - Never throws or affects execution
    */
   trackMemory(key: string, bytes: number): void {
@@ -37,6 +46,11 @@ export class DataDogClient {
       // Track peak memory
       if (GLOBAL_TOTAL_BYTES > GLOBAL_PEAK_BYTES) {
         GLOBAL_PEAK_BYTES = GLOBAL_TOTAL_BYTES;
+      }
+      
+      // Send metrics immediately if we have context
+      if (this.ctx && this.config.enabled) {
+        this.sendMemoryMetrics(this.ctx);
       }
     } catch (e) {
       // Silently catch - monitoring must never break the app

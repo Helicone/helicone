@@ -308,6 +308,10 @@ export class RequestWrapper {
     return this.cachedText;
   }
 
+  getDataDogClient(): DataDogClient | undefined {
+    return this.dataDogClient;
+  }
+
   shouldFormatPrompt(): boolean {
     return (
       this.promptSettings.promptMode === "production" ||
