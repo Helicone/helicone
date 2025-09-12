@@ -1,0 +1,73 @@
+## Table of Contents
+
+## Why Switch to Helicone AI Gateway
+
+Let's be honest: OpenRouter is a great tool. It's simple to use, has a great UI, and routes you to any model using the OpenAI API.
+
+So we thought: **why not build an open-source alternative, with Helicone's observability built in and charge 0% markup fees?**
+
+That's what we did. The Helicone AI Gateway is a an OpenRouter alternative - with all the features you love, but with 0% markup fees.
+
+- **0% markup fees** - only pay exactly what providers charge
+- **Automatic fallbacks** - when one provider is down, route to another instantly
+- **Built-in observability** - logs, traces, and metrics by default without extra setup
+- **Cost optimization** - automatically route to the cheapest, most reliable provider for each model, always rate-limit aware
+- **Passthrough billing & BYOK support** - let us handle auth for you or bring your own keys
+
+## Migration Guide: OpenRouter → Helicone AI Gateway
+
+### Step 1: Get your Helicone API key
+
+Go to [Helicone](https://us.helicone.ai/settings/api-keys) and get your Helicone API key.
+
+### Step 2: Edit Your Code
+
+Replace OpenRouter's endpoint with Helicone AI Gateway:
+
+```typescript
+// ❌ Before: OpenRouter
+const client = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: "sk-or-v1-..." // OpenRouter key
+});
+
+// ✅ After: Helicone AI Gateway
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY // Helicone key
+});
+
+// Query the model
+const response = await client.chat.completions.create({
+  model: "claude-3.5-sonnet", // or find 100+ other models in https://helicone.ai/models
+  messages: [{ role: "user", content: "Hello!" }]
+});
+```
+
+That's it. No other code changes needed.
+
+### Step 3: Review your requests in the Helicone dashboard
+
+Go to [Helicone](https://helicone.ai/requests) and see your requests logged automatically.
+
+### Migration Gotchas to Watch For
+
+- **Different model names:** Some models use slightly different naming conventions. Helicone has a [model registry](https://helicone.ai/models) to help you find the exact model name.
+- **Model Providers:** Helicone routes you to the cheapest, most reliable provider for each model, which means we don't require you to name the provider when making the request like OpenRouter does (i.e. OpenRouter: `anthropic/claude-3.5-sonnet` vs Helicone: `claude-3.5-sonnet`).
+- **Provider keys:** You can use Helicone's auth or bring your own keys. To BYOK, you can set up your provider keys to the [Helicone dashboard](https://helicone.ai/providers).
+
+### The Bottom Line
+
+As your AI usage grows, cost becomes more and more important.
+
+The Helicone AI Gateway gives you the control you need to optimize your costs while keeping your infrastructure simple and reliable. With observability built in, you never miss a request or an error again!
+
+**Ready to migrate?**
+
+- [Sign up for Helicone (free tier available)](https://helicone.ai/signup) and get your API key
+- Update the `baseURL` in your OpenAI request to `https://ai-gateway.helicone.ai`
+- Deploy and watch your costs (and errors) drop!
+
+Need help? Join our [Discord](https://discord.gg/7aSCGCGUeu) where engineers share about building with AI.
+
+**Want to contribute?** The Helicone AI Gateway is open-source on [GitHub](https://github.com/helicone/helicone). Help us build the future of AI infrastructure.
