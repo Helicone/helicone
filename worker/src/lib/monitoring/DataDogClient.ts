@@ -61,7 +61,7 @@ export class DataDogClient {
   /**
    * Increment request counter
    */
-  static incrementRequestCount(): void {
+  incrementRequestCount(): void {
     GLOBAL_REQUEST_COUNT++;
   }
 
@@ -135,7 +135,6 @@ export class DataDogClient {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Content-Encoding': 'string',
             'DD-API-KEY': this.config.apiKey
           },
           body: JSON.stringify(distribution)

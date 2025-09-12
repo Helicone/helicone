@@ -160,7 +160,7 @@ export class RequestWrapper {
     if ((env.DATADOG_ENABLED ?? "false") === "true") {
       this.dataDogClient = getDataDogClient(env);
       // Increment request counter for each new request
-      DataDogClient.incrementRequestCount();
+      this.dataDogClient.incrementRequestCount();
     }
     this.baseURLOverride = null;
     this.cf = request.cf;
