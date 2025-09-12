@@ -65,18 +65,24 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
 
       const jawnClient = getJawnClient(orgId);
 
+      // Build body object conditionally - only include defined values
+      const body: any = {};
+      if (key !== undefined) body.providerKey = key;
+      if (secretKey !== undefined) body.providerSecretKey = secretKey;
+      if (config !== undefined) body.config = config;
+      if (byokEnabled !== undefined) body.byokEnabled = byokEnabled;
+
+      // Debug log to see what we're sending
+      console.log("Updating provider key with body:", body);
+      console.log("Raw params:", { key, secretKey, config, byokEnabled });
+
       return jawnClient.PATCH("/v1/api-keys/provider-key/{providerKeyId}", {
         params: {
           path: {
             providerKeyId: keyId,
           },
         },
-        body: {
-          providerKey: key,
-          providerSecretKey: secretKey,
-          config,
-          byokEnabled,
-        },
+        body,
       });
     },
     onSuccess: () => {
@@ -193,6 +199,42 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     }
   };
 
+  const deleteProviderKey = useMutation({
+    mutationFn: async (keyId: string) => {
+      if (!orgId) throw new Error("No organization selected");
+
+      const jawnClient = getJawnClient(orgId);
+
+      const response = await jawnClient.DELETE(
+        "/v1/api-keys/provider-key/{providerKeyId}",
+        {
+          params: {
+            path: {
+              providerKeyId: keyId,
+            },
+          },
+        },
+      );
+
+      if (response && "error" in response) {
+        throw new Error(response.error);
+      }
+
+      return response.data;
+    },
+    onSuccess: () => {
+      setNotification("Provider key deleted successfully", "success");
+      queryClient.invalidateQueries({ queryKey: providerKeysQueryKey });
+    },
+    onError: (error: Error) => {
+      logger.error({ error }, "Failed to delete provider key");
+      setNotification(
+        "Failed to delete key: " + (error.message || "Unknown error"),
+        "error",
+      );
+    },
+  });
+
   const providerKeys = providerKeysData || [];
   const existingKey = providerId
     ? providerKeys.find(
@@ -208,8 +250,10 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     existingKey,
     addProviderKey,
     updateProviderKey,
+    deleteProviderKey,
     isSavingKey: updateProviderKey.isPending || addProviderKey.isPending,
     isSavedKey: updateProviderKey.isSuccess || addProviderKey.isSuccess,
+    isDeletingKey: deleteProviderKey.isPending,
     viewDecryptedProviderKey,
     refetchProviderKeys,
   };
