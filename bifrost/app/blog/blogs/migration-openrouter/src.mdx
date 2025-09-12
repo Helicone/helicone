@@ -12,15 +12,15 @@ That's what we did. The Helicone AI Gateway is a an OpenRouter alternative - wit
 - **Automatic fallbacks** - when one provider is down, route to another instantly
 - **Built-in observability** - logs, traces, and metrics by default without extra setup
 - **Cost optimization** - automatically route to the cheapest, most reliable provider for each model, always rate-limit aware
-- **Passthrough billing & BYOK support** - let us handle auth for you or bring your own keys
+- **Passthrough billing & BYOK support** - let us handle auth for you ([request access here!](https://helicone.ai/credits)) or bring your own keys
 
 ## Migration Guide: OpenRouter → Helicone AI Gateway
 
-### Step 1: Get your Helicone API key
+### Step 1: Set up your API keys
 
-Go to [Helicone](https://us.helicone.ai/settings/api-keys) and get your Helicone API key.
+Set up your provider [API keys](https://helicone.ai/providers) and get your Helicone API key from the [Helicone dashboard](https://helicone.ai/api-keys).
 
-### Step 2: Edit Your Code
+### Step 2: Edit your code
 
 Replace OpenRouter's endpoint with Helicone AI Gateway:
 
@@ -54,7 +54,7 @@ Go to [Helicone](https://helicone.ai/requests) and see your requests logged auto
 
 - **Different model names:** Some models use slightly different naming conventions. Helicone has a [model registry](https://helicone.ai/models) to help you find the exact model name.
 - **Model Providers:** Helicone routes you to the cheapest, most reliable provider for each model, which means we don't require you to name the provider when making the request like OpenRouter does (i.e. OpenRouter: `anthropic/claude-3.5-sonnet` vs Helicone: `claude-3.5-sonnet`).
-- **Provider keys:** You can use Helicone's auth or bring your own keys. To BYOK, you can set up your provider keys to the [Helicone dashboard](https://helicone.ai/providers).
+- **Provider keys:** You can use Helicone's auth ([request access here!](https://helicone.ai/credits)) or bring your own keys. To BYOK, you can set up your provider keys to the [Helicone dashboard](https://helicone.ai/providers).
 
 ### The Bottom Line
 
