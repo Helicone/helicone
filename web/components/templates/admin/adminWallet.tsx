@@ -31,7 +31,7 @@ import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
 
 const formatCurrency = (amount: number) => {
   return remoteFormatCurrency(amount, "USD", 6);
-}
+};
 
 interface DashboardData {
   organizations: Array<{
@@ -92,7 +92,10 @@ export default function AdminWallet() {
     queryKey: ["admin-wallet-dashboard"],
     queryFn: async () => {
       console.log("Fetching dashboard data...");
-      const response = await jawn.POST("/v1/admin/gateway/dashboard_data", {}) as any;
+      const response = (await jawn.POST(
+        "/v1/admin/gateway/dashboard_data",
+        {},
+      )) as any;
       console.log("Dashboard API response:", response);
       console.log("Response data:", response.data);
       console.log("Response error:", response.error);
@@ -120,7 +123,10 @@ export default function AdminWallet() {
       queryFn: async () => {
         if (!selectedOrg) throw new Error("No org selected");
         console.log("Fetching wallet details for org:", selectedOrg);
-        const response = await (jawn as any).POST(`/v1/admin/wallet/${selectedOrg}`, {});
+        const response = await (jawn as any).POST(
+          `/v1/admin/wallet/${selectedOrg}`,
+          {},
+        );
         console.log("Wallet details API response:", response);
         console.log("Wallet response data:", response.data);
         console.log("Wallet response error:", response.error);
@@ -351,7 +357,7 @@ export default function AdminWallet() {
                                 window.open(stripeUrl, "_blank");
                               }}
                             >
-                              <ExternalLink className="h-3 w-3 mr-1" />
+                              <ExternalLink className="mr-1 h-3 w-3" />
                               Stripe
                             </Button>
                           )}

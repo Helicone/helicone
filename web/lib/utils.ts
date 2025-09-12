@@ -16,4 +16,3 @@ export function isJson(content: string) {
     return false;
   }
 }
-
