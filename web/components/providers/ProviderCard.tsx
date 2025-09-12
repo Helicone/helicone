@@ -544,10 +544,12 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                 disabled={isEditMode && !isEditingKey}
               />
               {/* Copy and Eye buttons inside input */}
-              <div className={cn(
-                "absolute right-1 -translate-y-1/2 flex items-center gap-1",
-                provider.id === "aws" ? "top-[calc(50%+12px)]" : "top-1/2",
-              )}>
+              <div
+                className={cn(
+                  "absolute right-1 flex -translate-y-1/2 items-center gap-1",
+                  provider.id === "aws" ? "top-[calc(50%+12px)]" : "top-1/2",
+                )}
+              >
                 {/* Copy button - always visible for existing keys, disabled when no value */}
                 {isEditMode ? (
                   <button
@@ -557,8 +559,13 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                         isViewingKey && decryptedKey ? decryptedKey : keyValue,
                       )
                     }
-                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
-                    disabled={!((isViewingKey && decryptedKey) || (isEditingKey && keyValue))}
+                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+                    disabled={
+                      !(
+                        (isViewingKey && decryptedKey) ||
+                        (isEditingKey && keyValue)
+                      )
+                    }
                     title="Copy"
                   >
                     <Copy className="h-3 w-3" />
@@ -618,7 +625,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                   disabled={isEditMode && !isEditingKey}
                 />
                 {/* Copy and Eye buttons inside input */}
-                <div className="absolute right-1 top-[calc(50%+12px)] -translate-y-1/2 flex items-center gap-1">
+                <div className="absolute right-1 top-[calc(50%+12px)] flex -translate-y-1/2 items-center gap-1">
                   {/* Copy button - always visible for existing keys, disabled when no value */}
                   {isEditMode ? (
                     <button
@@ -630,8 +637,13 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                             : secretKeyValue,
                         )
                       }
-                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
-                      disabled={!((isViewingKey && decryptedSecretKey) || (isEditingKey && secretKeyValue))}
+                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+                      disabled={
+                        !(
+                          (isViewingKey && decryptedSecretKey) ||
+                          (isEditingKey && secretKeyValue)
+                        )
+                      }
                       title="Copy"
                     >
                       <Copy className="h-3 w-3" />
@@ -695,7 +707,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                 <AlertDialogTitle>Update Provider Key</AlertDialogTitle>
                 <AlertDialogDescription>
                   Are you sure you want to update this {provider.name} key? This
-                  will replace the existing key with the new value you've
+                  will replace the existing key with the new value you&apos;ve
                   entered.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -740,7 +752,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                   <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 ) : (
                   <>
-                    <Pencil className="h-3 w-3 mr-1" />
+                    <Pencil className="mr-1 h-3 w-3" />
                     Edit
                   </>
                 )}
@@ -759,17 +771,17 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                   "Saving..."
                 ) : isSavedLocal && !hasUnsavedChanges ? (
                   <>
-                    <Check className="h-3 w-3 mr-1" />
+                    <Check className="mr-1 h-3 w-3" />
                     Saved
                   </>
                 ) : isEditMode ? (
                   <>
-                    <Save className="h-3 w-3 mr-1" />
+                    <Save className="mr-1 h-3 w-3" />
                     Save
                   </>
                 ) : (
                   <>
-                    <Plus className="h-3 w-3 mr-1" />
+                    <Plus className="mr-1 h-3 w-3" />
                     Add
                   </>
                 )}
@@ -791,7 +803,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                       <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                     ) : (
                       <>
-                        <Trash2 className="h-3 w-3 mr-1" />
+                        <Trash2 className="mr-1 h-3 w-3" />
                         Delete
                       </>
                     )}
