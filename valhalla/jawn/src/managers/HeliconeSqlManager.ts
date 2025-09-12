@@ -391,7 +391,54 @@ export class HeliconeSqlManager {
   async downloadCsv(sql: string): Promise<Result<string, HqlError>> {
     const span = tracer.startSpan("hql.downloadCsv");
     span.setTag("resource.name", "hql.downloadCsv");
+    async downloadCsv(sql: string): Promise<Result<string, HqlError>> {
+    const span = tracer.startSpan("hql.downloadCsv");
+    span.setTag("resource.name", "hql.downloadCsv");
     span.setTag("span.type", "custom");
+    try {
+    const result = await this.executeSql(sql, MAX_LIMIT);
+    if (isError(result)) {
+      span.setTag("error", true);
+      span.setTag("error.message", result.error.message);
+      return result;
+    }
+
+    if (!result.data?.rows?.length) {
+      span.setTag("hql.no_data", true);
+      return hqlError(HqlErrorCode.NO_DATA_RETURNED);
+    }
+
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `hql-export-${timestamp}.csv`;
+    
+    // Upload to S3
+    const uploadResult = await this.hqlStore.uploadCsv(
+      filename,
+      this.authParams.organizationId,
+      result.data.rows
+    );
+
+    if (isError(uploadResult)) {
+      span.setTag("error", true);
+      span.setTag("error.message", uploadResult.error);
+      return hqlError(
+        HqlErrorCode.CSV_UPLOAD_FAILED,
+        uploadResult.error
+      );
+    }
+
+    if (!uploadResult.data) {
+      span.setTag("error", true);
+      span.setTag("error.message", "CSV URL not returned");
+      return hqlError(HqlErrorCode.CSV_URL_NOT_RETURNED);
+    }
+
+    span.setTag("hql.csv_url_generated", true);
+    return ok(uploadResult.data);
+    } finally {
+      span.finish();
+    }
     const result = await this.executeSql(sql, MAX_LIMIT);
     if (isError(result)) {
       span.setTag("error", true);
