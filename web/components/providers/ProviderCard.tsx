@@ -33,7 +33,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useNotification from "@/components/shared/notification/useNotification";
-import { Muted, Small } from "@/components/ui/typography";
+import { Small } from "@/components/ui/typography";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -86,12 +86,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   const [decryptedSecretKey, setDecryptedSecretKey] = useState<string | null>(
     null,
   );
-  const [configVisible, setConfigVisible] = useState(false);
   const [configValues, setConfigValues] = useState<Record<string, string>>({});
   const [byokEnabled, setByokEnabled] = useState(false);
-  const [isSavingByok, setIsSavingByok] = useState(false);
-  const [showByokConfirm, setShowByokConfirm] = useState(false);
-  const [pendingByokValue, setPendingByokValue] = useState<boolean | null>(null);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
   // Ref for the name input to programmatically focus it
@@ -247,7 +243,10 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
         setDecryptedKey(null);
         setDecryptedSecretKey(null);
       } catch (error) {
-        logger.error({ error, keyId: existingKey.id }, "Error fetching key for edit");
+        logger.error(
+          { error, keyId: existingKey.id },
+          "Error fetching key for edit",
+        );
         setNotification("Failed to load key for editing", "error");
       } finally {
         setIsLoading(false);
@@ -262,49 +261,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     setIsEditingKey(false);
     setKeyValue("");
     setSecretKeyValue("");
-  };
-
-  const handleByokToggle = (checked: boolean) => {
-    // Store the pending value and show confirmation
-    setPendingByokValue(checked);
-    setShowByokConfirm(true);
-  };
-
-  const handleByokConfirm = async () => {
-    if (pendingByokValue === null || !existingKey) return;
-    
-    setIsSavingByok(true);
-    setShowByokConfirm(false);
-    
-    try {
-      // Update only the BYOK setting - explicitly pass undefined for other fields
-      await updateProviderKey.mutateAsync({
-        keyId: existingKey.id,
-        key: undefined,  // Don't update the key
-        secretKey: undefined,  // Don't update the secret key
-        config: undefined,  // Don't update config
-        byokEnabled: pendingByokValue,
-      });
-      
-      setByokEnabled(pendingByokValue);
-      setNotification(
-        pendingByokValue 
-          ? "AI Gateway (BYOK) enabled" 
-          : "AI Gateway (BYOK) disabled",
-        "success"
-      );
-    } catch (error) {
-      logger.error({ error }, "Failed to update BYOK setting");
-      setNotification("Failed to update AI Gateway setting", "error");
-    } finally {
-      setIsSavingByok(false);
-      setPendingByokValue(null);
-    }
-  };
-
-  const handleByokCancel = () => {
-    setShowByokConfirm(false);
-    setPendingByokValue(null);
   };
 
   const handleCopyToClipboard = (text: string) => {
@@ -334,7 +290,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
       setShowSaveConfirm(true);
       return;
     }
-    
+
     // For new keys, save directly without confirmation
     if (!isEditMode) {
       try {
@@ -358,15 +314,15 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
 
   const handleConfirmSave = async () => {
     setShowSaveConfirm(false);
-    
+
     if (!existingKey) return;
-    
+
     // Only update if we're in edit mode and have new values
     if (!isEditingKey || (!keyValue && provider.id !== "aws")) {
       setNotification("Please enter a new key or cancel editing", "error");
       return;
     }
-    
+
     try {
       // Update the provider key
       updateProviderKey.mutate({
@@ -445,11 +401,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     }
 
     return (
-      <div className="mt-3 flex flex-col gap-2 border-t pt-3">
-        <Small className="font-medium">Advanced Configuration</Small>
-        <Muted>Required fields for this provider</Muted>
-
-        <div className="mt-2 flex flex-col gap-3">
+      <div className="mt-3 flex flex-col gap-2">
+        <div className="flex gap-3">
           {configFields.map((field) => (
             <div
               key={field.key}
@@ -457,7 +410,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                 "flex gap-1",
                 field.type === "boolean"
                   ? "flex-row items-center gap-2"
-                  : "flex-col",
+                  : "flex-1 flex-col",
               )}
             >
               <Small className="text-xs">{field.label}</Small>
@@ -480,6 +433,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                     handleUpdateConfigField(field.key, e.target.value)
                   }
                   className="h-7 text-xs"
+                  disabled={isEditMode && !isEditingKey}
                 />
               )}
             </div>
@@ -493,9 +447,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     <div
       className={cn(
         "bg-background transition-colors",
-        isMultipleMode
-          ? "border-l-2 border-l-muted-foreground/20 pl-3"
-          : "",
+        isMultipleMode ? "border-l-2 border-l-muted-foreground/20 pl-3" : "",
       )}
     >
       <div className={cn("", isMultipleMode && "py-2")}>
@@ -520,7 +472,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                 </div>
               ) : isMultipleMode ? (
                 <div className="text-xs font-medium">
-                  {existingKey?.provider_key_name || `Instance ${instanceIndex + 1}`}
+                  {existingKey?.provider_key_name ||
+                    `Instance ${instanceIndex + 1}`}
                 </div>
               ) : null}
               {isEditMode && existingKey?.cuid && (
@@ -541,7 +494,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                           <span className="font-mono text-[10px] text-muted-foreground">
                             {existingKey.cuid}
                           </span>
-                          <Copy className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 text-muted-foreground" />
+                          <Copy className="h-2.5 w-2.5 text-muted-foreground opacity-0 group-hover:opacity-100" />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>Copy Key ID</TooltipContent>
@@ -551,26 +504,25 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              {isMultipleMode && onRemove && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={onRemove}
-                        className="h-6 w-6 text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Remove instance</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
+            {/* Remove instance button for multiple mode - keeping at top right */}
+            {isMultipleMode && onRemove && !isEditMode && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={onRemove}
+                      className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Remove instance</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
 
           {/* Key input row */}
@@ -583,30 +535,66 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                   isEditMode && !isEditingKey
                     ? "••••••••••••••••"
                     : isEditingKey
-                    ? "Enter new API key..."
-                    : provider.apiKeyPlaceholder
+                      ? "Enter new API key..."
+                      : provider.apiKeyPlaceholder
                 }
                 value={isViewingKey && decryptedKey ? decryptedKey : keyValue}
                 onChange={(e) => handleKeyValueChange(e.target.value)}
-                className="h-7 flex-1 py-1 pr-8 text-xs"
+                className="h-7 flex-1 py-1 pr-16 text-xs"
                 disabled={isEditMode && !isEditingKey}
               />
-              {/* Copy button inside input */}
-              {((isViewingKey && decryptedKey) || (isEditingKey && keyValue)) && (
-                <button
-                  type="button"
-                  onClick={() => handleCopyToClipboard(
-                    isViewingKey && decryptedKey ? decryptedKey : keyValue
-                  )}
-                  className={cn(
-                    "absolute right-1 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground",
-                    provider.id === "aws" ? "top-[calc(50%+12px)]" : "top-1/2"
-                  )}
-                  title="Copy"
-                >
-                  <Copy className="h-3 w-3" />
-                </button>
-              )}
+              {/* Copy and Eye buttons inside input */}
+              <div className={cn(
+                "absolute right-1 -translate-y-1/2 flex items-center gap-1",
+                provider.id === "aws" ? "top-[calc(50%+12px)]" : "top-1/2",
+              )}>
+                {/* Copy button - always visible for existing keys, disabled when no value */}
+                {isEditMode ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleCopyToClipboard(
+                        isViewingKey && decryptedKey ? decryptedKey : keyValue,
+                      )
+                    }
+                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                    disabled={!((isViewingKey && decryptedKey) || (isEditingKey && keyValue))}
+                    title="Copy"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </button>
+                ) : (
+                  // For new keys, only show when there's a value
+                  keyValue && (
+                    <button
+                      type="button"
+                      onClick={() => handleCopyToClipboard(keyValue)}
+                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      title="Copy"
+                    >
+                      <Copy className="h-3 w-3" />
+                    </button>
+                  )
+                )}
+                {/* View/Hide button - only for existing keys */}
+                {isEditMode && !isEditingKey && (
+                  <button
+                    type="button"
+                    onClick={handleToggleKeyVisibility}
+                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    disabled={isLoading}
+                    title={isViewingKey ? "Hide" : "View"}
+                  >
+                    {isLoading ? (
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : isViewingKey ? (
+                      <EyeOff className="h-3 w-3" />
+                    ) : (
+                      <Eye className="h-3 w-3" />
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
             {provider.id === "aws" && (
               <div className="relative flex-1">
@@ -617,8 +605,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                     isEditMode && !isEditingKey
                       ? "••••••••••••••••"
                       : isEditingKey
-                      ? "Enter new secret key..."
-                      : "..."
+                        ? "Enter new secret key..."
+                        : "..."
                   }
                   value={
                     isViewingKey && decryptedSecretKey
@@ -626,170 +614,62 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                       : secretKeyValue
                   }
                   onChange={(e) => setSecretKeyValue(e.target.value)}
-                  className="h-7 flex-1 py-1 pr-8 text-xs"
+                  className="h-7 flex-1 py-1 pr-16 text-xs"
                   disabled={isEditMode && !isEditingKey}
                 />
-                {/* Copy button inside input */}
-                {((isViewingKey && decryptedSecretKey) || (isEditingKey && secretKeyValue)) && (
-                  <button
-                    type="button"
-                    onClick={() => handleCopyToClipboard(
-                      isViewingKey && decryptedSecretKey ? decryptedSecretKey : secretKeyValue
-                    )}
-                    className="absolute right-1 top-[calc(50%+12px)] -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                    title="Copy"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </button>
-                )}
+                {/* Copy and Eye buttons inside input */}
+                <div className="absolute right-1 top-[calc(50%+12px)] -translate-y-1/2 flex items-center gap-1">
+                  {/* Copy button - always visible for existing keys, disabled when no value */}
+                  {isEditMode ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCopyToClipboard(
+                          isViewingKey && decryptedSecretKey
+                            ? decryptedSecretKey
+                            : secretKeyValue,
+                        )
+                      }
+                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                      disabled={!((isViewingKey && decryptedSecretKey) || (isEditingKey && secretKeyValue))}
+                      title="Copy"
+                    >
+                      <Copy className="h-3 w-3" />
+                    </button>
+                  ) : (
+                    // For new keys, only show when there's a value
+                    secretKeyValue && (
+                      <button
+                        type="button"
+                        onClick={() => handleCopyToClipboard(secretKeyValue)}
+                        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        title="Copy"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </button>
+                    )
+                  )}
+                  {/* View/Hide button - only for existing keys */}
+                  {isEditMode && !isEditingKey && (
+                    <button
+                      type="button"
+                      onClick={handleToggleKeyVisibility}
+                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      disabled={isLoading}
+                      title={isViewingKey ? "Hide" : "View"}
+                    >
+                      {isLoading ? (
+                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : isViewingKey ? (
+                        <EyeOff className="h-3 w-3" />
+                      ) : (
+                        <Eye className="h-3 w-3" />
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             )}
-
-            {/* Action buttons */}
-            <div className="flex items-center gap-1">
-              {/* Show eye toggle for both new and existing keys */}
-              {!isEditingKey && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleToggleKeyVisibility}
-                        className="h-7 w-7 text-blue-500"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? (
-                          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        ) : isViewingKey ? (
-                          <EyeOff className="h-3.5 w-3.5" />
-                        ) : (
-                          <Eye className="h-3.5 w-3.5" />
-                        )}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {isViewingKey ? "Hide" : "View"}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-
-              {/* Edit button - only for existing keys */}
-              {isEditMode && !isEditingKey && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleEnterEditMode}
-                        className="h-7 w-7 text-blue-500"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? (
-                          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        ) : (
-                          <Pencil className="h-3.5 w-3.5" />
-                        )}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Edit key</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-
-              {/* Cancel button when editing */}
-              {isEditingKey && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCancelEdit}
-                  className="h-7 px-2 text-xs"
-                >
-                  Cancel
-                </Button>
-              )}
-
-              {/* Save/Add button - only show when adding new or editing */}
-              {(!isEditMode || isEditingKey) && (
-                <Button
-                  onClick={handleSaveKey}
-                  disabled={
-                    (!keyValue && !isEditMode) ||
-                    isSavingKey
-                  }
-                  size="sm"
-                  className="flex h-7 items-center gap-1 whitespace-nowrap px-2 text-xs"
-                >
-                  {isSavingKey ? (
-                    "Saving..."
-                  ) : isSavedLocal && !hasUnsavedChanges ? (
-                    <>
-                      <Check className="h-3.5 w-3.5" /> Saved
-                    </>
-                  ) : isEditMode ? (
-                    <>
-                      <Save className="h-3.5 w-3.5" /> Save
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="h-3.5 w-3.5" /> Add
-                    </>
-                  )}
-                </Button>
-              )}
-
-              {/* Delete button - only show for existing keys */}
-              {isEditMode && existingKey && (
-                <AlertDialog>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            disabled={isDeletingKey}
-                            className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {isDeletingKey ? (
-                              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                            ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
-                            )}
-                          </Button>
-                        </AlertDialogTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent>Delete key</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Provider Key</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this {provider.name} key? This
-                        action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => deleteProviderKey.mutate(existingKey.id)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
-            </div>
           </div>
 
           {/* BYOK toggle */}
@@ -797,51 +677,16 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
             <Checkbox
               id={`byok-${existingKey?.id || instanceIndex}`}
               checked={byokEnabled}
-              onCheckedChange={(checked) => {
-                if (isEditMode) {
-                  // For existing keys, show confirmation and auto-save
-                  handleByokToggle(!!checked);
-                } else {
-                  // For new keys, just update state (will save with the key)
-                  setByokEnabled(!!checked);
-                }
-              }}
-              disabled={isSavingByok}
+              onCheckedChange={(checked) => setByokEnabled(!!checked)}
+              disabled={isEditMode && !isEditingKey}
             />
             <Label
               htmlFor={`byok-${existingKey?.id || instanceIndex}`}
               className="cursor-pointer text-xs font-normal"
             >
               Enable for AI Gateway (BYOK)
-              {isSavingByok && (
-                <span className="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              )}
             </Label>
           </div>
-
-          {/* BYOK Confirmation Dialog */}
-          <AlertDialog open={showByokConfirm} onOpenChange={setShowByokConfirm}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {pendingByokValue ? "Enable" : "Disable"} AI Gateway (BYOK)
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {pendingByokValue
-                    ? "This will enable your key for use with AI Gateway. Your key will be available for BYOK (Bring Your Own Key) requests."
-                    : "This will disable your key for AI Gateway. BYOK requests using this key will no longer work."}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel onClick={handleByokCancel}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction onClick={handleByokConfirm}>
-                  {pendingByokValue ? "Enable" : "Disable"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
 
           {/* Save Key Confirmation Dialog */}
           <AlertDialog open={showSaveConfirm} onOpenChange={setShowSaveConfirm}>
@@ -849,7 +694,9 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
               <AlertDialogHeader>
                 <AlertDialogTitle>Update Provider Key</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to update this {provider.name} key? This will replace the existing key with the new value you've entered.
+                  Are you sure you want to update this {provider.name} key? This
+                  will replace the existing key with the new value you've
+                  entered.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -861,32 +708,116 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
             </AlertDialogContent>
           </AlertDialog>
 
-          {/* Advanced config toggle */}
-          {hasAdvancedConfig && (
-            <div className="mt-2">
+          {/* Advanced config fields */}
+          {hasAdvancedConfig && renderConfigFields()}
+
+          {/* Action buttons at bottom right */}
+          <div className="mt-3 flex justify-end gap-2">
+            {/* Cancel button when editing */}
+            {isEditingKey && (
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                onClick={() => setConfigVisible(!configVisible)}
-                className="flex h-6 items-center gap-1 px-2 text-xs text-muted-foreground"
+                onClick={handleCancelEdit}
+                className="h-7 px-3 text-xs"
               >
-                {configVisible ? (
-                  <>
-                    <ChevronUp className="h-3.5 w-3.5" /> Hide advanced settings
-                  </>
+                Cancel
+              </Button>
+            )}
+
+            {/* Edit button - only for existing keys when not editing */}
+            {isEditMode && !isEditingKey && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleEnterEditMode}
+                className="h-7 px-3 text-xs"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 ) : (
                   <>
-                    <ChevronDown className="h-3.5 w-3.5" /> Show advanced
-                    settings
+                    <Pencil className="h-3 w-3 mr-1" />
+                    Edit
                   </>
                 )}
               </Button>
+            )}
 
-              {/* Render the config fields when expanded */}
-              {configVisible && renderConfigFields()}
-            </div>
-          )}
+            {/* Save/Add button - only show when adding new or editing */}
+            {(!isEditMode || isEditingKey) && (
+              <Button
+                onClick={handleSaveKey}
+                disabled={(!keyValue && !isEditMode) || isSavingKey}
+                size="sm"
+                className="h-7 px-3 text-xs"
+              >
+                {isSavingKey ? (
+                  "Saving..."
+                ) : isSavedLocal && !hasUnsavedChanges ? (
+                  <>
+                    <Check className="h-3 w-3 mr-1" />
+                    Saved
+                  </>
+                ) : isEditMode ? (
+                  <>
+                    <Save className="h-3 w-3 mr-1" />
+                    Save
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add
+                  </>
+                )}
+              </Button>
+            )}
+
+            {/* Delete button - only show for existing keys when not editing */}
+            {isEditMode && existingKey && !isEditingKey && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isDeletingKey}
+                    className="h-7 px-3 text-xs text-destructive hover:text-destructive"
+                  >
+                    {isDeletingKey ? (
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : (
+                      <>
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </>
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Provider Key</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this {provider.name} key?
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteProviderKey.mutate(existingKey.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -920,7 +851,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
       {/* Main header row - always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-3 hover:bg-muted/50 transition-colors"
+        className="w-full p-3 transition-colors hover:bg-muted/50"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -944,7 +875,8 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
             <div className="text-xs text-muted-foreground">
               {existingKeys.length > 0 ? (
                 <span className="text-green-600 dark:text-green-400">
-                  {existingKeys.length} key{existingKeys.length !== 1 ? "s" : ""} configured
+                  {existingKeys.length} key
+                  {existingKeys.length !== 1 ? "s" : ""} configured
                 </span>
               ) : (
                 <span className="text-muted-foreground">
@@ -968,11 +900,14 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
 
       {/* Expanded content - dropdown */}
       {isExpanded && (
-        <div className="border-t border-border/50 bg-muted/20">
+        <div className="bg-muted/20">
           <div className="p-4">
             {/* For single-key providers */}
             {!provider.multipleAllowed && (
-              <ProviderInstance provider={provider} existingKey={existingKeys[0]} />
+              <ProviderInstance
+                provider={provider}
+                existingKey={existingKeys[0]}
+              />
             )}
 
             {/* For multi-key providers */}
