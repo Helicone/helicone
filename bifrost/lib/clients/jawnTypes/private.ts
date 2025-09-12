@@ -431,6 +431,9 @@ export interface paths {
   "/v1/alert-banner": {
     get: operations["GetAlertBanners"];
   };
+  "/v1/admin/gateway/dashboard_data": {
+    post: operations["StripeSync"];
+  };
   "/v1/admin/has-feature-flag": {
     post: operations["HasFeatureFlag"];
   };
@@ -495,6 +498,12 @@ export interface paths {
   "/v1/admin/backfill-costs": {
     /** @description Backfill costs in Clickhouse with updated cost package data. */
     post: operations["BackfillCosts"];
+  };
+  "/v1/admin/wallet/{orgId}": {
+    post: operations["GetWalletDetails"];
+  };
+  "/v1/admin/wallet/{orgId}/tables/{tableName}": {
+    post: operations["GetWalletTableData"];
   };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
@@ -3067,7 +3076,7 @@ Json: JsonObject;
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq" | "stripe:products";
+    SettingName: "stripe:products" | "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq";
     /**
      * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
      *
@@ -18326,6 +18335,16 @@ export interface operations {
       };
     };
   };
+  StripeSync: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_unknown_"];
+        };
+      };
+    };
+  };
   HasFeatureFlag: {
     requestBody: {
       content: {
@@ -18832,6 +18851,41 @@ export interface operations {
           "application/json": {
             query: string;
           };
+        };
+      };
+    };
+  };
+  GetWalletDetails: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
+        };
+      };
+    };
+  };
+  GetWalletTableData: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+      };
+      path: {
+        orgId: string;
+        tableName: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_unknown_"];
         };
       };
     };
