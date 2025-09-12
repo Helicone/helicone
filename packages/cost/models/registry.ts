@@ -23,6 +23,10 @@ import { anthropicModels, anthropicEndpointConfig } from "./authors/anthropic";
 import { openaiModels, openaiEndpointConfig } from "./authors/openai";
 import { googleModels, googleEndpointConfig } from "./authors/google";
 import { grokModels, grokEndpointConfig } from "./authors/xai";
+import { metaModels, metaEndpointConfig } from "./authors/meta";
+import { moonshotaiModels, moonshotaiEndpointConfig } from "./authors/moonshotai";
+import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
+import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
 
 // Combine all models
 const allModels = {
@@ -30,6 +34,10 @@ const allModels = {
   ...openaiModels,
   ...googleModels,
   ...grokModels,
+  ...metaModels,
+  ...moonshotaiModels,
+  ...alibabaModels,
+  ...deepseekModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -38,6 +46,10 @@ const modelProviderConfigs = {
   ...openaiEndpointConfig,
   ...googleEndpointConfig,
   ...grokEndpointConfig,
+  ...metaEndpointConfig,
+  ...moonshotaiEndpointConfig,
+  ...alibabaEndpointConfig,
+  ...deepseekEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
