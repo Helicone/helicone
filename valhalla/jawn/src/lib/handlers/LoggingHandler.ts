@@ -27,7 +27,6 @@ import {
   COST_PRECISION_MULTIPLIER,
   modelCost,
 } from "@helicone-package/cost/costCalc";
-import { normalizeTier } from "../utils/tiers";
 import { atLeastZero } from "../utils/helicone_math";
 
 type S3Record = {
@@ -36,7 +35,6 @@ type S3Record = {
   requestBody: string;
   responseBody: string;
   assets: Map<string, string>;
-  tier: string;
 };
 
 export type BatchPayload = {
@@ -244,18 +242,13 @@ export class LoggingHandler extends AbstractLogHandler {
         s3Record.organizationId
       );
 
-      // Get tier information from context (stored in s3Record)
-      const tags: Record<string, string> = {};
-      tags.tier = normalizeTier(s3Record.tier);
-
-      // Upload request and response body with tier tag
+      // Upload request and response body
       const uploadRes = await this.s3Client.store(
         key,
         JSON.stringify({
           request: s3Record.requestBody,
           response: s3Record.responseBody,
-        }),
-        tags
+        })
       );
 
       if (uploadRes.error) {
@@ -269,8 +262,7 @@ export class LoggingHandler extends AbstractLogHandler {
         const imageUploadRes = await this.storeRequestResponseImage(
           s3Record.organizationId,
           s3Record.requestId,
-          s3Record.assets,
-          s3Record.tier
+          s3Record.assets
         );
 
         if (imageUploadRes.error) {
@@ -293,18 +285,11 @@ export class LoggingHandler extends AbstractLogHandler {
   private async storeRequestResponseImage(
     organizationId: string,
     requestId: string,
-    assets: Map<string, string>,
-    tier: string
+    assets: Map<string, string>
   ): PromiseGenericResult<string> {
     const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
       ([assetId, imageUrl]) =>
-        this.handleImageUpload(
-          assetId,
-          imageUrl,
-          requestId,
-          organizationId,
-          tier
-        )
+        this.handleImageUpload(assetId, imageUrl, requestId, organizationId)
     );
 
     await Promise.allSettled(uploadPromises);
@@ -330,14 +315,9 @@ export class LoggingHandler extends AbstractLogHandler {
     assetId: string,
     imageUrl: string,
     requestId: string,
-    organizationId: string,
-    tier: string
+    organizationId: string
   ): Promise<void> {
     try {
-      // Prepare tags
-      const tags: Record<string, string> = {};
-      tags.tier = normalizeTier(tier);
-
       if (this.isBase64Image(imageUrl)) {
         const [assetType, base64Data] = this.extractBase64Data(imageUrl);
         const buffer = Buffer.from(base64Data, "base64");
@@ -346,8 +326,7 @@ export class LoggingHandler extends AbstractLogHandler {
           assetType,
           requestId,
           organizationId,
-          assetId,
-          tags
+          assetId
         );
       } else {
         const response = await fetch(imageUrl, {
@@ -363,8 +342,7 @@ export class LoggingHandler extends AbstractLogHandler {
           blob,
           requestId,
           organizationId,
-          assetId,
-          tags
+          assetId
         );
       }
     } catch (error) {
@@ -441,7 +419,6 @@ export class LoggingHandler extends AbstractLogHandler {
       requestBody: context.processedLog.request.body,
       responseBody: context.processedLog.response.body,
       assets: assets ?? new Map(),
-      tier: orgParams.tier,
     };
 
     return s3Record;
@@ -561,8 +538,8 @@ export class LoggingHandler extends AbstractLogHandler {
               prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
               prompt_audio_tokens: usage.promptAudioTokens ?? 0,
               completion_audio_tokens: usage.completionAudioTokens ?? 0,
-              sum_tokens:
-                (usage.promptTokens ?? 0) + (usage.completionTokens ?? 0),
+              prompt_cache_write_5m: usage.promptCacheWrite5m ?? 0,
+              prompt_cache_write_1h: usage.promptCacheWrite1h ?? 0,
               multiple: COST_PRECISION_MULTIPLIER,
             })
     );

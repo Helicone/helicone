@@ -4,7 +4,10 @@ on:
   workflow_dispatch: # Manual trigger for testing iterations!
   push:
     branches:
-      - "**" # Run on ALL branches for every push
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   worker-ai-gateway-tests:

@@ -9,6 +9,15 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
+  "/v1/waitlist/feature": {
+    post: operations["AddToWaitlist"];
+  };
+  "/v1/waitlist/feature/status": {
+    get: operations["IsOnWaitlist"];
+  };
+  "/v1/waitlist/feature/count": {
+    get: operations["GetWaitlistCount"];
+  };
   "/v1/user-feedback": {
     post: operations["PostUserFeedback"];
   };
@@ -90,6 +99,9 @@ export interface paths {
   };
   "/v1/stripe/subscription/migrate-to-pro": {
     post: operations["MigrateToPro"];
+  };
+  "/v1/stripe/payment-intents/search": {
+    get: operations["SearchPaymentIntents"];
   };
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
@@ -502,6 +514,38 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    "ResultSuccess__success-boolean--position_63_-number__": {
+      data: {
+        /** Format: double */
+        position?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
+    };
+    "Result__success-boolean--position_63_-number_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__isOnWaitlist-boolean__": {
+      data: {
+        isOnWaitlist: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__count-number__": {
+      data: {
+        /** Format: double */
+        count: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
     RateLimitRuleView: {
       id: string;
       name: string;
@@ -519,11 +563,6 @@ export interface components {
       data: components["schemas"]["RateLimitRuleView"][];
       /** @enum {number|null} */
       error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
     };
     "Result_RateLimitRuleView-Array.string_": components["schemas"]["ResultSuccess_RateLimitRuleView-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_RateLimitRuleView_: {
@@ -666,6 +705,25 @@ export interface components {
         /** Format: double */
         completion_token: number;
       };
+    };
+    PaymentIntentRecord: {
+      id: string;
+      /** Format: double */
+      amount: number;
+      /** Format: double */
+      created: number;
+      status: string;
+      isRefunded?: boolean;
+      /** Format: double */
+      refundedAmount?: number;
+      refundIds?: string[];
+    };
+    StripePaymentIntentsResponse: {
+      data: components["schemas"]["PaymentIntentRecord"][];
+      has_more: boolean;
+      next_page: string | null;
+      /** Format: double */
+      count: number;
     };
 Json: JsonObject;
     "ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_": {
@@ -15670,6 +15728,10 @@ Json: JsonObject;
       model: components["schemas"]["TextOperator"];
       cost: {
         /** Format: double */
+        prompt_cache_creation_1h?: number;
+        /** Format: double */
+        prompt_cache_creation_5m?: number;
+        /** Format: double */
         completion_audio_token?: number;
         /** Format: double */
         prompt_audio_token?: number;
@@ -15730,6 +15792,57 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  AddToWaitlist: {
+    requestBody: {
+      content: {
+        "application/json": {
+          organizationId?: string;
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--position_63_-number_.string_"];
+        };
+      };
+    };
+  };
+  IsOnWaitlist: {
+    parameters: {
+      query: {
+        email: string;
+        feature: string;
+        organizationId?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetWaitlistCount: {
+    parameters: {
+      query: {
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number_.string_"];
+        };
+      };
+    };
+  };
   PostUserFeedback: {
     requestBody: {
       content: {
@@ -16239,6 +16352,23 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  SearchPaymentIntents: {
+    parameters: {
+      query: {
+        search_kind: string;
+        limit?: number;
+        page?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StripePaymentIntentsResponse"];
+        };
       };
     };
   };

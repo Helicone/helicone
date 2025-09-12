@@ -10,12 +10,13 @@ const Banner = () => {
         <p>
           🔥 Introducing the{" "}
           <Link
-            href="https://helicone.ai/blog/introducing-ai-gateway"
+            href="https://www.helicone.ai/blog/ptb-gateway-launch"
             className="font-medium underline hover:text-blue-200"
           >
             Helicone AI Gateway
-          </Link>{" "}
-          (in beta) - reach 100+ models with a single integration.
+          </Link>
+          , now on the cloud with passthrough billing. Access 100+ models with 1
+          API and 0% markup.
         </p>
       </div>
     </div>

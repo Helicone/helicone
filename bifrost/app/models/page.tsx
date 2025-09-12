@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { ModelRegistryPage } from "./ModelRegistryPage";
-import { Suspense } from "react";
 import { Layout } from "@/app/components/Layout";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "AI Model Registry - Compare LLM Costs & Providers | Helicone",
@@ -27,9 +27,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ModelsPage() {
+export default function ModelsPage() {
   return (
-    <Layout>
+    <Layout noNavbarMargin={true}>
       <Suspense
         fallback={
           <div className="flex flex-col gap-4 w-full max-w-7xl mx-auto px-4 py-8">

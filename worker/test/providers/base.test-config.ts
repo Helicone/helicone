@@ -136,11 +136,12 @@ export abstract class BaseTestConfig {
 
   generateSuccessfulPtbTestCases(): TestCase[] {
     const cases: TestCase[] = [];
-    const models = registry.getProviderModels(this.provider).data;
-    if (!models || !(models instanceof Set)) return cases;
+    const endpoints = registry.getPtbEndpointsForProvider(this.provider);
 
-    models.forEach((modelId) => {
-      // Type 1: Direct provider test w/sufficient credit balance
+    endpoints.data?.forEach(({ endpoint, model: modelId }) => {
+      // Only process endpoints for this provider
+      if (endpoint.provider !== this.provider) return;
+
       cases.push({
         name: `${this.provider} - ${modelId} - PTB direct`,
         provider: this.provider,
@@ -192,7 +193,7 @@ export abstract class BaseTestConfig {
         Object.keys(modelConfig.endpointConfigs).forEach((configKey) => {
           if (configKey !== "*") {
             cases.push({
-              name: `${this.provider} - ${modelId} - BYOK config:${configKey}`,
+              name: `${this.provider} - ${modelId} - PTB config:${configKey}`,
               provider: this.provider,
               modelId,
               modelString: `${modelId}/${this.provider}`,
@@ -210,15 +211,15 @@ export abstract class BaseTestConfig {
         });
       }
     });
+
     return cases;
   }
 
   generateUnsuccessfulPtbTestCases(): TestCase[] {
     const cases: TestCase[] = [];
-    const models = registry.getProviderModels(this.provider).data;
-    if (!models || !(models instanceof Set)) return cases;
+    const modelEndpoints = registry.getPtbEndpointsForProvider(this.provider);
 
-    models.forEach((modelId) => {
+    modelEndpoints.data?.forEach(({ endpoint, model: modelId }) => {
       // type 1: PTB direct w/insufficient credit balance
       cases.push({
         name: `${this.provider} - ${modelId} - PTB direct - insufficient credits`,
@@ -262,6 +263,7 @@ export abstract class BaseTestConfig {
         }
       }
     });
+
     return cases;
   }
 }

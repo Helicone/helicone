@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the ports used by the workers
-PORTS=(8787 8788 8789 8790 8791)
+PORTS=(8787 8788 8789 8790 8791 8792 8793)
 
 echo "Attempting to kill processes on ports: ${PORTS[*]}"
 

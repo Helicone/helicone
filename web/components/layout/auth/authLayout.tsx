@@ -64,6 +64,10 @@ const AuthLayout = (props: AuthLayoutProps) => {
     const checkAuth = async () => {
       try {
         const user = await auth.getUser();
+        // Avoid redirecting while the auth client is still initializing
+        if (user.error === "Supabase client not found") {
+          return;
+        }
         if (user.error || !user.data) {
           router.push("/signin?unauthorized=true");
         }
@@ -74,7 +78,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     };
 
     checkAuth();
-  }, [router]);
+  }, [router, auth]);
 
   const currentPage = useMemo(() => {
     const path = pathname.split("/")[1];
@@ -91,10 +95,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
   useEffect(() => {
     if (orgContext?.currentOrg?.has_onboarded === false) {
       router.push("/onboarding");
-    } else if (orgContext?.currentOrg?.has_integrated === false) {
-      router.push("/quickstart");
     }
-  }, [orgContext?.currentOrg?.has_integrated]);
+  }, [orgContext?.currentOrg?.has_onboarded]);
 
   const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);

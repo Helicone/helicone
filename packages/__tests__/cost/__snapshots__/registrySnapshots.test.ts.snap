@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
@@ -18,7 +18,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "anthropic",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -38,7 +38,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -58,7 +58,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "global",
       ],
@@ -80,7 +80,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "anthropic",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -100,7 +100,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -120,7 +120,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "global",
       ],
@@ -142,7 +142,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "anthropic",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -162,7 +162,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -182,7 +182,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "global",
       ],
@@ -204,7 +204,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "anthropic",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -226,7 +226,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -246,7 +246,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "vertex",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "global",
       ],
@@ -268,7 +268,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "anthropic",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -290,7 +290,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -310,7 +310,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "vertex",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "global",
       ],
@@ -332,7 +332,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "anthropic",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -354,7 +354,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -374,7 +374,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "vertex",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "global",
       ],
@@ -549,7 +549,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -572,7 +572,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -595,7 +595,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -618,7 +618,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -641,7 +641,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -664,7 +664,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -689,7 +689,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -712,7 +712,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -735,7 +735,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -758,7 +758,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -781,7 +781,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -807,7 +807,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "verbosity",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -831,7 +831,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "verbosity",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -879,7 +879,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "verbosity",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -899,7 +899,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "azure",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -917,7 +917,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -935,7 +935,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -953,7 +953,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -973,7 +973,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "azure",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -991,7 +991,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "openai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -1025,7 +1025,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "groq",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -1057,7 +1057,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "groq",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -1085,7 +1085,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -1111,7 +1111,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -1137,7 +1137,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -1163,7 +1163,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -1697,7 +1697,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "audio": 0,
         "image": 0,
         "input": 1e-7,
-        "internal_reasoning": 0,
         "output": 5e-7,
         "request": 0,
         "threshold": 0,
@@ -1714,7 +1713,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "image": 0,
         "input": 3e-7,
-        "internal_reasoning": 0,
         "output": 5e-7,
         "request": 0,
         "threshold": 0,
@@ -1960,43 +1958,18 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     },
   ],
   "ptbEnabledModels": [
-    "chatgpt-4o-latest",
-    "claude-3.5-haiku",
-    "claude-3.5-sonnet-v2",
-    "claude-3.7-sonnet",
-    "claude-opus-4",
-    "claude-opus-4-1",
-    "claude-sonnet-4",
-    "gpt-4.1",
-    "gpt-4.1-mini",
-    "gpt-4.1-nano",
-    "gpt-4o",
-    "gpt-4o-mini",
-    "gpt-5",
-    "gpt-5-chat-latest",
-    "gpt-5-mini",
     "gpt-5-nano",
-    "gpt-oss-120b",
-    "gpt-oss-20b",
-    "grok-3",
-    "grok-3-mini",
-    "grok-4-0709",
-    "grok-code-fast-1",
-    "o3",
-    "o3-mini",
-    "o3-pro",
-    "o4-mini",
   ],
   "sampleEndpointIds": [
+    "chatgpt-4o-latest:openai:*",
     "claude-3.5-haiku:anthropic:*",
     "claude-3.5-haiku:bedrock:us-east-1",
     "claude-3.5-haiku:vertex:global",
     "claude-3.5-sonnet-v2:anthropic:*",
-    "claude-3.5-sonnet-v2:vertex:global",
   ],
   "totalEndpoints": 51,
   "totalModelProviderConfigs": 51,
-  "totalModelsWithPtb": 26,
+  "totalModelsWithPtb": 1,
   "totalProviders": 8,
 }
 `;

@@ -8,10 +8,10 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { MessageCircle, Rocket, Settings } from "lucide-react";
+import { MessageCircle, Rocket, Settings, Coins } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ChangelogModal from "../ChangelogModal";
 import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
@@ -20,6 +20,7 @@ import NavItem from "./NavItem";
 import { ChangelogItem } from "./types";
 import SidebarQuickstepCard from "../SidebarQuickstartCard";
 import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
+import { useCredits } from "@/services/hooks/useCredits";
 
 export interface NavigationItem {
   name: string;
@@ -47,6 +48,9 @@ const DesktopSidebar = ({
   const router = useRouter();
   const onboardingStatus = orgContext?.currentOrg
     ?.onboarding_status as unknown as OnboardingState;
+
+  // Fetch credit balance - defaults to 0 if it fails
+  const { data: creditData } = useCredits();
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
@@ -384,6 +388,50 @@ const DesktopSidebar = ({
 
               {orgContext?.currentOrg?.tier !== "demo" && (
                 <>
+                  <Button
+                    variant="ghost"
+                    size="none"
+                    onClick={() => router.push("/credits")}
+                    className={cn(
+                      "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                      isCollapsed
+                        ? "h-9 w-9 justify-center"
+                        : "h-9 w-full justify-start gap-2 px-3",
+                      router.pathname.includes("/credits")
+                        ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    <Coins
+                      size={16}
+                      className={cn(
+                        router.pathname.includes("/credits")
+                          ? "text-blue-700 dark:text-blue-300"
+                          : "text-muted-foreground",
+                      )}
+                    />
+                    {!isCollapsed && (
+                      <span className="flex flex-1 items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          Credits
+                          <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                            Beta
+                          </span>
+                        </span>
+                        <span
+                          className={cn(
+                            "text-xs",
+                            router.pathname.includes("/credits")
+                              ? "text-blue-700 dark:text-blue-300"
+                              : "text-muted-foreground",
+                          )}
+                        >
+                          ${((creditData?.balance ?? 0) / 100).toFixed(0)}
+                        </span>
+                      </span>
+                    )}
+                  </Button>
+
                   <Button
                     variant="ghost"
                     size="none"

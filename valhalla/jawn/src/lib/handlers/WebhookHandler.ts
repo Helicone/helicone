@@ -69,9 +69,10 @@ export class WebhookHandler extends AbstractLogHandler {
               context.usage.promptCacheWriteTokens || 0,
             prompt_cache_read_tokens: context.usage.promptCacheReadTokens || 0,
             sum_completion_tokens: completionTokens,
-            sum_tokens: totalTokens,
             prompt_audio_tokens: context.usage.promptAudioTokens || 0,
             completion_audio_tokens: context.usage.completionAudioTokens || 0,
+            prompt_cache_write_5m: context.usage.promptCacheWrite5m || 0,
+            prompt_cache_write_1h: context.usage.promptCacheWrite1h || 0,
           });
 
           // Calculate latency

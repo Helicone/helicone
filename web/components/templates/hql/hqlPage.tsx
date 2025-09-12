@@ -28,12 +28,14 @@ import {
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { useTheme } from "next-themes";
 
 function HQLPage() {
   const organization = useOrg();
   const { data: hasAccessToHQL, isLoading: isLoadingFeatureFlag } =
     useFeatureFlag("hql", organization?.currentOrg?.id ?? "");
   const { setNotification } = useNotification();
+  const { theme: currentTheme } = useTheme();
 
   const monaco = useMonaco();
   const clickhouseSchemas = useClickhouseSchemas();
@@ -140,6 +142,47 @@ function HQLPage() {
       }
     }
   }, [savedQueryDetails]);
+
+  // Keep Monaco theme in sync with app theme
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mono = (window as any).monaco;
+    if (!mono || !mono.editor) return;
+
+    // Define transparent background themes once (idempotent)
+    try {
+      mono.editor.defineTheme("custom-dark", {
+        base: "vs-dark",
+        inherit: true,
+        rules: [],
+        colors: {
+          "editor.background": "#00000000",
+          "minimap.background": "#1e1e1e",
+          "minimapSlider.background": "#79797933",
+          "minimapSlider.hoverBackground": "#79797944",
+          "minimapSlider.activeBackground": "#79797955",
+        },
+      });
+      mono.editor.defineTheme("custom-light", {
+        base: "vs",
+        inherit: true,
+        rules: [],
+        colors: {
+          "editor.background": "#00000000",
+          "minimap.background": "#ffffff",
+          "minimapSlider.background": "#64646433",
+          "minimapSlider.hoverBackground": "#64646444",
+          "minimapSlider.activeBackground": "#64646455",
+        },
+      });
+    } catch (e) {
+      // themes may already be defined; ignore
+    }
+
+    mono.editor.setTheme(
+      currentTheme === "dark" ? "custom-dark" : "custom-light",
+    );
+  }, [currentTheme]);
 
   // Setup autocompletion
   useEffect(() => {
@@ -253,7 +296,11 @@ function HQLPage() {
     latestQueryRef.current = currentQuery;
   }, [currentQuery]);
 
-  if (isLoadingFeatureFlag || savedQueryDetailsLoading) {
+  if (
+    !organization?.currentOrg?.id ||
+    isLoadingFeatureFlag ||
+    savedQueryDetailsLoading
+  ) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="text-lg">Loading...</div>
@@ -261,7 +308,7 @@ function HQLPage() {
     );
   }
 
-  if (!hasAccessToHQL?.data) {
+  if (hasAccessToHQL?.data === false) {
     return (
       <EmptyStateCard
         feature="hql"
@@ -314,6 +361,7 @@ function HQLPage() {
               <Editor
                 defaultLanguage="sql"
                 defaultValue={currentQuery.sql}
+                theme={currentTheme === "dark" ? "custom-dark" : "custom-light"}
                 options={{
                   minimap: {
                     enabled: true,
@@ -332,6 +380,12 @@ function HQLPage() {
                   editorRef.current = editor;
                   const model = editor.getModel();
                   if (!model) return;
+
+                  // Define and apply transparent background themes
+                  // Apply the custom theme immediately
+                  monaco.editor.setTheme(
+                    currentTheme === "dark" ? "custom-dark" : "custom-light",
+                  );
 
                   // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
                   const forbidden =

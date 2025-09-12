@@ -40,6 +40,8 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(gh run watch:*)",
+      "Bash(curl:*)",
+      "Bash(yarn lint:*)",
       "mcp__linear-server__list_comments"
     ],
     "deny": []

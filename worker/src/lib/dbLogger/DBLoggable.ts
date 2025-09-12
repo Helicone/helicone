@@ -31,7 +31,7 @@ import { costOfPrompt } from "@helicone-package/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
-import { EscrowInfo } from "../util/aiGateway";
+import { EscrowInfo } from "../ai-gateway/types";
 
 export interface DBLoggableProps {
   response: {
@@ -415,19 +415,56 @@ export class DBLoggable {
     return await this.response.status();
   }
 
-  async getResponse() {
+  // TODO: Refactor, see ProxyForwarder
+  async getRawResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
-    const endTime = this.timing.endTime ?? responseEndTime;
+    return responseBody.join("");
+  }
+
+  async readRawResponse(): Promise<Result<string, string>> {
+    try {
+      const rawResponse = await withTimeout(
+        this.getRawResponse(),
+        1000 * 60 * 15
+      ); // 15 minutes
+
+      return ok(rawResponse);
+    } catch (e) {
+      return err("error getting raw response, " + e);
+    }
+  }
+
+  async parseRawResponse(rawResponse: string): Promise<
+    Result<
+      {
+        response: Database["public"]["Tables"]["response"]["Insert"];
+      },
+      string
+    >
+  > {
+    try {
+      const parsedData = await withTimeout(
+        this.parseRawResponseInternal(rawResponse),
+        1000 * 60 * 30
+      ); // 30 minutes
+
+      return ok({
+        response: parsedData.response,
+      });
+    } catch (e) {
+      return err("error parsing raw response, " + e);
+    }
+  }
+
+  private async parseRawResponseInternal(rawResponse: string) {
+    const endTime = this.timing.endTime ?? new Date();
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
     const timeToFirstToken = this.request.isStream
       ? await this.timing.timeToFirstToken()
       : null;
     const status = await this.response.status();
-    const parsedResponse = await this.parseResponse(
-      responseBody.join(""),
-      status
-    );
+    const parsedResponse = await this.parseResponse(rawResponse, status);
     const isStream = this.request.isStream;
 
     const usage = this.getUsage(parsedResponse.data);
@@ -437,7 +474,7 @@ export class DBLoggable {
       this.provider === "GOOGLE" &&
       parsedResponse.error === null
     ) {
-      const body = this.tryJsonParse(responseBody.join(""));
+      const body = this.tryJsonParse(rawResponse);
       const model = body?.model ?? body?.body?.model ?? undefined;
 
       return {
@@ -527,28 +564,6 @@ export class DBLoggable {
             body: parsedResponse.data,
           },
         };
-  }
-
-  async readResponse(): Promise<
-    Result<
-      {
-        response: Database["public"]["Tables"]["response"]["Insert"];
-      },
-      string
-    >
-  > {
-    try {
-      const { response } = await withTimeout(
-        this.getResponse(),
-        1000 * 60 * 30
-      ); // 30 minutes
-
-      return ok({
-        response,
-      });
-    } catch (e) {
-      return err("error getting response, " + e);
-    }
   }
 
   isSuccessResponse = (status: number | undefined | null): boolean =>
@@ -675,7 +690,7 @@ export class DBLoggable {
       cacheSettings?.shouldReadFromCache && cachedHeaders
         ? cachedHeaders.get("Helicone-Id")
         : DEFAULT_UUID;
-      
+
     const kafkaMessage: MessageData = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,
@@ -794,31 +809,5 @@ export class DBLoggable {
     modelOverride: string | null
   ): string {
     return modelOverride ?? responseModel ?? requestModel ?? "not-found";
-  }
-
-  modelCost(modelRow: {
-    model: string;
-    provider: string;
-    sum_prompt_tokens: number;
-    sum_completion_tokens: number;
-    sum_tokens: number;
-    prompt_cache_write_tokens: number;
-    prompt_cache_read_tokens: number;
-  }): number {
-    const model = modelRow.model;
-    const promptTokens = modelRow.sum_prompt_tokens;
-    const completionTokens = modelRow.sum_completion_tokens;
-    return (
-      costOfPrompt({
-        model,
-        promptTokens,
-        completionTokens,
-        provider: modelRow.provider,
-        promptCacheWriteTokens: modelRow.prompt_cache_write_tokens,
-        promptCacheReadTokens: modelRow.prompt_cache_read_tokens,
-        promptAudioTokens: 0,
-        completionAudioTokens: 0,
-      }) ?? 0
-    );
   }
 }

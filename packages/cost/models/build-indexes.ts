@@ -35,6 +35,12 @@ function mergeConfigs(
   };
 }
 
+export interface ModelProviderEntry {
+  provider: ModelProviderName;
+  config: ModelProviderConfig;
+  ptbEndpoints: Endpoint[];
+}
+
 export interface ModelIndexes {
   endpointConfigIdToEndpointConfig: Map<
     ModelProviderConfigId,
@@ -47,6 +53,8 @@ export interface ModelIndexes {
   modelToEndpointConfigs: Map<ModelName, ModelProviderConfig[]>;
   modelToProviders: Map<ModelName, Set<ModelProviderName>>;
   modelToEndpoints: Map<ModelName, Endpoint[]>;
+  modelToProviderData: Map<ModelName, ModelProviderEntry[]>;
+  modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry>;
 }
 
 export function buildIndexes(
@@ -65,6 +73,8 @@ export function buildIndexes(
     new Map();
   const modelToProviders: Map<ModelName, Set<ModelProviderName>> = new Map();
   const modelToEndpoints: Map<ModelName, Endpoint[]> = new Map();
+  const modelToProviderData: Map<ModelName, ModelProviderEntry[]> = new Map();
+  const modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry> = new Map();
 
   for (const [configKey, config] of Object.entries(modelProviderConfigs)) {
     const typedConfigKey = configKey as ModelProviderConfigId;
@@ -94,6 +104,22 @@ export function buildIndexes(
     }
     modelToProviders.get(modelName)!.add(provider);
 
+    // Build provider data for this model/provider combination
+    if (!modelToProviderData.has(modelName)) {
+      modelToProviderData.set(modelName, []);
+    }
+
+    // Create provider data entry (we'll collect PTB endpoints as we build them below)
+    const providerData: ModelProviderEntry = {
+      provider,
+      config,
+      ptbEndpoints: [],
+    };
+    modelToProviderData.get(modelName)!.push(providerData);
+    
+    // Also add to direct lookup map
+    modelProviderToData.set(typedConfigKey, providerData);
+
     // Create an endpoint for each deployment
     for (const [deploymentId, deploymentConfig] of Object.entries(
       config.endpointConfigs
@@ -120,6 +146,9 @@ export function buildIndexes(
           endpointConfigIdToPtbEndpoints.set(typedConfigKey, []);
         }
         endpointConfigIdToPtbEndpoints.get(typedConfigKey)!.push(endpoint);
+
+        // Add to provider data PTB endpoints
+        providerData.ptbEndpoints.push(endpoint);
       }
     }
   }
@@ -137,6 +166,10 @@ export function buildIndexes(
     endpoints.sort(sortByCost)
   );
 
+  modelToProviderData.forEach((providerDataList) =>
+    providerDataList.forEach((pd) => pd.ptbEndpoints.sort(sortByCost))
+  );
+
   return {
     endpointConfigIdToEndpointConfig,
     endpointIdToEndpoint,
@@ -146,5 +179,7 @@ export function buildIndexes(
     modelToEndpointConfigs,
     modelToProviders,
     modelToEndpoints,
+    modelToProviderData,
+    modelProviderToData,
   };
 }

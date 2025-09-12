@@ -210,7 +210,7 @@ export class AgentController extends Controller {
     @Path() sessionId: string,
     @Body()
     bodyParams: {
-      messages: OpenAI.Chat.ChatCompletionMessageParam[];
+      messages: any[];
       metadata: {
         posthogSession?: string;
         [key: string]: any;
@@ -259,6 +259,22 @@ export class AgentController extends Controller {
     const threadsManager = new InAppThreadsManager(request.authParams);
 
     const result = await threadsManager.escalateThread(sessionId);
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data!);
+  }
+
+  @Post("/thread/create-and-escalate")
+  public async createAndEscalateThread(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<InAppThread, string>> {
+    const threadsManager = new InAppThreadsManager(request.authParams);
+
+    const result = await threadsManager.createAndEscalateThread();
 
     if (result.error) {
       this.setStatus(400);

@@ -5,11 +5,18 @@ import {
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { AuthParams } from "../packages/common/auth/types";
 import { ok, Result, isError } from "../packages/common/result";
-import { HqlError, HqlErrorCode, hqlError, parseClickhouseError } from "../lib/errors/HqlErrors";
+import {
+  HqlError,
+  HqlErrorCode,
+  hqlError,
+  parseClickhouseError,
+} from "../lib/errors/HqlErrors";
 import { AST, Parser } from "node-sql-parser";
 import { HqlStore } from "../lib/stores/HqlStore";
 import { z } from "zod";
 import tracer from "../tracer";
+import { S3Client } from "../lib/shared/db/s3Client";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 export const CLICKHOUSE_TABLES = ["request_response_rmt"];
 const MAX_LIMIT = 300000;
@@ -112,9 +119,17 @@ function normalizeAst(ast: AST | AST[]): AST[] {
 
 export class HeliconeSqlManager {
   private readonly hqlStore: HqlStore;
+  private readonly s3Client: S3Client;
 
   constructor(private readonly authParams: AuthParams) {
     this.hqlStore = new HqlStore();
+    this.s3Client = new S3Client(
+      process.env.S3_ACCESS_KEY || undefined,
+      process.env.S3_SECRET_KEY || undefined,
+      process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+      process.env.S3_BUCKET_NAME ?? "",
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    );
   }
 
   async getClickhouseSchema(): Promise<
@@ -229,16 +244,18 @@ export class HeliconeSqlManager {
       const start = Date.now();
 
       // Execute query with organization context for row-level security
-      const result = await clickhouseDb.queryWithContext<ExecuteSqlResponse["rows"]>({
+      const result = await clickhouseDb.hqlQueryWithContext<
+        ExecuteSqlResponse["rows"]
+      >({
         query: firstSql,
         organizationId: this.authParams.organizationId,
         parameters: [],
       });
 
       const elapsedMilliseconds = Date.now() - start;
+      
       span.setTag("hql.elapsed_ms", elapsedMilliseconds);
       span.setTag("hql.organization_id", this.authParams.organizationId);
-      
       if (isError(result)) {
         const errorCode = parseClickhouseError(result.error);
         span.setTag("error", true);
@@ -251,11 +268,15 @@ export class HeliconeSqlManager {
       const size = Buffer.byteLength(JSON.stringify(rows), "utf8");
       span.setTag("hql.row_count", rows.length);
       span.setTag("hql.size_bytes", size);
+      
+      // Enrich results with S3 bodies if request_body or response_body columns are present
+      const enrichedRows = await this.enrichResultsWithS3Bodies(rows);
+
       return ok({
-        rows: result.data ?? [],
+        rows: enrichedRows,
         elapsedMilliseconds,
-        size,
-        rowCount: rows.length,
+        size: Buffer.byteLength(JSON.stringify(enrichedRows), "utf8"),
+        rowCount: enrichedRows.length,
       });
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : String(e);
@@ -268,6 +289,103 @@ export class HeliconeSqlManager {
     } finally {
       span.finish();
     }
+  }
+
+  private async enrichResultsWithS3Bodies(
+    rows: Record<string, any>[]
+  ): Promise<Record<string, any>[]> {
+    // Early return for edge cases
+    if (!rows || rows.length === 0) {
+      return rows;
+    }
+
+    // Check if rows have request_id field
+    if (!rows[0].hasOwnProperty('request_id')) {
+      return rows;
+    }
+
+    // Process rows in batches for better performance
+    const BATCH_SIZE = 10;
+    const enrichedRows: Record<string, any>[] = [];
+    
+    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+      const batch = rows.slice(i, i + BATCH_SIZE);
+      const enrichedBatch = await Promise.all(
+        batch.map(row => this.fetchRowBodiesFromS3(row))
+      );
+      enrichedRows.push(...enrichedBatch);
+    }
+    
+    return enrichedRows;
+  }
+
+  private getRequestIdForS3(requestId: string, cacheReferenceId?: string): string {
+    // Use cache reference ID if it exists and is not the default UUID
+    if (cacheReferenceId && cacheReferenceId !== DEFAULT_UUID) {
+      return cacheReferenceId;
+    }
+    return requestId;
+  }
+
+  private async fetchRowBodiesFromS3(
+    row: Record<string, any>
+  ): Promise<Record<string, any>> {
+    try {
+      const requestId = row.request_id;
+      const requestIdForS3 = this.getRequestIdForS3(requestId, row.cache_reference_id);
+      
+      // Get signed URL for the request/response body
+      const signedUrlResult = await this.s3Client.getRequestResponseBodySignedUrl(
+        this.authParams.organizationId,
+        requestIdForS3
+      );
+      
+      if (signedUrlResult.error || !signedUrlResult.data) {
+        return this.createRowWithNullBodies(row);
+      }
+      
+      // Fetch and parse the body data from S3
+      const bodyData = await this.fetchBodyFromS3Url(signedUrlResult.data);
+      
+      if (!bodyData) {
+        console.error(`Failed to fetch S3 content for request ${requestId}`);
+        return this.createRowWithNullBodies(row);
+      }
+      
+      return {
+        ...row,
+        request_body: bodyData.request || null,
+        response_body: bodyData.response || null,
+      };
+    } catch (error) {
+      console.error(`Failed to enrich row with S3 bodies:`, error);
+      return this.createRowWithNullBodies(row);
+    }
+  }
+
+  private async fetchBodyFromS3Url(
+    signedUrl: string
+  ): Promise<{ request: any; response: any } | null> {
+    try {
+      const response = await fetch(signedUrl);
+      
+      if (!response.ok) {
+        return null;
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error(`Failed to fetch from S3 URL:`, error);
+      return null;
+    }
+  }
+
+  private createRowWithNullBodies(row: Record<string, any>): Record<string, any> {
+    return {
+      ...row,
+      request_body: null,
+      response_body: null,
+    };
   }
 
   async downloadCsv(sql: string): Promise<Result<string, HqlError>> {

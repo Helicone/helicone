@@ -72,6 +72,11 @@ export type Usage = {
   promptAudioTokens?: number;
   completionTokens?: number;
   completionAudioTokens?: number;
+
+  // anthropic cache control
+  promptCacheWrite5m?: number;
+  promptCacheWrite1h?: number;
+
   totalTokens?: number;
   heliconeCalculated?: boolean;
   cost?: number;

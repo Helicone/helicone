@@ -10,7 +10,7 @@ import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
-import { XIcon, Plus } from "lucide-react";
+import { XIcon, Plus, Clock } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
@@ -51,9 +51,13 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     messages,
     updateCurrentSessionMessages,
     createNewSession,
+    escalateSession,
+    currentSession,
     agentState,
     setAgentState,
   } = useHeliconeAgent();
+
+  const [escalating, setEscalating] = useState(false);
 
   const addErrorMessage = (
     updatedMessages: Message[],
@@ -398,11 +402,15 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     const updatedMessages = [...messages, userMessage];
     updateCurrentSessionMessages(updatedMessages, true);
 
-    setAgentState((prev) => ({
-      ...prev,
-      needsAssistantResponse: true,
-      isProcessing: true,
-    }));
+    // Only trigger AI response if thread is not escalated
+    if (!currentSession?.escalated) {
+      setAgentState((prev) => ({
+        ...prev,
+        needsAssistantResponse: true,
+        isProcessing: true,
+      }));
+    }
+    // If escalated, messages go directly to Slack - no system feedback needed
   };
 
   const handleSendMessage = async (input: string, uploadedImages: File[]) => {
@@ -493,6 +501,30 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         </div>
       </div>
 
+      {/* Escalation Banner */}
+      {currentSession?.escalated && (
+        <div className="mx-3 mb-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/20">
+          <div className="flex items-center gap-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+              <Clock size={16} className="text-green-600 dark:text-green-400" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-green-800 dark:text-green-200">
+                  Human support connected
+                </span>
+                <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-medium text-white">
+                  Live
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs text-green-700 dark:text-green-300">
+                Connected to our support team. They&apos;ll respond here
+                shortly.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex-1 space-y-2 overflow-y-auto px-3 py-1">
         {messages.length === 0 && (
           <div className="text-center text-sm text-muted-foreground">
@@ -537,6 +569,25 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         onModelChange={setSelectedModel}
         onForcePushMessage={forcePushMessageFromQueue}
         onRemoveFromQueue={removeFromQueue}
+        isEscalated={currentSession?.escalated}
+        onEscalate={async () => {
+          setEscalating(true);
+          try {
+            await escalateSession();
+            // Don't add a success message - the banner will show instead
+          } catch (error) {
+            console.error("Failed to escalate:", error);
+            const errorMessage: Message = {
+              role: "assistant",
+              content:
+                "❌ Sorry, I couldn't connect you to support right now. Please try again or email support@helicone.ai",
+            };
+            updateCurrentSessionMessages([...messages, errorMessage], true);
+          } finally {
+            setTimeout(() => setEscalating(false), 1000); // Small delay to show the animation
+          }
+        }}
+        isEscalating={escalating}
       />
     </div>
   );

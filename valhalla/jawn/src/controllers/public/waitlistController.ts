@@ -1,40 +1,121 @@
-import { Controller, Request, Route, Post, Tags, Security, Body } from "tsoa";
-import express from "express";
-import { err, ok } from "../../packages/common/result";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Route,
+  Tags,
+} from "tsoa";
+import { Result } from "../../packages/common/result";
+import { WaitlistManager } from "../../managers/waitlist/WaitlistManager";
 
 @Route("v1/public/waitlist")
 @Tags("Waitlist")
-export class WaitlistController extends Controller {
-  @Post("experiments")
+export class WaitListController extends Controller {
+  @Post("/feature")
   public async addToWaitlist(
-    @Request() request: express.Request,
-    @Body() reqBody: { email: string }
-  ) {
-    if (!reqBody.email) {
-      this.setStatus(400);
-      return err("Email is required");
+    @Body()
+    body: {
+      email: string;
+      feature: string;
     }
+  ): Promise<Result<{ 
+    success: boolean; 
+    position?: number;
+    alreadyOnList?: boolean;
+    sharedPlatforms?: string[];
+  }, string>> {
+    const manager = new WaitlistManager();
+    const result = await manager.addToWaitlist(body.email, body.feature);
 
-    try {
-      const { error } = await dbExecute(
-        `INSERT INTO experiments_waitlist (email) VALUES ($1)`,
-        [reqBody.email]
-      );
-
-      if (error) {
-        console.error(`Error adding to waitlist: ${error}`);
+    if (result.error) {
+      if (result.error === "already_on_waitlist") {
+        this.setStatus(409);
+      } else if (result.error.startsWith("Unsupported feature")) {
+        this.setStatus(400);
+      } else {
         this.setStatus(500);
-        return err(error);
       }
-
-      this.setStatus(200);
-      return ok("Added to waitlist");
-    } catch (error: any) {
-      console.error(`Error adding to waitlist: ${error.message}`);
-      this.setStatus(500);
-      return err(error.message);
+      return result;
     }
-    return;
+
+    // Return 200 for both new additions and existing users
+    this.setStatus(200);
+    return result;
+  }
+
+  @Get("/feature/status")
+  public async isOnWaitlist(
+    @Query() email: string,
+    @Query() feature: string
+  ): Promise<Result<{ isOnWaitlist: boolean }, string>> {
+    const manager = new WaitlistManager();
+    const result = await manager.isOnWaitlist(email, feature);
+
+    if (result.error) {
+      if (result.error.startsWith("Unsupported feature")) {
+        this.setStatus(400);
+      } else {
+        this.setStatus(500);
+      }
+      return result;
+    }
+
+    this.setStatus(200);
+    return result;
+  }
+
+  @Get("/feature/count")
+  public async getWaitlistCount(
+    @Query() feature: string
+  ): Promise<Result<{ count: number }, string>> {
+    const manager = new WaitlistManager();
+    const result = await manager.getWaitlistCount(feature);
+
+    if (result.error) {
+      if (result.error.startsWith("Unsupported feature")) {
+        this.setStatus(400);
+      } else {
+        this.setStatus(500);
+      }
+      return result;
+    }
+
+    this.setStatus(200);
+    return result;
+  }
+
+  @Post("/feature/share")
+  public async trackShare(
+    @Body()
+    body: {
+      email: string;
+      feature: string;
+      platform: "twitter" | "linkedin";
+    }
+  ): Promise<Result<{ 
+    success: boolean; 
+    newPosition?: number;
+    message: string;
+  }, string>> {
+    const manager = new WaitlistManager();
+    const result = await manager.trackShare(body.email, body.feature, body.platform);
+
+    if (result.error) {
+      if (result.error === "Already shared on this platform") {
+        this.setStatus(409);
+      } else if (result.error === "Not found on waitlist") {
+        this.setStatus(404);
+      } else if (result.error.startsWith("Unsupported feature")) {
+        this.setStatus(400);
+      } else {
+        this.setStatus(500);
+      }
+      return result;
+    }
+
+    this.setStatus(200);
+    return result;
   }
 }

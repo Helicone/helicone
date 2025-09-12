@@ -74,6 +74,10 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
     try {
       const processedResponseBody = await this.processBody(context);
+      if (processedResponseBody.data?.statusOverride) {
+        context.message.log.response.status =
+          processedResponseBody.data.statusOverride;
+      }
       context.processedLog.response.model = getModelFromResponse(
         processedResponseBody.data?.processedBody
       );
@@ -134,7 +138,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       context.usage.promptCacheReadTokens = usage.promptCacheReadTokens;
       context.usage.promptAudioTokens = usage.promptAudioTokens;
       context.usage.completionAudioTokens = usage.completionAudioTokens;
-
+      context.usage.promptCacheWrite5m = usage.promptCacheWrite5m;
+      context.usage.promptCacheWrite1h = usage.promptCacheWrite1h;
       return await super.handle(context);
     } catch (error: any) {
       return err(
