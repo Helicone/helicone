@@ -1,4 +1,5 @@
 import { hash } from "../../..";
+import { logObjectMemoryUsage } from "../../../observability/memory";
 import { safePut } from "../../safePut";
 import { Result, ok } from "../results";
 
@@ -168,8 +169,15 @@ async function storeInCacheWithHmac({
     console.error("Error storing in cache", e);
   }
   if (useMemoryCache) {
-    InMemoryCache.getInstance<string>().set(hashedKey, JSON.stringify(encrypted));
+    InMemoryCache.getInstance<string>().set(
+      hashedKey,
+      JSON.stringify(encrypted)
+    );
   }
+  logObjectMemoryUsage(
+    InMemoryCache.getInstance<string>(),
+    "storeInCacheWithHmac"
+  );
 }
 
 export async function storeInCache(
@@ -319,7 +327,13 @@ export async function getAndStoreInCache<T, K>(
     );
     return value;
   } else {
-    await storeInCache(key, JSON.stringify(value.data), env, expirationTtl, useMemoryCache);
+    await storeInCache(
+      key,
+      JSON.stringify(value.data),
+      env,
+      expirationTtl,
+      useMemoryCache
+    );
   }
   return value;
 }

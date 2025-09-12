@@ -19,6 +19,7 @@ import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
+import { logObjectMemoryUsage } from "../observability/memory";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -285,6 +286,7 @@ export class RequestWrapper {
       return this.cachedText;
     }
     this.cachedText = await this.request.text();
+    logObjectMemoryUsage(this.cachedText, "RequestWrapper.getRawText");
     return this.cachedText;
   }
 

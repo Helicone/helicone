@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { logObjectMemoryUsage } from "../../observability/memory";
 
 export interface CompletedStream {
   body: string[];
@@ -33,6 +34,7 @@ export class ReadableInterceptor {
 
   private interceptStream(stream: ReadableStream): ReadableStream {
     const onDone = (reason: "cancel" | "done") => {
+      logObjectMemoryUsage(this.responseBody, "ReadableInterceptor.onDone");
       this.chunkEmitter.emit(this.chunkEventName, {
         body: this.responseBody,
         reason,
