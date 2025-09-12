@@ -119,7 +119,7 @@ export async function handleProxyRequest(
 
   const interceptor = response.body
     ? new ReadableInterceptor(
-        response.body, 
+        response.body,
         proxyRequest.isStream,
         proxyRequest.requestWrapper.getDataDogClient()
       )
