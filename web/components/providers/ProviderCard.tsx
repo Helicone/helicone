@@ -318,8 +318,10 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     if (!existingKey) return;
 
     // Only update if we're in edit mode and have new values
-    if (!isEditingKey || (!keyValue && provider.id !== "aws")) {
-      setNotification("Please enter a new key or cancel editing", "error");
+    if (!isEditingKey || 
+        (provider.id === "aws" && !keyValue && !secretKeyValue) ||
+        (provider.id !== "aws" && !keyValue)) {
+      setNotification("Please enter at least one key value", "error");
       return;
     }
 
@@ -402,29 +404,53 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
 
     return (
       <div className="mt-3 flex flex-col gap-2">
-        <div className="flex gap-3">
-          {configFields.map((field) => (
-            <div
-              key={field.key}
-              className={cn(
-                "flex gap-1",
-                field.type === "boolean"
-                  ? "flex-row items-center gap-2"
-                  : "flex-1 flex-col",
-              )}
-            >
-              <Small className="text-xs">{field.label}</Small>
-              {field.type === "boolean" ? (
-                <Checkbox
-                  checked={configValues[field.key] === "true"}
-                  onCheckedChange={(checked) =>
-                    handleUpdateConfigField(
-                      field.key,
-                      checked ? "true" : "false",
-                    )
+        {provider.id === "aws" ? (
+          // Special layout for AWS to put cross region below region
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-3">
+              <div className="flex flex-1 flex-col gap-1">
+                <Small className="text-xs">Region</Small>
+                <Input
+                  type="text"
+                  placeholder="us-west-2"
+                  value={configValues.region || ""}
+                  onChange={(e) =>
+                    handleUpdateConfigField("region", e.target.value)
                   }
+                  className="h-7 text-xs"
+                  disabled={isEditMode && !isEditingKey}
                 />
-              ) : (
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id={`crossRegion-${existingKey?.id || instanceIndex}`}
+                checked={configValues.crossRegion === "true"}
+                onCheckedChange={(checked) =>
+                  handleUpdateConfigField(
+                    "crossRegion",
+                    checked ? "true" : "false",
+                  )
+                }
+                disabled={isEditMode && !isEditingKey}
+              />
+              <Label 
+                htmlFor={`crossRegion-${existingKey?.id || instanceIndex}`}
+                className="cursor-pointer text-xs font-normal"
+              >
+                Cross Region
+              </Label>
+            </div>
+          </div>
+        ) : (
+          // Default layout for other providers
+          <div className="flex gap-3">
+            {configFields.map((field) => (
+              <div
+                key={field.key}
+                className="flex flex-1 flex-col gap-1"
+              >
+                <Small className="text-xs">{field.label}</Small>
                 <Input
                   type={field.type ?? "text"}
                   placeholder={field.placeholder}
@@ -435,10 +461,10 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                   className="h-7 text-xs"
                   disabled={isEditMode && !isEditingKey}
                 />
-              )}
-            </div>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
