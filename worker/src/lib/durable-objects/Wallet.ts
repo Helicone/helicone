@@ -185,6 +185,53 @@ export class Wallet extends DurableObject<Env> {
     });
   }
 
+  deductCredits(amount: number, eventId: string, orgId: string): Result<void, string> {
+    const scaledAmount = amount * SCALE_FACTOR;
+    return this.ctx.storage.transactionSync(() => {
+      // Get current balance and escrow
+      const totalCreditsPurchased = this.ctx.storage.sql
+        .exec<{ total: number }>("SELECT COALESCE(SUM(credits), 0) as total FROM credit_purchases")
+        .one()
+        .total;
+      
+      const totalDebits = this.ctx.storage.sql
+        .exec<{ total: number }>("SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?", orgId)
+        .one()
+        .total;
+      
+      const escrowSum = this.ctx.storage.sql
+        .exec<{ total: number }>("SELECT COALESCE(SUM(amount), 0) as total FROM escrows")
+        .one()
+        .total;
+      
+      const currentBalance = totalCreditsPurchased - totalDebits;
+      const effectiveBalance = currentBalance - escrowSum;
+      
+      // Check if refund amount exceeds effective balance
+      if (scaledAmount > effectiveBalance) {
+        const refundInCents = amount;
+        const effectiveBalanceInCents = effectiveBalance / SCALE_FACTOR;
+        console.error(
+          `Refund amount (${refundInCents} cents) exceeds effective balance (${effectiveBalanceInCents} cents) for org ${orgId}. Rejecting refund.`
+        );
+        return err(`Refund amount exceeds effective balance. Refund: ${refundInCents} cents, Available: ${effectiveBalanceInCents} cents`);
+      }
+      
+      // Process the refund by adding a negative credit purchase
+      this.ctx.storage.sql.exec(
+        "INSERT INTO credit_purchases (id, created_at, credits, reference_id) VALUES (?, ?, ?, ?)",
+        crypto.randomUUID(),
+        Date.now(),
+        -scaledAmount,  // Negative amount for refund
+        eventId
+      );
+      
+      this.ctx.storage.sql.exec("INSERT INTO processed_webhook_events (id, processed_at) VALUES (?, ?)", eventId, Date.now());
+      
+      return ok(undefined);
+    });
+  }
+
   getTotalCreditsPurchased(): TotalCreditsPurchased {
     const result = this.ctx.storage.sql.exec<{ totalCredits: number }>(
       "SELECT COALESCE(SUM(credits), 0) as totalCredits FROM credit_purchases"
@@ -200,7 +247,6 @@ export class Wallet extends DurableObject<Env> {
         .total;
       
       const alertState = this.ctx.storage.sql
-        // `state: number` is correct here because this is how sqlit stores the boolean internally
         .exec<{ state: string }>("SELECT state FROM alert_state WHERE id = ?", ALERT_ID)
         .next()
         ?.value?.state === "on";

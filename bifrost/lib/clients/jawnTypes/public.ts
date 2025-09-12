@@ -2185,6 +2185,25 @@ Json: JsonObject;
         completion_token: number;
       };
     };
+    PaymentIntentRecord: {
+      id: string;
+      /** Format: double */
+      amount: number;
+      /** Format: double */
+      created: number;
+      status: string;
+      isRefunded?: boolean;
+      /** Format: double */
+      refundedAmount?: number;
+      refundIds?: string[];
+    };
+    StripePaymentIntentsResponse: {
+      data: components["schemas"]["PaymentIntentRecord"][];
+      has_more: boolean;
+      next_page: string | null;
+      /** Format: double */
+      count: number;
+    };
     ValidationError: {
       field: string;
       message: string;
@@ -5878,7 +5897,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["StripePaymentIntentsResponse"];
         };
       };
     };
