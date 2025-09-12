@@ -102,6 +102,24 @@ export class DataDogClient {
           [`uptime_minutes:${uptimeMinutes.toFixed(1)}`]
         ),
       ];
+      
+      // Send individual allocation metrics to identify what's using memory
+      for (const [key, bytes] of GLOBAL_MEMORY_ALLOCATIONS.entries()) {
+        const mb = bytes / (1024 * 1024);
+        if (mb > 0.1) { // Only track allocations > 0.1MB
+          metrics.push(
+            this.sendDistributionMetric(
+              timestamp,
+              mb,
+              "worker.memory.allocation",
+              [
+                `key:${key}`,
+                `requests:${GLOBAL_REQUEST_COUNT}`
+              ]
+            )
+          );
+        }
+      }
 
       ctx.waitUntil(Promise.all(metrics));
     } catch (error) {
