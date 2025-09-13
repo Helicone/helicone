@@ -161,6 +161,15 @@ export class RequestWrapper {
       this.dataDogClient = getDataDogClient(env);
       // Increment request counter for each new request
       this.dataDogClient.incrementRequestCount();
+      try {
+        this.dataDogClient.trackContentLength(
+          Number(this.headers.get("content-length") ?? 0)
+        );
+      } catch (e) {
+        // failed to get content length
+        this.dataDogClient.trackContentLength(-1);
+        // Silently catch - never let monitoring break the request
+      }
     }
     this.baseURLOverride = null;
     this.cf = request.cf;

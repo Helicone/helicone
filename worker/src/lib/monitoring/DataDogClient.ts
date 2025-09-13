@@ -30,6 +30,18 @@ export class DataDogClient {
     this.ctx = ctx;
   }
 
+  trackContentLength(bytes: number): void {
+    try {
+      this.sendDistributionMetric(
+        Date.now(),
+        bytes,
+        "worker.memory.request.content_length"
+      );
+    } catch (e) {
+      // Silently catch - monitoring must never break the app
+    }
+  }
+
   /**
    * Track memory allocation globally across worker lifetime
    * Automatically sends metrics to DataDog if context is available
