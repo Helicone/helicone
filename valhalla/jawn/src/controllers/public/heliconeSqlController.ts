@@ -15,16 +15,21 @@ import { err, ok, Result, isError } from "../../packages/common/result";
 import { 
   HqlError, 
   HqlErrorCode, 
-  StatusCodeMap,
+  HqlErrorMessages,
   createHqlError
 } from "../../lib/errors/HqlErrors";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
 import { type JawnAuthenticatedRequest } from "../../types/request";
-import {
-  checkFeatureFlag,
-  HQL_FEATURE_FLAG,
-} from "../../lib/utils/featureFlags";
+import { HQL_FEATURE_FLAG } from "../../lib/utils/featureFlags";
 import { HqlQueryManager } from "../../managers/HqlQueryManager";
+import { RequireFeatureFlag, createErrorFormatter } from "../../decorators/featureFlag";
+
+// Create a typed error formatter for HQL feature flags
+const hqlFeatureFlagFormatter = createErrorFormatter<HqlErrorCode>(
+  () => HqlErrorCode.FEATURE_NOT_ENABLED,
+  (code) => `[${code}] ${HqlErrorMessages[code]}`,
+  403
+);
 
 // --- Response Types ---
 export interface ClickHouseTableSchema {
@@ -42,6 +47,7 @@ export interface ClickHouseTableColumn {
   ttl_expression?: string;
 }
 
+// TODO DRY these interfaces
 export interface ExecuteSqlRequest {
   sql: string;
 }
@@ -111,21 +117,13 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Post("execute")
+  @RequireFeatureFlag<HqlErrorCode>(HQL_FEATURE_FLAG, {
+    errorFormatter: hqlFeatureFlagFormatter
+  })
   public async executeSql(
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExecuteSqlResponse, string>> {
-    // Check feature flag access
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      HQL_FEATURE_FLAG
-    );
-    if (isError(featureFlagResult)) {
-      const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
-      this.setStatus(error.statusCode || 403);
-      return err(formatHqlError(error));
-    }
-
     // Validate request
     if (!requestBody.sql?.trim()) {
       const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL);
@@ -153,21 +151,13 @@ export class HeliconeSqlController extends Controller {
    */
   @Security("api_key")
   @Post("download")
+  @RequireFeatureFlag<HqlErrorCode>(HQL_FEATURE_FLAG, {
+    errorFormatter: hqlFeatureFlagFormatter
+  })
   public async downloadCsv(
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
-    // Check feature flag access
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      HQL_FEATURE_FLAG
-    );
-    if (isError(featureFlagResult)) {
-      const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
-      this.setStatus(error.statusCode || 403);
-      return err(formatHqlError(error));
-    }
-
     // Validate request
     if (!requestBody.sql?.trim()) {
       const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL, "CSV download requires a SQL query");
