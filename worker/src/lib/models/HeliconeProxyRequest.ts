@@ -137,9 +137,15 @@ export class HeliconeProxyRequestMapper {
       return { data: null, error: api_base_error };
     }
 
-    const targetUrl = buildTargetUrl(this.request.url, api_base);
-
     const requestJson = await this.requestJson();
+    
+    // Extract deployment name from request body for Azure OpenAI
+    let deploymentName: string | undefined;
+    if (api_base.includes(".openai.azure.com") && requestJson.model) {
+      deploymentName = requestJson.model;
+    }
+
+    const targetUrl = buildTargetUrl(this.request.url, api_base, deploymentName);
     let isStream = requestJson.stream === true;
 
     if (this.provider === "GOOGLE") {
