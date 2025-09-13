@@ -1,7 +1,7 @@
 import { toOpenAI } from "../../providers/anthropic/response/toOpenai";
-import { AntResponseBody } from "../../providers/anthropic/response/types";
+import { AntResponseBody } from "../../types";
 import { toAnthropic } from "../../providers/openai/request/toAnthropic";
-import { OpenAIRequestBody } from "../../providers/openai/request/types";
+import { OpenAIRequestBody } from "../../types";
 
 export async function oai2ant({
   body,
@@ -34,20 +34,33 @@ export async function oai2ant({
     },
   });
 
-  const responseBody = await response.json<AntResponseBody>();
   try {
-    return new Response(JSON.stringify(toOpenAI(responseBody)), {
-      headers: {
-        ...response.headers,
-        "Content-Type": "application/json",
-      },
-    });
+    return await oai2antResponse(response);
   } catch (e) {
+    const responseBody = await response.json<AntResponseBody>();
     return new Response(JSON.stringify(responseBody), {
       headers: {
         ...response.headers,
         "Content-Type": "application/json",
       },
     });
+  }
+}
+
+export async function oai2antResponse(response: Response): Promise<Response> {
+  try {
+    const anthropicBody = await response.json<AntResponseBody>();
+    const openAIBody = toOpenAI(anthropicBody);
+
+    return new Response(JSON.stringify(openAIBody), {
+      status: response.status,
+      statusText: response.statusText,
+      headers: {
+        "content-type": "application/json",
+      },
+    });
+  } catch (error) {
+    console.error("Failed to transform Anthropic response:", error);
+    return response;
   }
 }

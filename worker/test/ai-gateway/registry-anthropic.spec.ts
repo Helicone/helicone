@@ -6,7 +6,7 @@ import { createAnthropicMockResponse } from "../test-utils";
 // Define auth expectations for different providers
 const anthropicAuthExpectations = {
   headers: {
-    // Anthropic uses OpenAI compatibility mode with Authorization header for /v1/chat/completions
+    // Anthropic uses OpenAI compatibility mode with Authorization header for /v1/messages
     Authorization: /^Bearer /,
   },
 };
@@ -39,7 +39,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-5-haiku-20241022",
                 data: createAnthropicMockResponse("claude-3.5-haiku"),
@@ -90,7 +90,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-5-haiku-20241022",
                 data: createAnthropicMockResponse("claude-3.5-haiku"),
@@ -107,7 +107,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Anthropic provider failed",
@@ -139,7 +139,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-5-sonnet-20241022",
                 data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
@@ -190,7 +190,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-5-sonnet-20241022",
                 data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
@@ -207,7 +207,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
@@ -239,7 +239,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-7-sonnet-20250219",
                 data: createAnthropicMockResponse("claude-3.7-sonnet"),
@@ -290,7 +290,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-7-sonnet-20250219",
                 data: createAnthropicMockResponse("claude-3.7-sonnet"),
@@ -307,7 +307,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
@@ -339,7 +339,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-opus-4-20250514",
                 data: createAnthropicMockResponse("claude-opus-4"),
@@ -390,7 +390,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-opus-4-20250514",
                 data: createAnthropicMockResponse("claude-opus-4"),
@@ -407,7 +407,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
@@ -439,7 +439,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-opus-4-1-20250805",
                 data: createAnthropicMockResponse("claude-opus-4-1"),
@@ -490,7 +490,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-opus-4-1-20250805",
                 data: createAnthropicMockResponse("claude-opus-4-1"),
@@ -507,7 +507,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
@@ -539,7 +539,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-sonnet-4-20250514",
                 data: createAnthropicMockResponse("claude-sonnet-4"),
@@ -590,7 +590,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-sonnet-4-20250514",
                 data: createAnthropicMockResponse("claude-sonnet-4"),
@@ -607,7 +607,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
@@ -639,7 +639,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Anthropic service unavailable",
@@ -655,7 +655,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -671,7 +671,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 401,
                 errorMessage: "Invalid API key",

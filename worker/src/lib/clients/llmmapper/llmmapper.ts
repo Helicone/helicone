@@ -1,6 +1,6 @@
-import { OpenAIRequestBody } from "./providers/openai/request/types";
+import { OpenAIRequestBody } from "./types";
 import { oai2ant } from "./router/oai2ant/nonStream";
-import { oaiStream2antStreamResponse } from "./router/oai2ant/stream";
+import { oaiStream2antStream } from "./router/oai2ant/stream";
 
 export function tryJSONParse(body: string): OpenAIRequestBody | null {
   try {
@@ -23,7 +23,7 @@ export async function llmmapper(
       return new Response("Invalid body", { status: 400 });
     }
     if (body?.stream) {
-      return oaiStream2antStreamResponse({
+      return oaiStream2antStream({
         body: body,
         headers: new Headers(init.headers),
       });
