@@ -146,6 +146,9 @@ export class DataDogClient {
     metricName: string,
     tags: string[] = []
   ): Promise<void> {
+    if (this.config.sampleRate && Math.random() > this.config.sampleRate) {
+      return;
+    }
     try {
       const distribution = {
         series: [
