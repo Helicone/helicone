@@ -157,7 +157,7 @@ export const endpoints = {
       },
     ],
     contextLength: 131_072,
-    maxCompletionTokens: 32_678,
+    maxCompletionTokens: 131_072,
     supportedParameters: [
       "frequency_penalty",
       "logit_bias",

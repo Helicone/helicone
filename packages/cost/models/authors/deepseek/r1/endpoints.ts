@@ -19,7 +19,7 @@ export const endpoints = {
       },
     ],
     contextLength: 128_000,
-    maxCompletionTokens: 4_096,
+    maxCompletionTokens: 131_072,
     supportedParameters: [
       "frequency_penalty",
       "include_reasoning",

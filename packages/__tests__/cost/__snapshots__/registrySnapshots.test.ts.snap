@@ -418,7 +418,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "deepseek-r1-distill-llama-70b:groq": {
       "context": 128000,
       "crossRegion": false,
-      "maxTokens": 4096,
+      "maxTokens": 131072,
       "modelId": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
       "parameters": [
         "frequency_penalty",
@@ -626,7 +626,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "llama-3.1-8b-instant:groq": {
       "context": 131072,
       "crossRegion": false,
-      "maxTokens": 32678,
+      "maxTokens": 131072,
       "modelId": "llama-3.1-8b-instant",
       "parameters": [
         "frequency_penalty",
@@ -776,11 +776,41 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "moonshotai/kimi-k2": {
-    "kimi-k2:groq": {
+    "kimi-k2-0905:groq": {
       "context": 262144,
       "crossRegion": false,
       "maxTokens": 16384,
-      "modelId": "moonshotai/Kimi-K2-Instruct",
+      "modelId": "moonshotai/kimi-k2-instruct-0905",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "moonshotai/kimi-k2-instruct",
       "parameters": [
         "frequency_penalty",
         "logit_bias",
@@ -1512,6 +1542,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
   ],
   "moonshotai/kimi-k2": [
+    "groq",
     "groq",
   ],
   "openai/gpt-4.1": [
@@ -2278,6 +2309,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "kimi-k2-0905",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
       "model": "llama-3.1-8b-instant",
       "providers": [
         "groq",
@@ -2370,7 +2407,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "google-ai-studio",
     },
     {
-      "modelCount": 13,
+      "modelCount": 14,
       "provider": "groq",
     },
     {
@@ -2391,6 +2428,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "gemma2-9b-it",
     "gpt-5-nano",
     "kimi-k2",
+    "kimi-k2-0905",
     "llama-3.1-8b-instant",
     "llama-3.3-70b-instruct",
     "llama-4-maverick",
@@ -2407,9 +2445,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:vertex:global",
     "claude-3.5-sonnet-v2:anthropic:*",
   ],
-  "totalEndpoints": 62,
-  "totalModelProviderConfigs": 62,
-  "totalModelsWithPtb": 12,
+  "totalEndpoints": 63,
+  "totalModelProviderConfigs": 63,
+  "totalModelsWithPtb": 13,
   "totalProviders": 8,
 }
 `;
