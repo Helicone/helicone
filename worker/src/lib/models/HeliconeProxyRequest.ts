@@ -83,7 +83,9 @@ export class HeliconeProxyRequestMapper {
   private async getHeliconeTemplate() {
     if (this.request.heliconeHeaders.promptHeaders.promptId) {
       try {
-        const rawJson = JSON.parse(await this.request.getRawText());
+        const rawJson = JSON.parse(
+          await this.request.requestBodyWrapper.unsafeGetRawText()
+        );
 
         // Get the mapper type based on the request
         const mapperType = getMapperType({
@@ -149,7 +151,8 @@ export class HeliconeProxyRequestMapper {
     }
 
     if (this.provider === "AWS" || this.provider === "BEDROCK") {
-      isStream = isStream || targetUrl.pathname.includes("invoke-with-response-stream");
+      isStream =
+        isStream || targetUrl.pathname.includes("invoke-with-response-stream");
     }
 
     return {
