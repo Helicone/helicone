@@ -22,6 +22,7 @@ type keySlug =
   | "key:slack_bot_token"
   | "key:slack_app_token"
   | "key:slack_channel"
+  | "key:slack_user_token"
   | "key:loops";
 
 const getKey = (key: string) => {
@@ -70,6 +71,10 @@ export const GET_KEY = async (key: keySlug) => {
 
   if (key === "key:slack_channel") {
     return process.env.HELICONE_IN_APP_SLACK_CHANNEL;
+  }
+
+  if (key === "key:slack_user_token") {
+    return process.env.HELICONE_IN_APP_SLACK_USER_TOKEN;
   }
 
   return null;

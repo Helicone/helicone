@@ -4,10 +4,12 @@ import { dbExecute } from "../lib/shared/db/dbExecute";
 import { AuthParams } from "../packages/common/auth/types";
 import OpenAI from "openai";
 import { SlackService } from "../services/SlackService";
+import { MessageAttachment } from "@slack/web-api";
+import { uuid } from "uuidv4";
 
 // Initialize Slack service on module load
 const slackService = SlackService.getInstance();
-slackService.initialize().catch(error => {
+slackService.initialize().catch((error) => {
   console.error("Failed to initialize Slack service:", error);
 });
 
@@ -161,6 +163,14 @@ export class InAppThreadsManager extends BaseManager {
     sessionId: string
   ): Promise<Result<InAppThread, string>> {
     const slackService = SlackService.getInstance();
+    const userEmailResult = await dbExecute<{ email: string }>(
+      `SELECT email FROM auth.users WHERE id = $1`,
+      [this.authParams.userId]
+    );
+    if (userEmailResult.error) {
+      return err(`Failed to get user email: ${userEmailResult.error}`);
+    }
+    const userEmail = userEmailResult.data?.[0].email;
 
     try {
       // Get the thread details to include in the Slack message
@@ -203,7 +213,7 @@ export class InAppThreadsManager extends BaseManager {
       const text = wasDirectlyEscalated
         ? `🎯 New direct support request`
         : `🚨 New escalation from user`;
-      
+
       const blocks = [
         {
           type: "header",
@@ -217,7 +227,7 @@ export class InAppThreadsManager extends BaseManager {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `*Organization:* ${this.authParams.organizationId}\n*User:* ${this.authParams.userId || "Unknown"}\n*Session:* \`${sessionId}\`\n*Current Page:* ${thread.metadata?.currentPage || "Unknown"}\n*Time:* ${new Date().toLocaleString()}`,
+            text: `*Organization:* ${this.authParams.organizationId}\n*User:* ${this.authParams.userId || "Unknown"}\n*User Email:* ${userEmail || "Unknown"}\n*Session:* \`${sessionId}\`\n*Current Page:* ${thread.metadata?.currentPage || "Unknown"}\n*Time:* ${new Date().toLocaleString()}`,
           },
         },
         {
@@ -272,7 +282,6 @@ export class InAppThreadsManager extends BaseManager {
         // If no row is updated, it means it was already escalated
         [sessionId, this.authParams.organizationId, threadTs]
       );
-
 
       if (updateResult.data?.[0]) {
         return ok(updateResult.data[0]);
@@ -404,10 +413,10 @@ export class InAppThreadsManager extends BaseManager {
       // Find new user messages by comparing content and timestamps
       const newUserMessages = lastMessage?.role === "user" ? [lastMessage] : [];
 
-
       // Forward each new user message to Slack
       for (const message of newUserMessages) {
         let messageText = "";
+        let attachments: MessageAttachment[] = [];
 
         if (typeof message.content === "string") {
           messageText = message.content;
@@ -423,13 +432,44 @@ export class InAppThreadsManager extends BaseManager {
           );
           if (imageParts.length > 0) {
             messageText += `\n\n📎 *[Message contains ${imageParts.length} image(s)]*`;
+            // if image_url is base64, upload it to slack first
+            for (const imagePart of imageParts) {
+              if (imagePart.image_url) {
+                const isBase64 =
+                  imagePart.image_url.url.startsWith("data:image/");
+                // upload all images to slack
+                if (isBase64) {
+                  const data = imagePart.image_url.url.replace(
+                    /^data:image\/\w+;base64,/,
+                    ""
+                  );
+                  const buffer = Buffer.from(data, "base64");
+                  const extension = imagePart.image_url.url
+                    .split(";")[0]
+                    .split("/")[1];
+                  const fileID = uuid();
+                  const uploaded = await slackService.uploadFile(
+                    buffer,
+                    `${fileID}.${extension}`,
+                    slackThreadTs
+                  );
+                  if (!uploaded) {
+                    continue;
+                  }
+                }
+              }
+            }
           }
         }
 
         if (messageText.trim()) {
           const formattedMessage = `👤 **Customer:**\n${messageText}`;
 
-          await slackService.postThreadMessage(slackThreadTs, formattedMessage);
+          await slackService.postThreadMessage(
+            slackThreadTs,
+            formattedMessage,
+            attachments
+          );
         }
       }
     } catch (error) {
