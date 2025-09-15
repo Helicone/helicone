@@ -20,6 +20,7 @@ import { SignatureV4 } from "@smithy/signature-v4";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
+import { RequestBodyBuffer } from "../RequestBodyBuffer/RequestBodyWrapper";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -63,6 +64,7 @@ export class RequestWrapper {
   prompt2025Settings: Prompt2025Settings; // I'm sorry. Will clean whenever we can remove old promtps.
   extraHeaders: Headers | null = null;
   requestReferrer: string | undefined;
+  requestBodyWrapper: RequestBodyBuffer;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -173,6 +175,10 @@ export class RequestWrapper {
     }
     this.baseURLOverride = null;
     this.cf = request.cf;
+    this.requestBodyWrapper = new RequestBodyBuffer(
+      request,
+      this.dataDogClient
+    );
   }
 
   private injectPromptProperties() {
@@ -298,23 +304,9 @@ export class RequestWrapper {
     return body;
   }
 
+  // TODO deprecate this function
   async getRawText(): Promise<string> {
-    if (this.cachedText) {
-      return this.cachedText;
-    }
-
-    this.cachedText = await this.request.text();
-
-    try {
-      if (this.dataDogClient) {
-        const sizeBytes = DataDogClient.estimateStringSize(this.cachedText);
-        this.dataDogClient.trackMemory("request-body", sizeBytes);
-      }
-    } catch (e) {
-      // Silently catch - never let monitoring break the request
-    }
-
-    return this.cachedText;
+    return this.requestBodyWrapper.unsafeGetRawText();
   }
 
   getDataDogClient(): DataDogClient | undefined {
