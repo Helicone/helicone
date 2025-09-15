@@ -95,7 +95,7 @@ export function formatHQL(query: string): string {
 
   // Normalize whitespace (but preserve single spaces)
   formatted = formatted.replace(/\s+/g, " ");
-  
+
   // Convert keywords to uppercase (but be careful with operators)
   keywords.forEach((keyword) => {
     const regex = new RegExp(`\\b${keyword}\\b`, "gi");
@@ -168,7 +168,7 @@ export function formatHQL(query: string): string {
       if (afterSelect) {
         // Parse comma-separated fields
         const fields = afterSelect.split(/,(?![^()]*\))/);
-        selectFields = fields.map(f => f.trim()).filter(f => f);
+        selectFields = fields.map((f) => f.trim()).filter((f) => f);
         formattedLines.push("  ".repeat(indentLevel) + "SELECT");
         inSelect = true;
       } else {
@@ -211,7 +211,7 @@ export function formatHQL(query: string): string {
     if (inSelect) {
       // This line contains select fields
       const fields = line.split(/,(?![^()]*\))/);
-      fields.forEach(field => {
+      fields.forEach((field) => {
         const trimmed = field.trim();
         if (trimmed) {
           selectFields.push(trimmed);
