@@ -183,6 +183,180 @@
 					}
 				]
 			},
+			"ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"sharedPlatforms": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							"alreadyOnList": {
+								"type": "boolean"
+							},
+							"position": {
+								"type": "number",
+								"format": "double"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"success"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__isOnWaitlist-boolean__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"isOnWaitlist": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"isOnWaitlist"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__isOnWaitlist-boolean_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__isOnWaitlist-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__count-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"count"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__count-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__count-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"message": {
+								"type": "string"
+							},
+							"newPosition": {
+								"type": "number",
+								"format": "double"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"message",
+							"success"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__success-boolean--newPosition_63_-number--message-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--newPosition_63_-number--message-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__id-string__": {
 				"properties": {
 					"data": {
@@ -5631,6 +5805,74 @@
 					"amount",
 					"description",
 					"totalCost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaymentIntentRecord": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"created": {
+						"type": "number",
+						"format": "double"
+					},
+					"status": {
+						"type": "string"
+					},
+					"isRefunded": {
+						"type": "boolean"
+					},
+					"refundedAmount": {
+						"type": "number",
+						"format": "double"
+					},
+					"refundIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"amount",
+					"created",
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"StripePaymentIntentsResponse": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PaymentIntentRecord"
+						},
+						"type": "array"
+					},
+					"has_more": {
+						"type": "boolean"
+					},
+					"next_page": {
+						"type": "string",
+						"nullable": true
+					},
+					"count": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"has_more",
+					"next_page",
+					"count"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -11402,503 +11644,6 @@
 					}
 				]
 			},
-			"ChatCompletionContentPartText": {
-				"description": "Learn about\n[text inputs](https://platform.openai.com/docs/guides/text-generation).",
-				"properties": {
-					"text": {
-						"type": "string",
-						"description": "The text content."
-					},
-					"type": {
-						"type": "string",
-						"enum": [
-							"text"
-						],
-						"nullable": false,
-						"description": "The type of the content part."
-					}
-				},
-				"required": [
-					"text",
-					"type"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionDeveloperMessageParam": {
-				"description": "Developer-provided instructions that the model should follow, regardless of\nmessages sent by the user. With o1 models and newer, `developer` messages\nreplace the previous `system` messages.",
-				"properties": {
-					"content": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"$ref": "#/components/schemas/ChatCompletionContentPartText"
-								},
-								"type": "array"
-							}
-						],
-						"description": "The contents of the developer message."
-					},
-					"role": {
-						"type": "string",
-						"enum": [
-							"developer"
-						],
-						"nullable": false,
-						"description": "The role of the messages author, in this case `developer`."
-					},
-					"name": {
-						"type": "string",
-						"description": "An optional name for the participant. Provides the model information to\ndifferentiate between participants of the same role."
-					}
-				},
-				"required": [
-					"content",
-					"role"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionSystemMessageParam": {
-				"description": "Developer-provided instructions that the model should follow, regardless of\nmessages sent by the user. With o1 models and newer, use `developer` messages\nfor this purpose instead.",
-				"properties": {
-					"content": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"$ref": "#/components/schemas/ChatCompletionContentPartText"
-								},
-								"type": "array"
-							}
-						],
-						"description": "The contents of the system message."
-					},
-					"role": {
-						"type": "string",
-						"enum": [
-							"system"
-						],
-						"nullable": false,
-						"description": "The role of the messages author, in this case `system`."
-					},
-					"name": {
-						"type": "string",
-						"description": "An optional name for the participant. Provides the model information to\ndifferentiate between participants of the same role."
-					}
-				},
-				"required": [
-					"content",
-					"role"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionContentPartImage.ImageURL": {
-				"properties": {
-					"url": {
-						"type": "string",
-						"description": "Either a URL of the image or the base64 encoded image data."
-					},
-					"detail": {
-						"type": "string",
-						"enum": [
-							"auto",
-							"low",
-							"high"
-						],
-						"description": "Specifies the detail level of the image. Learn more in the\n[Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding)."
-					}
-				},
-				"required": [
-					"url"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionContentPartImage": {
-				"description": "Learn about [image inputs](https://platform.openai.com/docs/guides/vision).",
-				"properties": {
-					"image_url": {
-						"$ref": "#/components/schemas/ChatCompletionContentPartImage.ImageURL"
-					},
-					"type": {
-						"type": "string",
-						"enum": [
-							"image_url"
-						],
-						"nullable": false,
-						"description": "The type of the content part."
-					}
-				},
-				"required": [
-					"image_url",
-					"type"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionContentPartInputAudio.InputAudio": {
-				"properties": {
-					"data": {
-						"type": "string",
-						"description": "Base64 encoded audio data."
-					},
-					"format": {
-						"type": "string",
-						"enum": [
-							"wav",
-							"mp3"
-						],
-						"description": "The format of the encoded audio data. Currently supports \"wav\" and \"mp3\"."
-					}
-				},
-				"required": [
-					"data",
-					"format"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionContentPartInputAudio": {
-				"description": "Learn about [audio inputs](https://platform.openai.com/docs/guides/audio).",
-				"properties": {
-					"input_audio": {
-						"$ref": "#/components/schemas/ChatCompletionContentPartInputAudio.InputAudio"
-					},
-					"type": {
-						"type": "string",
-						"enum": [
-							"input_audio"
-						],
-						"nullable": false,
-						"description": "The type of the content part. Always `input_audio`."
-					}
-				},
-				"required": [
-					"input_audio",
-					"type"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionContentPart.File.File": {
-				"properties": {
-					"file_data": {
-						"type": "string",
-						"description": "The base64 encoded file data, used when passing the file to the model as a\nstring."
-					},
-					"file_id": {
-						"type": "string",
-						"description": "The ID of an uploaded file to use as input."
-					},
-					"filename": {
-						"type": "string",
-						"description": "The name of the file, used when passing the file to the model as a string."
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionContentPart.File": {
-				"description": "Learn about [file inputs](https://platform.openai.com/docs/guides/text) for text\ngeneration.",
-				"properties": {
-					"file": {
-						"$ref": "#/components/schemas/ChatCompletionContentPart.File.File"
-					},
-					"type": {
-						"type": "string",
-						"enum": [
-							"file"
-						],
-						"nullable": false,
-						"description": "The type of the content part. Always `file`."
-					}
-				},
-				"required": [
-					"file",
-					"type"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionContentPart": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ChatCompletionContentPartText"
-					},
-					{
-						"$ref": "#/components/schemas/ChatCompletionContentPartImage"
-					},
-					{
-						"$ref": "#/components/schemas/ChatCompletionContentPartInputAudio"
-					},
-					{
-						"$ref": "#/components/schemas/ChatCompletionContentPart.File"
-					}
-				],
-				"description": "Learn about\n[text inputs](https://platform.openai.com/docs/guides/text-generation)."
-			},
-			"ChatCompletionUserMessageParam": {
-				"description": "Messages sent by an end user, containing prompts or additional context\ninformation.",
-				"properties": {
-					"content": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"$ref": "#/components/schemas/ChatCompletionContentPart"
-								},
-								"type": "array"
-							}
-						],
-						"description": "The contents of the user message."
-					},
-					"role": {
-						"type": "string",
-						"enum": [
-							"user"
-						],
-						"nullable": false,
-						"description": "The role of the messages author, in this case `user`."
-					},
-					"name": {
-						"type": "string",
-						"description": "An optional name for the participant. Provides the model information to\ndifferentiate between participants of the same role."
-					}
-				},
-				"required": [
-					"content",
-					"role"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionAssistantMessageParam.Audio": {
-				"description": "Data about a previous audio response from the model.\n[Learn more](https://platform.openai.com/docs/guides/audio).",
-				"properties": {
-					"id": {
-						"type": "string",
-						"description": "Unique identifier for a previous audio response from the model."
-					}
-				},
-				"required": [
-					"id"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionContentPartRefusal": {
-				"properties": {
-					"refusal": {
-						"type": "string",
-						"description": "The refusal message generated by the model."
-					},
-					"type": {
-						"type": "string",
-						"enum": [
-							"refusal"
-						],
-						"nullable": false,
-						"description": "The type of the content part."
-					}
-				},
-				"required": [
-					"refusal",
-					"type"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionAssistantMessageParam.FunctionCall": {
-				"properties": {
-					"arguments": {
-						"type": "string",
-						"description": "The arguments to call the function with, as generated by the model in JSON\nformat. Note that the model does not always generate valid JSON, and may\nhallucinate parameters not defined by your function schema. Validate the\narguments in your code before calling your function."
-					},
-					"name": {
-						"type": "string",
-						"description": "The name of the function to call."
-					}
-				},
-				"required": [
-					"arguments",
-					"name"
-				],
-				"type": "object",
-				"additionalProperties": false,
-				"deprecated": true
-			},
-			"ChatCompletionAssistantMessageParam": {
-				"description": "Messages sent by the model in response to user messages.",
-				"properties": {
-					"role": {
-						"type": "string",
-						"enum": [
-							"assistant"
-						],
-						"nullable": false,
-						"description": "The role of the messages author, in this case `assistant`."
-					},
-					"audio": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ChatCompletionAssistantMessageParam.Audio"
-							}
-						],
-						"nullable": true,
-						"description": "Data about a previous audio response from the model.\n[Learn more](https://platform.openai.com/docs/guides/audio)."
-					},
-					"content": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ChatCompletionContentPartText"
-										},
-										{
-											"$ref": "#/components/schemas/ChatCompletionContentPartRefusal"
-										}
-									]
-								},
-								"type": "array"
-							}
-						],
-						"nullable": true,
-						"description": "The contents of the assistant message. Required unless `tool_calls` or\n`function_call` is specified."
-					},
-					"function_call": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ChatCompletionAssistantMessageParam.FunctionCall"
-							}
-						],
-						"nullable": true,
-						"deprecated": true
-					},
-					"name": {
-						"type": "string",
-						"description": "An optional name for the participant. Provides the model information to\ndifferentiate between participants of the same role."
-					},
-					"refusal": {
-						"type": "string",
-						"nullable": true,
-						"description": "The refusal message by the assistant."
-					},
-					"tool_calls": {
-						"items": {
-							"$ref": "#/components/schemas/ChatCompletionMessageToolCall"
-						},
-						"type": "array",
-						"description": "The tool calls generated by the model, such as function calls."
-					}
-				},
-				"required": [
-					"role"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionToolMessageParam": {
-				"properties": {
-					"content": {
-						"anyOf": [
-							{
-								"type": "string"
-							},
-							{
-								"items": {
-									"$ref": "#/components/schemas/ChatCompletionContentPartText"
-								},
-								"type": "array"
-							}
-						],
-						"description": "The contents of the tool message."
-					},
-					"role": {
-						"type": "string",
-						"enum": [
-							"tool"
-						],
-						"nullable": false,
-						"description": "The role of the messages author, in this case `tool`."
-					},
-					"tool_call_id": {
-						"type": "string",
-						"description": "Tool call that this message is responding to."
-					}
-				},
-				"required": [
-					"content",
-					"role",
-					"tool_call_id"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ChatCompletionFunctionMessageParam": {
-				"properties": {
-					"content": {
-						"type": "string",
-						"nullable": true,
-						"description": "The contents of the function message."
-					},
-					"name": {
-						"type": "string",
-						"description": "The name of the function to call."
-					},
-					"role": {
-						"type": "string",
-						"enum": [
-							"function"
-						],
-						"nullable": false,
-						"description": "The role of the messages author, in this case `function`."
-					}
-				},
-				"required": [
-					"content",
-					"name",
-					"role"
-				],
-				"type": "object",
-				"additionalProperties": false,
-				"deprecated": true
-			},
-			"ChatCompletionMessageParam": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ChatCompletionDeveloperMessageParam"
-					},
-					{
-						"$ref": "#/components/schemas/ChatCompletionSystemMessageParam"
-					},
-					{
-						"$ref": "#/components/schemas/ChatCompletionUserMessageParam"
-					},
-					{
-						"$ref": "#/components/schemas/ChatCompletionAssistantMessageParam"
-					},
-					{
-						"$ref": "#/components/schemas/ChatCompletionToolMessageParam"
-					},
-					{
-						"$ref": "#/components/schemas/ChatCompletionFunctionMessageParam"
-					}
-				],
-				"description": "Developer-provided instructions that the model should follow, regardless of\nmessages sent by the user. With o1 models and newer, `developer` messages\nreplace the previous `system` messages."
-			},
 			"ResultSuccess__success-boolean__": {
 				"properties": {
 					"data": {
@@ -12129,6 +11874,172 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/public/waitlist/feature": {
+			"post": {
+				"operationId": "AddToWaitlist",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"feature": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"feature",
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/public/waitlist/feature/status": {
+			"get": {
+				"operationId": "IsOnWaitlist",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__isOnWaitlist-boolean_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "email",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "feature",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/waitlist/feature/count": {
+			"get": {
+				"operationId": "GetWaitlistCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__count-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "feature",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/waitlist/feature/share": {
+			"post": {
+				"operationId": "TrackShare",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__success-boolean--newPosition_63_-number--message-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"platform": {
+										"type": "string",
+										"enum": [
+											"twitter",
+											"linkedin"
+										]
+									},
+									"feature": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"platform",
+									"feature",
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/vault/add": {
@@ -17139,6 +17050,58 @@
 				"parameters": []
 			}
 		},
+		"/v1/stripe/payment-intents/search": {
+			"get": {
+				"operationId": "SearchPaymentIntents",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/StripePaymentIntentsResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "search_kind",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/stripe/subscription": {
 			"get": {
 				"operationId": "GetSubscription",
@@ -21456,9 +21419,7 @@
 										"type": "object"
 									},
 									"messages": {
-										"items": {
-											"$ref": "#/components/schemas/ChatCompletionMessageParam"
-										},
+										"items": {},
 										"type": "array"
 									}
 								},
@@ -21574,6 +21535,32 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/agent/thread/create-and-escalate": {
+			"post": {
+				"operationId": "CreateAndEscalateThread",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_InAppThread.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Agent"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/agent/threads": {

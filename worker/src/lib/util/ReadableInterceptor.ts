@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { DataDogClient } from "../monitoring/DataDogClient";
 
 export interface CompletedStream {
   body: string[];
@@ -14,10 +15,12 @@ export class ReadableInterceptor {
   private decoder = new TextDecoder("utf-8");
   private firstChunkTimeUnix: number | null = null;
   stream: ReadableStream;
+  private totalResponseBytes = 0;
 
   constructor(
     stream: ReadableStream,
     private isStream: boolean,
+    private dataDogClient?: DataDogClient,
     private chunkEventName = "done",
     private chunkTimeoutMs = 30 * 60 * 1000 // Default to 30 minutes
   ) {
@@ -33,6 +36,15 @@ export class ReadableInterceptor {
 
   private interceptStream(stream: ReadableStream): ReadableStream {
     const onDone = (reason: "cancel" | "done") => {
+      // Track final response size to DataDog
+      try {
+        if (this.dataDogClient && this.totalResponseBytes > 0) {
+          this.dataDogClient.trackMemory("response-body", this.totalResponseBytes);
+        }
+      } catch (e) {
+        // Silently catch - never let monitoring break the stream
+      }
+      
       this.chunkEmitter.emit(this.chunkEventName, {
         body: this.responseBody,
         reason,
@@ -46,7 +58,15 @@ export class ReadableInterceptor {
         this.firstChunkTimeUnix = Date.now();
       }
 
-      this.responseBody.push(this.decoder.decode(chunk, { stream: true }));
+      const decodedChunk = this.decoder.decode(chunk, { stream: true });
+      this.responseBody.push(decodedChunk);
+
+      // OBSERVATIONAL ONLY - Track memory usage without affecting flow
+      try {
+        this.totalResponseBytes += chunk.byteLength;
+      } catch (e) {
+        // Silently catch - never let monitoring break the stream
+      }
     };
 
     const reader = stream.getReader();
@@ -79,6 +99,13 @@ export class ReadableInterceptor {
     });
 
     return readable;
+  }
+
+  /**
+   * Get the total bytes received so far
+   */
+  getTotalResponseBytes(): number {
+    return this.totalResponseBytes;
   }
 
   async waitForStream(): Promise<CompletedStream> {

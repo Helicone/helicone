@@ -18,7 +18,15 @@ import {
   type PurchasedCredits,
 } from "@/services/hooks/useCredits";
 import { formatDate } from "@/utils/date";
-import { ChevronLeft, ChevronRight, RefreshCcw } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  RefreshCcw,
+  AlertCircle,
+  Clock,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { ReactElement, useState } from "react";
@@ -28,7 +36,8 @@ import { useFeatureFlag } from "@/services/hooks/admin";
 import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
 
 const Credits: NextPageWithLayout<void> = () => {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPageToken, setCurrentPageToken] = useState<string | null>(null);
+  const [pageTokenHistory, setPageTokenHistory] = useState<string[]>([]);
   const [pageSize, setPageSize] = useState(5);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
@@ -49,15 +58,14 @@ const Credits: NextPageWithLayout<void> = () => {
     refetch: refetchTransactions,
     error: transactionsError,
   } = useCreditTransactions({
-    page: currentPage,
-    pageSize: pageSize,
+    limit: pageSize,
+    page: currentPageToken,
   });
 
   const transactions = transactionsData?.purchases || [];
-  const totalTransactions = transactionsData?.total || 0;
-  const totalPages = Math.ceil(totalTransactions / pageSize);
-  const hasMore = currentPage < totalPages - 1;
-  const hasPrevious = currentPage > 0;
+  const hasMore = transactionsData?.hasMore || false;
+  const hasPrevious = pageTokenHistory.length > 0;
+  const currentPageNumber = pageTokenHistory.length + 1;
 
   const hasAccess = hasCreditsFeatureFlag?.data;
 
@@ -330,7 +338,8 @@ const Credits: NextPageWithLayout<void> = () => {
                         onValueChange={(value) => {
                           setPageSize(Number(value));
                           // Reset pagination when changing page size
-                          setCurrentPage(0);
+                          setCurrentPageToken(null);
+                          setPageTokenHistory([]);
                         }}
                       >
                         <SelectTrigger className="h-8 w-[60px]">
@@ -367,41 +376,183 @@ const Credits: NextPageWithLayout<void> = () => {
                               const created = new Date(transaction.createdAt);
                               const createdStr = created.toISOString();
 
-                              // All transactions are credit purchases for now
-                              const description = "Credit purchase";
-                              const isCredit = true; // All are credits being added
+                              // Get status from transaction
+                              const status = transaction.status;
+
+                              // Determine status display properties
+                              const getStatusDisplay = () => {
+                                // Handle fully refunded transactions
+                                if (status === "refunded") {
+                                  return {
+                                    label: "Refunded",
+                                    icon: AlertCircle,
+                                    className:
+                                      "text-amber-600 dark:text-amber-500",
+                                    showAmount: true,
+                                    showNetAmount: false,
+                                  };
+                                }
+
+                                // Handle partially refunded transactions
+                                if (
+                                  transaction.isRefunded &&
+                                  transaction.refundedAmount &&
+                                  transaction.refundedAmount > 0
+                                ) {
+                                  return {
+                                    label: "Partially refunded",
+                                    icon: AlertCircle,
+                                    className:
+                                      "text-amber-600 dark:text-amber-500",
+                                    showAmount: true,
+                                    showNetAmount: true,
+                                  };
+                                }
+
+                                // Handle regular payments
+                                switch (status) {
+                                  case "succeeded":
+                                    return {
+                                      label: "Completed",
+                                      icon: CheckCircle,
+                                      className:
+                                        "text-green-600 dark:text-green-500",
+                                      showAmount: true,
+                                      showNetAmount: false,
+                                    };
+                                  case "processing":
+                                    return {
+                                      label: "Processing",
+                                      icon: Clock,
+                                      className:
+                                        "text-blue-600 dark:text-blue-500",
+                                      showAmount: true,
+                                      showNetAmount: false,
+                                    };
+                                  case "canceled":
+                                    return {
+                                      label: "Canceled",
+                                      icon: XCircle,
+                                      className: "text-muted-foreground",
+                                      showAmount: false,
+                                      showNetAmount: false,
+                                    };
+                                  case "requires_action":
+                                  case "requires_capture":
+                                  case "requires_confirmation":
+                                  case "requires_payment_method":
+                                    return {
+                                      label: "Action Required",
+                                      icon: AlertCircle,
+                                      className:
+                                        "text-amber-600 dark:text-amber-500",
+                                      showAmount: true,
+                                      showNetAmount: false,
+                                    };
+                                  default:
+                                    return {
+                                      label: "Credit purchase",
+                                      icon: CheckCircle,
+                                      className:
+                                        "text-green-600 dark:text-green-500",
+                                      showAmount: true,
+                                      showNetAmount: false,
+                                    };
+                                }
+                              };
+
+                              const statusDisplay = getStatusDisplay();
+                              const StatusIcon = statusDisplay.icon;
+                              const refundedAmountCents =
+                                transaction.refundedAmount ?? 0;
+                              const netCents = amount - refundedAmountCents;
 
                               return (
                                 <div
                                   key={transaction.id || index}
                                   className="flex items-center justify-between border-b border-border py-4 last:border-b-0"
                                 >
-                                  <div className="flex flex-col gap-1">
-                                    <div
-                                      className="text-sm"
-                                      title={created.toLocaleString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                        year: "numeric",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
-                                    >
-                                      {formatDate(createdStr)}
+                                  <div className="flex items-start gap-3">
+                                    <StatusIcon
+                                      className={`mt-0.5 h-4 w-4 ${statusDisplay.className}`}
+                                    />
+                                    <div className="flex flex-col gap-1">
+                                      <div
+                                        className="text-sm"
+                                        title={created.toLocaleString("en-US", {
+                                          month: "short",
+                                          day: "numeric",
+                                          year: "numeric",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })}
+                                      >
+                                        {formatDate(createdStr)}
+                                      </div>
+                                      <XSmall className="text-muted-foreground">
+                                        {statusDisplay.label}
+                                      </XSmall>
                                     </div>
-                                    <XSmall className="text-muted-foreground">
-                                      {description}
-                                    </XSmall>
                                   </div>
-                                  <div
-                                    className={`text-sm font-medium ${isCredit ? "text-green-600 dark:text-green-500" : "text-muted-foreground"}`}
-                                  >
-                                    {isCredit ? "+" : "-"}
-                                    {(amount / 100).toLocaleString("en-US", {
-                                      style: "currency",
-                                      currency: "usd",
-                                    })}
-                                  </div>
+                                  {statusDisplay.showAmount && (
+                                    <div className="flex flex-col items-end gap-0.5">
+                                      {/* Always show original payment amount */}
+                                      <div
+                                        className={`text-sm font-medium ${
+                                          status === "refunded"
+                                            ? "text-muted-foreground line-through"
+                                            : transaction.isRefunded
+                                              ? "text-green-600 dark:text-green-500"
+                                              : statusDisplay.className
+                                        }`}
+                                      >
+                                        {status !== "refunded" &&
+                                        (status === "succeeded" ||
+                                          status === "processing")
+                                          ? "+"
+                                          : ""}
+                                        {(amount / 100).toLocaleString(
+                                          "en-US",
+                                          {
+                                            style: "currency",
+                                            currency: "usd",
+                                          },
+                                        )}
+                                      </div>
+
+                                      {/* Show refunded amount if there are refunds */}
+                                      {transaction.refundedAmount &&
+                                        transaction.refundedAmount > 0 && (
+                                          <div className="text-sm font-medium text-red-600 dark:text-red-500">
+                                            -
+                                            {(
+                                              transaction.refundedAmount / 100
+                                            ).toLocaleString("en-US", {
+                                              style: "currency",
+                                              currency: "usd",
+                                            })}
+                                          </div>
+                                        )}
+
+                                      {/* Show net amount for partially refunded payments */}
+                                      {statusDisplay.showNetAmount &&
+                                        refundedAmountCents > 0 &&
+                                        netCents > 0 && (
+                                          <div className="mt-0.5 border-t border-border pt-0.5">
+                                            <XSmall className="font-medium text-foreground">
+                                              Net: +
+                                              {(netCents / 100).toLocaleString(
+                                                "en-US",
+                                                {
+                                                  style: "currency",
+                                                  currency: "usd",
+                                                },
+                                              )}
+                                            </XSmall>
+                                          </div>
+                                        )}
+                                    </div>
+                                  )}
                                 </div>
                               );
                             },
@@ -423,7 +574,14 @@ const Credits: NextPageWithLayout<void> = () => {
                           onClick={() => {
                             // Go to previous page
                             if (hasPrevious) {
-                              setCurrentPage(currentPage - 1);
+                              const newHistory = [...pageTokenHistory];
+                              newHistory.pop();
+                              const previousToken =
+                                newHistory.length > 0
+                                  ? newHistory[newHistory.length - 1]
+                                  : null;
+                              setPageTokenHistory(newHistory);
+                              setCurrentPageToken(previousToken);
                             }
                           }}
                           disabled={!hasPrevious}
@@ -431,15 +589,19 @@ const Credits: NextPageWithLayout<void> = () => {
                           <ChevronLeft className="h-3 w-3" />
                         </Button>
                         <Badge variant="secondary" className="text-xs">
-                          Page {currentPage + 1} of {totalPages || 1}
+                          Page {currentPageNumber}
                         </Badge>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => {
                             // Go to next page
-                            if (hasMore) {
-                              setCurrentPage(currentPage + 1);
+                            if (hasMore && transactionsData?.nextPage) {
+                              setPageTokenHistory([
+                                ...pageTokenHistory,
+                                currentPageToken || "",
+                              ]);
+                              setCurrentPageToken(transactionsData.nextPage);
                             }
                           }}
                           disabled={!hasMore}

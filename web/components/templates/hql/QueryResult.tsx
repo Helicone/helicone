@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -39,7 +39,6 @@ import { $JAWN_API } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
 import useNotification from "@/components/shared/notification/useNotification";
 import { CircleCheckBig, CircleDashed } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import { HqlErrorDisplay } from "./HqlErrorDisplay";
 
 interface QueryResultProps {
@@ -169,32 +168,8 @@ const StatusBar = ({
   sql: string;
   queryLoading: boolean;
 }) => {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (queryLoading) {
-      setProgress(10);
-      interval = setInterval(() => {
-        setProgress((prev) => (prev < 90 ? prev + 10 : prev));
-      }, 200);
-    } else if (!queryLoading && progress > 0) {
-      setProgress(100);
-      setTimeout(() => setProgress(0), 500);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [queryLoading]);
-
   return (
     <div className="flex items-center justify-between border-b border-tremor-brand-subtle bg-background px-4 py-1">
-      {queryLoading && (
-        <Progress
-          value={progress}
-          className="mr-2 h-1 [&>div]:bg-sky-500 dark:[&>div]:bg-sky-500"
-        />
-      )}
       <div className="flex items-center gap-6 text-xs text-muted-foreground">
         <span className="flex items-center">
           {queryLoading ? (

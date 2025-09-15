@@ -7,19 +7,19 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"ResultSuccess__success-boolean--message-string__": {
+			"ResultSuccess__success-boolean--position_63_-number__": {
 				"properties": {
 					"data": {
 						"properties": {
-							"message": {
-								"type": "string"
+							"position": {
+								"type": "number",
+								"format": "double"
 							},
 							"success": {
 								"type": "boolean"
 							}
 						},
 						"required": [
-							"message",
 							"success"
 						],
 						"type": "object"
@@ -59,10 +59,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__success-boolean--message-string_.string_": {
+			"Result__success-boolean--position_63_-number_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__success-boolean--message-string__"
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--position_63_-number__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -101,6 +101,45 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__isOnWaitlist-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__count-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"count"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__count-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__count-number__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -685,6 +724,74 @@
 					"amount",
 					"description",
 					"totalCost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaymentIntentRecord": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"created": {
+						"type": "number",
+						"format": "double"
+					},
+					"status": {
+						"type": "string"
+					},
+					"isRefunded": {
+						"type": "boolean"
+					},
+					"refundedAmount": {
+						"type": "number",
+						"format": "double"
+					},
+					"refundIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"amount",
+					"created",
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"StripePaymentIntentsResponse": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PaymentIntentRecord"
+						},
+						"type": "array"
+					},
+					"has_more": {
+						"type": "boolean"
+					},
+					"next_page": {
+						"type": "string",
+						"nullable": true
+					},
+					"count": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"has_more",
+					"next_page",
+					"count"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -46913,7 +47020,7 @@
 		"contact": {}
 	},
 	"paths": {
-		"/v1/public/waitlist/feature": {
+		"/v1/waitlist/feature": {
 			"post": {
 				"operationId": "AddToWaitlist",
 				"responses": {
@@ -46922,7 +47029,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__success-boolean--message-string_.string_"
+									"$ref": "#/components/schemas/Result__success-boolean--position_63_-number_.string_"
 								}
 							}
 						}
@@ -46964,7 +47071,7 @@
 				}
 			}
 		},
-		"/v1/public/waitlist/feature/status": {
+		"/v1/waitlist/feature/status": {
 			"get": {
 				"operationId": "IsOnWaitlist",
 				"responses": {
@@ -47007,6 +47114,41 @@
 					{
 						"in": "query",
 						"name": "organizationId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/waitlist/feature/count": {
+			"get": {
+				"operationId": "GetWaitlistCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__count-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "feature",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -48470,6 +48612,58 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/stripe/payment-intents/search": {
+			"get": {
+				"operationId": "SearchPaymentIntents",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/StripePaymentIntentsResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "search_kind",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/stripe/subscription": {
