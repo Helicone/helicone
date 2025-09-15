@@ -137,7 +137,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
   const deleteWebhook = useMutation({
     mutationFn: async (id: string) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
-      return jawn.DELETE(`/v1/webhooks/{webhookId}`, {
+      return jawn.DELETE("/v1/webhooks/{webhookId}", {
         params: {
           path: {
             webhookId: id,
@@ -154,7 +154,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
   const testWebhook = useMutation({
     mutationFn: async (id: string) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
-      return jawn.POST(`/v1/webhooks/{webhookId}/test`, {
+      return jawn.POST("/v1/webhooks/{webhookId}/test", {
         params: {
           path: {
             webhookId: id,
