@@ -22,7 +22,7 @@ describe("OpenAIUsageProcessor", () => {
 
   it("should parse real GPT-4o response with cached tokens", async () => {
     const responseData = fs.readFileSync(
-      path.join(__dirname, "testData", "gpt4o-response-cached.txt"),
+      path.join(__dirname, "testData", "gpt4o-response-cached.snapshot"),
       "utf-8"
     );
 
@@ -43,7 +43,7 @@ describe("OpenAIUsageProcessor", () => {
 
   it("should parse real GPT-4o stream response", async () => {
     const streamData = fs.readFileSync(
-      path.join(__dirname, "testData", "gpt4o-stream-response.txt"),
+      path.join(__dirname, "testData", "gpt4o-stream-response.snapshot"),
       "utf-8"
     );
 
@@ -63,12 +63,12 @@ describe("OpenAIUsageProcessor", () => {
     const testCases = [
       {
         name: "cached-response",
-        data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-response-cached.txt"), "utf-8"),
+        data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-response-cached.snapshot"), "utf-8"),
         isStream: false
       },
       {
         name: "stream-response", 
-        data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-stream-response.txt"), "utf-8"),
+        data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-stream-response.snapshot"), "utf-8"),
         isStream: true
       }
     ];
