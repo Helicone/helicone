@@ -40,6 +40,7 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import useNotification from "@/components/shared/notification/useNotification";
 import { CircleCheckBig, CircleDashed } from "lucide-react";
 import { HqlErrorDisplay } from "./HqlErrorDisplay";
+import { PaginationControls } from "./PaginationControls";
 
 interface QueryResultProps {
   sql: string;
@@ -47,6 +48,11 @@ interface QueryResultProps {
   loading: boolean;
   error: string | null;
   queryStats: components["schemas"]["ExecuteSqlResponse"];
+  currentPage?: number;
+  rowsPerPage?: number;
+  totalRows?: number;
+  onPageChange?: (page: number) => void;
+  onRowsPerPageChange?: (rows: number) => void;
 }
 function QueryResult({
   sql,
@@ -54,6 +60,11 @@ function QueryResult({
   loading,
   error,
   queryStats,
+  currentPage = 1,
+  rowsPerPage = 50,
+  totalRows = 0,
+  onPageChange,
+  onRowsPerPageChange,
 }: QueryResultProps) {
   const columnKeys = useMemo(() => {
     if (!result || result.length === 0) {
@@ -112,6 +123,11 @@ function QueryResult({
     );
   }
 
+  const effectiveTotalRows = totalRows || result.length;
+  const totalPages = Math.max(1, Math.ceil(effectiveTotalRows / rowsPerPage));
+  const startRow = result.length > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0;
+  const endRow = Math.min(currentPage * rowsPerPage, effectiveTotalRows);
+
   return (
     <div className="flex flex-col">
       <StatusBar
@@ -122,6 +138,18 @@ function QueryResult({
         sql={sql}
         queryLoading={loading}
       />
+      {effectiveTotalRows > 0 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          totalRows={effectiveTotalRows}
+          startRow={startRow}
+          endRow={endRow}
+          onPageChange={onPageChange}
+          onRowsPerPageChange={onRowsPerPageChange}
+        />
+      )}
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -154,6 +182,19 @@ function QueryResult({
           ))}
         </TableBody>
       </Table>
+      {effectiveTotalRows > 0 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          totalRows={effectiveTotalRows}
+          startRow={startRow}
+          endRow={endRow}
+          onPageChange={onPageChange}
+          onRowsPerPageChange={onRowsPerPageChange}
+          isBottom={true}
+        />
+      )}
     </div>
   );
 }
