@@ -1,6 +1,6 @@
 import { hash } from "../../..";
 import { safePut } from "../../safePut";
-import { Result, ok } from "../results";
+import { Result, ok } from "@helicone/gateway";
 
 const hashWithHmac = async (key: string, hmac_key: 1 | 2) => {
   const hashedKey = await hash(hmac_key === 1 ? key : `${key}_2`);

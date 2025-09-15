@@ -2,8 +2,7 @@ import { Provider } from "..";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { safePut } from "../lib/safePut";
-import { enumerate } from "../lib/util/helpers";
-import { Result, err, ok } from "../lib/util/results";
+import { enumerate, Result, err, ok } from "@helicone/gateway";
 import {
   approvedDomains,
   providers,

@@ -5,7 +5,7 @@ import { PromptStore } from "../db/PromptStore";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
 import { ProviderKeysStore } from "../db/ProviderKeysStore";
 import { tryJSONParse } from "../clients/llmmapper/llmmapper";
-import { isErr, Result, ok, err } from "../util/results";
+import { isError, Result, ok, err } from "@helicone/gateway";
 import { errorForwarder } from "../HeliconeProxyRequest/ErrorForwarder";
 import { gatewayForwarder } from "../../routers/gatewayRouter";
 import { AttemptBuilder } from "./AttemptBuilder";
@@ -47,7 +47,7 @@ export class SimpleAIGateway {
   async handle(): Promise<Response> {
     // Step 1: Parse and prepare request
     const parseResult = await this.parseAndPrepareRequest();
-    if (isErr(parseResult)) {
+    if (isError(parseResult)) {
       return parseResult.error;
     }
     const { modelStrings, body: parsedBody } = parseResult.data;
@@ -56,7 +56,7 @@ export class SimpleAIGateway {
     let finalBody = parsedBody;
     if (this.hasPromptFields(parsedBody)) {
       const expandResult = await this.expandPrompt(parsedBody);
-      if (isErr(expandResult)) {
+      if (isError(expandResult)) {
         return expandResult.error;
       }
       finalBody = expandResult.data.body;
@@ -127,7 +127,7 @@ export class SimpleAIGateway {
         forwarder
       );
 
-      if (isErr(result)) {
+      if (isError(result)) {
         errors.push({
           attempt: attempt.source,
           error: result.error.message,
@@ -217,7 +217,7 @@ export class SimpleAIGateway {
       this.orgId
     );
 
-    if (isErr(expandedResult)) {
+    if (isError(expandedResult)) {
       return err(
         new Response(JSON.stringify({ error: expandedResult.error }), {
           status: 400,

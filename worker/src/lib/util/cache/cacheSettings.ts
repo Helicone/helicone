@@ -1,4 +1,4 @@
-import { Result } from "../results";
+import { Result } from "@helicone/gateway";
 
 const MAX_CACHE_AGE = 60 * 60 * 24 * 365; // 365 days
 const DEFAULT_CACHE_AGE = 60 * 60 * 24 * 7; // 7 days

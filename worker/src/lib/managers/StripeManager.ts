@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { ok, err, Result } from "../util/results";
+import { ok, err, Result } from "@helicone/gateway";
 import { Wallet } from "../durable-objects/Wallet";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";

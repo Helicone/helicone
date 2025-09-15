@@ -6,7 +6,7 @@ import {
   DBQueryTimer,
   FREQUENT_PRECENT_LOGGING,
 } from "../util/loggers/DBQueryTimer";
-import { Result } from "../util/results";
+import { Result } from "@helicone/gateway";
 import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
 import { Valhalla } from "./valhalla";
 

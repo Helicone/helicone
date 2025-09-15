@@ -12,7 +12,7 @@ import {
 } from "./managers/UsageLimitManager.ts";
 import { HeliconeHeaders } from "./models/HeliconeHeaders";
 import { getAndStoreInCache } from "./util/cache/secureCache";
-import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
+import { Result, err, map, ok, mapPostgrestErr } from "@helicone/gateway";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { parseJSXObject } from "@helicone/prompts";
 import { HttpRequest } from "@smithy/protocol-http";

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Result, ok } from "../../util/results";
+import { Result, ok } from "@helicone/gateway";
 import { consolidateTextFields } from "./responseParserHelpers";
 
 export function recursivelyConsolidateAnthropic(body: any, delta: any): any {

@@ -27,7 +27,7 @@ import { ResponseBuilder } from "../ResponseBuilder";
 import { getCachedResponse, saveToCache } from "../util/cache/cacheFunctions";
 import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";
 import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
-import { Result } from "../util/results";
+import { Result } from "@helicone/gateway";
 import {
   handleProxyRequest,
   handleThreatProxyRequest,

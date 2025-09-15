@@ -1,6 +1,6 @@
 import { AwsClient } from "aws4fetch";
-import { Result } from "../util/results";
-import { compress } from "../util/helpers";
+import { Result } from "@helicone/gateway";
+import { compress } from "@helicone/gateway";
 
 export class S3Client {
   private awsClient: AwsClient;

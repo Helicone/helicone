@@ -1,4 +1,4 @@
-import { err, ok, Result } from "../util/results";
+import { err, ok, Result } from "@helicone/gateway";
 
 export class SlackAlertManager {
   private slackWebhookUrl: Env["SLACK_WEBHOOK_URL"];

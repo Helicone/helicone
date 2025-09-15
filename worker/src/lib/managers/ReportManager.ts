@@ -1,4 +1,4 @@
-import { Result, err, ok } from "../util/results";
+import { Result, err, ok } from "@helicone/gateway";
 import { Integration, ReportStore } from "../db/ReportStore";
 
 export class ReportManager {

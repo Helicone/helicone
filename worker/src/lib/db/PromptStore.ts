@@ -1,7 +1,7 @@
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
-import { err, ok, Result } from "../util/results";
+import { err, ok, Result } from "@helicone/gateway";
 
 export class PromptStore {
   constructor(private supabaseClient: SupabaseClient<Database>) {}

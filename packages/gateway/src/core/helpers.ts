@@ -1,20 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { EventEmitter } from "events";
-import { Database } from "../../../supabase/database.types";
+/**
+ * Core utility functions for the gateway package
+ * These are pure functions with no external dependencies
+ */
 
-export const once = (
-  emitter: EventEmitter,
-  eventName: string
-): Promise<string> =>
-  new Promise((resolve) => {
-    const listener = (value: string) => {
-      emitter.removeListener(eventName, listener);
-      resolve(value);
-    };
-    emitter.addListener(eventName, listener);
-  });
-
+/**
+ * Wraps a promise with a timeout
+ * @param promise The promise to wrap
+ * @param timeout Timeout in milliseconds
+ * @returns The result of the promise or throws a timeout error
+ */
 export async function withTimeout<T>(
   promise: Promise<T>,
   timeout: number
@@ -25,10 +19,21 @@ export async function withTimeout<T>(
   return (await Promise.race([promise, timeoutPromise])) as T;
 }
 
+/**
+ * Enumerates an array with indices
+ * @param arr Array to enumerate
+ * @returns Array of [index, item] tuples
+ */
 export function enumerate<T>(arr: T[]): [number, T][] {
   return arr.map((item, index) => [index, item]);
 }
 
+/**
+ * Deep comparison of two objects
+ * @param a First object
+ * @param b Second object
+ * @returns True if objects are deeply equal
+ */
 export function deepCompare(a: any, b: any): boolean {
   if (a === b) return true;
 
@@ -45,7 +50,12 @@ export function deepCompare(a: any, b: any): boolean {
   return false;
 }
 
-export async function compress(str: string) {
+/**
+ * Compress a string using gzip
+ * @param str String to compress
+ * @returns Compressed Uint8Array
+ */
+export async function compress(str: string): Promise<Uint8Array> {
   // Convert the string to a byte stream.
   const stream = new Blob([str]).stream();
 
@@ -60,6 +70,11 @@ export async function compress(str: string) {
   return await concatUint8Arrays(chunks);
 }
 
+/**
+ * Concatenate multiple Uint8Arrays
+ * @param uint8arrays Arrays to concatenate
+ * @returns Single concatenated Uint8Array
+ */
 async function concatUint8Arrays(
   uint8arrays: Uint8Array[]
 ): Promise<Uint8Array> {
@@ -68,11 +83,15 @@ async function concatUint8Arrays(
   return new Uint8Array(buffer);
 }
 
-export function getModelFromRequest(requestBody: string, path: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (requestBody && (requestBody as any).model) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (requestBody as any).model;
+/**
+ * Extract model from request body or path
+ * @param requestBody Request body (as string or object)
+ * @param path Request path
+ * @returns Model name or null
+ */
+export function getModelFromRequest(requestBody: any, path: string): string | null {
+  if (requestBody && requestBody.model) {
+    return requestBody.model;
   }
 
   const modelFromPath = getModelFromPath(path);
@@ -83,7 +102,12 @@ export function getModelFromRequest(requestBody: string, path: string) {
   return null;
 }
 
-export function getModelFromPath(path: string) {
+/**
+ * Extract model from URL path
+ * @param path URL path
+ * @returns Model name or undefined
+ */
+export function getModelFromPath(path: string): string | undefined {
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;
 
@@ -100,7 +124,12 @@ export function getModelFromPath(path: string) {
   }
 }
 
-export function getModelFromResponse(responseBody: any) {
+/**
+ * Extract model from response body
+ * @param responseBody Response body object
+ * @returns Model name or "unknown"
+ */
+export function getModelFromResponse(responseBody: any): string {
   try {
     if (typeof responseBody !== "object" || !responseBody) {
       return "unknown";
@@ -110,7 +139,9 @@ export function getModelFromResponse(responseBody: any) {
     }
 
     return (
-      responseBody["model"] || (responseBody.body as any)["model"] || "unknown"
+      responseBody["model"] || 
+      (responseBody.body as any)?.["model"] || 
+      "unknown"
     );
   } catch (e) {
     return "unknown";

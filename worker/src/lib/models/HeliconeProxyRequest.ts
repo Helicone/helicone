@@ -4,7 +4,7 @@ import { Provider } from "@helicone-package/llm-mapper/types";
 import { approvedDomains } from "@helicone-package/cost/providers/mappings";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
-import { Result, ok } from "../util/results";
+import { Result, ok } from "@helicone/gateway";
 import { IHeliconeHeaders } from "./HeliconeHeaders";
 
 import { parseJSXObject } from "@helicone/prompts";

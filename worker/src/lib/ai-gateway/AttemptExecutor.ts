@@ -4,7 +4,7 @@ import {
 } from "@helicone-package/cost/models/provider-helpers";
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
-import { isErr, Result, ok, err } from "../util/results";
+import { isError, Result, ok, err } from "@helicone/gateway";
 import { Attempt, EscrowInfo, AttemptError } from "./types";
 import { Endpoint } from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
@@ -37,7 +37,7 @@ export class AttemptExecutor {
         orgId
       );
 
-      if (isErr(escrowResult)) {
+      if (isError(escrowResult)) {
         return err({
           type: "request_failed",
           message: escrowResult.error.message,
@@ -63,7 +63,7 @@ export class AttemptExecutor {
     );
 
     // If error, cancel escrow and return the error
-    if (isErr(result)) {
+    if (isError(result)) {
       if (escrowInfo) {
         this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, orgId));
       }
@@ -93,7 +93,7 @@ export class AttemptExecutor {
         toAnthropic: toAnthropic, // TODO: This is global, don't pass it in
       });
 
-      if (isErr(bodyResult) || !bodyResult.data) {
+      if (isError(bodyResult) || !bodyResult.data) {
         return err({
           type: "request_failed",
           message: bodyResult.error || "Failed to build request body",
@@ -201,7 +201,7 @@ export class AttemptExecutor {
         worstCaseCost
       );
 
-      if (isErr(escrowResult)) {
+      if (isError(escrowResult)) {
         return err({
           statusCode: escrowResult.error.statusCode,
           message: escrowResult.error.message,

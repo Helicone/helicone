@@ -4,7 +4,7 @@ import { type IRequest, type RouterType } from "itty-router";
 import { Database } from "../../supabase/database.types";
 import { DBWrapper } from "../lib/db/DBWrapper";
 import { RequestWrapper } from "../lib/RequestWrapper";
-import { err, ok, Result } from "../lib/util/results";
+import { err, ok, Result } from "@helicone/gateway";
 import {
   buildProviderUrl,
   getProviderConfig as getUnifiedProviderConfig,

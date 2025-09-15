@@ -9,7 +9,7 @@ import {
   Endpoint,
 } from "@helicone-package/cost/models/types";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
-import { isErr, Result, ok, err } from "../util/results";
+import { isError, Result, ok, err } from "@helicone/gateway";
 import { Attempt, ModelSpec } from "./types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 
@@ -31,7 +31,7 @@ export class AttemptBuilder {
 
       // Skip invalid model specs
       // TODO: Return error
-      if (isErr(modelSpec)) {
+      if (isError(modelSpec)) {
         console.error(`Skipping invalid model: ${modelSpec.error}`);
         continue;
       }
@@ -157,7 +157,7 @@ export class AttemptBuilder {
       userConfig
     );
 
-    if (isErr(endpointResult) || !endpointResult.data) {
+    if (isError(endpointResult) || !endpointResult.data) {
       return [];
     }
 
@@ -202,7 +202,7 @@ export class AttemptBuilder {
       userConfig
     );
 
-    if (!isErr(passthroughResult) && passthroughResult.data) {
+    if (!isError(passthroughResult) && passthroughResult.data) {
       return [
         {
           endpoint: passthroughResult.data,

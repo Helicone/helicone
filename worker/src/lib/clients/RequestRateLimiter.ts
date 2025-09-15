@@ -1,5 +1,5 @@
 import { AuthParams } from "../dbLogger/DBLoggable";
-import { Result, err, ok } from "../util/results";
+import { Result, err, ok } from "@helicone/gateway";
 
 export class RateLimiter {
   constructor(

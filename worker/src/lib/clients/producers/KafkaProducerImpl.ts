@@ -1,6 +1,6 @@
 import { Kafka } from "@upstash/kafka";
 import { MessageData, MessageProducer } from "./types";
-import { err, ok, Result } from "../../util/results";
+import { err, ok, Result } from "@helicone/gateway";
 
 export class KafkaProducerImpl implements MessageProducer {
   private kafka: Kafka;

@@ -1,4 +1,4 @@
-import { Result } from "../util/results";
+import { Result } from "@helicone/gateway";
 
 export interface HeliconeNode {
   name: string;

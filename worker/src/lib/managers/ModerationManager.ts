@@ -5,7 +5,7 @@ import { HeliconeProxyRequestMapper } from "../models/HeliconeProxyRequest";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 
-import type { Result } from "../util/results";
+import type { Result } from "@helicone/gateway";
 
 export class Moderator {
   env: Env;

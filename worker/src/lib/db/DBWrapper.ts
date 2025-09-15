@@ -4,7 +4,7 @@ import { Database } from "../../../supabase/database.types";
 import { getProviderKeyFromProxyCache } from "../RequestWrapper";
 import { AuthParams } from "../dbLogger/DBLoggable";
 import { SecureCacheEnv, getAndStoreInCache } from "../util/cache/secureCache";
-import { Result, err, ok } from "../util/results";
+import { Result, err, ok } from "@helicone/gateway";
 import { RateLimiter } from "../clients/RequestRateLimiter";
 
 export interface InternalAuthParams {

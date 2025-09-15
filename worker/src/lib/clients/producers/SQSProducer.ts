@@ -1,6 +1,6 @@
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { MessageData, MessageProducer } from "./types";
-import { Result, err, ok } from "../../util/results";
+import { Result, err, ok } from "@helicone/gateway";
 
 export class SQSProducerImpl implements MessageProducer {
   private sqs: SQSClient;

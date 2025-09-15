@@ -5,7 +5,7 @@ import {
   DBQueryTimer,
   FREQUENT_PRECENT_LOGGING,
 } from "../util/loggers/DBQueryTimer";
-import { Result } from "../util/results";
+import { Result } from "@helicone/gateway";
 
 interface FeedbackRequestBodyV2 {
   "helicone-id": string;

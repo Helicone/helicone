@@ -1,4 +1,4 @@
-import { Result, err, ok } from "../util/results";
+import { Result, err, ok } from "@helicone/gateway";
 import { Alert, AlertState, AlertStore } from "../db/AlertStore";
 import { safePut } from "../safePut";
 

@@ -1,4 +1,4 @@
-import { Result, ok } from "../../util/results";
+import { Result, ok } from "@helicone/gateway";
 
 export function parseVercelStream(result: string): Result<any, string> {
   const lines = result.split("\n").filter((line) => line.trim() !== "");

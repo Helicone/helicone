@@ -1,4 +1,4 @@
-import { Result } from "../util/results";
+import { Result } from "@helicone/gateway";
 
 const VALID_STATUS = ["RUNNING", "SUCCESS", "FAILED", "CANCELLED"];
 

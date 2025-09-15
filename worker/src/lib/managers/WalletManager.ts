@@ -5,8 +5,8 @@ import {
   Wallet,
 } from "../durable-objects/Wallet";
 import { SlackAlertManager } from "./SlackAlertManager";
-import { err, ok, Result } from "../util/results";
-import { isError } from "../../../../packages/common/result";
+import { err, ok, Result } from "@helicone/gateway";
+import { isErroror } from "../../../../packages/common/result";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 
 export class WalletManager {
@@ -94,7 +94,7 @@ export class WalletManager {
       );
       const clickhouseResponse: Result<{ totalSpend: number }, string> =
         await response.json();
-      if (isError(clickhouseResponse)) {
+      if (isErroror(clickhouseResponse)) {
         console.error("Error getting total spend", clickhouseResponse.error);
         throw new Error(clickhouseResponse.error);
       }

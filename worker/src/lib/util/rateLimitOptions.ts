@@ -1,5 +1,5 @@
 import { RateLimitOptions } from "../clients/DurableObjectRateLimiterClient";
-import { Result, err } from "./results";
+import { Result, err } from "@helicone/gateway";
 
 export class RateLimitOptionsBuilder {
   constructor(private policy: string | null) {}

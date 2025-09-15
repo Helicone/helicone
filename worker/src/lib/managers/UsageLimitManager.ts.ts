@@ -1,6 +1,6 @@
 import { hash } from "../..";
 import { Database } from "../../../supabase/database.types";
-import { Result, err, ok } from "../util/results";
+import { Result, err, ok } from "@helicone/gateway";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { safePut } from "../safePut";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";

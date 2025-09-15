@@ -1,5 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
-import { err, ok, Result } from "../util/results";
+import { err, ok, Result } from "@helicone/gateway";
 
 // 10^10 is the scale factor for the balance
 // (which is sent to us by stripe in cents)

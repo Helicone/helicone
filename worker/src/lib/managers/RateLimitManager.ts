@@ -1,6 +1,6 @@
 import { DBWrapper, RateLimitPolicy } from "../db/DBWrapper";
 import { RateLimitOptions } from "../clients/DurableObjectRateLimiterClient";
-import { Result, ok, err } from "../util/results";
+import { Result, ok, err } from "@helicone/gateway";
 import { HeliconeProperties } from "../models/HeliconeProxyRequest";
 
 export class RateLimitManager {

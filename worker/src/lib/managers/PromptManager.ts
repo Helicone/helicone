@@ -6,7 +6,7 @@ import {
 import { ChatCompletionCreateParams } from "openai/resources/chat/completions";
 import { PromptStore } from "../db/PromptStore";
 import { getAndStoreInCache } from "../util/cache/secureCache";
-import { err, isErr, ok, Result } from "../util/results";
+import { err, isError, ok, Result } from "@helicone/gateway";
 
 export class PromptManager {
   constructor(
@@ -31,7 +31,7 @@ export class PromptManager {
       params,
       orgId
     );
-    if (isErr(versionIdResult)) return err(versionIdResult.error);
+    if (isError(versionIdResult)) return err(versionIdResult.error);
 
     return await getAndStoreInCache(
       `prompt_body_${versionIdResult.data}_${orgId}`,
@@ -69,7 +69,7 @@ export class PromptManager {
     >
   > {
     const result = await this.getSourcePromptBodyWithFetch(params, orgId);
-    if (isErr(result)) return err(result.error);
+    if (isError(result)) return err(result.error);
 
     const mergedPromptBody = await this.promptManager.mergePromptBody(
       params,

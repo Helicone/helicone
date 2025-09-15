@@ -1,4 +1,4 @@
-import { Result } from "../util/results";
+import { Result } from "@helicone/gateway";
 import { createClient } from "@clickhouse/client-web";
 import { WebClickHouseClient } from "@clickhouse/client-web/dist/client";
 import dateFormat from "dateformat";

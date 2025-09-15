@@ -42,7 +42,13 @@
       "Bash(gh run watch:*)",
       "Bash(curl:*)",
       "Bash(yarn lint:*)",
-      "mcp__linear-server__list_comments"
+      "mcp__linear-server__list_comments",
+      "mcp__playwright__browser_evaluate",
+      "Bash(npm ls:*)",
+      "Bash(npm install)",
+      "Bash(npm test)",
+      "Bash(npm run clean:*)",
+      "Bash(npm run lint)"
     ],
     "deny": []
   }
