@@ -16,6 +16,9 @@ export interface paths {
   "/v1/webhooks/{webhookId}": {
     delete: operations["DeleteWebhook"];
   };
+  "/v1/webhooks/{webhookId}/test": {
+    post: operations["TestWebhook"];
+  };
   "/v1/public/waitlist/feature": {
     post: operations["AddToWaitlist"];
   };
@@ -751,6 +754,15 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--message-string__": {
+      data: {
+        message: string;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
       data: {
         sharedPlatforms?: string[];
@@ -3886,6 +3898,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  TestWebhook: {
+    parameters: {
+      path: {
+        webhookId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
         };
       };
     };
