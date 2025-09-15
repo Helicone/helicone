@@ -1,7 +1,41 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
+  "alibaba/qwen": {
+    "qwen3-32b:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 40960,
+      "modelId": "Qwen/Qwen3-32B",
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "anthropic/claude-3.5-haiku": {
     "claude-3.5-haiku:anthropic": {
       "context": 200000,
@@ -380,6 +414,38 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "deepseek/r1": {
+    "deepseek-r1-distill-llama-70b:groq": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "google/gemini-2.5-flash": {
     "gemini-2.5-flash:google-ai-studio": {
       "context": 1048576,
@@ -527,6 +593,253 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": false,
       "regions": [
         "global",
+      ],
+    },
+  },
+  "google/gemma": {
+    "gemma2-9b-it:groq": {
+      "context": 8192,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "google/gemma-2-9b",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "meta/llama": {
+    "llama-3.1-8b-instant:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "llama-3.1-8b-instant",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.3-70b-instruct:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 32678,
+      "modelId": "llama-3.3-70b-versatile",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-4-maverick:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
+      "parameters": [
+        "max_tokens",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-4-scout:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+      "parameters": [
+        "max_tokens",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-guard-4:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 1024,
+      "modelId": "meta-llama/Llama-Guard-4-12B",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-prompt-guard-2-22m:groq": {
+      "context": 512,
+      "crossRegion": false,
+      "maxTokens": 2,
+      "modelId": "meta-llama/llama-prompt-guard-2-22m",
+      "parameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-prompt-guard-2-86m:groq": {
+      "context": 512,
+      "crossRegion": false,
+      "maxTokens": 2,
+      "modelId": "meta-llama/llama-prompt-guard-2-86m",
+      "parameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "moonshotai/kimi-k2": {
+    "kimi-k2-0905:groq": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "moonshotai/kimi-k2-instruct-0905",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "moonshotai/kimi-k2-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
   },
@@ -1174,6 +1487,9 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 
 exports[`Registry Snapshots model coverage snapshot 1`] = `
 {
+  "alibaba/qwen": [
+    "groq",
+  ],
   "anthropic/claude-3.5-haiku": [
     "anthropic",
     "bedrock",
@@ -1204,6 +1520,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "bedrock",
     "vertex",
   ],
+  "deepseek/r1": [
+    "groq",
+  ],
   "google/gemini-2.5-flash": [
     "google-ai-studio",
     "vertex",
@@ -1215,6 +1534,22 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "google/gemini-2.5-pro": [
     "google-ai-studio",
     "vertex",
+  ],
+  "google/gemma": [
+    "groq",
+  ],
+  "meta/llama": [
+    "groq",
+    "groq",
+    "groq",
+    "groq",
+    "groq",
+    "groq",
+    "groq",
+  ],
+  "moonshotai/kimi-k2": [
+    "groq",
+    "groq",
   ],
   "openai/gpt-4.1": [
     "azure",
@@ -1262,6 +1597,19 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
 
 exports[`Registry Snapshots pricing snapshot 1`] = `
 {
+  "alibaba/qwen": {
+    "groq": [
+      {
+        "audio": 0,
+        "image": 0,
+        "input": 2.9e-7,
+        "output": 5.9e-7,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0,
+      },
+    ],
+  },
   "anthropic/claude-3.5-haiku": {
     "anthropic": [
       {
@@ -1493,6 +1841,19 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "deepseek/r1": {
+    "groq": [
+      {
+        "audio": 0,
+        "image": 0,
+        "input": 7.5e-7,
+        "output": 9.9e-7,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0,
+      },
+    ],
+  },
   "google/gemini-2.5-flash": {
     "google-ai-studio": [
       {
@@ -1588,6 +1949,45 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000025,
         "output": 0.000015,
         "threshold": 200000,
+      },
+    ],
+  },
+  "google/gemma": {
+    "groq": [
+      {
+        "image": 0,
+        "input": 2e-7,
+        "output": 2e-7,
+        "threshold": 0,
+      },
+    ],
+  },
+  "meta/llama": {
+    "groq": [
+      {
+        "audio": 0,
+        "image": 0,
+        "input": 1e-8,
+        "output": 1e-8,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0,
+      },
+    ],
+  },
+  "moonshotai/kimi-k2": {
+    "groq": [
+      {
+        "audio": 0,
+        "cacheMultipliers": {
+          "cachedInput": 0.5,
+        },
+        "image": 0,
+        "input": 0.000001,
+        "output": 0.000003,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0,
       },
     ],
   },
@@ -1781,6 +2181,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "deepseek-r1-distill-llama-70b",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
       "model": "gemini-2.5-flash",
       "providers": [
         "google-ai-studio",
@@ -1799,6 +2205,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "google-ai-studio",
         "vertex",
+      ],
+    },
+    {
+      "model": "gemma2-9b-it",
+      "providers": [
+        "groq",
       ],
     },
     {
@@ -1897,6 +2309,60 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "kimi-k2",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
+      "model": "kimi-k2-0905",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
+      "model": "llama-3.1-8b-instant",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
+      "model": "llama-3.3-70b-instruct",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
+      "model": "llama-4-maverick",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
+      "model": "llama-4-scout",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
+      "model": "llama-guard-4",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
+      "model": "llama-prompt-guard-2-22m",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
+      "model": "llama-prompt-guard-2-86m",
+      "providers": [
+        "groq",
+      ],
+    },
+    {
       "model": "o3",
       "providers": [
         "openai",
@@ -1922,6 +2388,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
         "openai",
       ],
     },
+    {
+      "model": "qwen3-32b",
+      "providers": [
+        "groq",
+      ],
+    },
   ],
   "providerBreakdown": [
     {
@@ -1941,7 +2413,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "google-ai-studio",
     },
     {
-      "modelCount": 2,
+      "modelCount": 14,
       "provider": "groq",
     },
     {
@@ -1958,7 +2430,19 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     },
   ],
   "ptbEnabledModels": [
+    "deepseek-r1-distill-llama-70b",
+    "gemma2-9b-it",
     "gpt-5-nano",
+    "kimi-k2",
+    "kimi-k2-0905",
+    "llama-3.1-8b-instant",
+    "llama-3.3-70b-instruct",
+    "llama-4-maverick",
+    "llama-4-scout",
+    "llama-guard-4",
+    "llama-prompt-guard-2-22m",
+    "llama-prompt-guard-2-86m",
+    "qwen3-32b",
   ],
   "sampleEndpointIds": [
     "chatgpt-4o-latest:openai:*",
@@ -1967,9 +2451,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:vertex:global",
     "claude-3.5-sonnet-v2:anthropic:*",
   ],
-  "totalEndpoints": 51,
-  "totalModelProviderConfigs": 51,
-  "totalModelsWithPtb": 1,
+  "totalEndpoints": 63,
+  "totalModelProviderConfigs": 63,
+  "totalModelsWithPtb": 13,
   "totalProviders": 8,
 }
 `;
