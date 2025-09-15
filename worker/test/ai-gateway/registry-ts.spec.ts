@@ -56,8 +56,12 @@ function mockProviderEndpoint(
   const url = new URL(endpoint.baseUrl);
 
   if (statusCode === 200) {
-    // For now just use anthropic config, in future we'll have a map of providers
-    const testConfig = anthropicTestConfig;
+    let testConfig;
+    if (provider === "anthropic") {
+      testConfig = anthropicTestConfig;
+    } else {
+      testConfig = openaiTestConfig;
+    }
 
     fetchMock
       .get(`${url.protocol}//${url.host}`)
