@@ -3,7 +3,7 @@ import type { ModelProviderConfig } from "../../../types";
 import { QwenModelName } from "./models";
 
 export const endpoints = {
-  "Qwen/Qwen3-32B:groq": {
+  "qwen3-32b:groq": {
     providerModelId: "Qwen/Qwen3-32B",
     provider: "groq",
     author: "alibaba",

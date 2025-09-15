@@ -1,7 +1,7 @@
 import { ModelConfig } from "../../../types";
 
 export const models = {
-  "Qwen/Qwen3-32B": {
+  "qwen3-32b": {
     name: "Qwen3-32B",
     author: "alibaba",
     description:

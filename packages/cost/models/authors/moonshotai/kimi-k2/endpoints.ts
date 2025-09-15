@@ -3,7 +3,7 @@ import type { ModelProviderConfig } from "../../../types";
 import { KimiK2ModelName } from "./models";
 
 export const endpoints = {
-  "moonshotai/Kimi-K2-Instruct:groq": {
+  "kimi-k2:groq": {
     providerModelId: "moonshotai/Kimi-K2-Instruct",
     provider: "groq",
     author: "moonshotai",

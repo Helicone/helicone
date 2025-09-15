@@ -3,7 +3,7 @@ import type { ModelProviderConfig } from "../../../types";
 import { LlamaModelName } from "./models";
 
 export const endpoints = {
-  "meta-llama/llama-4-scout-17b-16e-instruct:groq": {
+  "llama-4-scout:groq": {
     providerModelId: "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     provider: "groq",
     author: "meta-llama",
@@ -29,14 +29,14 @@ export const endpoints = {
       "tool_choice",
       "tools",
       "top_k",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "meta-llama/Llama-4-Maverick-17B-128E-Instruct:groq": {
+  "llama-4-maverick:groq": {
     providerModelId: "meta-llama/Llama-4-Maverick-17B-128E-Instruct",
     provider: "groq",
     author: "meta-llama",
@@ -62,14 +62,14 @@ export const endpoints = {
       "tool_choice",
       "tools",
       "top_k",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "meta-llama/Llama-Guard-4-12B:groq": {
+  "llama-guard-4:groq": {
     providerModelId: "meta-llama/Llama-Guard-4-12B",
     provider: "groq",
     author: "meta-llama",
@@ -98,15 +98,15 @@ export const endpoints = {
       "stop",
       "temperature",
       "top_k",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "meta-llama/Llama-3.3-70B-Instruct:groq": {
-    providerModelId: "meta-llama/Llama-3.3-70B-Instruct",
+  "llama-3.3-70b-instruct:groq": {
+    providerModelId: "llama-3.3-70b-versatile",
     provider: "groq",
     author: "meta-llama",
     pricing: [
@@ -134,15 +134,15 @@ export const endpoints = {
       "tool_choice",
       "tools",
       "top_k",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "meta-llama/Llama-3.1-8B:groq": {
-    providerModelId: "meta-llama/Llama-3.1-8B",
+  "llama-3.1-8b-instant:groq": {
+    providerModelId: "llama-3.1-8b-instant",
     provider: "groq",
     author: "meta-llama",
     pricing: [
@@ -170,119 +170,61 @@ export const endpoints = {
       "tool_choice",
       "tools",
       "top_k",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "meta-llama/Meta-Llama-3-70B-Instruct:groq": {
-    providerModelId: "meta-llama/Meta-Llama-3-70B-Instruct",
+  "llama-prompt-guard-2-86m:groq": {
+    providerModelId: "meta-llama/llama-prompt-guard-2-86m",
     provider: "groq",
     author: "meta-llama",
     pricing: [
       {
         threshold: 0,
-        input: 0.00000059,
-        output: 0.00000079,
+        input: 0.00000001,
+        output: 0.00000001,
         request: 0.0,
         image: 0.0,
         audio: 0.0,
         web_search: 0.0,
       },
     ],
-    contextLength: 8_192,
-    maxCompletionTokens: 16_384,
+    contextLength: 512,
+    maxCompletionTokens: 2,
     supportedParameters: [
-      "frequency_penalty",
-      "logit_bias",
       "max_tokens",
-      "min_p",
-      "presence_penalty",
-      "repetition_penalty",
-      "stop",
       "temperature",
-      "tool_choice",
-      "tools",
-      "top_k",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "meta-llama/Meta-Llama-3-8B:groq": {
-    providerModelId: "meta-llama/Meta-Llama-3-8B",
+  "llama-prompt-guard-2-22m:groq": {
+    providerModelId: "meta-llama/llama-prompt-guard-2-22m",
     provider: "groq",
     author: "meta-llama",
     pricing: [
       {
         threshold: 0,
-        input: 0.00000005,
-        output: 0.00000008,
+        input: 0.00000001,
+        output: 0.00000001,
         request: 0.0,
         image: 0.0,
         audio: 0.0,
         web_search: 0.0,
       },
     ],
-    contextLength: 8_192,
-    maxCompletionTokens: 8_192,
+    contextLength: 512,
+    maxCompletionTokens: 2,
     supportedParameters: [
-      "frequency_penalty",
-      "logit_bias",
       "max_tokens",
-      "min_p",
-      "presence_penalty",
-      "repetition_penalty",
-      "response_format",
-      "seed",
-      "stop",
       "temperature",
-      "tool_choice",
-      "tools",
-      "top_k",
-      "top_p"
-    ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "meta-llama/Llama-Guard-3-8B:groq": {
-    providerModelId: "meta-llama/Llama-Guard-3-8B",
-    provider: "groq",
-    author: "meta-llama",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.0000002,
-        output: 0.0000002,
-        request: 0.0,
-        image: 0.0,
-        audio: 0.0,
-        web_search: 0.0,
-      },
-    ],
-    contextLength: 8_192,
-    maxCompletionTokens: 8_192,
-    supportedParameters: [
-      "frequency_penalty",
-      "logit_bias",
-      "logprobs",
-      "max_tokens",
-      "min_p",
-      "presence_penalty",
-      "repetition_penalty",
-      "response_format",
-      "seed",
-      "stop",
-      "temperature",
-      "top_k",
-      "top_logprobs",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {

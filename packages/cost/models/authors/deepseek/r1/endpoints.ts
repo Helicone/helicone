@@ -3,7 +3,7 @@ import type { ModelProviderConfig } from "../../../types";
 import { DeepSeekR1ModelName } from "./models";
 
 export const endpoints = {
-  "deepseek-ai/DeepSeek-R1-Distill-Llama-70B:groq": {
+  "deepseek-r1-distill-llama-70b:groq": {
     providerModelId: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
     provider: "groq",
     author: "deepseek",

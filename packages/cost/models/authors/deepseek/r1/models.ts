@@ -1,7 +1,7 @@
 import { ModelConfig } from "../../../types";
 
 export const models = {
-  "deepseek-ai/DeepSeek-R1-Distill-Llama-70B": {
+  "deepseek-r1-distill-llama-70b": {
     name: "DeepSeek-R1-Distill-Llama-70B",
     author: "deepseek",
     description:

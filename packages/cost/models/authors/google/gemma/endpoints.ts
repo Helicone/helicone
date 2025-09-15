@@ -3,7 +3,7 @@ import type { ModelProviderConfig } from "../../../types";
 import { GemmaModelName } from "./model";
 
 export const endpoints = {
-  "google/gemma-2-9b:groq": {
+  "gemma2-9b-it:groq": {
     providerModelId: "google/gemma-2-9b",
     provider: "groq",
     author: "google",

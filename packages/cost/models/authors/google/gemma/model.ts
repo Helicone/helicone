@@ -1,7 +1,7 @@
 import { ModelConfig } from "../../../types";
 
 export const model = {
-  "google/gemma-2-9b": {
+  "gemma2-9b-it": {
     name: "Google: Gemma 2",
     author: "google",
     description:

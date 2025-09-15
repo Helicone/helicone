@@ -1,7 +1,7 @@
 import { ModelConfig } from "../../../types";
 
 export const models = {
-  "meta-llama/llama-4-scout-17b-16e-instruct": {
+  "llama-4-scout": {
     name: "Llama-4-Scout-17B-16E",
     author: "meta-llama",
     description:
@@ -12,7 +12,7 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "meta-llama/Llama-4-Maverick-17B-128E-Instruct": {
+  "llama-4-maverick": {
     name: "Llama-4-Maverick-17B-128E",
     author: "meta-llama",
     description:
@@ -23,7 +23,7 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "meta-llama/Llama-Guard-4-12B": {
+  "llama-guard-4": {
     name: "Llama-Guard-4-12B",
     author: "meta-llama",
     description:
@@ -34,7 +34,7 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "meta-llama/Llama-3.3-70B-Instruct": {
+  "llama-3.3-70b-instruct": {
     name: "Llama-3.3-70B-Versatile",
     author: "meta-llama",
     description:
@@ -45,7 +45,7 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "meta-llama/Llama-3.1-8B": {
+  "llama-3.1-8b-instant": {
     name: "Llama-3.1-8B-Instant",
     author: "meta-llama",
     description:
@@ -56,36 +56,25 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "meta-llama/Meta-Llama-3-70B-Instruct": {
-    name: "Llama-3-70B",
+  "llama-prompt-guard-2-86m": {
+    name: "Llama-Prompt-Guard-2-86M",
     author: "meta-llama",
     description:
-      "70B instruction-tuned model delivering strong conversational quality, tool use, and coding assistance across diverse domains.",
-    contextLength: 8_192,
-    maxOutputTokens: 16_384,
-    created: "2024-04-01T00:00:00.000Z",
+      "86M parameter multilingual prompt safety classifier based on mDeBERTa-base, detecting prompt injections and jailbreaks across 8+ languages with adversarial-resistant tokenization.",
+    contextLength: 512,
+    maxOutputTokens: 2,
+    created: "2024-10-01T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "meta-llama/Meta-Llama-3-8B": {
-    name: "Llama-3-8B",
+  "llama-prompt-guard-2-22m": {
+    name: "Llama-Prompt-Guard-2-22M",
     author: "meta-llama",
     description:
-      "8B general-purpose model for broad language tasks; a solid base for fine-tuning or lightweight production chat.",
-    contextLength: 8_192,
-    maxOutputTokens: 8_192,
-    created: "2024-04-01T00:00:00.000Z",
-    modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "GPT",
-  },
-  "meta-llama/Llama-Guard-3-8B": {
-    name: "Llama-Guard-3-8B",
-    author: "meta-llama",
-    description:
-      "Prior-generation safety model for content moderation and policy enforcement, filtering prompts/outputs to reduce unsafe responses.",
-    contextLength: 8_192,
-    maxOutputTokens: 8_192,
-    created: "2024-04-01T00:00:00.000Z",
+      "22M parameter lightweight prompt safety classifier based on DeBERTa-xsmall, offering 75% reduced latency for detecting prompt injections and jailbreaks, primarily optimized for English.",
+    contextLength: 512,
+    maxOutputTokens: 2,
+    created: "2024-10-01T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },

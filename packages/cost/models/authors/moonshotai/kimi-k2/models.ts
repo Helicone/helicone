@@ -1,7 +1,7 @@
 import { ModelConfig } from "../../../types";
 
 export const models = {
-  "moonshotai/Kimi-K2-Instruct": {
+  "kimi-k2": {
     name: "Kimi K2 Instruct (09/05/2025)",
     author: "moonshotai",
     description:
