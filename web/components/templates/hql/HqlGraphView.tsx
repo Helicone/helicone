@@ -60,7 +60,38 @@ const CHART_COLORS = [
   "#ef4444", // red
 ];
 
+// Supported chart types to display in the grid
+const SUPPORTED_TYPES: ChartType[] = [
+  "line",
+  "bar",
+  "pie",
+  "scatter",
+  "histogram",
+  "multi-line",
+  "area",
+];
+
 export function HqlGraphView({ data, loading }: HqlGraphViewProps) {
+  const rows = data ?? [];
+  const columns = useMemo(() => analyzeHqlColumns(rows), [rows]);
+  const suggestions = useMemo(
+    () => generateChartSuggestions(columns),
+    [columns],
+  );
+  // Grid view: no selection, we render multiple suggestions at once
+
+  // Prepare a list of supported suggestions to render in a grid
+  const gridSuggestions = useMemo(
+    () =>
+      suggestions
+        .filter((s) => SUPPORTED_TYPES.includes(s.type as ChartType))
+        .slice(0, 6),
+    [suggestions],
+  );
+
+  const numericColumns = columns.filter((c) => c.type === "numeric");
+  const dateColumns = columns.filter((c) => c.type === "datetime");
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -69,7 +100,7 @@ export function HqlGraphView({ data, loading }: HqlGraphViewProps) {
     );
   }
 
-  if (!data || data.length === 0) {
+  if (!rows || rows.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center">
         <P className="text-muted-foreground">
@@ -78,16 +109,6 @@ export function HqlGraphView({ data, loading }: HqlGraphViewProps) {
       </div>
     );
   }
-
-  const columns = useMemo(() => analyzeHqlColumns(data), [data]);
-  const suggestions = useMemo(
-    () => generateChartSuggestions(columns),
-    [columns],
-  );
-  // Grid view: no selection, we render multiple suggestions at once
-
-  const numericColumns = columns.filter((c) => c.type === "numeric");
-  const dateColumns = columns.filter((c) => c.type === "datetime");
 
   if (numericColumns.length === 0 && dateColumns.length === 0) {
     return (
@@ -101,23 +122,7 @@ export function HqlGraphView({ data, loading }: HqlGraphViewProps) {
     );
   }
 
-  // Prepare a list of supported suggestions to render in a grid
-  const supportedTypes: ChartType[] = [
-    "line",
-    "bar",
-    "pie",
-    "scatter",
-    "histogram",
-    "multi-line",
-    "area",
-  ];
-  const gridSuggestions = useMemo(
-    () =>
-      suggestions
-        .filter((s) => supportedTypes.includes(s.type as ChartType))
-        .slice(0, 6),
-    [suggestions],
-  );
+  
 
   // Helper: split y-axis for multi-line suggestions
   function getYColumnsForSuggestion(s: ChartSuggestion): string[] {
