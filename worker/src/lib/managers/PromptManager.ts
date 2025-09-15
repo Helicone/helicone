@@ -18,10 +18,15 @@ export class PromptManager {
   async getSourcePromptBodyWithFetch(
     params: HeliconeChatCreateParams,
     orgId: string
-  ): Promise<Result<{
-    promptVersionId: string,
-    body: ChatCompletionCreateParams
-  }, string>> {
+  ): Promise<
+    Result<
+      {
+        promptVersionId: string;
+        body: ChatCompletionCreateParams;
+      },
+      string
+    >
+  > {
     const versionIdResult = await this.promptStore.getPromptVersionId(
       params,
       orgId
@@ -39,12 +44,14 @@ export class PromptManager {
             );
           return ok({
             promptVersionId: versionIdResult.data,
-            body: sourcePromptBody
+            body: sourcePromptBody,
           });
         } catch (error) {
           return err(`Error retrieving prompt body: ${error}`);
         }
-      }
+      },
+      undefined,
+      false
     );
   }
 
@@ -53,7 +60,11 @@ export class PromptManager {
     orgId: string
   ): Promise<
     Result<
-      { body: ChatCompletionCreateParams; errors: ValidationError[]; promptVersionId: string },
+      {
+        body: ChatCompletionCreateParams;
+        errors: ValidationError[];
+        promptVersionId: string;
+      },
       string
     >
   > {

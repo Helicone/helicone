@@ -156,16 +156,6 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
           `You've reached the limit of ${limit} users. Upgrade for unlimited access.`,
       },
     },
-    webhooks: {
-      main: {
-        getLimit: () => 1,
-        description: (limit) =>
-          `You can create up to ${limit} webhooks with the free tier`,
-        upgradeFeatureName: FEATURE_DISPLAY_NAMES.webhooks,
-        upgradeMessage: (limit, used) =>
-          `You've used ${used}/${limit} webhooks. Upgrade for unlimited access.`,
-      },
-    },
   },
 };
 

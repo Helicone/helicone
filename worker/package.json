@@ -36,8 +36,7 @@
     "typescript": "^5.8.3",
     "vitest": "~3.2.0",
     "wrangler": "^4.27.0",
-    "yarn": "^1.22.22",
-    "zod": "^3.23.8"
+    "yarn": "^1.22.22"
   },
   "dependencies": {
     "@aws-crypto/sha256-js": "^5.2",

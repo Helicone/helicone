@@ -4,7 +4,6 @@ export const NON_FREE_FEATURES = [
   "sessions",
   "properties",
   "users",
-  "webhooks",
   "datasets",
   "alerts",
 ] as const;
@@ -57,7 +56,6 @@ export const FEATURE_DISPLAY_NAMES: Record<FeatureId, string> = {
   users: "Users",
   datasets: "Datasets",
   alerts: "Alerts",
-  webhooks: "Webhooks",
 };
 
 // Create lookup table for subfeature display names
