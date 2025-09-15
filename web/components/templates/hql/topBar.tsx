@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
+import { Save, Code2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ interface TopBarProps {
     sql: string;
   }) => void;
   handleRenameQuery: (newName: string) => void;
+  handleFormatQuery?: () => void;
 }
 
 export default function TopBar({
@@ -24,6 +25,7 @@ export default function TopBar({
   handleExecuteQuery,
   handleSaveQuery,
   handleRenameQuery,
+  handleFormatQuery,
 }: TopBarProps) {
   return (
     <div className="flex w-full shrink-0 flex-col border-b bg-background dark:border-border">
@@ -47,6 +49,17 @@ export default function TopBar({
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleFormatQuery}
+            disabled={!handleFormatQuery}
+            title="Format Query (Ctrl+Shift+F)"
+          >
+            <Code2 className="mr-1 h-4 w-4" />
+            Format
+          </Button>
+
           <Button
             variant="action"
             size="sm"

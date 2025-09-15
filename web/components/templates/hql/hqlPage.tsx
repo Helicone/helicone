@@ -29,6 +29,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { useTheme } from "next-themes";
+import { formatHQL } from "./formatHQL";
 
 function HQLPage() {
   const organization = useOrg();
@@ -356,6 +357,29 @@ function HQLPage() {
                   sql: currentQuery.sql,
                 });
               }}
+              handleFormatQuery={() => {
+                if (editorRef.current) {
+                  const formatted = formatHQL(currentQuery.sql);
+                  const model = editorRef.current.getModel();
+                  if (model) {
+                    // Use pushEditOperations to preserve undo stack
+                    editorRef.current.pushUndoStop();
+                    editorRef.current.executeEdits("format", [
+                      {
+                        range: model.getFullModelRange(),
+                        text: formatted,
+                        forceMoveMarkers: true,
+                      },
+                    ]);
+                    editorRef.current.pushUndoStop();
+                  }
+                  setCurrentQuery({
+                    id: currentQuery.id,
+                    name: currentQuery.name,
+                    sql: formatted,
+                  });
+                }
+              }}
             />
             <div className="relative flex-1">
               <Editor
@@ -455,6 +479,34 @@ function HQLPage() {
                     monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
                     () => {
                       handleSaveQuery(latestQueryRef.current);
+                    },
+                  );
+
+                  // Add Command/Ctrl+Shift+F for formatting
+                  editor.addCommand(
+                    monaco.KeyMod.CtrlCmd |
+                      monaco.KeyMod.Shift |
+                      monaco.KeyCode.KeyF,
+                    () => {
+                      const formatted = formatHQL(latestQueryRef.current.sql);
+                      const model = editor.getModel();
+                      if (model) {
+                        // Use executeEdits to preserve undo stack
+                        editor.pushUndoStop();
+                        editor.executeEdits("format", [
+                          {
+                            range: model.getFullModelRange(),
+                            text: formatted,
+                            forceMoveMarkers: true,
+                          },
+                        ]);
+                        editor.pushUndoStop();
+                      }
+                      setCurrentQuery({
+                        id: latestQueryRef.current.id,
+                        name: latestQueryRef.current.name,
+                        sql: formatted,
+                      });
                     },
                   );
                 }}
