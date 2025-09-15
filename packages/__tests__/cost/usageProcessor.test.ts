@@ -1,5 +1,6 @@
 import { describe, it, expect } from "@jest/globals";
 import { OpenAIUsageProcessor } from "@helicone-package/cost/usage/openAIUsageProcessor";
+import { AnthropicUsageProcessor } from "@helicone-package/cost/usage/anthropicUsageProcessor";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import * as fs from "fs";
 import * as path from "path";
@@ -8,6 +9,11 @@ describe("getUsageProcessor", () => {
   it("should return OpenAIUsageProcessor for openai provider", () => {
     const processor = getUsageProcessor("openai");
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
+  });
+
+  it("should return AnthropicUsageProcessor for anthropic provider", () => {
+    const processor = getUsageProcessor("anthropic");
+    expect(processor).toBeInstanceOf(AnthropicUsageProcessor);
   });
 
   it("should throw error for unsupported provider", () => {
@@ -69,6 +75,81 @@ describe("OpenAIUsageProcessor", () => {
       {
         name: "stream-response", 
         data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-stream-response.snapshot"), "utf-8"),
+        isStream: true
+      }
+    ];
+
+    const results: Record<string, any> = {};
+    
+    for (const testCase of testCases) {
+      const result = await processor.parse({
+        responseBody: testCase.data,
+        isStream: testCase.isStream
+      });
+      results[testCase.name] = result;
+    }
+
+    expect(results).toMatchSnapshot();
+  });
+});
+
+describe("AnthropicUsageProcessor", () => {
+  const processor = new AnthropicUsageProcessor();
+
+  it("should parse Anthropic response with cache details", async () => {
+    const responseData = fs.readFileSync(
+      path.join(__dirname, "testData", "anthropic-response.snapshot"),
+      "utf-8"
+    );
+
+    const result = await processor.parse({ 
+      responseBody: responseData, 
+      isStream: false 
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 9,
+      output: 12,
+      cacheDetails: {
+        cachedInput: 183,
+        write5m: 50
+      }
+    });
+  });
+
+  it("should parse Anthropic stream response", async () => {
+    const streamData = fs.readFileSync(
+      path.join(__dirname, "testData", "anthropic-stream-response.snapshot"),
+      "utf-8"
+    );
+
+    const result = await processor.parse({ 
+      responseBody: streamData, 
+      isStream: true 
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 338,
+      output: 65,
+      cacheDetails: {
+        cachedInput: 500,
+        write1h: 20
+      }
+    });
+  });
+
+  it("usage processing snapshot", async () => {
+    const testCases = [
+      {
+        name: "anthropic-response",
+        data: fs.readFileSync(path.join(__dirname, "testData", "anthropic-response.snapshot"), "utf-8"),
+        isStream: false
+      },
+      {
+        name: "anthropic-stream-response", 
+        data: fs.readFileSync(path.join(__dirname, "testData", "anthropic-stream-response.snapshot"), "utf-8"),
         isStream: true
       }
     ];
