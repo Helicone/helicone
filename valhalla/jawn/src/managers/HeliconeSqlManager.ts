@@ -16,6 +16,7 @@ import { HqlStore } from "../lib/stores/HqlStore";
 import { z } from "zod";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
+import tracer from "../tracer";
 
 export const CLICKHOUSE_TABLES = ["request_response_rmt"];
 const MAX_LIMIT = 300000;
@@ -134,44 +135,58 @@ export class HeliconeSqlManager {
   async getClickhouseSchema(): Promise<
     Result<ClickHouseTableSchema[], HqlError>
   > {
-    try {
-      const schemaPromises = CLICKHOUSE_TABLES.map(async (table_name) => {
-        const columns = await clickhouseDb.dbQuery<ClickHouseTableRow>(
-          `DESCRIBE TABLE ${table_name}`,
-          [],
-          describeRowSchema
+    return await tracer.trace("hql.getClickHouseSchema", async (span) => {
+      span.setTag("organizationId", this.authParams.organizationId);
+      span.setTag("service", "helicone-sql");
+      span.setTag("operation", "getClickhouseSchema");
+      span.setTag("tables.count", CLICKHOUSE_TABLES.length);
+
+      try {
+        const schemaPromises = CLICKHOUSE_TABLES.map(async (table_name) => {
+          const columns = await clickhouseDb.dbQuery<ClickHouseTableRow>(
+            `DESCRIBE TABLE ${table_name}`,
+            [],
+            describeRowSchema
+          );
+
+          if (isError(columns)) {
+            throw new Error(`Failed to describe table ${table_name}: ${columns.error}`);
+          }
+
+          return {
+            table_name,
+            columns:
+              columns.data
+                ?.map((col: ClickHouseTableRow) => ({
+                  name: col.name,
+                  type: col.type,
+                  default_type: col.default_type,
+                  default_expression: col.default_expression,
+                  comment: col.comment,
+                  codec_expression: col.codec_expression,
+                  ttl_expression: col.ttl_expression,
+                }))
+                .filter((col) => col.name !== "organization_id") ?? [],
+          };
+        });
+        
+        const schema = await Promise.all(schemaPromises);
+        
+        const totalColumns = schema.reduce((sum, table) => sum + table.columns.length, 0);
+        span.setTag("schema.total_columns", totalColumns);
+        span.setTag("schema.tables", CLICKHOUSE_TABLES.join(","));
+        
+        return ok(schema);
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        span.setTag("error", true);
+        span.setTag("error.message", errorMessage);
+        return hqlError(
+          HqlErrorCode.SCHEMA_FETCH_FAILED,
+          errorMessage
         );
-
-        if (isError(columns)) {
-          throw new Error(`Failed to describe table ${table_name}: ${columns.error}`);
-        }
-
-        return {
-          table_name,
-          columns:
-            columns.data
-              ?.map((col: ClickHouseTableRow) => ({
-                name: col.name,
-                type: col.type,
-                default_type: col.default_type,
-                default_expression: col.default_expression,
-                comment: col.comment,
-                codec_expression: col.codec_expression,
-                ttl_expression: col.ttl_expression,
-              }))
-              .filter((col) => col.name !== "organization_id") ?? [],
-        };
-      });
-      
-      const schema = await Promise.all(schemaPromises);
-      return ok(schema);
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      return hqlError(
-        HqlErrorCode.SCHEMA_FETCH_FAILED,
-        errorMessage
-      );
-    }
+      }
+    });
   }
 
   // Check for SQL injection by only always executing the first sql statement
@@ -182,76 +197,110 @@ export class HeliconeSqlManager {
     sql: string,
     limit: number = 100
   ): Promise<Result<ExecuteSqlResponse, HqlError>> {
-    try {
-      // Parse SQL to validate and add limit
-      let ast;
+    return await tracer.trace("hql.executeSql", async (span) => {
+      span.setTag("organizationId", this.authParams.organizationId);
+      span.setTag("service", "helicone-sql");
+      span.setTag("operation", "executeSql");
+      span.setTag("sql.length", sql.length);
+      span.setTag("sql.limit", limit);
+      span.setTag("sql.query", sql.substring(0, 200)); // First 200 chars for debugging
+
       try {
-        ast = parser.astify(sql, { database: "Postgresql" });
-      } catch (parseError) {
-        return hqlError(
-          HqlErrorCode.SYNTAX_ERROR,
-          parseError instanceof Error ? parseError.message : String(parseError)
-        );
+        // Parse SQL to validate and add limit
+        let ast;
+        try {
+          ast = parser.astify(sql, { database: "Postgresql" });
+        } catch (parseError) {
+          span.setTag("error", true);
+          span.setTag("error.type", "SYNTAX_ERROR");
+          span.setTag("error.phase", "parsing");
+          const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
+          span.setTag("error.message", errorMessage);
+          return hqlError(HqlErrorCode.SYNTAX_ERROR, errorMessage);
+        }
+        
+        // Always get first statement to prevent SQL injection
+        const normalizedAst = normalizeAst(ast)[0];
+        
+        // Add limit to prevent excessive data retrieval
+        let limitedAst;
+        try {
+          limitedAst = addLimit(normalizedAst, limit);
+        } catch (limitError) {
+          span.setTag("error", true);
+          span.setTag("error.type", "SYNTAX_ERROR");
+          span.setTag("error.phase", "limit_application");
+          const errorMessage = `Failed to apply limit: ${limitError instanceof Error ? limitError.message : String(limitError)}`;
+          span.setTag("error.message", errorMessage);
+          return hqlError(HqlErrorCode.SYNTAX_ERROR, errorMessage);
+        }
+        
+        const firstSql = parser.sqlify(limitedAst, { database: "Postgresql" });
+        span.setTag("sql.processed", firstSql.substring(0, 200));
+
+        // Validate SQL for security
+        const validatedSql = validateSql(firstSql);
+        if (isError(validatedSql)) {
+          span.setTag("error", true);
+          span.setTag("error.type", validatedSql.error.code);
+          span.setTag("error.phase", "validation");
+          span.setTag("error.message", validatedSql.error.message);
+          return validatedSql;
+        }
+
+        const start = Date.now();
+
+        // Execute query with organization context for row-level security
+        const result = await clickhouseDb.hqlQueryWithContext<
+          ExecuteSqlResponse["rows"]
+        >({
+          query: firstSql,
+          organizationId: this.authParams.organizationId,
+          parameters: [],
+        });
+
+        const elapsedMilliseconds = Date.now() - start;
+        span.setTag("execution.elapsed_ms", elapsedMilliseconds);
+
+        if (isError(result)) {
+          const errorString = String(result.error);
+          const errorCode = parseClickhouseError(errorString);
+          span.setTag("error", true);
+          span.setTag("error.type", errorCode);
+          span.setTag("error.phase", "clickhouse_execution");
+          span.setTag("error.message", errorString);
+          return hqlError(errorCode, errorString);
+        }
+
+        // Enrich results with S3 bodies if request_body or response_body columns are present
+        const rows = result.data ?? [];
+        const enrichmentStart = Date.now();
+        const enrichedRows = await this.enrichResultsWithS3Bodies(rows);
+        const enrichmentTime = Date.now() - enrichmentStart;
+        
+        const responseSize = Buffer.byteLength(JSON.stringify(enrichedRows), "utf8");
+        
+        span.setTag("result.row_count", enrichedRows.length);
+        span.setTag("result.size_bytes", responseSize);
+        span.setTag("result.elapsed_ms", elapsedMilliseconds);
+        span.setTag("enrichment.elapsed_ms", enrichmentTime);
+        span.setTag("enrichment.s3_enriched", enrichmentTime > 10); // Indicates if S3 enrichment occurred
+
+        return ok({
+          rows: enrichedRows,
+          elapsedMilliseconds,
+          size: responseSize,
+          rowCount: enrichedRows.length,
+        });
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        span.setTag("error", true);
+        span.setTag("error.type", "UNEXPECTED_ERROR");
+        span.setTag("error.phase", "general");
+        span.setTag("error.message", errorMessage);
+        return hqlError(HqlErrorCode.UNEXPECTED_ERROR, errorMessage);
       }
-      
-      // Always get first statement to prevent SQL injection
-      const normalizedAst = normalizeAst(ast)[0];
-      
-      // Add limit to prevent excessive data retrieval
-      let limitedAst;
-      try {
-        limitedAst = addLimit(normalizedAst, limit);
-      } catch (limitError) {
-        return hqlError(
-          HqlErrorCode.SYNTAX_ERROR,
-          `Failed to apply limit: ${limitError instanceof Error ? limitError.message : String(limitError)}`
-        );
-      }
-      
-      const firstSql = parser.sqlify(limitedAst, { database: "Postgresql" });
-
-      // Validate SQL for security
-      const validatedSql = validateSql(firstSql);
-      if (isError(validatedSql)) {
-        return validatedSql;
-      }
-
-      const start = Date.now();
-
-      // Execute query with organization context for row-level security
-      const result = await clickhouseDb.hqlQueryWithContext<
-        ExecuteSqlResponse["rows"]
-      >({
-        query: firstSql,
-        organizationId: this.authParams.organizationId,
-        parameters: [],
-      });
-
-      const elapsedMilliseconds = Date.now() - start;
-
-      if (isError(result)) {
-        const errorString = String(result.error);
-        const errorCode = parseClickhouseError(errorString);
-        return hqlError(errorCode, errorString);
-      }
-
-      // Enrich results with S3 bodies if request_body or response_body columns are present
-      const rows = result.data ?? [];
-      const enrichedRows = await this.enrichResultsWithS3Bodies(rows);
-
-      return ok({
-        rows: enrichedRows,
-        elapsedMilliseconds,
-        size: Buffer.byteLength(JSON.stringify(enrichedRows), "utf8"),
-        rowCount: enrichedRows.length,
-      });
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      return hqlError(
-        HqlErrorCode.UNEXPECTED_ERROR,
-        errorMessage
-      );
-    }
+    });
   }
 
   private async enrichResultsWithS3Bodies(
@@ -352,37 +401,76 @@ export class HeliconeSqlManager {
   }
 
   async downloadCsv(sql: string): Promise<Result<string, HqlError>> {
-    const result = await this.executeSql(sql, MAX_LIMIT);
-    if (isError(result)) {
-      return result;
-    }
+    return await tracer.trace("hql.downloadCsv", async (span) => {
+      span.setTag("organizationId", this.authParams.organizationId);
+      span.setTag("service", "helicone-sql");
+      span.setTag("operation", "downloadCsv");
+      span.setTag("sql.length", sql.length);
+      span.setTag("sql.limit", MAX_LIMIT);
 
-    if (!result.data?.rows?.length) {
-      return hqlError(HqlErrorCode.NO_DATA_RETURNED);
-    }
+      try {
+        const result = await this.executeSql(sql, MAX_LIMIT);
+        if (isError(result)) {
+          span.setTag("error", true);
+          span.setTag("error.type", result.error.code);
+          span.setTag("error.phase", "sql_execution");
+          span.setTag("error.message", result.error.message);
+          return result;
+        }
 
-    // Generate filename with timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `hql-export-${timestamp}.csv`;
-    
-    // Upload to S3
-    const uploadResult = await this.hqlStore.uploadCsv(
-      filename,
-      this.authParams.organizationId,
-      result.data.rows
-    );
+        if (!result.data?.rows?.length) {
+          span.setTag("error", true);
+          span.setTag("error.type", "NO_DATA_RETURNED");
+          span.setTag("error.phase", "data_validation");
+          return hqlError(HqlErrorCode.NO_DATA_RETURNED);
+        }
 
-    if (isError(uploadResult)) {
-      return hqlError(
-        HqlErrorCode.CSV_UPLOAD_FAILED,
-        uploadResult.error
-      );
-    }
+        const rowCount = result.data.rows.length;
+        span.setTag("csv.row_count", rowCount);
+        span.setTag("csv.data_size_bytes", result.data.size);
 
-    if (!uploadResult.data) {
-      return hqlError(HqlErrorCode.CSV_URL_NOT_RETURNED);
-    }
+        // Generate filename with timestamp
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `hql-export-${timestamp}.csv`;
+        span.setTag("csv.filename", filename);
+        
+        // Upload to S3
+        const uploadStart = Date.now();
+        const uploadResult = await this.hqlStore.uploadCsv(
+          filename,
+          this.authParams.organizationId,
+          result.data.rows
+        );
+        const uploadTime = Date.now() - uploadStart;
+        span.setTag("csv.upload_time_ms", uploadTime);
 
-    return ok(uploadResult.data);
+        if (isError(uploadResult)) {
+          span.setTag("error", true);
+          span.setTag("error.type", "CSV_UPLOAD_FAILED");
+          span.setTag("error.phase", "s3_upload");
+          span.setTag("error.message", uploadResult.error);
+          return hqlError(HqlErrorCode.CSV_UPLOAD_FAILED, uploadResult.error);
+        }
+
+        if (!uploadResult.data) {
+          span.setTag("error", true);
+          span.setTag("error.type", "CSV_URL_NOT_RETURNED");
+          span.setTag("error.phase", "url_generation");
+          return hqlError(HqlErrorCode.CSV_URL_NOT_RETURNED);
+        }
+
+        span.setTag("csv.upload_success", true);
+        span.setTag("csv.url_generated", !!uploadResult.data);
+
+        return ok(uploadResult.data);
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        span.setTag("error", true);
+        span.setTag("error.type", "UNEXPECTED_ERROR");
+        span.setTag("error.phase", "general");
+        span.setTag("error.message", errorMessage);
+        return hqlError(HqlErrorCode.UNEXPECTED_ERROR, errorMessage);
+      }
+    });
   }
 }

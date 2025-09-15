@@ -15,7 +15,6 @@ import { err, ok, Result, isError } from "../../packages/common/result";
 import { 
   HqlError, 
   HqlErrorCode, 
-  StatusCodeMap,
   createHqlError
 } from "../../lib/errors/HqlErrors";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
@@ -25,6 +24,7 @@ import {
   HQL_FEATURE_FLAG,
 } from "../../lib/utils/featureFlags";
 import { HqlQueryManager } from "../../managers/HqlQueryManager";
+import tracer from "../../tracer";
 
 // --- Response Types ---
 export interface ClickHouseTableSchema {
@@ -92,15 +92,32 @@ export class HeliconeSqlController extends Controller {
   public async getClickHouseSchema(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ClickHouseTableSchema[], string>> {
-    const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
-    const result = await heliconeSqlManager.getClickhouseSchema();
-    
-    if (isError(result)) {
-      this.setStatus(result.error.statusCode || 500);
-      return err(formatHqlError(result.error));
-    }
-    
-    return ok(result.data);
+    return await tracer.trace("hql.controller.getClickHouseSchema", async (span) => {
+      span.setTag("organizationId", request.authParams.organizationId);
+      span.setTag("component", "hql");
+      span.setTag("operation.name", "getClickHouseSchema");
+      span.setTag("span.kind", "server");
+
+      try {
+        const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
+        const result = await heliconeSqlManager.getClickhouseSchema();
+        
+        if (isError(result)) {
+          span.setTag("error", true);
+          span.setTag("error.type", result.error.code || "unknown");
+          span.setTag("error.message", result.error.message);
+          this.setStatus(result.error.statusCode || 500);
+          return err(formatHqlError(result.error));
+        }
+        
+        span.setTag("schema.table_count", result.data.length);
+        return ok(result.data);
+      } catch (error) {
+        span.setTag("error", true);
+        span.setTag("error.message", error instanceof Error ? error.message : String(error));
+        throw error;
+      }
+    });
   }
 
   /**
@@ -115,34 +132,62 @@ export class HeliconeSqlController extends Controller {
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExecuteSqlResponse, string>> {
-    // Check feature flag access
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      HQL_FEATURE_FLAG
-    );
-    if (isError(featureFlagResult)) {
-      const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
-      this.setStatus(error.statusCode || 403);
-      return err(formatHqlError(error));
-    }
+    return await tracer.trace("hql.controller.executeSql", async (span) => {
+      span.setTag("organizationId", request.authParams.organizationId);
+      span.setTag("service", "helicone-sql");
+      span.setTag("operation", "executeSql");
+      span.setTag("sql.length", requestBody.sql?.length || 0);
 
-    // Validate request
-    if (!requestBody.sql?.trim()) {
-      const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL);
-      this.setStatus(error.statusCode || 400);
-      return err(formatHqlError(error));
-    }
+      try {
+        // Check feature flag access
+        const featureFlagResult = await checkFeatureFlag(
+          request.authParams.organizationId,
+          HQL_FEATURE_FLAG
+        );
+        if (isError(featureFlagResult)) {
+          const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
+          span.setTag("error", true);
+          span.setTag("error.type", "FEATURE_NOT_ENABLED");
+          span.setTag("error.message", error.message);
+          this.setStatus(error.statusCode || 403);
+          return err(formatHqlError(error));
+        }
 
-    const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
-    const result = await heliconeSqlManager.executeSql(requestBody.sql);
-    
-    if (isError(result)) {
-      this.setStatus(result.error.statusCode || 500);
-      return err(formatHqlError(result.error));
-    }
+        // Validate request
+        if (!requestBody.sql?.trim()) {
+          const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL);
+          span.setTag("error", true);
+          span.setTag("error.type", "MISSING_QUERY_SQL");
+          span.setTag("error.message", error.message);
+          this.setStatus(error.statusCode || 400);
+          return err(formatHqlError(error));
+        }
 
-    this.setStatus(200);
-    return ok(result.data);
+        span.setTag("sql.query", requestBody.sql.substring(0, 200)); // First 200 chars for debugging
+        
+        const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
+        const result = await heliconeSqlManager.executeSql(requestBody.sql);
+        
+        if (isError(result)) {
+          span.setTag("error", true);
+          span.setTag("error.type", result.error.code || "unknown");
+          span.setTag("error.message", result.error.message);
+          this.setStatus(result.error.statusCode || 500);
+          return err(formatHqlError(result.error));
+        }
+
+        span.setTag("result.row_count", result.data.rowCount);
+        span.setTag("result.size_bytes", result.data.size);
+        span.setTag("result.elapsed_ms", result.data.elapsedMilliseconds);
+        
+        this.setStatus(200);
+        return ok(result.data);
+      } catch (error) {
+        span.setTag("error", true);
+        span.setTag("error.message", error instanceof Error ? error.message : String(error));
+        throw error;
+      }
+    });
   }
 
   /**
@@ -157,34 +202,60 @@ export class HeliconeSqlController extends Controller {
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
-    // Check feature flag access
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      HQL_FEATURE_FLAG
-    );
-    if (isError(featureFlagResult)) {
-      const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
-      this.setStatus(error.statusCode || 403);
-      return err(formatHqlError(error));
-    }
+    return await tracer.trace("hql.controller.downloadCsv", async (span) => {
+      span.setTag("organizationId", request.authParams.organizationId);
+      span.setTag("service", "helicone-sql");
+      span.setTag("operation", "downloadCsv");
+      span.setTag("sql.length", requestBody.sql?.length || 0);
 
-    // Validate request
-    if (!requestBody.sql?.trim()) {
-      const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL, "CSV download requires a SQL query");
-      this.setStatus(error.statusCode || 400);
-      return err(formatHqlError(error));
-    }
+      try {
+        // Check feature flag access
+        const featureFlagResult = await checkFeatureFlag(
+          request.authParams.organizationId,
+          HQL_FEATURE_FLAG
+        );
+        if (isError(featureFlagResult)) {
+          const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
+          span.setTag("error", true);
+          span.setTag("error.type", "FEATURE_NOT_ENABLED");
+          span.setTag("error.message", error.message);
+          this.setStatus(error.statusCode || 403);
+          return err(formatHqlError(error));
+        }
 
-    const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
-    const result = await heliconeSqlManager.downloadCsv(requestBody.sql);
-    
-    if (isError(result)) {
-      this.setStatus(result.error.statusCode || 500);
-      return err(formatHqlError(result.error));
-    }
+        // Validate request
+        if (!requestBody.sql?.trim()) {
+          const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL, "CSV download requires a SQL query");
+          span.setTag("error", true);
+          span.setTag("error.type", "MISSING_QUERY_SQL");
+          span.setTag("error.message", error.message);
+          this.setStatus(error.statusCode || 400);
+          return err(formatHqlError(error));
+        }
 
-    this.setStatus(200);
-    return ok(result.data);
+        span.setTag("sql.query", requestBody.sql.substring(0, 200)); // First 200 chars for debugging
+        
+        const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
+        const result = await heliconeSqlManager.downloadCsv(requestBody.sql);
+        
+        if (isError(result)) {
+          span.setTag("error", true);
+          span.setTag("error.type", result.error.code || "unknown");
+          span.setTag("error.message", result.error.message);
+          this.setStatus(result.error.statusCode || 500);
+          return err(formatHqlError(result.error));
+        }
+
+        span.setTag("download.url_generated", !!result.data);
+        
+        this.setStatus(200);
+        return ok(result.data);
+      } catch (error) {
+        span.setTag("error", true);
+        span.setTag("error.message", error instanceof Error ? error.message : String(error));
+        throw error;
+      }
+    });
   }
 
   /**
