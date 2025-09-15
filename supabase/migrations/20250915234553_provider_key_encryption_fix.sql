@@ -15,7 +15,7 @@ FROM old.provider_key THEN new.provider_key = CASE
             ELSE pg_catalog.encode(
                 pgsodium.crypto_aead_det_encrypt(
                     pg_catalog.convert_to(new.provider_key, 'utf8'),
-                    pg_catalog.convert_to((new.org_id::text)::text, 'utf8'),
+                    pg_catalog.convert_to(new.org_id::text, 'utf8'),
                     new.key_id::uuid,
                     new.nonce
                 ),
@@ -33,7 +33,7 @@ FROM old.provider_secret_key THEN new.provider_secret_key = CASE
             ELSE pg_catalog.encode(
                 pgsodium.crypto_aead_det_encrypt(
                     pg_catalog.convert_to(new.provider_secret_key, 'utf8'),
-                    pg_catalog.convert_to((new.org_id::text)::text, 'utf8'),
+                    pg_catalog.convert_to(new.org_id::text, 'utf8'),
                     new.key_id::uuid,
                     new.nonce
                 ),
