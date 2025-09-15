@@ -66,6 +66,7 @@ function extractSystemMessage(messages: OpenAIRequestBody["messages"]): {
 }
 
 function mapModel(model: string): string {
+  // TODO: move model maps to AnthropicProvider
   if (model.includes('claude-3.5-haiku')) {
     return 'claude-3-5-haiku-20241022'; // version with most features
   } else if (model.includes('claude-3.5-sonnet')) {
