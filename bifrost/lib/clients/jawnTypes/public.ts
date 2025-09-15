@@ -16,6 +16,9 @@ export interface paths {
   "/v1/webhooks/{webhookId}": {
     delete: operations["DeleteWebhook"];
   };
+  "/v1/webhooks/{webhookId}/test": {
+    post: operations["TestWebhook"];
+  };
   "/v1/public/waitlist/feature": {
     post: operations["AddToWaitlist"];
   };
@@ -751,6 +754,15 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--message-string__": {
+      data: {
+        message: string;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
       data: {
         sharedPlatforms?: string[];
@@ -2874,7 +2886,7 @@ Json: JsonObject;
     /** @enum {string} */
     AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "passthrough";
     /** @enum {string} */
-    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
+    StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
     ModelPricing: {
       /** Format: double */
       threshold: number;
@@ -3886,6 +3898,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  TestWebhook: {
+    parameters: {
+      path: {
+        webhookId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
         };
       };
     };
