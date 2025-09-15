@@ -119,7 +119,9 @@ export const PaginationControls = ({
             <Input
               autoFocus
               value={pageDraft}
-              onChange={(e) => setPageDraft(e.target.value.replace(/[^0-9]/g, ""))}
+              onChange={(e) =>
+                setPageDraft(e.target.value.replace(/[^0-9]/g, ""))
+              }
               onBlur={commitPage}
               onKeyDown={(e) => {
                 if (e.key === "Enter") commitPage();
@@ -165,5 +167,3 @@ export const PaginationControls = ({
     </div>
   );
 };
-
-

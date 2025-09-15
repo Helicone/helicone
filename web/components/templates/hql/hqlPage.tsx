@@ -25,7 +25,6 @@ import {
   useSaveQueryMutation,
   createExecuteQueryMutation,
 } from "./constants";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { useTheme } from "next-themes";
