@@ -1,6 +1,6 @@
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 
-// NEVER give the user direct acces to the body
+// NEVER give the user direct access to the body
 export class RequestBodyBuffer {
   private cachedText: string | null = null;
 
