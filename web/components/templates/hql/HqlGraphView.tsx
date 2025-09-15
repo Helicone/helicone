@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -27,7 +27,6 @@ import {
   ChartSuggestion,
   HqlColumn,
 } from "./utils/chartUtils";
- 
 
 export type ChartType =
   | "line"
@@ -86,7 +85,6 @@ export function HqlGraphView({ data, loading }: HqlGraphViewProps) {
     [columns],
   );
   // Grid view: no selection, we render multiple suggestions at once
-  
 
   const numericColumns = columns.filter((c) => c.type === "numeric");
   const dateColumns = columns.filter((c) => c.type === "datetime");
@@ -121,18 +119,21 @@ export function HqlGraphView({ data, loading }: HqlGraphViewProps) {
     [suggestions],
   );
 
-  
-
   // Helper: split y-axis for multi-line suggestions
   function getYColumnsForSuggestion(s: ChartSuggestion): string[] {
     if (s.type === "multi-line") {
-      return s.yAxis.split(",").map((t) => t.trim()).filter(Boolean);
+      return s.yAxis
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
     }
     return [s.yAxis];
   }
 
   // Helper: produce aggregated data for a suggestion
-  function getProcessedDataForSuggestion(s: ChartSuggestion): Array<Record<string, any>> {
+  function getProcessedDataForSuggestion(
+    s: ChartSuggestion,
+  ): Array<Record<string, any>> {
     const yCols = getYColumnsForSuggestion(s);
     if (s.type === "multi-line") {
       // Aggregate each series then merge on x-axis key
@@ -148,7 +149,9 @@ export function HqlGraphView({ data, loading }: HqlGraphViewProps) {
           index[xVal][yCols[i]] = row[yCols[i]];
         }
       }
-      return Object.values(index).sort((a, b) => String(a[s.xAxis]).localeCompare(String(b[s.xAxis])));
+      return Object.values(index).sort((a, b) =>
+        String(a[s.xAxis]).localeCompare(String(b[s.xAxis])),
+      );
     }
     if (s.type === "pie" || s.type === "scatter" || s.type === "histogram") {
       // Use raw data; renderer computes its own shape
@@ -191,7 +194,10 @@ export function HqlGraphView({ data, loading }: HqlGraphViewProps) {
                 </Badge>
               </div>
               <div className="h-72 w-full overflow-hidden rounded-lg border border-border bg-card p-4">
-                <ChartContainer className="h-full w-full" config={containerConfig}>
+                <ChartContainer
+                  className="h-full w-full"
+                  config={containerConfig}
+                >
                   {renderEnhancedChart(cfg, processed, columns)}
                 </ChartContainer>
               </div>
@@ -223,7 +229,10 @@ function renderEnhancedChart(
   switch (config.type) {
     case "line":
       return (
-        <LineChart data={data} margin={{ top: 8, right: 16, bottom: 24, left: 16 }}>
+        <LineChart
+          data={data}
+          margin={{ top: 8, right: 16, bottom: 24, left: 16 }}
+        >
           <XAxis
             dataKey={config.xAxis}
             tick={{ fontSize: 12 }}
@@ -249,7 +258,10 @@ function renderEnhancedChart(
 
     case "multi-line":
       return (
-        <LineChart data={data} margin={{ top: 8, right: 16, bottom: 24, left: 16 }}>
+        <LineChart
+          data={data}
+          margin={{ top: 8, right: 16, bottom: 24, left: 16 }}
+        >
           <XAxis
             dataKey={config.xAxis}
             tick={{ fontSize: 12 }}
@@ -282,7 +294,10 @@ function renderEnhancedChart(
 
     case "area":
       return (
-        <AreaChart data={data} margin={{ top: 8, right: 16, bottom: 24, left: 16 }}>
+        <AreaChart
+          data={data}
+          margin={{ top: 8, right: 16, bottom: 24, left: 16 }}
+        >
           <XAxis
             dataKey={config.xAxis}
             tick={{ fontSize: 12 }}
@@ -308,7 +323,10 @@ function renderEnhancedChart(
 
     case "bar":
       return (
-        <BarChart data={data.slice(0, 20)} margin={{ top: 8, right: 16, bottom: 48, left: 16 }}>
+        <BarChart
+          data={data.slice(0, 20)}
+          margin={{ top: 8, right: 16, bottom: 48, left: 16 }}
+        >
           {" "}
           {/* Limit bars for readability */}
           <XAxis
@@ -357,7 +375,10 @@ function renderEnhancedChart(
 
     case "scatter":
       return (
-        <ScatterChart data={data} margin={{ top: 8, right: 16, bottom: 24, left: 16 }}>
+        <ScatterChart
+          data={data}
+          margin={{ top: 8, right: 16, bottom: 24, left: 16 }}
+        >
           <XAxis dataKey={config.xAxis} type="number" tick={{ fontSize: 12 }} />
           <YAxis dataKey={yColumns[0]} type="number" tick={{ fontSize: 12 }} />
           <Tooltip content={<ChartTooltipContent />} />
@@ -368,7 +389,10 @@ function renderEnhancedChart(
     case "histogram":
       const histogramData = createHistogramData(data, config.xAxis);
       return (
-        <BarChart data={histogramData} margin={{ top: 8, right: 16, bottom: 64, left: 16 }}>
+        <BarChart
+          data={histogramData}
+          margin={{ top: 8, right: 16, bottom: 64, left: 16 }}
+        >
           <XAxis
             dataKey="range"
             tick={{ fontSize: 12 }}
