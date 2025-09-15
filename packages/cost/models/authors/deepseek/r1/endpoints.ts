@@ -33,6 +33,8 @@ export const endpoints = {
       "seed",
       "stop",
       "temperature",
+      "tool_choice",
+      "tools",
       "top_k",
       "top_logprobs",
       "top_p"
