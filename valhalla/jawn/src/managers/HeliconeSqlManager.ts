@@ -15,7 +15,7 @@ import { AST, Parser } from "node-sql-parser";
 import { HqlStore } from "../lib/stores/HqlStore";
 import { z } from "zod";
 import { S3Client } from "../lib/shared/db/s3Client";
-import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
+import { DEFAULT_UUID } from "../../../../packages/llm-mapper/types";
 import { Traced, withActiveSpan } from "../lib/decorators/tracing";
 
 export const CLICKHOUSE_TABLES = ["request_response_rmt"];
@@ -87,10 +87,20 @@ function addLimit(ast: AST, limit: number): AST {
         ast.limit.value[0].value = Math.min(currentLimit, limit);
       }
     } else if (ast.limit.value.length === 2) {
-      // Double LIMIT: LIMIT offset, count
-      const currentCount = ast.limit.value[1]?.value;
-      if (typeof currentCount === "number") {
-        ast.limit.value[1].value = Math.min(currentCount, limit);
+      // Two-value LIMIT can be either:
+      // - Postgres style: LIMIT count OFFSET offset => seperator === 'offset', count at index 0
+      // - ClickHouse/MySQL style: LIMIT offset, count => seperator !== 'offset', count at index 1
+      const sep: any = (ast as any).limit?.seperator;
+      if (sep === "offset") {
+        const currentCount = ast.limit.value[0]?.value;
+        if (typeof currentCount === "number") {
+          ast.limit.value[0].value = Math.min(currentCount, limit);
+        }
+      } else {
+        const currentCount = ast.limit.value[1]?.value;
+        if (typeof currentCount === "number") {
+          ast.limit.value[1].value = Math.min(currentCount, limit);
+        }
       }
     }
   } else {
@@ -205,10 +215,13 @@ export class HeliconeSqlManager {
   )
   async executeSql(
     sql: string,
-    limit: number = 100
+    limit: number = 500,
+    includeCount: boolean = true
   ): Promise<Result<ExecuteSqlResponse, HqlError>> {
     withActiveSpan()?.setTag("sql.query", sql.substring(0, 200));
     try {
+      // Ensure limit doesn't exceed maximum allowed for interactive queries
+      const safeLimit = Math.min(limit, 500);
       // Parse SQL to validate and add limit
       let ast;
       try {
@@ -227,7 +240,7 @@ export class HeliconeSqlManager {
       // Add limit to prevent excessive data retrieval
       let limitedAst;
       try {
-        limitedAst = addLimit(normalizedAst, limit);
+        limitedAst = addLimit(normalizedAst, safeLimit);
       } catch (limitError) {
         withActiveSpan()?.setTag("error.type", "SYNTAX_ERROR");
         withActiveSpan()?.setTag("error.phase", "limit_application");
@@ -285,11 +298,42 @@ export class HeliconeSqlManager {
       withActiveSpan()?.setTag("enrichment.elapsed_ms", enrichmentTime);
       withActiveSpan()?.setTag("enrichment.s3_enriched", enrichmentTime > 10);
 
+      // Default total count to number of returned rows
+      let totalCount = enrichedRows.length;
+
+      // Optionally compute total count by running a COUNT(*) on the original SQL (without limit/offset)
+      if (includeCount && (normalizedAst as any)?.type === "select") {
+        try {
+          const countAst: any = { ...(normalizedAst as any) };
+          delete countAst.limit;
+          delete countAst.offset;
+
+          const unlimitedSql = parser.sqlify(countAst as AST, { database: "Postgresql" });
+          const countSql = `SELECT COUNT(*) as total FROM (${unlimitedSql}) as countQuery`;
+
+          const countResult = await clickhouseDb.hqlQueryWithContext<{ total: number }[]>({
+            query: countSql,
+            organizationId: this.authParams.organizationId,
+            parameters: [],
+          });
+
+          if (!isError(countResult) && countResult.data && countResult.data[0]) {
+            const computed = Number((countResult.data[0] as any).total);
+            if (!Number.isNaN(computed) && computed >= 0) {
+              totalCount = computed;
+            }
+          }
+        } catch (e) {
+          // If count query fails, we keep the fallback totalCount
+          console.error("Failed to get total count:", e);
+        }
+      }
+
       return ok({
         rows: enrichedRows,
         elapsedMilliseconds,
         size: responseSize,
-        rowCount: enrichedRows.length,
+        rowCount: totalCount,
       });
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : String(e);
