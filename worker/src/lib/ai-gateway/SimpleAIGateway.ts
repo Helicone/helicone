@@ -294,12 +294,7 @@ export class SimpleAIGateway {
   private determineResponseFormat(
     provider: ModelProviderName,
     modelId: string,
-    bodyMapping?: "OPENAI" | "NO_MAPPING"
   ): "ANTHROPIC" | "OPENAI" { // TODO: make enum type when there's more map formats
-    if (bodyMapping !== "OPENAI") {
-      return "OPENAI";
-    }
-
     if (
       provider === "anthropic" ||
       (provider === "bedrock" && modelId.includes("claude-"))
@@ -315,29 +310,29 @@ export class SimpleAIGateway {
     response: Response,
     bodyMapping?: "OPENAI" | "NO_MAPPING"
   ): Promise<Result<Response, string>> {
+    if (bodyMapping === "NO_MAPPING") {
+      return ok(response); // do not map response
+    }
+
     const mappingType = this.determineResponseFormat(
       attempt.endpoint.provider,
       attempt.endpoint.providerModelId,
-      bodyMapping
-    );
+    ); // finds format of the response that we are mapping to OPENAI
     
     if (mappingType === "OPENAI") {
-      return ok(response);
+      return ok(response); // already in OPENAI format
     }
 
-    // clone to preserve original for logging
-    const clonedResponse = response.clone();
-    
     try {
       if (mappingType === "ANTHROPIC") {
-        const contentType = clonedResponse.headers.get("content-type");
+        const contentType = response.headers.get("content-type");
         const isStream = contentType?.includes("text/event-stream");
 
         if (isStream) {
-          const mappedResponse = oai2antStreamResponse(clonedResponse);
+          const mappedResponse = oai2antStreamResponse(response);
           return ok(mappedResponse);
         } else {
-          const mappedResponse = await oai2antResponse(clonedResponse);
+          const mappedResponse = await oai2antResponse(response);
           return ok(mappedResponse);
         }
       }

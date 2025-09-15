@@ -29,9 +29,9 @@ export class AnthropicProvider extends BaseProvider {
   authenticate(context: AuthContext): AuthResult {
     const headers: Record<string, string> = {};
     headers["x-api-key"] = context.apiKey || "";
-    if (context.bodyMapping === "OPENAI") {
+    if (context.bodyMapping === "OPENAI" || !headers["anthropic-version"]) {
       headers["anthropic-version"] = "2023-06-01";
-    } // if NO_MAPPING, then we can assume the header is already added (e.g by anthropic SDK)
+    }
     return { headers };
   }
 

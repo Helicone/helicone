@@ -67,11 +67,11 @@ function extractSystemMessage(messages: OpenAIRequestBody["messages"]): {
 
 function mapModel(model: string): string {
   if (model.includes('claude-3.5-haiku')) {
-    return 'claude-3-5-haiku-20241022';
+    return 'claude-3-5-haiku-20241022'; // version with most features
   } else if (model.includes('claude-3.5-sonnet')) {
     return 'claude-3-5-sonnet-latest';
   } else if (model.includes('claude-3.7-sonnet')) {
-    return 'claude-3-7-sonnet-20250219';
+    return 'claude-3-7-sonnet-20250219'; // version with most features
   }
   return model;
 }
