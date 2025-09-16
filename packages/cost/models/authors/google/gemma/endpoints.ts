@@ -4,7 +4,7 @@ import { GemmaModelName } from "./model";
 
 export const endpoints = {
   "gemma2-9b-it:groq": {
-    providerModelId: "google/gemma-2-9b",
+    providerModelId: "gemma2-9b-it",
     provider: "groq",
     author: "google",
     pricing: [
@@ -13,7 +13,7 @@ export const endpoints = {
         input: 0.0000002,
         output: 0.0000002,
         image: 0.0,
-      }
+      },
     ],
     contextLength: 8192,
     maxCompletionTokens: 8192,
@@ -30,7 +30,7 @@ export const endpoints = {
       "temperature",
       "top_k",
       "top_logprobs",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
