@@ -2,6 +2,10 @@ import {
   buildRequestBody,
   authenticateRequest,
 } from "@helicone-package/cost/models/provider-helpers";
+import {
+  validateRequestParameters,
+  formatValidationErrors,
+} from "@helicone-package/cost/models/parameter-validator";
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
 import { isErr, Result, ok, err } from "../util/results";
@@ -86,6 +90,40 @@ export class AttemptExecutor {
     escrowInfo: EscrowInfo | undefined
   ): Promise<Result<Response, AttemptError>> {
     try {
+      const validationResult = validateRequestParameters(parsedBody, endpoint);
+
+      if (isErr(validationResult)) {
+        return err({
+          type: "request_failed",
+          message: validationResult.error || "Parameter validation failed",
+          statusCode: 400,
+        });
+      }
+
+      const validation = validationResult.data;
+
+      if (validation.unsupported.length > 0) {
+        const errorMessage = formatValidationErrors(validation, endpoint);
+        console.error(
+          `[${endpoint.provider}/${endpoint.providerModelId}] Rejecting attempt due to unsupported parameters:\n${errorMessage}`
+        );
+
+        return err({
+          type: "unsupported_parameters",
+          message: `Parameters not supported: ${validation.unsupported.join(", ")}`,
+          statusCode: 400,
+          details: errorMessage,
+        });
+      }
+
+      // Log any warnings (like legacy parameter usage) but continue
+      if (validation.warnings.length > 0) {
+        console.warn(
+          `[${endpoint.provider}/${endpoint.providerModelId}] Parameter validation warnings:`,
+          validation.warnings
+        );
+      }
+
       // Build request body using provider helpers
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,

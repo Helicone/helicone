@@ -35,7 +35,8 @@ export type AttemptError = {
     | "missing_provider_key"
     | "request_failed"
     | "invalid_prompt"
-    | "model_not_supported";
+    | "model_not_supported"
+    | "unsupported_parameters";
   message: string;
   statusCode: number;
   details?: string;
