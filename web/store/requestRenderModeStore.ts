@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 
 export const MODE_LABELS = {
   rendered: "Rendered",
@@ -24,17 +24,23 @@ type RequestRenderModeState = {
 };
 
 export const useRequestRenderModeStore = create<RequestRenderModeState>()(
-  persist(
-    (set) => ({
-      mode: "rendered",
-      setMode: (mode) => set({ mode }),
-      toggleMode: (isShiftPressed) =>
-        set((state) => ({
-          mode: isShiftPressed ? "debug" : cycleMode(state.mode),
-        })),
-    }),
+  devtools(
+    persist(
+      (set) => ({
+        mode: "rendered",
+        setMode: (mode) => set({ mode }),
+        toggleMode: (isShiftPressed) =>
+          set((state) => ({
+            mode: isShiftPressed ? "debug" : cycleMode(state.mode),
+          })),
+      }),
+      {
+        name: "helicone-request-render-mode",
+      },
+    ),
     {
-      name: "helicone-request-render-mode",
+      name: "request-render-mode-store",
+      enabled: process.env.NODE_ENV !== "production",
     },
   ),
 );
