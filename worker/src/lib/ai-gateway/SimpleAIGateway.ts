@@ -365,12 +365,15 @@ export class SimpleAIGateway {
     // 1. If ANY error is 429 (insufficient credits), return 429
     // 2. If ANY error is 401 (authentication), return 401
     // 3. If ALL errors are disallowed (400), return 400
-    // 4. Otherwise return 500
+    // 4. If ALL errors are unsupported_parameters (400), return 400 with details
+    // 5. Otherwise return 500
 
     const has429 = errors.some((e) => e.statusCode === 429);
     const has401 = errors.some((e) => e.statusCode === 401);
     const allDisallowed =
       errors.length > 0 && errors.every((e) => e.type === "disallowed");
+    const allUnsupportedParams =
+      errors.length > 0 && errors.every((e) => e.type === "unsupported_parameters");
 
     if (has429) {
       statusCode = 429;
@@ -385,6 +388,10 @@ export class SimpleAIGateway {
       message =
         "Cloud billing is disabled for all requested models. Please contact support@helicone.ai for help";
       code = "request_failed";
+    } else if (allUnsupportedParams) {
+      statusCode = 400;
+      message = "Request contains parameters not supported by any of the requested models/providers";
+      code = "unsupported_parameters";
     }
 
     const errorResponse = await errorForwarder(
