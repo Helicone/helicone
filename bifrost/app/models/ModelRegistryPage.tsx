@@ -239,11 +239,6 @@ export function ModelRegistryPage() {
                             }
                             setSelectedProviders(newSet);
                           }}
-                          className={
-                            isSelected
-                              ? "bg-sky-50 dark:bg-sky-900/10 text-sky-700 dark:text-sky-400"
-                              : ""
-                          }
                         />
                       );
                     })}
