@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
@@ -862,7 +862,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -885,7 +885,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -908,7 +908,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -931,7 +931,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -954,7 +954,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -977,7 +977,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1002,7 +1002,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1025,7 +1025,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1048,7 +1048,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1071,7 +1071,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1094,7 +1094,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1108,7 +1108,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "modelId": "gpt-5-chat-latest",
       "parameters": [
         "frequency_penalty",
-        "max_tokens",
+        "max_completion_tokens",
         "presence_penalty",
         "response_format",
         "seed",
@@ -1120,7 +1120,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "verbosity",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1132,7 +1132,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "modelId": "gpt-5-mini",
       "parameters": [
         "frequency_penalty",
-        "max_tokens",
+        "max_completion_tokens",
         "presence_penalty",
         "response_format",
         "seed",
@@ -1144,7 +1144,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "verbosity",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1156,7 +1156,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "modelId": "gpt-5-nano",
       "parameters": [
         "frequency_penalty",
-        "max_tokens",
+        "max_completion_tokens",
         "presence_penalty",
         "response_format",
         "seed",
@@ -1180,7 +1180,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "modelId": "gpt-5",
       "parameters": [
         "frequency_penalty",
-        "max_tokens",
+        "max_completion_tokens",
         "presence_penalty",
         "response_format",
         "seed",
@@ -1192,7 +1192,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "verbosity",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1205,14 +1205,14 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 100000,
       "modelId": "o3-mini",
       "parameters": [
-        "max_tokens",
+        "max_completion_tokens",
         "response_format",
         "seed",
         "tool_choice",
         "tools",
       ],
       "provider": "azure",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1223,14 +1223,14 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 100000,
       "modelId": "o3-mini",
       "parameters": [
-        "max_tokens",
+        "max_completion_tokens",
         "response_format",
         "seed",
         "tool_choice",
         "tools",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1241,14 +1241,14 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 100000,
       "modelId": "o3-pro-2025-06-10",
       "parameters": [
-        "max_tokens",
+        "max_completion_tokens",
         "response_format",
         "seed",
         "tool_choice",
         "tools",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1259,14 +1259,14 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 100000,
       "modelId": "o3-2025-04-16",
       "parameters": [
-        "max_tokens",
+        "max_completion_tokens",
         "response_format",
         "seed",
         "tool_choice",
         "tools",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1279,14 +1279,14 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 100000,
       "modelId": "o4-mini",
       "parameters": [
-        "max_tokens",
+        "max_completion_tokens",
         "response_format",
         "seed",
         "tool_choice",
         "tools",
       ],
       "provider": "azure",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1297,14 +1297,14 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 100000,
       "modelId": "o4-mini",
       "parameters": [
-        "max_tokens",
+        "max_completion_tokens",
         "response_format",
         "seed",
         "tool_choice",
         "tools",
       ],
       "provider": "openai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1321,7 +1321,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "include_reasoning",
         "logit_bias",
         "logprobs",
-        "max_tokens",
+        "max_completion_tokens",
         "min_p",
         "presence_penalty",
         "reasoning",
@@ -1338,7 +1338,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "groq",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1353,7 +1353,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "include_reasoning",
         "logit_bias",
         "logprobs",
-        "max_tokens",
+        "max_completion_tokens",
         "min_p",
         "presence_penalty",
         "reasoning",
@@ -1370,7 +1370,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "groq",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -2430,9 +2430,20 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     },
   ],
   "ptbEnabledModels": [
+    "chatgpt-4o-latest",
     "deepseek-r1-distill-llama-70b",
     "gemma2-9b-it",
+    "gpt-4.1",
+    "gpt-4.1-mini",
+    "gpt-4.1-nano",
+    "gpt-4o",
+    "gpt-4o-mini",
+    "gpt-5",
+    "gpt-5-chat-latest",
+    "gpt-5-mini",
     "gpt-5-nano",
+    "gpt-oss-120b",
+    "gpt-oss-20b",
     "kimi-k2",
     "kimi-k2-0905",
     "llama-3.1-8b-instant",
@@ -2442,6 +2453,10 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "llama-guard-4",
     "llama-prompt-guard-2-22m",
     "llama-prompt-guard-2-86m",
+    "o3",
+    "o3-mini",
+    "o3-pro",
+    "o4-mini",
     "qwen3-32b",
   ],
   "sampleEndpointIds": [
@@ -2453,7 +2468,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
   ],
   "totalEndpoints": 63,
   "totalModelProviderConfigs": 63,
-  "totalModelsWithPtb": 13,
+  "totalModelsWithPtb": 28,
   "totalProviders": 8,
 }
 `;
