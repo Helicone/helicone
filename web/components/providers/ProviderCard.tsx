@@ -572,7 +572,9 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
               <div
                 className={cn(
                   "absolute right-1 flex -translate-y-1/2 items-center gap-1",
-                  provider.id === "bedrock" ? "top-[calc(50%+12px)]" : "top-1/2",
+                  provider.id === "bedrock"
+                    ? "top-[calc(50%+12px)]"
+                    : "top-1/2",
                 )}
               >
                 {/* Copy button - always visible for existing keys, disabled when no value */}
