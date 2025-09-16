@@ -77,8 +77,8 @@ describe("Pass-Through Tests", () => {
                 errorMessage: "Bedrock failed",
               },
               {
-                // Second attempt: Anthropic succeeds (NO_MAPPING not specified here, so uses /v1/chat/completions)
-                url: "https://api.anthropic.com/v1/chat/completions",
+                // Second attempt: Anthropic succeeds
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-7-sonnet-20250219",
                 data: {
@@ -376,7 +376,7 @@ describe("Pass-Through Tests", () => {
               },
               {
                 // Third attempt: Anthropic succeeds
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-7-sonnet-20250219",
                 data: {
