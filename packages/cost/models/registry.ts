@@ -27,6 +27,7 @@ import { metaModels, metaEndpointConfig } from "./authors/meta";
 import { moonshotaiModels, moonshotaiEndpointConfig } from "./authors/moonshotai";
 import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
+import { qwenModels, qwenEndpointConfig } from "./authors/qwen";
 
 // Combine all models
 const allModels = {
@@ -38,6 +39,7 @@ const allModels = {
   ...moonshotaiModels,
   ...alibabaModels,
   ...deepseekModels,
+  ...qwenModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -50,6 +52,7 @@ const modelProviderConfigs = {
   ...moonshotaiEndpointConfig,
   ...alibabaEndpointConfig,
   ...deepseekEndpointConfig,
+  ...qwenEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);

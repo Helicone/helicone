@@ -10,10 +10,12 @@ import { anthropicEndpointConfig } from "./authors/anthropic";
 import { openaiEndpointConfig } from "./authors/openai";
 import { googleEndpointConfig } from "./authors/google";
 import { grokEndpointConfig } from "./authors/xai";
+import { qwenEndpointConfig } from "./authors/qwen";
 import { anthropicModels } from "./authors/anthropic";
 import { openaiModels } from "./authors/openai";
 import { googleModels } from "./authors/google";
 import { grokModels } from "./authors/xai";
+import { qwenModels } from "./authors/qwen";
 
 // Combine all models for type derivation
 const allModels = {
@@ -21,6 +23,7 @@ const allModels = {
   ...openaiModels,
   ...googleModels,
   ...grokModels,
+  ...qwenModels
 };
 
 export type ModelName = keyof typeof allModels;
@@ -31,6 +34,7 @@ const modelProviderConfigs = {
   ...openaiEndpointConfig,
   ...googleEndpointConfig,
   ...grokEndpointConfig,
+  ...qwenEndpointConfig
 };
 
 export type ModelProviderConfigId = keyof typeof modelProviderConfigs;
