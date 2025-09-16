@@ -18,14 +18,21 @@ import {
   Check,
   X,
   Filter,
+  Info,
 } from "lucide-react";
 import { useModelFiltering } from "@/hooks/useModelFiltering";
-import { Model, SortOption, BillingMethod } from "@/lib/filters/modelFilters";
+import { Model, SortOption } from "@/lib/filters/modelFilters";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { FilterSection } from "@/components/ui/filters/FilterSection";
 import { FilterOption } from "@/components/ui/filters/FilterOption";
-import { RadioOption } from "@/components/ui/filters/RadioOption";
 import { SliderFilter } from "@/components/ui/filters/SliderFilter";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type ModelRegistryResponse = components["schemas"]["ModelRegistryResponse"];
 
@@ -58,8 +65,8 @@ export function ModelRegistryPage() {
   const [selectedCapabilities, setSelectedCapabilities] = useState<Set<string>>(
     new Set(searchParams.get("capabilities")?.split(",").filter(Boolean) || [])
   );
-  const [billingMethod, setBillingMethod] = useState<BillingMethod>(
-    (searchParams.get("billing") as BillingMethod) || "all"
+  const [showPtbOnly, setShowPtbOnly] = useState<boolean>(
+    searchParams.get("ptb") === "true"
   );
   const [sortBy, setSortBy] = useState<SortOption>(
     (searchParams.get("sort") as SortOption) || "newest"
@@ -74,13 +81,13 @@ export function ModelRegistryPage() {
       priceRange,
       minContextSize,
       selectedCapabilities,
-      billingMethod,
+      showPtbOnly,
       sortBy,
     });
 
   // Collapsible filter sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(["providers", "price", "context", "billing", "capabilities"])
+    new Set(["providers", "price", "context", "capabilities"])
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -135,7 +142,7 @@ export function ModelRegistryPage() {
         Array.from(selectedCapabilities).sort().join(",")
       );
     }
-    if (billingMethod !== "all") params.set("billing", billingMethod);
+    if (showPtbOnly) params.set("ptb", "true");
     if (sortBy !== "newest") params.set("sort", sortBy);
 
     const newUrl = params.toString()
@@ -149,7 +156,7 @@ export function ModelRegistryPage() {
     priceRange,
     minContextSize,
     selectedCapabilities,
-    billingMethod,
+    showPtbOnly,
     sortBy,
     router,
   ]);
@@ -232,11 +239,6 @@ export function ModelRegistryPage() {
                             }
                             setSelectedProviders(newSet);
                           }}
-                          className={
-                            isSelected
-                              ? "bg-sky-50 dark:bg-sky-900/10 text-sky-700 dark:text-sky-400"
-                              : ""
-                          }
                         />
                       );
                     })}
@@ -282,29 +284,6 @@ export function ModelRegistryPage() {
                         : `${size} tokens`;
                     }}
                   />
-                </FilterSection>
-
-                {/* Billing Method Filter */}
-                <FilterSection
-                  title="Billing Method"
-                  expanded={expandedSections.has("billing")}
-                  onToggle={() => toggleSection("billing")}
-                >
-                  <div className="space-y-1">
-                    {[
-                      { value: "all", label: "All Models" },
-                      { value: "ptb", label: "Pass-Through Billing" },
-                      { value: "byok", label: "Bring Your Own Key" },
-                    ].map((option) => (
-                      <RadioOption
-                        key={option.value}
-                        label={option.label}
-                        value={option.value}
-                        selected={billingMethod === option.value}
-                        onSelect={(value) => setBillingMethod(value as BillingMethod)}
-                      />
-                    ))}
-                  </div>
                 </FilterSection>
 
                 {/* Capabilities Filter */}
@@ -372,7 +351,7 @@ export function ModelRegistryPage() {
                         setPriceRange([0, 50]);
                         setMinContextSize(0);
                         setSelectedCapabilities(new Set());
-                        setBillingMethod("all");
+                        setShowPtbOnly(false);
                         setSearchQuery("");
                       }}
                       className={`px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all flex items-center gap-2 ${
@@ -407,6 +386,31 @@ export function ModelRegistryPage() {
                       <Filter className="h-4 w-4" />
                       <span>Filters</span>
                     </button>
+
+                    {/* PTB Toggle */}
+                    <TooltipProvider>
+                      <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900">
+                        <div className="flex items-center gap-1.5">
+                          <label htmlFor="ptb-toggle" className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                            Credits
+                          </label>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-3.5 w-3.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>Only show models that can be used with Helicone Credits. Add credits to your account to access these models without needing individual provider API keys.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Switch
+                          id="ptb-toggle"
+                          checked={showPtbOnly}
+                          onCheckedChange={setShowPtbOnly}
+                          className="data-[state=checked]:bg-blue-600"
+                        />
+                      </div>
+                    </TooltipProvider>
 
                     {/* Sort dropdown */}
                     <Select

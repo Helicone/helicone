@@ -16,7 +16,6 @@ export type ModelCapability =
   | "caching"
   | "reasoning";
 
-export type BillingMethod = "all" | "ptb" | "byok";
 
 export type SortOption = 
   | "name" 
@@ -66,7 +65,7 @@ export interface FilterOptions {
   inputModalities?: Set<InputModality>;
   outputModalities?: Set<OutputModality>;
   parameters?: Set<StandardParameter>;
-  billingMethod?: BillingMethod;
+  showPtbOnly?: boolean;
 }
 
 // Search filter
@@ -185,23 +184,14 @@ export const filterByCapabilities = (models: Model[], capabilities: Set<string>)
   });
 };
 
-// Billing method filter
-export const filterByBillingMethod = (models: Model[], billingMethod: BillingMethod): Model[] => {
-  switch (billingMethod) {
-    case "ptb":
-      // Only models with at least one PTB-enabled endpoint
-      return models.filter(model =>
-        model.endpoints.some(ep => ep.supportsPtb)
-      );
-    case "byok":
-      // All models support BYOK, but filter out PTB-only for clarity
-      return models.filter(model =>
-        !model.endpoints.every(ep => ep.supportsPtb)
-      );
-    case "all":
-    default:
-      return models;
-  }
+// PTB filter
+export const filterByPtb = (models: Model[], showPtbOnly: boolean): Model[] => {
+  if (!showPtbOnly) return models;
+
+  // Only models with at least one PTB-enabled endpoint
+  return models.filter(model =>
+    model.endpoints.some(ep => ep.supportsPtb)
+  );
 };
 
 // Sort models
@@ -280,8 +270,8 @@ export const applyFilters = (models: Model[], options: FilterOptions): Model[] =
     filtered = filterByCapabilities(filtered, options.capabilities);
   }
 
-  if (options.billingMethod && options.billingMethod !== "all") {
-    filtered = filterByBillingMethod(filtered, options.billingMethod);
+  if (options.showPtbOnly) {
+    filtered = filterByPtb(filtered, options.showPtbOnly);
   }
 
   return filtered;
