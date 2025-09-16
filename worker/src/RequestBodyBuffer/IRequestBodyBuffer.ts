@@ -1,0 +1,11 @@
+export interface IRequestBodyBuffer {
+  signAWSRequest(props: {
+    region: string;
+    forwardToHost: string;
+    requestHeaders: Record<string, string>;
+    method: string;
+    urlString: string;
+  }): Promise<{ newHeaders: Headers; model: string }>;
+
+  unsafeGetRawText(): Promise<string>;
+}

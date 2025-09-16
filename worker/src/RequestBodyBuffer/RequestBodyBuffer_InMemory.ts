@@ -2,9 +2,9 @@ import { SignatureV4 } from "@smithy/signature-v4";
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
-
+import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 // NEVER give the user direct acces to the body
-export class RequestBodyBuffer {
+export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   private cachedText: string | null = null;
 
   constructor(

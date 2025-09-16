@@ -20,7 +20,8 @@ import { SignatureV4 } from "@smithy/signature-v4";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
-import { RequestBodyBuffer } from "../RequestBodyBuffer/RequestBodyWrapper";
+import { RequestBodyBuffer_InMemory } from "../RequestBodyBuffer/RequestBodyBuffer_InMemory";
+import { IRequestBodyBuffer } from "../RequestBodyBuffer/IRequestBodyBuffer";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -64,7 +65,7 @@ export class RequestWrapper {
   prompt2025Settings: Prompt2025Settings; // I'm sorry. Will clean whenever we can remove old promtps.
   extraHeaders: Headers | null = null;
   requestReferrer: string | undefined;
-  requestBodyWrapper: RequestBodyBuffer;
+  requestBodyBuffer: IRequestBodyBuffer;
 
   private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
@@ -175,7 +176,7 @@ export class RequestWrapper {
     }
     this.baseURLOverride = null;
     this.cf = request.cf;
-    this.requestBodyWrapper = new RequestBodyBuffer(
+    this.requestBodyBuffer = new RequestBodyBuffer_InMemory(
       request,
       this.dataDogClient
     );
@@ -306,7 +307,7 @@ export class RequestWrapper {
 
   // TODO deprecate this function
   async getRawText(): Promise<string> {
-    return this.requestBodyWrapper.unsafeGetRawText();
+    return this.requestBodyBuffer.unsafeGetRawText();
   }
 
   getDataDogClient(): DataDogClient | undefined {
@@ -404,7 +405,7 @@ export class RequestWrapper {
     region: string;
     forwardToHost: string;
   }) {
-    const { newHeaders, model } = await this.requestBodyWrapper.signAWSRequest({
+    const { newHeaders, model } = await this.requestBodyBuffer.signAWSRequest({
       region,
       forwardToHost,
       requestHeaders: Object.fromEntries(this.headers.entries()),
