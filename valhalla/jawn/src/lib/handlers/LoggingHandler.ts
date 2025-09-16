@@ -21,12 +21,14 @@ import {
   HandlerContext,
   PromptRecord,
   toHeliconeRequest,
+  getPromptTokens,
+  getCompletionTokens,
+  getPromptCacheWriteTokens,
+  getPromptCacheReadTokens,
+  getPromptAudioTokens,
 } from "./HandlerContext";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
-import {
-  COST_PRECISION_MULTIPLIER,
-  modelCost,
-} from "@helicone-package/cost/costCalc";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { atLeastZero } from "../utils/helicone_math";
 
 type S3Record = {
@@ -515,7 +517,26 @@ export class LoggingHandler extends AbstractLogHandler {
   mapRequestResponseVersionedCH(context: HandlerContext): RequestResponseRMT {
     const request = context.message.log.request;
     const response = context.message.log.response;
-    const usage = context.usage;
+    const legacyUsage = context.legacyUsage;
+    const modelUsage = context.usage;
+    const promptTokens = atLeastZero(
+      getPromptTokens(modelUsage, legacyUsage) ?? 0
+    );
+    const completionTokens = atLeastZero(
+      getCompletionTokens(modelUsage, legacyUsage) ?? 0
+    );
+    const promptCacheWriteTokens = atLeastZero(
+      getPromptCacheWriteTokens(modelUsage, legacyUsage) ?? 0
+    );
+    const promptCacheReadTokens = atLeastZero(
+      getPromptCacheReadTokens(modelUsage, legacyUsage) ?? 0
+    );
+    const promptAudioTokens = atLeastZero(
+      getPromptAudioTokens(modelUsage, legacyUsage) ?? 0
+    );
+    const completionAudioTokens = atLeastZero(
+      legacyUsage.completionAudioTokens ?? 0
+    );
     const orgParams = context.orgParams;
     const { requestText, responseText } =
       this.requestResponseTextFromContext(context);
@@ -524,25 +545,16 @@ export class LoggingHandler extends AbstractLogHandler {
       context.message.log.request.cacheReferenceId &&
       context.message.log.request.cacheReferenceId != DEFAULT_UUID;
 
-    let cost = atLeastZero(
-      response.cost
-        ? response.cost * COST_PRECISION_MULTIPLIER
-        : isCacheHit
-          ? 0
-          : modelCost({
-              provider: request.provider ?? "",
-              model: context.processedLog.model ?? "",
-              sum_prompt_tokens: usage.promptTokens ?? 0,
-              sum_completion_tokens: usage.completionTokens ?? 0,
-              prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
-              prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
-              prompt_audio_tokens: usage.promptAudioTokens ?? 0,
-              completion_audio_tokens: usage.completionAudioTokens ?? 0,
-              prompt_cache_write_5m: usage.promptCacheWrite5m ?? 0,
-              prompt_cache_write_1h: usage.promptCacheWrite1h ?? 0,
-              multiple: COST_PRECISION_MULTIPLIER,
-            })
-    );
+    let rawCost;
+    // For requests on the new AI Gateway, both PTB and BYOK, we want to
+    // set cost to zero if we cannot calculate it from the new usage processor+registry
+    // rather than falling back to legacy usage cost
+    if (context.message.heliconeMeta.providerModelId) {
+      rawCost = atLeastZero(context.costBreakdown?.totalCost ?? 0);
+    } else {
+      rawCost = atLeastZero(context.legacyUsage.cost ?? 0);
+    }
+    const cost = Math.round(rawCost * COST_PRECISION_MULTIPLIER);
 
     const requestResponseLog: RequestResponseRMT = {
       user_id:
@@ -552,21 +564,17 @@ export class LoggingHandler extends AbstractLogHandler {
       request_id: request.id,
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
-      completion_tokens: atLeastZero(
-        isCacheHit ? 0 : (usage.completionTokens ?? 0)
-      ),
-      prompt_tokens: atLeastZero(isCacheHit ? 0 : (usage.promptTokens ?? 0)),
+      completion_tokens: atLeastZero(isCacheHit ? 0 : completionTokens),
+      prompt_tokens: atLeastZero(isCacheHit ? 0 : promptTokens),
       prompt_cache_write_tokens: atLeastZero(
-        isCacheHit ? 0 : (usage.promptCacheWriteTokens ?? 0)
+        isCacheHit ? 0 : promptCacheWriteTokens
       ),
       prompt_cache_read_tokens: atLeastZero(
-        isCacheHit ? 0 : (usage.promptCacheReadTokens ?? 0)
+        isCacheHit ? 0 : promptCacheReadTokens
       ),
-      prompt_audio_tokens: atLeastZero(
-        isCacheHit ? 0 : (usage.promptAudioTokens ?? 0)
-      ),
+      prompt_audio_tokens: atLeastZero(isCacheHit ? 0 : promptAudioTokens),
       completion_audio_tokens: atLeastZero(
-        isCacheHit ? 0 : (usage.completionAudioTokens ?? 0)
+        isCacheHit ? 0 : completionAudioTokens
       ),
       cost: cost,
       request_created_at: formatTimeString(
@@ -615,7 +623,26 @@ export class LoggingHandler extends AbstractLogHandler {
 
     const request = context.message.log.request;
     const response = context.message.log.response;
-    const usage = context.usage;
+    const legacyUsage = context.legacyUsage;
+    const modelUsage = context.usage;
+    const promptTokens = atLeastZero(
+      getPromptTokens(modelUsage, legacyUsage) ?? 0
+    );
+    const completionTokens = atLeastZero(
+      getCompletionTokens(modelUsage, legacyUsage) ?? 0
+    );
+    const promptCacheWriteTokens = atLeastZero(
+      getPromptCacheWriteTokens(modelUsage, legacyUsage) ?? 0
+    );
+    const promptCacheReadTokens = atLeastZero(
+      getPromptCacheReadTokens(modelUsage, legacyUsage) ?? 0
+    );
+    const promptAudioTokens = atLeastZero(
+      getPromptAudioTokens(modelUsage, legacyUsage) ?? 0
+    );
+    const completionAudioTokens = atLeastZero(
+      legacyUsage.completionAudioTokens ?? 0
+    );
     const orgParams = context.orgParams;
 
     const cacheMetricLog: CacheMetricSMT = {
@@ -627,18 +654,12 @@ export class LoggingHandler extends AbstractLogHandler {
       provider: request.provider ?? "",
       cache_hit_count: 1,
       saved_latency_ms: context.message.log.response.cachedLatency ?? 0,
-      saved_completion_tokens: atLeastZero(usage.completionTokens ?? 0),
-      saved_prompt_tokens: atLeastZero(usage.promptTokens ?? 0),
-      saved_prompt_cache_write_tokens: atLeastZero(
-        usage.promptCacheWriteTokens ?? 0
-      ),
-      saved_prompt_cache_read_tokens: atLeastZero(
-        usage.promptCacheReadTokens ?? 0
-      ),
-      saved_prompt_audio_tokens: atLeastZero(usage.promptAudioTokens ?? 0),
-      saved_completion_audio_tokens: atLeastZero(
-        usage.completionAudioTokens ?? 0
-      ),
+      saved_completion_tokens: atLeastZero(completionTokens),
+      saved_prompt_tokens: atLeastZero(promptTokens),
+      saved_prompt_cache_write_tokens: atLeastZero(promptCacheWriteTokens),
+      saved_prompt_cache_read_tokens: atLeastZero(promptCacheReadTokens),
+      saved_prompt_audio_tokens: atLeastZero(promptAudioTokens),
+      saved_completion_audio_tokens: atLeastZero(completionAudioTokens),
       last_hit: formatTimeString(response.responseCreatedAt.toISOString()),
       first_hit: formatTimeString(response.responseCreatedAt.toISOString()),
       request_body: requestText,
@@ -742,16 +763,25 @@ export class LoggingHandler extends AbstractLogHandler {
     // Sanitize delay_ms to prevent PostgreSQL integer overflow
     const sanitizedDelayMs = this.sanitizeDelayMs(response.delayMs);
 
+    const promptCacheWriteTokens = getPromptCacheWriteTokens(
+      context.usage,
+      context.legacyUsage
+    );
+    const promptCacheReadTokens = getPromptCacheReadTokens(
+      context.usage,
+      context.legacyUsage
+    );
     const responseInsert: Database["public"]["Tables"]["response"]["Insert"] = {
       id: response.id,
       request: context.message.log.request.id,
       helicone_org_id: orgParams?.id ?? null,
       status: response.status,
       model: processedResponse.model,
-      completion_tokens: context.usage.completionTokens,
-      prompt_tokens: context.usage.promptTokens,
-      prompt_cache_write_tokens: context.usage.promptCacheWriteTokens,
-      prompt_cache_read_tokens: context.usage.promptCacheReadTokens,
+      completion_tokens:
+        context.usage?.output ?? context.legacyUsage.completionTokens,
+      prompt_tokens: context.usage?.input ?? context.legacyUsage.promptTokens,
+      prompt_cache_write_tokens: promptCacheWriteTokens,
+      prompt_cache_read_tokens: promptCacheReadTokens,
       time_to_first_token: response.timeToFirstToken,
       delay_ms: sanitizedDelayMs,
       created_at: response.responseCreatedAt.toISOString(),
@@ -791,40 +821,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
     return requestInsert;
   }
-
-  private ensureMaxVectorLength = (text: string): string => {
-    const maxBytes = 512000; // ~500k less than 1MB for buffer
-    text = text.replace(/[^\x00-\x7F]/g, "");
-    text = text.trim();
-
-    let buffer = Buffer.from(text, "utf-8");
-
-    if (buffer.length <= maxBytes) {
-      return text;
-    }
-
-    let truncatedBuffer = Buffer.alloc(maxBytes);
-    buffer.copy(truncatedBuffer, 0, 0, maxBytes);
-
-    let endIndex = maxBytes;
-    while (endIndex > 0 && truncatedBuffer[endIndex - 1] >> 6 === 2) {
-      endIndex--;
-    }
-
-    const truncatedText = truncatedBuffer.toString("utf-8", 0, endIndex);
-
-    return truncatedText;
-  };
-
   cleanBody(body: string): string {
     return body.replace(/\u0000/g, "");
   }
-
-  private vectorizeModel = (model: string): boolean => {
-    if (!model) {
-      return false;
-    }
-    const nonVectorizedModels: Set<string> = new Set(["dall-e-2", "dall-e-3"]);
-    return !nonVectorizedModels.has(model);
-  };
 }

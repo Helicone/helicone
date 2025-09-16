@@ -50,7 +50,6 @@ export class AttemptExecutor {
       escrowInfo = {
         escrowId: escrowResult.data.escrowId,
         endpoint: endpoint,
-        model: endpoint.providerModelId,
       };
     }
 

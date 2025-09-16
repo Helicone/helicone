@@ -121,6 +121,8 @@ export class SimpleAIGateway {
         });
         continue;
       }
+      // Set gateway attempt to request wrapper
+      this.requestWrapper.setGatewayAttempt(attempt);
 
       const result = await this.attemptExecutor.execute(
         attempt,
@@ -139,9 +141,6 @@ export class SimpleAIGateway {
         });
         // Continue to next attempt
       } else {
-        // Success!
-        this.requestWrapper.setSuccessfulAttempt(attempt);
-        
         const mappedResponse = await this.mapResponse(
           attempt,
           result.data,

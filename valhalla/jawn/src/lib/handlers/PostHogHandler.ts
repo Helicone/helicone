@@ -27,23 +27,6 @@ export class PostHogHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    const usage = context.usage;
-
-    const cost = modelCost({
-      model: context.processedLog.model ?? "",
-      provider: context.message.log.request.provider ?? "",
-      sum_prompt_tokens: usage.promptTokens ?? 0,
-      prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
-      prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
-      prompt_audio_tokens: usage.promptAudioTokens ?? 0,
-      sum_completion_tokens: usage.completionTokens ?? 0,
-      completion_audio_tokens: usage.completionAudioTokens ?? 0,
-      prompt_cache_write_5m: usage.promptCacheWrite5m ?? 0,
-      prompt_cache_write_1h: usage.promptCacheWrite1h ?? 0,
-    });
-
-    context.usage.cost = cost;
-
     const posthogProperties = this.mapPostHogLog(context);
 
     this.posthogEvents.push({
@@ -62,9 +45,10 @@ export class PostHogHandler extends AbstractLogHandler {
         const posthogClient = new PosthogUserClient(event.apiKey, event.host);
 
         // Use Helicone-User-Id as distinct_id if available, else fallback to random UUID
-        const distinctId = event.properties.userId && event.properties.userId.trim() !== ""
-          ? event.properties.userId
-          : crypto.randomUUID();
+        const distinctId =
+          event.properties.userId && event.properties.userId.trim() !== ""
+            ? event.properties.userId
+            : crypto.randomUUID();
 
         posthogClient.captureEvent(
           "helicone_request_response",
@@ -90,7 +74,13 @@ export class PostHogHandler extends AbstractLogHandler {
     const response = context.message.log.response;
     const model = context.processedLog.model;
     const reqBody = context.processedLog.request.body;
-    const usage = context.usage;
+    const legacyUsage = context.legacyUsage;
+    const modelUsage = context.usage;
+
+    const promptTokens = modelUsage?.input ?? legacyUsage.promptTokens ?? 0;
+    const completionTokens =
+      modelUsage?.output ?? legacyUsage.completionTokens ?? 0;
+    const totalTokens = promptTokens + completionTokens;
 
     const posthogLog: HeliconeRequestResponseToPosthog = {
       model: model ?? "",
@@ -98,12 +88,12 @@ export class PostHogHandler extends AbstractLogHandler {
       n: reqBody.n ?? 0,
       promptId: request.promptId ?? "",
       timeToFirstToken: response.timeToFirstToken ?? 0,
-      cost: usage.cost ?? 0,
+      cost: context.costBreakdown?.totalCost ?? legacyUsage.cost ?? 0,
       provider: request.provider ?? "",
       path: request.path ?? "",
-      completetionTokens: usage.completionTokens ?? 0,
-      promptTokens: usage.promptTokens ?? 0,
-      totalTokens: (usage.completionTokens ?? 0) + (usage.promptTokens ?? 0),
+      completetionTokens: completionTokens,
+      promptTokens,
+      totalTokens,
       userId: request.userId ?? "",
       countryCode: request.countryCode ?? "",
       requestBodySize: request.bodySize ?? 0,

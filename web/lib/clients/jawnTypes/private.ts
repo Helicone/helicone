@@ -2119,6 +2119,7 @@ Json: JsonObject;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     HeliconeMeta: {
+      providerModelId?: string;
       isPassthroughBilling?: boolean;
       gatewayDeploymentTarget?: string;
       gatewayRouterId?: string;

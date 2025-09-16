@@ -25,7 +25,6 @@ export interface DisallowListEntry {
 export interface EscrowInfo {
   escrowId: string;
   endpoint: Endpoint;
-  model: string;
 }
 
 // Error type matching the old aiGateway pattern
