@@ -524,12 +524,12 @@ async function log(
       const rawResponse = rawResponseResult.data;
       let cost: number | undefined = undefined;
 
-      // handle AI Gateway requests (successful Attempt)
-      const successfulAttempt =
-        proxyRequest.requestWrapper.getSuccessfulAttempt();
-      if (rawResponse && successfulAttempt) {
-        const attemptModel = successfulAttempt.endpoint.providerModelId;
-        const attemptProvider = successfulAttempt.endpoint.provider;
+      // handle all AI Gateway requests (both BYOK and PTB)
+      const gatewayAttempt =
+        proxyRequest.requestWrapper.getGatewayAttempt();
+      if (rawResponse && gatewayAttempt) {
+        const attemptModel = gatewayAttempt.endpoint.providerModelId;
+        const attemptProvider = gatewayAttempt.endpoint.provider;
 
         const usageProcessor = getUsageProcessor(attemptProvider);
 

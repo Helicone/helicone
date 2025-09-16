@@ -4,11 +4,16 @@
  */
 
 import { ModelRow } from "./interfaces/Cost";
-import { allCosts, defaultProvider, providers } from "./providers/mappings";
+import { defaultProvider, providers } from "./providers/mappings";
 import { COST_PRECISION_MULTIPLIER } from "./costCalc";
 
 export type { ModelRow } from "./interfaces/Cost";
 export { providers } from "./providers/mappings";
+export { modelCostBreakdownFromRegistry } from "./costCalc";
+export type { CostBreakdown } from "./models/calculate-cost";
+export { getUsageProcessor } from "./usage/getUsageProcessor";
+export type { ModelUsage } from "./usage/types";
+export type { ModelProviderName } from "./models/providers";
 
 export type ModelWithProvider = {
   provider: string;

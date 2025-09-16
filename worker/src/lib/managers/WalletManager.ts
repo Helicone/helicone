@@ -56,7 +56,7 @@ export class WalletManager {
         await this.walletStub.addToDisallowList(
           proxyRequest.requestId,
           proxyRequest.escrowInfo.endpoint.provider,
-          proxyRequest.escrowInfo.model ?? "*"
+          proxyRequest.requestWrapper.getGatewayAttempt()?.endpoint.providerModelId ?? "*"
         );
       }
 
@@ -72,7 +72,9 @@ export class WalletManager {
         `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}:`,
         error
       );
-      return err(`Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}: ${error}`);
+      return err(
+        `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}: ${error}`
+      );
     }
   }
 

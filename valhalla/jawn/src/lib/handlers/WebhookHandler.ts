@@ -3,9 +3,12 @@ import { sendToWebhook, WebhookPayload } from "../clients/webhookSender";
 import { err, ok, PromiseGenericResult } from "../../packages/common/result";
 import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext } from "./HandlerContext";
+import {
+  getCompletionTokens,
+  getPromptTokens,
+  HandlerContext,
+} from "./HandlerContext";
 import { S3Client } from "../shared/db/s3Client";
-import { modelCost } from "@helicone-package/cost/costCalc";
 import { WebhookConfig } from "../shared/types";
 
 export class WebhookHandler extends AbstractLogHandler {
@@ -54,26 +57,14 @@ export class WebhookHandler extends AbstractLogHandler {
         const model =
           context.processedLog.model ?? context.processedLog.request.model;
 
-        if (model && context.usage) {
-          const promptTokens = context.usage.promptTokens || 0;
-          const completionTokens = context.usage.completionTokens || 0;
-          const totalTokens =
-            context.usage.totalTokens || promptTokens + completionTokens;
-
-          // Calculate cost using the costCalc module
-          const cost = modelCost({
-            provider: context.message.log.request.provider || "openai",
-            model: model,
-            sum_prompt_tokens: promptTokens,
-            prompt_cache_write_tokens:
-              context.usage.promptCacheWriteTokens || 0,
-            prompt_cache_read_tokens: context.usage.promptCacheReadTokens || 0,
-            sum_completion_tokens: completionTokens,
-            prompt_audio_tokens: context.usage.promptAudioTokens || 0,
-            completion_audio_tokens: context.usage.completionAudioTokens || 0,
-            prompt_cache_write_5m: context.usage.promptCacheWrite5m || 0,
-            prompt_cache_write_1h: context.usage.promptCacheWrite1h || 0,
-          });
+        if (model) {
+          const cost =
+            context.costBreakdown?.totalCost ?? context.legacyUsage.cost ?? 0;
+          const promptTokens =
+            getPromptTokens(context.usage, context.legacyUsage) ?? 0;
+          const completionTokens =
+            getCompletionTokens(context.usage, context.legacyUsage) ?? 0;
+          const totalTokens = promptTokens + completionTokens;
 
           // Calculate latency
           const latencyMs = context.message.log.response.delayMs;
@@ -101,7 +92,8 @@ export class WebhookHandler extends AbstractLogHandler {
             body: context.processedLog.request.body,
 
             model: includeData
-              ? context.processedLog.model ?? context.processedLog.request.model
+              ? (context.processedLog.model ??
+                context.processedLog.request.model)
               : undefined,
             provider: includeData
               ? context.message.log.request.provider

@@ -31,6 +31,12 @@ import {
 } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
+import { getUsageProcessor } from "@helicone-package/cost";
+import {
+  modelCost,
+  modelCostBreakdownFromRegistry,
+} from "@helicone-package/cost/costCalc";
+import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -124,22 +130,78 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         context.processedLog.model = model;
       }
 
-      // Set usage
-      const usage =
+      // Set legacy usage values captured from body processors
+      const legacyUsage =
         processedResponseBody.data?.usage ??
         processedResponseBody.data?.processedBody?.usage ??
         {};
-      context.usage.completionTokens = usage.completionTokens;
-      context.usage.promptTokens = usage.promptTokens;
-      context.usage.totalTokens = usage.totalTokens;
-      context.usage.heliconeCalculated = usage.heliconeCalculated;
-      context.usage.cost = usage.cost;
-      context.usage.promptCacheWriteTokens = usage.promptCacheWriteTokens;
-      context.usage.promptCacheReadTokens = usage.promptCacheReadTokens;
-      context.usage.promptAudioTokens = usage.promptAudioTokens;
-      context.usage.completionAudioTokens = usage.completionAudioTokens;
-      context.usage.promptCacheWrite5m = usage.promptCacheWrite5m;
-      context.usage.promptCacheWrite1h = usage.promptCacheWrite1h;
+      context.legacyUsage.completionTokens = legacyUsage.completionTokens;
+      context.legacyUsage.promptTokens = legacyUsage.promptTokens;
+      context.legacyUsage.totalTokens = legacyUsage.totalTokens;
+      context.legacyUsage.heliconeCalculated = legacyUsage.heliconeCalculated;
+      context.legacyUsage.promptCacheWriteTokens =
+        legacyUsage.promptCacheWriteTokens;
+      context.legacyUsage.promptCacheReadTokens =
+        legacyUsage.promptCacheReadTokens;
+      context.legacyUsage.promptAudioTokens = legacyUsage.promptAudioTokens;
+      context.legacyUsage.completionAudioTokens =
+        legacyUsage.completionAudioTokens;
+      context.legacyUsage.promptCacheWrite5m = legacyUsage.promptCacheWrite5m;
+      context.legacyUsage.promptCacheWrite1h = legacyUsage.promptCacheWrite1h;
+      if (typeof legacyUsage.cost === "number" && legacyUsage.cost) {
+        context.legacyUsage.cost = legacyUsage.cost;
+      } else {
+        const cost = modelCost({
+          model: context.processedLog.model ?? "",
+          provider: context.message.log.request.provider ?? "",
+          sum_prompt_tokens: legacyUsage.promptTokens ?? 0,
+          prompt_cache_write_tokens: legacyUsage.promptCacheWriteTokens ?? 0,
+          prompt_cache_read_tokens: legacyUsage.promptCacheReadTokens ?? 0,
+          prompt_audio_tokens: legacyUsage.promptAudioTokens ?? 0,
+          sum_completion_tokens: legacyUsage.completionTokens ?? 0,
+          completion_audio_tokens: legacyUsage.completionAudioTokens ?? 0,
+          prompt_cache_write_5m: legacyUsage.promptCacheWrite5m ?? 0,
+          prompt_cache_write_1h: legacyUsage.promptCacheWrite1h ?? 0,
+        });
+
+        context.legacyUsage.cost = cost;
+      }
+
+      // Parse structured usage via the registry-aware processors when available
+      const provider = heliconeProviderToModelProviderName(
+        context.message.log.request.provider
+      );
+      const rawResponse = context.rawLog.rawResponseBody;
+      if (provider && rawResponse) {
+        const usageProcessor = getUsageProcessor(provider);
+        if (usageProcessor) {
+          const parsedUsage = await usageProcessor.parse({
+            responseBody: rawResponse,
+            isStream: context.message.log.request.isStream,
+          });
+          if (parsedUsage.error !== null) {
+            console.error(
+              `Error parsing structured usage for provider ${provider}: ${parsedUsage.error}`
+            );
+          } else if (parsedUsage.data) {
+            context.usage = parsedUsage.data ?? null;
+
+            const providerModelId =
+              context.message.heliconeMeta.providerModelId ?? "";
+
+            const breakdown = modelCostBreakdownFromRegistry({
+              modelUsage: parsedUsage.data,
+              providerModelId,
+              provider,
+            });
+
+            if (breakdown) {
+              context.costBreakdown = breakdown;
+            }
+          }
+        }
+      }
+
       return await super.handle(context);
     } catch (error: any) {
       return err(
