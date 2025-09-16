@@ -148,6 +148,9 @@ export interface paths {
   "/v1/organization/{organizationId}/update_member": {
     post: operations["UpdateOrganizationMember"];
   };
+  "/v1/organization/{organizationId}/update_owner": {
+    post: operations["UpdateOrganizationOwner"];
+  };
   "/v1/organization/{organizationId}/owner": {
     get: operations["GetOrganizationOwner"];
   };
@@ -942,6 +945,7 @@ Json: JsonObject;
     };
     "Result_OrganizationLayout.string_": components["schemas"]["ResultSuccess_OrganizationLayout_"] | components["schemas"]["ResultError_string_"];
     OrganizationMember: {
+      created_at: string;
       org_role: string;
       member: string;
       email: string;
@@ -16625,6 +16629,28 @@ export interface operations {
         "application/json": {
           memberId: string;
           role: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrganizationOwner: {
+    parameters: {
+      path: {
+        organizationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          memberId: string;
         };
       };
     };

@@ -13,10 +13,7 @@ import {
 import { HeliconeHeaders } from "./models/HeliconeHeaders";
 import { getAndStoreInCache } from "./util/cache/secureCache";
 import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
-import { Sha256 } from "@aws-crypto/sha256-js";
 import { parseJSXObject } from "@helicone/prompts";
-import { HttpRequest } from "@smithy/protocol-http";
-import { SignatureV4 } from "@smithy/signature-v4";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
@@ -67,7 +64,6 @@ export class RequestWrapper {
   requestReferrer: string | undefined;
   requestBodyBuffer: IRequestBodyBuffer;
 
-  private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
 
   private gatewayAttempt?: Attempt;
@@ -604,7 +600,7 @@ export class RequestWrapper {
   }
 
   setBody(body: string): void {
-    this.cachedText = body;
+    this.requestBodyBuffer.tempSetBody(body);
   }
 
   setSuccessfulAttempt(attempt: Attempt): void {

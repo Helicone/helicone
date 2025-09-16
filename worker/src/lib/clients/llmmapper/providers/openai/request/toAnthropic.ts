@@ -1,8 +1,8 @@
-import { AntRequestBody, ContentBlock } from "../../anthropic/request/types";
-import { OpenAIRequestBody } from "./types";
+import { AnthropicRequestBody, AnthropicContentBlock, AnthropicTool, AnthropicToolChoice } from "../../../types";
+import { OpenAIRequestBody } from "../../../types";
 
-export function toAnthropic(openAIBody: OpenAIRequestBody): AntRequestBody {
-  const antBody: AntRequestBody = {
+export function toAnthropic(openAIBody: OpenAIRequestBody): AnthropicRequestBody {
+  const antBody: AnthropicRequestBody = {
     model: mapModel(openAIBody.model),
     messages: [],
     max_tokens: openAIBody.max_tokens ?? 1024,
@@ -30,8 +30,19 @@ export function toAnthropic(openAIBody: OpenAIRequestBody): AntRequestBody {
     antBody.metadata = { user_id: openAIBody.user };
   }
 
+  // Map tools from OpenAI format to Anthropic format
+  if (openAIBody.tools) {
+    antBody.tools = mapTools(openAIBody.tools);
+  }
+
+  // Map tool_choice from OpenAI format to Anthropic format
+  if (openAIBody.tool_choice) {
+    antBody.tool_choice = mapToolChoice(openAIBody.tool_choice);
+  }
+
+  // Legacy function_call/functions not supported
   if (openAIBody.function_call || openAIBody.functions) {
-    throw new Error("Function calling and tools are not supported");
+    throw new Error("Legacy function_call and functions are not supported. Use tools instead.");
   }
 
   if (openAIBody.logit_bias) {
@@ -55,21 +66,67 @@ function extractSystemMessage(messages: OpenAIRequestBody["messages"]): {
 }
 
 function mapModel(model: string): string {
+  // TODO: move model maps to AnthropicProvider
+  if (model.includes('claude-3.5-haiku')) {
+    return 'claude-3-5-haiku-20241022'; // version with most features
+  } else if (model.includes('claude-3.5-sonnet')) {
+    return 'claude-3-5-sonnet-latest';
+  } else if (model.includes('claude-3.7-sonnet')) {
+    return 'claude-3-7-sonnet-20250219'; // version with most features
+  }
   return model;
 }
 
 function mapMessages(
   messages: OpenAIRequestBody["messages"]
-): AntRequestBody["messages"] {
-  return messages.map((message): AntRequestBody["messages"][0] => {
+): AnthropicRequestBody["messages"] {
+  return messages.map((message): AnthropicRequestBody["messages"][0] => {
     if (message.role === "function") {
       throw new Error("Function messages are not supported");
     }
 
-    const antMessage: AntRequestBody["messages"][0] = {
+    if (message.role === "tool") {
+      return {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: message.tool_call_id,
+            content: typeof message.content === "string" ? message.content : "",
+          },
+        ],
+      };
+    }
+
+    const antMessage: AnthropicRequestBody["messages"][0] = {
       role: message.role as "user" | "assistant",
       content: "n/a",
     };
+
+    if (message.role === "assistant" && message.tool_calls) {
+      const contentBlocks: AnthropicContentBlock[] = [];
+      
+      if (message.content && typeof message.content === "string") {
+        contentBlocks.push({
+          type: "text",
+          text: message.content,
+        });
+      }
+      
+      message.tool_calls.forEach((toolCall) => {
+        if (toolCall.type === "function") {
+          contentBlocks.push({
+            type: "tool_use",
+            id: toolCall.id,
+            name: toolCall.function.name,
+            input: JSON.parse(toolCall.function.arguments || "{}"),
+          });
+        }
+      });
+      
+      antMessage.content = contentBlocks;
+      return antMessage;
+    }
 
     if (typeof message.content === "string") {
       if (message.content.length === 0) {
@@ -78,7 +135,7 @@ function mapMessages(
         antMessage.content = message.content;
       }
     } else if (Array.isArray(message.content)) {
-      antMessage.content = message.content.map((item): ContentBlock => {
+      antMessage.content = message.content.map((item): AnthropicContentBlock => {
         if (item.type === "text") {
           return { type: "text", text: item.text || "" };
         } else if (item.type === "image_url" && item.image_url) {
@@ -104,4 +161,55 @@ function mapMessages(
 
     return antMessage;
   });
+}
+
+function mapTools(tools: OpenAIRequestBody["tools"]): AnthropicTool[] {
+  if (!tools) return [];
+  
+  return tools.map((tool) => {
+    if (tool.type !== "function") {
+      throw new Error(`Unsupported tool type: ${tool.type}`);
+    }
+
+    const inputSchema = tool.function.parameters as any || {
+      type: "object",
+      properties: {},
+    };
+
+    return {
+      name: tool.function.name,
+      description: tool.function.description || "",
+      input_schema: {
+        type: "object" as const,
+        properties: inputSchema.properties || {},
+        required: inputSchema.required,
+      },
+    };
+  });
+}
+
+function mapToolChoice(toolChoice: OpenAIRequestBody["tool_choice"]): AnthropicToolChoice {
+  if (!toolChoice) {
+    return { type: "auto" };
+  }
+
+  if (typeof toolChoice === "string") {
+    switch (toolChoice) {
+      case "auto":
+        return { type: "auto" };
+      case "none":
+        return { type: "auto" };
+      default:
+        throw new Error(`Unsupported tool_choice string: ${toolChoice}`);
+    }
+  }
+
+  if (typeof toolChoice === "object" && toolChoice.type === "function") {
+    return {
+      type: "tool",
+      name: toolChoice.function.name,
+    };
+  }
+
+  throw new Error("Unsupported tool_choice format");
 }

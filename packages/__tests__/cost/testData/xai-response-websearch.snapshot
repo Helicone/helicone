@@ -1,0 +1,36 @@
+{
+  "id": "a3d1008e-4544-40d4-d075-11527e794e4a",
+  "object": "chat.completion",
+  "created": 1752854522,
+  "model": "grok-4",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here's what I found from searching the web about recent AI developments...",
+        "refusal": null
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 32,
+    "completion_tokens": 15,
+    "total_tokens": 47,
+    "prompt_tokens_details": {
+      "text_tokens": 26,
+      "audio_tokens": 0,
+      "image_tokens": 0,
+      "cached_tokens": 6
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    },
+    "num_sources_used": 5
+  },
+  "system_fingerprint": "fp_3a7881249c"
+}

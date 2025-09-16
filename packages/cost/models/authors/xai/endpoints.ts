@@ -22,7 +22,7 @@ export const endpoints = {
       },
     ],
     contextLength: 256000,
-    maxCompletionTokens: 256000,
+    maxCompletionTokens: 10000,
     supportedParameters: [
       "frequency_penalty",
       "logit_bias",
@@ -38,13 +38,13 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "grok-4-0709:xai": {
-    providerModelId: "grok-4-0709",
+  "grok-4:xai": {
+    providerModelId: "grok-4",
     provider: "xai",
     author: "xai",
     pricing: [
@@ -90,7 +90,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -130,7 +130,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -170,7 +170,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

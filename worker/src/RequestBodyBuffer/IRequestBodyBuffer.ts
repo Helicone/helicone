@@ -8,4 +8,6 @@ export interface IRequestBodyBuffer {
   }): Promise<{ newHeaders: Headers; model: string }>;
 
   unsafeGetRawText(): Promise<string>;
+
+  tempSetBody(body: string): void;
 }
