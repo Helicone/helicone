@@ -122,8 +122,6 @@ export function HqlGraphView({ data, loading }: HqlGraphViewProps) {
     );
   }
 
-  
-
   // Helper: split y-axis for multi-line suggestions
   function getYColumnsForSuggestion(s: ChartSuggestion): string[] {
     if (s.type === "multi-line") {
