@@ -178,6 +178,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
 ]
 
 kv_namespaces = [
@@ -188,6 +189,10 @@ kv_namespaces = [
 	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
 	{ binding = "SECURE_CACHE", id = "43d1ce4eaa9c4be9ae88a97ea8ed88ef", preview_id = "23d7b3cb44254e0eb0b824a310abe155" },
 	{ binding = "EU_SECURE_CACHE", id = "39c1d7b64db749e39adeba19c698e6a1" },
+]
+
+containers = [
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10 }
 ]
 
 [env.production.triggers]
@@ -205,7 +210,6 @@ DATADOG_ENABLED = "true"
 QUEUE_PROVIDER = "sqs"
 ENVIRONMENT = "production"
 APP_URL = "https://us.helicone.ai"
-
 
 [env.production_staging]
 name = "helicone-worker-prod-staging"
@@ -254,10 +258,15 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
 ]
 
 queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-staging" },
+]
+
+containers = [
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10 }
 ]
 
 # Environment-specific variables only (inherit most from top-level [vars])
@@ -271,6 +280,9 @@ APP_URL = "https://us.helicone.ai"
 
 [env.production_staging.triggers]
 crons = []
+
+
+
 
 [[migrations]]
 tag = "v1"
