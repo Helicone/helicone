@@ -1,11 +1,6 @@
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
-import { Container, getContainer } from "@cloudflare/containers";
-
-export class RequestBodyBufferContainer extends Container {
-  defaultPort = 8000; // Port the container is listening on
-  sleepAfter = "10m"; // Stop the instance if requests not sent for 10 minutes
-}
+import { getContainer } from "@cloudflare/containers";
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
