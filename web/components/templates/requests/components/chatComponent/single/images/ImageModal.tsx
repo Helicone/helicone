@@ -18,7 +18,6 @@ export const ImageModal: React.FC<ImageModalProps> = ({
 }) => {
   // Store the original overflow value to restore it later
   const originalOverflowRef = useRef<string | null>(null);
-
   // Handle escape key
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {

@@ -1,11 +1,13 @@
 import { App } from "@slack/bolt";
-import { WebClient } from "@slack/web-api";
+import { MessageAttachment, WebClient } from "@slack/web-api";
 import { GET_KEY } from "../lib/clients/constant";
 import { dbExecute } from "../lib/shared/db/dbExecute";
+import fs from "fs";
 interface SlackConfig {
   botToken: string | null;
   appToken: string | null;
   channel: string | null;
+  userToken: string | null;
 }
 
 interface MessageWithEventTs {
@@ -35,6 +37,7 @@ export class SlackService {
     botToken: null,
     appToken: null,
     channel: null,
+    userToken: null,
   };
   private processedEvents = new Set<string>();
   private cleanupInterval: NodeJS.Timeout | null = null;
@@ -53,6 +56,7 @@ export class SlackService {
     this.config.botToken = await GET_KEY("key:slack_bot_token");
     this.config.appToken = await GET_KEY("key:slack_app_token");
     this.config.channel = await GET_KEY("key:slack_channel");
+    this.config.userToken = await GET_KEY("key:slack_user_token");
 
     // Check if Slack is configured
     if (
@@ -63,7 +67,6 @@ export class SlackService {
       console.error("Slack configuration incomplete, Slack features disabled");
       return;
     }
-
     // Initialize Slack app
     this.app = new App({
       token: this.config.botToken,
@@ -132,7 +135,42 @@ export class SlackService {
 
       const message: MessageWithEventTs = {
         role: "assistant",
-        content: event.text,
+        ...(event.files && event.files.length > 0
+          ? {
+              content: [
+                {
+                  type: "text",
+                  text: event.text,
+                },
+                ...(await Promise.all(
+                  event.files
+                    .filter((file: any) => file.mimetype.includes("image"))
+                    .map(async (file: any) => {
+                      const result =
+                        await this.app!.client.files.sharedPublicURL({
+                          file: file.id,
+                          token: this.config.userToken!,
+                        });
+
+                      const [_, __, pubSecret] =
+                        result.file?.permalink_public
+                          ?.replace("https://slack-files.com/", "")
+                          .split("-") ?? [];
+                      const imageURL = `${result.file?.url_private}?pub_secret=${pubSecret}`;
+
+                      return {
+                        type: "image_url",
+                        image_url: {
+                          url: imageURL,
+                        },
+                      };
+                    })
+                )),
+              ],
+            }
+          : {
+              content: event.text,
+            }),
         event_ts: event.event_ts,
         name: firstName,
       };
@@ -178,6 +216,33 @@ export class SlackService {
     }
   }
 
+  public async uploadFile(
+    file: Buffer,
+    filename: string,
+    threadTs: string
+  ): Promise<boolean> {
+    if (!this.client || !this.config.channel) {
+      console.error("Slack not configured, cannot upload file");
+      return false;
+    }
+
+    try {
+      const result = await this.retryWithBackoff(async () => {
+        return await this.client!.filesUploadV2({
+          file,
+          filename,
+          thread_ts: threadTs,
+          channel_id: this.config.channel!,
+        });
+      });
+
+      return result.files.every((file) => file.ok);
+    } catch (error) {
+      console.error("Failed to upload file after retry:", error);
+      throw error;
+    }
+  }
+
   public async postMessage(
     text: string,
     blocks?: any[]
@@ -205,7 +270,8 @@ export class SlackService {
 
   public async postThreadMessage(
     threadTs: string,
-    text: string
+    text: string,
+    attachments?: MessageAttachment[]
   ): Promise<void> {
     if (!this.client || !this.config.channel) {
       console.error("Slack not configured, cannot post thread message");
@@ -218,8 +284,9 @@ export class SlackService {
           channel: this.config.channel!,
           thread_ts: threadTs,
           text,
-          unfurl_links: false,
-          unfurl_media: false,
+          // unfurl_links: false,
+          // unfurl_media: false,
+          attachments,
         });
       });
     } catch (error) {
