@@ -3,6 +3,7 @@ import {
   Model,
   FilterOptions,
   SortOption,
+  BillingMethod,
   applyFilters,
   sortModels,
   extractAvailableFilters,
@@ -16,6 +17,7 @@ interface UseModelFilteringProps {
   minContextSize: number;
   selectedCapabilities: Set<string>;
   sortBy: SortOption;
+  billingMethod?: BillingMethod;
   selectedAuthors?: Set<string>;
   selectedInputModalities?: Set<string>;
   selectedOutputModalities?: Set<string>;
@@ -41,6 +43,7 @@ export function useModelFiltering({
   minContextSize,
   selectedCapabilities,
   sortBy,
+  billingMethod = "all",
   selectedAuthors,
   selectedInputModalities,
   selectedOutputModalities,
@@ -61,6 +64,7 @@ export function useModelFiltering({
       priceRange[1] < 50 ||
       minContextSize > 0 ||
       selectedCapabilities.size > 0 ||
+      billingMethod !== "all" ||
       (selectedAuthors && selectedAuthors.size > 0) ||
       (selectedInputModalities && selectedInputModalities.size > 0) ||
       (selectedOutputModalities && selectedOutputModalities.size > 0) ||
@@ -72,6 +76,7 @@ export function useModelFiltering({
     priceRange,
     minContextSize,
     selectedCapabilities,
+    billingMethod,
     selectedAuthors,
     selectedInputModalities,
     selectedOutputModalities,
@@ -86,6 +91,7 @@ export function useModelFiltering({
       priceRange,
       minContextSize,
       capabilities: selectedCapabilities,
+      billingMethod,
       authors: selectedAuthors,
       inputModalities: selectedInputModalities as any,
       outputModalities: selectedOutputModalities as any,
@@ -104,6 +110,7 @@ export function useModelFiltering({
     priceRange,
     minContextSize,
     selectedCapabilities,
+    billingMethod,
     selectedAuthors,
     selectedInputModalities,
     selectedOutputModalities,
@@ -139,6 +146,6 @@ export function useModelFilterState(searchParams: URLSearchParams) {
     ] as [number, number],
     minContextSize: getNumberFromParam(searchParams.get("contextMin"), 0),
     selectedCapabilities: getSetFromParam(searchParams.get("capabilities")),
-    sortBy: (searchParams.get("sort") as SortOption) || "name",
+    sortBy: (searchParams.get("sort") as SortOption) || "newest",
   };
 }

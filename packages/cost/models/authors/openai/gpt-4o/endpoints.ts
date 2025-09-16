@@ -35,7 +35,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -72,7 +72,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -110,7 +110,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -147,7 +147,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -185,7 +185,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
