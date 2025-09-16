@@ -38,9 +38,9 @@ describe("OpenAIUsageProcessor", () => {
       "utf-8"
     );
 
-    const result = await processor.parse({ 
-      responseBody: responseData, 
-      isStream: false 
+    const result = await processor.parse({
+      responseBody: responseData,
+      isStream: false,
     });
 
     expect(result.error).toBeNull();
@@ -48,8 +48,8 @@ describe("OpenAIUsageProcessor", () => {
       input: 96,
       output: 10,
       cacheDetails: {
-        cachedInput: 1152
-      }
+        cachedInput: 1152,
+      },
     });
   });
 
@@ -59,15 +59,15 @@ describe("OpenAIUsageProcessor", () => {
       "utf-8"
     );
 
-    const result = await processor.parse({ 
-      responseBody: streamData, 
-      isStream: true 
+    const result = await processor.parse({
+      responseBody: streamData,
+      isStream: true,
     });
 
     expect(result.error).toBeNull();
     expect(result.data).toEqual({
       input: 1248,
-      output: 10
+      output: 10,
     });
   });
 
@@ -75,22 +75,28 @@ describe("OpenAIUsageProcessor", () => {
     const testCases = [
       {
         name: "cached-response",
-        data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-response-cached.snapshot"), "utf-8"),
-        isStream: false
+        data: fs.readFileSync(
+          path.join(__dirname, "testData", "gpt4o-response-cached.snapshot"),
+          "utf-8"
+        ),
+        isStream: false,
       },
       {
         name: "stream-response",
-        data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-stream-response.snapshot"), "utf-8"),
-        isStream: true
-      }
+        data: fs.readFileSync(
+          path.join(__dirname, "testData", "gpt4o-stream-response.snapshot"),
+          "utf-8"
+        ),
+        isStream: true,
+      },
     ];
 
     const results: Record<string, any> = {};
-    
+
     for (const testCase of testCases) {
       const result = await processor.parse({
         responseBody: testCase.data,
-        isStream: testCase.isStream
+        isStream: testCase.isStream,
       });
       results[testCase.name] = result;
     }
@@ -109,17 +115,17 @@ describe("OpenAIUsageProcessor", () => {
 
       const result = await xaiProcessor.parse({
         responseBody: xaiResponse,
-        isStream: false
+        isStream: false,
       });
 
       expect(result.error).toBeNull();
       expect(result.data).toEqual({
-        input: 26,  // text_tokens (26) - cached are handled separately
+        input: 26, // text_tokens (26) - cached are handled separately
         output: 15,
         cacheDetails: {
-          cachedInput: 6
+          cachedInput: 6,
         },
-        web_search: 5
+        web_search: 5,
       });
     });
 
@@ -131,17 +137,17 @@ describe("OpenAIUsageProcessor", () => {
 
       const result = await xaiProcessor.parse({
         responseBody: xaiResponse,
-        isStream: false
+        isStream: false,
       });
 
       expect(result.error).toBeNull();
       expect(result.data).toEqual({
-        input: 45,  // text_tokens (45)
-        output: 35,  // completion_tokens (120) - reasoning_tokens (85)
+        input: 45, // text_tokens (45)
+        output: 35, // completion_tokens (120) - reasoning_tokens (85)
         cacheDetails: {
-          cachedInput: 5
+          cachedInput: 5,
         },
-        thinking: 85
+        thinking: 85,
       });
       // web_search should not be present when num_sources_used is 0
       expect(result.data?.web_search).toBeUndefined();
@@ -155,17 +161,17 @@ describe("OpenAIUsageProcessor", () => {
 
       const result = await xaiProcessor.parse({
         responseBody: streamData,
-        isStream: true
+        isStream: true,
       });
 
       expect(result.error).toBeNull();
       expect(result.data).toEqual({
-        input: 30,  // text_tokens (30) - cached handled separately
+        input: 30, // text_tokens (30) - cached handled separately
         output: 8,
         cacheDetails: {
-          cachedInput: 12
+          cachedInput: 12,
         },
-        web_search: 3
+        web_search: 3,
       });
     });
   });
@@ -181,13 +187,13 @@ describe("OpenAIUsageProcessor", () => {
 
       const result = await groqProcessor.parse({
         responseBody: groqResponse,
-        isStream: false
+        isStream: false,
       });
 
       expect(result.error).toBeNull();
       expect(result.data).toEqual({
         input: 50,
-        output: 10
+        output: 10,
       });
     });
 
@@ -199,14 +205,14 @@ describe("OpenAIUsageProcessor", () => {
 
       const result = await groqProcessor.parse({
         responseBody: streamData,
-        isStream: true
+        isStream: true,
       });
 
       expect(result.error).toBeNull();
       expect(result.data).toEqual({
         input: 47,
-        output: 10
+        output: 10,
       });
     });
   });
-}); 
+});

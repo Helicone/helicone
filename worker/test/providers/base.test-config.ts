@@ -33,7 +33,7 @@ export abstract class BaseTestConfig {
   }
 
   // Override this if provider needs custom mock response
-  generateMockResponse(modelId: string) {
+  generateMockResponse(modelId: string): any {
     const config = registry.getModelProviderConfig(modelId, this.provider);
     const providerModelId = config.data?.providerModelId || modelId;
 
