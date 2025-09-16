@@ -1,5 +1,7 @@
 import { describe, it, expect } from "@jest/globals";
 import { OpenAIUsageProcessor } from "@helicone-package/cost/usage/openAIUsageProcessor";
+import { GroqUsageProcessor } from "@helicone-package/cost/usage/groqUsageProcessor";
+import { XAIUsageProcessor } from "@helicone-package/cost/usage/xaiUsageProcessor";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import * as fs from "fs";
 import * as path from "path";
@@ -97,13 +99,15 @@ describe("OpenAIUsageProcessor", () => {
   });
 
   describe("XAI/Grok specific features", () => {
+    const xaiProcessor = new XAIUsageProcessor();
+
     it("should parse XAI response with web search", async () => {
       const xaiResponse = fs.readFileSync(
         path.join(__dirname, "testData", "xai-response-websearch.snapshot"),
         "utf-8"
       );
 
-      const result = await processor.parse({
+      const result = await xaiProcessor.parse({
         responseBody: xaiResponse,
         isStream: false
       });
@@ -125,7 +129,7 @@ describe("OpenAIUsageProcessor", () => {
         "utf-8"
       );
 
-      const result = await processor.parse({
+      const result = await xaiProcessor.parse({
         responseBody: xaiResponse,
         isStream: false
       });
@@ -149,7 +153,7 @@ describe("OpenAIUsageProcessor", () => {
         "utf-8"
       );
 
-      const result = await processor.parse({
+      const result = await xaiProcessor.parse({
         responseBody: streamData,
         isStream: true
       });
@@ -167,13 +171,15 @@ describe("OpenAIUsageProcessor", () => {
   });
 
   describe("Groq specific features", () => {
+    const groqProcessor = new GroqUsageProcessor();
+
     it("should parse Groq non-streaming response", async () => {
       const groqResponse = fs.readFileSync(
         path.join(__dirname, "testData", "groq-response.snapshot"),
         "utf-8"
       );
 
-      const result = await processor.parse({
+      const result = await groqProcessor.parse({
         responseBody: groqResponse,
         isStream: false
       });
@@ -191,7 +197,7 @@ describe("OpenAIUsageProcessor", () => {
         "utf-8"
       );
 
-      const result = await processor.parse({
+      const result = await groqProcessor.parse({
         responseBody: streamData,
         isStream: true
       });

@@ -49,10 +49,10 @@ describe("xAI Registry Tests", () => {
         }));
     });
 
-    describe("grok-4-0709", () => {
+    describe("grok-4", () => {
       it("should handle xai provider", () =>
         runGatewayTest({
-          model: "grok-4-0709/xai",
+          model: "grok-4/xai",
           expected: {
             providers: [
               {
@@ -68,7 +68,7 @@ describe("xAI Registry Tests", () => {
 
       it("should auto-select xai provider when none specified", () =>
         runGatewayTest({
-          model: "grok-4-0709",
+          model: "grok-4",
           expected: {
             providers: [
               {
@@ -164,7 +164,7 @@ describe("xAI Registry Tests", () => {
                 errorMessage: "xAI service unavailable",
               },
             ],
-            finalStatus: 500,
+            finalStatus: 429,
           },
         }));
 
@@ -196,7 +196,7 @@ describe("xAI Registry Tests", () => {
                 errorMessage: "Invalid API key",
               },
             ],
-            finalStatus: 401,
+            finalStatus: 429,
           },
         }));
     });
