@@ -3,9 +3,7 @@ import Link from "next/link";
 
 const Banner = () => {
   return (
-    <div
-      className={cn("flex flex-col justify-center w-full h-auto pb-4 relative")}
-    >
+    <div className={cn("flex flex-col justify-center w-full h-auto relative")}>
       <div className="bg-sky-500 text-blue-50 text-center text-sm md:text-base py-3 w-full">
         <p>
           🔥 Introducing the{" "}
