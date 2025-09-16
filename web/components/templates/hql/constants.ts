@@ -271,3 +271,24 @@ export const useBulkDeleteQueryMutation = (
     },
   };
 };
+
+// Add/ensure pagination helper export used by HQL page
+export const addPaginationToQuery = (
+  sql: string,
+  offset: number,
+  limit: number,
+): string => {
+  let cleanedSql = sql.trim();
+  // Drop trailing semicolon first
+  cleanedSql = cleanedSql.replace(/;\s*$/g, "");
+  // Remove trailing "LIMIT n OFFSET m" (optional semicolon/whitespace)
+  cleanedSql = cleanedSql.replace(/\s+LIMIT\s+\d+\s+OFFSET\s+\d+\s*;?$/gi, "");
+  // Remove trailing "OFFSET m" if present
+  cleanedSql = cleanedSql.replace(/\s+OFFSET\s+\d+\s*;?$/gi, "");
+  // Remove trailing "LIMIT m, n" form as well
+  cleanedSql = cleanedSql.replace(/\s+LIMIT\s+\d+\s*,\s*\d+\s*;?$/gi, "");
+
+  const safeOffset = Math.max(0, Math.floor(offset));
+  const safeLimit = Math.max(1, Math.floor(limit));
+  return `${cleanedSql} LIMIT ${safeLimit} OFFSET ${safeOffset}`;
+};
