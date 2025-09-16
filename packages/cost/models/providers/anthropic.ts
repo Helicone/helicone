@@ -37,7 +37,10 @@ export class AnthropicProvider extends BaseProvider {
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
     if (context.bodyMapping === "NO_MAPPING") {
-      return JSON.stringify(context.parsedBody); // return without mapping
+      return JSON.stringify({
+        ...context.parsedBody,
+        model: endpoint.providerModelId,
+      });
     }
     const anthropicBody = context.toAnthropic(context.parsedBody);
     return JSON.stringify(anthropicBody);
