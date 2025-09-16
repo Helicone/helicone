@@ -161,7 +161,7 @@ export const providers: Provider[] = [
   // },
   // TODO: Setup AWS Bedrock
   {
-    id: "aws",
+    id: "bedrock",
     name: "AWS Bedrock",
     logoUrl: "/assets/home/providers/bedrock.webp",
     description: "Configure your AWS Bedrock API keys",
