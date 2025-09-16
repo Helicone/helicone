@@ -75,8 +75,8 @@ const SidebarHelpDropdown = ({
             variant="outline"
             size="none"
             className={clsx(
-              "flex h-9 items-center text-xs text-muted-foreground hover:text-foreground",
-              isCollapsed ? "w-9" : "w-full gap-1",
+              "flex h-8 items-center text-xs text-muted-foreground hover:text-foreground",
+              isCollapsed ? "w-8" : "w-full gap-1",
             )}
           >
             <div className="relative flex items-center">
