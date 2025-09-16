@@ -20,6 +20,7 @@ import { APIKeysManager } from "./lib/managers/APIKeysManager";
 import { SecretManagerClass } from "@helicone-package/secrets/SecretManager";
 import { getContainer } from "@cloudflare/containers";
 
+// Needed for migrations
 export { RequestBodyBufferContainer } from "./RequestBodyBuffer/RequestBodyContainer";
 
 const FALLBACK_QUEUE = "fallback-queue";
