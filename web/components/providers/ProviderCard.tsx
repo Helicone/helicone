@@ -318,9 +318,11 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     if (!existingKey) return;
 
     // Only update if we're in edit mode and have new values
-    if (!isEditingKey || 
-        (provider.id === "aws" && !keyValue && !secretKeyValue) ||
-        (provider.id !== "aws" && !keyValue)) {
+    if (
+      !isEditingKey ||
+      (provider.id === "aws" && !keyValue && !secretKeyValue) ||
+      (provider.id !== "aws" && !keyValue)
+    ) {
       setNotification("Please enter at least one key value", "error");
       return;
     }
@@ -434,7 +436,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                 }
                 disabled={isEditMode && !isEditingKey}
               />
-              <Label 
+              <Label
                 htmlFor={`crossRegion-${existingKey?.id || instanceIndex}`}
                 className="cursor-pointer text-xs font-normal"
               >
@@ -446,10 +448,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           // Default layout for other providers
           <div className="flex gap-3">
             {configFields.map((field) => (
-              <div
-                key={field.key}
-                className="flex flex-1 flex-col gap-1"
-              >
+              <div key={field.key} className="flex flex-1 flex-col gap-1">
                 <Small className="text-xs">{field.label}</Small>
                 <Input
                   type={field.type ?? "text"}
