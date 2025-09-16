@@ -18,7 +18,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
   }
 
-  private parseNonStreamResponse(responseBody: string): Result<ModelUsage, string> {
+  protected parseNonStreamResponse(responseBody: string): Result<ModelUsage, string> {
     try {
       const parsedResponse = JSON.parse(responseBody);
       const usage = this.extractUsageFromResponse(parsedResponse);
@@ -35,7 +35,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
   }
 
-  private parseStreamResponse(responseBody: string): Result<ModelUsage, string> {
+  protected parseStreamResponse(responseBody: string): Result<ModelUsage, string> {
     try {
       const lines = responseBody
         .split("\n")
@@ -65,7 +65,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
   }
 
-  private consolidateStreamData(streamData: any[]): any {
+  protected consolidateStreamData(streamData: any[]): any {
     const lastChunkWithUsage = [...streamData].reverse().find(chunk => chunk?.usage);
     if (lastChunkWithUsage?.usage) {
       return lastChunkWithUsage;
@@ -91,7 +91,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     return consolidated;
   }
 
-  private extractUsageFromResponse(parsedResponse: any): ModelUsage {
+  protected extractUsageFromResponse(parsedResponse: any): ModelUsage {
     if (!parsedResponse || typeof parsedResponse !== "object") {
       return {
         input: 0,
