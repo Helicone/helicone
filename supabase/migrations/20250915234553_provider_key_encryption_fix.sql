@@ -7,7 +7,12 @@ SELECT EXISTS (
         WHERE extname = 'pgsodium'
     ) INTO has_pgsodium;
 IF has_pgsodium THEN
-CREATE OR REPLACE FUNCTION provider_keys_encrypt_secret_provider_key() RETURNS trigger AS $func$ BEGIN IF new.provider_key IS DISTINCT
+-- Drop existing trigger and function first to avoid ownership issues
+DROP TRIGGER IF EXISTS provider_keys_encrypt_secret_trigger_provider_key ON provider_keys;
+DROP FUNCTION IF EXISTS provider_keys_encrypt_secret_provider_key() CASCADE;
+
+-- Create the function fresh
+CREATE FUNCTION provider_keys_encrypt_secret_provider_key() RETURNS trigger AS $func$ BEGIN IF new.provider_key IS DISTINCT
 FROM old.provider_key THEN new.provider_key = CASE
         WHEN new.provider_key IS NULL THEN NULL
         ELSE CASE
@@ -45,8 +50,8 @@ END IF;
 RETURN new;
 END;
 $func$ LANGUAGE plpgsql;
--- Recreate the trigger
-CREATE OR REPLACE TRIGGER provider_keys_encrypt_secret_trigger_provider_key BEFORE
+-- Create the trigger
+CREATE TRIGGER provider_keys_encrypt_secret_trigger_provider_key BEFORE
 INSERT
     OR
 UPDATE ON provider_keys FOR EACH ROW EXECUTE FUNCTION provider_keys_encrypt_secret_provider_key();
