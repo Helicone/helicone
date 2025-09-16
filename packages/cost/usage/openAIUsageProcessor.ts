@@ -66,9 +66,16 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
   }
 
   private consolidateStreamData(streamData: any[]): any {
-    const lastChunkWithUsage = [...streamData].reverse().find(chunk => chunk?.usage);
+    const lastChunkWithUsage = [...streamData].reverse().find(chunk => chunk?.usage || chunk?.x_groq?.usage);
     if (lastChunkWithUsage?.usage) {
       return lastChunkWithUsage;
+    }
+    // Handle Groq streaming format where usage is in x_groq.usage
+    if (lastChunkWithUsage?.x_groq?.usage) {
+      return {
+        ...lastChunkWithUsage,
+        usage: lastChunkWithUsage.x_groq.usage
+      };
     }
 
     const consolidated: any = {
@@ -79,6 +86,8 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     for (const chunk of streamData) {
       if (chunk?.usage) {
         consolidated.usage = chunk.usage;
+      } else if (chunk?.x_groq?.usage) {
+        consolidated.usage = chunk.x_groq.usage;
       }
       if (chunk?.id) {
         consolidated.id = chunk.id;

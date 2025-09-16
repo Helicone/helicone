@@ -15,6 +15,11 @@ describe("getUsageProcessor", () => {
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
   });
 
+  it("should return OpenAIUsageProcessor for groq provider", () => {
+    const processor = getUsageProcessor("groq");
+    expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
+  });
+
   it("should throw error for unsupported provider", () => {
     expect(() => {
       getUsageProcessor("unsupported-provider" as any);
@@ -157,6 +162,44 @@ describe("OpenAIUsageProcessor", () => {
           cachedInput: 12
         },
         web_search: 3
+      });
+    });
+  });
+
+  describe("Groq specific features", () => {
+    it("should parse Groq non-streaming response", async () => {
+      const groqResponse = fs.readFileSync(
+        path.join(__dirname, "testData", "groq-response.snapshot"),
+        "utf-8"
+      );
+
+      const result = await processor.parse({
+        responseBody: groqResponse,
+        isStream: false
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        input: 50,
+        output: 10
+      });
+    });
+
+    it("should parse Groq streaming response with usage in x_groq", async () => {
+      const streamData = fs.readFileSync(
+        path.join(__dirname, "testData", "groq-stream-response.snapshot"),
+        "utf-8"
+      );
+
+      const result = await processor.parse({
+        responseBody: streamData,
+        isStream: true
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        input: 47,
+        output: 10
       });
     });
   });
