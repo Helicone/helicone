@@ -18,7 +18,6 @@ import { ProviderKeysStore } from "./lib/db/ProviderKeysStore";
 import { APIKeysStore } from "./lib/db/APIKeysStore";
 import { APIKeysManager } from "./lib/managers/APIKeysManager";
 import { SecretManagerClass } from "@helicone-package/secrets/SecretManager";
-import { getContainer } from "@cloudflare/containers";
 
 // Needed for migrations
 export { RequestBodyBufferContainer } from "./RequestBodyBuffer/RequestBodyContainer";
