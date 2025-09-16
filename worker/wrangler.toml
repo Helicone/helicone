@@ -11,7 +11,9 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBuffer" }
 ]
+
 
 kv_namespaces = [
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
@@ -25,6 +27,10 @@ kv_namespaces = [
 
 queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-dev" },
+]
+
+containers = [
+	{ image = "./RequestBodyBuffer/Dockerfile", class_name = "RequestBodyBuffer", max_instances = 10 }
 ]
 
 [vars]
@@ -97,6 +103,7 @@ UPSTASH_KAFKA_PASSWORD=""
 
 [triggers]
 crons = ["* * * * *", "0 * * * *", "0 10 * * mon", "*/5 * * * *"]
+
 
 [env.production]
 name = "helicone-worker-prod"
@@ -297,3 +304,7 @@ new_sqlite_classes = ["RateLimiterDO"]
 [[migrations]]
 tag = "v8"
 new_sqlite_classes = ["Wallet"]
+
+[[migrations]]
+tag = "v9"
+new_sqlite_classes = ["RequestBodyBuffer"]

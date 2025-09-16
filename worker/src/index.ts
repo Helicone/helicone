@@ -18,6 +18,9 @@ import { ProviderKeysStore } from "./lib/db/ProviderKeysStore";
 import { APIKeysStore } from "./lib/db/APIKeysStore";
 import { APIKeysManager } from "./lib/managers/APIKeysManager";
 import { SecretManagerClass } from "@helicone-package/secrets/SecretManager";
+import { getContainer } from "@cloudflare/containers";
+
+export { RequestBodyBuffer } from "./RequestBodyBuffer/RequestBodyBuffer";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -47,6 +50,14 @@ async function modifyEnvBasedOnPath(
   env: Env,
   request: RequestWrapper
 ): Promise<Env> {
+  const requestBodyBuffer = getContainer(env.REQUEST_BODY_BUFFER, "1");
+  const response = await requestBodyBuffer.fetch("http://localhost/", {
+    method: "POST",
+    body: JSON.stringify({ hello: "world" }),
+  });
+
+  console.log(response);
+
   const secretManager = new SecretManagerClass([
     (key: string) => {
       try {
