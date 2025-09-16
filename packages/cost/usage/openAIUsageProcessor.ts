@@ -111,6 +111,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const promptAudioTokens = promptDetails.audio_tokens ?? 0;
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
+    const numSourcesUsed = usage.num_sources_used ?? 0;
     
     const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
     const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
@@ -140,6 +141,10 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const acceptedTokens = completionDetails.accepted_prediction_tokens ?? 0;
     if (rejectedTokens > 0 || acceptedTokens > 0) {
       modelUsage.output = effectiveCompletionTokens + acceptedTokens;
+    }
+
+    if (numSourcesUsed > 0) {
+      modelUsage.web_search = numSourcesUsed;
     }
 
     return modelUsage;

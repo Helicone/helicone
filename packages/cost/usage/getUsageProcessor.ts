@@ -8,6 +8,7 @@ export function getUsageProcessor(
   switch (provider) {
     case "openai":
     case "groq":
+    case "xai":
       return new OpenAIUsageProcessor();
     default:
       throw new Error(`Usage processor not found for provider: ${provider}`);

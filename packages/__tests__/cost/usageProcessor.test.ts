@@ -10,6 +10,11 @@ describe("getUsageProcessor", () => {
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
   });
 
+  it("should return OpenAIUsageProcessor for xai provider", () => {
+    const processor = getUsageProcessor("xai");
+    expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
+  });
+
   it("should throw error for unsupported provider", () => {
     expect(() => {
       getUsageProcessor("unsupported-provider" as any);
@@ -22,7 +27,7 @@ describe("OpenAIUsageProcessor", () => {
 
   it("should parse real GPT-4o response with cached tokens", async () => {
     const responseData = fs.readFileSync(
-      path.join(__dirname, "testData", "gpt4o-response-cached.txt"),
+      path.join(__dirname, "testData", "gpt4o-response-cached.snapshot"),
       "utf-8"
     );
 
@@ -43,7 +48,7 @@ describe("OpenAIUsageProcessor", () => {
 
   it("should parse real GPT-4o stream response", async () => {
     const streamData = fs.readFileSync(
-      path.join(__dirname, "testData", "gpt4o-stream-response.txt"),
+      path.join(__dirname, "testData", "gpt4o-stream-response.snapshot"),
       "utf-8"
     );
 
@@ -63,12 +68,12 @@ describe("OpenAIUsageProcessor", () => {
     const testCases = [
       {
         name: "cached-response",
-        data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-response-cached.txt"), "utf-8"),
+        data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-response-cached.snapshot"), "utf-8"),
         isStream: false
       },
       {
-        name: "stream-response", 
-        data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-stream-response.txt"), "utf-8"),
+        name: "stream-response",
+        data: fs.readFileSync(path.join(__dirname, "testData", "gpt4o-stream-response.snapshot"), "utf-8"),
         isStream: true
       }
     ];
@@ -84,5 +89,75 @@ describe("OpenAIUsageProcessor", () => {
     }
 
     expect(results).toMatchSnapshot();
+  });
+
+  describe("XAI/Grok specific features", () => {
+    it("should parse XAI response with web search", async () => {
+      const xaiResponse = fs.readFileSync(
+        path.join(__dirname, "testData", "xai-response-websearch.snapshot"),
+        "utf-8"
+      );
+
+      const result = await processor.parse({
+        responseBody: xaiResponse,
+        isStream: false
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        input: 26,  // text_tokens (26) - cached are handled separately
+        output: 15,
+        cacheDetails: {
+          cachedInput: 6
+        },
+        web_search: 5
+      });
+    });
+
+    it("should parse XAI response with reasoning tokens", async () => {
+      const xaiResponse = fs.readFileSync(
+        path.join(__dirname, "testData", "xai-response-reasoning.snapshot"),
+        "utf-8"
+      );
+
+      const result = await processor.parse({
+        responseBody: xaiResponse,
+        isStream: false
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        input: 45,  // text_tokens (45)
+        output: 35,  // completion_tokens (120) - reasoning_tokens (85)
+        cacheDetails: {
+          cachedInput: 5
+        },
+        thinking: 85
+      });
+      // web_search should not be present when num_sources_used is 0
+      expect(result.data?.web_search).toBeUndefined();
+    });
+
+    it("should parse XAI stream response with web search", async () => {
+      const streamData = fs.readFileSync(
+        path.join(__dirname, "testData", "xai-stream-response.snapshot"),
+        "utf-8"
+      );
+
+      const result = await processor.parse({
+        responseBody: streamData,
+        isStream: true
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        input: 30,  // text_tokens (30) - cached handled separately
+        output: 8,
+        cacheDetails: {
+          cachedInput: 12
+        },
+        web_search: 3
+      });
+    });
   });
 }); 
