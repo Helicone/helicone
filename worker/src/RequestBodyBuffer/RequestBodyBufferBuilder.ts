@@ -21,7 +21,7 @@ export async function RequestBodyBufferBuilder(
   // while (!done) {
   //   size += value.length;
 
-  //   let {done, value} = await reader?.read();
+  //   ({done, value} = await reader?.read());
   //   if(value.length > MAX_SIZE) {
   //     return new RequestBodyBuffer_Remote(request, dataDogClient, requestBodyBufferEnv, requestId);
   //   }
