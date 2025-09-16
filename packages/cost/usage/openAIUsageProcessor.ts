@@ -18,7 +18,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
   }
 
-  private parseNonStreamResponse(responseBody: string): Result<ModelUsage, string> {
+  protected parseNonStreamResponse(responseBody: string): Result<ModelUsage, string> {
     try {
       const parsedResponse = JSON.parse(responseBody);
       const usage = this.extractUsageFromResponse(parsedResponse);
@@ -35,7 +35,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
   }
 
-  private parseStreamResponse(responseBody: string): Result<ModelUsage, string> {
+  protected parseStreamResponse(responseBody: string): Result<ModelUsage, string> {
     try {
       const lines = responseBody
         .split("\n")
@@ -65,17 +65,10 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
   }
 
-  private consolidateStreamData(streamData: any[]): any {
-    const lastChunkWithUsage = [...streamData].reverse().find(chunk => chunk?.usage || chunk?.x_groq?.usage);
+  protected consolidateStreamData(streamData: any[]): any {
+    const lastChunkWithUsage = [...streamData].reverse().find(chunk => chunk?.usage);
     if (lastChunkWithUsage?.usage) {
       return lastChunkWithUsage;
-    }
-    // Handle Groq streaming format where usage is in x_groq.usage
-    if (lastChunkWithUsage?.x_groq?.usage) {
-      return {
-        ...lastChunkWithUsage,
-        usage: lastChunkWithUsage.x_groq.usage
-      };
     }
 
     const consolidated: any = {
@@ -86,8 +79,6 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     for (const chunk of streamData) {
       if (chunk?.usage) {
         consolidated.usage = chunk.usage;
-      } else if (chunk?.x_groq?.usage) {
-        consolidated.usage = chunk.x_groq.usage;
       }
       if (chunk?.id) {
         consolidated.id = chunk.id;
@@ -100,7 +91,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     return consolidated;
   }
 
-  private extractUsageFromResponse(parsedResponse: any): ModelUsage {
+  protected extractUsageFromResponse(parsedResponse: any): ModelUsage {
     if (!parsedResponse || typeof parsedResponse !== "object") {
       return {
         input: 0,
@@ -120,7 +111,6 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const promptAudioTokens = promptDetails.audio_tokens ?? 0;
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
-    const numSourcesUsed = usage.num_sources_used ?? 0;
     
     const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
     const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
@@ -150,10 +140,6 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const acceptedTokens = completionDetails.accepted_prediction_tokens ?? 0;
     if (rejectedTokens > 0 || acceptedTokens > 0) {
       modelUsage.output = effectiveCompletionTokens + acceptedTokens;
-    }
-
-    if (numSourcesUsed > 0) {
-      modelUsage.web_search = numSourcesUsed;
     }
 
     return modelUsage;
