@@ -1750,6 +1750,9 @@
 			},
 			"OrganizationMember": {
 				"properties": {
+					"created_at": {
+						"type": "string"
+					},
 					"org_role": {
 						"type": "string"
 					},
@@ -1761,6 +1764,7 @@
 					}
 				},
 				"required": [
+					"created_at",
 					"org_role",
 					"member",
 					"email"
@@ -49336,6 +49340,59 @@
 								"required": [
 									"memberId",
 									"role"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/update_owner": {
+			"post": {
+				"operationId": "UpdateOrganizationOwner",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"memberId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"memberId"
 								],
 								"type": "object"
 							}
