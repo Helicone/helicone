@@ -66,7 +66,6 @@ export class RequestWrapper {
   requestReferrer: string | undefined;
   requestBodyWrapper: RequestBodyBuffer;
 
-  private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
 
   private gatewayAttempt?: Attempt;
@@ -661,7 +660,7 @@ export class RequestWrapper {
   }
 
   setBody(body: string): void {
-    this.cachedText = body;
+    this.requestBodyWrapper.tempSetBody(body);
   }
 
   setSuccessfulAttempt(attempt: Attempt): void {

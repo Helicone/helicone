@@ -9,6 +9,11 @@ export class RequestBodyBuffer {
     private dataDogClient: DataDogClient | undefined
   ) {}
 
+  // TODO remove this function in later phases
+  public tempSetBody(body: string): void {
+    this.cachedText = body;
+  }
+
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
     if (this.cachedText) {
