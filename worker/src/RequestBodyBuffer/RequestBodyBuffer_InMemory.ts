@@ -12,6 +12,10 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     private dataDogClient: DataDogClient | undefined
   ) {}
 
+  public tempSetBody(body: string): void {
+    this.cachedText = body;
+  }
+
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
     if (this.cachedText) {

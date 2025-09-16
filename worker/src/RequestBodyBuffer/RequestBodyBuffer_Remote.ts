@@ -1,7 +1,11 @@
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
-import { getContainer } from "@cloudflare/containers";
-import { RequestBodyBuffer } from "./RequestBodyBufferBuilder";
+import { Container, getContainer } from "@cloudflare/containers";
+
+export class RequestBodyBufferContainer extends Container {
+  defaultPort = 8000; // Port the container is listening on
+  sleepAfter = "10m"; // Stop the instance if requests not sent for 10 minutes
+}
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
@@ -66,15 +70,19 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       });
   }
 
+  public tempSetBody(body: string): void {
+    throw new Error("Not implemented");
+  }
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
-    const response = await this.requestBodyBuffer.fetch(
-      `${BASE_URL}/${this.requestId}/unsafe/read`,
-      {
-        method: "GET",
-      }
-    );
-    return await response.text();
+    throw new Error("Not implemented");
+    // const response = await this.requestBodyBuffer.fetch(
+    //   `${BASE_URL}/${this.requestId}/unsafe/read`,
+    //   {
+    //     method: "GET",
+    //   }
+    // );
+    // return await response.text();
   }
 
   async signAWSRequest(body: {
@@ -87,13 +95,14 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     newHeaders: Headers;
     model: string;
   }> {
-    const response = await this.requestBodyBuffer.fetch(
-      `${BASE_URL}/${this.requestId}/sign-aws`,
-      {
-        method: "GET",
-        body: JSON.stringify(body),
-      }
-    );
-    return await response.json();
+    throw new Error("Not implemented");
+    // const response = await this.requestBodyBuffer.fetch(
+    //   `${BASE_URL}/${this.requestId}/sign-aws`,
+    //   {
+    //     method: "GET",
+    //     body: JSON.stringify(body),
+    //   }
+    // );
+    // return await response.json();
   }
 }

@@ -11,7 +11,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
-	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBuffer" }
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
 ]
 
 
@@ -30,7 +30,7 @@ queues.producers = [
 ]
 
 containers = [
-	{ image = "./RequestBodyBuffer/Dockerfile", class_name = "RequestBodyBuffer", max_instances = 10 }
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10 }
 ]
 
 [vars]
@@ -308,4 +308,4 @@ new_sqlite_classes = ["Wallet"]
 
 [[migrations]]
 tag = "v9"
-new_sqlite_classes = ["RequestBodyBuffer"]
+new_sqlite_classes = ["RequestBodyBufferContainer"]
