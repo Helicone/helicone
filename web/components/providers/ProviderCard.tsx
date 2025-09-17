@@ -97,7 +97,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   const isEditMode = !!existingKey;
   const hasAdvancedConfig =
     provider.id === "azure" ||
-    provider.id === "aws" ||
+    provider.id === "bedrock" ||
     provider.id === "vertex";
 
   // Track if there are unsaved changes
@@ -123,7 +123,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
         apiVersion: "",
         deploymentName: "",
       };
-    } else if (provider.id === "aws") {
+    } else if (provider.id === "bedrock") {
       initialConfig = {
         region: "",
         crossRegion: "false",
@@ -320,8 +320,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     // Only update if we're in edit mode and have new values
     if (
       !isEditingKey ||
-      (provider.id === "aws" && !keyValue && !secretKeyValue) ||
-      (provider.id !== "aws" && !keyValue)
+      (provider.id === "bedrock" && !keyValue && !secretKeyValue) ||
+      (provider.id !== "bedrock" && !keyValue)
     ) {
       setNotification("Please enter at least one key value", "error");
       return;
@@ -383,7 +383,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           placeholder: "gpt-35-turbo",
         },
       ];
-    } else if (provider.id === "aws") {
+    } else if (provider.id === "bedrock") {
       configFields = [
         { label: "Region", key: "region", placeholder: "us-west-2" },
         {
@@ -406,8 +406,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
 
     return (
       <div className="mt-3 flex flex-col gap-2">
-        {provider.id === "aws" ? (
-          // Special layout for AWS to put cross region below region
+        {provider.id === "bedrock" ? (
+          // Special layout for AWS Bedrock to put cross region below region
           <div className="flex flex-col gap-2">
             <div className="flex gap-3">
               <div className="flex flex-1 flex-col gap-1">
@@ -553,7 +553,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           {/* Key input row */}
           <div className="flex items-end gap-1">
             <div className="relative flex-1">
-              {provider.id === "aws" && <Label>Access key</Label>}
+              {provider.id === "bedrock" && <Label>Access key</Label>}
               <Input
                 type={isViewingKey || isEditingKey ? "text" : "password"}
                 placeholder={
@@ -572,7 +572,9 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
               <div
                 className={cn(
                   "absolute right-1 flex -translate-y-1/2 items-center gap-1",
-                  provider.id === "aws" ? "top-[calc(50%+12px)]" : "top-1/2",
+                  provider.id === "bedrock"
+                    ? "top-[calc(50%+12px)]"
+                    : "top-1/2",
                 )}
               >
                 {/* Copy button - always visible for existing keys, disabled when no value */}
@@ -628,7 +630,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                 )}
               </div>
             </div>
-            {provider.id === "aws" && (
+            {provider.id === "bedrock" && (
               <div className="relative flex-1">
                 <Label>Secret key</Label>
                 <Input

@@ -1,7 +1,11 @@
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { getContainer } from "@cloudflare/containers";
+<<<<<<< HEAD
 import type { RequestBodyBufferContainer } from "./RequestBodyContainer";
+=======
+import { RequestBodyBufferContainer } from "./RequestBodyContainer";
+>>>>>>> main
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 

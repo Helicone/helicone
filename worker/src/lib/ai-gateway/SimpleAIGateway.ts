@@ -364,11 +364,13 @@ export class SimpleAIGateway {
     // Priority order for status codes:
     // 1. If ANY error is 429 (insufficient credits), return 429
     // 2. If ANY error is 401 (authentication), return 401
-    // 3. If ALL errors are disallowed (400), return 400
-    // 4. Otherwise return 500
+    // 3. If ANY error is 403 (wallet suspended, etc), return 403 with upstream message
+    // 4. If ALL errors are disallowed (400), return 400
+    // 5. Otherwise return 500
 
     const has429 = errors.some((e) => e.statusCode === 429);
     const has401 = errors.some((e) => e.statusCode === 401);
+    const first403 = errors.find((e) => e.statusCode === 403);
     const allDisallowed =
       errors.length > 0 && errors.every((e) => e.type === "disallowed");
 
@@ -379,6 +381,10 @@ export class SimpleAIGateway {
     } else if (has401) {
       statusCode = 401;
       message = "Authentication failed";
+      code = "request_failed";
+    } else if (first403) {
+      statusCode = 403;
+      message = first403.error;
       code = "request_failed";
     } else if (allDisallowed) {
       statusCode = 400;
