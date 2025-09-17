@@ -10,7 +10,7 @@ export async function handleLoggingEndpoint(
   request: RequestWrapper,
   env: Env
 ): Promise<Response> {
-  const body = await request.getJson<LoggingRequestBody>();
+  const body = await request.unsafeGetJson<LoggingRequestBody>();
   const heliconeId = body["helicone-id"];
   const propTag = "helicone-property-";
   const heliconeHeaders = Object.fromEntries(
