@@ -1,5 +1,32 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`AnthropicUsageProcessor usage processing snapshot 1`] = `
+{
+  "anthropic-response": {
+    "data": {
+      "cacheDetails": {
+        "cachedInput": 183,
+        "write5m": 50,
+      },
+      "input": 9,
+      "output": 12,
+    },
+    "error": null,
+  },
+  "anthropic-stream-response": {
+    "data": {
+      "cacheDetails": {
+        "cachedInput": 500,
+        "write1h": 20,
+      },
+      "input": 338,
+      "output": 65,
+    },
+    "error": null,
+  },
+}
+`;
+
 exports[`OpenAIUsageProcessor usage processing snapshot 1`] = `
 {
   "cached-response": {
