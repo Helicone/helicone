@@ -2,8 +2,8 @@ export type AppConfig = {
   port: number;
   maxSizeBytes: number;
   ttlSeconds: number;
-  internalSecret: string;
   logLevel: string;
+  enableUnsafeRead: boolean;
 };
 
 export function getConfig(): AppConfig {
@@ -14,7 +14,7 @@ export function getConfig(): AppConfig {
       10
     ),
     ttlSeconds: parseInt(process.env.TTL_SECONDS ?? "120", 10),
-    internalSecret: process.env.INTERNAL_SECRET ?? "",
     logLevel: process.env.LOG_LEVEL ?? "info",
+    enableUnsafeRead: (process.env.ENABLE_UNSAFE_READ ?? "true").toLowerCase() === "true",
   };
 }

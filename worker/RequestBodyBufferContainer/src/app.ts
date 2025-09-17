@@ -16,11 +16,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     done(null, payload);
   });
 
-  function checkSecret(req: any): boolean {
-    if (!config.internalSecret) return true;
-    const v = req.headers["x-helicone-internal-secret"] as string | undefined;
-    return v === config.internalSecret;
-  }
+  // No internal secret: container is not publicly accessible.
 
   async function readBody(req: any, maxBytes: number): Promise<Buffer> {
     const b = (req.body ?? null) as unknown;
@@ -55,7 +51,6 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
   app.post<{
     Params: { requestId: string };
   }>("/:requestId", async (request, reply) => {
-    if (!checkSecret(request)) return reply.code(401).send({ error: "unauthorized" });
 
     const { requestId } = request.params;
     const t0 = Date.now();
@@ -77,7 +72,6 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
   app.get<{
     Params: { requestId: string };
   }>("/:requestId/unsafe/read", async (request, reply) => {
-    if (!checkSecret(request)) return reply.code(401).send("unauthorized");
     const { requestId } = request.params;
     const entry = store.get(requestId);
     if (!entry) return reply.code(404).send("not found");
@@ -98,7 +92,6 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     Params: { requestId: string };
     Body: SignAwsInput;
   }>("/:requestId/sign-aws", async (request, reply) => {
-    if (!checkSecret(request)) return reply.code(401).send({ error: "unauthorized" });
     const { requestId } = request.params;
     const entry = store.get(requestId);
     if (!entry) return reply.code(404).send({ error: "not found" });
@@ -119,7 +112,6 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
   app.delete<{
     Params: { requestId: string };
   }>("/:requestId", async (request, reply) => {
-    if (!checkSecret(request)) return reply.code(401).send({ error: "unauthorized" });
     const { requestId } = request.params;
     store.delete(requestId);
     return reply.send({ ok: true });

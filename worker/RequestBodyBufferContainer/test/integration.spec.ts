@@ -7,9 +7,7 @@ function appWith(cfg: Partial<AppConfig> = {}) {
   const config: AppConfig = {
     port: 0,
     maxSizeBytes: 256 * 1024 * 1024,
-    unsafeReadMaxBytes: 5 * 1024 * 1024,
     ttlSeconds: 60,
-    internalSecret: "",
     logLevel: "error",
     ...cfg,
   };
@@ -91,27 +89,7 @@ describe("RequestBodyBufferContainer (memory-only)", () => {
     expect(j.newHeaders["host"]).toBe(input.forwardToHost);
   });
 
-  it("requires internal secret when configured", async () => {
-    app = appWith({ internalSecret: "sekret" });
-    const res1 = await app.inject({
-      method: "POST",
-      url: "/s1",
-      payload: "x",
-      headers: { "content-type": "application/octet-stream" },
-    });
-    expect(res1.statusCode).toBe(401);
-
-    const res2 = await app.inject({
-      method: "POST",
-      url: "/s2",
-      payload: "x",
-      headers: {
-        "content-type": "application/octet-stream",
-        "x-helicone-internal-secret": "sekret",
-      },
-    });
-    expect(res2.statusCode).toBe(200);
-  });
+  // No internal secret: container is private to Worker networking.
 
   it("expires entries after TTL", async () => {
     app = appWith({ ttlSeconds: 1 });
