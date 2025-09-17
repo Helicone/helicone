@@ -37,7 +37,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
     const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
-      providerModelId: "claude-3.5-sonnet-v2",
+      providerModelId: "claude-3-5-sonnet-20241022",
       provider: "anthropic" as ModelProviderName,
     });
 

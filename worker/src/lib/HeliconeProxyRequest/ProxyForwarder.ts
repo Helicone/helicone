@@ -532,9 +532,6 @@ async function log(
         const attemptProvider = successfulAttempt.endpoint.provider;
 
         const usageProcessor = getUsageProcessor(attemptProvider);
-        if (!usageProcessor) {
-          throw new Error(`No usage processor found for AI Gateway provider: ${attemptProvider}`);
-        }
 
         const usage = await usageProcessor.parse({
           responseBody: rawResponse,
@@ -576,8 +573,9 @@ async function log(
 
           if (modelProviderName) {
             // try usage processor + new registry first
-            const usageProcessor = getUsageProcessor(modelProviderName);
-            if (usageProcessor) {
+            try {
+              const usageProcessor = getUsageProcessor(modelProviderName);
+              
               try {
                 const usage = await usageProcessor.parse({
                   responseBody: rawResponse,
@@ -608,8 +606,10 @@ async function log(
                   }
                 }
               } catch (error) {
-                console.warn("Usage processor failed, falling back to legacy:", error);
+                console.warn("Usage processor parsing failed, falling back to legacy:", error);
               }
+            } catch (error) {
+              console.warn(`No usage processor available for provider ${modelProviderName}, falling back to legacy:`, error);
             }
           }
 
