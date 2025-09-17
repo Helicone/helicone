@@ -9,6 +9,68 @@ import type {
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
+import { Provider } from "@helicone-package/llm-mapper/types";
+
+// Helper function to convert legacy Provider type to ModelProviderName
+export function heliconeProviderToModelProviderName(
+  provider: Provider
+): ModelProviderName | null {
+  if (provider === "CUSTOM") {
+    return null;
+  }
+
+  switch (provider) {
+    case "OPENAI":
+      return "openai";
+    case "ANTHROPIC":
+      return "anthropic";
+    case "GOOGLE":
+      return "google-ai-studio";
+    case "GROQ":
+      return "groq";
+    case "X":
+      return "xai";
+    case "AZURE":
+      return "azure";
+    case "AWS":
+    case "BEDROCK":
+      return "bedrock";
+    case "PERPLEXITY":
+      return "perplexity";
+    case "DEEPSEEK":
+      return "deepseek";
+    case "COHERE":
+      return "cohere";
+    case "OPENROUTER":
+      return "openrouter";
+    // new registry does not have
+    case "LOCAL":
+    case "HELICONE":
+    case "AMDBARTEK":
+    case "ANYSCALE":
+    case "CLOUDFLARE":
+    case "2YFV":
+    case "TOGETHER":
+    case "LEMONFOX":
+    case "FIREWORKS":
+    case "WISDOMINANUTSHELL":
+    case "MISTRAL":
+    case "DEEPINFRA":
+    case "QSTASH":
+    case "FIRECRAWL":
+    case "AVIAN":
+    case "NEBIUS":
+    case "NOVITA":
+    case "OPENPIPE":
+    case "CHUTES":
+    case "LLAMA":
+    case "NVIDIA":
+    case "VERCEL":
+      return null;
+    default:
+      return null;
+  }
+}
 
 // Helper function to get provider instance
 export function getProvider(providerName: string): Result<BaseProvider> {
@@ -53,6 +115,9 @@ export const dbProviderToProvider = (
   }
   if (provider === "Azure OpenAI") {
     return "azure";
+  }
+  if (provider === "deepseek" || provider === "DeepSeek") {
+    return "deepseek";
   }
   return null;
 };

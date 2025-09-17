@@ -86,7 +86,6 @@ describe("RequestBodyBufferContainer (memory-only)", () => {
     expect(j.userId).toBeUndefined();
     expect(j.model).toBeUndefined();
   });
-
   it("sign-aws returns signed headers and model", async () => {
     app = appWith();
     const payload = JSON.stringify({ foo: "bar" });

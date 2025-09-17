@@ -87,9 +87,7 @@ export function getModel(requestBody: string): string {
 }
 
 export async function anthropicAIStream(
-  result: string,
-  tokenCounter: (text: string) => Promise<number>,
-  model?: string
+  result: string
 ): Promise<Result<any, string>> {
   const lines = result
     .split("\n")
@@ -105,32 +103,9 @@ export async function anthropicAIStream(
     .filter((line) => line !== null);
 
   try {
-    if (
-      model?.includes("claude-3") ||
-      model?.includes("claude-sonnet-4") ||
-      model?.includes("claude-opus-4") ||
-      // for AI SDK
-      model?.includes("claude-4")
-    ) {
-      return ok({
-        ...recursivelyConsolidateAnthropicListForClaude(lines),
-      });
-    } else {
-      const claudeData = {
-        ...lines[lines.length - 1],
-        completion: lines.map((d) => d.completion).join(""),
-      };
-
-      return ok({
-        ...consolidateTextFields(lines),
-        usage: {
-          total_tokens: -1,
-          prompt_tokens: -1,
-          completion_tokens: -1,
-          helicone_calculated: true,
-        },
-      });
-    }
+    return ok({
+      ...recursivelyConsolidateAnthropicListForClaude(lines),
+    });
   } catch (e) {
     console.error("Error parsing response", e);
     return {

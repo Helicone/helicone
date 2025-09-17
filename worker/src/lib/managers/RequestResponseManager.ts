@@ -1,22 +1,5 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { S3Client } from "../clients/S3Client";
-import { Result, ok } from "../util/results";
-import { Database } from "../../../supabase/database.types";
-import {
-  IRequestBodyBuffer,
-  ValidRequestBody,
-} from "../../RequestBodyBuffer/IRequestBodyBuffer";
-
-export type RequestResponseContent = {
-  requestId: string;
-  organizationId: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  requestBody: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  responseBody: any;
-  model: string;
-  assets: Map<string, string>;
-};
+import { Result } from "../util/results";
 
 export class RequestResponseManager {
   constructor(private s3Client: S3Client) {}
@@ -24,9 +7,7 @@ export class RequestResponseManager {
   async storeRequestResponseRaw(content: {
     organizationId: string;
     requestId: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    requestBodyBuffer: IRequestBodyBuffer;
-    responseBody: any;
+    requestStream: ReadableStream;
   }): Promise<Result<string, string>> {
     const url = this.s3Client.getRequestResponseRawUrl(
       content.requestId,
@@ -37,10 +18,6 @@ export class RequestResponseManager {
       name: "raw-request-response-body",
     };
 
-    return await content.requestBodyBuffer.uploadS3Body(
-      content.responseBody,
-      url,
-      tags
-    );
+    return await this.s3Client.store(url, content.requestStream, tags);
   }
 }

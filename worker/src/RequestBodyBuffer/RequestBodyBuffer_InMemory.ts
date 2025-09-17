@@ -3,48 +3,15 @@ import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
 import { IRequestBodyBuffer, ValidRequestBody } from "./IRequestBodyBuffer";
-import { ok, Result } from "../lib/util/results";
-import { S3Client } from "../lib/clients/S3Client";
 
-async function concatUint8Arrays(
-  uint8arrays: Uint8Array[]
-): Promise<Uint8Array> {
-  const blob = new Blob(uint8arrays);
-  const buffer = await blob.arrayBuffer();
-  return new Uint8Array(buffer);
-}
-
-async function compress(str: string) {
-  // Convert the string to a byte stream.
-  const stream = new Blob([str]).stream();
-
-  // Create a compressed stream.
-  const compressedStream = stream.pipeThrough(new CompressionStream("gzip"));
-
-  // Read all the bytes from this stream.
-  const chunks = [];
-  for await (const chunk of compressedStream) {
-    chunks.push(chunk);
-  }
-  return await concatUint8Arrays(chunks);
-}
 // NEVER give the user direct access to the body
 export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   private cachedText: string | null = null;
-  private s3Client: S3Client;
 
   constructor(
     private request: Request,
-    private dataDogClient: DataDogClient | undefined,
-    private env: Env
+    private dataDogClient: DataDogClient | undefined
   ) {
-    this.s3Client = new S3Client(
-      env.S3_ACCESS_KEY ?? "",
-      env.S3_SECRET_KEY ?? "",
-      env.S3_ENDPOINT ?? "",
-      env.S3_BUCKET_NAME ?? "",
-      env.S3_REGION ?? "us-west-2"
-    );
   }
 
   public tempSetBody(body: string): void {
@@ -182,20 +149,5 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   async model(): Promise<string | undefined> {
     const json = await this.getJson<{ model?: string }>();
     return json.model ?? "unknown";
-  }
-
-  async uploadS3Body(
-    responseBody: any,
-    url: string,
-    tags?: Record<string, string>
-  ): Promise<Result<string, string>> {
-    return this.s3Client.store(
-      url,
-      JSON.stringify({
-        request: await this.unsafeGetRawText(),
-        response: responseBody,
-      }),
-      tags
-    );
   }
 }

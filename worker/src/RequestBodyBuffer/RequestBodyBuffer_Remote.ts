@@ -199,38 +199,4 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     await this.ingestPromise.catch(() => undefined);
     return this.metadata.model;
   }
-
-  /**
-   * Prepares a stream in the container so that we return it as a stream in this format:
-   * {
-   *    request: requestBody,
-   *    response: responseBody
-   * }
-   * @param responseBody
-   */
-  async uploadS3Body(
-    responseBody: any,
-    tags?: Record<string, string>,
-    url?: string
-  ): Promise<Result<string, string>> {
-    await this.ingestPromise.catch(() => undefined);
-    const res = await this.requestBodyBuffer.fetch(
-      `${BASE_URL}/${this.uniqueId}/s3/upload-body`,
-      {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-access-key": this.awsCreds.accessKey,
-          "x-secret-key": this.awsCreds.secretKey,
-          "x-region": this.awsCreds.region,
-        },
-        body: JSON.stringify({ response: responseBody, tags, url }),
-      }
-    );
-
-    if (!res.ok) {
-      return err(`Failed to store data: ${res.statusText}, ${res.url}, ${url}`);
-    }
-    return ok(res.url);
-  }
 }
