@@ -1,4 +1,6 @@
 import Fastify, { FastifyInstance } from "fastify";
+import type { FastifyRequest } from "fastify";
+import type { IncomingMessage } from "http";
 import { Readable } from "node:stream";
 import { z } from "zod";
 import { MemoryStore } from "./storage/memoryStore";
@@ -18,8 +20,14 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
   // No internal secret: container is not publicly accessible.
 
-  async function readBody(req: any, maxBytes: number): Promise<Buffer> {
-    const b = (req.body ?? null) as unknown;
+  type IngestRequest = Pick<FastifyRequest, "body" | "raw"> & {
+    raw: IncomingMessage;
+    // after our content-type parser, body is either Buffer or string
+    body?: Buffer | string;
+  };
+
+  async function readBody(req: IngestRequest, maxBytes: number): Promise<Buffer> {
+    const b = req.body;
     if (typeof b === 'string') {
       const buf = Buffer.from(b);
       if (buf.byteLength > maxBytes) throw new Error('Payload Too Large');
@@ -29,7 +37,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
       if (b.byteLength > maxBytes) throw new Error('Payload Too Large');
       return b;
     }
-    const stream: Readable = req.raw as Readable;
+    const stream: Readable = req.raw as unknown as Readable;
     return await new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = [];
       let total = 0;
