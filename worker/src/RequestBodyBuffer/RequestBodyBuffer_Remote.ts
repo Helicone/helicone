@@ -2,8 +2,7 @@ import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { getContainer } from "@cloudflare/containers";
 import type { RequestBodyBufferContainer } from "./RequestBodyContainer";
-import { ok, Result } from "../lib/util/results";
-import { S3Client } from "../lib/clients/S3Client";
+import { err, ok, Result } from "../lib/util/results";
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
@@ -54,7 +53,11 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   // */
   private uniqueId: string;
   private ingestPromise: Promise<void>;
-  private s3Client: S3Client;
+  private awsCreds: {
+    accessKey: string;
+    secretKey: string;
+    region: string;
+  };
   private metadataPromise: Promise<void>;
 
   private metadata: {
@@ -67,15 +70,17 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     request: Request,
     private dataDogClient: DataDogClient | undefined,
     requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"],
-    env: Env
+    env: {
+      AWS_ACCESS_KEY_ID: string;
+      AWS_SECRET_ACCESS_KEY: string;
+      AWS_REGION: string;
+    }
   ) {
-    this.s3Client = new S3Client(
-      env.S3_ACCESS_KEY ?? "",
-      env.S3_SECRET_KEY ?? "",
-      env.S3_ENDPOINT ?? "",
-      env.S3_BUCKET_NAME ?? "",
-      env.S3_REGION ?? "us-west-2"
-    );
+    this.awsCreds = {
+      accessKey: env.AWS_ACCESS_KEY_ID,
+      secretKey: env.AWS_SECRET_ACCESS_KEY,
+      region: env.AWS_REGION,
+    };
     this.uniqueId = crypto.randomUUID();
     this.requestBodyBuffer = getRequestBodyContainer(
       requestBodyBufferEnv,
@@ -229,11 +234,23 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     tags?: Record<string, string>
   ): Promise<Result<string, string>> {
     await this.ingestPromise.catch(() => undefined);
-    const reqText = await this.unsafeGetRawText();
-    return this.s3Client.store(
-      url,
-      JSON.stringify({ request: reqText, response: responseBody }),
-      tags
+    const res = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/s3/upload-body`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-access-key": this.awsCreds.accessKey,
+          "x-secret-key": this.awsCreds.secretKey,
+          "x-region": this.awsCreds.region,
+        },
+        body: JSON.stringify({ response: responseBody, tags, url }),
+      }
     );
+
+    if (!res.ok) {
+      return err(`Failed to store data: ${res.statusText}, ${res.url}, ${url}`);
+    }
+    return ok(res.url);
   }
 }
