@@ -33,6 +33,39 @@ async function isOver(
 }
 
 /**
+ * Sometimes the durable object is not initialized yet, so let's fallback to in-memory
+ * @returns
+ */
+function tryInitRemote(
+  request: Request,
+  dataDogClient: DataDogClient | undefined,
+  env: Env
+) {
+  try {
+    if (env.REQUEST_BODY_BUFFER) {
+      return new RequestBodyBuffer_Remote(
+        null,
+        dataDogClient,
+        env.REQUEST_BODY_BUFFER,
+        env
+      );
+    } else {
+      return new RequestBodyBuffer_InMemory(
+        request.body ?? null,
+        dataDogClient,
+        env
+      );
+    }
+  } catch (e) {
+    return new RequestBodyBuffer_InMemory(
+      request.body ?? null,
+      dataDogClient,
+      env
+    );
+  }
+}
+
+/**
  * Choose the request body buffer strategy without consuming the body.
  * Heuristic:
  * - If method is GET/HEAD or no body: use in-memory.
@@ -64,25 +97,23 @@ export async function RequestBodyBufferBuilder(
   if (sizeIsKnown) {
     if (contentLength > MAX_INMEMORY_BYTES) {
       // Large known body → InMemory, pass original stream
-      return new RequestBodyBuffer_InMemory(request.body ?? null, dataDogClient, env);
+      return new RequestBodyBuffer_InMemory(
+        request.body ?? null,
+        dataDogClient,
+        env
+      );
     } else {
-      // Small known body → Remote if available, else InMemory
-      if (env.REQUEST_BODY_BUFFER) {
-        return new RequestBodyBuffer_Remote(
-          request.body ?? null,
-          dataDogClient,
-          env.REQUEST_BODY_BUFFER,
-          env
-        );
-      } else {
-        return new RequestBodyBuffer_InMemory(request.body ?? null, dataDogClient, env);
-      }
+      return tryInitRemote(request, dataDogClient, env);
     }
   }
 
   // If container is not bound and size is unknown, default to in-memory.
   if (!env.REQUEST_BODY_BUFFER) {
-    return new RequestBodyBuffer_InMemory(request.body ?? null, dataDogClient, env);
+    return new RequestBodyBuffer_InMemory(
+      request.body ?? null,
+      dataDogClient,
+      env
+    );
   }
 
   const originalBody = request.body!;
@@ -93,12 +124,6 @@ export async function RequestBodyBufferBuilder(
     // Large request (> 20 MiB): use InMemory, feed it the left side of tee
     return new RequestBodyBuffer_InMemory(leftForRemote, dataDogClient, env);
   } else {
-    // Small request (≤ 20 MiB): prefer Remote and forward the untouched left stream
-    return new RequestBodyBuffer_Remote(
-      leftForRemote,
-      dataDogClient,
-      env.REQUEST_BODY_BUFFER,
-      env
-    );
+    return tryInitRemote(request, dataDogClient, env);
   }
 }
