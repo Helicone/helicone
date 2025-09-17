@@ -15,4 +15,6 @@ export interface IRequestBodyBuffer {
 
   // For forwarding to providers without reading into memory when possible.
   getReadableStreamToBody(): Promise<ValidRequestBody>;
+
+  isStream(): Promise<boolean>;
 }

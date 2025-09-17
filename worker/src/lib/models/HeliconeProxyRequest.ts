@@ -35,7 +35,6 @@ export interface HeliconeProxyRequest {
   retryOptions: IHeliconeHeaders["retryHeaders"];
   omitOptions: IHeliconeHeaders["omitHeaders"];
 
-  requestJson: { stream?: boolean; user?: string } | Record<string, never>;
   body: ValidRequestBody;
   unsafeGetBodyText: () => Promise<string | null>;
 
@@ -143,8 +142,7 @@ export class HeliconeProxyRequestMapper {
 
     const targetUrl = buildTargetUrl(this.request.url, api_base);
 
-    const requestJson = await this.requestJson();
-    let isStream = requestJson.stream === true;
+    let isStream = await this.request.requestBodyBuffer.isStream();
 
     if (this.provider === "GOOGLE") {
       const queryParams = new URLSearchParams(targetUrl.search);
@@ -164,7 +162,6 @@ export class HeliconeProxyRequestMapper {
         isRateLimitedKey:
           this.request.heliconeHeaders.heliconeAuthV2?.keyType ===
           "rate-limited",
-        requestJson: requestJson,
         retryOptions: this.request.heliconeHeaders.retryHeaders,
         provider: this.provider,
         tokenCalcUrl: this.tokenCalcUrl,
@@ -263,11 +260,5 @@ export class HeliconeProxyRequestMapper {
       this.heliconeErrors.push(rateLimitOptions.error);
     }
     return rateLimitOptions.data ?? null;
-  }
-
-  async requestJson(): Promise<HeliconeProxyRequest["requestJson"]> {
-    return this.request.getMethod() === "POST"
-      ? await this.request.unsafeGetJson()
-      : {};
   }
 }
