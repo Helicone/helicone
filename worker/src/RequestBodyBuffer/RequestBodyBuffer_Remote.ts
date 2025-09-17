@@ -46,7 +46,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   private requestBodyBuffer: DurableObjectStub<RequestBodyBufferContainer>;
 
   // **
-  // * NOTE we are explicity not ussing the requestId here
+  // * NOTE we are explicitly not using the requestId here
   // * because users can set their own requestId.
   // So we need to generate a unique id for each request. (For security reasons)
   // */
