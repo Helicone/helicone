@@ -32,6 +32,10 @@ jobs:
         working-directory: worker/RequestBodyBufferContainer
         run: npm ci
 
+      - name: Type check
+        working-directory: worker/RequestBodyBufferContainer
+        run: npm run typecheck
+
       - name: Run tests
         working-directory: worker/RequestBodyBufferContainer
         run: npm test --silent
@@ -39,4 +43,3 @@ jobs:
       - name: Summary
         if: always()
         run: echo "✅ RequestBodyBufferContainer tests completed"
-

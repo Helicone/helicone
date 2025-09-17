@@ -1,5 +1,4 @@
 import Fastify, { FastifyInstance } from "fastify";
-import type { FastifyRequest } from "fastify";
 import type { IncomingMessage } from "http";
 import { Readable } from "node:stream";
 import { z } from "zod";
@@ -26,7 +25,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
   type IngestRequest = {
     raw: IncomingMessage;
-    body?: unknown;
+    body?: Buffer | string;
   };
 
   async function readBody(
