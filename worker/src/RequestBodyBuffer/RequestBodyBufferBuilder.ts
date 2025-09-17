@@ -101,23 +101,19 @@ export async function RequestBodyBufferBuilder(
       // Large known body → InMemory, pass original stream
       return new RequestBodyBuffer_InMemory(
         request.body ?? null,
+  if (sizeIsKnown) {
+    if (contentLength > MAX_INMEMORY_BYTES) {
+      // Large known body → Remote, use durable object
+      return tryInitRemote(request, dataDogClient, env);
+    } else {
+      // Small known body → InMemory
+      return new RequestBodyBuffer_InMemory(
+        request.body ?? null,
         dataDogClient,
         env
       );
-    } else {
-      return tryInitRemote(request, dataDogClient, env);
     }
   }
-
-  // If container is not bound and size is unknown, default to in-memory.
-  if (!env.REQUEST_BODY_BUFFER) {
-    return new RequestBodyBuffer_InMemory(
-      request.body ?? null,
-      dataDogClient,
-      env
-    );
-  }
-
   if (exceeded) {
     // Large request (> 20 MiB): use Remote to avoid memory pressure
     return tryInitRemote(request, dataDogClient, env);
