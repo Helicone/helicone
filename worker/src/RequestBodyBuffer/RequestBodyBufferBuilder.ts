@@ -118,14 +118,11 @@ export async function RequestBodyBufferBuilder(
     );
   }
 
-  const originalBody = request.body!;
-  const [leftForRemote, rightForProbe] = originalBody.tee();
-  const exceeded = await isOver(rightForProbe, MAX_INMEMORY_BYTES);
-
   if (exceeded) {
-    // Large request (> 20 MiB): use InMemory, feed it the left side of tee
-    return new RequestBodyBuffer_InMemory(leftForRemote, dataDogClient, env);
-  } else {
+    // Large request (> 20 MiB): use Remote to avoid memory pressure
     return tryInitRemote(request, dataDogClient, env);
+  } else {
+    // Small request: use InMemory for better performance
+    return new RequestBodyBuffer_InMemory(leftForRemote, dataDogClient, env);
   }
 }
