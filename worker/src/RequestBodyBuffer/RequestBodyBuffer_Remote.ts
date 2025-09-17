@@ -90,6 +90,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   }
 
   public tempSetBody(body: string): void {
+    // TODO we need to implement this for gateway
     // no-op for remote buffer
   }
   // super unsafe and should only be used for cases we know will be smaller bodies
@@ -154,5 +155,20 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     );
     if (!response.ok) return null;
     return response.body ?? null;
+  }
+
+  async isStream(): Promise<boolean> {
+    await this.ingestPromise.catch(() => undefined);
+    const response = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/is-stream`,
+      { method: "GET" }
+    );
+    if (!response.ok) return false;
+    try {
+      const data = (await response.json()) as { isStream?: boolean };
+      return data?.isStream === true;
+    } catch (_e) {
+      return false;
+    }
   }
 }
