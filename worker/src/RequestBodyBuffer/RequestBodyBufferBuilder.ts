@@ -27,5 +27,5 @@ export async function RequestBodyBufferBuilder(
   // }
 
   // Future: switch to Remote variant behind a feature flag when enabled.
-  return new RequestBodyBuffer_InMemory(request, dataDogClient);
+  return new RequestBodyBuffer_InMemory(request, dataDogClient, env);
 }

@@ -23,4 +23,10 @@ export interface IRequestBodyBuffer {
   userId(): Promise<string | undefined>;
 
   model(): Promise<string | undefined>;
+
+  uploadS3Body(
+    responseBody: any,
+    url: string,
+    tags?: Record<string, string>
+  ): Promise<Result<string, string>>;
 }

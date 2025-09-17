@@ -669,21 +669,13 @@ export class DBLoggable {
 
     if (S3_ENABLED === "true") {
       try {
-        const payload = JSON.stringify({
-          request: (await this.request.unsafeGetBodyText?.()) ?? "{}",
-          response: rawResponseBody.join(""),
-        });
-        const stream = new ReadableStream({
-          start(controller) {
-            controller.enqueue(payload);
-            controller.close();
-          },
-        });
-        const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
-          organizationId: authParams.organizationId,
-          requestId: this.request.requestId,
-          requestStream: stream,
-        });
+        const s3Result =
+          await db.requestResponseManager.storeRequestResponseRaw({
+            organizationId: authParams.organizationId,
+            requestId: this.request.requestId,
+            requestBodyBuffer: this.request.requestBodyBuffer,
+            responseBody: rawResponseBody.join(""),
+          });
 
         if (s3Result.error) {
           console.error(
