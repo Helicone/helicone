@@ -79,7 +79,7 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
       }
       if (chunk?.type === "message_delta" && chunk?.usage) {
         // message_delta contains the final usage, merge with any existing usage
-        finalUsage = { ...finalUsage, ...chunk.usage };
+        finalUsage = { ...finalUsage || {}, ...chunk.usage };
       }
     }
 
