@@ -1,6 +1,7 @@
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { getContainer } from "@cloudflare/containers";
+import type { RequestBodyBufferContainer } from "./RequestBodyContainer";
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
@@ -42,7 +43,7 @@ function getRequestBodyContainer(
 }
 
 export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
-  private requestBodyBuffer: DurableObjectStub<RequestBodyBuffer>;
+  private requestBodyBuffer: DurableObjectStub<RequestBodyBufferContainer>;
 
   constructor(
     request: Request,
@@ -54,30 +55,44 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       requestBodyBufferEnv,
       requestId
     );
+    const headers = new Headers();
+    headers.set("content-type", "application/octet-stream");
+
     this.requestBodyBuffer
       .fetch(`${BASE_URL}/${requestId}`, {
         method: "POST",
+        headers,
         body: request.body,
       })
       .then(async (response) => {
+        if (!response.ok) {
+          console.error("RequestBodyBuffer_Remote ingest failed", response.status);
+          return;
+        }
         const { size } = await response.json<{ size: number }>();
         dataDogClient?.trackMemory("container-request-body-size", size);
+      })
+      .catch((e) => {
+        console.error("RequestBodyBuffer_Remote ingest error", e);
       });
   }
 
   public tempSetBody(body: string): void {
-    throw new Error("Not implemented");
+    // no-op for remote buffer
   }
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
-    throw new Error("Not implemented");
-    // const response = await this.requestBodyBuffer.fetch(
-    //   `${BASE_URL}/${this.requestId}/unsafe/read`,
-    //   {
-    //     method: "GET",
-    //   }
-    // );
-    // return await response.text();
+    const response = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.requestId}/unsafe/read`,
+      {
+        method: "GET",
+      }
+    );
+    if (!response.ok) {
+      // keep behavior graceful; return empty string on miss
+      return "";
+    }
+    return await response.text();
   }
 
   async signAWSRequest(body: {
@@ -90,14 +105,22 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     newHeaders: Headers;
     model: string;
   }> {
-    throw new Error("Not implemented");
-    // const response = await this.requestBodyBuffer.fetch(
-    //   `${BASE_URL}/${this.requestId}/sign-aws`,
-    //   {
-    //     method: "GET",
-    //     body: JSON.stringify(body),
-    //   }
-    // );
-    // return await response.json();
+    const response = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.requestId}/sign-aws`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`sign-aws failed with status ${response.status}`);
+    }
+    const json = await response.json<{ newHeaders: Record<string, string>; model: string }>();
+    const headers = new Headers();
+    for (const [k, v] of Object.entries(json.newHeaders ?? {})) {
+      if (v !== undefined && v !== null) headers.set(k, String(v));
+    }
+    return { newHeaders: headers, model: json.model };
   }
 }
