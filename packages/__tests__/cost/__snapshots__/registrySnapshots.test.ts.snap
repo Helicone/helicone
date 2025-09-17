@@ -3,6 +3,32 @@
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
   "alibaba/qwen": {
+    "qwen3-30b-a3b:deepinfra": {
+      "context": 32768,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "Qwen/Qwen3-30B-A3B",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "qwen3-32b:groq": {
       "context": 131072,
       "crossRegion": false,
@@ -1544,6 +1570,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 exports[`Registry Snapshots model coverage snapshot 1`] = `
 {
   "alibaba/qwen": [
+    "deepinfra",
     "groq",
   ],
   "anthropic/claude-3.5-haiku": [
@@ -1660,6 +1687,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
 exports[`Registry Snapshots pricing snapshot 1`] = `
 {
   "alibaba/qwen": {
+    "deepinfra": [
+      {
+        "input": 8e-8,
+        "output": 2.9e-7,
+        "threshold": 0,
+      },
+    ],
     "groq": [
       {
         "audio": 0,
@@ -2487,6 +2521,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "qwen3-30b-a3b",
+      "providers": [
+        "deepinfra",
+      ],
+    },
+    {
       "model": "qwen3-32b",
       "providers": [
         "groq",
@@ -2505,6 +2545,10 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "modelCount": 6,
       "provider": "bedrock",
+    },
+    {
+      "modelCount": 1,
+      "provider": "deepinfra",
     },
     {
       "modelCount": 2,
@@ -2574,9 +2618,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:vertex:global",
     "claude-3.5-sonnet-v2:anthropic:*",
   ],
-  "totalEndpoints": 65,
-  "totalModelProviderConfigs": 65,
+  "totalEndpoints": 66,
+  "totalModelProviderConfigs": 66,
   "totalModelsWithPtb": 34,
-  "totalProviders": 9,
+  "totalProviders": 10
 }
 `;

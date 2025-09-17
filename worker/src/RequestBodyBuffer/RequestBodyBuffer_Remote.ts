@@ -53,6 +53,12 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   private uniqueId: string;
   private ingestPromise: Promise<void>;
 
+  private metadata: {
+    isStream?: boolean;
+    userId?: string;
+    model?: string;
+  } = {};
+
   constructor(
     request: Request,
     private dataDogClient: DataDogClient | undefined,
@@ -80,7 +86,13 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
           );
           return;
         }
-        const { size } = await response.json<{ size: number }>();
+        const { size, isStream, userId, model } = await response.json<{
+          size: number;
+          isStream?: boolean;
+          userId?: string;
+          model?: string;
+        }>();
+        this.metadata = { isStream, userId, model };
         console.log("RequestBodyBuffer_Remote ingest success", size);
         dataDogClient?.trackMemory("container-request-body-size", size);
       })
@@ -90,6 +102,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   }
 
   public tempSetBody(body: string): void {
+    // TODO we need to implement this for gateway
     // no-op for remote buffer
   }
   // super unsafe and should only be used for cases we know will be smaller bodies
@@ -154,5 +167,20 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     );
     if (!response.ok) return null;
     return response.body ?? null;
+  }
+
+  async isStream(): Promise<boolean> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.isStream ?? false;
+  }
+
+  async userId(): Promise<string | undefined> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.userId;
+  }
+
+  async model(): Promise<string | undefined> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.model;
   }
 }

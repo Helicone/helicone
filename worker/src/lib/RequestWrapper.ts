@@ -467,8 +467,7 @@ export class RequestWrapper {
 
   async getUserId(): Promise<string | undefined> {
     const userId =
-      this.heliconeHeaders.userId ||
-      (await this.unsafeGetJson<{ user?: string }>()).user;
+      this.heliconeHeaders.userId || (await this.requestBodyBuffer.userId());
     return userId;
   }
 

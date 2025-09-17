@@ -20,7 +20,7 @@ const allModels = {
   ...anthropicModels,
   ...openaiModels,
   ...googleModels,
-  ...grokModels,
+  ...grokModels
 };
 
 export type ModelName = keyof typeof allModels;
@@ -30,7 +30,7 @@ const modelProviderConfigs = {
   ...anthropicEndpointConfig,
   ...openaiEndpointConfig,
   ...googleEndpointConfig,
-  ...grokEndpointConfig,
+  ...grokEndpointConfig
 };
 
 export type ModelProviderConfigId = keyof typeof modelProviderConfigs;

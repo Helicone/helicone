@@ -157,7 +157,16 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
-          deepseek: {
+         deepinfra: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "deepinfra",
+            decrypted_provider_key: "helicone-deepinfra-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+         },
+         deepseek: {
             org_id: "test-org-id",
             provider_name: "deepseek",
             decrypted_provider_key: "test-deepseek-api-key",
@@ -251,7 +260,16 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: true,
           },
-          deepseek: {
+          deepinfra: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "deepinfra",
+            decrypted_provider_key: "helicone-deepinfra-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: true,
+          },
+         deepseek: {
             org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
             provider_name: "deepseek",
             decrypted_provider_key: "helicone-deepseek-api-key",

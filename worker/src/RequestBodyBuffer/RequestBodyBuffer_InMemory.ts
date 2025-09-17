@@ -124,4 +124,28 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   async getReadableStreamToBody(): Promise<string> {
     return await this.unsafeGetRawText();
   }
+
+  private async getJson<T>(): Promise<T> {
+    try {
+      return JSON.parse(await this.unsafeGetRawText());
+    } catch (e) {
+      console.error("RequestWrapper.getJson", e, await this.unsafeGetRawText());
+      return {} as T;
+    }
+  }
+
+  async isStream(): Promise<boolean> {
+    const json = await this.getJson<{ stream?: boolean }>();
+    return json.stream === true;
+  }
+
+  async userId(): Promise<string | undefined> {
+    const json = await this.getJson<{ user?: string }>();
+    return json.user;
+  }
+
+  async model(): Promise<string | undefined> {
+    const json = await this.getJson<{ model?: string }>();
+    return json.model ?? "unknown";
+  }
 }

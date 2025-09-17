@@ -7,8 +7,8 @@ TTL, exposes a small API to read small bodies, and can sign AWS Bedrock
 requests using SigV4.
 
 Endpoints
-- POST `/:requestId` — stream-ingest body; returns `{ size: number }`.
-- GET `/:requestId/unsafe/read` — returns text if size ≤ `UNSAFE_READ_MAX_BYTES`.
+- POST `/:requestId` — stream-ingest body; returns `{ size: number, isStream?: boolean, userId?: string, model?: string }` extracted from JSON bodies when present.
+- GET `/:requestId/unsafe/read` — returns stored body text (for small bodies / debugging).
 - POST `/:requestId/sign-aws` — body `{ region, forwardToHost, requestHeaders, method, urlString }`; returns `{ newHeaders, model }`.
 - GET `/healthz` — liveness probe.
 
@@ -27,7 +27,8 @@ Notes
 - This variant keeps everything in memory. It is suitable for low concurrency
   and short-lived bodies. Scale and caps should be enforced by the Worker.
 - The Worker-side Remote client should POST to `/:requestId` immediately after
-  selecting the Remote path, and then call `sign-aws` when needed.
+  selecting the Remote path, and then may read metadata from the response (e.g., `isStream`, `userId`, `model`).
+  When needed, call `sign-aws` for Bedrock signing.
 
 Tests (bare metal)
 - Install deps and run: `npm i && npm test`
