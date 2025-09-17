@@ -428,7 +428,7 @@ const SessionsPage = (props: SessionsPageProps) => {
           />
         )}
 
-        <TabsContent value="sessions" className="h-full w-full">
+        <TabsContent value="sessions" className="min-h-0 w-full flex-1">
           <ThemedTable
             id="sessions-table"
             tableRef={tableRef}
