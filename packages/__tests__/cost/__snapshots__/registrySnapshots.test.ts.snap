@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
@@ -1398,7 +1398,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1424,16 +1424,16 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
     },
-    "grok-4-0709:xai": {
+    "grok-4:xai": {
       "context": 256000,
       "crossRegion": false,
       "maxTokens": 256000,
-      "modelId": "grok-4-0709",
+      "modelId": "grok-4",
       "parameters": [
         "frequency_penalty",
         "logit_bias",
@@ -1450,7 +1450,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1458,7 +1458,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "grok-code-fast-1:xai": {
       "context": 256000,
       "crossRegion": false,
-      "maxTokens": 256000,
+      "maxTokens": 10000,
       "modelId": "grok-code-fast-1",
       "parameters": [
         "frequency_penalty",
@@ -1476,7 +1476,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -2297,7 +2297,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
-      "model": "grok-4-0709",
+      "model": "grok-4",
       "providers": [
         "xai",
       ],
@@ -2444,6 +2444,10 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "gpt-5-nano",
     "gpt-oss-120b",
     "gpt-oss-20b",
+    "grok-3",
+    "grok-3-mini",
+    "grok-4",
+    "grok-code-fast-1",
     "kimi-k2",
     "kimi-k2-0905",
     "llama-3.1-8b-instant",
@@ -2468,7 +2472,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
   ],
   "totalEndpoints": 63,
   "totalModelProviderConfigs": 63,
-  "totalModelsWithPtb": 28,
+  "totalModelsWithPtb": 32,
   "totalProviders": 8,
 }
 `;

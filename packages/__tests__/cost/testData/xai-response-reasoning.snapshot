@@ -1,0 +1,36 @@
+{
+  "id": "b4e2119f-6789-41c2-a098-22338d8a9f5b",
+  "object": "chat.completion",
+  "created": 1752854530,
+  "model": "grok-4",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Let me think through this step by step to solve the problem correctly.",
+        "refusal": null
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 50,
+    "completion_tokens": 120,
+    "total_tokens": 170,
+    "prompt_tokens_details": {
+      "text_tokens": 45,
+      "audio_tokens": 0,
+      "image_tokens": 0,
+      "cached_tokens": 5
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 85,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    },
+    "num_sources_used": 0
+  },
+  "system_fingerprint": "fp_4b8821259d"
+}

@@ -105,16 +105,16 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-950">
+      <div className="min-h-screen bg-background antialiased">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="animate-pulse">
-            <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-4" />
-            <div className="h-4 w-96 bg-gray-200 dark:bg-gray-800 rounded mb-8" />
+            <div className="h-8 w-48 bg-muted rounded mb-4" />
+            <div className="h-4 w-96 bg-muted rounded mb-8" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
-                  className="h-32 bg-white dark:bg-gray-900 rounded-lg"
+                  className="h-32 bg-card rounded-lg"
                 />
               ))}
             </div>
@@ -126,13 +126,13 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
 
   if (!model) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-950">
+      <div className="min-h-screen bg-background antialiased">
         <div className="max-w-7xl mx-auto px-4 py-16">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground mb-4">
               Model not found
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-8">
+            <p className="text-muted-foreground mb-8">
               The model &quot;{decodedModelName}&quot; could not be found.
             </p>
             <Button 
@@ -203,13 +203,13 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div className="min-h-screen bg-background antialiased">
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Back to Models Link */}
         <div className="mb-4">
           <Link 
             href={`/models${searchParams.toString() ? `?${searchParams.toString()}` : ''}`}
-            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Models
@@ -221,10 +221,10 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
           {/* Model Name and ID */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
                 {model.author}: {cleanModelName}
               </h1>
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                 <span className="font-mono flex items-center gap-1">
                   {model.id}
                   <Button
@@ -243,32 +243,40 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
               </div>
 
               {/* Quick Stats */}
-              <div className="flex flex-wrap items-center gap-4 text-sm mb-3">
+              <div className="flex flex-wrap items-center gap-2 text-xs mb-3">
                 {model.trainingDate && (
-                  <span className="text-gray-500">
-                    Created{" "}
-                    {new Date(model.trainingDate).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
+                  <>
+                    <span className="text-muted-foreground">
+                      Created{" "}
+                      {new Date(model.trainingDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                    <span className="text-muted-foreground">·</span>
+                  </>
                 )}
-                <span className="text-gray-500">
+                <span className="text-muted-foreground">
                   {formatContext(model.contextLength)} context
                 </span>
-                <span className="text-gray-500">
-                  Starting at {formatCost(basePricing.prompt)}{" "}
+                <span className="text-muted-foreground">·</span>
+                <span className="text-muted-foreground">
+                  {formatCost(basePricing.prompt)}{" "}
                   input tokens
                 </span>
-                <span className="text-gray-500">
-                  Starting at {formatCost(basePricing.completion)}{" "}
+                <span className="text-muted-foreground">·</span>
+                <span className="text-muted-foreground">
+                  {formatCost(basePricing.completion)}{" "}
                   output tokens
                 </span>
                 {model.maxOutput && (
-                  <span className="text-gray-500">
-                    {formatContext(model.maxOutput)} max output
-                  </span>
+                  <>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="text-muted-foreground">
+                      {formatContext(model.maxOutput)} max output
+                    </span>
+                  </>
                 )}
               </div>
             </div>
@@ -277,7 +285,7 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
 
           {/* Description */}
           {model.description && (
-            <p className="text-gray-600 dark:text-gray-400 max-w-4xl">
+            <p className="text-muted-foreground max-w-4xl">
               {model.description}
             </p>
           )}
@@ -287,10 +295,10 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
         <div className="space-y-8">
               {/* Providers Section */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-foreground mb-4">
                   Providers for {cleanModelName}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   Available through {model.endpoints.length} provider
                   {model.endpoints.length > 1 ? "s" : ""}. Prices shown per 1M
                   tokens.
@@ -356,7 +364,7 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
                                           className="whitespace-nowrap"
                                         >
                                           {idx > 0 && (
-                                            <span className="text-gray-500 text-xs">
+                                            <span className="text-muted-foreground text-xs">
                                               Tier {idx + 1}:{" "}
                                             </span>
                                           )}
@@ -383,7 +391,7 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
                                           className="whitespace-nowrap"
                                         >
                                           {idx > 0 && (
-                                            <span className="text-gray-500 text-xs">
+                                            <span className="text-muted-foreground text-xs">
                                               Tier {idx + 1}:{" "}
                                             </span>
                                           )}
@@ -400,12 +408,12 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
                                   </span>
                                 )}
                               </TableCell>
-                              <TableCell className="font-mono text-sm text-gray-500">
+                              <TableCell className="font-mono text-sm text-muted-foreground">
                                 {endpoint.pricing.cacheRead
                                   ? formatCost(endpoint.pricing.cacheRead)
                                   : "--"}
                               </TableCell>
-                              <TableCell className="font-mono text-sm text-gray-500">
+                              <TableCell className="font-mono text-sm text-muted-foreground">
                                 {endpoint.pricing.cacheWrite
                                   ? formatCost(endpoint.pricing.cacheWrite)
                                   : "--"}
@@ -420,45 +428,45 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
 
               {/* Model Information */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-foreground mb-3">
                   Model Information
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       Context Window
                     </span>
-                    <p className="font-medium">
+                    <p className="font-medium text-slate-900 dark:text-foreground">
                       {formatContext(model.contextLength)} tokens
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Max Output</span>
-                    <p className="font-medium">
+                    <span className="text-sm text-muted-foreground">Max Output</span>
+                    <p className="font-medium text-slate-900 dark:text-foreground">
                       {model.maxOutput
                         ? formatContext(model.maxOutput) + " tokens"
                         : "Unlimited"}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       Input Modalities
                     </span>
-                    <p className="font-medium">
+                    <p className="font-medium text-slate-900 dark:text-foreground">
                       {model.inputModalities.join(", ")}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       Output Modalities
                     </span>
-                    <p className="font-medium">
+                    <p className="font-medium text-slate-900 dark:text-foreground">
                       {model.outputModalities.join(", ")}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">Training Date</span>
-                    <p className="font-medium">
+                    <span className="text-sm text-muted-foreground">Training Date</span>
+                    <p className="font-medium text-slate-900 dark:text-foreground">
                       {model.trainingDate
                         ? new Date(model.trainingDate).toLocaleDateString()
                         : "N/A"}
@@ -470,18 +478,18 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
               {/* Special Capabilities */}
               {capabilities.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-foreground mb-3">
                     Special Capabilities
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {capabilities.map((cap) => (
                       <div
                         key={cap.key}
-                        className="flex items-center justify-between p-3 border rounded-lg"
+                        className="flex items-center justify-between p-3 border border-border rounded-lg"
                       >
                         <span className="text-sm font-medium">{cap.label}</span>
                         {cap.cost && (
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-muted-foreground">
                             {cap.cost}
                           </span>
                         )}

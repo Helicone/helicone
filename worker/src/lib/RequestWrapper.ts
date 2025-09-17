@@ -20,6 +20,7 @@ import { SignatureV4 } from "@smithy/signature-v4";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
+import { RequestBodyBuffer } from "../RequestBodyBuffer/RequestBodyWrapper";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -63,8 +64,8 @@ export class RequestWrapper {
   prompt2025Settings: Prompt2025Settings; // I'm sorry. Will clean whenever we can remove old promtps.
   extraHeaders: Headers | null = null;
   requestReferrer: string | undefined;
+  requestBodyWrapper: RequestBodyBuffer;
 
-  private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
 
   private gatewayAttempt?: Attempt;
@@ -173,6 +174,10 @@ export class RequestWrapper {
     }
     this.baseURLOverride = null;
     this.cf = request.cf;
+    this.requestBodyWrapper = new RequestBodyBuffer(
+      request,
+      this.dataDogClient
+    );
   }
 
   private injectPromptProperties() {
@@ -298,23 +303,9 @@ export class RequestWrapper {
     return body;
   }
 
+  // TODO deprecate this function
   async getRawText(): Promise<string> {
-    if (this.cachedText) {
-      return this.cachedText;
-    }
-
-    this.cachedText = await this.request.text();
-
-    try {
-      if (this.dataDogClient) {
-        const sizeBytes = DataDogClient.estimateStringSize(this.cachedText);
-        this.dataDogClient.trackMemory("request-body", sizeBytes);
-      }
-    } catch (e) {
-      // Silently catch - never let monitoring break the request
-    }
-
-    return this.cachedText;
+    return this.requestBodyWrapper.unsafeGetRawText();
   }
 
   getDataDogClient(): DataDogClient | undefined {
@@ -412,75 +403,17 @@ export class RequestWrapper {
     region: string;
     forwardToHost: string;
   }) {
-    // Extract model from URL path
-    const pathParts = this.url.pathname.split("/");
-    const model = decodeURIComponent(pathParts.at(-2) ?? "");
-
-    const awsAccessKey = this.headers.get("aws-access-key");
-    const awsSecretKey = this.headers.get("aws-secret-key");
-    const awsSessionToken = this.headers.get("aws-session-token");
-    const service = "bedrock";
-
-    const sigv4 = new SignatureV4({
-      service,
+    const { newHeaders, model } = await this.requestBodyWrapper.signAWSRequest({
       region,
-      credentials: {
-        accessKeyId: awsAccessKey ?? "",
-        secretAccessKey: awsSecretKey ?? "",
-        ...(awsSessionToken ? { sessionToken: awsSessionToken } : {}),
-      },
-      sha256: Sha256,
-    });
-
-    const headers = new Headers();
-
-    // Required headers for AWS requests
-    headers.set("host", forwardToHost);
-    headers.set("content-type", "application/json");
-
-    // Include only AWS-specific headers needed for authentication
-    const awsHeaders = [
-      "x-amz-date",
-      "x-amz-security-token",
-      "x-amz-content-sha256",
-      "x-amz-target",
-      // Add any other required x-amz headers for your specific use case
-    ];
-
-    for (const [key, value] of this.headers.entries()) {
-      if (awsHeaders.includes(key.toLowerCase())) {
-        headers.set(key, value);
-      }
-    }
-
-    const url = new URL(this.url.toString());
-    const request = new HttpRequest({
+      forwardToHost,
+      requestHeaders: Object.fromEntries(this.headers.entries()),
       method: this.request.method,
-      protocol: url.protocol,
-      hostname: forwardToHost,
-      path: url.pathname + url.search,
-      headers: Object.fromEntries(headers.entries()),
-      body: await this.getRawText(),
+      urlString: this.url.toString(),
     });
-
-    const signedRequest = await sigv4.sign(request);
-
-    // Create new headers with the signed values
-    const newHeaders = new Headers();
-    // Only copy over the essential headers
-    newHeaders.set("host", forwardToHost);
-    newHeaders.set("content-type", "application/json");
 
     // Add model override header if model was found
     if (model) {
       this.heliconeHeaders.setModelOverride(model);
-    }
-
-    // Add all the signed AWS headers
-    for (const [key, value] of Object.entries(signedRequest.headers)) {
-      if (value) {
-        newHeaders.set(key, value.toString());
-      }
     }
 
     this.remapHeaders(newHeaders);
@@ -669,7 +602,7 @@ export class RequestWrapper {
   }
 
   setBody(body: string): void {
-    this.cachedText = body;
+    this.requestBodyWrapper.tempSetBody(body);
   }
 
   setSuccessfulAttempt(attempt: Attempt): void {

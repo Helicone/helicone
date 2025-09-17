@@ -109,16 +109,16 @@ export const providers: Provider[] = [
   //   apiKeyPlaceholder: "...",
   //   relevanceScore: 70,
   // },
-  // {
-  //   id: "x",
-  //   name: "X.AI (Grok)",
-  //   logoUrl: "/assets/home/providers/anthropic.png",
-  //   description: "Configure your X.AI API keys for Grok models",
-  //   docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
-  //   apiKeyLabel: "X.AI API Key",
-  //   apiKeyPlaceholder: "...",
-  //   relevanceScore: 68,
-  // },
+  {
+    id: "xai",
+    name: "X.AI (Grok)",
+    logoUrl: "/assets/home/providers/groq.png",
+    description: "Configure your X.AI API keys for Grok models",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "X.AI API Key",
+    apiKeyPlaceholder: "xai-...",
+    relevanceScore: 68,
+  },
   // {
   //   id: "perplexity",
   //   name: "Perplexity",
@@ -161,7 +161,7 @@ export const providers: Provider[] = [
   // },
   // TODO: Setup AWS Bedrock
   {
-    id: "aws",
+    id: "bedrock",
     name: "AWS Bedrock",
     logoUrl: "/assets/home/providers/bedrock.webp",
     description: "Configure your AWS Bedrock API keys",
