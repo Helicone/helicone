@@ -70,8 +70,22 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     try {
       const buf = await readBody(request, config.maxSizeBytes);
       const size = store.set(requestId, buf);
-      request.log.info({ requestId, size }, "ingested body");
-      return reply.send({ size });
+      let isStream: boolean | undefined;
+      let userId: string | undefined;
+      let model: string | undefined;
+      try {
+        const obj = JSON.parse(buf.toString("utf8"));
+        if (typeof obj?.stream === "boolean") isStream = obj.stream === true;
+        if (typeof obj?.user === "string") userId = obj.user;
+        if (typeof obj?.model === "string") model = obj.model;
+      } catch (_e) {
+        // non-JSON bodies are fine; leave metadata undefined
+      }
+      request.log.info(
+        { requestId, size, isStream, userId, model },
+        "ingested body"
+      );
+      return reply.send({ size, isStream, userId, model });
     } catch (e: any) {
       request.log.warn({ err: e, requestId }, "ingest failed");
       const msg = String(e?.message ?? e ?? "error");
