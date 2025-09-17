@@ -1,5 +1,6 @@
 import { AwsClient } from "aws4fetch";
 import { Result } from "../util/results";
+import { compress } from "../util/helpers";
 
 async function concatUint8Arrays(uint8arrays: Uint8Array[]): Promise<Uint8Array> {
   const blob = new Blob(uint8arrays);
@@ -25,7 +26,7 @@ export class S3Client {
     secretKey: string,
     private endpoint: string,
     private bucketName: string,
-    private region: string
+    private region: string,
   ) {
     this.awsClient = new AwsClient({
       accessKeyId: accessKey,

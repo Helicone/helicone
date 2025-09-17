@@ -18,7 +18,11 @@ vi.mock("../../src/lib/safePut", () => ({
   safePut: vi.fn(),
 }));
 
-import { kvKeyFromRequest, saveToCache, getCachedResponse } from "../../src/lib/util/cache/cacheFunctions";
+import {
+  kvKeyFromRequest,
+  saveToCache,
+  getCachedResponse,
+} from "../../src/lib/util/cache/cacheFunctions";
 import { safePut } from "../../src/lib/safePut";
 
 describe("Simple Cache Test", () => {
@@ -44,16 +48,18 @@ describe("Simple Cache Test", () => {
     // Create a mock request
     const headers = new Headers({
       "Content-Type": "application/json",
-      "Authorization": "Bearer test-key",
+      Authorization: "Bearer test-key",
     });
-    
+
     mockRequest = {
       url: "https://api.openai.com/v1/chat/completions",
       requestWrapper: {
-        getText: vi.fn().mockResolvedValue(JSON.stringify({
-          model: "gpt-4",
-          messages: [{ role: "user", content: "What is 2+2?" }],
-        })),
+        unsafeGetText: vi.fn().mockResolvedValue(
+          JSON.stringify({
+            model: "gpt-4",
+            messages: [{ role: "user", content: "What is 2+2?" }],
+          })
+        ),
         getHeaders: vi.fn(() => headers),
         heliconeHeaders: {
           cacheHeaders: {
@@ -133,13 +139,13 @@ describe("Simple Cache Test", () => {
     const createMockRequest = (body: string) => {
       const headers = new Headers({
         "Content-Type": "application/json",
-        "Authorization": "Bearer test-key",
+        Authorization: "Bearer test-key",
       });
-      
+
       return {
         url: "https://api.openai.com/v1/chat/completions",
         requestWrapper: {
-          getText: vi.fn().mockResolvedValue(body),
+          unsafeGetText: vi.fn().mockResolvedValue(body),
           getHeaders: vi.fn(() => headers),
           heliconeHeaders: {
             cacheHeaders: {
@@ -218,10 +224,13 @@ describe("Simple Cache Test", () => {
       timestamp: "2024-01-01T00:00:00Z",
       request_id: "req-123",
     });
-    
-    mockRequest.requestWrapper.getText.mockResolvedValue(request1);
-    mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["timestamp", "request_id"];
-    
+
+    mockRequest.requestWrapper.unsafeGetText.mockResolvedValue(request1);
+    mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = [
+      "timestamp",
+      "request_id",
+    ];
+
     // Save response
     await saveToCache({
       request: mockRequest,
@@ -241,9 +250,9 @@ describe("Simple Cache Test", () => {
       timestamp: "2024-02-02T00:00:00Z",
       request_id: "req-456",
     });
-    
-    mockRequest.requestWrapper.getText.mockResolvedValue(request2);
-    
+
+    mockRequest.requestWrapper.unsafeGetText.mockResolvedValue(request2);
+
     // Should hit cache despite different timestamp and request_id
     const cachedResponse = await getCachedResponse(
       mockRequest,
@@ -251,7 +260,7 @@ describe("Simple Cache Test", () => {
       mockCacheKv,
       null
     );
-    
+
     expect(cachedResponse).not.toBeNull();
     expect(cachedResponse?.headers.get("Helicone-Cache")).toBe("HIT");
     const body = await cachedResponse?.text();
@@ -263,15 +272,15 @@ describe("Simple Cache Test", () => {
       model: "gpt-4",
       messages: [{ role: "user", content: "Tell me a joke" }],
     });
-    mockRequest.requestWrapper.getText.mockResolvedValue(requestBody);
-    
+    mockRequest.requestWrapper.unsafeGetText.mockResolvedValue(requestBody);
+
     // Save 3 different responses in different buckets
     const responses = [
       '{"joke":"Why did the chicken cross the road?"}',
       '{"joke":"What do you call a bear with no teeth?"}',
       '{"joke":"Why dont scientists trust atoms?"}',
     ];
-    
+
     // Manually populate cache buckets
     for (let i = 0; i < 3; i++) {
       const key = await kvKeyFromRequest(mockRequest, i, null);
@@ -289,14 +298,14 @@ describe("Simple Cache Test", () => {
       mockCacheKv,
       null
     );
-    
+
     expect(cachedResponse).not.toBeNull();
     expect(cachedResponse?.headers.get("Helicone-Cache")).toBe("HIT");
-    
+
     const bucketIdx = cachedResponse?.headers.get("Helicone-Cache-Bucket-Idx");
     expect(bucketIdx).toBeDefined();
     expect(["0", "1", "2"]).toContain(bucketIdx);
-    
+
     const body = await cachedResponse?.text();
     expect(responses).toContain(body);
   });

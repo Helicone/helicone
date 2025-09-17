@@ -2,7 +2,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
-import { getTokenCount } from "../clients/TokenCounterClient";
+
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { DBWrapper } from "../db/DBWrapper";
 import { RequestResponseStore } from "../db/RequestResponseStore";
@@ -106,8 +106,8 @@ export function dbLoggableRequestFromProxyRequest(
     userId: proxyRequest.userId,
     startTime: requestStartTime,
     unsafeGetBodyText: proxyRequest.unsafeGetBodyText,
-    requestBodyBuffer: proxyRequest.requestWrapper.requestBodyBuffer,
     body: proxyRequest.body,
+    requestBodyBuffer: proxyRequest.requestWrapper.requestBodyBuffer,
     path: proxyRequest.requestWrapper.url.href,
     targetUrl: proxyRequest.targetUrl.href,
     properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
@@ -179,8 +179,8 @@ export async function dbLoggableRequestFromAsyncLogModel(
             promptVersion: "",
             promptMode: "deactivated",
           },
-      requestBodyBuffer: requestWrapper.requestBodyBuffer,
       prompt2025Settings: requestWrapper.prompt2025Settings,
+      requestBodyBuffer: requestWrapper.requestBodyBuffer,
       userId: providerRequestHeaders.userId ?? undefined,
       startTime: asyncLogModel.timing
         ? new Date(
@@ -188,14 +188,8 @@ export async function dbLoggableRequestFromAsyncLogModel(
               asyncLogModel.timing.startTime.milliseconds
           )
         : new Date(),
-      // TEMP HACK
-      body: new ReadableStream({
-        async pull(controller) {
-          controller.enqueue(
-            JSON.stringify(asyncLogModel.providerRequest.json)
-          );
-        },
-      }),
+      body: JSON.stringify(asyncLogModel.providerRequest.json),
+
       unsafeGetBodyText: async () =>
         JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
@@ -278,10 +272,6 @@ export class DBLoggable {
     return this.timing.startTime.getTime();
   }
 
-  async tokenCounter(text: string): Promise<number> {
-    return getTokenCount(text, this.provider, this.tokenCalcUrl);
-  }
-
   async parseResponse(
     responseBody: string,
     status: number
@@ -291,8 +281,6 @@ export class DBLoggable {
     const isStream = await this.request.requestBodyBuffer.isStream();
     const model = await this.request.requestBodyBuffer.model();
     const responseStatus = await this.response.status();
-
-    const tokenCounter = (t: string) => this.tokenCounter(t);
     if (isStream && status === INTERNAL_ERRORS["Cancelled"]) {
       // Remove last line of stream from result
       result = result.split("\n").slice(0, -1).join("\n");
@@ -358,7 +346,7 @@ export class DBLoggable {
           },
         });
       } else if (isStream && this.provider === "ANTHROPIC") {
-        return anthropicAIStream(result, tokenCounter, model);
+        return anthropicAIStream(result);
       } else if (isStream) {
         return parseOpenAIStream(result);
       } else if (
@@ -680,17 +668,22 @@ export class DBLoggable {
       await this.response.getResponseBody();
 
     if (S3_ENABLED === "true") {
-      const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
-        organizationId: authParams.organizationId,
-        requestId: this.request.requestId,
-        requestBodyBuffer: this.request.requestBodyBuffer,
-        responseBody: rawResponseBody.join(""),
-      });
+      try {
+        const s3Result =
+          await db.requestResponseManager.storeRequestResponseRaw({
+            organizationId: authParams.organizationId,
+            requestId: this.request.requestId,
+            requestBodyBuffer: this.request.requestBodyBuffer,
+            responseBody: rawResponseBody.join(""),
+          });
 
-      if (s3Result.error) {
-        console.error(
-          `Error storing request response in S3: ${s3Result.error}`
-        );
+        if (s3Result.error) {
+          console.error(
+            `Error storing request response in S3: ${s3Result.error}`
+          );
+        }
+      } catch (e) {
+        console.error("Error preparing S3 payload:", e);
       }
     }
 
@@ -746,7 +739,7 @@ export class DBLoggable {
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
           targetUrl: this.request.targetUrl,
           provider: this.request.provider,
-          bodySize: this.request.unsafeGetBodyText?.length ?? 0,
+          bodySize: (await this.request.unsafeGetBodyText?.())?.length ?? 0,
           path: this.request.path,
           threat: this.request.threat ?? undefined,
           countryCode: this.request.country_code ?? undefined,

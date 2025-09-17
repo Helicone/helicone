@@ -2,12 +2,13 @@ import { OpenAIUsageProcessor } from "./openAIUsageProcessor";
 import { AnthropicUsageProcessor } from "./anthropicUsageProcessor";
 import { GroqUsageProcessor } from "./groqUsageProcessor";
 import { XAIUsageProcessor } from "./xaiUsageProcessor";
+import { DeepSeekUsageProcessor } from "./deepseekUsageProcessor";
 import { IUsageProcessor } from "./IUsageProcessor";
 import { ModelProviderName } from "../models/providers";
 
 export function getUsageProcessor(
   provider: ModelProviderName
-): IUsageProcessor {
+): IUsageProcessor | null {
   switch (provider) {
     case "openai":
       return new OpenAIUsageProcessor();
@@ -17,7 +18,9 @@ export function getUsageProcessor(
       return new GroqUsageProcessor();
     case "xai":
       return new XAIUsageProcessor();
+    case "deepseek":
+      return new DeepSeekUsageProcessor();
     default:
-      throw new Error(`Usage processor not found for provider: ${provider}`);
+      return null;
   }
 }
