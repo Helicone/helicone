@@ -1,7 +1,7 @@
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { getContainer } from "@cloudflare/containers";
-import { RequestBodyBufferContainer } from "./RequestBodyContainer";
+import type { RequestBodyBufferContainer } from "./RequestBodyContainer";
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
@@ -45,40 +45,85 @@ function getRequestBodyContainer(
 export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   private requestBodyBuffer: DurableObjectStub<RequestBodyBufferContainer>;
 
+  // **
+  // * NOTE we are explicitly not using the requestId here
+  // * because users can set their own requestId.
+  // So we need to generate a unique id for each request. (For security reasons)
+  // */
+  private uniqueId: string;
+  private ingestPromise: Promise<void>;
+
+  private metadata: {
+    isStream?: boolean;
+    userId?: string;
+    model?: string;
+  } = {};
+
   constructor(
     request: Request,
-    dataDogClient: DataDogClient | undefined,
-    requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"],
-    private requestId: string
+    private dataDogClient: DataDogClient | undefined,
+    requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"]
   ) {
+    this.uniqueId = crypto.randomUUID();
     this.requestBodyBuffer = getRequestBodyContainer(
       requestBodyBufferEnv,
-      requestId
+      this.uniqueId
     );
-    this.requestBodyBuffer
-      .fetch(`${BASE_URL}/${requestId}`, {
+    const headers = new Headers();
+    headers.set("content-type", "application/octet-stream");
+
+    this.ingestPromise = this.requestBodyBuffer
+      .fetch(`${BASE_URL}/${this.uniqueId}`, {
         method: "POST",
+        headers,
         body: request.body,
       })
       .then(async (response) => {
-        const { size } = await response.json<{ size: number }>();
+        if (!response.ok) {
+          console.error(
+            "RequestBodyBuffer_Remote ingest failed",
+            response.status
+          );
+          return;
+        }
+        const { size, isStream, userId, model } = await response.json<{
+          size: number;
+          isStream?: boolean;
+          userId?: string;
+          model?: string;
+        }>();
+        this.metadata = { isStream, userId, model };
+        console.log("RequestBodyBuffer_Remote ingest success", size);
         dataDogClient?.trackMemory("container-request-body-size", size);
+      })
+      .catch((e) => {
+        console.error("RequestBodyBuffer_Remote ingest error", e);
       });
   }
 
   public tempSetBody(body: string): void {
-    throw new Error("Not implemented");
+    // TODO we need to implement this for gateway
+    // no-op for remote buffer
   }
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
-    throw new Error("Not implemented");
-    // const response = await this.requestBodyBuffer.fetch(
-    //   `${BASE_URL}/${this.requestId}/unsafe/read`,
-    //   {
-    //     method: "GET",
-    //   }
-    // );
-    // return await response.text();
+    console.log(
+      "unsafeGetRawText on remote - Please traverse this stack trace and fix the issue"
+    );
+    this.dataDogClient?.trackMemory("container-called-unsafe-read", 1);
+    await this.ingestPromise.catch(() => undefined);
+
+    const response = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/unsafe/read`,
+      {
+        method: "GET",
+      }
+    );
+    if (!response.ok) {
+      // keep behavior graceful; return empty string on miss
+      return "";
+    }
+    return await response.text();
   }
 
   async signAWSRequest(body: {
@@ -91,14 +136,51 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     newHeaders: Headers;
     model: string;
   }> {
-    throw new Error("Not implemented");
-    // const response = await this.requestBodyBuffer.fetch(
-    //   `${BASE_URL}/${this.requestId}/sign-aws`,
-    //   {
-    //     method: "GET",
-    //     body: JSON.stringify(body),
-    //   }
-    // );
-    // return await response.json();
+    const response = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/sign-aws`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`sign-aws failed with status ${response.status}`);
+    }
+    const json = await response.json<{
+      newHeaders: Record<string, string>;
+      model: string;
+    }>();
+    const headers = new Headers();
+    for (const [k, v] of Object.entries(json.newHeaders ?? {})) {
+      if (v !== undefined && v !== null) headers.set(k, String(v));
+    }
+    return { newHeaders: headers, model: json.model };
+  }
+
+  async getReadableStreamToBody(): Promise<ReadableStream | null> {
+    // Wait for ingest to be attempted to reduce race with GET
+    await this.ingestPromise.catch(() => undefined);
+    const response = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/unsafe/read`,
+      { method: "GET" }
+    );
+    if (!response.ok) return null;
+    return response.body ?? null;
+  }
+
+  async isStream(): Promise<boolean> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.isStream ?? false;
+  }
+
+  async userId(): Promise<string | undefined> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.userId;
+  }
+
+  async model(): Promise<string | undefined> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.model;
   }
 }

@@ -79,6 +79,44 @@ export const endpoints = {
       "*": {},
     },
   },
+  "qwen3-30b-a3b:deepinfra": {
+    providerModelId: "Qwen/Qwen3-30B-A3B",
+    provider: "deepinfra",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000008,
+        output: 0.00000029,
+      },
+    ],
+    rateLimits: {
+      rpm: 12000,
+      tpm: 60000000,
+      tpd: 6000000000,
+    },
+    contextLength: 32_768,
+    maxCompletionTokens: 32_768,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "min_p",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${QwenModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

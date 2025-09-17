@@ -1,0 +1,28 @@
+{
+  "id": "ee354f01-feae-4c4d-bdcb-a6b222439dd0",
+  "object": "chat.completion",
+  "created": 1758080205,
+  "model": "deepseek-chat",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Of course. \"PTB\" can stand for several things..."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 13,
+    "completion_tokens": 723,
+    "total_tokens": 736,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 13
+  },
+  "system_fingerprint": "fp_08f168e49b_prod0820_fp8_kvcache"
+}

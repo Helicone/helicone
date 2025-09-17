@@ -32,71 +32,103 @@ interface GenerateParams {
 }
 
 // Manual validation function
-function validateGenerateParams(data: any): { success: true; data: GenerateParams } | { success: false; error: any } {
+function validateGenerateParams(
+  data: any
+): { success: true; data: GenerateParams } | { success: false; error: any } {
   const errors: any = {};
-  
+
   // Validate promptId (required string)
-  if (!data.promptId || typeof data.promptId !== 'string' || data.promptId.length === 0) {
+  if (
+    !data.promptId ||
+    typeof data.promptId !== "string" ||
+    data.promptId.length === 0
+  ) {
     errors.promptId = "promptId is required and must be a non-empty string";
   }
-  
+
   // Validate version (optional number or "production")
   if (data.version !== undefined) {
-    if (data.version !== "production" && typeof data.version !== 'number') {
+    if (data.version !== "production" && typeof data.version !== "number") {
       errors.version = "version must be a number or 'production'";
     }
   }
-  
+
   // Validate inputs (optional record)
   if (data.inputs !== undefined) {
-    if (typeof data.inputs !== 'object' || data.inputs === null || Array.isArray(data.inputs)) {
+    if (
+      typeof data.inputs !== "object" ||
+      data.inputs === null ||
+      Array.isArray(data.inputs)
+    ) {
       errors.inputs = "inputs must be an object";
     } else {
       // Check all values are strings
       for (const value of Object.values(data.inputs)) {
-        if (typeof value !== 'string') {
+        if (typeof value !== "string") {
           errors.inputs = "all input values must be strings";
           break;
         }
       }
     }
   }
-  
+
   // Validate chat (optional string array)
   if (data.chat !== undefined) {
     if (!Array.isArray(data.chat)) {
       errors.chat = "chat must be an array";
-    } else if (!data.chat.every((item: any) => typeof item === 'string')) {
+    } else if (!data.chat.every((item: any) => typeof item === "string")) {
       errors.chat = "all chat items must be strings";
     }
   }
-  
+
   // Validate stream (optional boolean)
-  if (data.stream !== undefined && typeof data.stream !== 'boolean') {
+  if (data.stream !== undefined && typeof data.stream !== "boolean") {
     errors.stream = "stream must be a boolean";
   }
-  
+
   // Validate properties (optional object)
   if (data.properties !== undefined) {
-    if (typeof data.properties !== 'object' || data.properties === null || Array.isArray(data.properties)) {
+    if (
+      typeof data.properties !== "object" ||
+      data.properties === null ||
+      Array.isArray(data.properties)
+    ) {
       errors.properties = "properties must be an object";
     } else {
-      if (data.properties.userId !== undefined && typeof data.properties.userId !== 'string') {
-        errors.properties = { ...errors.properties, userId: "userId must be a string" };
+      if (
+        data.properties.userId !== undefined &&
+        typeof data.properties.userId !== "string"
+      ) {
+        errors.properties = {
+          ...errors.properties,
+          userId: "userId must be a string",
+        };
       }
-      if (data.properties.sessionId !== undefined && typeof data.properties.sessionId !== 'string') {
-        errors.properties = { ...errors.properties, sessionId: "sessionId must be a string" };
+      if (
+        data.properties.sessionId !== undefined &&
+        typeof data.properties.sessionId !== "string"
+      ) {
+        errors.properties = {
+          ...errors.properties,
+          sessionId: "sessionId must be a string",
+        };
       }
-      if (data.properties.cache !== undefined && typeof data.properties.cache !== 'boolean') {
-        errors.properties = { ...errors.properties, cache: "cache must be a boolean" };
+      if (
+        data.properties.cache !== undefined &&
+        typeof data.properties.cache !== "boolean"
+      ) {
+        errors.properties = {
+          ...errors.properties,
+          cache: "cache must be a boolean",
+        };
       }
     }
   }
-  
+
   if (Object.keys(errors).length > 0) {
     return { success: false, error: { format: () => errors } };
   }
-  
+
   // Apply defaults
   const result: GenerateParams = {
     promptId: data.promptId,
@@ -104,9 +136,9 @@ function validateGenerateParams(data: any): { success: true; data: GenerateParam
     inputs: data.inputs ?? {},
     chat: data.chat,
     stream: data.stream ?? false,
-    properties: data.properties
+    properties: data.properties,
   };
-  
+
   return { success: true, data: result };
 }
 const generateHandler = async (
@@ -136,7 +168,8 @@ const generateHandler = async (
     }
 
     // 2. BUILD GENERATE PARAMETERS FROM REQUEST BODY AND VALIDATE
-    const rawBody = await requestWrapper.getJson<Record<string, unknown>>();
+    const rawBody =
+      await requestWrapper.unsafeGetJson<Record<string, unknown>>();
     const paramsResult = validateGenerateParams(rawBody);
     if (!paramsResult.success) {
       return createErrorResponse(

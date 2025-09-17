@@ -27,7 +27,7 @@ export class WalletManager {
   async finalizeEscrowAndSyncSpend(
     organizationId: string,
     proxyRequest: HeliconeProxyRequest,
-    cost: number,
+    cost: number | undefined,
     statusCode: number,
     cachedResponse?: Response
   ): Promise<Result<void, string>> {
@@ -39,11 +39,11 @@ export class WalletManager {
       const { clickhouseLastCheckedAt } = await this.walletStub.finalizeEscrow(
         organizationId,
         proxyRequest.escrowInfo.escrowId,
-        cost
+        cost ?? 0
       );
 
       if (
-        cost === 0 &&
+        cost === undefined &&
         statusCode >= 200 && statusCode < 300 &&
         // anthropic, and other providers, may return a 200 status code for streams
         // even when an error occurs in the middle of the event stream. Therefore,

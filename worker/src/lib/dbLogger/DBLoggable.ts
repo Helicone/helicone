@@ -32,6 +32,10 @@ import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { EscrowInfo } from "../ai-gateway/types";
+import {
+  IRequestBodyBuffer,
+  ValidRequestBody,
+} from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
 export interface DBLoggableProps {
   response: {
@@ -52,7 +56,9 @@ export interface DBLoggableProps {
     promptSettings: PromptSettings;
     prompt2025Settings: Prompt2025Settings;
     startTime: Date;
-    bodyText?: string;
+    body: ValidRequestBody;
+    requestBodyBuffer: IRequestBodyBuffer;
+    unsafeGetBodyText?: () => Promise<string | null>;
     path: string;
     targetUrl: string;
     properties: Record<string, string>;
@@ -99,7 +105,9 @@ export function dbLoggableRequestFromProxyRequest(
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     userId: proxyRequest.userId,
     startTime: requestStartTime,
-    bodyText: proxyRequest.bodyText ?? undefined,
+    unsafeGetBodyText: proxyRequest.unsafeGetBodyText,
+    body: proxyRequest.body,
+    requestBodyBuffer: proxyRequest.requestWrapper.requestBodyBuffer,
     path: proxyRequest.requestWrapper.url.href,
     targetUrl: proxyRequest.targetUrl.href,
     properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
@@ -172,6 +180,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
             promptMode: "deactivated",
           },
       prompt2025Settings: requestWrapper.prompt2025Settings,
+      requestBodyBuffer: requestWrapper.requestBodyBuffer,
       userId: providerRequestHeaders.userId ?? undefined,
       startTime: asyncLogModel.timing
         ? new Date(
@@ -179,7 +188,10 @@ export async function dbLoggableRequestFromAsyncLogModel(
               asyncLogModel.timing.startTime.milliseconds
           )
         : new Date(),
-      bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
+      body: JSON.stringify(asyncLogModel.providerRequest.json),
+
+      unsafeGetBodyText: async () =>
+        JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
       targetUrl: asyncLogModel.providerRequest.url,
       properties: providerRequestHeaders.heliconeProperties,
@@ -270,9 +282,9 @@ export class DBLoggable {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<Result<any, string>> {
     let result = responseBody;
-    const isStream = this.request.isStream;
+    const isStream = await this.request.requestBodyBuffer.isStream();
+    const model = await this.request.requestBodyBuffer.model();
     const responseStatus = await this.response.status();
-    const requestBody = this.request.bodyText;
     const tokenCounter = (t: string) => this.tokenCounter(t);
     if (isStream && status === INTERNAL_ERRORS["Cancelled"]) {
       // Remove last line of stream from result
@@ -285,9 +297,9 @@ export class DBLoggable {
     try {
       if (HTTPSErrorRange || HTTPSRedirect) {
         return ok(JSON.parse(result));
-      } else if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
+      } else if (!isStream && this.provider === "ANTHROPIC") {
         const responseJson = JSON.parse(result);
-        if (getModel(requestBody ?? "{}").includes("claude-3")) {
+        if (model?.includes("claude-3")) {
           if (
             !responseJson?.usage?.output_tokens ||
             !responseJson?.usage?.input_tokens
@@ -307,16 +319,12 @@ export class DBLoggable {
             });
           }
         } else {
-          const prompt = JSON.parse(requestBody)?.prompt ?? "";
-          const completion = responseJson?.completion ?? "";
-          const completionTokens = await tokenCounter(completion);
-          const promptTokens = await tokenCounter(prompt);
           return ok({
             ...responseJson,
             usage: {
-              total_tokens: promptTokens + completionTokens,
-              prompt_tokens: promptTokens,
-              completion_tokens: completionTokens,
+              total_tokens: -1,
+              prompt_tokens: -1,
+              completion_tokens: -1,
               helicone_calculated: true,
             },
           });
@@ -343,9 +351,9 @@ export class DBLoggable {
           },
         });
       } else if (isStream && this.provider === "ANTHROPIC") {
-        return anthropicAIStream(result, tokenCounter, requestBody);
+        return anthropicAIStream(result);
       } else if (isStream) {
-        return parseOpenAIStream(result, tokenCounter, requestBody);
+        return parseOpenAIStream(result);
       } else if (
         this.provider === "VERCEL" &&
         result.includes("data: {") &&
@@ -665,17 +673,22 @@ export class DBLoggable {
       await this.response.getResponseBody();
 
     if (S3_ENABLED === "true") {
-      const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
-        organizationId: authParams.organizationId,
-        requestId: this.request.requestId,
-        requestBody: this.request.bodyText ?? "{}",
-        responseBody: rawResponseBody.join(""),
-      });
+      try {
+        const s3Result =
+          await db.requestResponseManager.storeRequestResponseRaw({
+            organizationId: authParams.organizationId,
+            requestId: this.request.requestId,
+            requestBody: (await this.request.unsafeGetBodyText?.()) ?? "{}",
+            responseBody: rawResponseBody.join(""),
+          });
 
-      if (s3Result.error) {
-        console.error(
-          `Error storing request response in S3: ${s3Result.error}`
-        );
+        if (s3Result.error) {
+          console.error(
+            `Error storing request response in S3: ${s3Result.error}`
+          );
+        }
+      } catch (e) {
+        console.error("Error preparing S3 payload:", e);
       }
     }
 
@@ -731,7 +744,7 @@ export class DBLoggable {
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
           targetUrl: this.request.targetUrl,
           provider: this.request.provider,
-          bodySize: this.request.bodyText?.length ?? 0,
+          bodySize: (await this.request.unsafeGetBodyText?.())?.length ?? 0,
           path: this.request.path,
           threat: this.request.threat ?? undefined,
           countryCode: this.request.country_code ?? undefined,
