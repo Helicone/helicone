@@ -31,7 +31,7 @@ export async function logAsync(
   ctx: ExecutionContext,
   provider: Provider
 ): Promise<Response> {
-  const asyncLogModel = await requestWrapper.getJson<AsyncLogModel>();
+  const asyncLogModel = await requestWrapper.unsafeGetJson<AsyncLogModel>();
   // if payload is larger than 10MB, return 400
   const MAX_PAYLOAD_SIZE = 10 * 1024 * 1024;
   if (JSON.stringify(asyncLogModel).length > MAX_PAYLOAD_SIZE) {

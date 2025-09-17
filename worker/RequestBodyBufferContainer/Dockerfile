@@ -1,40 +1,16 @@
-# Simple Flask echo server, all-in-one Dockerfile
-FROM python:3.12-slim
+FROM node:22-slim AS builder
+WORKDIR /app
+COPY package.json package-lock.json tsconfig.json ./
+COPY src ./src
+RUN corepack enable && npm ci && npm run build
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PORT=8000
-
-RUN pip install --no-cache-dir flask
-
-# Write the app in-place
-RUN set -eux; cat > /app.py <<'PY'
-from flask import Flask, request, jsonify
-import os
-
-app = Flask(__name__)
-
-@app.route("/", methods=["GET","POST","PUT","PATCH","DELETE","OPTIONS"])
-def echo():
-    return jsonify({
-        "path": request.path,
-        "method": request.method,
-        "args": request.args.to_dict(flat=False),
-        "form": request.form.to_dict(flat=False),
-        "json": request.get_json(silent=True),
-        "headers": dict(request.headers),
-        "data": request.get_data(as_text=True),
-        "remote_addr": request.remote_addr,
-    })
-
-@app.route("/healthz", methods=["GET"])
-def healthz():
-    return "ok", 200
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "8000"))
-    app.run(host="0.0.0.0", port=port)
-PY
-
+FROM node:22-slim AS runner
+ENV NODE_ENV=production PORT=8000
+WORKDIR /app
+COPY --from=builder /app/package.json /app/package-lock.json ./
+RUN corepack enable && npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
+COPY --from=builder /app/dist ./dist
+USER node
 EXPOSE 8000
-CMD ["python", "/app.py"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD node -e "fetch('http://127.0.0.1:8000/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+CMD ["node", "dist/server.js"]

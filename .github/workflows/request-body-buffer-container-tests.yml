@@ -1,0 +1,45 @@
+name: RequestBodyBufferContainer Tests
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'worker/RequestBodyBufferContainer/**'
+      - '.github/workflows/request-body-buffer-container-tests.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'worker/RequestBodyBufferContainer/**'
+      - '.github/workflows/request-body-buffer-container-tests.yml'
+  workflow_dispatch: {}
+
+jobs:
+  rbb-tests:
+    name: Run integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: worker/RequestBodyBufferContainer/package-lock.json
+
+      - name: Install dependencies
+        working-directory: worker/RequestBodyBufferContainer
+        run: npm ci
+
+      - name: Type check
+        working-directory: worker/RequestBodyBufferContainer
+        run: npm run typecheck
+
+      - name: Run tests
+        working-directory: worker/RequestBodyBufferContainer
+        run: npm test --silent
+
+      - name: Summary
+        if: always()
+        run: echo "✅ RequestBodyBufferContainer tests completed"

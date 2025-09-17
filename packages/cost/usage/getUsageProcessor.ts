@@ -2,6 +2,7 @@ import { OpenAIUsageProcessor } from "./openAIUsageProcessor";
 import { AnthropicUsageProcessor } from "./anthropicUsageProcessor";
 import { GroqUsageProcessor } from "./groqUsageProcessor";
 import { XAIUsageProcessor } from "./xaiUsageProcessor";
+import { DeepSeekUsageProcessor } from "./deepseekUsageProcessor";
 import { IUsageProcessor } from "./IUsageProcessor";
 import { ModelProviderName } from "../models/providers";
 
@@ -17,6 +18,8 @@ export function getUsageProcessor(
       return new GroqUsageProcessor();
     case "xai":
       return new XAIUsageProcessor();
+    case "deepseek":
+      return new DeepSeekUsageProcessor();
     default:
       return null;
   }

@@ -116,6 +116,9 @@ export const dbProviderToProvider = (
   if (provider === "Azure OpenAI") {
     return "azure";
   }
+  if (provider === "deepseek" || provider === "DeepSeek") {
+    return "deepseek";
+  }
   return null;
 };
 
