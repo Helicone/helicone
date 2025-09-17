@@ -536,12 +536,22 @@ async function log(
           throw new Error(`Error parsing usage for provider ${attemptProvider}: ${usage.error}`);
         }
 
-        const breakdown = modelCostBreakdownFromRegistry({
-          modelUsage: usage.data,
-          model: attemptModel,
-          provider: attemptProvider,
-        });
-        // TODO: apply breakdown totalCost to escrow    
+        let totalCost: number | undefined;
+
+        // Check if this is OpenRouter with direct cost from response
+        if (attemptProvider === "openrouter" && usage.data && 'cost' in usage.data && typeof usage.data.cost === 'number') {
+          // Use direct cost from OpenRouter (already in USD)
+          totalCost = usage.data.cost;
+        } else {
+          // Use token-based calculation for other providers
+          const breakdown = modelCostBreakdownFromRegistry({
+            modelUsage: usage.data,
+            model: attemptModel,
+            provider: attemptProvider,
+          });
+          totalCost = breakdown?.totalCost;
+        }
+        // TODO: apply totalCost to escrow    
       }
 
       const responseBodyResult = await loggable.parseRawResponse(rawResponse);

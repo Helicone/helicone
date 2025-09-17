@@ -46,6 +46,39 @@ export const endpoints = {
       "*": {},
     },
   },
+  // OpenRouter fallback endpoint with 5.5% markup
+  "qwen3-32b:openrouter": {
+    providerModelId: "qwen/qwen3-32b",
+    provider: "openrouter",
+    author: "alibaba",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000000316, // $0.00000003 * 1.055 = $0.0000000316 (OpenRouter: $0.03/1M + 5.5% markup)
+        output: 0.0000001371, // $0.00000013 * 1.055 = $0.0000001371 (OpenRouter: $0.13/1M + 5.5% markup)
+      },
+    ],
+    contextLength: 40960,
+    maxCompletionTokens: 40_960,
+    supportedParameters: [
+      "frequency_penalty",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3, // Fallback priority
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${QwenModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
