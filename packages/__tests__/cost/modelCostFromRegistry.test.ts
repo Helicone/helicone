@@ -11,7 +11,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
     const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
-      model: "gpt-4o",
+      providerModelId: "gpt-4o",
       provider: "openai" as ModelProviderName,
     });
 
@@ -37,7 +37,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
     const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
-      model: "claude-3.5-sonnet-v2",
+      providerModelId: "claude-3.5-sonnet-v2",
       provider: "anthropic" as ModelProviderName,
     });
 
@@ -64,7 +64,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
     const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
-      model: "non-existent-model",
+      providerModelId: "non-existent-model",
       provider: "unknown" as ModelProviderName,
     });
 
@@ -79,7 +79,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
     const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
-      model: "gpt-4o",
+      providerModelId: "gpt-4o",
       provider: "openai" as ModelProviderName,
     });
 
@@ -100,7 +100,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
     const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
-      model: "gpt-4o",
+      providerModelId: "gpt-4o",
       provider: "openai" as ModelProviderName,
     });
 
@@ -124,7 +124,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
     const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
-      model: "gemini-2.5-flash",
+      providerModelId: "gemini-2.5-flash",
       provider: "google-ai-studio" as ModelProviderName,
     });
 
@@ -144,7 +144,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
     const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
-      model: "grok-3",
+      providerModelId: "grok-3",
       provider: "xai" as ModelProviderName,
     });
 
@@ -163,7 +163,7 @@ describe("modelCostBreakdownFromRegistry", () => {
 
     const breakdown = modelCostBreakdownFromRegistry({
       modelUsage,
-      model: "gemini-2.5-flash",
+      providerModelId: "gemini-2.5-flash",
       provider: "vertex" as ModelProviderName,
     });
 
