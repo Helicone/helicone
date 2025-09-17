@@ -14,9 +14,13 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
   // Accept any content-type and parse as Buffer for simplicity.
   // In production, we can switch to stream-based handling when needed.
-  app.addContentTypeParser('*', { parseAs: 'buffer' }, (_req, payload, done) => {
-    done(null, payload);
-  });
+  app.addContentTypeParser(
+    "*",
+    { parseAs: "buffer" },
+    (_req, payload, done) => {
+      done(null, payload);
+    }
+  );
 
   // No internal secret: container is not publicly accessible.
 
@@ -26,31 +30,34 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     body?: Buffer | string;
   };
 
-  async function readBody(req: IngestRequest, maxBytes: number): Promise<Buffer> {
+  async function readBody(
+    req: IngestRequest,
+    maxBytes: number
+  ): Promise<Buffer> {
     const b = req.body;
-    if (typeof b === 'string') {
+    if (typeof b === "string") {
       const buf = Buffer.from(b);
-      if (buf.byteLength > maxBytes) throw new Error('Payload Too Large');
+      if (buf.byteLength > maxBytes) throw new Error("Payload Too Large");
       return buf;
     }
     if (Buffer.isBuffer(b)) {
-      if (b.byteLength > maxBytes) throw new Error('Payload Too Large');
+      if (b.byteLength > maxBytes) throw new Error("Payload Too Large");
       return b;
     }
-    const stream: Readable = req.raw as unknown as Readable;
+    const stream: Readable = req.raw;
     return await new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = [];
       let total = 0;
-      stream.on('data', (chunk: Buffer) => {
+      stream.on("data", (chunk: Buffer) => {
         total += chunk.length;
         if (total > maxBytes) {
-          stream.destroy(new Error('Payload Too Large'));
+          stream.destroy(new Error("Payload Too Large"));
           return;
         }
         chunks.push(chunk);
       });
-      stream.once('end', () => resolve(Buffer.concat(chunks)));
-      stream.once('error', reject);
+      stream.once("end", () => resolve(Buffer.concat(chunks)));
+      stream.once("error", reject);
     });
   }
 
@@ -59,7 +66,6 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
   app.post<{
     Params: { requestId: string };
   }>("/:requestId", async (request, reply) => {
-
     const { requestId } = request.params;
     const t0 = Date.now();
     try {
@@ -70,7 +76,8 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     } catch (e: any) {
       request.log.warn({ err: e, requestId }, "ingest failed");
       const msg = String(e?.message ?? e ?? "error");
-      if (msg.includes("Too Large")) return reply.code(413).send({ error: "payload too large" });
+      if (msg.includes("Too Large"))
+        return reply.code(413).send({ error: "payload too large" });
       return reply.code(500).send({ error: "ingest failed" });
     } finally {
       request.log.debug({ requestId, ms: Date.now() - t0 }, "ingest done");
@@ -106,7 +113,9 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
     const parse = SignSchema.safeParse(request.body);
     if (!parse.success)
-      return reply.code(400).send({ error: "bad request", details: parse.error.flatten() });
+      return reply
+        .code(400)
+        .send({ error: "bad request", details: parse.error.flatten() });
 
     try {
       const res = await signAws(parse.data, entry.data.toString("utf8"));
