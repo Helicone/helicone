@@ -120,7 +120,6 @@ export class AnthropicToOpenAIStreamConverter {
       case "content_block_stop":
         // handle tool calls with empty arguments
         const toolCall = this.toolCallState.get(event.index);
-        console.log("content_block_stop", toolCall);
         if (toolCall && !toolCall.hasNonEmptyDelta) {
           this.emitEmptyToolCallArguments(toolCall, chunks);
         }

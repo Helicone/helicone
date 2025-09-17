@@ -3,6 +3,7 @@ import { OpenAIUsageProcessor } from "@helicone-package/cost/usage/openAIUsagePr
 import { AnthropicUsageProcessor } from "@helicone-package/cost/usage/anthropicUsageProcessor";
 import { GroqUsageProcessor } from "@helicone-package/cost/usage/groqUsageProcessor";
 import { XAIUsageProcessor } from "@helicone-package/cost/usage/xaiUsageProcessor";
+import { DeepSeekUsageProcessor } from "@helicone-package/cost/usage/deepseekUsageProcessor";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import * as fs from "fs";
 import * as path from "path";
@@ -28,10 +29,14 @@ describe("getUsageProcessor", () => {
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
   });
 
-  it("should throw error for unsupported provider", () => {
-    expect(() => {
-      getUsageProcessor("unsupported-provider" as any);
-    }).toThrow("Usage processor not found for provider: unsupported-provider");
+  it("should return DeepSeekUsageProcessor for deepseek provider", () => {
+    const processor = getUsageProcessor("deepseek");
+    expect(processor).toBeInstanceOf(DeepSeekUsageProcessor);
+  });
+
+  it("should return null for unsupported provider", () => {
+    const processor = getUsageProcessor("unsupported-provider" as any);
+    expect(processor).toBeNull();
   });
 });
 
@@ -294,6 +299,89 @@ describe("Groq specific features", () => {
     expect(result.data).toEqual({
       input: 47,
       output: 10,
+    });
+  });
+
+  describe("DeepSeekUsageProcessor", () => {
+    const deepseekProcessor = new DeepSeekUsageProcessor();
+
+    it("should parse real DeepSeek non-streaming response", async () => {
+      const responseData = fs.readFileSync(
+        path.join(__dirname, "testData", "deepseek-non-stream.snapshot"),
+        "utf-8"
+      );
+
+      const result = await deepseekProcessor.parse({
+        responseBody: responseData,
+        isStream: false,
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        input: 13, // prompt_cache_miss_tokens
+        output: 723, // completion_tokens
+      });
+    });
+
+    it("should parse DeepSeek response with cache hits", async () => {
+      const responseData = fs.readFileSync(
+        path.join(__dirname, "testData", "deepseek-cached.snapshot"),
+        "utf-8"
+      );
+
+      const result = await deepseekProcessor.parse({
+        responseBody: responseData,
+        isStream: false,
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        input: 30, // prompt_cache_miss_tokens
+        output: 50,
+        cacheDetails: {
+          cachedInput: 70, // prompt_cache_hit_tokens
+        },
+      });
+    });
+
+    it("should parse DeepSeek reasoner response with thinking tokens", async () => {
+      const responseData = fs.readFileSync(
+        path.join(__dirname, "testData", "deepseek-reasoner.snapshot"),
+        "utf-8"
+      );
+
+      const result = await deepseekProcessor.parse({
+        responseBody: responseData,
+        isStream: false,
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        input: 50, // prompt_cache_miss_tokens
+        output: 50, // completion_tokens (200) - reasoning_tokens (150)
+        cacheDetails: {
+          cachedInput: 50,
+        },
+        thinking: 150, // reasoning_tokens tracked separately
+      });
+    });
+
+    it("should parse DeepSeek streaming response", async () => {
+      const streamData = fs.readFileSync(
+        path.join(__dirname, "testData", "deepseek-stream.snapshot"),
+        "utf-8"
+      );
+
+      const result = await deepseekProcessor.parse({
+        responseBody: streamData,
+        isStream: true,
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        input: 13, // prompt_cache_miss_tokens from final chunk
+        output: 10, // completion_tokens from final chunk
+      });
     });
   });
 });

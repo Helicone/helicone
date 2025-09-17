@@ -14,6 +14,7 @@ import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType"
 import { RateLimitOptions } from "../clients/DurableObjectRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 import { EscrowInfo } from "../ai-gateway/types";
+import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -34,8 +35,8 @@ export interface HeliconeProxyRequest {
   retryOptions: IHeliconeHeaders["retryHeaders"];
   omitOptions: IHeliconeHeaders["omitHeaders"];
 
-  requestJson: { stream?: boolean; user?: string } | Record<string, never>;
-  bodyText: string | null;
+  body: ValidRequestBody;
+  unsafeGetBodyText: () => Promise<string | null>;
 
   heliconeErrors: string[];
   providerAuthHash?: string;
@@ -141,8 +142,7 @@ export class HeliconeProxyRequestMapper {
 
     const targetUrl = buildTargetUrl(this.request.url, api_base);
 
-    const requestJson = await this.requestJson();
-    let isStream = requestJson.stream === true;
+    let isStream = await this.request.requestBodyBuffer.isStream();
 
     if (this.provider === "GOOGLE") {
       const queryParams = new URLSearchParams(targetUrl.search);
@@ -162,7 +162,6 @@ export class HeliconeProxyRequestMapper {
         isRateLimitedKey:
           this.request.heliconeHeaders.heliconeAuthV2?.keyType ===
           "rate-limited",
-        requestJson: requestJson,
         retryOptions: this.request.heliconeHeaders.retryHeaders,
         provider: this.provider,
         tokenCalcUrl: this.tokenCalcUrl,
@@ -174,7 +173,9 @@ export class HeliconeProxyRequestMapper {
         heliconeErrors: this.heliconeErrors,
         api_base,
         isStream: isStream,
-        bodyText: await this.getBody(),
+        body: await this.request.requestBodyBuffer.getReadableStreamToBody(),
+        unsafeGetBodyText: this.unsafeGetBody.bind(this),
+
         startTime,
         url: this.request.url,
         requestId:
@@ -189,7 +190,7 @@ export class HeliconeProxyRequestMapper {
     };
   }
 
-  private async getBody(): Promise<string | null> {
+  private async unsafeGetBody(): Promise<string | null> {
     if (this.request.getMethod() === "GET") {
       return null;
     }
@@ -260,11 +261,5 @@ export class HeliconeProxyRequestMapper {
       this.heliconeErrors.push(rateLimitOptions.error);
     }
     return rateLimitOptions.data ?? null;
-  }
-
-  async requestJson(): Promise<HeliconeProxyRequest["requestJson"]> {
-    return this.request.getMethod() === "POST"
-      ? await this.request.unsafeGetJson()
-      : {};
   }
 }

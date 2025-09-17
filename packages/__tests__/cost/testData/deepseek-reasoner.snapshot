@@ -1,0 +1,31 @@
+{
+  "id": "test-reasoner-response",
+  "object": "chat.completion",
+  "created": 1758080205,
+  "model": "deepseek-reasoner",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The answer is 42."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 100,
+    "completion_tokens": 200,
+    "total_tokens": 300,
+    "prompt_tokens_details": {
+      "cached_tokens": 50
+    },
+    "prompt_cache_hit_tokens": 50,
+    "prompt_cache_miss_tokens": 50,
+    "completion_tokens_details": {
+      "reasoning_tokens": 150
+    }
+  },
+  "system_fingerprint": "fp_reasoner_v3"
+}

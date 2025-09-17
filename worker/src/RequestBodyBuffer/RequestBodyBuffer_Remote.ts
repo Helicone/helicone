@@ -51,10 +51,17 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   // So we need to generate a unique id for each request. (For security reasons)
   // */
   private uniqueId: string;
+  private ingestPromise: Promise<void>;
+
+  private metadata: {
+    isStream?: boolean;
+    userId?: string;
+    model?: string;
+  } = {};
 
   constructor(
     request: Request,
-    dataDogClient: DataDogClient | undefined,
+    private dataDogClient: DataDogClient | undefined,
     requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"]
   ) {
     this.uniqueId = crypto.randomUUID();
@@ -65,7 +72,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     const headers = new Headers();
     headers.set("content-type", "application/octet-stream");
 
-    this.requestBodyBuffer
+    this.ingestPromise = this.requestBodyBuffer
       .fetch(`${BASE_URL}/${this.uniqueId}`, {
         method: "POST",
         headers,
@@ -79,7 +86,13 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
           );
           return;
         }
-        const { size } = await response.json<{ size: number }>();
+        const { size, isStream, userId, model } = await response.json<{
+          size: number;
+          isStream?: boolean;
+          userId?: string;
+          model?: string;
+        }>();
+        this.metadata = { isStream, userId, model };
         console.log("RequestBodyBuffer_Remote ingest success", size);
         dataDogClient?.trackMemory("container-request-body-size", size);
       })
@@ -89,10 +102,17 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   }
 
   public tempSetBody(body: string): void {
+    // TODO we need to implement this for gateway
     // no-op for remote buffer
   }
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
+    console.log(
+      "unsafeGetRawText on remote - Please traverse this stack trace and fix the issue"
+    );
+    this.dataDogClient?.trackMemory("container-called-unsafe-read", 1);
+    await this.ingestPromise.catch(() => undefined);
+
     const response = await this.requestBodyBuffer.fetch(
       `${BASE_URL}/${this.uniqueId}/unsafe/read`,
       {
@@ -136,5 +156,31 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       if (v !== undefined && v !== null) headers.set(k, String(v));
     }
     return { newHeaders: headers, model: json.model };
+  }
+
+  async getReadableStreamToBody(): Promise<ReadableStream | null> {
+    // Wait for ingest to be attempted to reduce race with GET
+    await this.ingestPromise.catch(() => undefined);
+    const response = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/unsafe/read`,
+      { method: "GET" }
+    );
+    if (!response.ok) return null;
+    return response.body ?? null;
+  }
+
+  async isStream(): Promise<boolean> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.isStream ?? false;
+  }
+
+  async userId(): Promise<string | undefined> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.userId;
+  }
+
+  async model(): Promise<string | undefined> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.model;
   }
 }

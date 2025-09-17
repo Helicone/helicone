@@ -1,10 +1,6 @@
-import { consolidateTextFields, getUsage } from "./responseParserHelpers";
+import { consolidateTextFields } from "./responseParserHelpers";
 
-export async function parseOpenAIStream(
-  result: string,
-  tokenCounter: (text: string) => Promise<number>,
-  requestBody?: string
-) {
+export async function parseOpenAIStream(result: string) {
   const lines = result
     .split("\n")
     .filter((line) => !line.includes("OPENROUTER PROCESSING"))
@@ -23,7 +19,12 @@ export async function parseOpenAIStream(
     return {
       data: {
         ...consolidateTextFields(data),
-        usage: await getUsage(data, requestBody, () => Promise.resolve(0)),
+        usage: {
+          total_tokens: -1,
+          completion_tokens: -1,
+          prompt_tokens: -1,
+          helicone_calculated: false,
+        },
       },
       error: null,
     };
