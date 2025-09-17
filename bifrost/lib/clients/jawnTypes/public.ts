@@ -2882,7 +2882,7 @@ Json: JsonObject;
       timeZoneDifference: number;
     };
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio" | "openrouter";
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
     /** @enum {string} */
     AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "passthrough";
     /** @enum {string} */
@@ -4128,7 +4128,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio" | "openrouter";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
           }) | {
             error: string;
           };

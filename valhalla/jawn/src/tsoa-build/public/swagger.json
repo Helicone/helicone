@@ -7841,6 +7841,7 @@
 					"deepseek",
 					"cohere",
 					"xai",
+					"deepinfra",
 					"google-ai-studio",
 					"openrouter"
 				],
@@ -12424,6 +12425,7 @@
 														"deepseek",
 														"cohere",
 														"xai",
+														"deepinfra",
 														"google-ai-studio",
 														"openrouter"
 													]
