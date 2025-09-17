@@ -32,6 +32,7 @@ import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { EscrowInfo } from "../ai-gateway/types";
+import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
 export interface DBLoggableProps {
   response: {
@@ -52,7 +53,8 @@ export interface DBLoggableProps {
     promptSettings: PromptSettings;
     prompt2025Settings: Prompt2025Settings;
     startTime: Date;
-    bodyText?: string;
+    body: ValidRequestBody;
+    unsafeGetBodyText?: () => Promise<string | null>;
     path: string;
     targetUrl: string;
     properties: Record<string, string>;
@@ -99,7 +101,8 @@ export function dbLoggableRequestFromProxyRequest(
     heliconeTemplate: proxyRequest.heliconePromptTemplate ?? undefined,
     userId: proxyRequest.userId,
     startTime: requestStartTime,
-    bodyText: proxyRequest.bodyText ?? undefined,
+    unsafeGetBodyText: proxyRequest.unsafeGetBodyText,
+    body: proxyRequest.body,
     path: proxyRequest.requestWrapper.url.href,
     targetUrl: proxyRequest.targetUrl.href,
     properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
@@ -179,7 +182,9 @@ export async function dbLoggableRequestFromAsyncLogModel(
               asyncLogModel.timing.startTime.milliseconds
           )
         : new Date(),
-      bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
+      body: JSON.stringify(asyncLogModel.providerRequest.json),
+      unsafeGetBodyText: async () =>
+        JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
       targetUrl: asyncLogModel.providerRequest.url,
       properties: providerRequestHeaders.heliconeProperties,
@@ -272,7 +277,7 @@ export class DBLoggable {
     let result = responseBody;
     const isStream = this.request.isStream;
     const responseStatus = await this.response.status();
-    const requestBody = this.request.bodyText;
+    const requestBody = (await this.request.unsafeGetBodyText?.()) || undefined;
     const tokenCounter = (t: string) => this.tokenCounter(t);
     if (isStream && status === INTERNAL_ERRORS["Cancelled"]) {
       // Remove last line of stream from result
@@ -668,7 +673,7 @@ export class DBLoggable {
       const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
         organizationId: authParams.organizationId,
         requestId: this.request.requestId,
-        requestBody: this.request.bodyText ?? "{}",
+        requestBody: (await this.request.unsafeGetBodyText?.()) ?? "{}",
         responseBody: rawResponseBody.join(""),
       });
 
@@ -731,7 +736,7 @@ export class DBLoggable {
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
           targetUrl: this.request.targetUrl,
           provider: this.request.provider,
-          bodySize: this.request.bodyText?.length ?? 0,
+          bodySize: (await this.request.unsafeGetBodyText?.())?.length ?? 0,
           path: this.request.path,
           threat: this.request.threat ?? undefined,
           countryCode: this.request.country_code ?? undefined,

@@ -14,6 +14,7 @@ import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType"
 import { RateLimitOptions } from "../clients/DurableObjectRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 import { EscrowInfo } from "../ai-gateway/types";
+import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -35,7 +36,8 @@ export interface HeliconeProxyRequest {
   omitOptions: IHeliconeHeaders["omitHeaders"];
 
   requestJson: { stream?: boolean; user?: string } | Record<string, never>;
-  bodyText: string | null;
+  body: ValidRequestBody;
+  unsafeGetBodyText: () => Promise<string | null>;
 
   heliconeErrors: string[];
   providerAuthHash?: string;
@@ -174,7 +176,8 @@ export class HeliconeProxyRequestMapper {
         heliconeErrors: this.heliconeErrors,
         api_base,
         isStream: isStream,
-        bodyText: await this.getBody(),
+        body: await this.request.requestBodyBuffer.getReadableStreamToBody(),
+        unsafeGetBodyText: this.unsafeGetBody.bind(this),
         startTime,
         url: this.request.url,
         requestId:
@@ -189,7 +192,7 @@ export class HeliconeProxyRequestMapper {
     };
   }
 
-  private async getBody(): Promise<string | null> {
+  private async unsafeGetBody(): Promise<string | null> {
     if (this.request.getMethod() === "GET") {
       return null;
     }

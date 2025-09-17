@@ -187,7 +187,7 @@ export async function proxyForwarder(
     provider === "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
-      parseLatestMessage(proxyRequest);
+      await parseLatestMessage(proxyRequest);
     if (latestMsgErr || !latestMsg) {
       return responseBuilder.build({
         body: latestMsgErr,
@@ -269,7 +269,7 @@ export async function proxyForwarder(
     provider == "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
-      parseLatestMessage(proxyRequest);
+      await parseLatestMessage(proxyRequest);
 
     if (latestMsgErr || !latestMsg) {
       return responseBuilder.build({
@@ -418,14 +418,14 @@ export async function proxyForwarder(
   });
 }
 
-function parseLatestMessage(
+async function parseLatestMessage(
   proxyRequest: HeliconeProxyRequest
-): Result<LatestMessage, string> {
+): Promise<Result<LatestMessage, string>> {
   try {
     return {
       error: null,
       data: JSON.parse(
-        proxyRequest.bodyText ?? ""
+        (await proxyRequest.unsafeGetBodyText?.()) || "{}"
       ).messages.pop() as LatestMessage,
     };
   } catch (error) {
@@ -520,10 +520,10 @@ async function log(
         console.error("Error reading raw response:", rawResponseResult.error);
         return;
       }
-      
+
       const rawResponse = rawResponseResult.data;
       let cost: number | undefined = undefined;
-      let responseData = null;
+      let responseData: any = null;
 
       // handle AI Gateway requests (successful Attempt)
       const successfulAttempt = proxyRequest.requestWrapper.getSuccessfulAttempt();
@@ -532,7 +532,6 @@ async function log(
         const attemptProvider = successfulAttempt.endpoint.provider;
 
         const usageProcessor = getUsageProcessor(attemptProvider);
-
         if (usageProcessor) {
           const usage = await usageProcessor.parse({
             responseBody: rawResponse,
@@ -548,10 +547,14 @@ async function log(
 
             cost = breakdown?.totalCost;
           } else {
-            console.error(`No usage data found for AI Gateway model ${attemptModel} with provider ${attemptProvider}`);
+            console.error(
+              `No usage data found for AI Gateway model ${attemptModel} with provider ${attemptProvider}`
+            );
           }
         } else {
-          console.error(`No usage processor available for provider ${attemptProvider}`);
+          console.error(
+            `No usage processor available for provider ${attemptProvider}`
+          );
         }
       } else {
         // for non AI Gateway requests, we need to fall back to legacy methods when applicable
@@ -594,16 +597,21 @@ async function log(
 
           // final fallback for providers not in ModelProviderName
           if (cost === undefined) {
-            cost = costOfPrompt({
-              model,
-              promptTokens: responseData.response.prompt_tokens ?? 0,
-              completionTokens: responseData.response.completion_tokens ?? 0,
-              provider,
-              promptCacheWriteTokens: responseData.response.prompt_cache_write_tokens ?? 0,
-              promptCacheReadTokens: responseData.response.prompt_cache_read_tokens ?? 0,
-              promptAudioTokens: responseData.response.prompt_audio_tokens ?? 0,
-              completionAudioTokens: responseData.response.completion_audio_tokens ?? 0,
-            }) ?? 0;
+            cost =
+              costOfPrompt({
+                model,
+                promptTokens: responseData.response.prompt_tokens ?? 0,
+                completionTokens: responseData.response.completion_tokens ?? 0,
+                provider,
+                promptCacheWriteTokens:
+                  responseData.response.prompt_cache_write_tokens ?? 0,
+                promptCacheReadTokens:
+                  responseData.response.prompt_cache_read_tokens ?? 0,
+                promptAudioTokens:
+                  responseData.response.prompt_audio_tokens ?? 0,
+                completionAudioTokens:
+                  responseData.response.completion_audio_tokens ?? 0,
+              }) ?? 0;
           }
         }
       }
