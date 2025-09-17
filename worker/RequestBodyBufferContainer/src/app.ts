@@ -24,10 +24,9 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
   // No internal secret: container is not publicly accessible.
 
-  type IngestRequest = Pick<FastifyRequest, "body" | "raw"> & {
+  type IngestRequest = {
     raw: IncomingMessage;
-    // after our content-type parser, body is either Buffer or string
-    body?: Buffer | string;
+    body?: unknown;
   };
 
   async function readBody(
@@ -65,6 +64,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
   app.post<{
     Params: { requestId: string };
+    Body: string | Buffer;
   }>("/:requestId", async (request, reply) => {
     const { requestId } = request.params;
     const t0 = Date.now();
