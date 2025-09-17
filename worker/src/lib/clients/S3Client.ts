@@ -1,6 +1,22 @@
 import { AwsClient } from "aws4fetch";
 import { Result } from "../util/results";
 
+async function concatUint8Arrays(uint8arrays: Uint8Array[]): Promise<Uint8Array> {
+  const blob = new Blob(uint8arrays);
+  const buffer = await blob.arrayBuffer();
+  return new Uint8Array(buffer);
+}
+
+async function compress(str: string): Promise<Uint8Array> {
+  const stream = new Blob([str]).stream();
+  const compressedStream = stream.pipeThrough(new CompressionStream("gzip"));
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of (compressedStream as any)) {
+    chunks.push(chunk as Uint8Array);
+  }
+  return await concatUint8Arrays(chunks);
+}
+
 export class S3Client {
   private awsClient: AwsClient;
 
