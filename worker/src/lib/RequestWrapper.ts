@@ -19,6 +19,7 @@ import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
 import { RequestBodyBuffer_InMemory } from "../RequestBodyBuffer/RequestBodyBuffer_InMemory";
 import { IRequestBodyBuffer } from "../RequestBodyBuffer/IRequestBodyBuffer";
+import { RequestBodyBufferBuilder } from "../RequestBodyBuffer/RequestBodyBufferBuilder";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -62,12 +63,10 @@ export class RequestWrapper {
   prompt2025Settings: Prompt2025Settings; // I'm sorry. Will clean whenever we can remove old promtps.
   extraHeaders: Headers | null = null;
   requestReferrer: string | undefined;
-  requestBodyBuffer: IRequestBodyBuffer;
 
   private bodyKeyOverride: object | null = null;
 
   private gatewayAttempt?: Attempt;
-  private dataDogClient?: DataDogClient;
 
   /*
   We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
@@ -135,6 +134,8 @@ export class RequestWrapper {
     }
     return headers;
   }
+
+  // TODO we reallllyyyy should not be calling this.. it's hacky
   public resetObject() {
     this.url = new URL(this.originalUrl);
     this.headers = this.mutatedAuthorizationHeaders(this.request);
@@ -145,7 +146,9 @@ export class RequestWrapper {
 
   private constructor(
     private request: Request,
-    private env: Env
+    private env: Env,
+    readonly requestBodyBuffer: IRequestBodyBuffer,
+    private readonly dataDogClient: DataDogClient | undefined
   ) {
     this.url = new URL(request.url);
     this.originalUrl = new URL(request.url);
@@ -154,28 +157,17 @@ export class RequestWrapper {
     this.promptSettings = this.getPromptSettings();
     this.prompt2025Settings = {}; // initialized later, if a prompt is used.
     this.injectPromptProperties();
-
-    // Get DataDog client singleton (persists across all requests)
-    if ((env.DATADOG_ENABLED ?? "false") === "true") {
-      this.dataDogClient = getDataDogClient(env);
-      // Increment request counter for each new request
-      this.dataDogClient.incrementRequestCount();
-      try {
-        this.dataDogClient.trackContentLength(
-          Number(this.headers.get("content-length") ?? 0)
-        );
-      } catch (e) {
-        // failed to get content length
-        this.dataDogClient.trackContentLength(-1);
-        // Silently catch - never let monitoring break the request
-      }
-    }
     this.baseURLOverride = null;
     this.cf = request.cf;
-    this.requestBodyBuffer = new RequestBodyBuffer_InMemory(
-      request,
-      this.dataDogClient
-    );
+
+    try {
+      dataDogClient?.incrementRequestCount();
+      dataDogClient?.trackContentLength(
+        Number(this.headers.get("content-length") ?? 0)
+      );
+    } catch (e) {
+      dataDogClient?.trackContentLength(-1);
+    }
   }
 
   private injectPromptProperties() {
@@ -232,7 +224,22 @@ export class RequestWrapper {
     request: Request,
     env: Env
   ): Promise<Result<RequestWrapper, string>> {
-    const requestWrapper = new RequestWrapper(request, env);
+    let dataDogClient: DataDogClient | undefined;
+    // Get DataDog client singleton (persists across all requests)
+    if ((env.DATADOG_ENABLED ?? "false") === "true") {
+      dataDogClient = getDataDogClient(env);
+    }
+    const requestBodyBuffer = await RequestBodyBufferBuilder(
+      request,
+      dataDogClient,
+      env.REQUEST_BODY_BUFFER
+    );
+    const requestWrapper = new RequestWrapper(
+      request,
+      env,
+      requestBodyBuffer,
+      dataDogClient
+    );
     const authorization = await requestWrapper.setAuthorization(env);
 
     if (authorization.error) {
