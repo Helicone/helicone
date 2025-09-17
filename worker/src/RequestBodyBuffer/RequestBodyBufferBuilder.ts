@@ -44,7 +44,7 @@ function tryInitRemote(
   try {
     if (env.REQUEST_BODY_BUFFER) {
       return new RequestBodyBuffer_Remote(
-        null,
+        bodyStream ?? null,
         dataDogClient,
         env.REQUEST_BODY_BUFFER,
         env
@@ -106,7 +106,6 @@ export async function RequestBodyBufferBuilder(
 
   if (sizeIsKnown) {
     if (contentLength > MAX_INMEMORY_BYTES) {
-      // Large known body → InMemory, pass original stream
       return tryInitRemote(request.body, dataDogClient, env);
     } else {
       return new RequestBodyBuffer_InMemory(
@@ -131,7 +130,6 @@ export async function RequestBodyBufferBuilder(
   const exceeded = await isOver(rightForProbe, MAX_INMEMORY_BYTES);
 
   if (exceeded) {
-    // Large request (> 20 MiB): use InMemory, feed it the left side of tee
     return tryInitRemote(leftForRemote, dataDogClient, env);
   } else {
     return new RequestBodyBuffer_InMemory(leftForRemote, dataDogClient, env);

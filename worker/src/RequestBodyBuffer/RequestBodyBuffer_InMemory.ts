@@ -59,7 +59,10 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     // Handle string bodies directly
     if (typeof this.body === "string") {
       this.cachedText = this.body;
-    } else if (this.body && typeof (this.body as any).getReader === "function") {
+    } else if (
+      this.body &&
+      typeof (this.body as any).getReader === "function"
+    ) {
       // Read the stream into a string
       const reader = (this.body as ReadableStream<Uint8Array>).getReader();
       const chunks: Uint8Array[] = [];
