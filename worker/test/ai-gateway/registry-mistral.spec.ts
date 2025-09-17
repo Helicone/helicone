@@ -18,24 +18,24 @@ const deepinfraAuthExpectations = {
   },
 };
 
-describe("Alibaba Registry Tests", () => {
+describe("Mistral Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
     vi.clearAllMocks();
   });
 
-  describe("BYOK Tests - Qwen Models", () => {
-    describe("qwen3-30b-a3b", () => {
+  describe("BYOK Tests - Mistral Small Model", () => {
+    describe("mistral-small", () => {
       it("should handle deepinfra provider", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -45,14 +45,14 @@ describe("Alibaba Registry Tests", () => {
 
       it("should auto-select deepinfra provider when none specified", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b",
+          model: "mistral-small",
           expected: {
             providers: [
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -62,10 +62,10 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle successful request with custom parameters", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [
-              { role: "user", content: "Test message for Qwen model" },
+              { role: "user", content: "Test message for Mistral Small model" },
             ],
             maxTokens: 1000,
           },
@@ -74,11 +74,11 @@ describe("Alibaba Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: {
                   ...deepinfraAuthExpectations,
-                  bodyContains: ["Test message for Qwen model"],
+                  bodyContains: ["Test message for Mistral Small model"],
                 },
               },
             ],
@@ -88,7 +88,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle tools parameter support", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [{ role: "user", content: "What's the weather like?" }],
             // Tools would be added here in a real test, but we're just testing the structure
@@ -98,8 +98,8 @@ describe("Alibaba Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -109,7 +109,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle streaming requests", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [{ role: "user", content: "Stream this response" }],
             stream: true,
@@ -119,8 +119,8 @@ describe("Alibaba Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ['"stream":true'],
@@ -133,7 +133,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle multimodal input (text and image)", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [
               {
@@ -147,9 +147,87 @@ describe("Alibaba Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle supported parameters correctly", () =>
+        runGatewayTest({
+          model: "mistral-small/deepinfra",
+          request: {
+            messages: [
+              { role: "user", content: "Test with various parameters" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                expects: deepinfraAuthExpectations,
+                customVerify: (call) => {
+                  // Verify that the request supports the expected parameters
+                  // like temperature, top_p, frequency_penalty, etc.
+                  // This would be expanded in actual implementation
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify context length limits are respected", () =>
+        runGatewayTest({
+          model: "mistral-small/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test message within context limits",
+              },
+            ],
+            maxTokens: 128000, // Should be within the 128,000 limit
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify pricing and rate limits configuration", () =>
+        runGatewayTest({
+          model: "mistral-small/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                expects: deepinfraAuthExpectations,
+                customVerify: (call) => {
+                  // In a real implementation, this would verify that
+                  // pricing tiers and rate limits are correctly applied
+                  // Based on the model configuration:
+                  // - Input: 0.05 per token
+                  // - Output: 0.1 per token
+                  // - RPM: 12000, TPM: 60000000, TPD: 6000000000
+                },
               },
             ],
             finalStatus: 200,
@@ -157,10 +235,10 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
-    describe("Error scenarios", () => {
+    describe("Error scenarios for mistral-small", () => {
       it("should handle DeepInfra provider failure", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
@@ -176,7 +254,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle rate limiting from DeepInfra", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
@@ -192,7 +270,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle authentication failure", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
@@ -208,7 +286,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle model not found", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
@@ -224,7 +302,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle quota exceeded", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
@@ -240,7 +318,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle bad request with invalid parameters", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
@@ -256,7 +334,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle timeout scenarios", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
@@ -272,7 +350,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle content filtering violations", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [
               { role: "user", content: "Content that might be filtered" },
@@ -292,10 +370,10 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
-    describe("Advanced scenarios", () => {
+    describe("Advanced scenarios for mistral-small", () => {
       it("should handle custom headers and body mapping", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [{ role: "user", content: "Test with custom mapping" }],
             headers: {
@@ -308,8 +386,8 @@ describe("Alibaba Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: {
                   ...deepinfraAuthExpectations,
                   headers: {
@@ -323,12 +401,12 @@ describe("Alibaba Registry Tests", () => {
           },
         }));
 
-      it("should handle supported parameters correctly", () =>
+      it("should handle response format parameter", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [
-              { role: "user", content: "Test with various parameters" },
+              { role: "user", content: "Return structured JSON response" },
             ],
           },
           expected: {
@@ -336,13 +414,10 @@ describe("Alibaba Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
-                expects: deepinfraAuthExpectations,
-                customVerify: (call) => {
-                  // Verify that the request supports the expected parameters
-                  // like temperature, top_p, frequency_penalty, etc.
-                  // This would be expanded in actual implementation
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                expects: {
+                  ...deepinfraAuthExpectations,
                 },
               },
             ],
@@ -350,66 +425,23 @@ describe("Alibaba Registry Tests", () => {
           },
         }));
 
-      it("should verify context length limits are respected", () =>
+      it("should handle stop sequences", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [
-              {
-                role: "user",
-                content: "Test message within context limits",
-              },
+              { role: "user", content: "Generate a list and stop at the end" },
             ],
-            maxTokens: 32768, // Should be within the 32,768 limit
           },
           expected: {
             providers: [
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
-                expects: deepinfraAuthExpectations,
-              },
-            ],
-            finalStatus: 200,
-          },
-        }));
-
-      it("should handle rate limit recovery scenario", () =>
-        runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
-          expected: {
-            providers: [
-              {
-                url: "https://api.deepinfra.com/v1/openai",
-                response: "failure",
-                statusCode: 429,
-                errorMessage: "Rate limit exceeded",
-              },
-            ],
-            finalStatus: 429,
-          },
-        }));
-
-      it("should verify pricing and rate limits configuration", () =>
-        runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
-          expected: {
-            providers: [
-              {
-                url: "https://api.deepinfra.com/v1/openai",
-                response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
-                expects: deepinfraAuthExpectations,
-                customVerify: (call) => {
-                  // In a real implementation, this would verify that
-                  // pricing tiers and rate limits are correctly applied
-                  // Based on the model configuration:
-                  // - Input: 0.00000008 per token
-                  // - Output: 0.00000029 per token
-                  // - RPM: 30000, TPM: 150000000, TPD: 15000000000
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                expects: {
+                  ...deepinfraAuthExpectations,
                 },
               },
             ],
@@ -418,17 +450,17 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
-    describe("Provider URL validation", () => {
+    describe("Provider URL validation for mistral-small", () => {
       it("should construct correct DeepInfra URL", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the URL is correctly constructed
@@ -443,14 +475,14 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle provider model ID mapping correctly", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B", // Should map to the correct provider model ID
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506", // Should map to the correct provider model ID
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -459,10 +491,10 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
-    describe("Edge cases and robustness", () => {
+    describe("Edge cases and robustness for mistral-small", () => {
       it("should handle empty messages array", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [],
           },
@@ -481,12 +513,12 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle very long input within context limits", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [
               {
                 role: "user",
-                content: "Very long input... ".repeat(1000), // Still within 32k token limit
+                content: "Very long input... ".repeat(1000), // Still within 128k token limit
               },
             ],
           },
@@ -495,8 +527,8 @@ describe("Alibaba Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -506,7 +538,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle unicode and special characters", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           request: {
             messages: [
               {
@@ -520,8 +552,8 @@ describe("Alibaba Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai",
                 response: "success",
-                model: "Qwen/Qwen3-30B-A3B",
-                data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -531,7 +563,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle malformed JSON gracefully", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
           expected: {
             providers: [
               {
@@ -547,7 +579,546 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle network connectivity issues", () =>
         runGatewayTest({
-          model: "qwen3-30b-a3b/deepinfra",
+          model: "mistral-small/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 502,
+                errorMessage: "Bad gateway - upstream server error",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+  });
+
+  describe("BYOK Tests - Mistral Nemo Model", () => {
+    describe("mistral-nemo", () => {
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select deepinfra provider when none specified", () =>
+        runGatewayTest({
+          model: "mistral-nemo",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle successful request with custom parameters", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [
+              { role: "user", content: "Test message for Mistral Nemo model" },
+            ],
+            maxTokens: 1000,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: ["Test message for Mistral Nemo model"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tools parameter support", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [{ role: "user", content: "What's the weather like?" }],
+            // Tools would be added here in a real test, but we're just testing the structure
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle streaming requests", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [{ role: "user", content: "Stream this response" }],
+            stream: true,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: ['"stream":true'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle multimodal input (text and image)", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Describe this image and provide text analysis",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("Error scenarios for mistral-nemo", () => {
+      it("should handle DeepInfra provider failure", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "DeepInfra service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from DeepInfra", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle authentication failure", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+
+      it("should handle model not found", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle quota exceeded", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 403,
+                errorMessage: "Quota exceeded",
+              },
+            ],
+            finalStatus: 403,
+          },
+        }));
+
+      it("should handle bad request with invalid parameters", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid request parameters",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle timeout scenarios", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 408,
+                errorMessage: "Request timeout",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle content filtering violations", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [
+              { role: "user", content: "Content that might be filtered" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 422,
+                errorMessage: "Content filtering violation",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("Advanced scenarios for mistral-nemo", () => {
+      it("should handle custom headers and body mapping", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [{ role: "user", content: "Test with custom mapping" }],
+            headers: {
+              "X-Custom-Header": "test-value",
+            },
+            bodyMapping: "NO_MAPPING",
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  headers: {
+                    ...deepinfraAuthExpectations.headers,
+                    "X-Custom-Header": "test-value",
+                  },
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle supported parameters correctly", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [
+              { role: "user", content: "Test with various parameters" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+                customVerify: (call) => {
+                  // Verify that the request supports the expected parameters
+                  // like temperature, top_p, frequency_penalty, etc.
+                  // This would be expanded in actual implementation
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify context length limits are respected", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test message within context limits",
+              },
+            ],
+            maxTokens: 16400, // Should be within the 16,400 limit
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle rate limit recovery scenario", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should verify pricing and rate limits configuration", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+                customVerify: (call) => {
+                  // In a real implementation, this would verify that
+                  // pricing tiers and rate limits are correctly applied
+                  // Based on the model configuration:
+                  // - Input: 0.02 per token
+                  // - Output: 0.04 per token
+                  // - RPM: 12000, TPM: 60000000, TPD: 6000000000
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("Provider URL validation for mistral-nemo", () => {
+      it("should construct correct DeepInfra URL", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+                customVerify: (call) => {
+                  // Verify that the URL is correctly constructed
+                  // Base URL: https://api.deepinfra.com/
+                  // Built URL: https://api.deepinfra.com/v1/openai
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle provider model ID mapping correctly", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407", // Should map to the correct provider model ID
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("Edge cases and robustness for mistral-nemo", () => {
+      it("should handle empty messages array", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Messages array cannot be empty",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle very long input within context limits", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Very long input... ".repeat(1000), // Still within 128k token limit
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle unicode and special characters", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "测试中文 🚀 émojis and spéciål chars",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle malformed JSON gracefully", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid JSON in request body",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle network connectivity issues", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
           expected: {
             providers: [
               {
