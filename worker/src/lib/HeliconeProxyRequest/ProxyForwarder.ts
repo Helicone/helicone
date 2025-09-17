@@ -591,18 +591,6 @@ async function log(
 
                   if (breakdown) {
                     calculatedCost = breakdown.totalCost;
-                  } else {
-                    // not in new registry, fall back to legacy extraction + legacy registry
-                    calculatedCost = costOfPrompt({
-                      model,
-                      provider,
-                      promptTokens: responseData.response.prompt_tokens ?? 0,
-                      completionTokens: responseData.response.completion_tokens ?? 0,
-                      promptCacheWriteTokens: responseData.response.prompt_cache_write_tokens ?? 0,
-                      promptCacheReadTokens: responseData.response.prompt_cache_read_tokens ?? 0,
-                      promptAudioTokens: responseData.response.prompt_audio_tokens ?? 0,
-                      completionAudioTokens: responseData.response.completion_audio_tokens ?? 0,
-                    }) ?? 0;
                   }
                 }
               } catch (error) {
