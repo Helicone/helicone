@@ -28,10 +28,9 @@ describe("getUsageProcessor", () => {
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
   });
 
-  it("should throw error for unsupported provider", () => {
-    expect(() => {
-      getUsageProcessor("unsupported-provider" as any);
-    }).toThrow("Usage processor not found for provider: unsupported-provider");
+  it("should return null for unsupported provider", () => {
+    const processor = getUsageProcessor("unsupported-provider" as any);
+    expect(processor).toBeNull();
   });
 });
 
