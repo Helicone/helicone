@@ -30,8 +30,8 @@ export const AUTHORS = [
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
 
-export type InputModality = "text" | "image" | "audio" | "video";
-export type OutputModality = "text" | "image" | "audio" | "video";
+export type InputModality = "text" | "image" | "audio" | "video" | "pdf";
+export type OutputModality = "text" | "image" | "audio" | "video" | "pdf";
 
 export interface Modality {
   inputs: InputModality[];
@@ -49,7 +49,8 @@ export type Tokenizer =
   | "Qwen"
   | "DeepSeek"
   | "Cohere"
-  | "Grok";
+  | "Grok"
+  | "Tekken";
 
 export type StandardParameter =
   | "max_tokens"

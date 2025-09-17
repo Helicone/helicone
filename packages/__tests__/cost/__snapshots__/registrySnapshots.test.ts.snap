@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
@@ -863,6 +863,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "mistral/mistral-nemo": {
+    "mistral-nemo:deepinfra": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16400,
+      "modelId": "mistralai/Mistral-Nemo-Instruct-2407",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "moonshotai/kimi-k2": {
     "kimi-k2-0905:groq": {
       "context": 262144,
@@ -1636,6 +1662,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
   ],
+  "mistral/mistral-nemo": [
+    "deepinfra",
+  ],
   "moonshotai/kimi-k2": [
     "groq",
     "groq",
@@ -2095,6 +2124,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "mistral/mistral-nemo": {
+    "deepinfra": [
+      {
+        "input": 0.02,
+        "output": 0.04,
+        "threshold": 0,
+      },
+    ],
+  },
   "moonshotai/kimi-k2": {
     "groq": [
       {
@@ -2495,6 +2533,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "mistral-nemo",
+      "providers": [
+        "deepinfra",
+      ],
+    },
+    {
       "model": "o3",
       "providers": [
         "openai",
@@ -2547,7 +2591,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "deepinfra",
     },
     {
@@ -2618,8 +2662,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:vertex:global",
     "claude-3.5-sonnet-v2:anthropic:*",
   ],
-  "totalEndpoints": 66,
-  "totalModelProviderConfigs": 66,
+  "totalEndpoints": 67,
+  "totalModelProviderConfigs": 67,
   "totalModelsWithPtb": 34,
   "totalProviders": 10,
 }
