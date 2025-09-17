@@ -108,8 +108,6 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     return reply.send(entry.data.toString("utf8"));
   });
 
-  // Removed deprecated is-stream endpoint.
-
   const SignSchema = z.object({
     region: z.string().min(1),
     forwardToHost: z.string().min(1),
