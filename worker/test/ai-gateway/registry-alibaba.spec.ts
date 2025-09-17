@@ -10,7 +10,7 @@ const deepinfraAuthExpectations = {
   },
 };
 
-describe("Qwen Registry Tests", () => {
+describe("Alibaba Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
     vi.clearAllMocks();
