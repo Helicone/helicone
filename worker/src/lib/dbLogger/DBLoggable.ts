@@ -743,7 +743,7 @@ export class DBLoggable {
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
           targetUrl: this.request.targetUrl,
           provider: this.request.provider,
-          bodySize: this.request.unsafeGetBodyText?.length ?? 0,
+          bodySize: (await this.request.unsafeGetBodyText?.())?.length ?? 0,
           path: this.request.path,
           threat: this.request.threat ?? undefined,
           countryCode: this.request.country_code ?? undefined,
