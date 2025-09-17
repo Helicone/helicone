@@ -1,4 +1,5 @@
 import {
+  ChatCompletionContentPart,
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionCreateParamsStreaming,
 } from "openai/resources/chat/completions";
@@ -52,11 +53,82 @@ export interface Prompt2025Input {
   inputs: Record<string, any>;
 }
 
-// OpenAI chat completion types where messages is optional
-// this is because we can generally assume that prompts contain messages themselves, and so after merging the params, the messages will be present
-// and OpenAI compatible endpoints will not complain about messages being omitted.
-type ChatCompletionCreateParamsNonStreamingPartialMessages = Omit<ChatCompletionCreateParamsNonStreaming, 'messages'> & Partial<Pick<ChatCompletionCreateParamsNonStreaming, 'messages'>>;
-type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCreateParamsStreaming, 'messages'> & Partial<Pick<ChatCompletionCreateParamsStreaming, 'messages'>>;
+/**
+ * Cache control configuration for Anthropic's prompt caching feature.
+ * 
+ * When using Anthropic models through the Helicone AI Gateway, you can enable
+ * prompt caching to reduce costs and latency for repeated prompts.
+ * 
+ * @example
+ * ```typescript
+ * const message = {
+ *   role: "user",
+ *   content: "Analyze this document...",
+ *   cache_control: { type: "ephemeral", ttl: "5m" }
+ * };
+ * ```
+ */
+export interface CacheControl {
+  /** Cache type - currently only ephemeral caching is supported */
+  type: "ephemeral";
+  /** Time-to-live for the cached content */
+  ttl: "5m" | "1h"
+}
+
+/**
+ * OpenAI content part extended with optional cache control.
+ * Allows individual content parts within a message to have cache control.
+ */
+type HeliconeChatCompletionContentPart = ChatCompletionContentPart & {
+  cache_control?: CacheControl;
+};
+
+/**
+ * Helicone message type that supports cache control exclusively at one level:
+ * - If content is a string, cache_control can be added to the message
+ * - If content is an array, only individual content parts can have cache_control (not the message)
+ */
+type HeliconeMessageParam<T> = T extends { content: string }
+  ? T & { cache_control?: CacheControl }
+  : T extends { content: infer U }
+  ? U extends Array<any>
+    ? Omit<T, 'content'> & { 
+        content: HeliconeChatCompletionContentPart[];
+      }
+    : T & { cache_control?: CacheControl }
+  : T & { cache_control?: CacheControl };
+
+/**
+ * OpenAI chat completion message extended with optional cache control.
+ * Used for non-streaming requests with Helicone prompt templates.
+ */
+type ChatCompletionCreateParamsNonStreamingMessage = HeliconeMessageParam<ChatCompletionCreateParamsNonStreaming['messages'][number]>;
+
+/**
+ * OpenAI chat completion message extended with optional cache control.
+ * Used for streaming requests with Helicone prompt templates.
+ */
+type ChatCompletionCreateParamsStreamingMessage = HeliconeMessageParam<ChatCompletionCreateParamsStreaming['messages'][number]>;
+
+/**
+ * Modified OpenAI chat completion parameters where:
+ * - `messages` is optional (may be provided by prompt template)
+ * - Each message can include `cache_control` for Anthropic caching
+ * - Used for non-streaming requests
+ */
+type ChatCompletionCreateParamsNonStreamingPartialMessages = Omit<ChatCompletionCreateParamsNonStreaming, 'messages'> & { 
+  messages?: ChatCompletionCreateParamsNonStreamingMessage[] 
+};
+
+/**
+ * Modified OpenAI chat completion parameters where:
+ * - `messages` is optional (may be provided by prompt template)
+ * - Each message can include `cache_control` for Anthropic caching
+ * - Used for streaming requests
+ */
+type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCreateParamsStreaming, 'messages'> & { 
+  messages?: ChatCompletionCreateParamsStreamingMessage[] 
+};
 
 /**
  * Parameters for using Helicone prompt templates.
@@ -95,14 +167,36 @@ export type HeliconePromptParams = {
  * @example
  * ```typescript
  * const response = await openai.chat.completions.create({
- *   prompt_id: "XXXXXX",
- *   model: "gpt-4",
- *   messages: [{ role: "user", content: "Hello!" }], // optional
+ *   prompt_id: "123",
+ *   model: "gpt-4o",
+ *   messages: [
+ *     // Message-level cache control (string content)
+ *     {
+ *       role: "user",
+ *       content: "Hello!",
+ *       cache_control: { type: "ephemeral", ttl: "5m" },
+ *     },
+ *     // Content-part-level cache control (array content, no message-level cache)
+ *     {
+ *       role: "user",
+ *       content: [
+ *         {
+ *           type: "text",
+ *           text: "Analyze this document",
+ *           cache_control: { type: "ephemeral", ttl: "1h" },
+ *         },
+ *         {
+ *           type: "text",
+ *           text: "Additional context",
+ *         },
+ *       ],
+ *     },
+ *   ],
  *   inputs: {
  *     name: "John",
  *     age: 20,
- *   }
- * } as HeliconeChatCreateCompletion);
+ *   },
+ * } as HeliconeChatCreateParams);
  * ```
  */
 export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreamingPartialMessages &
@@ -115,15 +209,31 @@ export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreamingPar
  * @example
  * ```typescript
  * const stream = await openai.chat.completions.create({
- *   prompt_id: "XXXXXX",
- *   model: "gpt-4",
- *   messages: [{ role: "user", content: "Hello!" }], // optional
+ *   prompt_id: "123",
+ *   model: "gpt-4o",
+ *   messages: [
+ *     // Content-part-level cache control only (no message-level cache allowed)
+ *     {
+ *       role: "user",
+ *       content: [
+ *         {
+ *           type: "text",
+ *           text: "Process this data",
+ *           cache_control: { type: "ephemeral", ttl: "5m" },
+ *         },
+ *         {
+ *           type: "text",
+ *           text: "Additional data without cache",
+ *         },
+ *       ],
+ *     },
+ *   ],
  *   stream: true,
  *   inputs: {
  *     name: "John",
  *     age: 20,
- *   }
- * } as HeliconePromptChatCompletionStreaming);
+ *   },
+ * } as HeliconeChatCreateParamsStreaming);
  * ```
  */
 export type HeliconeChatCreateParamsStreaming =
