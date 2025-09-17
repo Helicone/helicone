@@ -19,10 +19,9 @@ Env
   (No internal secret — the container is assumed private to the Worker.)
 
 Build & Run (Docker)
-```
+```bash
 docker build -t rbb-container .
 docker run -p 8000:8000 rbb-container
-```
 
 Notes
 - This variant keeps everything in memory. It is suitable for low concurrency
