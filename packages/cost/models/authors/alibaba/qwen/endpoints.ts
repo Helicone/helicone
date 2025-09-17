@@ -54,11 +54,11 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.0000000316, // $0.00000003 * 1.055 = $0.0000000316 (OpenRouter: $0.03/1M + 5.5% markup)
-        output: 0.0000001371, // $0.00000013 * 1.055 = $0.0000001371 (OpenRouter: $0.13/1M + 5.5% markup)
+        input: 0.000000422, // $0.42/1M - worst-case: $0.40/1M (Cerebras/SambaNova) * 1.055
+        output: 0.000000844, // $0.84/1M - worst-case: $0.80/1M (Cerebras/SambaNova) * 1.055
       },
     ],
-    contextLength: 40960,
+    contextLength: 40_960,
     maxCompletionTokens: 40_960,
     supportedParameters: [
       "frequency_penalty",
@@ -74,7 +74,7 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3, // Fallback priority
+    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -112,7 +112,7 @@ export const endpoints = {
       "top_k",
       "min_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
