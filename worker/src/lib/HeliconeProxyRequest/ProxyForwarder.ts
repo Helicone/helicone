@@ -522,7 +522,7 @@ async function log(
       }
       
       const rawResponse = rawResponseResult.data;
-      let cost = 0;
+      let cost: number | undefined = undefined;
       let responseData = null;
 
       // handle AI Gateway requests (successful Attempt)
@@ -533,26 +533,26 @@ async function log(
 
         const usageProcessor = getUsageProcessor(attemptProvider);
 
-        const usage = await usageProcessor.parse({
-          responseBody: rawResponse,
-          isStream: proxyRequest.isStream,
-        });
+        if (usageProcessor) {
+          const usage = await usageProcessor.parse({
+            responseBody: rawResponse,
+            isStream: proxyRequest.isStream,
+          });
 
-        if (usage.error !== null) {
-          throw new Error(`Error parsing usage for AI Gateway provider ${attemptProvider}: ${usage.error}`);
+          if (usage.data) {
+            const breakdown = modelCostBreakdownFromRegistry({
+              modelUsage: usage.data,
+              providerModelId: attemptModel,
+              provider: attemptProvider,
+            });
+
+            cost = breakdown?.totalCost;
+          } else {
+            console.error(`No usage data found for AI Gateway model ${attemptModel} with provider ${attemptProvider}`);
+          }
+        } else {
+          console.error(`No usage processor available for provider ${attemptProvider}`);
         }
-
-        const breakdown = modelCostBreakdownFromRegistry({
-          modelUsage: usage.data,
-          providerModelId: attemptModel,
-          provider: attemptProvider,
-        });
-
-        if (!breakdown) {
-          throw new Error(`No cost breakdown found for AI Gateway model ${attemptModel} with provider ${attemptProvider}`);
-        }
-
-        cost = breakdown.totalCost;
       } else {
         // for non AI Gateway requests, we need to fall back to legacy methods when applicable
         // parse response body to help get usage (legacy method compatibility)
@@ -569,41 +569,32 @@ async function log(
         if (model && provider) {
           // Provider -> ModelProviderName to try and use new registry
           const modelProviderName = heliconeProviderToModelProviderName(provider);
-          let calculatedCost = null;
 
           if (modelProviderName) {
             // try usage processor + new registry first
-            try {
-              const usageProcessor = getUsageProcessor(modelProviderName);
-              
-              try {
-                const usage = await usageProcessor.parse({
-                  responseBody: rawResponse,
-                  isStream: proxyRequest.isStream,
+            const usageProcessor = getUsageProcessor(modelProviderName);
+            
+            if (usageProcessor) {
+              const usage = await usageProcessor.parse({
+                responseBody: rawResponse,
+                isStream: proxyRequest.isStream,
+              });
+
+              if (usage.data) {
+                const breakdown = modelCostBreakdownFromRegistry({
+                  modelUsage: usage.data,
+                  providerModelId: model,
+                  provider: modelProviderName,
                 });
 
-                if (usage.error === null) {
-                  const breakdown = modelCostBreakdownFromRegistry({
-                    modelUsage: usage.data,
-                    providerModelId: model,
-                    provider: modelProviderName,
-                  });
-
-                  if (breakdown) {
-                    calculatedCost = breakdown.totalCost;
-                  }
-                }
-              } catch (error) {
-                console.warn("Usage processor parsing failed, falling back to legacy:", error);
+                cost = breakdown?.totalCost;
               }
-            } catch (error) {
-              console.warn(`No usage processor available for provider ${modelProviderName}, falling back to legacy:`, error);
             }
           }
 
           // final fallback for providers not in ModelProviderName
-          if (calculatedCost === null) {
-            calculatedCost = costOfPrompt({
+          if (cost === undefined) {
+            cost = costOfPrompt({
               model,
               promptTokens: responseData.response.prompt_tokens ?? 0,
               completionTokens: responseData.response.completion_tokens ?? 0,
@@ -614,8 +605,6 @@ async function log(
               completionAudioTokens: responseData.response.completion_audio_tokens ?? 0,
             }) ?? 0;
           }
-
-          cost = calculatedCost;
         }
       }
 
@@ -651,7 +640,7 @@ async function log(
           !orgError &&
           orgData?.organizationId
         ) {
-          const costInCents = cost * 100;
+          const costInCents = (cost ?? 0) * 100;
           await updateRateLimitCounterDO({
             organizationId: orgData?.organizationId,
             heliconeProperties:
