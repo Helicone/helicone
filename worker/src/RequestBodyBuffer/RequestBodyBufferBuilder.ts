@@ -79,11 +79,13 @@ export async function RequestBodyBufferBuilder(
   env: Env
 ): Promise<IRequestBodyBuffer> {
   const method = (request.method || "GET").toUpperCase();
-  const hasBody = !["GET", "HEAD"].includes(method) && request.body !== null;
 
-  // If there is no body, in-memory is fine.
-  if (!hasBody) {
-    return new RequestBodyBuffer_InMemory(null, dataDogClient, env);
+  if (["GET", "HEAD"].includes(method)) {
+    return new RequestBodyBuffer_InMemory(
+      request.body ?? null,
+      dataDogClient,
+      env
+    );
   }
 
   // Threshold for routing: small → Remote, large → InMemory.
