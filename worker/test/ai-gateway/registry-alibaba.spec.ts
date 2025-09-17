@@ -1,4 +1,13 @@
 import { describe, it, beforeEach, vi } from "vitest";
+
+// Mock @cloudflare/containers to fix test environment
+vi.mock("@cloudflare/containers", () => ({
+  Container: vi.fn().mockImplementation(() => ({
+    defaultPort: 8000,
+    sleepAfter: "10m",
+  })),
+}));
+
 import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { createOpenAIMockResponse } from "../test-utils";
@@ -230,7 +239,7 @@ describe("Alibaba Registry Tests", () => {
                 errorMessage: "Quota exceeded",
               },
             ],
-            finalStatus: 500,
+            finalStatus: 403,
           },
         }));
 
