@@ -3,14 +3,49 @@ import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
 import { IRequestBodyBuffer, ValidRequestBody } from "./IRequestBodyBuffer";
+import { ok, Result } from "../lib/util/results";
+import { S3Client } from "../lib/clients/S3Client";
+
+async function concatUint8Arrays(
+  uint8arrays: Uint8Array[]
+): Promise<Uint8Array> {
+  const blob = new Blob(uint8arrays);
+  const buffer = await blob.arrayBuffer();
+  return new Uint8Array(buffer);
+}
+
+async function compress(str: string) {
+  // Convert the string to a byte stream.
+  const stream = new Blob([str]).stream();
+
+  // Create a compressed stream.
+  const compressedStream = stream.pipeThrough(new CompressionStream("gzip"));
+
+  // Read all the bytes from this stream.
+  const chunks = [];
+  for await (const chunk of compressedStream) {
+    chunks.push(chunk);
+  }
+  return await concatUint8Arrays(chunks);
+}
 // NEVER give the user direct access to the body
 export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   private cachedText: string | null = null;
+  private s3Client: S3Client;
 
   constructor(
     private request: Request,
-    private dataDogClient: DataDogClient | undefined
-  ) {}
+    private dataDogClient: DataDogClient | undefined,
+    private env: Env
+  ) {
+    this.s3Client = new S3Client(
+      env.S3_ACCESS_KEY ?? "",
+      env.S3_SECRET_KEY ?? "",
+      env.S3_ENDPOINT ?? "",
+      env.S3_BUCKET_NAME ?? "",
+      env.S3_REGION ?? "us-west-2"
+    );
+  }
 
   public tempSetBody(body: string): void {
     this.cachedText = body;
@@ -149,38 +184,18 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     return json.model ?? "unknown";
   }
 
-  private deepOverride(base: any, override: any): any {
-    if (!override || typeof override !== "object") return base;
-    if (!base || typeof base !== "object") return base;
-    for (const [k, v] of Object.entries(override)) {
-      if (v && typeof v === "object" && !Array.isArray(v)) {
-        base[k] = this.deepOverride(base[k], v);
-      } else {
-        base[k] = v as any;
-      }
-    }
-    return base;
-  }
-
-  async prepareS3Body(
+  async uploadS3Body(
     responseBody: any,
-    override?: object
-  ): Promise<ReadableStream> {
-    let reqText = await this.unsafeGetRawText();
-    if (override) {
-      try {
-        const obj = JSON.parse(reqText);
-        reqText = JSON.stringify(this.deepOverride(obj, override));
-      } catch (_e) {
-        // keep original if not JSON
-      }
-    }
-    const payload = JSON.stringify({ request: reqText, response: responseBody });
-    return new ReadableStream({
-      pull(controller) {
-        controller.enqueue(payload);
-        controller.close();
-      },
-    });
+    url: string,
+    tags?: Record<string, string>
+  ): Promise<Result<string, string>> {
+    return this.s3Client.store(
+      url,
+      JSON.stringify({
+        request: await this.unsafeGetRawText(),
+        response: responseBody,
+      }),
+      tags
+    );
   }
 }

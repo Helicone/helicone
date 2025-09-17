@@ -2,6 +2,7 @@ import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { getContainer } from "@cloudflare/containers";
 import type { RequestBodyBufferContainer } from "./RequestBodyContainer";
+import { err, ok, Result } from "../lib/util/results";
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
@@ -52,6 +53,11 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   // */
   private uniqueId: string;
   private ingestPromise: Promise<void>;
+  private awsCreds: {
+    accessKey: string;
+    secretKey: string;
+    region: string;
+  };
 
   private metadata: {
     isStream?: boolean;
@@ -62,8 +68,18 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   constructor(
     request: Request,
     private dataDogClient: DataDogClient | undefined,
-    requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"]
+    requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"],
+    env: {
+      AWS_ACCESS_KEY_ID: string;
+      AWS_SECRET_ACCESS_KEY: string;
+      AWS_REGION: string;
+    }
   ) {
+    this.awsCreds = {
+      accessKey: env.AWS_ACCESS_KEY_ID,
+      secretKey: env.AWS_SECRET_ACCESS_KEY,
+      region: env.AWS_REGION,
+    };
     this.uniqueId = crypto.randomUUID();
     this.requestBodyBuffer = getRequestBodyContainer(
       requestBodyBufferEnv,
@@ -192,34 +208,29 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
    * }
    * @param responseBody
    */
-  async prepareS3Body(
+  async uploadS3Body(
     responseBody: any,
-    override?: object
-  ): Promise<ReadableStream> {
+    tags?: Record<string, string>,
+    url?: string
+  ): Promise<Result<string, string>> {
     await this.ingestPromise.catch(() => undefined);
     const res = await this.requestBodyBuffer.fetch(
-      `${BASE_URL}/${this.uniqueId}/s3-body`,
+      `${BASE_URL}/${this.uniqueId}/s3/upload-body`,
       {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ response: responseBody, override }),
+        headers: {
+          "content-type": "application/json",
+          "x-access-key": this.awsCreds.accessKey,
+          "x-secret-key": this.awsCreds.secretKey,
+          "x-region": this.awsCreds.region,
+        },
+        body: JSON.stringify({ response: responseBody, tags, url }),
       }
     );
+
     if (!res.ok) {
-      throw new Error(`s3-body failed with status ${res.status}`);
+      return err(`Failed to store data: ${res.statusText}, ${res.url}, ${url}`);
     }
-    // Return the container's streaming body directly
-    const body = res.body;
-    if (!body) {
-      // Graceful fallback: synthesize a small stream if body missing
-      const payload = JSON.stringify({ request: "", response: responseBody });
-      return new ReadableStream({
-        pull(controller) {
-          controller.enqueue(payload);
-          controller.close();
-        },
-      });
-    }
-    return body;
+    return ok(res.url);
   }
 }

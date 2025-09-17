@@ -2,7 +2,10 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { S3Client } from "../clients/S3Client";
 import { Result, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
-import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
+import {
+  IRequestBodyBuffer,
+  ValidRequestBody,
+} from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
 export type RequestResponseContent = {
   requestId: string;
@@ -22,7 +25,8 @@ export class RequestResponseManager {
     organizationId: string;
     requestId: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    requestStream: ReadableStream;
+    requestBodyBuffer: IRequestBodyBuffer;
+    responseBody: any;
   }): Promise<Result<string, string>> {
     const url = this.s3Client.getRequestResponseRawUrl(
       content.requestId,
@@ -33,6 +37,10 @@ export class RequestResponseManager {
       name: "raw-request-response-body",
     };
 
-    return await this.s3Client.store(url, content.requestStream, tags);
+    return await content.requestBodyBuffer.uploadS3Body(
+      content.responseBody,
+      url,
+      tags
+    );
   }
 }

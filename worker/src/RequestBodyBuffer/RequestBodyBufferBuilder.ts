@@ -6,7 +6,7 @@ import { RequestBodyBuffer_Remote } from "./RequestBodyBuffer_Remote";
 export async function RequestBodyBufferBuilder(
   request: Request,
   dataDogClient: DataDogClient | undefined,
-  requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"]
+  env: Env
 ): Promise<IRequestBodyBuffer> {
   //TODO uncomment this and make it work...
   // const MAX_SIZE = 1024 * 1024 * 50; // 50mb
@@ -27,12 +27,14 @@ export async function RequestBodyBufferBuilder(
   //   }
   // }
 
-  /// THIS WORKS HOLY SHIT I CANT BELIEVE IT WORKS LOL
-  return new RequestBodyBuffer_Remote(
-    request,
-    dataDogClient,
-    requestBodyBufferEnv
-  );
+  // / THIS WORKS HOLY SHIT I CANT BELIEVE IT WORKS LOL
+  // return new RequestBodyBuffer_Remote(
+  //   request,
+  //   dataDogClient,
+  //   env.REQUEST_BODY_BUFFER,
+  //   env,
 
-  // return new RequestBodyBuffer_InMemory(request, dataDogClient);
+  // );
+
+  return new RequestBodyBuffer_InMemory(request, dataDogClient);
 }

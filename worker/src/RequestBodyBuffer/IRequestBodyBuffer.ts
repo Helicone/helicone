@@ -1,3 +1,5 @@
+import { Result } from "../lib/util/results";
+
 export type ValidRequestBody = ReadableStream | string | null;
 
 export interface IRequestBodyBuffer {
@@ -22,9 +24,9 @@ export interface IRequestBodyBuffer {
 
   model(): Promise<string | undefined>;
 
-  /**
-   * Build a streamed JSON payload for S3: { request: string, response: any }
-   * Implementations may offload construction to a remote container.
-   */
-  prepareS3Body(responseBody: any, override?: object): Promise<ReadableStream>;
+  uploadS3Body(
+    responseBody: any,
+    url: string,
+    tags?: Record<string, string>
+  ): Promise<Result<string, string>>;
 }

@@ -54,34 +54,37 @@ describe("RequestBodyBufferContainer (memory-only)", () => {
     expect(res.statusCode).toBe(413);
   });
 
-  it("reports is-stream true when body has stream: true", async () => {
+  it("returns metadata (isStream true) on ingest when stream: true", async () => {
     app = appWith();
-    const payload = JSON.stringify({ stream: true });
-    await app.inject({
+    const payload = JSON.stringify({ stream: true, user: "abc", model: "gpt-4" });
+    const res = await app.inject({
       method: "POST",
       url: "/s",
       payload,
       headers: { "content-type": "application/octet-stream" },
     });
-    const res = await app.inject({ method: "GET", url: "/s/is-stream" });
     expect(res.statusCode).toBe(200);
     const j = res.json();
+    expect(j.size).toBeGreaterThan(0);
     expect(j.isStream).toBe(true);
+    expect(j.userId).toBe("abc");
+    expect(j.model).toBe("gpt-4");
   });
 
-  it("reports is-stream false when absent/false", async () => {
+  it("returns metadata (isStream false) on ingest when absent", async () => {
     app = appWith();
     const payload = JSON.stringify({});
-    await app.inject({
+    const res = await app.inject({
       method: "POST",
       url: "/ns",
       payload,
       headers: { "content-type": "application/octet-stream" },
     });
-    const res = await app.inject({ method: "GET", url: "/ns/is-stream" });
     expect(res.statusCode).toBe(200);
     const j = res.json();
-    expect(j.isStream).toBe(false);
+    expect(j.isStream ?? false).toBe(false);
+    expect(j.userId).toBeUndefined();
+    expect(j.model).toBeUndefined();
   });
 
   it("sign-aws returns signed headers and model", async () => {
