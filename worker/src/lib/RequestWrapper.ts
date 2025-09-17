@@ -232,7 +232,7 @@ export class RequestWrapper {
     const requestBodyBuffer = await RequestBodyBufferBuilder(
       request,
       dataDogClient,
-      env.REQUEST_BODY_BUFFER
+      env
     );
     const requestWrapper = new RequestWrapper(
       request,

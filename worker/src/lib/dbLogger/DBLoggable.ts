@@ -673,7 +673,7 @@ export class DBLoggable {
           await db.requestResponseManager.storeRequestResponseRaw({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
-            requestBody: (await this.request.unsafeGetBodyText?.()) ?? "{}",
+            requestBodyBuffer: this.request.requestBodyBuffer,
             responseBody: rawResponseBody.join(""),
           });
 

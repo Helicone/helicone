@@ -2,6 +2,7 @@ import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { getContainer } from "@cloudflare/containers";
 import type { RequestBodyBufferContainer } from "./RequestBodyContainer";
+import { err, ok, Result } from "../lib/util/results";
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
@@ -52,6 +53,11 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   // */
   private uniqueId: string;
   private ingestPromise: Promise<void>;
+  private awsCreds: {
+    accessKey: string;
+    secretKey: string;
+    region: string;
+  };
   private metadataPromise: Promise<void>;
 
   private metadata: {
@@ -63,8 +69,18 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   constructor(
     request: Request,
     private dataDogClient: DataDogClient | undefined,
-    requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"]
+    requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"],
+    env: {
+      AWS_ACCESS_KEY_ID: string;
+      AWS_SECRET_ACCESS_KEY: string;
+      AWS_REGION: string;
+    }
   ) {
+    this.awsCreds = {
+      accessKey: env.AWS_ACCESS_KEY_ID,
+      secretKey: env.AWS_SECRET_ACCESS_KEY,
+      region: env.AWS_REGION,
+    };
     this.uniqueId = crypto.randomUUID();
     this.requestBodyBuffer = getRequestBodyContainer(
       requestBodyBufferEnv,
@@ -202,5 +218,39 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   async model(): Promise<string | undefined> {
     await this.metadataPromise.catch(() => undefined);
     return this.metadata.model;
+  }
+
+  /**
+   * Prepares a stream in the container so that we return it as a stream in this format:
+   * {
+   *    request: requestBody,
+   *    response: responseBody
+   * }
+   * @param responseBody
+   */
+  async uploadS3Body(
+    responseBody: any,
+    url: string,
+    tags?: Record<string, string>
+  ): Promise<Result<string, string>> {
+    await this.ingestPromise.catch(() => undefined);
+    const res = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/s3/upload-body`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-access-key": this.awsCreds.accessKey,
+          "x-secret-key": this.awsCreds.secretKey,
+          "x-region": this.awsCreds.region,
+        },
+        body: JSON.stringify({ response: responseBody, tags, url }),
+      }
+    );
+
+    if (!res.ok) {
+      return err(`Failed to store data: ${res.statusText}, ${res.url}, ${url}`);
+    }
+    return ok(res.url);
   }
 }
