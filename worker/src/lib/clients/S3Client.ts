@@ -1,6 +1,5 @@
 import { AwsClient } from "aws4fetch";
 import { Result } from "../util/results";
-import { compress } from "../util/helpers";
 
 export class S3Client {
   private awsClient: AwsClient;

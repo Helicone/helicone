@@ -106,8 +106,8 @@ export function dbLoggableRequestFromProxyRequest(
     userId: proxyRequest.userId,
     startTime: requestStartTime,
     unsafeGetBodyText: proxyRequest.unsafeGetBodyText,
-    requestBodyBuffer: proxyRequest.requestWrapper.requestBodyBuffer,
     body: proxyRequest.body,
+    requestBodyBuffer: proxyRequest.requestWrapper.requestBodyBuffer,
     path: proxyRequest.requestWrapper.url.href,
     targetUrl: proxyRequest.targetUrl.href,
     properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
@@ -179,8 +179,8 @@ export async function dbLoggableRequestFromAsyncLogModel(
             promptVersion: "",
             promptMode: "deactivated",
           },
-      requestBodyBuffer: requestWrapper.requestBodyBuffer,
       prompt2025Settings: requestWrapper.prompt2025Settings,
+      requestBodyBuffer: requestWrapper.requestBodyBuffer,
       userId: providerRequestHeaders.userId ?? undefined,
       startTime: asyncLogModel.timing
         ? new Date(
@@ -188,14 +188,8 @@ export async function dbLoggableRequestFromAsyncLogModel(
               asyncLogModel.timing.startTime.milliseconds
           )
         : new Date(),
-      // TEMP HACK
-      body: new ReadableStream({
-        async pull(controller) {
-          controller.enqueue(
-            JSON.stringify(asyncLogModel.providerRequest.json)
-          );
-        },
-      }),
+      body: JSON.stringify(asyncLogModel.providerRequest.json),
+
       unsafeGetBodyText: async () =>
         JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
@@ -291,7 +285,6 @@ export class DBLoggable {
     const isStream = await this.request.requestBodyBuffer.isStream();
     const model = await this.request.requestBodyBuffer.model();
     const responseStatus = await this.response.status();
-
     const tokenCounter = (t: string) => this.tokenCounter(t);
     if (isStream && status === INTERNAL_ERRORS["Cancelled"]) {
       // Remove last line of stream from result
@@ -747,7 +740,7 @@ export class DBLoggable {
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
           targetUrl: this.request.targetUrl,
           provider: this.request.provider,
-          bodySize: this.request.unsafeGetBodyText?.length ?? 0,
+          bodySize: (await this.request.unsafeGetBodyText?.())?.length ?? 0,
           path: this.request.path,
           threat: this.request.threat ?? undefined,
           countryCode: this.request.country_code ?? undefined,

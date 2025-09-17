@@ -175,7 +175,10 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
         // keep original if not JSON
       }
     }
-    const payload = JSON.stringify({ request: reqText, response: responseBody });
+    const payload = JSON.stringify({
+      request: reqText,
+      response: responseBody,
+    });
     return new ReadableStream({
       pull(controller) {
         controller.enqueue(payload);

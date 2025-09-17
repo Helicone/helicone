@@ -34,14 +34,14 @@ function getPricingTier(
 export function calculateModelCostBreakdown(
   params: {
     modelUsage: ModelUsage;
-    model: string;
+    providerModelId: string;
     provider: ModelProviderName;
     requestCount?: number;
   }
 ): CostBreakdown | null {
-  const { modelUsage, model, provider, requestCount = 1 } = params;
+  const { modelUsage, providerModelId, provider, requestCount = 1 } = params;
 
-  const configResult = registry.getModelProviderConfig(model, provider);
+  const configResult = registry.getModelProviderConfigByProviderModelId(providerModelId);
   if (configResult.error || !configResult.data) return null;
 
   const config: ModelProviderConfig = configResult.data;
