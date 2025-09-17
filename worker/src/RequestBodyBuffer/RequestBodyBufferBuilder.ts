@@ -1,6 +1,7 @@
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { RequestBodyBuffer_InMemory } from "./RequestBodyBuffer_InMemory";
+import { RequestBodyBuffer_Remote } from "./RequestBodyBuffer_Remote";
 
 export async function RequestBodyBufferBuilder(
   request: Request,
@@ -26,6 +27,13 @@ export async function RequestBodyBufferBuilder(
   //   }
   // }
 
-  // Future: switch to Remote variant behind a feature flag when enabled.
-  return new RequestBodyBuffer_InMemory(request, dataDogClient, env);
+  // / THIS WORKS HOLY SHIT I CANT BELIEVE IT WORKS LOL
+  return new RequestBodyBuffer_Remote(
+    request,
+    dataDogClient,
+    env.REQUEST_BODY_BUFFER,
+    env
+  );
+
+  // return new RequestBodyBuffer_InMemory(request, dataDogClient);
 }

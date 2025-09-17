@@ -202,14 +202,16 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
       request: requestText,
       response: responseText,
     });
-    
+
     const compressedBody = await gzipAsync(jsonData);
-    
+    headers["Content-Length"] = String(compressedBody.byteLength);
+
     const signedRequest = await awsClient.sign(parsed.data.url, {
       method: "PUT",
       body: compressedBody,
       headers,
     });
+    // return reply.send({ url: signedRequest.url });
 
     return await fetch(signedRequest.url, signedRequest);
   });
