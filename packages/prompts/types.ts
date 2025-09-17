@@ -72,7 +72,7 @@ export interface CacheControl {
   /** Cache type - currently only ephemeral caching is supported */
   type: "ephemeral";
   /** Time-to-live for the cached content */
-  ttl: "5m" | "1h"
+  ttl?: "5m" | "1h"
 }
 
 /**
