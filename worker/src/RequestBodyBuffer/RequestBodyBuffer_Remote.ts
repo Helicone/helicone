@@ -52,6 +52,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   // */
   private uniqueId: string;
   private ingestPromise: Promise<void>;
+  private metadataPromise: Promise<void>;
 
   private metadata: {
     isStream?: boolean;
@@ -88,6 +89,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
         }
 
         // READING THE BODY DOES NOT WORK IN PROD IDK WHY - Justin 2025-09-17
+        // calling repsonse.text or response.json just hangs forever.. but works locally. UGHHH
         // const { size, isStream, userId, model } = await response.json<{
         //   size: number;
         //   isStream?: boolean;
@@ -95,26 +97,28 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
         //   model?: string;
         // }>();
         // this.metadata = { isStream, userId, model };
-
-        return this.requestBodyBuffer
-          .fetch(`${BASE_URL}/${this.uniqueId}/metadata`, {
-            method: "GET",
-          })
-          .then((response) => {
-            response
-              .json<{
-                isStream?: boolean;
-                userId?: string;
-                model?: string;
-              }>()
-              .then((json) => {
-                this.metadata = json;
-              });
-          });
       })
       .catch((e) => {
         console.error("RequestBodyBuffer_Remote ingest error", e);
       });
+
+    this.metadataPromise = this.ingestPromise.then(() =>
+      this.requestBodyBuffer
+        .fetch(`${BASE_URL}/${this.uniqueId}/metadata`, {
+          method: "GET",
+        })
+        .then((response) => {
+          response
+            .json<{
+              isStream?: boolean;
+              userId?: string;
+              model?: string;
+            }>()
+            .then((json) => {
+              this.metadata = json;
+            });
+        })
+    );
   }
 
   public tempSetBody(body: string): void {
@@ -186,17 +190,17 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   }
 
   async isStream(): Promise<boolean> {
-    await this.ingestPromise.catch(() => undefined);
+    await this.metadataPromise.catch(() => undefined);
     return this.metadata.isStream ?? false;
   }
 
   async userId(): Promise<string | undefined> {
-    await this.ingestPromise.catch(() => undefined);
+    await this.metadataPromise.catch(() => undefined);
     return this.metadata.userId;
   }
 
   async model(): Promise<string | undefined> {
-    await this.ingestPromise.catch(() => undefined);
+    await this.metadataPromise.catch(() => undefined);
     return this.metadata.model;
   }
 }
