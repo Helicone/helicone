@@ -108,22 +108,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     return reply.send(entry.data.toString("utf8"));
   });
 
-  // Return whether the stored JSON body has stream: true
-  app.get<{
-    Params: { requestId: string };
-  }>("/:requestId/is-stream", async (request, reply) => {
-    const { requestId } = request.params;
-    const entry = store.get(requestId);
-    if (!entry) return reply.code(404).send({ isStream: false });
-
-    try {
-      const obj = JSON.parse(entry.data.toString("utf8"));
-      const isStream = typeof obj?.stream === "boolean" ? obj.stream === true : false;
-      return reply.send({ isStream });
-    } catch (_e) {
-      return reply.send({ isStream: false });
-    }
-  });
+  // Removed deprecated is-stream endpoint.
 
   const SignSchema = z.object({
     region: z.string().min(1),

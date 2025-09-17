@@ -183,43 +183,4 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     await this.ingestPromise.catch(() => undefined);
     return this.metadata.model;
   }
-
-  /**
-   * Prepares a stream in the container so that we return it as a stream in this format:
-   * {
-   *    request: requestBody,
-   *    response: responseBody
-   * }
-   * @param responseBody
-   */
-  async prepareS3Body(
-    responseBody: any,
-    override?: object
-  ): Promise<ReadableStream> {
-    await this.ingestPromise.catch(() => undefined);
-    const res = await this.requestBodyBuffer.fetch(
-      `${BASE_URL}/${this.uniqueId}/s3-body`,
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ response: responseBody, override }),
-      }
-    );
-    if (!res.ok) {
-      throw new Error(`s3-body failed with status ${res.status}`);
-    }
-    // Return the container's streaming body directly
-    const body = res.body;
-    if (!body) {
-      // Graceful fallback: synthesize a small stream if body missing
-      const payload = JSON.stringify({ request: "", response: responseBody });
-      return new ReadableStream({
-        pull(controller) {
-          controller.enqueue(payload);
-          controller.close();
-        },
-      });
-    }
-    return body;
-  }
 }

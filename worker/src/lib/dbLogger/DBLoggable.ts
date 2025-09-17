@@ -673,18 +673,30 @@ export class DBLoggable {
       await this.response.getResponseBody();
 
     if (S3_ENABLED === "true") {
-      const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
-        organizationId: authParams.organizationId,
-        requestId: this.request.requestId,
-        requestStream: await this.request.requestBodyBuffer.prepareS3Body(
-          rawResponseBody.join("")
-        ),
-      });
+      try {
+        const payload = JSON.stringify({
+          request: (await this.request.unsafeGetBodyText?.()) ?? "{}",
+          response: rawResponseBody.join(""),
+        });
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(payload);
+            controller.close();
+          },
+        });
+        const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
+          organizationId: authParams.organizationId,
+          requestId: this.request.requestId,
+          requestStream: stream,
+        });
 
-      if (s3Result.error) {
-        console.error(
-          `Error storing request response in S3: ${s3Result.error}`
-        );
+        if (s3Result.error) {
+          console.error(
+            `Error storing request response in S3: ${s3Result.error}`
+          );
+        }
+      } catch (e) {
+        console.error("Error preparing S3 payload:", e);
       }
     }
 

@@ -54,35 +54,7 @@ describe("RequestBodyBufferContainer (memory-only)", () => {
     expect(res.statusCode).toBe(413);
   });
 
-  it("reports is-stream true when body has stream: true", async () => {
-    app = appWith();
-    const payload = JSON.stringify({ stream: true });
-    await app.inject({
-      method: "POST",
-      url: "/s",
-      payload,
-      headers: { "content-type": "application/octet-stream" },
-    });
-    const res = await app.inject({ method: "GET", url: "/s/is-stream" });
-    expect(res.statusCode).toBe(200);
-    const j = res.json();
-    expect(j.isStream).toBe(true);
-  });
-
-  it("reports is-stream false when absent/false", async () => {
-    app = appWith();
-    const payload = JSON.stringify({});
-    await app.inject({
-      method: "POST",
-      url: "/ns",
-      payload,
-      headers: { "content-type": "application/octet-stream" },
-    });
-    const res = await app.inject({ method: "GET", url: "/ns/is-stream" });
-    expect(res.statusCode).toBe(200);
-    const j = res.json();
-    expect(j.isStream).toBe(false);
-  });
+  // Removed deprecated is-stream endpoint tests.
 
   it("sign-aws returns signed headers and model", async () => {
     app = appWith();
