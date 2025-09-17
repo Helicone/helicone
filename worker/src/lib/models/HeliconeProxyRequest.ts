@@ -177,7 +177,7 @@ export class HeliconeProxyRequestMapper {
         api_base,
         isStream: isStream,
         body: await this.request.requestBodyBuffer.getReadableStreamToBody(),
-        unsafeGetBodyText: async () => this.unsafeGetBody(),
+        unsafeGetBodyText: this.unsafeGetBody.bind(this),
         startTime,
         url: this.request.url,
         requestId:
