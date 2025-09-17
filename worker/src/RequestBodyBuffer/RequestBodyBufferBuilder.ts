@@ -99,14 +99,8 @@ export async function RequestBodyBufferBuilder(
   if (sizeIsKnown) {
     if (contentLength > MAX_INMEMORY_BYTES) {
       // Large known body → InMemory, pass original stream
-      return new RequestBodyBuffer_InMemory(
-        request.body ?? null,
-  if (sizeIsKnown) {
-    if (contentLength > MAX_INMEMORY_BYTES) {
-      // Large known body → Remote, use durable object
       return tryInitRemote(request, dataDogClient, env);
     } else {
-      // Small known body → InMemory
       return new RequestBodyBuffer_InMemory(
         request.body ?? null,
         dataDogClient,
@@ -114,11 +108,24 @@ export async function RequestBodyBufferBuilder(
       );
     }
   }
+
+  // If container is not bound and size is unknown, default to in-memory.
+  if (!env.REQUEST_BODY_BUFFER) {
+    return new RequestBodyBuffer_InMemory(
+      request.body ?? null,
+      dataDogClient,
+      env
+    );
+  }
+
+  const originalBody = request.body!;
+  const [leftForRemote, rightForProbe] = originalBody.tee();
+  const exceeded = await isOver(rightForProbe, MAX_INMEMORY_BYTES);
+
   if (exceeded) {
-    // Large request (> 20 MiB): use Remote to avoid memory pressure
+    // Large request (> 20 MiB): use InMemory, feed it the left side of tee
     return tryInitRemote(request, dataDogClient, env);
   } else {
-    // Small request: use InMemory for better performance
     return new RequestBodyBuffer_InMemory(leftForRemote, dataDogClient, env);
   }
 }
