@@ -98,31 +98,3 @@ export function consolidateTextFields(responseBody: any[]): any {
     return responseBody[0];
   }
 }
-
-function getResponseText(responseBody: any): string {
-  type Choice =
-    | {
-        delta: {
-          content: string;
-        };
-      }
-    | {
-        text: string;
-      };
-  if (responseBody.choices !== undefined) {
-    const choices = responseBody.choices;
-    return (choices as Choice[])
-      .map((c) => {
-        if ("delta" in c) {
-          return c.delta.content;
-        } else if ("text" in c) {
-          return c.text;
-        } else {
-          throw new Error("Invalid choice type");
-        }
-      })
-      .join("");
-  } else {
-    throw new Error(`Invalid response body:\n${JSON.stringify(responseBody)}`);
-  }
-}

@@ -2,7 +2,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Provider } from "../..";
 import { Database, Json } from "../../../supabase/database.types";
-import { getTokenCount } from "../clients/TokenCounterClient";
+
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { DBWrapper } from "../db/DBWrapper";
 import { RequestResponseStore } from "../db/RequestResponseStore";
@@ -272,10 +272,6 @@ export class DBLoggable {
     return this.timing.startTime.getTime();
   }
 
-  async tokenCounter(text: string): Promise<number> {
-    return getTokenCount(text, this.provider, this.tokenCalcUrl);
-  }
-
   async parseResponse(
     responseBody: string,
     status: number
@@ -285,7 +281,6 @@ export class DBLoggable {
     const isStream = await this.request.requestBodyBuffer.isStream();
     const model = await this.request.requestBodyBuffer.model();
     const responseStatus = await this.response.status();
-    const tokenCounter = (t: string) => this.tokenCounter(t);
     if (isStream && status === INTERNAL_ERRORS["Cancelled"]) {
       // Remove last line of stream from result
       result = result.split("\n").slice(0, -1).join("\n");
