@@ -501,8 +501,7 @@ async function log(
           env.S3_ENDPOINT ?? "",
           env.S3_BUCKET_NAME ?? "",
           env.S3_REGION ?? "us-west-2"
-        ),
-        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+        )
       ),
       producer: new HeliconeProducer(env),
     },
@@ -537,7 +536,6 @@ async function log(
             responseBody: rawResponse,
             isStream: proxyRequest.isStream,
           });
-
           if (usage.data) {
             const breakdown = modelCostBreakdownFromRegistry({
               modelUsage: usage.data,
