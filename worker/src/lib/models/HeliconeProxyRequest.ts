@@ -196,7 +196,7 @@ export class HeliconeProxyRequestMapper {
 
     if (this.request.heliconeHeaders.featureFlags.streamUsage) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const jsonBody = (await this.request.getJson()) as any;
+      const jsonBody = (await this.request.unsafeGetJson()) as any;
       if (!jsonBody["stream_options"]) {
         jsonBody["stream_options"] = {};
       }
@@ -204,7 +204,7 @@ export class HeliconeProxyRequestMapper {
       return JSON.stringify(jsonBody);
     }
 
-    return await this.request.getText();
+    return await this.request.unsafeGetText();
   }
 
   private validateApiConfiguration(api_base: string | undefined): boolean {
@@ -264,7 +264,7 @@ export class HeliconeProxyRequestMapper {
 
   async requestJson(): Promise<HeliconeProxyRequest["requestJson"]> {
     return this.request.getMethod() === "POST"
-      ? await this.request.getJson()
+      ? await this.request.unsafeGetJson()
       : {};
   }
 }
