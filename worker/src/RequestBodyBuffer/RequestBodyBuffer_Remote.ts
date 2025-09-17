@@ -108,7 +108,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
           method: "GET",
         })
         .then((response) => {
-          response
+          return response
             .json<{
               isStream?: boolean;
               userId?: string;
