@@ -14,13 +14,15 @@ import { anthropicModels } from "./authors/anthropic";
 import { openaiModels } from "./authors/openai";
 import { googleModels } from "./authors/google";
 import { grokModels } from "./authors/xai";
+import { mistralEndpointConfig, mistralModels } from "./authors/mistralai";
 
 // Combine all models for type derivation
 const allModels = {
   ...anthropicModels,
   ...openaiModels,
   ...googleModels,
-  ...grokModels
+  ...grokModels,
+  ...mistralModels
 };
 
 export type ModelName = keyof typeof allModels;
@@ -30,7 +32,8 @@ const modelProviderConfigs = {
   ...anthropicEndpointConfig,
   ...openaiEndpointConfig,
   ...googleEndpointConfig,
-  ...grokEndpointConfig
+  ...grokEndpointConfig,
+  ...mistralEndpointConfig
 };
 
 export type ModelProviderConfigId = keyof typeof modelProviderConfigs;
