@@ -37,7 +37,7 @@ const allModels = {
   ...metaModels,
   ...moonshotaiModels,
   ...alibabaModels,
-  ...deepseekModels,
+  ...deepseekModels
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -49,7 +49,7 @@ const modelProviderConfigs = {
   ...metaEndpointConfig,
   ...moonshotaiEndpointConfig,
   ...alibabaEndpointConfig,
-  ...deepseekEndpointConfig,
+  ...deepseekEndpointConfig
 } satisfies Record<string, ModelProviderConfig>;
 
 const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
