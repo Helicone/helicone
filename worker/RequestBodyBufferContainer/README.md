@@ -15,7 +15,7 @@ Endpoints
 Env
 - `PORT` (default `8000`)
 - `MAX_SIZE_BYTES` (default `268435456` => 256MB)
-- `TTL_SECONDS` (default `60`)
+- `TTL_SECONDS` (default `120`)
 - `INTERNAL_SECRET` (optional). If set, all endpoints require header `x-helicone-internal-secret` to match.
 
 Build & Run (Docker)

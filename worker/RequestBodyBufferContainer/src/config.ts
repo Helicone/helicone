@@ -13,7 +13,7 @@ export function getConfig(): AppConfig {
       process.env.MAX_SIZE_BYTES ?? `${256 * 1024 * 1024}`,
       10
     ),
-    ttlSeconds: parseInt(process.env.TTL_SECONDS ?? "60", 10),
+    ttlSeconds: parseInt(process.env.TTL_SECONDS ?? "120", 10),
     internalSecret: process.env.INTERNAL_SECRET ?? "",
     logLevel: process.env.LOG_LEVEL ?? "info",
   };
