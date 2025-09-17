@@ -525,14 +525,6 @@ async function log(
       let cost = 0;
       let responseData = null;
 
-      // parse response body to help get usage (legacy method compatibility)
-      const responseBodyResult = await loggable.parseRawResponse(rawResponse);
-      if (responseBodyResult.error !== null) {
-        console.error("Error parsing response:", responseBodyResult.error);
-        return;
-      }
-      responseData = responseBodyResult.data;
-
       // handle AI Gateway requests (successful Attempt)
       const successfulAttempt = proxyRequest.requestWrapper.getSuccessfulAttempt();
       if (rawResponse && successfulAttempt) {
@@ -566,6 +558,14 @@ async function log(
         cost = breakdown.totalCost;
       } else {
         // for non AI Gateway requests, we need to fall back to legacy methods when applicable
+        // parse response body to help get usage (legacy method compatibility)
+        const responseBodyResult = await loggable.parseRawResponse(rawResponse);
+        if (responseBodyResult.error !== null) {
+          console.error("Error parsing response:", responseBodyResult.error);
+          return;
+        }
+        responseData = responseBodyResult.data;
+
         const model = responseData.response.model;
         const provider = proxyRequest.provider;
 
