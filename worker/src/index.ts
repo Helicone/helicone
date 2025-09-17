@@ -19,6 +19,9 @@ import { APIKeysStore } from "./lib/db/APIKeysStore";
 import { APIKeysManager } from "./lib/managers/APIKeysManager";
 import { SecretManagerClass } from "@helicone-package/secrets/SecretManager";
 
+// Needed for migrations
+export { RequestBodyBufferContainer } from "./RequestBodyBuffer/RequestBodyContainer";
+
 const FALLBACK_QUEUE = "fallback-queue";
 
 export type Provider = ProviderName | "CUSTOM";

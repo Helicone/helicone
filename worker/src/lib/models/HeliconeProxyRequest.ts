@@ -84,7 +84,7 @@ export class HeliconeProxyRequestMapper {
     if (this.request.heliconeHeaders.promptHeaders.promptId) {
       try {
         const rawJson = JSON.parse(
-          await this.request.requestBodyWrapper.unsafeGetRawText()
+          await this.request.requestBodyBuffer.unsafeGetRawText()
         );
 
         // Get the mapper type based on the request

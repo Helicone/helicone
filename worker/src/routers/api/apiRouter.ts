@@ -594,7 +594,7 @@ function getAPIRouterV1(
         return new Response("Missing stripe-signature header", { status: 400 });
       }
 
-      const body = await requestWrapper.requestBodyWrapper.unsafeGetRawText();
+      const body = await requestWrapper.requestBodyBuffer.unsafeGetRawText();
       if (!body) {
         return new Response("Missing request body", { status: 400 });
       }
