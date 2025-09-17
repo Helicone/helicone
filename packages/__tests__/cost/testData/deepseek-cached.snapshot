@@ -1,0 +1,28 @@
+{
+  "id": "test-cached-response",
+  "object": "chat.completion",
+  "created": 1758080205,
+  "model": "deepseek-chat",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "This is a cached response test."
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 100,
+    "completion_tokens": 50,
+    "total_tokens": 150,
+    "prompt_tokens_details": {
+      "cached_tokens": 70
+    },
+    "prompt_cache_hit_tokens": 70,
+    "prompt_cache_miss_tokens": 30
+  },
+  "system_fingerprint": "fp_08f168e49b_prod0820_fp8_kvcache"
+}
