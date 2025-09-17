@@ -54,8 +54,6 @@ describe("RequestBodyBufferContainer (memory-only)", () => {
     expect(res.statusCode).toBe(413);
   });
 
-  // Removed deprecated is-stream endpoint tests.
-
   it("sign-aws returns signed headers and model", async () => {
     app = appWith();
     const payload = JSON.stringify({ foo: "bar" });
