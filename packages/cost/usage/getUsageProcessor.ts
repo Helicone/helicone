@@ -6,7 +6,7 @@ import { ModelProviderName } from "../models/providers";
 
 export function getUsageProcessor(
   provider: ModelProviderName
-): IUsageProcessor {
+): IUsageProcessor | null {
   switch (provider) {
     case "openai":
       return new OpenAIUsageProcessor();
@@ -15,6 +15,6 @@ export function getUsageProcessor(
     case "xai":
       return new XAIUsageProcessor();
     default:
-      throw new Error(`Usage processor not found for provider: ${provider}`);
+      return null;
   }
 }
