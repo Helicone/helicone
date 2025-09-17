@@ -55,6 +55,7 @@ export interface ModelIndexes {
   modelToEndpoints: Map<ModelName, Endpoint[]>;
   modelToProviderData: Map<ModelName, ModelProviderEntry[]>;
   modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry>;
+  providerModelIdToConfig: Map<string, ModelProviderConfig>;
 }
 
 export function buildIndexes(
@@ -75,6 +76,7 @@ export function buildIndexes(
   const modelToEndpoints: Map<ModelName, Endpoint[]> = new Map();
   const modelToProviderData: Map<ModelName, ModelProviderEntry[]> = new Map();
   const modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry> = new Map();
+  const providerModelIdToConfig: Map<string, ModelProviderConfig> = new Map();
 
   for (const [configKey, config] of Object.entries(modelProviderConfigs)) {
     const typedConfigKey = configKey as ModelProviderConfigId;
@@ -85,6 +87,9 @@ export function buildIndexes(
 
     // Store base config for BYOK
     endpointConfigIdToEndpointConfig.set(typedConfigKey, config);
+
+    // Store providerModelId -> config mapping
+    providerModelIdToConfig.set(config.providerModelId, config);
 
     // Track provider to models mapping
     if (!providerToModels.has(provider)) {
@@ -181,5 +186,6 @@ export function buildIndexes(
     modelToEndpoints,
     modelToProviderData,
     modelProviderToData,
+    providerModelIdToConfig,
   };
 }
