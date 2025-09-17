@@ -539,7 +539,11 @@ async function log(
           });
           if (usage.data) {
             // Check if this is OpenRouter with direct cost from response
-            if (attemptProvider === "openrouter" && 'cost' in usage.data && typeof usage.data.cost === 'number') {
+            if (
+              attemptProvider === "openrouter" &&
+              "cost" in usage.data &&
+              typeof usage.data.cost === "number"
+            ) {
               // Use direct cost from OpenRouter (already in USD)
               cost = usage.data.cost;
             } else {
