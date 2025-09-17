@@ -165,7 +165,7 @@ export class SimpleAIGateway {
     Result<{ modelStrings: string[]; body: any }, Response>
   > {
     // Get raw text body once
-    const rawBody = await this.requestWrapper.getText();
+    const rawBody = await this.requestWrapper.unsafeGetText();
     const parsedBody: any = tryJSONParse(rawBody ?? "{}");
 
     if (!parsedBody || !parsedBody.model) {

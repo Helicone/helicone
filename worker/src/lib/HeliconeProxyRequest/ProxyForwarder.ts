@@ -186,7 +186,7 @@ export async function proxyForwarder(
     provider === "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
-      parseLatestMessage(proxyRequest);
+      await parseLatestMessage(proxyRequest);
     if (latestMsgErr || !latestMsg) {
       return responseBuilder.build({
         body: latestMsgErr,
@@ -268,7 +268,7 @@ export async function proxyForwarder(
     provider == "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
-      parseLatestMessage(proxyRequest);
+      await parseLatestMessage(proxyRequest);
 
     if (latestMsgErr || !latestMsg) {
       return responseBuilder.build({
@@ -417,14 +417,14 @@ export async function proxyForwarder(
   });
 }
 
-function parseLatestMessage(
+async function parseLatestMessage(
   proxyRequest: HeliconeProxyRequest
-): Result<LatestMessage, string> {
+): Promise<Result<LatestMessage, string>> {
   try {
     return {
       error: null,
       data: JSON.parse(
-        proxyRequest.bodyText ?? ""
+        (await proxyRequest.unsafeGetBodyText?.()) || "{}"
       ).messages.pop() as LatestMessage,
     };
   } catch (error) {

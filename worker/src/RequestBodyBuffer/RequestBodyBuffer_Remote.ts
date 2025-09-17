@@ -137,4 +137,8 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     }
     return { newHeaders: headers, model: json.model };
   }
+
+  getReadableStreamToBody(): ReadableStream | null {
+    return null;
+  }
 }

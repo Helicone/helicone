@@ -120,4 +120,17 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
       model,
     };
   }
+
+  getReadableStreamToBody(): ReadableStream {
+    const getUnsafeBody = async () => {
+      const body = await this.unsafeGetRawText();
+      return body;
+    };
+    return new ReadableStream({
+      async pull(controller) {
+        controller.enqueue(await getUnsafeBody());
+        controller.close();
+      },
+    });
+  }
 }

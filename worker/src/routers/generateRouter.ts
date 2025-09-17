@@ -136,7 +136,7 @@ const generateHandler = async (
     }
 
     // 2. BUILD GENERATE PARAMETERS FROM REQUEST BODY AND VALIDATE
-    const rawBody = await requestWrapper.getJson<Record<string, unknown>>();
+    const rawBody = await requestWrapper.unsafeGetJson<Record<string, unknown>>();
     const paramsResult = validateGenerateParams(rawBody);
     if (!paramsResult.success) {
       return createErrorResponse(

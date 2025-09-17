@@ -9,7 +9,7 @@ export interface CallProps {
   headers: Headers;
   method: string;
   apiBase: string;
-  body: string | null;
+  body: ReadableStream | null;
   increaseTimeout: boolean;
   originalUrl: URL;
   extraHeaders: Headers | null;
@@ -20,7 +20,7 @@ export function callPropsFromProxyRequest(
 ): CallProps {
   return {
     apiBase: proxyRequest.api_base,
-    body: proxyRequest.bodyText,
+    body: proxyRequest.body,
     headers: proxyRequest.requestWrapper.getHeaders(),
     method: proxyRequest.requestWrapper.getMethod(),
     increaseTimeout:
