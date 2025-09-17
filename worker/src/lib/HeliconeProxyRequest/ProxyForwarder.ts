@@ -519,9 +519,10 @@ async function log(
         console.error("Error reading raw response:", rawResponseResult.error);
         return;
       }
-      
+
       const rawResponse = rawResponseResult.data;
-      const successfulAttempt = proxyRequest.requestWrapper.getSuccessfulAttempt();
+      const successfulAttempt =
+        proxyRequest.requestWrapper.getSuccessfulAttempt();
       if (rawResponse && successfulAttempt) {
         const attemptModel = successfulAttempt.endpoint.providerModelId;
         const attemptProvider = successfulAttempt.endpoint.provider;
@@ -533,7 +534,9 @@ async function log(
         });
 
         if (usage.error !== null) {
-          throw new Error(`Error parsing usage for provider ${attemptProvider}: ${usage.error}`);
+          throw new Error(
+            `Error parsing usage for provider ${attemptProvider}: ${usage.error}`
+          );
         }
 
         const breakdown = modelCostBreakdownFromRegistry({
@@ -541,7 +544,7 @@ async function log(
           model: attemptModel,
           provider: attemptProvider,
         });
-        // TODO: apply breakdown totalCost to escrow    
+        // TODO: apply breakdown totalCost to escrow
       }
 
       const responseBodyResult = await loggable.parseRawResponse(rawResponse);
@@ -559,8 +562,7 @@ async function log(
         responseData.response.prompt_cache_write_tokens ?? 0;
       const promptCacheReadTokens =
         responseData.response.prompt_cache_read_tokens ?? 0;
-      const promptAudioTokens =
-        responseData.response.prompt_audio_tokens ?? 0;
+      const promptAudioTokens = responseData.response.prompt_audio_tokens ?? 0;
       const completionAudioTokens =
         responseData.response.completion_audio_tokens ?? 0;
 

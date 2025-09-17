@@ -2,7 +2,7 @@ import { SignatureV4 } from "@smithy/signature-v4";
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
-import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
+import { IRequestBodyBuffer, ValidRequestBody } from "./IRequestBodyBuffer";
 // NEVER give the user direct access to the body
 export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   private cachedText: string | null = null;
@@ -121,16 +121,7 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     };
   }
 
-  getReadableStreamToBody(): ReadableStream {
-    const getUnsafeBody = async () => {
-      const body = await this.unsafeGetRawText();
-      return body;
-    };
-    return new ReadableStream({
-      async pull(controller) {
-        controller.enqueue(await getUnsafeBody());
-        controller.close();
-      },
-    });
+  async getReadableStreamToBody(): Promise<string> {
+    return await this.unsafeGetRawText();
   }
 }

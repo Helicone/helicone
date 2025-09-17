@@ -32,6 +32,7 @@ import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { EscrowInfo } from "../ai-gateway/types";
+import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
 export interface DBLoggableProps {
   response: {
@@ -52,7 +53,7 @@ export interface DBLoggableProps {
     promptSettings: PromptSettings;
     prompt2025Settings: Prompt2025Settings;
     startTime: Date;
-    body: ReadableStream | null;
+    body: ValidRequestBody;
     unsafeGetBodyText?: () => Promise<string | null>;
     path: string;
     targetUrl: string;

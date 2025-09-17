@@ -51,10 +51,11 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   // So we need to generate a unique id for each request. (For security reasons)
   // */
   private uniqueId: string;
+  private ingestPromise: Promise<void>;
 
   constructor(
     request: Request,
-    dataDogClient: DataDogClient | undefined,
+    private dataDogClient: DataDogClient | undefined,
     requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"]
   ) {
     this.uniqueId = crypto.randomUUID();
@@ -65,7 +66,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     const headers = new Headers();
     headers.set("content-type", "application/octet-stream");
 
-    this.requestBodyBuffer
+    this.ingestPromise = this.requestBodyBuffer
       .fetch(`${BASE_URL}/${this.uniqueId}`, {
         method: "POST",
         headers,
@@ -93,6 +94,12 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   }
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
+    console.log(
+      "unsafeGetRawText on remote - Please traverse this stack trace and fix the issue"
+    );
+    this.dataDogClient?.trackMemory("container-called-unsafe-read", 1);
+    await this.ingestPromise.catch(() => undefined);
+
     const response = await this.requestBodyBuffer.fetch(
       `${BASE_URL}/${this.uniqueId}/unsafe/read`,
       {
@@ -138,7 +145,14 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     return { newHeaders: headers, model: json.model };
   }
 
-  getReadableStreamToBody(): ReadableStream | null {
-    return null;
+  async getReadableStreamToBody(): Promise<ReadableStream | null> {
+    // Wait for ingest to be attempted to reduce race with GET
+    await this.ingestPromise.catch(() => undefined);
+    const response = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/unsafe/read`,
+      { method: "GET" }
+    );
+    if (!response.ok) return null;
+    return response.body ?? null;
   }
 }
