@@ -559,14 +559,14 @@ async function log(
         const responseBodyResult = await loggable.parseRawResponse(rawResponse);
         if (responseBodyResult.error !== null) {
           console.error("Error parsing response:", responseBodyResult.error);
-          return;
+          // return;
         }
         responseData = responseBodyResult.data;
 
-        const model = responseData.response.model;
+        const model = responseData?.response.model;
         const provider = proxyRequest.provider;
 
-        if (model && provider) {
+        if (model && provider && responseData) {
           // Provider -> ModelProviderName to try and use new registry
           const modelProviderName = heliconeProviderToModelProviderName(provider);
 
