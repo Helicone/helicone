@@ -36,7 +36,7 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   constructor(
     private body: ValidRequestBody,
     private dataDogClient: DataDogClient | undefined,
-    private env: Env
+    env: Env
   ) {
     this.s3Client = new S3Client(
       env.S3_ACCESS_KEY ?? "",

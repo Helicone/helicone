@@ -1,11 +1,6 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { S3Client } from "../clients/S3Client";
-import { Result, ok } from "../util/results";
-import { Database } from "../../../supabase/database.types";
-import {
-  IRequestBodyBuffer,
-  ValidRequestBody,
-} from "../../RequestBodyBuffer/IRequestBodyBuffer";
+import { Result } from "../util/results";
+import { IRequestBodyBuffer } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
 export type RequestResponseContent = {
   requestId: string;

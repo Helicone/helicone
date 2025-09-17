@@ -37,7 +37,7 @@ const allModels = {
   ...metaModels,
   ...moonshotaiModels,
   ...alibabaModels,
-  ...deepseekModels,
+  ...deepseekModels
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -49,7 +49,7 @@ const modelProviderConfigs = {
   ...metaEndpointConfig,
   ...moonshotaiEndpointConfig,
   ...alibabaEndpointConfig,
-  ...deepseekEndpointConfig,
+  ...deepseekEndpointConfig
 } satisfies Record<string, ModelProviderConfig>;
 
 const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
@@ -145,6 +145,13 @@ function getModelProviderConfig(
   return config ? ok(config) : err(`Config not found: ${configId}`);
 }
 
+function getModelProviderConfigByProviderModelId(
+  providerModelId: string
+): Result<ModelProviderConfig> {
+  const result = indexes.providerModelIdToConfig.get(providerModelId);
+  return result ? ok(result) : err(`Config not found for providerModelId: ${providerModelId}`);
+}
+
 function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {
   const configs = indexes.modelToEndpointConfigs.get(model as ModelName) || [];
   return ok(configs);
@@ -204,6 +211,7 @@ export const registry = {
   getProviderModels,
   buildEndpoint,
   getModelProviderConfig,
+  getModelProviderConfigByProviderModelId,
   getPtbEndpointsForProvider,
   getModelProviderConfigs,
   getModelProviders,

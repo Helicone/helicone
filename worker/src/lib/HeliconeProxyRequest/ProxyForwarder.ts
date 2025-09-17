@@ -34,8 +34,9 @@ import {
 } from "./ProxyRequestHandler";
 import { WalletManager } from "../managers/WalletManager";
 import { costOfPrompt } from "@helicone-package/cost";
-import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { EscrowInfo } from "../ai-gateway/types";
+import { CostBreakdown } from "@helicone-package/cost/models/calculate-cost";
+import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 
 export async function proxyForwarder(
@@ -522,28 +523,31 @@ async function log(
       const rawResponse = rawResponseResult.data;
       const successfulAttempt =
         proxyRequest.requestWrapper.getSuccessfulAttempt();
+      let modernCostBreakdown: CostBreakdown | null = null;
+
       if (rawResponse && successfulAttempt) {
         const attemptModel = successfulAttempt.endpoint.providerModelId;
         const attemptProvider = successfulAttempt.endpoint.provider;
 
         const usageProcessor = getUsageProcessor(attemptProvider);
-        const usage = await usageProcessor.parse({
-          responseBody: rawResponse,
-          isStream: proxyRequest.isStream,
-        });
+        if (usageProcessor) {
+          const usage = await usageProcessor.parse({
+            responseBody: rawResponse,
+            isStream: proxyRequest.isStream,
+          });
 
-        if (usage.error !== null) {
-          throw new Error(
-            `Error parsing usage for provider ${attemptProvider}: ${usage.error}`
-          );
+          if (usage.error !== null) {
+            console.warn(
+              `Error parsing usage for provider ${attemptProvider}: ${usage.error}`
+            );
+          } else if (usage.data) {
+            modernCostBreakdown = modelCostBreakdownFromRegistry({
+              modelUsage: usage.data,
+              providerModelId: attemptModel,
+              provider: attemptProvider,
+            });
+          }
         }
-
-        const breakdown = modelCostBreakdownFromRegistry({
-          modelUsage: usage.data,
-          model: attemptModel,
-          provider: attemptProvider,
-        });
-        // TODO: apply breakdown totalCost to escrow
       }
 
       const responseBodyResult = await loggable.parseRawResponse(rawResponse);
@@ -554,32 +558,31 @@ async function log(
 
       const responseData = responseBodyResult.data;
       const model = responseData.response.model;
-      const promptTokens = responseData.response.prompt_tokens ?? 0;
-      const completionTokens = responseData.response.completion_tokens ?? 0;
       const provider = proxyRequest.provider;
-      const promptCacheWriteTokens =
-        responseData.response.prompt_cache_write_tokens ?? 0;
-      const promptCacheReadTokens =
-        responseData.response.prompt_cache_read_tokens ?? 0;
-      const promptAudioTokens = responseData.response.prompt_audio_tokens ?? 0;
-      const completionAudioTokens =
-        responseData.response.completion_audio_tokens ?? 0;
 
       let cost;
-      if (model && provider) {
+      if (
+        (modernCostBreakdown?.totalCost === undefined ||
+          modernCostBreakdown?.totalCost === null) &&
+        model &&
+        provider
+      ) {
         cost =
           costOfPrompt({
             model,
-            promptTokens,
-            completionTokens,
+            promptTokens: responseData.response.prompt_tokens ?? 0,
+            completionTokens: responseData.response.completion_tokens ?? 0,
             provider,
-            promptCacheWriteTokens,
-            promptCacheReadTokens,
-            promptAudioTokens,
-            completionAudioTokens,
+            promptCacheWriteTokens:
+              responseData.response.prompt_cache_write_tokens ?? 0,
+            promptCacheReadTokens:
+              responseData.response.prompt_cache_read_tokens ?? 0,
+            promptAudioTokens: responseData.response.prompt_audio_tokens ?? 0,
+            completionAudioTokens:
+              responseData.response.completion_audio_tokens ?? 0,
           }) ?? 0;
       } else {
-        cost = 0;
+        cost = modernCostBreakdown?.totalCost ?? 0;
       }
 
       // Handle escrow finalization if needed

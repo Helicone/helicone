@@ -104,6 +104,29 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
   app.get<{
     Params: { requestId: string };
+  }>("/:requestId/metadata", async (request, reply) => {
+    const { requestId } = request.params;
+    const entry = store.get(requestId);
+
+    if (!entry) return reply.code(404).send("not found");
+
+    let isStream: boolean | undefined;
+    let userId: string | undefined;
+    let model: string | undefined;
+    try {
+      const obj = JSON.parse(entry.data.toString("utf8"));
+      if (typeof obj?.stream === "boolean") isStream = obj.stream === true;
+      if (typeof obj?.user === "string") userId = obj.user;
+      if (typeof obj?.model === "string") model = obj.model;
+    } catch (_e) {
+      // non-JSON bodies are fine; leave metadata undefined
+    }
+
+    return reply.send({ isStream, userId, model });
+  });
+
+  app.get<{
+    Params: { requestId: string };
   }>("/:requestId/unsafe/read", async (request, reply) => {
     const { requestId } = request.params;
     const entry = store.get(requestId);
@@ -202,14 +225,16 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
       request: requestText,
       response: responseText,
     });
-    
+
     const compressedBody = await gzipAsync(jsonData);
-    
+    headers["Content-Length"] = String(compressedBody.byteLength);
+
     const signedRequest = await awsClient.sign(parsed.data.url, {
       method: "PUT",
       body: compressedBody,
       headers,
     });
+    // return reply.send({ url: signedRequest.url });
 
     return await fetch(signedRequest.url, signedRequest);
   });
