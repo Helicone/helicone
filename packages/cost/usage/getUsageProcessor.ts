@@ -1,4 +1,5 @@
 import { OpenAIUsageProcessor } from "./openAIUsageProcessor";
+import { AnthropicUsageProcessor } from "./anthropicUsageProcessor";
 import { GroqUsageProcessor } from "./groqUsageProcessor";
 import { XAIUsageProcessor } from "./xaiUsageProcessor";
 import { IUsageProcessor } from "./IUsageProcessor";
@@ -10,6 +11,8 @@ export function getUsageProcessor(
   switch (provider) {
     case "openai":
       return new OpenAIUsageProcessor();
+    case "anthropic":
+      return new AnthropicUsageProcessor();
     case "groq":
       return new GroqUsageProcessor();
     case "xai":

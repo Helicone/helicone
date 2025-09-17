@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
@@ -419,7 +419,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 128000,
       "crossRegion": false,
       "maxTokens": 131072,
-      "modelId": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+      "modelId": "deepseek-r1-distill-llama-70b",
       "parameters": [
         "frequency_penalty",
         "include_reasoning",
@@ -601,7 +601,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 8192,
       "crossRegion": false,
       "maxTokens": 8192,
-      "modelId": "google/gemma-2-9b",
+      "modelId": "gemma2-9b-it",
       "parameters": [
         "frequency_penalty",
         "logit_bias",
