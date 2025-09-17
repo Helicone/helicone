@@ -1,11 +1,7 @@
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { getContainer } from "@cloudflare/containers";
-<<<<<<< HEAD
 import type { RequestBodyBufferContainer } from "./RequestBodyContainer";
-=======
-import { RequestBodyBufferContainer } from "./RequestBodyContainer";
->>>>>>> main
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
@@ -49,31 +45,42 @@ function getRequestBodyContainer(
 export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   private requestBodyBuffer: DurableObjectStub<RequestBodyBufferContainer>;
 
+  // **
+  // * NOTE we are explicity not ussing the requestId here
+  // * because users can set their own requestId.
+  // So we need to generate a unique id for each request. (For security reasons)
+  // */
+  private uniqueId: string;
+
   constructor(
     request: Request,
     dataDogClient: DataDogClient | undefined,
-    requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"],
-    private requestId: string
+    requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"]
   ) {
+    this.uniqueId = crypto.randomUUID();
     this.requestBodyBuffer = getRequestBodyContainer(
       requestBodyBufferEnv,
-      requestId
+      this.uniqueId
     );
     const headers = new Headers();
     headers.set("content-type", "application/octet-stream");
 
     this.requestBodyBuffer
-      .fetch(`${BASE_URL}/${requestId}`, {
+      .fetch(`${BASE_URL}/${this.uniqueId}`, {
         method: "POST",
         headers,
         body: request.body,
       })
       .then(async (response) => {
         if (!response.ok) {
-          console.error("RequestBodyBuffer_Remote ingest failed", response.status);
+          console.error(
+            "RequestBodyBuffer_Remote ingest failed",
+            response.status
+          );
           return;
         }
         const { size } = await response.json<{ size: number }>();
+        console.log("RequestBodyBuffer_Remote ingest success", size);
         dataDogClient?.trackMemory("container-request-body-size", size);
       })
       .catch((e) => {
@@ -87,7 +94,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
     const response = await this.requestBodyBuffer.fetch(
-      `${BASE_URL}/${this.requestId}/unsafe/read`,
+      `${BASE_URL}/${this.uniqueId}/unsafe/read`,
       {
         method: "GET",
       }
@@ -110,7 +117,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     model: string;
   }> {
     const response = await this.requestBodyBuffer.fetch(
-      `${BASE_URL}/${this.requestId}/sign-aws`,
+      `${BASE_URL}/${this.uniqueId}/sign-aws`,
       {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -120,7 +127,10 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     if (!response.ok) {
       throw new Error(`sign-aws failed with status ${response.status}`);
     }
-    const json = await response.json<{ newHeaders: Record<string, string>; model: string }>();
+    const json = await response.json<{
+      newHeaders: Record<string, string>;
+      model: string;
+    }>();
     const headers = new Headers();
     for (const [k, v] of Object.entries(json.newHeaders ?? {})) {
       if (v !== undefined && v !== null) headers.set(k, String(v));
