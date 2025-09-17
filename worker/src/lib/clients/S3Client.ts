@@ -1,5 +1,6 @@
 import { AwsClient } from "aws4fetch";
 import { Result } from "../util/results";
+import { compress } from "../util/helpers";
 
 export class S3Client {
   private awsClient: AwsClient;
@@ -9,7 +10,7 @@ export class S3Client {
     secretKey: string,
     private endpoint: string,
     private bucketName: string,
-    private region: string
+    private region: string,
   ) {
     this.awsClient = new AwsClient({
       accessKeyId: accessKey,
@@ -49,14 +50,14 @@ export class S3Client {
 
   async store(
     url: string,
-    value: ReadableStream,
+    value: string,
     tags?: Record<string, string>
   ): Promise<Result<string, string>> {
     try {
+      const compressedValue = await compress(value);
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         "Content-Encoding": "gzip",
-        "x-amz-content-sha256": "UNSIGNED-PAYLOAD",
       };
       if (tags && Object.keys(tags).length > 0) {
         const tagsString = Object.entries(tags)
@@ -68,16 +69,18 @@ export class S3Client {
         headers["x-amz-tagging"] = tagsString;
       }
 
-      const response = await this.awsClient.fetch(url, {
+      const signedRequest = await this.awsClient.sign(url, {
         method: "PUT",
+        body: compressedValue,
         headers,
-        body: value.pipeThrough(new CompressionStream("gzip")), // web ReadableStream, no buffering
       });
+
+      const response = await fetch(signedRequest.url, signedRequest);
 
       if (!response.ok) {
         return {
           data: null,
-          error: `Failed to store data: ${response.statusText}, ${response.url}, ${url}`,
+          error: `Failed to store data: ${response.statusText}, ${response.url}, ${signedRequest.url}`,
         };
       }
 

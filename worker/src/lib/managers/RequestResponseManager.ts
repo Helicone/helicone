@@ -22,7 +22,8 @@ export class RequestResponseManager {
     organizationId: string;
     requestId: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    requestStream: ReadableStream;
+    requestBody: any;
+    responseBody: string;
   }): Promise<Result<string, string>> {
     const url = this.s3Client.getRequestResponseRawUrl(
       content.requestId,
@@ -33,6 +34,13 @@ export class RequestResponseManager {
       name: "raw-request-response-body",
     };
 
-    return await this.s3Client.store(url, content.requestStream, tags);
+    return await this.s3Client.store(
+      url,
+      JSON.stringify({
+        request: content.requestBody,
+        response: content.responseBody,
+      }),
+      tags
+    );
   }
 }
