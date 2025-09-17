@@ -1,6 +1,7 @@
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { getContainer } from "@cloudflare/containers";
+import { RequestBodyBufferContainer } from "./RequestBodyContainer";
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
@@ -42,7 +43,7 @@ function getRequestBodyContainer(
 }
 
 export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
-  private requestBodyBuffer: DurableObjectStub<RequestBodyBuffer>;
+  private requestBodyBuffer: DurableObjectStub<RequestBodyBufferContainer>;
 
   constructor(
     request: Request,
