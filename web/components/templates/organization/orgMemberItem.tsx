@@ -1,11 +1,8 @@
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { AcademicCapIcon } from "@heroicons/react/20/solid";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
-import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
@@ -17,6 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { logger } from "@/lib/telemetry/logger";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface OrgMemberItemProps {
   index: number;
@@ -25,20 +27,30 @@ interface OrgMemberItemProps {
     member: string | undefined;
     isOwner: boolean;
     org_role: string | undefined;
+    created_at: string | undefined;
   };
   isUserAdmin: boolean;
+  isUserOwner: boolean;
   orgId: string;
   refetch: () => void;
   refreshOrgs: () => void;
 }
 
 const OrgMemberItem = (props: OrgMemberItemProps) => {
-  const { index, orgMember, isUserAdmin, orgId, refetch, refreshOrgs } = props;
+  const {
+    index,
+    orgMember,
+    isUserAdmin,
+    isUserOwner,
+    orgId,
+    refetch,
+    refreshOrgs,
+  } = props;
 
   const { setNotification } = useNotification();
 
   const [openDelete, setOpenDelete] = useState(false);
-
+  const [openTransferOwnership, setOpenTransferOwnership] = useState(false);
   const { user } = useHeliconeAuthClient();
 
   const router = useRouter();
@@ -61,6 +73,10 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
           <p className="truncate overflow-ellipsis text-[13px]">
             {orgMember.email}
           </p>
+          <p className="truncate overflow-ellipsis text-[11px] text-muted-foreground">
+            (Added on{" "}
+            {new Date(orgMember.created_at || "").toLocaleDateString()})
+          </p>
           {isUser && (
             <div className="flex justify-end gap-2">
               <span className="inline-flex items-center rounded-full bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-700/10 dark:bg-sky-900/20 dark:text-sky-300 dark:ring-sky-300/20">
@@ -75,6 +91,11 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
               <Select
                 value={memberRole}
                 onValueChange={async (role) => {
+                  if (role === "owner" && !orgMember.isOwner) {
+                    // open dialog to confirm transfer ownership
+                    setOpenTransferOwnership(true);
+                    return;
+                  }
                   const { error } = await jawn.POST(
                     "/v1/organization/{organizationId}/update_member",
                     {
@@ -111,6 +132,22 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="w-64">
+                  {isUserOwner && (
+                    <SelectItem
+                      value="owner"
+                      className="py-2"
+                      textValue="Owner"
+                    >
+                      <div className="flex flex-col items-start gap-0.5">
+                        <span className="font-medium">Owner</span>
+                        <span className="text-xs text-muted-foreground">
+                          Can manage all members including admins, owners,
+                          configurations, and settings
+                        </span>
+                      </div>
+                    </SelectItem>
+                  )}
+
                   <SelectItem value="admin" className="py-2" textValue="Admin">
                     <div className="flex flex-col items-start gap-0.5">
                       <span className="font-medium">Admin</span>
@@ -134,32 +171,25 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                 </SelectContent>
               </Select>
             ) : (
-              <Tooltip
-                title={
-                  orgMember.isOwner
+              <Tooltip>
+                <TooltipTrigger className="w-full">
+                  <Select disabled value={memberRole}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Role">
+                        {memberRole === "admin"
+                          ? "Admin"
+                          : memberRole === "member"
+                            ? "Member"
+                            : memberRole}
+                      </SelectValue>
+                    </SelectTrigger>
+                  </Select>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {orgMember.isOwner
                     ? "Owner role cannot be changed"
-                    : "Requires admin privileges"
-                }
-              >
-                <div
-                  className={clsx(
-                    "relative w-full cursor-default rounded-md border border-gray-300 bg-gray-50 py-2 pl-3 pr-10 text-left shadow-sm hover:cursor-not-allowed focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:border-gray-700 dark:bg-gray-900 sm:text-sm",
-                  )}
-                >
-                  <span className="block truncate">
-                    {memberRole === "admin"
-                      ? "Admin"
-                      : memberRole === "member"
-                        ? "Member"
-                        : memberRole}
-                  </span>
-                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                    <ChevronDownIcon
-                      className="h-5 w-5 text-gray-400"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </div>
+                    : "Requires admin privileges"}
+                </TooltipContent>
               </Tooltip>
             )}
           </div>
@@ -271,6 +301,61 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
               }}
             >
               Remove
+            </button>
+          </div>
+        </div>
+      </ThemedModal>
+      <ThemedModal
+        open={openTransferOwnership}
+        setOpen={setOpenTransferOwnership}
+      >
+        <div className="flex min-w-[25rem] flex-col space-y-4 sm:space-y-8">
+          <div className="flex flex-col space-y-2">
+            <p className="sm:text-md text-sm font-semibold text-gray-900 dark:text-gray-100">
+              Transfer Ownership
+            </p>
+            <p className="sm:text-md text-sm text-gray-500">
+              {`Are you sure you want to transfer ownership to ${orgMember.email}?`}
+            </p>
+          </div>
+
+          <div className="flex w-full justify-end space-x-2 text-sm">
+            <button
+              type="button"
+              onClick={() => setOpenTransferOwnership(false)}
+              className="flex flex-row items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:border-gray-700 dark:bg-black dark:text-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
+              onClick={async () => {
+                const { error } = await jawn.POST(
+                  "/v1/organization/{organizationId}/update_owner",
+                  {
+                    params: {
+                      path: {
+                        organizationId: orgId,
+                      },
+                    },
+                    body: {
+                      memberId: orgMember.member!,
+                    },
+                  },
+                );
+                if (error) {
+                  console.error(error);
+                  setNotification("Error transferring ownership", "error");
+                  logger.error(
+                    { error, orgId, memberId: orgMember.member },
+                    "Error transferring ownership",
+                  );
+                }
+                setOpenTransferOwnership(false);
+                refetch();
+              }}
+            >
+              Transfer
             </button>
           </div>
         </div>

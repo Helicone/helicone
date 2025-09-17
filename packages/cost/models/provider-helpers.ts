@@ -35,7 +35,11 @@ export const dbProviderToProvider = (
   if (provider === "anthropic" || provider === "Anthropic") {
     return "anthropic";
   }
-  if (provider === "bedrock" || provider === "AWS Bedrock") {
+  if (
+    provider === "bedrock" ||
+    provider === "AWS Bedrock" ||
+    provider === "aws"
+  ) {
     return "bedrock";
   }
   if (provider === "vertex" || provider === "Vertex AI") {

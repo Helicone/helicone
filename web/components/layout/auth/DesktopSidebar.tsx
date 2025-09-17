@@ -1,5 +1,6 @@
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
@@ -262,7 +263,11 @@ const DesktopSidebar = ({
 
           {/* Main content area */}
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="mb-2 flex h-full flex-1 flex-col justify-between overflow-y-auto">
+            <ScrollArea
+              className="mb-2 flex h-full flex-1 flex-col justify-between"
+              width="thin"
+              type="scroll"
+            >
               {/* Navigation items */}
               <div className="flex flex-col">
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
@@ -359,9 +364,9 @@ const DesktopSidebar = ({
                     </div>
                   </div>
                 ))}
-            </div>
+            </ScrollArea>
 
-            <div className="flex flex-col gap-2 p-3">
+            <div className="flex flex-col px-2 pb-2">
               <Button
                 variant="ghost"
                 size="none"
@@ -369,8 +374,8 @@ const DesktopSidebar = ({
                 className={cn(
                   "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
                   isCollapsed
-                    ? "h-9 w-9 justify-center"
-                    : "h-9 w-full justify-start gap-2 px-3",
+                    ? "h-8 w-8 justify-center"
+                    : "h-8 w-full justify-start gap-2 px-3",
                   agentChatOpen
                     ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
                     : "text-muted-foreground",
@@ -395,8 +400,8 @@ const DesktopSidebar = ({
                     className={cn(
                       "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
                       isCollapsed
-                        ? "h-9 w-9 justify-center"
-                        : "h-9 w-full justify-start gap-2 px-3",
+                        ? "h-8 w-8 justify-center"
+                        : "h-8 w-full justify-start gap-2 px-3",
                       router.pathname.includes("/credits")
                         ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
                         : "text-muted-foreground",
@@ -439,8 +444,8 @@ const DesktopSidebar = ({
                     className={cn(
                       "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
                       isCollapsed
-                        ? "h-9 w-9 justify-center"
-                        : "h-9 w-full justify-start gap-2 px-3",
+                        ? "h-8 w-8 justify-center"
+                        : "h-8 w-full justify-start gap-2 px-3",
                       router.pathname.startsWith("/settings")
                         ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
                         : "text-muted-foreground",

@@ -4,6 +4,18 @@ export const universalTools = [
   {
     type: "function" as const,
     function: {
+      name: "escalate",
+      description:
+        "Escalates the conversation to a human. This should be used when the agent is unable to answer the question or the user asks for a human.",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
       name: "search-helicone-docs",
       description:
         "Search across the Helicone OSS LLM Observability documentation to find relevant information, code examples, API references, and guides. Use this tool when you need to answer questions about Helicone OSS LLM Observability, find specific documentation, understand how features work, or locate implementation details. The search returns contextual content with titles and direct links to the documentation pages.",

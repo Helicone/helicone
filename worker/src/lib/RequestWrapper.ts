@@ -13,13 +13,13 @@ import {
 import { HeliconeHeaders } from "./models/HeliconeHeaders";
 import { getAndStoreInCache } from "./util/cache/secureCache";
 import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
-import { Sha256 } from "@aws-crypto/sha256-js";
 import { parseJSXObject } from "@helicone/prompts";
-import { HttpRequest } from "@smithy/protocol-http";
-import { SignatureV4 } from "@smithy/signature-v4";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
+import { RequestBodyBuffer_InMemory } from "../RequestBodyBuffer/RequestBodyBuffer_InMemory";
+import { IRequestBodyBuffer } from "../RequestBodyBuffer/IRequestBodyBuffer";
+import { RequestBodyBufferBuilder } from "../RequestBodyBuffer/RequestBodyBufferBuilder";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -64,11 +64,9 @@ export class RequestWrapper {
   extraHeaders: Headers | null = null;
   requestReferrer: string | undefined;
 
-  private cachedText: string | null = null;
   private bodyKeyOverride: object | null = null;
 
   private gatewayAttempt?: Attempt;
-  private dataDogClient?: DataDogClient;
 
   /*
   We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
@@ -136,6 +134,8 @@ export class RequestWrapper {
     }
     return headers;
   }
+
+  // TODO we reallllyyyy should not be calling this.. it's hacky
   public resetObject() {
     this.url = new URL(this.originalUrl);
     this.headers = this.mutatedAuthorizationHeaders(this.request);
@@ -146,7 +146,9 @@ export class RequestWrapper {
 
   private constructor(
     private request: Request,
-    private env: Env
+    private env: Env,
+    readonly requestBodyBuffer: IRequestBodyBuffer,
+    private readonly dataDogClient: DataDogClient | undefined
   ) {
     this.url = new URL(request.url);
     this.originalUrl = new URL(request.url);
@@ -155,24 +157,17 @@ export class RequestWrapper {
     this.promptSettings = this.getPromptSettings();
     this.prompt2025Settings = {}; // initialized later, if a prompt is used.
     this.injectPromptProperties();
-
-    // Get DataDog client singleton (persists across all requests)
-    if ((env.DATADOG_ENABLED ?? "false") === "true") {
-      this.dataDogClient = getDataDogClient(env);
-      // Increment request counter for each new request
-      this.dataDogClient.incrementRequestCount();
-      try {
-        this.dataDogClient.trackContentLength(
-          Number(this.headers.get("content-length") ?? 0)
-        );
-      } catch (e) {
-        // failed to get content length
-        this.dataDogClient.trackContentLength(-1);
-        // Silently catch - never let monitoring break the request
-      }
-    }
     this.baseURLOverride = null;
     this.cf = request.cf;
+
+    try {
+      dataDogClient?.incrementRequestCount();
+      dataDogClient?.trackContentLength(
+        Number(this.headers.get("content-length") ?? 0)
+      );
+    } catch (e) {
+      dataDogClient?.trackContentLength(-1);
+    }
   }
 
   private injectPromptProperties() {
@@ -229,7 +224,22 @@ export class RequestWrapper {
     request: Request,
     env: Env
   ): Promise<Result<RequestWrapper, string>> {
-    const requestWrapper = new RequestWrapper(request, env);
+    let dataDogClient: DataDogClient | undefined;
+    // Get DataDog client singleton (persists across all requests)
+    if ((env.DATADOG_ENABLED ?? "false") === "true") {
+      dataDogClient = getDataDogClient(env);
+    }
+    const requestBodyBuffer = await RequestBodyBufferBuilder(
+      request,
+      dataDogClient,
+      env.REQUEST_BODY_BUFFER
+    );
+    const requestWrapper = new RequestWrapper(
+      request,
+      env,
+      requestBodyBuffer,
+      dataDogClient
+    );
     const authorization = await requestWrapper.setAuthorization(env);
 
     if (authorization.error) {
@@ -298,23 +308,9 @@ export class RequestWrapper {
     return body;
   }
 
+  // TODO deprecate this function
   async getRawText(): Promise<string> {
-    if (this.cachedText) {
-      return this.cachedText;
-    }
-
-    this.cachedText = await this.request.text();
-
-    try {
-      if (this.dataDogClient) {
-        const sizeBytes = DataDogClient.estimateStringSize(this.cachedText);
-        this.dataDogClient.trackMemory("request-body", sizeBytes);
-      }
-    } catch (e) {
-      // Silently catch - never let monitoring break the request
-    }
-
-    return this.cachedText;
+    return this.requestBodyBuffer.unsafeGetRawText();
   }
 
   getDataDogClient(): DataDogClient | undefined {
@@ -412,75 +408,17 @@ export class RequestWrapper {
     region: string;
     forwardToHost: string;
   }) {
-    // Extract model from URL path
-    const pathParts = this.url.pathname.split("/");
-    const model = decodeURIComponent(pathParts.at(-2) ?? "");
-
-    const awsAccessKey = this.headers.get("aws-access-key");
-    const awsSecretKey = this.headers.get("aws-secret-key");
-    const awsSessionToken = this.headers.get("aws-session-token");
-    const service = "bedrock";
-
-    const sigv4 = new SignatureV4({
-      service,
+    const { newHeaders, model } = await this.requestBodyBuffer.signAWSRequest({
       region,
-      credentials: {
-        accessKeyId: awsAccessKey ?? "",
-        secretAccessKey: awsSecretKey ?? "",
-        ...(awsSessionToken ? { sessionToken: awsSessionToken } : {}),
-      },
-      sha256: Sha256,
-    });
-
-    const headers = new Headers();
-
-    // Required headers for AWS requests
-    headers.set("host", forwardToHost);
-    headers.set("content-type", "application/json");
-
-    // Include only AWS-specific headers needed for authentication
-    const awsHeaders = [
-      "x-amz-date",
-      "x-amz-security-token",
-      "x-amz-content-sha256",
-      "x-amz-target",
-      // Add any other required x-amz headers for your specific use case
-    ];
-
-    for (const [key, value] of this.headers.entries()) {
-      if (awsHeaders.includes(key.toLowerCase())) {
-        headers.set(key, value);
-      }
-    }
-
-    const url = new URL(this.url.toString());
-    const request = new HttpRequest({
+      forwardToHost,
+      requestHeaders: Object.fromEntries(this.headers.entries()),
       method: this.request.method,
-      protocol: url.protocol,
-      hostname: forwardToHost,
-      path: url.pathname + url.search,
-      headers: Object.fromEntries(headers.entries()),
-      body: await this.getRawText(),
+      urlString: this.url.toString(),
     });
-
-    const signedRequest = await sigv4.sign(request);
-
-    // Create new headers with the signed values
-    const newHeaders = new Headers();
-    // Only copy over the essential headers
-    newHeaders.set("host", forwardToHost);
-    newHeaders.set("content-type", "application/json");
 
     // Add model override header if model was found
     if (model) {
       this.heliconeHeaders.setModelOverride(model);
-    }
-
-    // Add all the signed AWS headers
-    for (const [key, value] of Object.entries(signedRequest.headers)) {
-      if (value) {
-        newHeaders.set(key, value.toString());
-      }
     }
 
     this.remapHeaders(newHeaders);
@@ -669,7 +607,7 @@ export class RequestWrapper {
   }
 
   setBody(body: string): void {
-    this.cachedText = body;
+    this.requestBodyBuffer.tempSetBody(body);
   }
 
   setSuccessfulAttempt(attempt: Attempt): void {

@@ -594,7 +594,7 @@ function getAPIRouterV1(
         return new Response("Missing stripe-signature header", { status: 400 });
       }
 
-      const body = await requestWrapper.getRawText();
+      const body = await requestWrapper.requestBodyBuffer.unsafeGetRawText();
       if (!body) {
         return new Response("Missing request body", { status: 400 });
       }
@@ -618,12 +618,12 @@ function getAPIRouterV1(
 
       if (handleError) {
         console.error("Error handling webhook event:", handleError);
-        
+
         // Check if error is related to insufficient balance (refund exceeds effective balance)
         if (handleError.includes("Refund amount exceeds effective balance")) {
           return new Response(handleError, { status: 400 });
         }
-        
+
         return new Response("", { status: 500 });
       }
 

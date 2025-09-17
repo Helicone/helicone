@@ -183,6 +183,48 @@
 					}
 				]
 			},
+			"ResultSuccess__success-boolean--message-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"message": {
+								"type": "string"
+							},
+							"success": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"message",
+							"success"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__success-boolean--message-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--message-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
 				"properties": {
 					"data": {
@@ -7799,7 +7841,8 @@
 					"deepseek",
 					"cohere",
 					"xai",
-					"google-ai-studio"
+					"google-ai-studio",
+					"openrouter"
 				],
 				"nullable": false
 			},
@@ -7828,6 +7871,7 @@
 				"type": "string",
 				"enum": [
 					"max_tokens",
+					"max_completion_tokens",
 					"temperature",
 					"top_p",
 					"top_k",
@@ -11877,6 +11921,41 @@
 				]
 			}
 		},
+		"/v1/webhooks/{webhookId}/test": {
+			"post": {
+				"operationId": "TestWebhook",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__success-boolean--message-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "webhookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/public/waitlist/feature": {
 			"post": {
 				"operationId": "AddToWaitlist",
@@ -12345,7 +12424,8 @@
 														"deepseek",
 														"cohere",
 														"xai",
-														"google-ai-studio"
+														"google-ai-studio",
+														"openrouter"
 													]
 												}
 											},

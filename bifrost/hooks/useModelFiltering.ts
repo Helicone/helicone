@@ -16,6 +16,7 @@ interface UseModelFilteringProps {
   minContextSize: number;
   selectedCapabilities: Set<string>;
   sortBy: SortOption;
+  showPtbOnly?: boolean;
   selectedAuthors?: Set<string>;
   selectedInputModalities?: Set<string>;
   selectedOutputModalities?: Set<string>;
@@ -41,6 +42,7 @@ export function useModelFiltering({
   minContextSize,
   selectedCapabilities,
   sortBy,
+  showPtbOnly = false,
   selectedAuthors,
   selectedInputModalities,
   selectedOutputModalities,
@@ -61,6 +63,7 @@ export function useModelFiltering({
       priceRange[1] < 50 ||
       minContextSize > 0 ||
       selectedCapabilities.size > 0 ||
+      showPtbOnly ||
       (selectedAuthors && selectedAuthors.size > 0) ||
       (selectedInputModalities && selectedInputModalities.size > 0) ||
       (selectedOutputModalities && selectedOutputModalities.size > 0) ||
@@ -72,6 +75,7 @@ export function useModelFiltering({
     priceRange,
     minContextSize,
     selectedCapabilities,
+    showPtbOnly,
     selectedAuthors,
     selectedInputModalities,
     selectedOutputModalities,
@@ -86,6 +90,7 @@ export function useModelFiltering({
       priceRange,
       minContextSize,
       capabilities: selectedCapabilities,
+      showPtbOnly,
       authors: selectedAuthors,
       inputModalities: selectedInputModalities as any,
       outputModalities: selectedOutputModalities as any,
@@ -104,6 +109,7 @@ export function useModelFiltering({
     priceRange,
     minContextSize,
     selectedCapabilities,
+    showPtbOnly,
     selectedAuthors,
     selectedInputModalities,
     selectedOutputModalities,
@@ -139,6 +145,6 @@ export function useModelFilterState(searchParams: URLSearchParams) {
     ] as [number, number],
     minContextSize: getNumberFromParam(searchParams.get("contextMin"), 0),
     selectedCapabilities: getSetFromParam(searchParams.get("capabilities")),
-    sortBy: (searchParams.get("sort") as SortOption) || "name",
+    sortBy: (searchParams.get("sort") as SortOption) || "newest",
   };
 }

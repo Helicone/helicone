@@ -11,7 +11,9 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
 ]
+
 
 kv_namespaces = [
 	{ binding = "RATE_LIMIT_KV", id = "0492dc9511cb4ed5b6f012a85354fa34", preview_id = "d275df550f7a4276ad50a3115f3e84b4" },
@@ -25,6 +27,10 @@ kv_namespaces = [
 
 queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-dev" },
+]
+
+containers = [
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10 }
 ]
 
 [vars]
@@ -89,6 +95,7 @@ SLACK_ALERT_CHANNEL = "C092GFJQP43"
 STRIPE_SECRET_KEY = "sk_test_"
 STRIPE_WEBHOOK_SECRET = "whsec_"
 HELICONE_ORG_ID = ""
+EU_HELICONE_ORG_ID = ""
 STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT="prod_StWk1FmJ88b9Ju"
 
 UPSTASH_KAFKA_URL=""
@@ -97,6 +104,7 @@ UPSTASH_KAFKA_PASSWORD=""
 
 [triggers]
 crons = ["* * * * *", "0 * * * *", "0 10 * * mon", "*/5 * * * *"]
+
 
 [env.production]
 name = "helicone-worker-prod"
@@ -171,6 +179,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
 ]
 
 kv_namespaces = [
@@ -181,6 +190,10 @@ kv_namespaces = [
 	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
 	{ binding = "SECURE_CACHE", id = "43d1ce4eaa9c4be9ae88a97ea8ed88ef", preview_id = "23d7b3cb44254e0eb0b824a310abe155" },
 	{ binding = "EU_SECURE_CACHE", id = "39c1d7b64db749e39adeba19c698e6a1" },
+]
+
+containers = [
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10 }
 ]
 
 [env.production.triggers]
@@ -198,7 +211,6 @@ DATADOG_ENABLED = "true"
 QUEUE_PROVIDER = "sqs"
 ENVIRONMENT = "production"
 APP_URL = "https://us.helicone.ai"
-
 
 [env.production_staging]
 name = "helicone-worker-prod-staging"
@@ -221,6 +233,7 @@ routes = [
 	{ pattern = "fireworks.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "llmmapper.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "ai-gateway.staging.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "bedrock.staging.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
@@ -246,10 +259,15 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
 ]
 
 queues.producers = [
 	{ binding = "FALLBACK_QUEUE", queue = "fallback-queue-staging" },
+]
+
+containers = [
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10 }
 ]
 
 # Environment-specific variables only (inherit most from top-level [vars])
@@ -263,6 +281,9 @@ APP_URL = "https://us.helicone.ai"
 
 [env.production_staging.triggers]
 crons = []
+
+
+
 
 [[migrations]]
 tag = "v1"
@@ -297,3 +318,7 @@ new_sqlite_classes = ["RateLimiterDO"]
 [[migrations]]
 tag = "v8"
 new_sqlite_classes = ["Wallet"]
+
+[[migrations]]
+tag = "v9"
+new_sqlite_classes = ["RequestBodyBufferContainer"]

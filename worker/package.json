@@ -43,6 +43,7 @@
     "@aws-sdk/client-sqs": "^3.799",
     "@clickhouse/client-common": "^0.2",
     "@clickhouse/client-web": "^0.2",
+    "@cloudflare/containers": "^0.0.28",
     "@cloudflare/itty-router-openapi": "^1",
     "@helicone/prompts": "^1",
     "@smithy/protocol-http": "^4.1.7",

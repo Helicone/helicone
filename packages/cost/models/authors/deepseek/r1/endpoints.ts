@@ -4,7 +4,7 @@ import { DeepSeekR1ModelName } from "./models";
 
 export const endpoints = {
   "deepseek-r1-distill-llama-70b:groq": {
-    providerModelId: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+    providerModelId: "deepseek-r1-distill-llama-70b",
     provider: "groq",
     author: "deepseek",
     pricing: [
@@ -37,7 +37,7 @@ export const endpoints = {
       "tools",
       "top_k",
       "top_logprobs",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
