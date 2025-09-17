@@ -2882,7 +2882,7 @@ Json: JsonObject;
       timeZoneDifference: number;
     };
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio";
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio" | "openrouter";
     /** @enum {string} */
     AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "passthrough";
     /** @enum {string} */
@@ -2930,6 +2930,8 @@ Json: JsonObject;
       author: components["schemas"]["AuthorName"];
       providerModelId: string;
       supportedParameters: components["schemas"]["StandardParameter"][];
+      /** Format: double */
+      priority?: number;
     };
     SimplifiedPricing: {
       /** Format: double */
@@ -4128,7 +4130,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio" | "openrouter";
           }) | {
             error: string;
           };

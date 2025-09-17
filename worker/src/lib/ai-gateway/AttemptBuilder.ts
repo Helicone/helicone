@@ -166,7 +166,7 @@ export class AttemptBuilder {
         endpoint: endpointResult.data,
         providerKey: userKey,
         authType: "byok",
-        priority: 1,
+        priority: endpointResult.data.priority ?? 1,
         source: `${modelName}/${providerData.provider}/byok${customUid ? `/${customUid}` : ""}`,
       },
     ];
@@ -208,7 +208,7 @@ export class AttemptBuilder {
           endpoint: passthroughResult.data,
           providerKey: userKey,
           authType: "byok",
-          priority: 1,
+          priority: passthroughResult.data.priority ?? 1,
           source: `${modelName}/${provider}/byok${customUid ? `/${customUid}` : ""}`,
         },
       ];
@@ -258,7 +258,7 @@ export class AttemptBuilder {
           endpoint,
           providerKey,
           authType: "ptb",
-          priority: 2,
+          priority: endpoint.priority ?? 2,
           source: `${modelName}/${provider}/ptb`,
         }) as Attempt
     );

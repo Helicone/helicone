@@ -32,6 +32,7 @@ function mergeConfigs(
     ptbEnabled: endpointConfig.ptbEnabled ?? modelProviderConfig.ptbEnabled,
     version: endpointConfig.version ?? modelProviderConfig.version,
     supportedParameters: modelProviderConfig.supportedParameters,
+    priority: endpointConfig.priority ?? modelProviderConfig.priority,
   };
 }
 

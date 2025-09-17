@@ -47431,7 +47431,8 @@
 														"deepseek",
 														"cohere",
 														"xai",
-														"google-ai-studio"
+														"google-ai-studio",
+														"openrouter"
 													]
 												}
 											},

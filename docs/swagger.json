@@ -7841,7 +7841,8 @@
 					"deepseek",
 					"cohere",
 					"xai",
-					"google-ai-studio"
+					"google-ai-studio",
+					"openrouter"
 				],
 				"nullable": false
 			},
@@ -8008,6 +8009,10 @@
 							"$ref": "#/components/schemas/StandardParameter"
 						},
 						"type": "array"
+					},
+					"priority": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -12423,7 +12428,8 @@
 														"deepseek",
 														"cohere",
 														"xai",
-														"google-ai-studio"
+														"google-ai-studio",
+														"openrouter"
 													]
 												}
 											},

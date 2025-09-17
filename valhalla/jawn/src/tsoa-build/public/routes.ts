@@ -2530,7 +2530,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelProviderName": {
         "dataType": "refAlias",
-        "type": {"dataType":"enum","enums":["anthropic","openai","bedrock","vertex","azure","perplexity","groq","deepseek","cohere","xai","google-ai-studio"],"validators":{}},
+        "type": {"dataType":"enum","enums":["anthropic","openai","bedrock","vertex","azure","perplexity","groq","deepseek","cohere","xai","google-ai-studio","openrouter"],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AuthorName": {
@@ -2574,6 +2574,7 @@ const models: TsoaRoute.Models = {
             "author": {"ref":"AuthorName","required":true},
             "providerModelId": {"dataType":"string","required":true},
             "supportedParameters": {"dataType":"array","array":{"dataType":"refAlias","ref":"StandardParameter"},"required":true},
+            "priority": {"dataType":"double"},
         },
         "additionalProperties": false,
     },

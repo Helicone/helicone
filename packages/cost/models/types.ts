@@ -161,6 +161,7 @@ export interface ModelProviderConfig extends BaseConfig {
   rateLimits?: RateLimits;
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;
+  priority?: number;
 }
 
 export interface EndpointConfig extends UserEndpointConfig {
@@ -171,6 +172,7 @@ export interface EndpointConfig extends UserEndpointConfig {
   ptbEnabled?: boolean;
   version?: string;
   rateLimits?: RateLimits;
+  priority?: number;
 }
 
 export interface Endpoint extends BaseConfig {
@@ -179,6 +181,7 @@ export interface Endpoint extends BaseConfig {
   author: AuthorName;
   providerModelId: string;
   supportedParameters: StandardParameter[];
+  priority?: number; // Lower number = higher priority
 }
 
 export interface UserEndpointConfig {
