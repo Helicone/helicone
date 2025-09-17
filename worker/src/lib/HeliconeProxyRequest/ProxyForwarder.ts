@@ -536,17 +536,13 @@ async function log(
       // handle AI Gateway requests (successful Attempt)
       const successfulAttempt = proxyRequest.requestWrapper.getSuccessfulAttempt();
       if (rawResponse && successfulAttempt) {
-        console.log("🚀 AI Gateway request detected");
         const attemptModel = successfulAttempt.endpoint.providerModelId;
         const attemptProvider = successfulAttempt.endpoint.provider;
-        console.log(`   Model: ${attemptModel}, Provider: ${attemptProvider}`);
 
         const usageProcessor = getUsageProcessor(attemptProvider);
         if (!usageProcessor) {
-          console.log("❌ No usage processor found for AI Gateway provider");
           throw new Error(`No usage processor found for AI Gateway provider: ${attemptProvider}`);
         }
-        console.log("✅ Usage processor found");
 
         const usage = await usageProcessor.parse({
           responseBody: rawResponse,
@@ -554,30 +550,24 @@ async function log(
         });
 
         if (usage.error !== null) {
-          console.log("❌ Usage processor failed");
           throw new Error(`Error parsing usage for AI Gateway provider ${attemptProvider}: ${usage.error}`);
         }
-        console.log("✅ Usage parsed successfully");
 
         const breakdown = modelCostBreakdownFromRegistry({
           modelUsage: usage.data,
-          model: attemptModel,
+          providerModelId: attemptModel,
           provider: attemptProvider,
         });
 
         if (!breakdown) {
-          console.log("❌ No cost breakdown found in new registry");
           throw new Error(`No cost breakdown found for AI Gateway model ${attemptModel} with provider ${attemptProvider}`);
         }
-        console.log("✅ Cost breakdown calculated from new registry");
 
         cost = breakdown.totalCost;
       } else {
-        console.log("📦 Non-AI Gateway request detected");
         // for non AI Gateway requests, we need to fall back to legacy methods when applicable
         const model = responseData.response.model;
         const provider = proxyRequest.provider;
-        console.log(`   Model: ${model}, Provider: ${provider}`);
 
         if (model && provider) {
           // Provider -> ModelProviderName to try and use new registry
@@ -585,11 +575,9 @@ async function log(
           let calculatedCost = null;
 
           if (modelProviderName) {
-            console.log(`🔄 Provider mapped to ModelProviderName: ${modelProviderName}`);
             // try usage processor + new registry first
             const usageProcessor = getUsageProcessor(modelProviderName);
             if (usageProcessor) {
-              console.log("✅ Usage processor available, trying usage processor + new registry");
               try {
                 const usage = await usageProcessor.parse({
                   responseBody: rawResponse,
@@ -597,18 +585,15 @@ async function log(
                 });
 
                 if (usage.error === null) {
-                  console.log("✅ Usage processor succeeded");
                   const breakdown = modelCostBreakdownFromRegistry({
                     modelUsage: usage.data,
-                    model,
+                    providerModelId: model,
                     provider: modelProviderName,
                   });
 
                   if (breakdown) {
-                    console.log("✅ New registry found model, cost calculated");
                     calculatedCost = breakdown.totalCost;
                   } else {
-                    console.log("⚠️ New registry missing model, falling back to legacy extraction + legacy registry");
                     // not in new registry, fall back to legacy extraction + legacy registry
                     calculatedCost = costOfPrompt({
                       model,
@@ -621,22 +606,15 @@ async function log(
                       completionAudioTokens: responseData.response.completion_audio_tokens ?? 0,
                     }) ?? 0;
                   }
-                } else {
-                  console.log("❌ Usage processor failed, will fallback to legacy");
                 }
               } catch (error) {
-                console.log("❌ Usage processor threw error, falling back to legacy:", error);
+                console.warn("Usage processor failed, falling back to legacy:", error);
               }
-            } else {
-              console.log("❌ No usage processor available for this provider");
             }
-          } else {
-            console.log("❌ Provider not mappable to ModelProviderName");
           }
 
           // final fallback for providers not in ModelProviderName
           if (calculatedCost === null) {
-            console.log("🔄 Using final fallback: legacy extraction + legacy registry");
             calculatedCost = costOfPrompt({
               model,
               promptTokens: responseData.response.prompt_tokens ?? 0,
@@ -650,11 +628,8 @@ async function log(
           }
 
           cost = calculatedCost;
-        } else {
-          console.log("❌ Missing model or provider, cost = 0");
         }
       }
-      console.log("cost", cost);
 
       // Handle escrow finalization if needed
       if (responseData && proxyRequest.escrowInfo) {
