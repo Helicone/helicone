@@ -13,7 +13,7 @@ interface FeedbackRequestBodyV2 {
 }
 
 export async function handleFeedback(request: RequestWrapper) {
-  const body = await request.getJson<FeedbackRequestBodyV2>();
+  const body = await request.unsafeGetJson<FeedbackRequestBodyV2>();
   const heliconeId = body["helicone-id"];
   const rating = body["rating"];
 

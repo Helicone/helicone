@@ -309,7 +309,7 @@ export class RequestWrapper {
   }
 
   // TODO deprecate this function
-  async getRawText(): Promise<string> {
+  async unsafeGetRawText(): Promise<string> {
     return this.requestBodyBuffer.unsafeGetRawText();
   }
 
@@ -332,8 +332,8 @@ export class RequestWrapper {
     return !!hostParts.includes("eu") || !!auth?.includes("helicone-eu");
   }
 
-  async getText(): Promise<string> {
-    let text = await this.getRawText();
+  async unsafeGetText(): Promise<string> {
+    let text = await this.unsafeGetRawText();
 
     if (this.bodyKeyOverride) {
       try {
@@ -354,11 +354,11 @@ export class RequestWrapper {
     return text;
   }
 
-  async getJson<T>(): Promise<T> {
+  async unsafeGetJson<T>(): Promise<T> {
     try {
-      return JSON.parse(await this.getText());
+      return JSON.parse(await this.unsafeGetText());
     } catch (e) {
-      console.error("RequestWrapper.getJson", e, await this.getText());
+      console.error("RequestWrapper.getJson", e, await this.unsafeGetText());
       return {} as T;
     }
   }
@@ -468,7 +468,7 @@ export class RequestWrapper {
   async getUserId(): Promise<string | undefined> {
     const userId =
       this.heliconeHeaders.userId ||
-      (await this.getJson<{ user?: string }>()).user;
+      (await this.unsafeGetJson<{ user?: string }>()).user;
     return userId;
   }
 
