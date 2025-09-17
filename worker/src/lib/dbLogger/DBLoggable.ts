@@ -182,14 +182,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
               asyncLogModel.timing.startTime.milliseconds
           )
         : new Date(),
-      // TEMP HACK
-      body: new ReadableStream({
-        async pull(controller) {
-          controller.enqueue(
-            JSON.stringify(asyncLogModel.providerRequest.json)
-          );
-        },
-      }),
+      body: JSON.stringify(asyncLogModel.providerRequest.json),
       unsafeGetBodyText: async () =>
         JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
