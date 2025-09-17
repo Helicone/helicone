@@ -3,6 +3,35 @@ import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { RequestBodyBuffer_InMemory } from "./RequestBodyBuffer_InMemory";
 import { RequestBodyBuffer_Remote } from "./RequestBodyBuffer_Remote";
 
+// Read up to `limitBytes` from `readable`. If total bytes exceed the limit,
+// stop and return `{ over: true }`. Otherwise, return the collected chunks so
+// the caller can reuse them without re-reading the original source.
+async function isOver(
+  readable: ReadableStream<Uint8Array>,
+  limitBytes: number
+): Promise<boolean> {
+  const reader = readable.getReader();
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        total += value.byteLength;
+        if (total > limitBytes) {
+          try {
+            await reader.cancel();
+          } catch {}
+          return true;
+        }
+      }
+    }
+    return false;
+  } finally {
+    // Reader is either closed or canceled above.
+  }
+}
+
 /**
  * Choose the request body buffer strategy without consuming the body.
  * Heuristic:
@@ -19,38 +48,57 @@ export async function RequestBodyBufferBuilder(
   const method = (request.method || "GET").toUpperCase();
   const hasBody = !["GET", "HEAD"].includes(method) && request.body !== null;
 
-  // Conservative default for Worker memory usage.
-  const INMEMORY_MAX_BYTES = 20 * 1024 * 1024; // 20 MiB
-
   // If there is no body, in-memory is fine.
   if (!hasBody) {
-    return new RequestBodyBuffer_InMemory(request, dataDogClient, env);
+    return new RequestBodyBuffer_InMemory(null, dataDogClient, env);
   }
 
-  // If the size is known and small enough, stay in-memory.
+  // Threshold for routing: small → Remote, large → InMemory.
+  const MAX_INMEMORY_BYTES = 20 * 1024 * 1024; // 20 MiB
+
+  // If Content-Length is present, honor it to avoid reading.
   const lenHeader = request.headers.get("content-length");
   const contentLength = lenHeader ? Number(lenHeader) : NaN;
   const sizeIsKnown = Number.isFinite(contentLength) && contentLength >= 0;
 
-  if (sizeIsKnown && contentLength <= INMEMORY_MAX_BYTES) {
-    return new RequestBodyBuffer_InMemory(request, dataDogClient, env);
+  if (sizeIsKnown) {
+    if (contentLength > MAX_INMEMORY_BYTES) {
+      // Large known body → InMemory, pass original stream
+      return new RequestBodyBuffer_InMemory(request.body ?? null, dataDogClient, env);
+    } else {
+      // Small known body → Remote if available, else InMemory
+      if (env.REQUEST_BODY_BUFFER) {
+        return new RequestBodyBuffer_Remote(
+          request.body ?? null,
+          dataDogClient,
+          env.REQUEST_BODY_BUFFER,
+          env
+        );
+      } else {
+        return new RequestBodyBuffer_InMemory(request.body ?? null, dataDogClient, env);
+      }
+    }
   }
 
-  // If size is large or unknown and we have the container, use remote.
-  if (
-    env.REQUEST_BODY_BUFFER &&
-    // TEMP ONLY SEND KNOWN SIZES TO REMOTE - we will read the first 20 megabytes later and check to swap it over if needed
-    sizeIsKnown &&
-    contentLength > INMEMORY_MAX_BYTES
-  ) {
+  // If container is not bound and size is unknown, default to in-memory.
+  if (!env.REQUEST_BODY_BUFFER) {
+    return new RequestBodyBuffer_InMemory(request.body ?? null, dataDogClient, env);
+  }
+
+  const originalBody = request.body!;
+  const [leftForRemote, rightForProbe] = originalBody.tee();
+  const exceeded = await isOver(rightForProbe, MAX_INMEMORY_BYTES);
+
+  if (exceeded) {
+    // Large request (> 20 MiB): use InMemory, feed it the left side of tee
+    return new RequestBodyBuffer_InMemory(leftForRemote, dataDogClient, env);
+  } else {
+    // Small request (≤ 20 MiB): prefer Remote and forward the untouched left stream
     return new RequestBodyBuffer_Remote(
-      request,
+      leftForRemote,
       dataDogClient,
       env.REQUEST_BODY_BUFFER,
       env
     );
   }
-
-  // Fallback: if binding not available, use in-memory.
-  return new RequestBodyBuffer_InMemory(request, dataDogClient, env);
 }

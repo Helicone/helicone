@@ -63,7 +63,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   } = {};
 
   constructor(
-    request: Request,
+    body: ReadableStream | null,
     private dataDogClient: DataDogClient | undefined,
     requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"],
     env: Env
@@ -87,7 +87,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       .fetch(`${BASE_URL}/${this.uniqueId}`, {
         method: "POST",
         headers,
-        body: request.body,
+        body: body ?? null,
       })
       .then(async (response) => {
         if (!response.ok) {
