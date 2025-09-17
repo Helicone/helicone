@@ -126,32 +126,3 @@ function getResponseText(responseBody: any): string {
     throw new Error(`Invalid response body:\n${JSON.stringify(responseBody)}`);
   }
 }
-
-async function getRequestTokenCount(
-  requestBody: any,
-  tokenCounter: (text: string) => Promise<number>
-): Promise<number> {
-  if (requestBody.prompt !== undefined) {
-    const prompt = requestBody.prompt;
-    if (typeof prompt === "string") {
-      return tokenCounter(requestBody.prompt);
-    } else if ("length" in prompt) {
-      return tokenCounter((prompt as string[]).join(""));
-    } else {
-      throw new Error("Invalid prompt type");
-    }
-  } else if (requestBody.messages !== undefined) {
-    const messages = requestBody.messages as { content: string }[];
-
-    let totalTokenCount = 0;
-
-    for (const message of messages) {
-      const tokenCount = await tokenCounter(message.content);
-      totalTokenCount += tokenCount;
-    }
-
-    return totalTokenCount + 3 + messages.length * 5;
-  } else {
-    throw new Error(`Invalid request body:\n${JSON.stringify(requestBody)}`);
-  }
-}

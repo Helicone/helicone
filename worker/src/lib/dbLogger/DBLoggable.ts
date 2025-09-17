@@ -351,7 +351,7 @@ export class DBLoggable {
           },
         });
       } else if (isStream && this.provider === "ANTHROPIC") {
-        return anthropicAIStream(result, tokenCounter, model);
+        return anthropicAIStream(result);
       } else if (isStream) {
         return parseOpenAIStream(result);
       } else if (
