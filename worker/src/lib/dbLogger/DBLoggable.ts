@@ -680,7 +680,7 @@ export class DBLoggable {
       const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
         organizationId: authParams.organizationId,
         requestId: this.request.requestId,
-        requestBody: this.request.unsafeGetBodyText ?? "{}",
+        requestBody: (await this.request.unsafeGetBodyText?.()) ?? "{}",
         responseBody: rawResponseBody.join(""),
       });
 
