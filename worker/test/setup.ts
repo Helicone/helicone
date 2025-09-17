@@ -165,6 +165,7 @@ vi.mock("@supabase/supabase-js", () => ({
             auth_type: "api_key",
             config: null,
             byok_enabled: isByokEnabled,
+         },
          deepseek: {
             org_id: "test-org-id",
             provider_name: "deepseek",

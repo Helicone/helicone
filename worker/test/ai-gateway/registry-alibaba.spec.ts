@@ -1,11 +1,10 @@
 import { describe, it, beforeEach, vi } from "vitest";
 
-// Mock @cloudflare/containers to fix test environment
 vi.mock("@cloudflare/containers", () => ({
-  Container: vi.fn().mockImplementation(() => ({
-    defaultPort: 8000,
-    sleepAfter: "10m",
-  })),
+  Container: class MockContainer {
+    defaultPort = 8000;
+    sleepAfter = "10m";
+  },
 }));
 
 import "../setup";
