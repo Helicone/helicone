@@ -65,6 +65,14 @@ function tryInitRemote(
   }
 }
 
+function toNumber(value: string | null): number {
+  try {
+    return value ? Number(value) : NaN;
+  } catch (e) {
+    return NaN;
+  }
+}
+
 /**
  * Choose the request body buffer strategy without consuming the body.
  * Heuristic:
@@ -93,7 +101,7 @@ export async function RequestBodyBufferBuilder(
 
   // If Content-Length is present, honor it to avoid reading.
   const lenHeader = request.headers.get("content-length");
-  const contentLength = lenHeader ? Number(lenHeader) : NaN;
+  const contentLength = toNumber(lenHeader);
   const sizeIsKnown = Number.isFinite(contentLength) && contentLength >= 0;
 
   if (sizeIsKnown) {
