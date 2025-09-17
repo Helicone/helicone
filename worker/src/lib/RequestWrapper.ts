@@ -147,7 +147,7 @@ export class RequestWrapper {
   private constructor(
     private request: Request,
     private env: Env,
-    private readonly requestBodyBuffer: IRequestBodyBuffer,
+    readonly requestBodyBuffer: IRequestBodyBuffer,
     private readonly dataDogClient: DataDogClient | undefined
   ) {
     this.url = new URL(request.url);
