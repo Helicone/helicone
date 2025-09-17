@@ -28,12 +28,12 @@ export async function RequestBodyBufferBuilder(
   // }
 
   // / THIS WORKS HOLY SHIT I CANT BELIEVE IT WORKS LOL
-  return new RequestBodyBuffer_Remote(
-    request,
-    dataDogClient,
-    env.REQUEST_BODY_BUFFER,
-    env
-  );
+  // return new RequestBodyBuffer_Remote(
+  //   request,
+  //   dataDogClient,
+  //   env.REQUEST_BODY_BUFFER,
+  //   env
+  // );
 
-  // return new RequestBodyBuffer_InMemory(request, dataDogClient);
+  return new RequestBodyBuffer_InMemory(request, dataDogClient, env);
 }
