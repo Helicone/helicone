@@ -86,15 +86,31 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
           );
           return;
         }
-        const { size, isStream, userId, model } = await response.json<{
-          size: number;
-          isStream?: boolean;
-          userId?: string;
-          model?: string;
-        }>();
-        this.metadata = { isStream, userId, model };
-        console.log("RequestBodyBuffer_Remote ingest success", size);
-        dataDogClient?.trackMemory("container-request-body-size", size);
+
+        // READING THE BODY DOES NOT WORK IN PROD IDK WHY - Justin 2025-09-17
+        // const { size, isStream, userId, model } = await response.json<{
+        //   size: number;
+        //   isStream?: boolean;
+        //   userId?: string;
+        //   model?: string;
+        // }>();
+        // this.metadata = { isStream, userId, model };
+
+        return this.requestBodyBuffer
+          .fetch(`${BASE_URL}/${this.uniqueId}/metadata`, {
+            method: "GET",
+          })
+          .then((response) => {
+            response
+              .json<{
+                isStream?: boolean;
+                userId?: string;
+                model?: string;
+              }>()
+              .then((json) => {
+                this.metadata = json;
+              });
+          });
       })
       .catch((e) => {
         console.error("RequestBodyBuffer_Remote ingest error", e);

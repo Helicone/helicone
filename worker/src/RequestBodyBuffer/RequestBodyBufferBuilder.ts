@@ -1,6 +1,7 @@
 import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { RequestBodyBuffer_InMemory } from "./RequestBodyBuffer_InMemory";
+import { RequestBodyBuffer_Remote } from "./RequestBodyBuffer_Remote";
 
 export async function RequestBodyBufferBuilder(
   request: Request,
