@@ -89,7 +89,7 @@ export function getModel(requestBody: string): string {
 export async function anthropicAIStream(
   result: string,
   tokenCounter: (text: string) => Promise<number>,
-  requestBody?: string
+  model?: string
 ): Promise<Result<any, string>> {
   const lines = result
     .split("\n")
@@ -106,11 +106,11 @@ export async function anthropicAIStream(
 
   try {
     if (
-      getModel(requestBody ?? "{}").includes("claude-3") ||
-      getModel(requestBody ?? "{}").includes("claude-sonnet-4") ||
-      getModel(requestBody ?? "{}").includes("claude-opus-4") ||
+      model?.includes("claude-3") ||
+      model?.includes("claude-sonnet-4") ||
+      model?.includes("claude-opus-4") ||
       // for AI SDK
-      getModel(requestBody ?? "{}").includes("claude-4")
+      model?.includes("claude-4")
     ) {
       return ok({
         ...recursivelyConsolidateAnthropicListForClaude(lines),
@@ -120,16 +120,13 @@ export async function anthropicAIStream(
         ...lines[lines.length - 1],
         completion: lines.map((d) => d.completion).join(""),
       };
-      const completionTokens = await tokenCounter(claudeData.completion);
-      const promptTokens = await tokenCounter(
-        JSON.parse(requestBody ?? "{}")?.prompt ?? ""
-      );
+
       return ok({
         ...consolidateTextFields(lines),
         usage: {
-          total_tokens: completionTokens + promptTokens,
-          prompt_tokens: promptTokens,
-          completion_tokens: completionTokens,
+          total_tokens: -1,
+          prompt_tokens: -1,
+          completion_tokens: -1,
           helicone_calculated: true,
         },
       });

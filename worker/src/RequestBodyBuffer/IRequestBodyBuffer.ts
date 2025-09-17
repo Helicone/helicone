@@ -17,4 +17,14 @@ export interface IRequestBodyBuffer {
   getReadableStreamToBody(): Promise<ValidRequestBody>;
 
   isStream(): Promise<boolean>;
+
+  userId(): Promise<string | undefined>;
+
+  model(): Promise<string | undefined>;
+
+  /**
+   * Build a streamed JSON payload for S3: { request: string, response: any }
+   * Implementations may offload construction to a remote container.
+   */
+  prepareS3Body(responseBody: any, override?: object): Promise<ReadableStream>;
 }

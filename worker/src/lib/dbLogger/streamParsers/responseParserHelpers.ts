@@ -99,45 +99,6 @@ export function consolidateTextFields(responseBody: any[]): any {
   }
 }
 
-export async function getUsage(
-  streamedData: any[],
-  requestBody: any,
-  tokenCounter: (text: string) => Promise<number>
-): Promise<{
-  total_tokens: number;
-  completion_tokens: number;
-  prompt_tokens: number;
-  helicone_calculated: boolean;
-}> {
-  try {
-    const responseTokenCount = await tokenCounter(
-      streamedData
-        .filter((d) => "id" in d)
-        .map((d) => getResponseText(d))
-        .join("")
-    );
-    const requestTokenCount = await getRequestTokenCount(
-      JSON.parse(requestBody),
-      tokenCounter
-    );
-    const totalTokens = requestTokenCount + responseTokenCount;
-    return {
-      total_tokens: totalTokens,
-      completion_tokens: responseTokenCount,
-      prompt_tokens: requestTokenCount,
-      helicone_calculated: true,
-    };
-  } catch (e) {
-    console.error("Error getting usage", e);
-    return {
-      total_tokens: -1,
-      completion_tokens: -1,
-      prompt_tokens: -1,
-      helicone_calculated: false,
-    };
-  }
-}
-
 function getResponseText(responseBody: any): string {
   type Choice =
     | {

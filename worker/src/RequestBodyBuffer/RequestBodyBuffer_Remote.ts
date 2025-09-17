@@ -53,6 +53,12 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   private uniqueId: string;
   private ingestPromise: Promise<void>;
 
+  private metadata: {
+    isStream?: boolean;
+    userId?: string;
+    model?: string;
+  } = {};
+
   constructor(
     request: Request,
     private dataDogClient: DataDogClient | undefined,
@@ -80,7 +86,13 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
           );
           return;
         }
-        const { size } = await response.json<{ size: number }>();
+        const { size, isStream, userId, model } = await response.json<{
+          size: number;
+          isStream?: boolean;
+          userId?: string;
+          model?: string;
+        }>();
+        this.metadata = { isStream, userId, model };
         console.log("RequestBodyBuffer_Remote ingest success", size);
         dataDogClient?.trackMemory("container-request-body-size", size);
       })
@@ -159,16 +171,55 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
 
   async isStream(): Promise<boolean> {
     await this.ingestPromise.catch(() => undefined);
-    const response = await this.requestBodyBuffer.fetch(
-      `${BASE_URL}/${this.uniqueId}/is-stream`,
-      { method: "GET" }
+    return this.metadata.isStream ?? false;
+  }
+
+  async userId(): Promise<string | undefined> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.userId;
+  }
+
+  async model(): Promise<string | undefined> {
+    await this.ingestPromise.catch(() => undefined);
+    return this.metadata.model;
+  }
+
+  /**
+   * Prepares a stream in the container so that we return it as a stream in this format:
+   * {
+   *    request: requestBody,
+   *    response: responseBody
+   * }
+   * @param responseBody
+   */
+  async prepareS3Body(
+    responseBody: any,
+    override?: object
+  ): Promise<ReadableStream> {
+    await this.ingestPromise.catch(() => undefined);
+    const res = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/s3-body`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ response: responseBody, override }),
+      }
     );
-    if (!response.ok) return false;
-    try {
-      const data = (await response.json()) as { isStream?: boolean };
-      return data?.isStream === true;
-    } catch (_e) {
-      return false;
+    if (!res.ok) {
+      throw new Error(`s3-body failed with status ${res.status}`);
     }
+    // Return the container's streaming body directly
+    const body = res.body;
+    if (!body) {
+      // Graceful fallback: synthesize a small stream if body missing
+      const payload = JSON.stringify({ request: "", response: responseBody });
+      return new ReadableStream({
+        pull(controller) {
+          controller.enqueue(payload);
+          controller.close();
+        },
+      });
+    }
+    return body;
   }
 }

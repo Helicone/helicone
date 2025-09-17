@@ -32,7 +32,10 @@ import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { EscrowInfo } from "../ai-gateway/types";
-import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
+import {
+  IRequestBodyBuffer,
+  ValidRequestBody,
+} from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
 export interface DBLoggableProps {
   response: {
@@ -54,6 +57,7 @@ export interface DBLoggableProps {
     prompt2025Settings: Prompt2025Settings;
     startTime: Date;
     body: ValidRequestBody;
+    requestBodyBuffer: IRequestBodyBuffer;
     unsafeGetBodyText?: () => Promise<string | null>;
     path: string;
     targetUrl: string;
@@ -102,6 +106,7 @@ export function dbLoggableRequestFromProxyRequest(
     userId: proxyRequest.userId,
     startTime: requestStartTime,
     unsafeGetBodyText: proxyRequest.unsafeGetBodyText,
+    requestBodyBuffer: proxyRequest.requestWrapper.requestBodyBuffer,
     body: proxyRequest.body,
     path: proxyRequest.requestWrapper.url.href,
     targetUrl: proxyRequest.targetUrl.href,
@@ -174,6 +179,7 @@ export async function dbLoggableRequestFromAsyncLogModel(
             promptVersion: "",
             promptMode: "deactivated",
           },
+      requestBodyBuffer: requestWrapper.requestBodyBuffer,
       prompt2025Settings: requestWrapper.prompt2025Settings,
       userId: providerRequestHeaders.userId ?? undefined,
       startTime: asyncLogModel.timing
@@ -282,9 +288,10 @@ export class DBLoggable {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<Result<any, string>> {
     let result = responseBody;
-    const isStream = this.request.isStream;
+    const isStream = await this.request.requestBodyBuffer.isStream();
+    const model = await this.request.requestBodyBuffer.model();
     const responseStatus = await this.response.status();
-    const requestBody = (await this.request.unsafeGetBodyText?.()) || undefined;
+
     const tokenCounter = (t: string) => this.tokenCounter(t);
     if (isStream && status === INTERNAL_ERRORS["Cancelled"]) {
       // Remove last line of stream from result
@@ -297,9 +304,9 @@ export class DBLoggable {
     try {
       if (HTTPSErrorRange || HTTPSRedirect) {
         return ok(JSON.parse(result));
-      } else if (!isStream && this.provider === "ANTHROPIC" && requestBody) {
+      } else if (!isStream && this.provider === "ANTHROPIC") {
         const responseJson = JSON.parse(result);
-        if (getModel(requestBody ?? "{}").includes("claude-3")) {
+        if (model?.includes("claude-3")) {
           if (
             !responseJson?.usage?.output_tokens ||
             !responseJson?.usage?.input_tokens
@@ -319,16 +326,12 @@ export class DBLoggable {
             });
           }
         } else {
-          const prompt = JSON.parse(requestBody)?.prompt ?? "";
-          const completion = responseJson?.completion ?? "";
-          const completionTokens = await tokenCounter(completion);
-          const promptTokens = await tokenCounter(prompt);
           return ok({
             ...responseJson,
             usage: {
-              total_tokens: promptTokens + completionTokens,
-              prompt_tokens: promptTokens,
-              completion_tokens: completionTokens,
+              total_tokens: -1,
+              prompt_tokens: -1,
+              completion_tokens: -1,
               helicone_calculated: true,
             },
           });
@@ -355,9 +358,9 @@ export class DBLoggable {
           },
         });
       } else if (isStream && this.provider === "ANTHROPIC") {
-        return anthropicAIStream(result, tokenCounter, requestBody);
+        return anthropicAIStream(result, tokenCounter, model);
       } else if (isStream) {
-        return parseOpenAIStream(result, tokenCounter, requestBody);
+        return parseOpenAIStream(result);
       } else if (
         this.provider === "VERCEL" &&
         result.includes("data: {") &&
@@ -680,8 +683,9 @@ export class DBLoggable {
       const s3Result = await db.requestResponseManager.storeRequestResponseRaw({
         organizationId: authParams.organizationId,
         requestId: this.request.requestId,
-        requestBody: this.request.unsafeGetBodyText ?? "{}",
-        responseBody: rawResponseBody.join(""),
+        requestStream: await this.request.requestBodyBuffer.prepareS3Body(
+          rawResponseBody.join("")
+        ),
       });
 
       if (s3Result.error) {

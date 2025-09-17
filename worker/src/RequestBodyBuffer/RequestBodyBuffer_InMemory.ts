@@ -138,4 +138,49 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     const json = await this.getJson<{ stream?: boolean }>();
     return json.stream === true;
   }
+
+  async userId(): Promise<string | undefined> {
+    const json = await this.getJson<{ user?: string }>();
+    return json.user;
+  }
+
+  async model(): Promise<string | undefined> {
+    const json = await this.getJson<{ model?: string }>();
+    return json.model ?? "unknown";
+  }
+
+  private deepOverride(base: any, override: any): any {
+    if (!override || typeof override !== "object") return base;
+    if (!base || typeof base !== "object") return base;
+    for (const [k, v] of Object.entries(override)) {
+      if (v && typeof v === "object" && !Array.isArray(v)) {
+        base[k] = this.deepOverride(base[k], v);
+      } else {
+        base[k] = v as any;
+      }
+    }
+    return base;
+  }
+
+  async prepareS3Body(
+    responseBody: any,
+    override?: object
+  ): Promise<ReadableStream> {
+    let reqText = await this.unsafeGetRawText();
+    if (override) {
+      try {
+        const obj = JSON.parse(reqText);
+        reqText = JSON.stringify(this.deepOverride(obj, override));
+      } catch (_e) {
+        // keep original if not JSON
+      }
+    }
+    const payload = JSON.stringify({ request: reqText, response: responseBody });
+    return new ReadableStream({
+      pull(controller) {
+        controller.enqueue(payload);
+        controller.close();
+      },
+    });
+  }
 }
