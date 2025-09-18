@@ -11,7 +11,6 @@ import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
 import { Provider } from "@helicone-package/llm-mapper/types";
 
-// Helper function to convert legacy Provider type to ModelProviderName
 export function heliconeProviderToModelProviderName(
   provider: Provider
 ): ModelProviderName | null {
@@ -251,4 +250,21 @@ export async function buildRequestBody(
       error instanceof Error ? error.message : "Failed to build request body"
     );
   }
+}
+
+export async function buildErrorMessage(
+  endpoint: Endpoint,
+  response: Response
+): Promise<Result<string>> {
+  const providerResult = getProvider(endpoint.provider);
+  if (providerResult.error) {
+    return err(providerResult.error);
+  }
+
+  const provider = providerResult.data;
+  if (!provider) {
+    return err(`Provider data is null for: ${endpoint.provider}`);
+  }
+
+  return ok(await provider.buildErrorMessage(response));
 }
