@@ -539,11 +539,7 @@ async function log(
             isStream: proxyRequest.isStream,
           });
 
-          if (usage.error !== null) {
-            console.warn(
-              `Error parsing usage for provider ${attemptProvider}: ${usage.error}`
-            );
-          } else if (usage.data) {
+          if (usage.data) {
             // For OpenRouter, use the direct cost from their response if available
             if (
               attemptProvider === "openrouter" &&
@@ -600,21 +596,13 @@ async function log(
               });
 
               if (usage.data) {
-                // For OpenRouter, use the direct cost if available
-                if (
-                  modelProviderName === "openrouter" &&
-                  "cost" in usage.data &&
-                  typeof usage.data.cost === "number"
-                ) {
-                  cost = usage.data.cost;
-                } else {
-                  const breakdown = modelCostBreakdownFromRegistry({
-                    modelUsage: usage.data,
-                    providerModelId: model,
-                    provider: modelProviderName,
-                  });
-                  cost = breakdown?.totalCost;
-                }
+                const breakdown = modelCostBreakdownFromRegistry({
+                  modelUsage: usage.data,
+                  providerModelId: model,
+                  provider: modelProviderName,
+                });
+
+                cost = breakdown?.totalCost;
               }
             }
           }
