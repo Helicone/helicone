@@ -4,6 +4,7 @@ import { AnthropicResponseBody } from '../../src/lib/clients/llmmapper/types/ant
 import { toAnthropic } from '../../src/lib/clients/llmmapper/providers/openai/request/toAnthropic';
 import { AnthropicToOpenAIStreamConverter } from '../../src/lib/clients/llmmapper/providers/anthropic/streamedResponse/toOpenai';
 import { AnthropicStreamEvent } from '../../src/lib/clients/llmmapper/types/anthropic';
+import { HeliconeChatCreateParams } from '@helicone-package/prompts/types';
 
 describe('Anthropic to OpenAI Response Mapper', () => {
   // ANTHROPIC NON-STREAM RESPONSE -> OPENAI RESPONSE
@@ -103,7 +104,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
   // OPENAI REQUEST -> ANTHROPIC REQUEST
   describe('toAnthropic', () => {
     it('should convert basic text request', () => {
-      const openAIRequest = {
+      const openAIRequest: HeliconeChatCreateParams = {
         model: 'gpt-4o',
         messages: [
           {
@@ -114,7 +115,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
         temperature: 0.7,
         max_tokens: 1000,
         stream: false
-      } as any;
+      };
 
       const result = toAnthropic(openAIRequest);
 
@@ -130,7 +131,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should convert request with tool calls', () => {
-      const openAIRequest = {
+      const openAIRequest: HeliconeChatCreateParams = {
         model: 'gpt-4o',
         messages: [
           {
@@ -178,7 +179,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
             }
           }
         ]
-      } as any;
+      };
 
       const result = toAnthropic(openAIRequest);
 
@@ -228,7 +229,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should handle assistant message with both text and tool calls', () => {
-      const openAIRequest = {
+      const openAIRequest: HeliconeChatCreateParams = {
         model: 'gpt-4o',
         messages: [
           {
@@ -246,7 +247,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
             ]
           }
         ]
-      } as any;
+      };
 
       const result = toAnthropic(openAIRequest);
 
@@ -266,7 +267,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should extract system message', () => {
-      const openAIRequest = {
+      const openAIRequest: HeliconeChatCreateParams = {
         model: 'gpt-4o',
         messages: [
           {
@@ -278,7 +279,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
             content: 'Hello'
           }
         ]
-      } as any;
+      };
 
       const result = toAnthropic(openAIRequest);
 
@@ -291,7 +292,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should handle cache control on system message', () => {
-      const openAIRequest = {
+      const openAIRequest: HeliconeChatCreateParams = {
         model: 'gpt-4o',
         messages: [
           {
@@ -304,7 +305,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
             content: 'Hello'
           }
         ]
-      } as any;
+      };
 
       const result = toAnthropic(openAIRequest);
 
@@ -317,7 +318,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should handle cache control on content parts', () => {
-      const openAIRequest = {
+      const openAIRequest: HeliconeChatCreateParams = {
         model: 'gpt-4o',
         messages: [
           {
@@ -335,7 +336,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
             ]
           }
         ]
-      } as any;
+      };
 
       const result = toAnthropic(openAIRequest);
 
@@ -354,7 +355,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should handle cache control on tool results', () => {
-      const openAIRequest = {
+      const openAIRequest: HeliconeChatCreateParams = {
         model: 'gpt-4o',
         messages: [
           {
@@ -364,7 +365,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
             cache_control: { type: 'ephemeral', ttl: '5m' }
           }
         ]
-      } as any;
+      };
 
       const result = toAnthropic(openAIRequest);
 
@@ -381,7 +382,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should handle cache control on assistant messages with text and tools', () => {
-      const openAIRequest = {
+      const openAIRequest: HeliconeChatCreateParams = {
         model: 'gpt-4o',
         messages: [
           {
@@ -400,7 +401,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
             ]
           }
         ]
-      } as any;
+      };
 
       const result = toAnthropic(openAIRequest);
 
