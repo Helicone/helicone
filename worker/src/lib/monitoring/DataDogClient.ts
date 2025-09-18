@@ -42,6 +42,19 @@ export class DataDogClient {
     }
   }
 
+  trackRemoteBodyBufferUsed(used: boolean): void {
+    try {
+      this.sendDistributionMetric(
+        Date.now(),
+        used ? 1 : 0,
+        "worker.memory.request.remote_body_buffer_used"
+      );
+    } catch (e) {
+      // Silently catch - monitoring must never break the app
+      console.error("[DataDog] Error in trackRemoteBodyBufferUsed:", e);
+    }
+  }
+
   /**
    * Track memory allocation globally across worker lifetime
    * Automatically sends metrics to DataDog if context is available
