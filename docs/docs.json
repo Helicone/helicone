@@ -245,7 +245,7 @@
                   "getting-started/self-host/kubernetes"
                 ]
               },
-
+              "references/provider-integration",
               "references/how-we-calculate-cost",
               "references/data-autonomy",
               "helicone-headers/header-directory",
