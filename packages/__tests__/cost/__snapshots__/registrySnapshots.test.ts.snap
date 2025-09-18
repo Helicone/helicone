@@ -24,7 +24,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -2609,6 +2609,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "o3-mini",
     "o3-pro",
     "o4-mini",
+    "qwen3-30b-a3b",
     "qwen3-32b",
   ],
   "sampleEndpointIds": [
@@ -2620,7 +2621,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
   ],
   "totalEndpoints": 66,
   "totalModelProviderConfigs": 66,
-  "totalModelsWithPtb": 34,
+  "totalModelsWithPtb": 35,
   "totalProviders": 10,
 }
 `;
