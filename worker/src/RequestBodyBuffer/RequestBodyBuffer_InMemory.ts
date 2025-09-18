@@ -20,7 +20,7 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   private s3Client: S3Client;
 
   constructor(
-    private body: ReadableStream | null,
+    private request: Request | null,
     private dataDogClient: DataDogClient | undefined,
     env: Env
   ) {
@@ -53,23 +53,8 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     if (this.cachedText) {
       return this.cachedText;
     }
-    if (!this.body) {
-      return "";
-    }
-    const reader = this.body.getReader();
-    const chunks: Uint8Array[] = [];
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) chunks.push(value);
-    }
-    const buffer = await concatUint8Arrays(chunks);
-    this.cachedText = new TextDecoder().decode(buffer);
 
-    // Track actual request body size
-    if (this.dataDogClient && buffer.byteLength > 0) {
-      this.dataDogClient.trackRequestSize(buffer.byteLength);
-    }
+    this.cachedText = (await this.request?.text()) ?? "";
 
     return this.cachedText;
   }
