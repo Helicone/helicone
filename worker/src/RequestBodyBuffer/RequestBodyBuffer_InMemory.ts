@@ -34,6 +34,16 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     );
   }
 
+  public resetS3Client(env: Env): void {
+    this.s3Client = new S3Client(
+      env.S3_ACCESS_KEY ?? "",
+      env.S3_SECRET_KEY ?? "",
+      env.S3_ENDPOINT ?? "",
+      env.S3_BUCKET_NAME ?? "",
+      env.S3_REGION ?? "us-west-2"
+    );
+  }
+
   public async tempSetBody(body: string): Promise<void> {
     this.cachedText = body;
   }

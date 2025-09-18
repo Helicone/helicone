@@ -94,6 +94,8 @@ async function modifyEnvBasedOnPath(
       AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
       HELICONE_ORG_ID: env.EU_HELICONE_ORG_ID,
     };
+
+    request.requestBodyBuffer.resetS3Client(env);
   }
   if (env.WORKER_TYPE) {
     return env;
