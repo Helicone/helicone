@@ -164,6 +164,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       {
         method: "POST",
         body: JSON.stringify({ body: body }),
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }
