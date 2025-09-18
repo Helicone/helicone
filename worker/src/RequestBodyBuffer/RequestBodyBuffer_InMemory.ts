@@ -38,6 +38,7 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     private dataDogClient: DataDogClient | undefined,
     env: Env
   ) {
+    dataDogClient?.trackMemory("request-body-buffer-remote", 0);
     this.s3Client = new S3Client(
       env.S3_ACCESS_KEY ?? "",
       env.S3_SECRET_KEY ?? "",
