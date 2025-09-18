@@ -542,22 +542,26 @@ async function log(
             );
           } else if (usage.data) {
             // For OpenRouter, use the direct cost from their response if available
-            if (attemptProvider === "openrouter" && 'cost' in usage.data && typeof usage.data.cost === 'number') {
-              // OpenRouter gives us total cost but not the breakdown
-              // We need to estimate the split based on token ratio
-              const inputTokens = usage.data.input || 0;
-              const outputTokens = usage.data.output || 0;
-              const totalTokens = inputTokens + outputTokens;
-
-              // If we have token counts, split proportionally; otherwise split 50/50
-              const promptRatio = totalTokens > 0 ? inputTokens / totalTokens : 0.5;
-              const completionRatio = totalTokens > 0 ? outputTokens / totalTokens : 0.5;
-
+            if (
+              attemptProvider === "openrouter" &&
+              "cost" in usage.data &&
+              typeof usage.data.cost === "number"
+            ) {
+              // OpenRouter provides total cost in USD but not the breakdown
+              // Create a proper CostBreakdown with only totalCost set
               modernCostBreakdown = {
+                inputCost: 0,
+                outputCost: 0,
+                cachedInputCost: 0,
+                cacheWrite5mCost: 0,
+                cacheWrite1hCost: 0,
+                thinkingCost: 0,
+                audioCost: 0,
+                videoCost: 0,
+                webSearchCost: 0,
+                imageCost: 0,
+                requestCost: 0,
                 totalCost: usage.data.cost,
-                promptCost: usage.data.cost * promptRatio,
-                completionCost: usage.data.cost * completionRatio,
-                totalTokens: totalTokens,
               };
             } else {
               modernCostBreakdown = modelCostBreakdownFromRegistry({
