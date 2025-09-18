@@ -9,7 +9,7 @@ const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 /**
  * Containers are OOMing so let's load 5 containers to be safe.
  */
-const CONTAINER_LOAD_COUNT = 5;
+const CONTAINER_LOAD_COUNT = 10;
 
 function fnvHash(str: string): number {
   let hash = 2166136261; // FNV offset basis
