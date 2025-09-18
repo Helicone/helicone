@@ -6,13 +6,13 @@ export type AppConfig = {
   enableUnsafeRead: boolean;
 };
 
-export const DEFAULT_TTL_SECONDS = 60 * 10; // 10 minutes
+export const DEFAULT_TTL_SECONDS = 60 * 2; // 10 minutes
 
 export function getConfig(): AppConfig {
   return {
     port: parseInt(process.env.PORT ?? "8000", 10),
     maxSizeBytes: parseInt(
-      process.env.MAX_SIZE_BYTES ?? `${512 * 1024 * 1024}`, // 512MB
+      process.env.MAX_SIZE_BYTES ?? `${256 * 1024 * 1024}`, // 256MB
       10
     ),
     ttlSeconds: parseInt(
@@ -20,6 +20,7 @@ export function getConfig(): AppConfig {
       10
     ),
     logLevel: process.env.LOG_LEVEL ?? "info",
-    enableUnsafeRead: (process.env.ENABLE_UNSAFE_READ ?? "true").toLowerCase() === "true",
+    enableUnsafeRead:
+      (process.env.ENABLE_UNSAFE_READ ?? "true").toLowerCase() === "true",
   };
 }

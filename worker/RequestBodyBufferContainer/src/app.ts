@@ -15,7 +15,7 @@ const gzipAsync = promisify(gzip);
 export function createApp(config: AppConfig, logger: any): FastifyInstance {
   const app = Fastify({
     logger,
-    bodyLimit: config.maxSizeBytes // Set Fastify body limit to match our config
+    bodyLimit: config.maxSizeBytes, // Set Fastify body limit to match our config
   });
   const store = new MemoryStore(config.ttlSeconds);
 
@@ -187,7 +187,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     const { requestId } = request.params;
     const entry = store.get(requestId);
     if (!entry) return reply.code(404).send({ error: "not found" });
-    return reply.send({ length: entry.data.length });
+    return reply.send({ length: entry.size });
   });
 
   app.post<{
