@@ -15,7 +15,7 @@ const OPENAI_EXPECTATIONS = {
 describe("AI Gateway wallet disputes", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    setSupabaseTestCase({ byokEnabled: false });
+    setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
     const walletId = env.WALLET.idFromName(ORG_ID);
     const walletStub = env.WALLET.get(walletId);
 

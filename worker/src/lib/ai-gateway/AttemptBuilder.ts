@@ -9,15 +9,20 @@ import {
   Endpoint,
 } from "@helicone-package/cost/models/types";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
+import { FeatureFlagManager } from "../managers/FeatureFlagManager";
 import { isErr, Result, ok, err } from "../util/results";
 import { Attempt, ModelSpec } from "./types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 
 export class AttemptBuilder {
+  private readonly featureFlagManager: FeatureFlagManager;
+
   constructor(
     private readonly providerKeysManager: ProviderKeysManager,
     private readonly env: Env
-  ) {}
+  ) {
+    this.featureFlagManager = new FeatureFlagManager(env);
+  }
 
   async buildAttempts(
     modelStrings: string[],
@@ -113,19 +118,28 @@ export class AttemptBuilder {
 
     const providerData = providerDataResult.data;
 
-    // Get both BYOK and PTB attempts with provider data
-    const [byokAttempts, ptbAttempts] = await Promise.all([
-      this.buildByokAttempts(
-        modelName,
-        providerData,
-        orgId,
-        bodyMapping,
-        customUid
-      ),
-      this.buildPtbAttempts(modelName, providerData),
-    ]);
+    // Check if credits feature is enabled for this organization
+    const hasCreditsFeature = await this.featureFlagManager.hasFeature(
+      orgId,
+      "credits"
+    );
 
-    return [...byokAttempts, ...ptbAttempts];
+    // Get BYOK attempts
+    const byokAttempts = await this.buildByokAttempts(
+      modelName,
+      providerData,
+      orgId,
+      bodyMapping,
+      customUid
+    );
+
+    // Only build PTB attempts if credits feature is enabled
+    if (hasCreditsFeature) {
+      const ptbAttempts = await this.buildPtbAttempts(modelName, providerData);
+      return [...byokAttempts, ...ptbAttempts];
+    }
+
+    return byokAttempts;
   }
 
   private async buildByokAttempts(
