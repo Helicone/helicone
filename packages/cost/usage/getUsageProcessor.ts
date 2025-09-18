@@ -11,6 +11,7 @@ export function getUsageProcessor(
 ): IUsageProcessor | null {
   switch (provider) {
     case "openai":
+    case "azure":
       return new OpenAIUsageProcessor();
     case "anthropic":
       return new AnthropicUsageProcessor();

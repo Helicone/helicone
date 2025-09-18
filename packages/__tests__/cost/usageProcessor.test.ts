@@ -34,6 +34,11 @@ describe("getUsageProcessor", () => {
     expect(processor).toBeInstanceOf(DeepSeekUsageProcessor);
   });
 
+  it("should return OpenAIUsageProcessor for azure provider", () => {
+    const processor = getUsageProcessor("azure");
+    expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
+  });
+
   it("should return null for unsupported provider", () => {
     const processor = getUsageProcessor("unsupported-provider" as any);
     expect(processor).toBeNull();
@@ -116,6 +121,80 @@ describe("OpenAIUsageProcessor", () => {
   });
 });
 
+describe("Azure Usage Processing", () => {
+  const processor = new OpenAIUsageProcessor(); // Azure uses OpenAI processor
+
+  it("should parse Azure regular response", async () => {
+    const responseData = fs.readFileSync(
+      path.join(__dirname, "testData", "azure-response.snapshot"),
+      "utf-8"
+    );
+
+    const result = await processor.parse({
+      responseBody: responseData,
+      isStream: false,
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 18,
+      output: 100,
+    });
+  });
+
+  it("should parse Azure stream response", async () => {
+    const streamData = fs.readFileSync(
+      path.join(__dirname, "testData", "azure-stream-response.snapshot"),
+      "utf-8"
+    );
+
+    const result = await processor.parse({
+      responseBody: streamData,
+      isStream: true,
+    });
+
+    expect(result.error).toBeNull();
+    // Azure now includes usage data in the final chunk of the stream
+    expect(result.data).toEqual({
+      input: 18,
+      output: 100,
+    });
+  });
+
+  it("Azure usage processing snapshot", async () => {
+    const testCases = [
+      {
+        name: "azure-response",
+        data: fs.readFileSync(
+          path.join(__dirname, "testData", "azure-response.snapshot"),
+          "utf-8"
+        ),
+        isStream: false,
+      },
+      {
+        name: "azure-stream-response",
+        data: fs.readFileSync(
+          path.join(__dirname, "testData", "azure-stream-response.snapshot"),
+          "utf-8"
+        ),
+        isStream: true,
+      },
+    ];
+
+    const results: Record<string, any> = {};
+
+    for (const testCase of testCases) {
+      const result = await processor.parse({
+        responseBody: testCase.data,
+        isStream: testCase.isStream,
+      });
+      results[testCase.name] = result;
+    }
+
+    expect(results).toMatchSnapshot();
+  });
+});
+
 describe("AnthropicUsageProcessor", () => {
   const processor = new AnthropicUsageProcessor();
 
@@ -125,9 +204,9 @@ describe("AnthropicUsageProcessor", () => {
       "utf-8"
     );
 
-    const result = await processor.parse({ 
-      responseBody: responseData, 
-      isStream: false 
+    const result = await processor.parse({
+      responseBody: responseData,
+      isStream: false,
     });
 
     expect(result.error).toBeNull();
@@ -136,8 +215,8 @@ describe("AnthropicUsageProcessor", () => {
       output: 12,
       cacheDetails: {
         cachedInput: 183,
-        write5m: 50
-      }
+        write5m: 50,
+      },
     });
   });
 
@@ -147,9 +226,9 @@ describe("AnthropicUsageProcessor", () => {
       "utf-8"
     );
 
-    const result = await processor.parse({ 
-      responseBody: streamData, 
-      isStream: true 
+    const result = await processor.parse({
+      responseBody: streamData,
+      isStream: true,
     });
 
     expect(result.error).toBeNull();
@@ -158,8 +237,8 @@ describe("AnthropicUsageProcessor", () => {
       output: 65,
       cacheDetails: {
         cachedInput: 500,
-        write1h: 20
-      }
+        write1h: 20,
+      },
     });
   });
 
@@ -167,22 +246,32 @@ describe("AnthropicUsageProcessor", () => {
     const testCases = [
       {
         name: "anthropic-response",
-        data: fs.readFileSync(path.join(__dirname, "testData", "anthropic-response.snapshot"), "utf-8"),
-        isStream: false
+        data: fs.readFileSync(
+          path.join(__dirname, "testData", "anthropic-response.snapshot"),
+          "utf-8"
+        ),
+        isStream: false,
       },
       {
-        name: "anthropic-stream-response", 
-        data: fs.readFileSync(path.join(__dirname, "testData", "anthropic-stream-response.snapshot"), "utf-8"),
-        isStream: true
-      }
+        name: "anthropic-stream-response",
+        data: fs.readFileSync(
+          path.join(
+            __dirname,
+            "testData",
+            "anthropic-stream-response.snapshot"
+          ),
+          "utf-8"
+        ),
+        isStream: true,
+      },
     ];
 
     const results: Record<string, any> = {};
-    
+
     for (const testCase of testCases) {
       const result = await processor.parse({
         responseBody: testCase.data,
-        isStream: testCase.isStream
+        isStream: testCase.isStream,
       });
       results[testCase.name] = result;
     }
