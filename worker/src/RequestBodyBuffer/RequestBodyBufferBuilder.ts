@@ -98,7 +98,7 @@ export async function RequestBodyBufferBuilder(
   }
 
   // Threshold for routing: small → InMemory, large → Remote.
-  const MAX_INMEMORY_BYTES = 30 * 1024 * 1024; // 20 MiB
+  const MAX_INMEMORY_BYTES = 25 * 1024 * 1024; // 25 MiB
 
   // If Content-Length is present, honor it to avoid reading.
   const lenHeader = request.headers.get("content-length");
@@ -119,6 +119,7 @@ export async function RequestBodyBufferBuilder(
       );
     }
   }
+  dataDogClient?.trackBufferDecision("size_unknown");
 
   // If container is not bound and size is unknown, default to in-memory.
   if (!env.REQUEST_BODY_BUFFER) {

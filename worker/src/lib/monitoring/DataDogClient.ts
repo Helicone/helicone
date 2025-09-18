@@ -11,6 +11,7 @@ const ALLOWED_METRICS = new Set([
   "worker.buffer.decision.unknown_no_container",
   "worker.buffer.decision.tee_small",
   "worker.buffer.decision.tee_large",
+  "worker.buffer.decision.size_unknown",
 ]);
 
 export interface DataDogConfig {
@@ -78,7 +79,8 @@ export class DataDogClient {
       | "known_large"
       | "unknown_no_container"
       | "tee_small"
-      | "tee_large",
+      | "tee_large"
+      | "size_unknown",
     sizeMB?: number
   ): void {
     const value = sizeMB ?? 1; // Use size if provided, otherwise 1

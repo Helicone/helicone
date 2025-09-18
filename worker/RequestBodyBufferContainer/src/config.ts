@@ -6,7 +6,7 @@ export type AppConfig = {
   enableUnsafeRead: boolean;
 };
 
-export const DEFAULT_TTL_SECONDS = 60 * 2; // 10 minutes
+export const DEFAULT_TTL_SECONDS = 60 * 5; // 5 minutes
 
 export function getConfig(): AppConfig {
   return {
