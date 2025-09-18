@@ -126,12 +126,16 @@ export async function RequestBodyBufferBuilder(
   }
 
   const originalBody = request.body!;
-  const [leftForRemote, rightForProbe] = originalBody.tee();
-  const exceeded = await isOver(rightForProbe, MAX_INMEMORY_BYTES);
+  const [mainBodyToConsume, streamToCheckSize] = originalBody.tee();
+  const exceeded = await isOver(streamToCheckSize, MAX_INMEMORY_BYTES);
 
   if (exceeded) {
-    return tryInitRemote(leftForRemote, dataDogClient, env);
+    return tryInitRemote(mainBodyToConsume, dataDogClient, env);
   } else {
-    return new RequestBodyBuffer_InMemory(leftForRemote, dataDogClient, env);
+    return new RequestBodyBuffer_InMemory(
+      mainBodyToConsume,
+      dataDogClient,
+      env
+    );
   }
 }
