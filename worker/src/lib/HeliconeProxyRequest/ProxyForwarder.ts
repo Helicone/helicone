@@ -541,11 +541,31 @@ async function log(
               `Error parsing usage for provider ${attemptProvider}: ${usage.error}`
             );
           } else if (usage.data) {
-            modernCostBreakdown = modelCostBreakdownFromRegistry({
-              modelUsage: usage.data,
-              providerModelId: attemptModel,
-              provider: attemptProvider,
-            });
+            // For OpenRouter, use the direct cost from their response if available
+            if (attemptProvider === "openrouter" && 'cost' in usage.data && typeof usage.data.cost === 'number') {
+              // OpenRouter gives us total cost but not the breakdown
+              // We need to estimate the split based on token ratio
+              const inputTokens = usage.data.input || 0;
+              const outputTokens = usage.data.output || 0;
+              const totalTokens = inputTokens + outputTokens;
+
+              // If we have token counts, split proportionally; otherwise split 50/50
+              const promptRatio = totalTokens > 0 ? inputTokens / totalTokens : 0.5;
+              const completionRatio = totalTokens > 0 ? outputTokens / totalTokens : 0.5;
+
+              modernCostBreakdown = {
+                totalCost: usage.data.cost,
+                promptCost: usage.data.cost * promptRatio,
+                completionCost: usage.data.cost * completionRatio,
+                totalTokens: totalTokens,
+              };
+            } else {
+              modernCostBreakdown = modelCostBreakdownFromRegistry({
+                modelUsage: usage.data,
+                providerModelId: attemptModel,
+                provider: attemptProvider,
+              });
+            }
           }
         }
       }
