@@ -78,7 +78,8 @@ export class DataDogClient {
       | "known_large"
       | "unknown_no_container"
       | "tee_small"
-      | "tee_large",
+      | "tee_large"
+      | "size_unknown",
     sizeMB?: number
   ): void {
     const value = sizeMB ?? 1; // Use size if provided, otherwise 1

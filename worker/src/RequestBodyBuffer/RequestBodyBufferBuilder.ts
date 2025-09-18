@@ -119,6 +119,7 @@ export async function RequestBodyBufferBuilder(
       );
     }
   }
+  dataDogClient?.trackBufferDecision("size_unknown");
 
   // If container is not bound and size is unknown, default to in-memory.
   if (!env.REQUEST_BODY_BUFFER) {
