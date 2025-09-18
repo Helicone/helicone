@@ -189,12 +189,12 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
   app.post<{
     Params: { requestId: string };
-    Body: { body: unknown };
+    Body: { body: string };
   }>("/:requestId/s3/set-body", async (request, reply) => {
     const { requestId } = request.params;
     const entry = store.get(requestId);
     if (!entry) return reply.code(404).send({ error: "not found" });
-    entry.data = Buffer.from(request.body.body as string);
+    entry.data = Buffer.from(request.body.body);
     return reply.send({ ok: true });
   });
 
