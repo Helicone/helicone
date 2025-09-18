@@ -39,12 +39,12 @@ export class ReadableInterceptor {
       // Track final response size to DataDog
       try {
         if (this.dataDogClient && this.totalResponseBytes > 0) {
-          this.dataDogClient.trackMemory("response-body", this.totalResponseBytes);
+          this.dataDogClient.trackResponseSize(this.totalResponseBytes);
         }
       } catch (e) {
         // Silently catch - never let monitoring break the stream
       }
-      
+
       this.chunkEmitter.emit(this.chunkEventName, {
         body: this.responseBody,
         reason,

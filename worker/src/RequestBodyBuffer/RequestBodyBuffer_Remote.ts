@@ -76,7 +76,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       AWS_REGION: string;
     }
   ) {
-    dataDogClient?.trackRemoteBodyBufferUsed(true);
+    dataDogClient?.trackBufferType(true);
     this.awsCreds = {
       accessKey: env.AWS_ACCESS_KEY_ID,
       secretKey: env.AWS_SECRET_ACCESS_KEY,
@@ -173,7 +173,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     console.log(
       "unsafeGetRawText on remote - Please traverse this stack trace and fix the issue"
     );
-    this.dataDogClient?.trackMemory("container-called-unsafe-read", 1);
+    // No more memory tracking
     await this.ingestPromise.catch(() => undefined);
 
     const response = await this.requestBodyBuffer.fetch(

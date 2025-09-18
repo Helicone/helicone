@@ -160,13 +160,13 @@ export class RequestWrapper {
     this.baseURLOverride = null;
     this.cf = request.cf;
 
-    try {
-      dataDogClient?.incrementRequestCount();
-      dataDogClient?.trackContentLength(
-        Number(this.headers.get("content-length") ?? 0)
-      );
-    } catch (e) {
-      dataDogClient?.trackContentLength(-1);
+    // Track request size if available
+    const contentLength = this.headers.get("content-length");
+    if (contentLength && dataDogClient) {
+      const bytes = Number(contentLength);
+      if (!isNaN(bytes) && bytes > 0) {
+        dataDogClient.trackRequestSize(bytes);
+      }
     }
   }
 
