@@ -119,6 +119,9 @@ export const dbProviderToProvider = (
   if (provider === "deepseek" || provider === "DeepSeek") {
     return "deepseek";
   }
+  if (provider === "openrouter" || provider === "OpenRouter") {
+    return "openrouter";
+  }
   return null;
 };
 
