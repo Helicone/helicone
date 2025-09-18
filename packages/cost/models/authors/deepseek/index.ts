@@ -6,12 +6,12 @@
 import type { ModelConfig, ModelProviderConfig } from "../../types";
 
 // Import models
-import { models as r1Models } from "./r1/models";
+import { models as r1Models } from "./r1-distill/models";
 import { models as v3Models } from "./deepseek-v3/model";
 import { models as reasonerModels } from "./deepseek-reasoner/model";
 
 // Import endpoints
-import { endpoints as r1Endpoints } from "./r1/endpoints";
+import { endpoints as r1Endpoints } from "./r1-distill/endpoints";
 import { endpoints as v3Endpoints } from "./deepseek-v3/endpoints";
 import { endpoints as reasonerEndpoints } from "./deepseek-reasoner/endpoints";
 

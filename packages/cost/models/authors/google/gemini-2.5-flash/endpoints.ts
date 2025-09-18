@@ -85,6 +85,35 @@ export const endpoints = {
       },
     },
   },
+  "gemini-2.5-flash:openrouter": {
+    provider: "openrouter",
+    author: "google",
+    providerModelId: "google/gemini-2.5-flash",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000032, // $0.32/1M - worst-case: $0.30/1M (Google) * 1.055
+        output: 0.00000264, // $2.64/1M - worst-case: $2.50/1M (Google) * 1.055
+      },
+    ],
+    contextLength: 1_048_576,
+    maxCompletionTokens: 65_535,
+    supportedParameters: [
+      "max_tokens",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Gemini25FlashModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

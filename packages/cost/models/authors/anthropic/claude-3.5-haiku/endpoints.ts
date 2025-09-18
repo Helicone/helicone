@@ -99,6 +99,34 @@ export const endpoints = {
       "us-east-1": {},
     },
   },
+  "claude-3.5-haiku:openrouter": {
+    provider: "openrouter",
+    author: "anthropic",
+    providerModelId: "anthropic/claude-3.5-haiku",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000000844, // $0.84/1M - worst-case: $0.80/1M (Anthropic/Google) * 1.055
+        output: 0.00000422, // $4.22/1M - worst-case: $4.00/1M (Anthropic/Google) * 1.055
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 8192,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "stop",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Claude35HaikuModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

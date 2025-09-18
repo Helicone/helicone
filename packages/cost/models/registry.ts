@@ -133,6 +133,7 @@ function buildEndpoint(
     maxCompletionTokens: endpointConfig.maxCompletionTokens,
     ptbEnabled: false,
     version: endpointConfig.version,
+    priority: endpointConfig.priority,
   });
 }
 

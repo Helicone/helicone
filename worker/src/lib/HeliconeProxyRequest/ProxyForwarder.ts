@@ -540,13 +540,23 @@ async function log(
           });
 
           if (usage.data) {
-            const breakdown = modelCostBreakdownFromRegistry({
-              modelUsage: usage.data,
-              providerModelId: attemptModel,
-              provider: attemptProvider,
-            });
-
-            cost = breakdown?.totalCost;
+            // For OpenRouter, use the direct cost from their response if available
+            if (
+              attemptProvider === "openrouter" &&
+              "cost" in usage.data &&
+              typeof usage.data.cost === "number"
+            ) {
+              // OpenRouter provides total cost in USD directly
+              cost = usage.data.cost;
+            } else {
+              // Use the standard cost calculation from registry
+              const breakdown = modelCostBreakdownFromRegistry({
+                modelUsage: usage.data,
+                providerModelId: attemptModel,
+                provider: attemptProvider,
+              });
+              cost = breakdown?.totalCost;
+            }
           } else {
             console.error(
               `No usage data found for AI Gateway model ${attemptModel} with provider ${attemptProvider}`

@@ -88,6 +88,76 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-oss-20b:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/gpt-oss-20b",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000011, // $0.11/1M - worst-case: $0.10/1M (Hyperbolic) * 1.055
+        output: 0.00000053, // $0.53/1M - worst-case: $0.50/1M (Groq) * 1.055
+      },
+    ],
+    contextLength: 131_000,
+    maxCompletionTokens: 131_000,
+    supportedParameters: [
+      "frequency_penalty",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "repetition_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_k",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-oss-120b:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/gpt-oss-120b",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000037, // $0.37/1M - worst-case: $0.35/1M (Cerebras) * 1.055
+        output: 0.00000079, // $0.79/1M - worst-case: $0.75/1M (Groq) * 1.055
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072, // Not specified, using context length
+    supportedParameters: [
+      "frequency_penalty",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "repetition_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_k",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPTOSSModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
