@@ -56,7 +56,11 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     const buffer = await concatUint8Arrays(chunks);
     this.cachedText = new TextDecoder().decode(buffer);
 
-    // No more memory tracking - we only track request/response sizes now
+    // Track actual request body size
+    if (this.dataDogClient && buffer.byteLength > 0) {
+      this.dataDogClient.trackRequestSize(buffer.byteLength);
+    }
+
     return this.cachedText;
   }
 

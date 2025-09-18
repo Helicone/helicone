@@ -159,15 +159,6 @@ export class RequestWrapper {
     this.injectPromptProperties();
     this.baseURLOverride = null;
     this.cf = request.cf;
-
-    // Track request size if available
-    const contentLength = this.headers.get("content-length");
-    if (contentLength && dataDogClient) {
-      const bytes = Number(contentLength);
-      if (!isNaN(bytes) && bytes > 0) {
-        dataDogClient.trackRequestSize(bytes);
-      }
-    }
   }
 
   private injectPromptProperties() {

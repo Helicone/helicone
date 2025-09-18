@@ -3,6 +3,7 @@ const ALLOWED_METRICS = new Set([
   "worker.request.size_mb",
   "worker.response.size_mb",
   "worker.buffer.remote_used",
+  "worker.buffer.unsafe_remote_read",
 ]);
 
 export interface DataDogConfig {
@@ -14,12 +15,10 @@ export interface DataDogConfig {
 
 export class DataDogClient {
   private config: DataDogConfig;
-  private disabled: boolean;
+  // MASTER KILL SWITCH - set to true to disable ALL DataDog
+  private readonly DISABLED = false; // Change this to true to kill all DataDog
 
   constructor(config: DataDogConfig) {
-    // MASTER KILL SWITCH - hardcode to false to completely disable
-    this.disabled = false; // Set to true to disable ALL DataDog functionality
-
     this.config = {
       sampleRate: 0.05, // Default to 5% sampling
       ...config,
@@ -27,10 +26,9 @@ export class DataDogClient {
   }
 
   /**
-   * Track request body size
+   * Track actual request body size (called from buffer after reading)
    */
   trackRequestSize(bytes: number): void {
-    if (this.disabled) return; // Master kill switch
     if (bytes < 0) return; // Skip invalid sizes
 
     // Convert to MB for easier reading
@@ -42,7 +40,6 @@ export class DataDogClient {
    * Track response body size
    */
   trackResponseSize(bytes: number): void {
-    if (this.disabled) return; // Master kill switch
     if (bytes < 0) return; // Skip invalid sizes
 
     // Convert to MB for easier reading
@@ -54,8 +51,14 @@ export class DataDogClient {
    * Track whether remote buffer was used (for large requests)
    */
   trackBufferType(isRemote: boolean): void {
-    if (this.disabled) return; // Master kill switch
     this.sendMetric("worker.buffer.remote_used", isRemote ? 1 : 0);
+  }
+
+  /**
+   * Track unsafe reads from remote buffer (warning metric)
+   */
+  trackUnsafeRemoteRead(): void {
+    this.sendMetric("worker.buffer.unsafe_remote_read", 1);
   }
 
   /**
@@ -63,8 +66,8 @@ export class DataDogClient {
    */
   private async sendMetric(metricName: string, value: number): Promise<void> {
     try {
-      // MASTER KILL SWITCH
-      if (this.disabled) return;
+      // Check kill switch
+      if (this.DISABLED) return;
 
       // STRICT VALIDATION - ONLY ALLOWED METRICS
       if (!ALLOWED_METRICS.has(metricName)) {
@@ -104,42 +107,6 @@ export class DataDogClient {
       // Silently ignore errors
     }
   }
-
-  // Legacy methods - do nothing now
-  setContext(ctx: ExecutionContext): void {
-    // No-op - removed complex memory tracking
-  }
-
-  trackContentLength(bytes: number): void {
-    // Redirect to new method for compatibility
-    this.trackRequestSize(bytes);
-  }
-
-  trackRemoteBodyBufferUsed(used: boolean): void {
-    // Redirect to new method for compatibility
-    this.trackBufferType(used);
-  }
-
-  trackMemory(key: string, bytes: number): void {
-    // No-op - removed complex memory tracking
-  }
-
-  incrementRequestCount(): void {
-    // No-op - removed request counting
-  }
-
-  async sendMemoryMetrics(ctx: ExecutionContext): Promise<void> {
-    // No-op - removed complex memory metrics
-  }
-
-  // Legacy static methods - keep for compatibility but they do nothing
-  static estimateStringSize(str: string): number {
-    return 0; // No-op
-  }
-
-  static estimateObjectSize(obj: any): number {
-    return 0; // No-op
-  }
 }
 
 // Singleton instance
@@ -156,15 +123,4 @@ export function getDataDogClient(env: Env): DataDogClient {
   }
 
   return dataDogClient;
-}
-
-// Legacy export - returns empty stats
-export function getGlobalMemoryStats() {
-  return {
-    totalMB: "0",
-    peakMB: "0",
-    requestCount: 0,
-    uptimeMinutes: "0",
-    allocationsCount: 0,
-  };
 }
