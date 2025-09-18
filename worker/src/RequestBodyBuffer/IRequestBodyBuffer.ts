@@ -34,4 +34,6 @@ export interface IRequestBodyBuffer {
 
   //temp
   resetS3Client(env: Env): void;
+
+  delete(): Promise<void>;
 }

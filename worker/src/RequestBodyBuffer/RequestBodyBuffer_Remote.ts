@@ -6,7 +6,10 @@ import { err, ok, Result } from "../lib/util/results";
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
-const CONTAINER_LOAD_COUNT = 2;
+/**
+ * Containers are OOMing so let's load 5 containers to be safe.
+ */
+const CONTAINER_LOAD_COUNT = 5;
 
 function fnvHash(str: string): number {
   let hash = 2166136261; // FNV offset basis
@@ -294,5 +297,11 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       return err(`Failed to store data: ${res.statusText}, ${res.url}, ${url}`);
     }
     return ok(res.url);
+  }
+
+  async delete(): Promise<void> {
+    await this.requestBodyBuffer.fetch(`${BASE_URL}/${this.uniqueId}`, {
+      method: "DELETE",
+    });
   }
 }
