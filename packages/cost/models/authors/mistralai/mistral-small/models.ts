@@ -14,4 +14,4 @@ export const models = {
   },
 } satisfies Record<string, ModelConfig>;
 
-export type MistralNemoModelName = keyof typeof models;
+export type MistralSmallModelName = keyof typeof models;

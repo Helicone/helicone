@@ -1,6 +1,6 @@
 import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
-import { MistralNemoModelName } from "./models";
+import { MistralSmallModelName } from "./models";
 
 export const endpoints = {
   "mistral-small:deepinfra": {
@@ -41,7 +41,7 @@ export const endpoints = {
   },
 } satisfies Partial<
   Record<
-    `${MistralNemoModelName}:${ModelProviderName}` | MistralNemoModelName,
+    `${MistralSmallModelName}:${ModelProviderName}` | MistralSmallModelName,
     ModelProviderConfig
   >
 >;
