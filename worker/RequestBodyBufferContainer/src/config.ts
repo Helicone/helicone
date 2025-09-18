@@ -6,6 +6,8 @@ export type AppConfig = {
   enableUnsafeRead: boolean;
 };
 
+export const DEFAULT_TTL_SECONDS = 60 * 10; // 10 minutes
+
 export function getConfig(): AppConfig {
   return {
     port: parseInt(process.env.PORT ?? "8000", 10),
