@@ -11,6 +11,7 @@ const ALLOWED_METRICS = new Set([
   "worker.buffer.decision.unknown_no_container",
   "worker.buffer.decision.tee_small",
   "worker.buffer.decision.tee_large",
+  "worker.buffer.decision.size_unknown",
 ]);
 
 export interface DataDogConfig {
