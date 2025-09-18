@@ -72,8 +72,16 @@ function openAIContentToAnthropicContent(content: string | HeliconeChatCompletio
         const url = part.image_url.url;
         if (url.startsWith('data:')) {
           // format: data:image/jpeg;base64,{base64_data}
-          const [mimeType, base64Data] = url.split(',');
-          const mediaType = mimeType.split(':')[1].split(';')[0];
+          const parts = url.split(',');
+          if (parts.length !== 2) {
+            throw new Error(`Invalid data URI format: ${url}`);
+          }
+          const [mimeType, base64Data] = parts;
+          const mediaParts = mimeType.split(':');
+          if (mediaParts.length < 2) {
+            throw new Error(`Invalid data URI MIME type: ${mimeType}`);
+          }
+          const mediaType = mediaParts[1].split(';')[0];
           return {
             type: "image",
             source: {
