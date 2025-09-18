@@ -47,7 +47,7 @@ export class DataDogClient {
       this.sendDistributionMetric(
         Date.now(),
         used ? 1 : 0,
-        "worker.memory.request.remoote_body_buffer_used"
+        "worker.memory.request.remote_body_buffer_used"
       );
     } catch (e) {
       // Silently catch - monitoring must never break the app
