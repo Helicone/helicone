@@ -21,11 +21,7 @@ export class AzureOpenAIProvider extends BaseProvider {
   buildUrl(endpoint: ModelProviderConfig, config: UserEndpointConfig): string {
     if (
       !config.baseUri ||
-<<<<<<< HEAD
-      (!config.deploymentName && endpoint.providerModelId)
-=======
       (!config.deploymentName && !endpoint.providerModelId)
->>>>>>> origin/main
     ) {
       throw new Error("Azure OpenAI requires baseUri and deploymentName");
     }
