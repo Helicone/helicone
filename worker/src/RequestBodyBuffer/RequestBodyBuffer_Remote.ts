@@ -138,6 +138,14 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     );
   }
 
+  public resetS3Client(env: Env): void {
+    this.awsCreds = {
+      accessKey: env.AWS_ACCESS_KEY_ID,
+      secretKey: env.AWS_SECRET_ACCESS_KEY,
+      region: env.AWS_REGION,
+    };
+  }
+
   async bodyLength(): Promise<number> {
     try {
       await this.ingestPromise.catch(() => undefined);

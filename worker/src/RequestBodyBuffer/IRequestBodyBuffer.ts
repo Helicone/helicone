@@ -31,4 +31,7 @@ export interface IRequestBodyBuffer {
   ): Promise<Result<string, string>>;
 
   bodyLength(): Promise<number>;
+
+  //temp
+  resetS3Client(env: Env): void;
 }
