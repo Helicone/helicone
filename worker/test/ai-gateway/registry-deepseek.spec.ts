@@ -163,7 +163,7 @@ describe("DeepSeek Registry Tests", () => {
               errorMessage: "DeepSeek service unavailable",
             },
           ],
-          finalStatus: 429,
+          finalStatus: 500,
         },
       }));
 
@@ -195,7 +195,7 @@ describe("DeepSeek Registry Tests", () => {
               errorMessage: "Invalid API key",
             },
           ],
-          finalStatus: 429,
+          finalStatus: 401,
         },
       }));
   });
@@ -263,7 +263,7 @@ describe("DeepSeek Registry Tests", () => {
               errorMessage: "Groq service unavailable",
             },
           ],
-          finalStatus: 429,
+          finalStatus: 500,
         },
       }));
 
@@ -295,7 +295,7 @@ describe("DeepSeek Registry Tests", () => {
               errorMessage: "Invalid API key",
             },
           ],
-          finalStatus: 429,
+          finalStatus: 401,
         },
       }));
   });

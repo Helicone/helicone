@@ -16,7 +16,7 @@ export interface AnthropicRequestBody {
   metadata?: {
     user_id?: string;
   };
-  system?: string;
+  system?: string | AnthropicContentBlock[];
   temperature?: number;
   top_p?: number;
   top_k?: number;
@@ -27,7 +27,7 @@ export interface AnthropicRequestBody {
 }
 
 export interface AnthropicMessage {
-  role: Exclude<Role, "function" | "tool">; // Anthropic takes function/tool roles as user messages
+  role: "user" | "assistant";
   content: string | AnthropicContentBlock[];
 }
 

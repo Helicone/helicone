@@ -90,9 +90,7 @@ describe("Alibaba Registry Tests", () => {
         runGatewayTest({
           model: "qwen3-30b-a3b/deepinfra",
           request: {
-            messages: [
-              { role: "user", content: "What's the weather like?" },
-            ],
+            messages: [{ role: "user", content: "What's the weather like?" }],
             // Tools would be added here in a real test, but we're just testing the structure
           },
           expected: {
@@ -113,9 +111,7 @@ describe("Alibaba Registry Tests", () => {
         runGatewayTest({
           model: "qwen3-30b-a3b/deepinfra",
           request: {
-            messages: [
-              { role: "user", content: "Stream this response" },
-            ],
+            messages: [{ role: "user", content: "Stream this response" }],
             stream: true,
           },
           expected: {
@@ -301,9 +297,7 @@ describe("Alibaba Registry Tests", () => {
         runGatewayTest({
           model: "qwen3-30b-a3b/deepinfra",
           request: {
-            messages: [
-              { role: "user", content: "Test with custom mapping" },
-            ],
+            messages: [{ role: "user", content: "Test with custom mapping" }],
             headers: {
               "X-Custom-Header": "test-value",
             },

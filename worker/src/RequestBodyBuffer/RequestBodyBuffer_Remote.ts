@@ -6,7 +6,10 @@ import { err, ok, Result } from "../lib/util/results";
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
-const CONTAINER_LOAD_COUNT = 2;
+/**
+ * Containers are OOMing so let's load 5 containers to be safe.
+ */
+const CONTAINER_LOAD_COUNT = 5;
 
 function fnvHash(str: string): number {
   let hash = 2166136261; // FNV offset basis
@@ -76,7 +79,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       AWS_REGION: string;
     }
   ) {
-    dataDogClient?.trackRemoteBodyBufferUsed(true);
+    dataDogClient?.trackBufferType(true);
     this.awsCreds = {
       accessKey: env.AWS_ACCESS_KEY_ID,
       secretKey: env.AWS_SECRET_ACCESS_KEY,
@@ -138,6 +141,14 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     );
   }
 
+  public resetS3Client(env: Env): void {
+    this.awsCreds = {
+      accessKey: env.AWS_ACCESS_KEY_ID,
+      secretKey: env.AWS_SECRET_ACCESS_KEY,
+      region: env.AWS_REGION,
+    };
+  }
+
   async bodyLength(): Promise<number> {
     try {
       await this.ingestPromise.catch(() => undefined);
@@ -149,6 +160,12 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
         return 0;
       }
       const json = await response.json<{ length: number }>();
+
+      // Track actual request body size for remote buffer
+      if (this.dataDogClient && json.length > 0) {
+        this.dataDogClient.trackRequestSize(json.length);
+      }
+
       return json.length;
     } catch (e) {
       console.error("RequestBodyBuffer_Remote bodyLength error", e);
@@ -164,7 +181,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       {
         method: "POST",
         body: JSON.stringify({ body: body }),
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -173,7 +190,8 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     console.log(
       "unsafeGetRawText on remote - Please traverse this stack trace and fix the issue"
     );
-    this.dataDogClient?.trackMemory("container-called-unsafe-read", 1);
+    // Track that we're doing an unsafe read from remote buffer
+    this.dataDogClient?.trackUnsafeRemoteRead();
     await this.ingestPromise.catch(() => undefined);
 
     const response = await this.requestBodyBuffer.fetch(
@@ -279,5 +297,11 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       return err(`Failed to store data: ${res.statusText}, ${res.url}, ${url}`);
     }
     return ok(res.url);
+  }
+
+  async delete(): Promise<void> {
+    await this.requestBodyBuffer.fetch(`${BASE_URL}/${this.uniqueId}`, {
+      method: "DELETE",
+    });
   }
 }
