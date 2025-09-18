@@ -2,51 +2,11 @@ import {
   Role, 
   OpenAIFinishReason, 
   OpenAIUsage, 
-  OpenAIContentBlock, 
-  OpenAITool, 
-  OpenAIToolChoice, 
   OpenAIToolCall, 
   OpenAIFunctionCall,
   OpenAIStreamingToolCall,
   BaseOpenAIEvent 
 } from './common';
-
-// === REQUEST TYPES ===
-export interface OpenAIRequestBody {
-  model: string;
-  messages: OpenAIMessage[];
-  functions?: OpenAIFunction[];
-  function_call?: "auto" | "none" | { name: string };
-  temperature?: number;
-  top_p?: number;
-  n?: number;
-  stream?: boolean;
-  stop?: string | string[];
-  max_tokens?: number;
-  presence_penalty?: number;
-  frequency_penalty?: number;
-  logit_bias?: { [key: string]: number };
-  user?: string;
-  seed?: number;
-  tools?: OpenAITool[];
-  tool_choice?: OpenAIToolChoice;
-  response_format?: { type: "text" | "json_object" };
-}
-
-export interface OpenAIMessage {
-  role: Role;
-  content: string | null | OpenAIContentBlock[];
-  name?: string;
-  function_call?: OpenAIFunctionCall;
-  tool_calls?: OpenAIToolCall[];
-  tool_call_id?: string;
-}
-
-export interface OpenAIFunction {
-  name: string;
-  description?: string;
-  parameters: object; // JSON Schema object
-}
 
 // === RESPONSE TYPES ===
 export interface OpenAIResponseBody {
@@ -125,8 +85,6 @@ export type OpenAIStreamEvent = ChatCompletionChunk;
 export type { 
   OpenAIFinishReason, 
   OpenAIUsage, 
-  OpenAIContentBlock, 
-  OpenAITool, 
   OpenAIToolChoice, 
   OpenAIToolCall, 
   OpenAIFunctionCall,

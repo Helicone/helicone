@@ -1,6 +1,6 @@
 import { AnthropicToOpenAIStreamConverter } from "../../providers/anthropic/streamedResponse/toOpenai";
 import { toAnthropic } from "../../providers/openai/request/toAnthropic";
-import { OpenAIRequestBody } from "../../types";
+import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 
 // transform the readable stream from Anthropic SSE to OpenAI SSE format
 export function oai2antStream(
@@ -107,7 +107,7 @@ export async function oaiStream2antStream({
   body,
   headers,
 }: {
-  body: OpenAIRequestBody;
+  body: HeliconeChatCreateParams;
   headers: Headers;
 }): Promise<Response> {
   const anthropicBody = toAnthropic(body);

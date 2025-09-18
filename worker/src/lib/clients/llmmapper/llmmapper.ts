@@ -1,8 +1,8 @@
-import { OpenAIRequestBody } from "./types";
+import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 import { oai2ant } from "./router/oai2ant/nonStream";
 import { oaiStream2antStream } from "./router/oai2ant/stream";
 
-export function tryJSONParse(body: string): OpenAIRequestBody | null {
+export function tryJSONParse(body: string): HeliconeChatCreateParams | null {
   try {
     return JSON.parse(body);
   } catch (e) {

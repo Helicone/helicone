@@ -2621,6 +2621,6 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
   "totalEndpoints": 66,
   "totalModelProviderConfigs": 66,
   "totalModelsWithPtb": 34,
-  "totalProviders": 10
+  "totalProviders": 10,
 }
 `;
