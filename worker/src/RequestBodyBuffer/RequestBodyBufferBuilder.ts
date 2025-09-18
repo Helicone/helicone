@@ -96,7 +96,7 @@ export async function RequestBodyBufferBuilder(
     );
   }
 
-  // Threshold for routing: small → Remote, large → InMemory.
+  // Threshold for routing: small → InMemory, large → Remote.
   const MAX_INMEMORY_BYTES = 20 * 1024 * 1024; // 20 MiB
 
   // If Content-Length is present, honor it to avoid reading.
