@@ -1,3 +1,5 @@
+import { Result } from "../lib/util/results";
+
 export type ValidRequestBody = ReadableStream | string | null;
 
 export interface IRequestBodyBuffer {
@@ -11,7 +13,7 @@ export interface IRequestBodyBuffer {
 
   unsafeGetRawText(): Promise<string>;
 
-  tempSetBody(body: string): void;
+  tempSetBody(body: string): Promise<void>;
 
   // For forwarding to providers without reading into memory when possible.
   getReadableStreamToBody(): Promise<ValidRequestBody>;
@@ -21,4 +23,12 @@ export interface IRequestBodyBuffer {
   userId(): Promise<string | undefined>;
 
   model(): Promise<string | undefined>;
+
+  uploadS3Body(
+    responseBody: any,
+    url: string,
+    tags?: Record<string, string>
+  ): Promise<Result<string, string>>;
+
+  bodyLength(): Promise<number>;
 }

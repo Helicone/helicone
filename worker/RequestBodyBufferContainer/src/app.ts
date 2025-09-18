@@ -1,11 +1,16 @@
+import { AwsClient } from "aws4fetch";
 import Fastify, { FastifyInstance } from "fastify";
 import type { IncomingMessage } from "http";
 import { Readable } from "node:stream";
+import { gzip } from "node:zlib";
+import { promisify } from "node:util";
 import { z } from "zod";
 import { MemoryStore } from "./storage/memoryStore";
 import { signAws } from "./aws/sign";
 import type { SignAwsInput } from "./types";
 import type { AppConfig } from "./config";
+
+const gzipAsync = promisify(gzip);
 
 export function createApp(config: AppConfig, logger: any): FastifyInstance {
   const app = Fastify({ logger });
@@ -99,6 +104,29 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
   app.get<{
     Params: { requestId: string };
+  }>("/:requestId/metadata", async (request, reply) => {
+    const { requestId } = request.params;
+    const entry = store.get(requestId);
+
+    if (!entry) return reply.code(404).send("not found");
+
+    let isStream: boolean | undefined;
+    let userId: string | undefined;
+    let model: string | undefined;
+    try {
+      const obj = JSON.parse(entry.data.toString("utf8"));
+      if (typeof obj?.stream === "boolean") isStream = obj.stream === true;
+      if (typeof obj?.user === "string") userId = obj.user;
+      if (typeof obj?.model === "string") model = obj.model;
+    } catch (_e) {
+      // non-JSON bodies are fine; leave metadata undefined
+    }
+
+    return reply.send({ isStream, userId, model });
+  });
+
+  app.get<{
+    Params: { requestId: string };
   }>("/:requestId/unsafe/read", async (request, reply) => {
     const { requestId } = request.params;
     const entry = store.get(requestId);
@@ -137,6 +165,98 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
       request.log.error({ err: e, requestId }, "sign-aws failed");
       return reply.code(500).send({ error: "sign failed" });
     }
+  });
+
+  // Build a streamed JSON payload suitable for S3 storage:
+  // {
+  //   request: "<original or mutated request body string>",
+  //   response: <response body JSON>
+  // }
+  const BuildS3Schema = z.object({
+    response: z.any(),
+    tags: z.record(z.string()),
+    url: z.string().url(),
+  });
+
+  app.get<{
+    Params: { requestId: string };
+  }>("/:requestId/body-length", async (request, reply) => {
+    const { requestId } = request.params;
+    const entry = store.get(requestId);
+    if (!entry) return reply.code(404).send({ error: "not found" });
+    return reply.send({ length: entry.data.length });
+  });
+
+  app.post<{
+    Params: { requestId: string };
+    Body: { body: string };
+  }>("/:requestId/s3/set-body", async (request, reply) => {
+    const { requestId } = request.params;
+    const entry = store.get(requestId);
+    if (!entry) return reply.code(404).send({ error: "not found" });
+    entry.data = Buffer.from(request.body.body);
+    return reply.send({ ok: true });
+  });
+
+  app.post<{
+    Params: { requestId: string };
+    Body: { response: unknown };
+  }>("/:requestId/s3/upload-body", async (request, reply) => {
+    const awsClient = new AwsClient({
+      accessKeyId: request.headers["x-access-key"] as string,
+      secretAccessKey: request.headers["x-secret-key"] as string,
+      service: "s3",
+      region: request.headers["x-region"] as string,
+    });
+
+    const { requestId } = request.params;
+    const entry = store.get(requestId);
+    if (!entry) return reply.code(404).send({ error: "not found" });
+
+    const parsed = BuildS3Schema.safeParse(request.body);
+    if (!parsed.success) {
+      return reply
+        .code(400)
+        .send({ error: "bad request", details: parsed.error.flatten() });
+    }
+
+    const responseText = parsed.data.response;
+
+    const requestText = entry.data.toString("utf8");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "Content-Encoding": "gzip",
+    };
+
+    const tags = parsed.data.tags;
+
+    if (tags && Object.keys(tags).length > 0) {
+      const tagsString = Object.entries(tags)
+        .map(
+          ([key, val]) =>
+            `${encodeURIComponent(key)}=${encodeURIComponent(val)}`
+        )
+        .join("&");
+      headers["x-amz-tagging"] = tagsString;
+    }
+
+    const jsonData = JSON.stringify({
+      request: requestText,
+      response: responseText,
+    });
+
+    const compressedBody = await gzipAsync(jsonData);
+    headers["Content-Length"] = String(compressedBody.byteLength);
+
+    const signedRequest = await awsClient.sign(parsed.data.url, {
+      method: "PUT",
+      body: compressedBody,
+      headers,
+    });
+    // return reply.send({ url: signedRequest.url });
+
+    return await fetch(signedRequest.url, signedRequest);
   });
 
   app.delete<{

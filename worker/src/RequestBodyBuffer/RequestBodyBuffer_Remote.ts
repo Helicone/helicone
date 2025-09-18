@@ -2,6 +2,7 @@ import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { IRequestBodyBuffer } from "./IRequestBodyBuffer";
 import { getContainer } from "@cloudflare/containers";
 import type { RequestBodyBufferContainer } from "./RequestBodyContainer";
+import { err, ok, Result } from "../lib/util/results";
 
 const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 
@@ -52,6 +53,12 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   // */
   private uniqueId: string;
   private ingestPromise: Promise<void>;
+  private awsCreds: {
+    accessKey: string;
+    secretKey: string;
+    region: string;
+  };
+  private metadataPromise: Promise<void>;
 
   private metadata: {
     isStream?: boolean;
@@ -60,10 +67,21 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   } = {};
 
   constructor(
-    request: Request,
+    body: ReadableStream | null,
     private dataDogClient: DataDogClient | undefined,
-    requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"]
+    requestBodyBufferEnv: Env["REQUEST_BODY_BUFFER"],
+    env: {
+      AWS_ACCESS_KEY_ID: string;
+      AWS_SECRET_ACCESS_KEY: string;
+      AWS_REGION: string;
+    }
   ) {
+    dataDogClient?.trackRemoteBodyBufferUsed(true);
+    this.awsCreds = {
+      accessKey: env.AWS_ACCESS_KEY_ID,
+      secretKey: env.AWS_SECRET_ACCESS_KEY,
+      region: env.AWS_REGION,
+    };
     this.uniqueId = crypto.randomUUID();
     this.requestBodyBuffer = getRequestBodyContainer(
       requestBodyBufferEnv,
@@ -76,7 +94,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       .fetch(`${BASE_URL}/${this.uniqueId}`, {
         method: "POST",
         headers,
-        body: request.body,
+        body: body ?? null,
       })
       .then(async (response) => {
         if (!response.ok) {
@@ -86,24 +104,69 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
           );
           return;
         }
-        const { size, isStream, userId, model } = await response.json<{
-          size: number;
-          isStream?: boolean;
-          userId?: string;
-          model?: string;
-        }>();
-        this.metadata = { isStream, userId, model };
-        console.log("RequestBodyBuffer_Remote ingest success", size);
-        dataDogClient?.trackMemory("container-request-body-size", size);
+
+        // READING THE BODY DOES NOT WORK IN PROD IDK WHY - Justin 2025-09-17
+        // calling repsonse.text or response.json just hangs forever.. but works locally. UGHHH
+        // const { size, isStream, userId, model } = await response.json<{
+        //   size: number;
+        //   isStream?: boolean;
+        //   userId?: string;
+        //   model?: string;
+        // }>();
+        // this.metadata = { isStream, userId, model };
       })
       .catch((e) => {
         console.error("RequestBodyBuffer_Remote ingest error", e);
       });
+
+    this.metadataPromise = this.ingestPromise.then(() =>
+      this.requestBodyBuffer
+        .fetch(`${BASE_URL}/${this.uniqueId}/metadata`, {
+          method: "GET",
+        })
+        .then((response) => {
+          return response
+            .json<{
+              isStream?: boolean;
+              userId?: string;
+              model?: string;
+            }>()
+            .then((json) => {
+              this.metadata = json;
+            });
+        })
+    );
   }
 
-  public tempSetBody(body: string): void {
+  async bodyLength(): Promise<number> {
+    try {
+      await this.ingestPromise.catch(() => undefined);
+      const response = await this.requestBodyBuffer.fetch(
+        `${BASE_URL}/${this.uniqueId}/body-length`,
+        { method: "GET" }
+      );
+      if (!response.ok) {
+        return 0;
+      }
+      const json = await response.json<{ length: number }>();
+      return json.length;
+    } catch (e) {
+      console.error("RequestBodyBuffer_Remote bodyLength error", e);
+      return 0;
+    }
+  }
+
+  public async tempSetBody(body: string): Promise<void> {
     // TODO we need to implement this for gateway
     // no-op for remote buffer
+    await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/s3/set-body`,
+      {
+        method: "POST",
+        body: JSON.stringify({ body: body }),
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
@@ -170,17 +233,51 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   }
 
   async isStream(): Promise<boolean> {
-    await this.ingestPromise.catch(() => undefined);
+    await this.metadataPromise.catch(() => undefined);
     return this.metadata.isStream ?? false;
   }
 
   async userId(): Promise<string | undefined> {
-    await this.ingestPromise.catch(() => undefined);
+    await this.metadataPromise.catch(() => undefined);
     return this.metadata.userId;
   }
 
   async model(): Promise<string | undefined> {
-    await this.ingestPromise.catch(() => undefined);
+    await this.metadataPromise.catch(() => undefined);
     return this.metadata.model;
+  }
+
+  /**
+   * Prepares a stream in the container so that we return it as a stream in this format:
+   * {
+   *    request: requestBody,
+   *    response: responseBody
+   * }
+   * @param responseBody
+   */
+  async uploadS3Body(
+    responseBody: any,
+    url: string,
+    tags?: Record<string, string>
+  ): Promise<Result<string, string>> {
+    await this.ingestPromise.catch(() => undefined);
+    const res = await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/s3/upload-body`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-access-key": this.awsCreds.accessKey,
+          "x-secret-key": this.awsCreds.secretKey,
+          "x-region": this.awsCreds.region,
+        },
+        body: JSON.stringify({ response: responseBody, tags, url }),
+      }
+    );
+
+    if (!res.ok) {
+      return err(`Failed to store data: ${res.statusText}, ${res.url}, ${url}`);
+    }
+    return ok(res.url);
   }
 }

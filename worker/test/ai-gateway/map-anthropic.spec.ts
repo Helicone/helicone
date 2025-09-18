@@ -1,10 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { toOpenAI } from '../../src/lib/clients/llmmapper/providers/anthropic/response/toOpenai';
-import { AnthropicResponseBody } from '../../src/lib/clients/llmmapper/types';
+import { AnthropicResponseBody } from '../../src/lib/clients/llmmapper/types/anthropic';
 import { toAnthropic } from '../../src/lib/clients/llmmapper/providers/openai/request/toAnthropic';
-import { OpenAIRequestBody } from '../../src/lib/clients/llmmapper/types';
 import { AnthropicToOpenAIStreamConverter } from '../../src/lib/clients/llmmapper/providers/anthropic/streamedResponse/toOpenai';
-import { AnthropicStreamEvent } from '../../src/lib/clients/llmmapper/types';
+import { AnthropicStreamEvent } from '../../src/lib/clients/llmmapper/types/anthropic';
 
 describe('Anthropic to OpenAI Response Mapper', () => {
   // ANTHROPIC NON-STREAM RESPONSE -> OPENAI RESPONSE
@@ -104,7 +103,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
   // OPENAI REQUEST -> ANTHROPIC REQUEST
   describe('toAnthropic', () => {
     it('should convert basic text request', () => {
-      const openAIRequest: OpenAIRequestBody = {
+      const openAIRequest = {
         model: 'gpt-4o',
         messages: [
           {
@@ -115,7 +114,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
         temperature: 0.7,
         max_tokens: 1000,
         stream: false
-      };
+      } as any;
 
       const result = toAnthropic(openAIRequest);
 
@@ -131,7 +130,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should convert request with tool calls', () => {
-      const openAIRequest: OpenAIRequestBody = {
+      const openAIRequest = {
         model: 'gpt-4o',
         messages: [
           {
@@ -179,7 +178,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
             }
           }
         ]
-      };
+      } as any;
 
       const result = toAnthropic(openAIRequest);
 
@@ -229,7 +228,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should handle assistant message with both text and tool calls', () => {
-      const openAIRequest: OpenAIRequestBody = {
+      const openAIRequest = {
         model: 'gpt-4o',
         messages: [
           {
@@ -247,7 +246,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
             ]
           }
         ]
-      };
+      } as any;
 
       const result = toAnthropic(openAIRequest);
 
@@ -267,7 +266,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
     });
 
     it('should extract system message', () => {
-      const openAIRequest: OpenAIRequestBody = {
+      const openAIRequest = {
         model: 'gpt-4o',
         messages: [
           {
@@ -279,7 +278,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
             content: 'Hello'
           }
         ]
-      };
+      } as any;
 
       const result = toAnthropic(openAIRequest);
 
@@ -288,6 +287,136 @@ describe('Anthropic to OpenAI Response Mapper', () => {
       expect(result.messages[0]).toEqual({
         role: 'user',
         content: 'Hello'
+      });
+    });
+
+    it('should handle cache control on system message', () => {
+      const openAIRequest = {
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful assistant.',
+            cache_control: { type: 'ephemeral', ttl: '5m' }
+          },
+          {
+            role: 'user',
+            content: 'Hello'
+          }
+        ]
+      } as any;
+
+      const result = toAnthropic(openAIRequest);
+
+      expect(result.system).toEqual([{
+        type: 'text',
+        text: 'You are a helpful assistant.',
+        cache_control: { type: 'ephemeral', ttl: '5m' }
+      }]);
+      expect(result.messages).toHaveLength(1);
+    });
+
+    it('should handle cache control on content parts', () => {
+      const openAIRequest = {
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Analyze this document',
+                cache_control: { type: 'ephemeral', ttl: '1h' }
+              },
+              {
+                type: 'text',
+                text: 'Additional context'
+              }
+            ]
+          }
+        ]
+      } as any;
+
+      const result = toAnthropic(openAIRequest);
+
+      expect(result.messages).toHaveLength(1);
+      expect(result.messages[0].content).toEqual([
+        {
+          type: 'text',
+          text: 'Analyze this document',
+          cache_control: { type: 'ephemeral', ttl: '1h' }
+        },
+        {
+          type: 'text',
+          text: 'Additional context'
+        }
+      ]);
+    });
+
+    it('should handle cache control on tool results', () => {
+      const openAIRequest = {
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'tool',
+            content: 'Large calculation result...',
+            tool_call_id: 'call_123',
+            cache_control: { type: 'ephemeral', ttl: '5m' }
+          }
+        ]
+      } as any;
+
+      const result = toAnthropic(openAIRequest);
+
+      expect(result.messages).toHaveLength(1);
+      expect(result.messages[0].role).toBe('user');
+      const content = result.messages[0].content as any[];
+      expect(content).toHaveLength(1);
+      expect(content[0]).toEqual({
+        type: 'tool_result',
+        tool_use_id: 'call_123',
+        content: 'Large calculation result...',
+        cache_control: { type: 'ephemeral', ttl: '5m' }
+      });
+    });
+
+    it('should handle cache control on assistant messages with text and tools', () => {
+      const openAIRequest = {
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'assistant',
+            content: "I'll help you calculate that.",
+            cache_control: { type: 'ephemeral', ttl: '1h' },
+            tool_calls: [
+              {
+                id: 'call_123',
+                type: 'function',
+                function: {
+                  name: 'calculate',
+                  arguments: '{"expression":"2+2"}'
+                }
+              }
+            ]
+          }
+        ]
+      } as any;
+
+      const result = toAnthropic(openAIRequest);
+
+      expect(result.messages[0].role).toBe('assistant');
+      const content = result.messages[0].content as any[];
+      expect(content).toHaveLength(2);
+      expect(content[0]).toEqual({
+        type: 'text',
+        text: "I'll help you calculate that.",
+        cache_control: { type: 'ephemeral', ttl: '1h' }
+      });
+      expect(content[1]).toEqual({
+        type: 'tool_use',
+        id: 'call_123',
+        name: 'calculate',
+        input: { expression: '2+2' }
       });
     });
   });

@@ -20,6 +20,7 @@
     "@smithy/signature-v4": "^4.2.3",
     "fastify": "^4.28.1",
     "pino": "^9.5.0",
+    "aws4fetch": "^1.0.18",
     "zod": "^3.23.8"
   },
   "devDependencies": {

@@ -2,6 +2,12 @@ import {
   ChatCompletionContentPart,
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionCreateParamsStreaming,
+  ChatCompletionDeveloperMessageParam,
+  ChatCompletionFunctionMessageParam,
+  ChatCompletionSystemMessageParam,
+  ChatCompletionToolMessageParam,
+  ChatCompletionUserMessageParam,
+  ChatCompletionAssistantMessageParam,
 } from "openai/resources/chat/completions";
 
 export type ALLOWED_VARIABLE_TYPE = "string" | "boolean" | "number";
@@ -79,55 +85,38 @@ export interface CacheControl {
  * OpenAI content part extended with optional cache control.
  * Allows individual content parts within a message to have cache control.
  */
-type HeliconeChatCompletionContentPart = ChatCompletionContentPart & {
+export type HeliconeChatCompletionContentPart = ChatCompletionContentPart & {
   cache_control?: CacheControl;
 };
 
 /**
- * Helicone message type that supports cache control exclusively at one level:
- * - If content is a string, cache_control can be added to the message
- * - If content is an array, only individual content parts can have cache_control (not the message)
+ * OpenAI message with optional cache control support
  */
-type HeliconeMessageParam<T> = T extends { content: string }
-  ? T & { cache_control?: CacheControl }
-  : T extends { content: infer U }
-  ? U extends Array<any>
-    ? Omit<T, 'content'> & { 
-        content: HeliconeChatCompletionContentPart[];
-      }
-    : T & { cache_control?: CacheControl }
-  : T & { cache_control?: CacheControl };
+type HeliconeMessageParam<T> = Omit<T, 'content'> & {
+  content: string | HeliconeChatCompletionContentPart[] | null;
+  cache_control?: CacheControl;
+};
+
+export type HeliconeChatCompletionMessageParam = 
+  | HeliconeMessageParam<ChatCompletionDeveloperMessageParam>
+  | HeliconeMessageParam<ChatCompletionSystemMessageParam>
+  | HeliconeMessageParam<ChatCompletionUserMessageParam>
+  | HeliconeMessageParam<ChatCompletionAssistantMessageParam>
+  | HeliconeMessageParam<ChatCompletionToolMessageParam>
+  | HeliconeMessageParam<ChatCompletionFunctionMessageParam>
 
 /**
- * OpenAI chat completion message extended with optional cache control.
- * Used for non-streaming requests with Helicone prompt templates.
- */
-type ChatCompletionCreateParamsNonStreamingMessage = HeliconeMessageParam<ChatCompletionCreateParamsNonStreaming['messages'][number]>;
-
-/**
- * OpenAI chat completion message extended with optional cache control.
- * Used for streaming requests with Helicone prompt templates.
- */
-type ChatCompletionCreateParamsStreamingMessage = HeliconeMessageParam<ChatCompletionCreateParamsStreaming['messages'][number]>;
-
-/**
- * Modified OpenAI chat completion parameters where:
- * - `messages` is optional (may be provided by prompt template)
- * - Each message can include `cache_control` for Anthropic caching
- * - Used for non-streaming requests
+ * Non-streaming completion params with optional messages
  */
 type ChatCompletionCreateParamsNonStreamingPartialMessages = Omit<ChatCompletionCreateParamsNonStreaming, 'messages'> & { 
-  messages?: ChatCompletionCreateParamsNonStreamingMessage[] 
+  messages?: HeliconeChatCompletionMessageParam[] 
 };
 
 /**
- * Modified OpenAI chat completion parameters where:
- * - `messages` is optional (may be provided by prompt template)
- * - Each message can include `cache_control` for Anthropic caching
- * - Used for streaming requests
+ * Streaming completion params with optional messages
  */
 type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCreateParamsStreaming, 'messages'> & { 
-  messages?: ChatCompletionCreateParamsStreamingMessage[] 
+  messages?: HeliconeChatCompletionMessageParam[] 
 };
 
 /**
