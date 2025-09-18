@@ -929,7 +929,7 @@ describe("OpenAI Registry Tests", () => {
                 errorMessage: "Azure endpoint unavailable",
               },
             ],
-            finalStatus: 429,
+            finalStatus: 500,
           },
         }));
     });
