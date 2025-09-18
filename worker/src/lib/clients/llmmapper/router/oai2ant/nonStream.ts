@@ -1,13 +1,13 @@
 import { toOpenAI } from "../../providers/anthropic/response/toOpenai";
-import { AntResponseBody } from "../../types";
+import { AnthropicResponseBody } from "../../types/anthropic";
 import { toAnthropic } from "../../providers/openai/request/toAnthropic";
-import { OpenAIRequestBody } from "../../types";
+import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 
 export async function oai2ant({
   body,
   headers,
 }: {
-  body: OpenAIRequestBody;
+  body: HeliconeChatCreateParams;
   headers: Headers;
 }): Promise<Response> {
   const anthropicBody = toAnthropic(body);
@@ -37,7 +37,7 @@ export async function oai2ant({
   try {
     return await oai2antResponse(response);
   } catch (e) {
-    const responseBody = await response.json<AntResponseBody>();
+    const responseBody = await response.json<AnthropicResponseBody>();
     return new Response(JSON.stringify(responseBody), {
       headers: {
         ...response.headers,
@@ -49,7 +49,7 @@ export async function oai2ant({
 
 export async function oai2antResponse(response: Response): Promise<Response> {
   try {
-    const anthropicBody = await response.json<AntResponseBody>();
+    const anthropicBody = await response.json<AnthropicResponseBody>();
     const openAIBody = toOpenAI(anthropicBody);
 
     return new Response(JSON.stringify(openAIBody), {

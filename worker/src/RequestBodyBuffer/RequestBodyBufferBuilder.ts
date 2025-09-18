@@ -89,6 +89,7 @@ export async function RequestBodyBufferBuilder(
   const method = (request.method || "GET").toUpperCase();
 
   if (["GET", "HEAD"].includes(method) || request.body === null) {
+    dataDogClient?.trackBufferDecision("get_head");
     return new RequestBodyBuffer_InMemory(
       request.body ?? null,
       dataDogClient,
@@ -97,6 +98,7 @@ export async function RequestBodyBufferBuilder(
   }
 
   // Threshold for routing: small → InMemory, large → Remote.
+  // ** 20 is the perfect size from my test - Justin 2025-09-18
   const MAX_INMEMORY_BYTES = 20 * 1024 * 1024; // 20 MiB
 
   // If Content-Length is present, honor it to avoid reading.
@@ -105,9 +107,12 @@ export async function RequestBodyBufferBuilder(
   const sizeIsKnown = Number.isFinite(contentLength) && contentLength >= 0;
 
   if (sizeIsKnown) {
+    const sizeMB = contentLength / (1024 * 1024);
     if (contentLength > MAX_INMEMORY_BYTES) {
+      dataDogClient?.trackBufferDecision("known_large", sizeMB);
       return tryInitRemote(request.body, dataDogClient, env);
     } else {
+      dataDogClient?.trackBufferDecision("known_small", sizeMB);
       return new RequestBodyBuffer_InMemory(
         request.body ?? null,
         dataDogClient,
@@ -115,9 +120,11 @@ export async function RequestBodyBufferBuilder(
       );
     }
   }
+  dataDogClient?.trackBufferDecision("size_unknown");
 
   // If container is not bound and size is unknown, default to in-memory.
   if (!env.REQUEST_BODY_BUFFER) {
+    dataDogClient?.trackBufferDecision("unknown_no_container");
     return new RequestBodyBuffer_InMemory(
       request.body ?? null,
       dataDogClient,
@@ -125,13 +132,16 @@ export async function RequestBodyBufferBuilder(
     );
   }
 
+  // Size unknown, container available - must use tee() to check size
   const originalBody = request.body!;
   const [mainBodyToConsume, streamToCheckSize] = originalBody.tee();
   const exceeded = await isOver(streamToCheckSize, MAX_INMEMORY_BYTES);
 
   if (exceeded) {
+    dataDogClient?.trackBufferDecision("tee_large");
     return tryInitRemote(mainBodyToConsume, dataDogClient, env);
   } else {
+    dataDogClient?.trackBufferDecision("tee_small");
     return new RequestBodyBuffer_InMemory(
       mainBodyToConsume,
       dataDogClient,

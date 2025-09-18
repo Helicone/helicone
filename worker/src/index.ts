@@ -94,6 +94,8 @@ async function modifyEnvBasedOnPath(
       AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
       HELICONE_ORG_ID: env.EU_HELICONE_ORG_ID,
     };
+
+    request.requestBodyBuffer.resetS3Client(env);
   }
   if (env.WORKER_TYPE) {
     return env;
@@ -396,12 +398,6 @@ export default {
         return handleError(requestWrapper.error);
       }
       env = await modifyEnvBasedOnPath(env, requestWrapper.data);
-
-      // Set ExecutionContext in DataDog client for automatic metric sending
-      const dataDogClient = requestWrapper.data.getDataDogClient();
-      if (dataDogClient) {
-        dataDogClient.setContext(ctx);
-      }
 
       if (env.WORKER_DEFINED_REDIRECT_URL) {
         return Response.redirect(env.WORKER_DEFINED_REDIRECT_URL, 301);

@@ -1,5 +1,5 @@
-import { OpenAIResponseBody, OpenAIChoice, OpenAIToolCall } from "../../../types";
-import { AnthropicResponseBody, AnthropicContentBlock } from "../../../types";
+import { OpenAIResponseBody, OpenAIChoice, OpenAIToolCall } from "../../../types/openai";
+import { AnthropicResponseBody, AnthropicContentBlock } from "../../../types/anthropic";
 
 // Anthropic Response Body -> OpenAI Response Body
 export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {

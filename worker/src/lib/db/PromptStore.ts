@@ -12,6 +12,10 @@ export class PromptStore {
   ): Promise<Result<string, string>> {
     const { prompt_id, version_id, environment } = params;
 
+    if (!prompt_id) {
+      return err("No prompt ID provided");
+    }
+
     if (environment) {
       const envVersionId = await this.getEnvironmentVersionId(prompt_id, environment, orgId);
       if (envVersionId) {

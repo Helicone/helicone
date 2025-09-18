@@ -38,6 +38,7 @@ import { EscrowInfo } from "../ai-gateway/types";
 import { CostBreakdown } from "@helicone-package/cost/models/calculate-cost";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
+import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -521,15 +522,17 @@ async function log(
       }
 
       const rawResponse = rawResponseResult.data;
+      let cost: number | undefined = undefined;
+
+      // handle AI Gateway requests (successful Attempt)
       const successfulAttempt =
         proxyRequest.requestWrapper.getSuccessfulAttempt();
-      let modernCostBreakdown: CostBreakdown | null = null;
-
       if (rawResponse && successfulAttempt) {
         const attemptModel = successfulAttempt.endpoint.providerModelId;
         const attemptProvider = successfulAttempt.endpoint.provider;
 
         const usageProcessor = getUsageProcessor(attemptProvider);
+
         if (usageProcessor) {
           const usage = await usageProcessor.parse({
             responseBody: rawResponse,
@@ -547,70 +550,98 @@ async function log(
               "cost" in usage.data &&
               typeof usage.data.cost === "number"
             ) {
-              // OpenRouter provides total cost in USD but not the breakdown
-              // Create a proper CostBreakdown with only totalCost set
-              modernCostBreakdown = {
-                inputCost: 0,
-                outputCost: 0,
-                cachedInputCost: 0,
-                cacheWrite5mCost: 0,
-                cacheWrite1hCost: 0,
-                thinkingCost: 0,
-                audioCost: 0,
-                videoCost: 0,
-                webSearchCost: 0,
-                imageCost: 0,
-                requestCost: 0,
-                totalCost: usage.data.cost,
-              };
+              // OpenRouter provides total cost in USD directly
+              cost = usage.data.cost;
             } else {
-              modernCostBreakdown = modelCostBreakdownFromRegistry({
+              // Use the standard cost calculation from registry
+              const breakdown = modelCostBreakdownFromRegistry({
                 modelUsage: usage.data,
                 providerModelId: attemptModel,
                 provider: attemptProvider,
               });
+              cost = breakdown?.totalCost;
             }
+          } else {
+            console.error(
+              `No usage data found for AI Gateway model ${attemptModel} with provider ${attemptProvider}`
+            );
+          }
+        } else {
+          console.error(
+            `No usage processor available for provider ${attemptProvider}`
+          );
+        }
+      } else {
+        // for non AI Gateway requests, we need to fall back to legacy methods when applicable
+        // parse response body to help get usage (legacy method compatibility)
+        const responseBodyResult = await loggable.parseRawResponse(rawResponse);
+        if (responseBodyResult.error !== null) {
+          console.error("Error parsing response:", responseBodyResult.error);
+          return;
+        }
+        const responseData = responseBodyResult.data;
+
+        const model = responseData?.response.model;
+        const provider = proxyRequest.provider;
+
+        if (model && provider && responseData) {
+          // Provider -> ModelProviderName to try and use new registry
+          const modelProviderName =
+            heliconeProviderToModelProviderName(provider);
+
+          if (modelProviderName) {
+            // try usage processor + new registry first
+            const usageProcessor = getUsageProcessor(modelProviderName);
+
+            if (usageProcessor) {
+              const usage = await usageProcessor.parse({
+                responseBody: rawResponse,
+                isStream: proxyRequest.isStream,
+              });
+
+              if (usage.data) {
+                // For OpenRouter, use the direct cost if available
+                if (
+                  modelProviderName === "openrouter" &&
+                  "cost" in usage.data &&
+                  typeof usage.data.cost === "number"
+                ) {
+                  cost = usage.data.cost;
+                } else {
+                  const breakdown = modelCostBreakdownFromRegistry({
+                    modelUsage: usage.data,
+                    providerModelId: model,
+                    provider: modelProviderName,
+                  });
+                  cost = breakdown?.totalCost;
+                }
+              }
+            }
+          }
+
+          // final fallback for providers not in ModelProviderName
+          if (cost === undefined) {
+            cost =
+              costOfPrompt({
+                model,
+                promptTokens: responseData.response.prompt_tokens ?? 0,
+                completionTokens: responseData.response.completion_tokens ?? 0,
+                provider,
+                promptCacheWriteTokens:
+                  responseData.response.prompt_cache_write_tokens ?? 0,
+                promptCacheReadTokens:
+                  responseData.response.prompt_cache_read_tokens ?? 0,
+                promptAudioTokens:
+                  responseData.response.prompt_audio_tokens ?? 0,
+                completionAudioTokens:
+                  responseData.response.completion_audio_tokens ?? 0,
+              }) ?? 0;
           }
         }
       }
 
-      const responseBodyResult = await loggable.parseRawResponse(rawResponse);
-      if (responseBodyResult.error !== null) {
-        console.error("Error parsing response:", responseBodyResult.error);
-        return;
-      }
-
-      const responseData = responseBodyResult.data;
-      const model = responseData.response.model;
-      const provider = proxyRequest.provider;
-
-      let cost;
-      if (
-        (modernCostBreakdown?.totalCost === undefined ||
-          modernCostBreakdown?.totalCost === null) &&
-        model &&
-        provider
-      ) {
-        cost =
-          costOfPrompt({
-            model,
-            promptTokens: responseData.response.prompt_tokens ?? 0,
-            completionTokens: responseData.response.completion_tokens ?? 0,
-            provider,
-            promptCacheWriteTokens:
-              responseData.response.prompt_cache_write_tokens ?? 0,
-            promptCacheReadTokens:
-              responseData.response.prompt_cache_read_tokens ?? 0,
-            promptAudioTokens: responseData.response.prompt_audio_tokens ?? 0,
-            completionAudioTokens:
-              responseData.response.completion_audio_tokens ?? 0,
-          }) ?? 0;
-      } else {
-        cost = modernCostBreakdown?.totalCost ?? 0;
-      }
-
       // Handle escrow finalization if needed
-      if (responseData && proxyRequest.escrowInfo) {
+      if (proxyRequest.escrowInfo) {
         const walletId = env.WALLET.idFromName(orgData.organizationId);
         const walletStub = env.WALLET.get(walletId);
         const walletManager = new WalletManager(env, ctx, walletStub);
@@ -641,7 +672,7 @@ async function log(
           !orgError &&
           orgData?.organizationId
         ) {
-          const costInCents = cost * 100;
+          const costInCents = (cost ?? 0) * 100;
           await updateRateLimitCounterDO({
             organizationId: orgData?.organizationId,
             heliconeProperties:

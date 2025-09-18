@@ -164,7 +164,7 @@ describe("xAI Registry Tests", () => {
                 errorMessage: "xAI service unavailable",
               },
             ],
-            finalStatus: 429,
+            finalStatus: 500,
           },
         }));
 
@@ -196,7 +196,7 @@ describe("xAI Registry Tests", () => {
                 errorMessage: "Invalid API key",
               },
             ],
-            finalStatus: 429,
+            finalStatus: 401,
           },
         }));
     });

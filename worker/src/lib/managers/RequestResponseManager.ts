@@ -32,10 +32,15 @@ export class RequestResponseManager {
       name: "raw-request-response-body",
     };
 
-    return await content.requestBodyBuffer.uploadS3Body(
+    const result = await content.requestBodyBuffer.uploadS3Body(
       content.responseBody,
       url,
       tags
     );
+
+    // THIS SHOULD BE THE LAST THING WE DO WITH THE BODY
+    await content.requestBodyBuffer.delete();
+
+    return result;
   }
 }
