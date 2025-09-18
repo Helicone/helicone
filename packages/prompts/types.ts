@@ -137,7 +137,7 @@ type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCre
  */
 export type HeliconePromptParams = {
   /** The unique identifier for your Helicone prompt template */
-  prompt_id: string;
+  prompt_id?: string;
   /** The deployment environment to target for the prompt */
   environment?: string;
   /** Optional version ID. If not provided, uses the latest version */
