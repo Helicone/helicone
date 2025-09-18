@@ -12,7 +12,7 @@ export function getConfig(): AppConfig {
   return {
     port: parseInt(process.env.PORT ?? "8000", 10),
     maxSizeBytes: parseInt(
-      process.env.MAX_SIZE_BYTES ?? `${256 * 1024 * 1024}`,
+      process.env.MAX_SIZE_BYTES ?? `${512 * 1024 * 1024}`, // 512MB
       10
     ),
     ttlSeconds: parseInt(
