@@ -76,7 +76,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       AWS_REGION: string;
     }
   ) {
-    dataDogClient?.trackMemory("request-body-buffer-remote", 1);
+    dataDogClient?.trackRemoteBodyBufferUsed(true);
     this.awsCreds = {
       accessKey: env.AWS_ACCESS_KEY_ID,
       secretKey: env.AWS_SECRET_ACCESS_KEY,

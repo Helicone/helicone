@@ -14,20 +14,6 @@ async function concatUint8Arrays(
   return new Uint8Array(buffer);
 }
 
-async function compress(str: string) {
-  // Convert the string to a byte stream.
-  const stream = new Blob([str]).stream();
-
-  // Create a compressed stream.
-  const compressedStream = stream.pipeThrough(new CompressionStream("gzip"));
-
-  // Read all the bytes from this stream.
-  const chunks = [];
-  for await (const chunk of compressedStream) {
-    chunks.push(chunk);
-  }
-  return await concatUint8Arrays(chunks);
-}
 // NEVER give the user direct access to the body
 export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   private cachedText: string | null = null;
@@ -38,7 +24,7 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     private dataDogClient: DataDogClient | undefined,
     env: Env
   ) {
-    dataDogClient?.trackMemory("request-body-buffer-remote", 0);
+    dataDogClient?.trackRemoteBodyBufferUsed(false);
     this.s3Client = new S3Client(
       env.S3_ACCESS_KEY ?? "",
       env.S3_SECRET_KEY ?? "",
