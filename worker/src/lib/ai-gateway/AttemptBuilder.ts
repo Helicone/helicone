@@ -31,6 +31,12 @@ export class AttemptBuilder {
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
 
+    // Check if credits feature is enabled for this organization once
+    const hasCreditsFeature = await this.featureFlagManager.hasFeature(
+      orgId,
+      "credits"
+    );
+
     for (const modelString of modelStrings) {
       const modelSpec = this.parseModelString(modelString);
 
@@ -48,6 +54,7 @@ export class AttemptBuilder {
           modelSpec.data.provider,
           orgId,
           bodyMapping,
+          hasCreditsFeature,
           modelSpec.data.customUid
         );
         allAttempts.push(...providerAttempts);
@@ -56,7 +63,8 @@ export class AttemptBuilder {
         const attempts = await this.buildAttemptsForAllProviders(
           modelSpec.data.modelName,
           orgId,
-          bodyMapping
+          bodyMapping,
+          hasCreditsFeature
         );
         allAttempts.push(...attempts);
       }
@@ -70,7 +78,8 @@ export class AttemptBuilder {
   private async buildAttemptsForAllProviders(
     modelName: string,
     orgId: string,
-    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI"
+    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
+    hasCreditsFeature: boolean
   ): Promise<Attempt[]> {
     // Get all provider data in one query
     const providerDataResult =
@@ -80,12 +89,20 @@ export class AttemptBuilder {
     // Process all providers in parallel (we know model exists because parseModelString validated it)
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
-        const [byokAttempts, ptbAttempts] = await Promise.all([
-          this.buildByokAttempts(modelName, data, orgId, bodyMapping),
-          this.buildPtbAttempts(modelName, data),
-        ]);
+        const byokAttempts = await this.buildByokAttempts(
+          modelName,
+          data,
+          orgId,
+          bodyMapping
+        );
 
-        return [...byokAttempts, ...ptbAttempts];
+        // Only build PTB attempts if credits feature is enabled
+        if (hasCreditsFeature) {
+          const ptbAttempts = await this.buildPtbAttempts(modelName, data);
+          return [...byokAttempts, ...ptbAttempts];
+        }
+
+        return byokAttempts;
       })
     );
 
@@ -97,6 +114,7 @@ export class AttemptBuilder {
     provider: ModelProviderName,
     orgId: string,
     bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
+    hasCreditsFeature: boolean,
     customUid?: string
   ): Promise<Attempt[]> {
     // Get provider data once
@@ -117,12 +135,6 @@ export class AttemptBuilder {
     }
 
     const providerData = providerDataResult.data;
-
-    // Check if credits feature is enabled for this organization
-    const hasCreditsFeature = await this.featureFlagManager.hasFeature(
-      orgId,
-      "credits"
-    );
 
     // Get BYOK attempts
     const byokAttempts = await this.buildByokAttempts(
