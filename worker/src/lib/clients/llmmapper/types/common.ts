@@ -1,4 +1,5 @@
 // Common types used across different providers
+import { CacheControl } from "@helicone-package/prompts/types";
 
 // Role types
 export type Role = "system" | "user" | "assistant" | "function" | "tool";
@@ -60,16 +61,7 @@ export interface AnthropicContentBlock {
   // Thinking fields
   thinking?: string;
   signature?: string;
-}
-
-// OpenAI content types
-export interface OpenAIContentBlock {
-  type: "text" | "image_url";
-  text?: string;
-  image_url?: {
-    url: string;
-    detail?: "auto" | "low" | "high";
-  };
+  cache_control?: CacheControl;
 }
 
 // Tool definitions
@@ -80,15 +72,6 @@ export interface AnthropicTool {
     type: "object";
     properties: Record<string, any>;
     required?: string[];
-  };
-}
-
-export interface OpenAITool {
-  type: string;
-  function: {
-    name: string;
-    description?: string;
-    parameters: object; // JSON Schema object
   };
 }
 

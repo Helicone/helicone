@@ -34,8 +34,9 @@ import {
 } from "./ProxyRequestHandler";
 import { WalletManager } from "../managers/WalletManager";
 import { costOfPrompt } from "@helicone-package/cost";
-import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { EscrowInfo } from "../ai-gateway/types";
+import { CostBreakdown } from "@helicone-package/cost/models/calculate-cost";
+import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
 
@@ -522,20 +523,22 @@ async function log(
 
       const rawResponse = rawResponseResult.data;
       let cost: number | undefined = undefined;
-      let responseData: any = null;
 
       // handle AI Gateway requests (successful Attempt)
-      const successfulAttempt = proxyRequest.requestWrapper.getSuccessfulAttempt();
+      const successfulAttempt =
+        proxyRequest.requestWrapper.getSuccessfulAttempt();
       if (rawResponse && successfulAttempt) {
         const attemptModel = successfulAttempt.endpoint.providerModelId;
         const attemptProvider = successfulAttempt.endpoint.provider;
 
         const usageProcessor = getUsageProcessor(attemptProvider);
+
         if (usageProcessor) {
           const usage = await usageProcessor.parse({
             responseBody: rawResponse,
             isStream: proxyRequest.isStream,
           });
+
           if (usage.data) {
             const breakdown = modelCostBreakdownFromRegistry({
               modelUsage: usage.data,
@@ -560,21 +563,22 @@ async function log(
         const responseBodyResult = await loggable.parseRawResponse(rawResponse);
         if (responseBodyResult.error !== null) {
           console.error("Error parsing response:", responseBodyResult.error);
-          // return;
+          return;
         }
-        responseData = responseBodyResult.data;
+        const responseData = responseBodyResult.data;
 
         const model = responseData?.response.model;
         const provider = proxyRequest.provider;
 
         if (model && provider && responseData) {
           // Provider -> ModelProviderName to try and use new registry
-          const modelProviderName = heliconeProviderToModelProviderName(provider);
+          const modelProviderName =
+            heliconeProviderToModelProviderName(provider);
 
           if (modelProviderName) {
             // try usage processor + new registry first
             const usageProcessor = getUsageProcessor(modelProviderName);
-            
+
             if (usageProcessor) {
               const usage = await usageProcessor.parse({
                 responseBody: rawResponse,
@@ -615,7 +619,7 @@ async function log(
       }
 
       // Handle escrow finalization if needed
-      if (responseData && proxyRequest.escrowInfo) {
+      if (proxyRequest.escrowInfo) {
         const walletId = env.WALLET.idFromName(orgData.organizationId);
         const walletStub = env.WALLET.get(walletId);
         const walletManager = new WalletManager(env, ctx, walletStub);

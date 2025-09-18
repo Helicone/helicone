@@ -673,7 +673,7 @@ export class DBLoggable {
           await db.requestResponseManager.storeRequestResponseRaw({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
-            requestBody: (await this.request.unsafeGetBodyText?.()) ?? "{}",
+            requestBodyBuffer: this.request.requestBodyBuffer,
             responseBody: rawResponseBody.join(""),
           });
 
@@ -739,7 +739,7 @@ export class DBLoggable {
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
           targetUrl: this.request.targetUrl,
           provider: this.request.provider,
-          bodySize: (await this.request.unsafeGetBodyText?.())?.length ?? 0,
+          bodySize: await this.request.requestBodyBuffer.bodyLength(),
           path: this.request.path,
           threat: this.request.threat ?? undefined,
           countryCode: this.request.country_code ?? undefined,

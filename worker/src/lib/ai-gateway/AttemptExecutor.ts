@@ -127,7 +127,7 @@ export class AttemptExecutor {
       );
       requestWrapper.resetObject();
       requestWrapper.setUrl(endpoint.baseUrl ?? requestWrapper.url.toString());
-      requestWrapper.setBody(bodyResult.data);
+      await requestWrapper.setBody(bodyResult.data);
 
       // Apply auth headers from provider
       for (const [key, value] of Object.entries(

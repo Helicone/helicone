@@ -159,15 +159,6 @@ export class RequestWrapper {
     this.injectPromptProperties();
     this.baseURLOverride = null;
     this.cf = request.cf;
-
-    try {
-      dataDogClient?.incrementRequestCount();
-      dataDogClient?.trackContentLength(
-        Number(this.headers.get("content-length") ?? 0)
-      );
-    } catch (e) {
-      dataDogClient?.trackContentLength(-1);
-    }
   }
 
   private injectPromptProperties() {
@@ -232,7 +223,7 @@ export class RequestWrapper {
     const requestBodyBuffer = await RequestBodyBufferBuilder(
       request,
       dataDogClient,
-      env.REQUEST_BODY_BUFFER
+      env
     );
     const requestWrapper = new RequestWrapper(
       request,
@@ -605,8 +596,8 @@ export class RequestWrapper {
     };
   }
 
-  setBody(body: string): void {
-    this.requestBodyBuffer.tempSetBody(body);
+  async setBody(body: string): Promise<void> {
+    await this.requestBodyBuffer.tempSetBody(body);
   }
 
   setSuccessfulAttempt(attempt: Attempt): void {

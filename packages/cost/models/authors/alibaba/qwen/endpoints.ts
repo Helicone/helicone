@@ -79,11 +79,11 @@ export const endpoints = {
       "top_k",
       "min_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
-  }
+  },
 } satisfies Partial<
   Record<`${QwenModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

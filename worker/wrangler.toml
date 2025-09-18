@@ -30,7 +30,7 @@ queues.producers = [
 ]
 
 containers = [
-	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10 }
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" }
 ]
 
 [vars]
@@ -195,7 +195,7 @@ kv_namespaces = [
 ]
 
 containers = [
-	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10 }
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" }
 ]
 
 [env.production.triggers]
@@ -269,7 +269,7 @@ queues.producers = [
 ]
 
 containers = [
-	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10 }
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" }
 ]
 
 # Environment-specific variables only (inherit most from top-level [vars])

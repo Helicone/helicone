@@ -3,16 +3,48 @@ import { DataDogClient } from "../lib/monitoring/DataDogClient";
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
 import { IRequestBodyBuffer, ValidRequestBody } from "./IRequestBodyBuffer";
+import { ok, Result } from "../lib/util/results";
+import { S3Client } from "../lib/clients/S3Client";
+
+async function concatUint8Arrays(
+  uint8arrays: Uint8Array[]
+): Promise<Uint8Array> {
+  const blob = new Blob(uint8arrays);
+  const buffer = await blob.arrayBuffer();
+  return new Uint8Array(buffer);
+}
+
 // NEVER give the user direct access to the body
 export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   private cachedText: string | null = null;
+  private s3Client: S3Client;
 
   constructor(
-    private request: Request,
-    private dataDogClient: DataDogClient | undefined
-  ) {}
+    private body: ReadableStream | null,
+    private dataDogClient: DataDogClient | undefined,
+    env: Env
+  ) {
+    dataDogClient?.trackBufferType(false);
+    this.s3Client = new S3Client(
+      env.S3_ACCESS_KEY ?? "",
+      env.S3_SECRET_KEY ?? "",
+      env.S3_ENDPOINT ?? "",
+      env.S3_BUCKET_NAME ?? "",
+      env.S3_REGION ?? "us-west-2"
+    );
+  }
 
-  public tempSetBody(body: string): void {
+  public resetS3Client(env: Env): void {
+    this.s3Client = new S3Client(
+      env.S3_ACCESS_KEY ?? "",
+      env.S3_SECRET_KEY ?? "",
+      env.S3_ENDPOINT ?? "",
+      env.S3_BUCKET_NAME ?? "",
+      env.S3_REGION ?? "us-west-2"
+    );
+  }
+
+  public async tempSetBody(body: string): Promise<void> {
     this.cachedText = body;
   }
 
@@ -21,15 +53,24 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     if (this.cachedText) {
       return this.cachedText;
     }
-    this.cachedText = await this.request.text();
-    try {
-      if (this.dataDogClient) {
-        const sizeBytes = DataDogClient.estimateStringSize(this.cachedText);
-        this.dataDogClient.trackMemory("request-body", sizeBytes);
-      }
-    } catch (e) {
-      // Silently catch - never let monitoring break the request
+    if (!this.body) {
+      return "";
     }
+    const reader = this.body.getReader();
+    const chunks: Uint8Array[] = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) chunks.push(value);
+    }
+    const buffer = await concatUint8Arrays(chunks);
+    this.cachedText = new TextDecoder().decode(buffer);
+
+    // Track actual request body size
+    if (this.dataDogClient && buffer.byteLength > 0) {
+      this.dataDogClient.trackRequestSize(buffer.byteLength);
+    }
+
     return this.cachedText;
   }
 
@@ -149,4 +190,26 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     return json.model ?? "unknown";
   }
 
+  async uploadS3Body(
+    responseBody: any,
+    url: string,
+    tags?: Record<string, string>
+  ): Promise<Result<string, string>> {
+    return this.s3Client.store(
+      url,
+      JSON.stringify({
+        request: await this.unsafeGetRawText(),
+        response: responseBody,
+      }),
+      tags
+    );
+  }
+
+  async bodyLength(): Promise<number> {
+    return (await this.unsafeGetRawText())?.length ?? 0;
+  }
+
+  async delete(): Promise<void> {
+    // no-op
+  }
 }
