@@ -159,15 +159,6 @@ export class RequestWrapper {
     this.injectPromptProperties();
     this.baseURLOverride = null;
     this.cf = request.cf;
-
-    try {
-      dataDogClient?.incrementRequestCount();
-      dataDogClient?.trackContentLength(
-        Number(this.headers.get("content-length") ?? 0)
-      );
-    } catch (e) {
-      dataDogClient?.trackContentLength(-1);
-    }
   }
 
   private injectPromptProperties() {

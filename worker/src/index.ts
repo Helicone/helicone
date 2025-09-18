@@ -399,12 +399,6 @@ export default {
       }
       env = await modifyEnvBasedOnPath(env, requestWrapper.data);
 
-      // Set ExecutionContext in DataDog client for automatic metric sending
-      const dataDogClient = requestWrapper.data.getDataDogClient();
-      if (dataDogClient) {
-        dataDogClient.setContext(ctx);
-      }
-
       if (env.WORKER_DEFINED_REDIRECT_URL) {
         return Response.redirect(env.WORKER_DEFINED_REDIRECT_URL, 301);
       }

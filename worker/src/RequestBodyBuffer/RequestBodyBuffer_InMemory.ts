@@ -24,7 +24,7 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     private dataDogClient: DataDogClient | undefined,
     env: Env
   ) {
-    dataDogClient?.trackRemoteBodyBufferUsed(false);
+    dataDogClient?.trackBufferType(false);
     this.s3Client = new S3Client(
       env.S3_ACCESS_KEY ?? "",
       env.S3_SECRET_KEY ?? "",
@@ -66,14 +66,11 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     const buffer = await concatUint8Arrays(chunks);
     this.cachedText = new TextDecoder().decode(buffer);
 
-    try {
-      if (this.dataDogClient) {
-        const sizeBytes = DataDogClient.estimateStringSize(this.cachedText);
-        this.dataDogClient.trackMemory("request-body", sizeBytes);
-      }
-    } catch (e) {
-      // Silently catch - never let monitoring break the request
+    // Track actual request body size
+    if (this.dataDogClient && buffer.byteLength > 0) {
+      this.dataDogClient.trackRequestSize(buffer.byteLength);
     }
+
     return this.cachedText;
   }
 
