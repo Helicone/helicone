@@ -13,7 +13,10 @@ import type { AppConfig } from "./config";
 const gzipAsync = promisify(gzip);
 
 export function createApp(config: AppConfig, logger: any): FastifyInstance {
-  const app = Fastify({ logger });
+  const app = Fastify({
+    logger,
+    bodyLimit: config.maxSizeBytes // Set Fastify body limit to match our config
+  });
   const store = new MemoryStore(config.ttlSeconds);
 
   // Accept any content-type and parse as Buffer for simplicity.
