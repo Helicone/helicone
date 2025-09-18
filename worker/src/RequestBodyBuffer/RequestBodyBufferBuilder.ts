@@ -88,7 +88,7 @@ export async function RequestBodyBufferBuilder(
 ): Promise<IRequestBodyBuffer> {
   const method = (request.method || "GET").toUpperCase();
 
-  if (["GET", "HEAD"].includes(method)) {
+  if (["GET", "HEAD"].includes(method) || request.body === null) {
     return new RequestBodyBuffer_InMemory(
       request.body ?? null,
       dataDogClient,
