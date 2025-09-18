@@ -20,6 +20,7 @@ export class DataDogClient {
     this.config = {
       sampleRate: 0.1,
       ...config,
+      enabled: false,
     };
   }
 
@@ -31,6 +32,7 @@ export class DataDogClient {
   }
 
   trackContentLength(bytes: number): void {
+    if (!this.config.enabled) return;
     try {
       this.sendDistributionMetric(
         Date.now(),
@@ -43,6 +45,7 @@ export class DataDogClient {
   }
 
   trackRemoteBodyBufferUsed(used: boolean): void {
+    if (!this.config.enabled) return;
     try {
       this.sendDistributionMetric(
         Date.now(),
@@ -61,6 +64,7 @@ export class DataDogClient {
    * OBSERVATIONAL ONLY - Never throws or affects execution
    */
   trackMemory(key: string, bytes: number): void {
+    if (!this.config.enabled) return;
     try {
       const previousBytes = GLOBAL_MEMORY_ALLOCATIONS.get(key) || 0;
       const delta = bytes - previousBytes;
@@ -94,6 +98,7 @@ export class DataDogClient {
    * OBSERVATIONAL ONLY - Never throws or affects execution
    */
   async sendMemoryMetrics(ctx: ExecutionContext): Promise<void> {
+    if (!this.config.enabled) return;
     try {
       if (!this.config.enabled) return;
 
@@ -159,6 +164,7 @@ export class DataDogClient {
     metricName: string,
     tags: string[] = []
   ): Promise<void> {
+    if (!this.config.enabled) return;
     if (this.config.sampleRate && Math.random() > this.config.sampleRate) {
       return;
     }
