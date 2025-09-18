@@ -48,4 +48,12 @@ export abstract class BaseProvider {
       model: endpoint.providerModelId,
     });
   }
+
+  async buildErrorMessage(response: Response): Promise<string> {
+    const respJson = await response.json();
+    if (respJson.error.message) {
+      return respJson.error.message;
+    }
+    return `Request failed with status ${response.status}`;
+  }
 }
