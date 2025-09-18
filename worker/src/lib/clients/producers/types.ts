@@ -41,7 +41,6 @@ export type Log = {
     heliconeProxyKeyId?: string;
     targetUrl: string;
     provider: Provider;
-    bodySize: number;
     path: string;
     threat?: boolean;
     countryCode?: string;
@@ -60,7 +59,6 @@ export type Log = {
   response: {
     id: string;
     status: number;
-    bodySize: number;
     timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
