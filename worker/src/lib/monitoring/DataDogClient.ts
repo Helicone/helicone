@@ -20,6 +20,7 @@ export class DataDogClient {
     this.config = {
       sampleRate: 0.1,
       ...config,
+      enabled: false,
     };
   }
 
