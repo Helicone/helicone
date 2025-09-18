@@ -4,6 +4,13 @@ const ALLOWED_METRICS = new Set([
   "worker.response.size_mb",
   "worker.buffer.remote_used",
   "worker.buffer.unsafe_remote_read",
+  // Buffer decision path metrics
+  "worker.buffer.decision.get_head",
+  "worker.buffer.decision.known_small",
+  "worker.buffer.decision.known_large",
+  "worker.buffer.decision.unknown_no_container",
+  "worker.buffer.decision.tee_small",
+  "worker.buffer.decision.tee_large",
 ]);
 
 export interface DataDogConfig {
@@ -59,6 +66,23 @@ export class DataDogClient {
    */
   trackUnsafeRemoteRead(): void {
     this.sendMetric("worker.buffer.unsafe_remote_read", 1);
+  }
+
+  /**
+   * Track buffer decision path taken
+   */
+  trackBufferDecision(
+    path:
+      | "get_head"
+      | "known_small"
+      | "known_large"
+      | "unknown_no_container"
+      | "tee_small"
+      | "tee_large",
+    sizeMB?: number
+  ): void {
+    const value = sizeMB ?? 1; // Use size if provided, otherwise 1
+    this.sendMetric(`worker.buffer.decision.${path}`, value);
   }
 
   /**
