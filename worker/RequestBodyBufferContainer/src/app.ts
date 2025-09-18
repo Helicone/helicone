@@ -23,7 +23,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
   // In production, we can switch to stream-based handling when needed.
   app.addContentTypeParser(
     "*",
-    { parseAs: "buffer" },
+    { parseAs: "buffer", bodyLimit: config.maxSizeBytes },
     (_req, payload, done) => {
       done(null, payload);
     }
