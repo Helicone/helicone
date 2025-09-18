@@ -178,6 +178,26 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     url: z.string().url(),
   });
 
+  app.get<{
+    Params: { requestId: string };
+  }>("/:requestId/body-length", async (request, reply) => {
+    const { requestId } = request.params;
+    const entry = store.get(requestId);
+    if (!entry) return reply.code(404).send({ error: "not found" });
+    return reply.send({ length: entry.data.length });
+  });
+
+  app.post<{
+    Params: { requestId: string };
+    Body: { body: unknown };
+  }>("/:requestId/s3/set-body", async (request, reply) => {
+    const { requestId } = request.params;
+    const entry = store.get(requestId);
+    if (!entry) return reply.code(404).send({ error: "not found" });
+    entry.data = Buffer.from(request.body.body as string);
+    return reply.send({ ok: true });
+  });
+
   app.post<{
     Params: { requestId: string };
     Body: { response: unknown };

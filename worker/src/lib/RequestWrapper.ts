@@ -605,8 +605,8 @@ export class RequestWrapper {
     };
   }
 
-  setBody(body: string): void {
-    this.requestBodyBuffer.tempSetBody(body);
+  async setBody(body: string): Promise<void> {
+    await this.requestBodyBuffer.tempSetBody(body);
   }
 
   setSuccessfulAttempt(attempt: Attempt): void {

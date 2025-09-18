@@ -138,9 +138,34 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     );
   }
 
-  public tempSetBody(body: string): void {
+  async bodyLength(): Promise<number> {
+    try {
+      await this.ingestPromise.catch(() => undefined);
+      const response = await this.requestBodyBuffer.fetch(
+        `${BASE_URL}/${this.uniqueId}/body-length`,
+        { method: "GET" }
+      );
+      if (!response.ok) {
+        return 0;
+      }
+      const json = await response.json<{ length: number }>();
+      return json.length;
+    } catch (e) {
+      console.error("RequestBodyBuffer_Remote bodyLength error", e);
+      return 0;
+    }
+  }
+
+  public async tempSetBody(body: string): Promise<void> {
     // TODO we need to implement this for gateway
     // no-op for remote buffer
+    await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/s3/set-body`,
+      {
+        method: "POST",
+        body: JSON.stringify({ body: body }),
+      }
+    );
   }
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {

@@ -48,7 +48,7 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     );
   }
 
-  public tempSetBody(body: string): void {
+  public async tempSetBody(body: string): Promise<void> {
     this.cachedText = body;
   }
 
@@ -210,5 +210,9 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
       }),
       tags
     );
+  }
+
+  async bodyLength(): Promise<number> {
+    return (await this.unsafeGetRawText())?.length ?? 0;
   }
 }
