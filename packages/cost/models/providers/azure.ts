@@ -19,17 +19,27 @@ export class AzureOpenAIProvider extends BaseProvider {
   ];
 
   buildUrl(endpoint: ModelProviderConfig, config: UserEndpointConfig): string {
+    // If it's PTB and no baseUri provided, use Helicone's Azure baseUri
+    const effectiveConfig = {
+      ...config,
+      ...(endpoint.ptbEnabled && !config.baseUri
+        ? {
+            baseUri: "https://helicone-gateway.cognitiveservices.azure.com",
+          }
+        : {}),
+    };
+
     if (
-      !config.baseUri ||
-      (!config.deploymentName && !endpoint.providerModelId)
+      !effectiveConfig.baseUri ||
+      (!effectiveConfig.deploymentName && !endpoint.providerModelId)
     ) {
       throw new Error("Azure OpenAI requires baseUri and deploymentName");
     }
-    const apiVersion = config.apiVersion || "2025-01-01-preview";
-    const baseUri = config.baseUri.endsWith("/")
-      ? config.baseUri
-      : `${config.baseUri}/`;
-    const builtUrl = `${baseUri}openai/deployments/${config.deploymentName ?? endpoint.providerModelId}/chat/completions?api-version=${apiVersion}`;
+    const apiVersion = effectiveConfig.apiVersion || "2025-01-01-preview";
+    const baseUri = effectiveConfig.baseUri.endsWith("/")
+      ? effectiveConfig.baseUri
+      : `${effectiveConfig.baseUri}/`;
+    const builtUrl = `${baseUri}openai/deployments/${effectiveConfig.deploymentName ?? endpoint.providerModelId}/chat/completions?api-version=${apiVersion}`;
     return builtUrl;
   }
 
