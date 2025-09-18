@@ -208,4 +208,8 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   async bodyLength(): Promise<number> {
     return (await this.unsafeGetRawText())?.length ?? 0;
   }
+
+  async delete(): Promise<void> {
+    // no-op
+  }
 }
