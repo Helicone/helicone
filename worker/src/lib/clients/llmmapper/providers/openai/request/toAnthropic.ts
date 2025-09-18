@@ -1,15 +1,15 @@
-import { AnthropicRequestBody, AnthropicContentBlock, AnthropicTool, AnthropicToolChoice } from "../../../types";
-import { OpenAIRequestBody } from "../../../types";
+import { AnthropicRequestBody, AnthropicContentBlock, AnthropicTool, AnthropicToolChoice } from "../../../types/anthropic";
+import { HeliconeChatCompletionContentPart, HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 
-export function toAnthropic(openAIBody: OpenAIRequestBody): AnthropicRequestBody {
+export function toAnthropic(openAIBody: HeliconeChatCreateParams): AnthropicRequestBody {
   const antBody: AnthropicRequestBody = {
     model: mapModel(openAIBody.model),
     messages: [],
-    max_tokens: openAIBody.max_tokens ?? 1024,
-    temperature: openAIBody.temperature,
-    top_p: openAIBody.top_p,
+    max_tokens: openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 1024,
+    temperature: openAIBody.temperature ?? undefined,
+    top_p: openAIBody.top_p ?? undefined,
 
-    stream: openAIBody.stream,
+    stream: openAIBody.stream ?? undefined,
   };
 
   if (openAIBody.stop) {
@@ -26,8 +26,9 @@ export function toAnthropic(openAIBody: OpenAIRequestBody): AnthropicRequestBody
     antBody.system = system;
   }
 
-  if (openAIBody.user) {
-    antBody.metadata = { user_id: openAIBody.user };
+  const user_id = openAIBody.safety_identifier || openAIBody.prompt_cache_key || openAIBody.user;
+  if (user_id) {
+    antBody.metadata = { user_id };
   }
 
   // Map tools from OpenAI format to Anthropic format
@@ -52,16 +53,72 @@ export function toAnthropic(openAIBody: OpenAIRequestBody): AnthropicRequestBody
   return antBody;
 }
 
-function extractSystemMessage(messages: OpenAIRequestBody["messages"]): {
-  messages: OpenAIRequestBody["messages"];
-  system?: string;
+function openAIContentToAnthropicContent(content: string | HeliconeChatCompletionContentPart[] | null): string | AnthropicContentBlock[] {
+  if (content === null) {
+    return "";
+  }
+  
+  if (typeof content === "string") {
+    return content;
+  }
+
+  return content.map((part) => {
+    switch (part.type) {
+      case "text":
+        return { type: "text", text: part.text, cache_control: part.cache_control };
+      case "image_url":
+      case "input_audio":
+      case "file":
+        throw new Error(`Unsupported content type: ${part.type}`);
+    }
+  });
+}
+
+function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
+  messages: HeliconeChatCreateParams["messages"];
+  system?: string | AnthropicContentBlock[];
 } {
-  const systemMessage = messages.find((msg) => msg.role === "system");
+  if (!messages) {
+    return { messages: [], system: undefined };
+  }
+  const systemMessages = messages.filter((msg) => msg.role === "system");
   const otherMessages = messages.filter((msg) => msg.role !== "system");
+
+  if (systemMessages.length === 1 && typeof systemMessages[0].content === "string") {
+    const content = systemMessages[0].content;
+    if (!systemMessages[0].cache_control) {
+      return {
+        messages: otherMessages,
+        system: content,
+      };
+    }
+    return {
+      messages: otherMessages,
+      system: [{
+        type: "text",
+        text: systemMessages[0].content,
+        cache_control: systemMessages[0].cache_control,
+      }],
+    }
+  }
+
+  const systemMessageBlocks: AnthropicContentBlock[] = [];
+  for (const msg of systemMessages) {
+    const convertedBlock = openAIContentToAnthropicContent(msg.content);
+    if (typeof convertedBlock === "string") {
+      systemMessageBlocks.push({
+        type: "text",
+        text: convertedBlock,
+        cache_control: msg.cache_control,
+      });
+    } else {
+      systemMessageBlocks.push(...convertedBlock);
+    }
+  }
 
   return {
     messages: otherMessages,
-    system: systemMessage?.content as string | undefined,
+    system: systemMessageBlocks,
   };
 }
 
@@ -78,8 +135,12 @@ function mapModel(model: string): string {
 }
 
 function mapMessages(
-  messages: OpenAIRequestBody["messages"]
+  messages: HeliconeChatCreateParams["messages"]
 ): AnthropicRequestBody["messages"] {
+  if (!messages) {
+    return [];
+  }
+  
   return messages.map((message): AnthropicRequestBody["messages"][0] => {
     if (message.role === "function") {
       throw new Error("Function messages are not supported");
@@ -93,6 +154,7 @@ function mapMessages(
             type: "tool_result",
             tool_use_id: message.tool_call_id,
             content: typeof message.content === "string" ? message.content : "",
+            cache_control: message.cache_control,
           },
         ],
       };
@@ -105,12 +167,18 @@ function mapMessages(
 
     if (message.role === "assistant" && message.tool_calls) {
       const contentBlocks: AnthropicContentBlock[] = [];
-      
-      if (message.content && typeof message.content === "string") {
-        contentBlocks.push({
-          type: "text",
-          text: message.content,
-        });
+
+      if (message.content) {
+        const convertedContent = openAIContentToAnthropicContent(message.content);
+        if (typeof convertedContent === "string") {
+          contentBlocks.push({
+            type: "text",
+            text: convertedContent,
+            cache_control: message.cache_control,
+          });
+        } else {
+          contentBlocks.push(...convertedContent);
+        }
       }
       
       message.tool_calls.forEach((toolCall) => {
@@ -120,6 +188,7 @@ function mapMessages(
             id: toolCall.id,
             name: toolCall.function.name,
             input: JSON.parse(toolCall.function.arguments || "{}"),
+            // TODO: add cache_control support to message.tool_calls in types
           });
         }
       });
@@ -128,42 +197,12 @@ function mapMessages(
       return antMessage;
     }
 
-    if (typeof message.content === "string") {
-      if (message.content.length === 0) {
-        antMessage.content = "n/a";
-      } else {
-        antMessage.content = message.content;
-      }
-    } else if (Array.isArray(message.content)) {
-      antMessage.content = message.content.map((item): AnthropicContentBlock => {
-        if (item.type === "text") {
-          return { type: "text", text: item.text || "" };
-        } else if (item.type === "image_url" && item.image_url) {
-          const url = item.image_url.url;
-          return {
-            type: "image",
-            source: {
-              type: url.startsWith("data:") ? "base64" : "url",
-              media_type: url.startsWith("data:")
-                ? url.split(";")[0].split(":")[1]
-                : `image/${url.split(".").pop()}`,
-              data: url.startsWith("data:") ? url.split(",")[1] : url,
-            },
-          };
-        }
-        throw new Error(`Unsupported content type: ${item.type}`);
-      });
-    } else if (message.content === null) {
-      antMessage.content = " ";
-    } else {
-      throw new Error("Unsupported message content type");
-    }
-
+    antMessage.content = openAIContentToAnthropicContent(message.content);
     return antMessage;
   });
 }
 
-function mapTools(tools: OpenAIRequestBody["tools"]): AnthropicTool[] {
+function mapTools(tools: HeliconeChatCreateParams["tools"]): AnthropicTool[] {
   if (!tools) return [];
   
   return tools.map((tool) => {
@@ -188,7 +227,7 @@ function mapTools(tools: OpenAIRequestBody["tools"]): AnthropicTool[] {
   });
 }
 
-function mapToolChoice(toolChoice: OpenAIRequestBody["tool_choice"]): AnthropicToolChoice {
+function mapToolChoice(toolChoice: HeliconeChatCreateParams["tool_choice"]): AnthropicToolChoice {
   if (!toolChoice) {
     return { type: "auto" };
   }

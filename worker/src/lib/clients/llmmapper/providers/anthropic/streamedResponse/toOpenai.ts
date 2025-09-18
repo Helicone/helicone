@@ -1,9 +1,9 @@
-import { AnthropicStreamEvent } from "../../../types";
+import { AnthropicStreamEvent } from "../../../types/anthropic";
 import {
   OpenAIStreamEvent,
   ChatCompletionChunk,
   OpenAIStreamChoice,
-} from "../../../types";
+} from "../../../types/openai";
 
 export class AnthropicToOpenAIStreamConverter {
   private messageId: string = "";
