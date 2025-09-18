@@ -467,6 +467,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "deepseek/deepseek-v3": {
+    "deepseek-v3:deepinfra": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek-ai/DeepSeek-V3.1",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3:deepseek": {
       "context": 128000,
       "crossRegion": false,
@@ -1607,6 +1633,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepseek",
   ],
   "deepseek/deepseek-v3": [
+    "deepinfra",
     "deepseek",
   ],
   "deepseek/r1": [
@@ -1950,6 +1977,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/deepseek-v3": {
+    "deepinfra": [
+      {
+        "input": 2.7e-7,
+        "output": 0.000001,
+        "threshold": 0,
+      },
+    ],
     "deepseek": [
       {
         "cacheMultipliers": {
@@ -2315,6 +2349,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "deepseek-v3",
       "providers": [
+        "deepinfra",
         "deepseek",
       ],
     },
@@ -2547,7 +2582,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "deepinfra",
     },
     {
@@ -2618,9 +2653,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:vertex:global",
     "claude-3.5-sonnet-v2:anthropic:*",
   ],
-  "totalEndpoints": 66,
-  "totalModelProviderConfigs": 66,
+  "totalEndpoints": 67,
+  "totalModelProviderConfigs": 67,
   "totalModelsWithPtb": 34,
-  "totalProviders": 10
+  "totalProviders": 10,
 }
 `;

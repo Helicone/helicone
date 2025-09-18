@@ -1,6 +1,7 @@
 import { describe, it, beforeEach, vi } from "vitest";
 import "../setup";
 import { runGatewayTest } from "./test-framework";
+import { createOpenAIMockResponse } from "../test-utils";
 
 const deepseekAuthExpectations = {
   headers: {
@@ -9,6 +10,12 @@ const deepseekAuthExpectations = {
 };
 
 const groqAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
+const deepinfraAuthExpectations = {
   headers: {
     Authorization: /^Bearer /,
   },
@@ -48,6 +55,23 @@ describe("DeepSeek Registry Tests", () => {
                 response: "success",
                 model: "deepseek-chat", // Maps to deepseek-chat on API
                 expects: deepseekAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
+                expects: deepinfraAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -176,6 +200,56 @@ describe("DeepSeek Registry Tests", () => {
       }));
   });
 
+  describe("Error scenarios - DeepInfra Provider with DeepSeek V3", () => {
+    it("should handle DeepInfra provider failure", () =>
+      runGatewayTest({
+        model: "deepseek-v3/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "DeepInfra service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from DeepInfra", () =>
+      runGatewayTest({
+        model: "deepseek-v3/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from DeepInfra", () =>
+      runGatewayTest({
+        model: "deepseek-v3/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+  });
+
   describe("Error scenarios - Groq Provider with DeepSeek Model", () => {
     it("should handle Groq provider failure", () =>
       runGatewayTest({
@@ -222,6 +296,70 @@ describe("DeepSeek Registry Tests", () => {
             },
           ],
           finalStatus: 429,
+        },
+      }));
+  });
+
+  describe("Provider URL validation and model mapping", () => {
+    it("should construct correct DeepInfra URL for DeepSeek V3", () =>
+      runGatewayTest({
+        model: "deepseek-v3/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-V3.1",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
+              expects: deepinfraAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://api.deepinfra.com/
+                // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for DeepInfra", () =>
+      runGatewayTest({
+        model: "deepseek-v3/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-V3.1", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
+              expects: deepinfraAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for DeepInfra", () =>
+      runGatewayTest({
+        model: "deepseek-v3/deepinfra",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-V3.1",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
+              expects: {
+                ...deepinfraAuthExpectations,
+                bodyContains: ["user", "Test message"],
+              },
+            },
+          ],
+          finalStatus: 200,
         },
       }));
   });

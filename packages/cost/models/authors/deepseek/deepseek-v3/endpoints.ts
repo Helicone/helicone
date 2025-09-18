@@ -41,6 +41,39 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-v3:deepinfra": {
+    provider: "deepinfra",
+    author: "deepseek",
+    providerModelId: "deepseek-ai/DeepSeek-V3.1",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000027, // $0.27 per 1M tokens
+        output: 0.00000100, // $1.00 per 1M tokens
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format"
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${DeepSeekV3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
