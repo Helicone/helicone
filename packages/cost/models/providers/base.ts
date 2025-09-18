@@ -51,7 +51,7 @@ export abstract class BaseProvider {
 
   async buildErrorMessage(response: Response): Promise<string> {
     try {
-      const respJson = await response.json();
+      const respJson = await response.json() as any;
       if (respJson.error?.message) {
         return respJson.error.message;
       }
