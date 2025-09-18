@@ -523,7 +523,6 @@ async function log(
 
       const rawResponse = rawResponseResult.data;
       let cost: number | undefined = undefined;
-      let responseData = null;
 
       // handle AI Gateway requests (successful Attempt)
       const successfulAttempt =
@@ -566,7 +565,7 @@ async function log(
           console.error("Error parsing response:", responseBodyResult.error);
           return;
         }
-        responseData = responseBodyResult.data;
+        const responseData = responseBodyResult.data;
 
         const model = responseData?.response.model;
         const provider = proxyRequest.provider;
@@ -620,7 +619,7 @@ async function log(
       }
 
       // Handle escrow finalization if needed
-      if (responseData && proxyRequest.escrowInfo) {
+      if (proxyRequest.escrowInfo) {
         const walletId = env.WALLET.idFromName(orgData.organizationId);
         const walletStub = env.WALLET.get(walletId);
         const walletManager = new WalletManager(env, ctx, walletStub);
