@@ -49,7 +49,8 @@ export type Tokenizer =
   | "Qwen"
   | "DeepSeek"
   | "Cohere"
-  | "Grok";
+  | "Grok"
+  | "Tekken";
 
 export type StandardParameter =
   | "max_tokens"
