@@ -6,32 +6,58 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { XSmall } from "@/components/ui/typography";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { LockIcon, Search, Tag } from "lucide-react";
+import { LockIcon, Search, Tag, Trash2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";
 import PropertyPanel from "./propertyPanel";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 const PropertiesPage = (props: { initialPropertyKey?: string }) => {
   const { initialPropertyKey } = props;
-  const { properties, isLoading: isPropertiesLoading } =
+  const { properties, isLoading: isPropertiesLoading, refetch } =
     useGetPropertiesV2(getPropertyFiltersV2);
 
   const router = useRouter();
+  const org = useOrg();
   const [searchQuery, setSearchQuery] = useState("");
+  const [hiddenKeysLocal, setHiddenKeysLocal] = useState<Set<string>>(new Set());
+  const [hidingKey, setHidingKey] = useState<string | null>(null);
 
   // Filter properties based on search query
   const filteredProperties = useMemo(() => {
-    if (!searchQuery) return properties;
-    return properties.filter((property) =>
+    const base = properties.filter((p) => !hiddenKeysLocal.has(p));
+    if (!searchQuery) return base;
+    return base.filter((property) =>
       property.toLowerCase().includes(searchQuery.toLowerCase()),
     );
-  }, [properties, searchQuery]);
+  }, [properties, searchQuery, hiddenKeysLocal]);
 
   // Only update URL when property is selected via UI
   const handlePropertySelect = (property: string) => {
     router.push(`/properties/${encodeURIComponent(property)}`);
+  };
+
+  const handleHideProperty = async (property: string) => {
+    try {
+      setHidingKey(property);
+      const jawn = getJawnClient(org?.currentOrg?.id);
+      await (jawn as any).POST("/v1/property/hide", {
+        body: { key: property },
+      });
+      setHiddenKeysLocal((prev) => new Set([...Array.from(prev), property]));
+      // Fire and forget refetch; cache may update asynchronously
+      refetch();
+      if (initialPropertyKey === property) {
+        router.replace("/properties");
+      }
+    } catch (e) {
+      // no-op; could add toast later
+    } finally {
+      setHidingKey(null);
+    }
   };
 
   // Determine the selected property based on initialPropertyKey or first property
@@ -159,17 +185,31 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
                         </div>
                       </FreeTierLimitWrapper>
                     ) : (
-                      <button
-                        className={`flex w-full items-center gap-2 px-4 py-3 text-left transition-colors ${
-                          isSelected
+                      <div
+                        className={`group flex w-full items-center justify-between px-4 py-3 transition-colors ${isSelected
                             ? "bg-muted text-foreground"
                             : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                        }`}
-                        onClick={() => handlePropertySelect(property)}
+                          }`}
                       >
-                        <Tag className="h-3 w-3 flex-shrink-0" />
-                        <XSmall className="truncate">{property}</XSmall>
-                      </button>
+                        <button
+                          className="flex items-center gap-2 text-left"
+                          onClick={() => handlePropertySelect(property)}
+                        >
+                          <Tag className="h-3 w-3 flex-shrink-0" />
+                          <XSmall className="truncate">{property}</XSmall>
+                        </button>
+                        <button
+                          className={`ml-2 opacity-0 transition-opacity group-hover:opacity-100 text-red-500 hover:text-red-600 disabled:opacity-50`}
+                          title="Hide property"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleHideProperty(property);
+                          }}
+                          disabled={hidingKey === property}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 );

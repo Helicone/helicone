@@ -51,6 +51,11 @@ export class InMemoryCache {
     }
     return item.value;
   }
+
+  // Removes a value from the cache
+  delete(key: string): void {
+    this.cache.delete(key);
+  }
 }
 
 class ProviderKeyCache extends InMemoryCache {
@@ -70,25 +75,35 @@ class ProviderKeyCache extends InMemoryCache {
   set<T>(key: string, value: T, ttl: number = 300_000): void {
     super.set(key, value, ttl);
   }
+
+  delete(key: string): void {
+    super.delete(key);
+  }
 }
 
 export async function storeInCache(
   key: string,
   value: string,
-  ttl: number = 600
+  ttlSeconds: number = 600
 ): Promise<void> {
   const encrypted = await encrypt(value);
   const hashedKey = await hashAuth(key);
   try {
     // redis
-    await redisClient?.set(hashedKey, JSON.stringify(encrypted), "EX", ttl);
+    await redisClient?.set(
+      hashedKey,
+      JSON.stringify(encrypted),
+      "EX",
+      ttlSeconds
+    );
   } catch (e) {
     console.error("Error storing in cache", e);
   }
 
   ProviderKeyCache.getInstance().set<string>(
     hashedKey,
-    JSON.stringify(encrypted)
+    JSON.stringify(encrypted),
+    ttlSeconds * 1000
   );
 }
 
@@ -109,6 +124,16 @@ export async function getFromCache(key: string): Promise<string | null> {
     console.error("Error decrypting cached result", e);
     return null;
   }
+}
+
+export async function clearCache(key: string): Promise<void> {
+  const hashedKey = await hashAuth(key);
+  try {
+    await redisClient?.del(hashedKey);
+  } catch (e) {
+    console.error("Error clearing cache in redis", e);
+  }
+  ProviderKeyCache.getInstance().delete(hashedKey);
 }
 
 export async function getAndStoreInCache<T, K>(
