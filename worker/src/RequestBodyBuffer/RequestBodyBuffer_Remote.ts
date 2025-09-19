@@ -67,6 +67,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     isStream?: boolean;
     userId?: string;
     model?: string;
+    size?: number;
   } = {};
 
   constructor(
@@ -133,6 +134,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
               isStream?: boolean;
               userId?: string;
               model?: string;
+              size?: number;
             }>()
             .then((json) => {
               this.metadata = json;
@@ -150,27 +152,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   }
 
   async bodyLength(): Promise<number> {
-    try {
-      await this.ingestPromise.catch(() => undefined);
-      const response = await this.requestBodyBuffer.fetch(
-        `${BASE_URL}/${this.uniqueId}/body-length`,
-        { method: "GET" }
-      );
-      if (!response.ok) {
-        return 0;
-      }
-      const json = await response.json<{ length: number }>();
-
-      // Track actual request body size for remote buffer
-      if (this.dataDogClient && json.length > 0) {
-        this.dataDogClient.trackRequestSize(json.length);
-      }
-
-      return json.length;
-    } catch (e) {
-      console.error("RequestBodyBuffer_Remote bodyLength error", e);
-      return 0;
-    }
+    return this.metadata.size ?? 0;
   }
 
   public async tempSetBody(body: string): Promise<void> {
