@@ -70,6 +70,38 @@ export const endpoints = {
       "response_format"
     ],
     ptbEnabled: false,
+  "deepseek-v3:openrouter": {
+    provider: "openrouter",
+    author: "deepseek",
+    providerModelId: "deepseek/deepseek-chat-v3.1",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000316, // $3.16/1M - worst-case: $3.00/1M (SambaNova) * 1.055
+        output: 0.00000475, // $4.75/1M - worst-case: $4.50/1M (SambaNova) * 1.055
+      },
+    ],
+    contextLength: 163_840,
+    maxCompletionTokens: 163_840, // Same as context length when not specified
+    supportedParameters: [
+      "frequency_penalty",
+      "function_call",
+      "functions",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "stream",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3, // Fallback priority
     endpointConfigs: {
       "*": {},
     },

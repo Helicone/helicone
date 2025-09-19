@@ -44,6 +44,38 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-r1-distill-llama-70b:openrouter": {
+    provider: "openrouter",
+    author: "deepseek",
+    providerModelId: "deepseek/deepseek-r1-distill-llama-70b",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000211, // $2.11/1M - worst-case: $2.00/1M (Together) * 1.055
+        output: 0.00000211, // $2.11/1M - worst-case: $2.00/1M (Together) * 1.055
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072, // Same as context length when not specified
+    supportedParameters: [
+      "frequency_penalty",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3, // Fallback priority
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${DeepSeekR1ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

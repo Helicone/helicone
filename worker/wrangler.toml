@@ -94,7 +94,7 @@ SLACK_ALERT_CHANNEL = "C092GFJQP43"
 # only required for pass through billing development
 STRIPE_SECRET_KEY = "sk_test_"
 
-STRIPE_WEBHOOK_SECRET = "whsec_"
+STRIPE_WEBHOOK_SECRET = ""
 HELICONE_ORG_ID = ""
 
 EU_HELICONE_ORG_ID = ""

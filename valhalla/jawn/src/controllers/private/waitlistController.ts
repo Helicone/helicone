@@ -13,6 +13,7 @@ import { Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { WaitlistManager } from "../../managers/waitlist/WaitlistManager";
 
+
 @Route("v1/waitlist")
 @Tags("Waitlist")
 @Security("api_key")

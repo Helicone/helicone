@@ -46,6 +46,39 @@ export const endpoints = {
       "*": {},
     },
   },
+  // OpenRouter fallback endpoint with 5.5% markup
+  "qwen3-32b:openrouter": {
+    providerModelId: "qwen/qwen3-32b",
+    provider: "openrouter",
+    author: "alibaba",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000000422, // $0.42/1M - worst-case: $0.40/1M (Cerebras/SambaNova) * 1.055
+        output: 0.000000844, // $0.84/1M - worst-case: $0.80/1M (Cerebras/SambaNova) * 1.055
+      },
+    ],
+    contextLength: 40_960,
+    maxCompletionTokens: 40_960,
+    supportedParameters: [
+      "frequency_penalty",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "qwen3-30b-a3b:deepinfra": {
     providerModelId: "Qwen/Qwen3-30B-A3B",
     provider: "deepinfra",

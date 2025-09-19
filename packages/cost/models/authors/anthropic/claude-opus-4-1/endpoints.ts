@@ -106,6 +106,34 @@ export const endpoints = {
       "us-east-1": {},
     },
   },
+  "claude-opus-4-1:openrouter": {
+    provider: "openrouter",
+    author: "anthropic",
+    providerModelId: "anthropic/claude-opus-4.1",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00001583, // $15.83/1M - worst-case: $15.00/1M (Anthropic/Google) * 1.055
+        output: 0.00007913, // $79.13/1M - worst-case: $75.00/1M (Anthropic/Google) * 1.055
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 32000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "stop",
+      "tools",
+      "tool_choice",
+      "top_p",
+      "top_k",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${ClaudeOpus41ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

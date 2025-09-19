@@ -31,7 +31,7 @@ import { costOfPrompt } from "@helicone-package/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
-import { EscrowInfo } from "../ai-gateway/types";
+import { Attempt, EscrowInfo } from "../ai-gateway/types";
 import {
   IRequestBodyBuffer,
   ValidRequestBody,
@@ -73,7 +73,10 @@ export interface DBLoggableProps {
     request_ip: string | null;
     country_code: string | null;
     requestReferrer: string | null;
+    // set for AI Gateway PTB requests
     escrowInfo?: EscrowInfo;
+    // set for all AI Gateway requests (PTB+BYOK)
+    attempt?: Attempt;
   };
   timing: {
     startTime: Date;
@@ -123,6 +126,7 @@ export function dbLoggableRequestFromProxyRequest(
     country_code: (proxyRequest.requestWrapper.cf?.country as string) ?? null,
     requestReferrer: proxyRequest.requestWrapper.requestReferrer ?? null,
     escrowInfo: proxyRequest.escrowInfo ?? undefined,
+    attempt: proxyRequest.requestWrapper.getGatewayAttempt() ?? undefined,
   };
 }
 
@@ -718,6 +722,7 @@ export class DBLoggable {
         promptInputs: this.request.prompt2025Settings.promptInputs,
         promptEnvironment: this.request.prompt2025Settings.environment,
         isPassthroughBilling: this.request.escrowInfo ? true : false,
+        providerModelId: this.request.attempt?.endpoint.providerModelId ?? undefined,
       },
       log: {
         request: {

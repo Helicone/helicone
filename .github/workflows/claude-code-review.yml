@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write  # Required for inline comments
       issues: read
       id-token: write
 
@@ -42,28 +42,27 @@ jobs:
 
           # Direct prompt for automated review (no @claude mention needed)
           direct_prompt: |
+            Review this PR focusing on:
+            - Critical bugs or security issues only
+            - Major performance problems
+            - Breaking changes or API issues
 
-            Put long feedback in a collapsible section. (<details>...</details>)
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
+            Keep feedback concise. Only mention high-impact issues.
+            Use inline comments for specific code suggestions.
 
-            Be constructive and helpful in your feedback.
+            Provide a confidence score (0-10):
+            - 0-3: Critical issues, do not merge
+            - 4-7: Minor issues, merge with caution
+            - 8-10: Good to merge
 
-            Add a confidence score to the feedback. (0-10) 
-              - 0: Do not merge this PR
-              - 5: Merge this PR with caution
-              - 10: Merge this PR
+            Summary format:
+            **Score: X/10** - Brief reason
 
-            [Reason why if low score]
+          # Disable sticky comments to allow inline suggestions
+          use_sticky_comment: false
 
-
-            Add a summary of the feedback. Highlight the most important feedback, like the most important bugs, or the most important performance improvements.
-
-          # Optional: Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
-          use_sticky_comment: true
+          # Enable inline suggestions for specific code improvements
+          review_mode: "inline"
 
           # Optional: Different prompts for different authors
           # direct_prompt: |

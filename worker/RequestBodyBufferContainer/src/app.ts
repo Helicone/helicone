@@ -12,10 +12,23 @@ import type { AppConfig } from "./config";
 
 const gzipAsync = promisify(gzip);
 
+const REQUEST_TIMEOUT_MS = 1000 * 60 * 5; // 5 minutes
+const CONNECTION_TIMEOUT_MS = REQUEST_TIMEOUT_MS; // 5 minutes
+const KEEP_ALIVE_TIMEOUT_MS = 1 * 60 * 1000; // 1 minute
+const HEADERS_TIMEOUT_MS = 30 * 1000; // 30 seconds
+
 export function createApp(config: AppConfig, logger: any): FastifyInstance {
   const app = Fastify({
     logger,
     bodyLimit: config.maxSizeBytes, // Set Fastify body limit to match our config
+    connectionTimeout: CONNECTION_TIMEOUT_MS,
+    requestTimeout: REQUEST_TIMEOUT_MS,
+    keepAliveTimeout: KEEP_ALIVE_TIMEOUT_MS,
+    http: {
+      headersTimeout: HEADERS_TIMEOUT_MS,
+      requestTimeout: REQUEST_TIMEOUT_MS,
+      keepAliveTimeout: KEEP_ALIVE_TIMEOUT_MS,
+    },
   });
   const store = new MemoryStore(config.ttlSeconds);
 
@@ -116,6 +129,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     let isStream: boolean | undefined;
     let userId: string | undefined;
     let model: string | undefined;
+    let size: number = entry.size;
     try {
       const obj = JSON.parse(entry.data.toString("utf8"));
       if (typeof obj?.stream === "boolean") isStream = obj.stream === true;
@@ -125,7 +139,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
       // non-JSON bodies are fine; leave metadata undefined
     }
 
-    return reply.send({ isStream, userId, model });
+    return reply.send({ isStream, userId, model, size });
   });
 
   app.get<{
@@ -177,7 +191,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
   // }
   const BuildS3Schema = z.object({
     response: z.any(),
-    tags: z.record(z.string()),
+    tags: z.optional(z.record(z.string())),
     url: z.string().url(),
   });
 

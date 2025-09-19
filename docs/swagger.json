@@ -8010,6 +8010,10 @@
 							"$ref": "#/components/schemas/StandardParameter"
 						},
 						"type": "array"
+					},
+					"priority": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [

@@ -121,6 +121,34 @@ export const endpoints = {
       "us-east-1": {},
     },
   },
+  "claude-sonnet-4:openrouter": {
+    provider: "openrouter",
+    author: "anthropic",
+    providerModelId: "anthropic/claude-sonnet-4",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000006330, // $6.33/1M - worst-case: $6.00/1M (Google >200K) * 1.055
+        output: 0.00002374, // $23.74/1M - worst-case: $22.50/1M (Google >200K) * 1.055
+      },
+    ],
+    contextLength: 1000000, // OpenRouter shows 1M context for this model
+    maxCompletionTokens: 64000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "stop",
+      "tools",
+      "tool_choice",
+      "top_p",
+      "top_k",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${ClaudeSonnet4ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

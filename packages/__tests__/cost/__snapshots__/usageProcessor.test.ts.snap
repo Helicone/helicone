@@ -27,6 +27,25 @@ exports[`AnthropicUsageProcessor usage processing snapshot 1`] = `
 }
 `;
 
+exports[`Azure Usage Processing Azure usage processing snapshot 1`] = `
+{
+  "azure-response": {
+    "data": {
+      "input": 18,
+      "output": 100,
+    },
+    "error": null,
+  },
+  "azure-stream-response": {
+    "data": {
+      "input": 18,
+      "output": 100,
+    },
+    "error": null,
+  },
+}
+`;
+
 exports[`OpenAIUsageProcessor usage processing snapshot 1`] = `
 {
   "cached-response": {

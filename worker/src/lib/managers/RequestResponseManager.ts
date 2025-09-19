@@ -28,17 +28,12 @@ export class RequestResponseManager {
       content.organizationId
     );
 
-    const tags: Record<string, string> = {
-      name: "raw-request-response-body",
-    };
-
     const result = await content.requestBodyBuffer.uploadS3Body(
       content.responseBody,
-      url,
-      tags
+      url
     );
 
-    // THIS SHOULD BE THE LAST THING WE DO WITH THE BODY
+    // THIS SHOULD BE THE LAST THING WE DO WITH THE BODY....
     await content.requestBodyBuffer.delete();
 
     return result;

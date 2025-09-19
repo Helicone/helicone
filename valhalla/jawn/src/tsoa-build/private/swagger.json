@@ -6384,6 +6384,9 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"providerModelId": {
+						"type": "string"
+					},
 					"isPassthroughBilling": {
 						"type": "boolean"
 					},

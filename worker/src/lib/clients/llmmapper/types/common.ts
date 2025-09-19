@@ -46,11 +46,16 @@ export interface AnthropicContentBlock {
   type: "text" | "image" | "tool_use" | "tool_result" | "thinking" | "server_tool_use";
   text?: string;
   // Image fields
-  source?: {
-    type: "base64" | "url";
-    media_type: string;
-    data: string;
-  };
+  source?: 
+    | {
+        type: "base64";
+        media_type: string;
+        data: string;
+      }
+    | {
+        type: "url";
+        url: string;
+      };
   // Tool use fields
   id?: string;
   name?: string;
