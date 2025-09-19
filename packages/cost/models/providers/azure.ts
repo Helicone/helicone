@@ -19,28 +19,27 @@ export class AzureOpenAIProvider extends BaseProvider {
   ];
 
   buildUrl(endpoint: ModelProviderConfig, config: UserEndpointConfig): string {
-    // If it's PTB and no baseUri provided, use Helicone's Azure baseUri
-    const effectiveConfig = {
-      ...config,
-      ...(endpoint.ptbEnabled && !config.baseUri
-        ? {
-            baseUri: "https://helicone-gateway.cognitiveservices.azure.com",
-          }
-        : {}),
-    };
+    // Determine base URI - use provided or Helicone gateway for PTB
+    const baseUri = config.baseUri ||
+      (endpoint.ptbEnabled ? "https://helicone-gateway.cognitiveservices.azure.com" : null);
 
-    if (
-      !effectiveConfig.baseUri ||
-      (!effectiveConfig.deploymentName && !endpoint.providerModelId)
-    ) {
-      throw new Error("Azure OpenAI requires baseUri and deploymentName");
+    if (!baseUri) {
+      throw new Error("Azure OpenAI requires baseUri");
     }
-    const apiVersion = effectiveConfig.apiVersion || "2025-01-01-preview";
-    const baseUri = effectiveConfig.baseUri.endsWith("/")
-      ? effectiveConfig.baseUri
-      : `${effectiveConfig.baseUri}/`;
-    const builtUrl = `${baseUri}openai/deployments/${effectiveConfig.deploymentName ?? endpoint.providerModelId}/chat/completions?api-version=${apiVersion}`;
-    return builtUrl;
+
+    // Get deployment name - fallback chain: deploymentName -> providerModelId -> modelName
+    const deploymentName = config.deploymentName?.trim();
+    const deployment = deploymentName || endpoint.providerModelId || config.modelName;
+
+    if (!deployment) {
+      throw new Error("Azure OpenAI requires a deployment name, provider model ID, or model name");
+    }
+
+    // Build URL with normalized base URI and API version
+    const normalizedBaseUri = baseUri.endsWith("/") ? baseUri : `${baseUri}/`;
+    const apiVersion = config.apiVersion || "2025-01-01-preview";
+
+    return `${normalizedBaseUri}openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`;
   }
 
   authenticate(context: AuthContext): AuthResult {
