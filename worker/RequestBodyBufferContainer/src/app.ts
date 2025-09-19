@@ -191,7 +191,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
   // }
   const BuildS3Schema = z.object({
     response: z.any(),
-    tags: z.record(z.string()),
+    tags: z.optional(z.record(z.string())),
     url: z.string().url(),
   });
 
