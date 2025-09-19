@@ -378,6 +378,9 @@ export interface paths {
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
+  "/v1/session/count": {
+    post: operations["GetSessionsCount"];
+  };
   "/v1/session/name/query": {
     post: operations["GetNames"];
   };
@@ -2357,6 +2360,10 @@ Json: JsonObject;
       /** Format: double */
       timezoneDifference: number;
       filter: components["schemas"]["SessionFilterNode"];
+      /** Format: double */
+      offset?: number;
+      /** Format: double */
+      limit?: number;
     };
     SessionNameResult: {
       name: string;
@@ -6048,6 +6055,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_SessionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetSessionsCount: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
         };
       };
     };

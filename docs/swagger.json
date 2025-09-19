@@ -6427,6 +6427,14 @@
 					},
 					"filter": {
 						"$ref": "#/components/schemas/SessionFilterNode"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -17472,6 +17480,42 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_SessionResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Session"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SessionQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/session/count": {
+			"post": {
+				"operationId": "GetSessionsCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
 								}
 							}
 						}

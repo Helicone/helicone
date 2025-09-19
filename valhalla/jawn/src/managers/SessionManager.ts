@@ -259,20 +259,18 @@ export class SessionManager {
     );
   }
 
-  async getSessions(
+  private async buildSessionFilters(
     requestBody: SessionQueryParams
-  ): Promise<Result<SessionResult[], string>> {
+  ): Promise<{
+    builtFilter: any;
+    havingFilter: any;
+  }> {
     const {
       search,
       timeFilter,
-      timezoneDifference,
       filter: filterTree,
       nameEquals,
     } = requestBody;
-
-    if (!isValidTimeZoneDifference(timezoneDifference)) {
-      return err("Invalid timezone difference");
-    }
 
     const filters: FilterNode[] = [...timeFilterNodes(timeFilter), filterTree];
 
@@ -329,6 +327,24 @@ export class SessionManager {
       having: true,
     });
 
+    return { builtFilter, havingFilter };
+  }
+
+  async getSessions(
+    requestBody: SessionQueryParams
+  ): Promise<Result<SessionResult[], string>> {
+    const {
+      timezoneDifference,
+      offset = 0,
+      limit = 50,
+    } = requestBody;
+
+    if (!isValidTimeZoneDifference(timezoneDifference)) {
+      return err("Invalid timezone difference");
+    }
+
+    const { builtFilter, havingFilter } = await this.buildSessionFilters(requestBody);
+
     // Step 1 get all the properties given this filter
     const query = `
     SELECT 
@@ -351,8 +367,9 @@ export class SessionManager {
     )
     GROUP BY properties['Helicone-Session-Id'], properties['Helicone-Session-Name']
     HAVING (${havingFilter.filter})
-    ORDER BY created_at DESC -- TODO: REMOVE FOR TEST
-    LIMIT 50
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
     `;
 
     const results = await clickhouseDb.dbQuery<SessionResult>(
@@ -360,7 +377,7 @@ export class SessionManager {
       builtFilter.argsAcc
     );
 
-    return resultMap(results, (x) =>
+    const mappedResults = resultMap(results, (x) =>
       x.map((y) => ({
         ...y,
         completion_tokens: +y.completion_tokens,
@@ -369,6 +386,47 @@ export class SessionManager {
         avg_latency: +y.avg_latency,
       }))
     );
+
+    if (!mappedResults.data) {
+      return err(mappedResults.error);
+    }
+
+    return ok(mappedResults.data);
+  }
+
+  async getSessionsCount(
+    requestBody: SessionQueryParams
+  ): Promise<Result<number, string>> {
+    const { timezoneDifference } = requestBody;
+
+    if (!isValidTimeZoneDifference(timezoneDifference)) {
+      return err("Invalid timezone difference");
+    }
+
+    const { builtFilter, havingFilter } = await this.buildSessionFilters(requestBody);
+
+    const countQuery = `
+    SELECT count(DISTINCT (properties['Helicone-Session-Id'], properties['Helicone-Session-Name'])) as count 
+    FROM request_response_rmt
+    WHERE (
+        has(properties, 'Helicone-Session-Id')
+        AND (
+          ${builtFilter.filter}
+        )
+    )
+    HAVING (${havingFilter.filter})
+    `;
+
+    const countResult = await clickhouseDb.dbQuery<{ count: number }>(
+      countQuery,
+      builtFilter.argsAcc
+    );
+
+    if (!countResult.data) {
+      return err(countResult.error ?? "Error getting sessions count");
+    }
+
+    return ok(+countResult.data[0].count);
   }
 
   async updateSessionFeedback(
