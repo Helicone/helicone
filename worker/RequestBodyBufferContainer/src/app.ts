@@ -129,6 +129,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     let isStream: boolean | undefined;
     let userId: string | undefined;
     let model: string | undefined;
+    let size: number = entry.size;
     try {
       const obj = JSON.parse(entry.data.toString("utf8"));
       if (typeof obj?.stream === "boolean") isStream = obj.stream === true;
@@ -138,7 +139,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
       // non-JSON bodies are fine; leave metadata undefined
     }
 
-    return reply.send({ isStream, userId, model });
+    return reply.send({ isStream, userId, model, size });
   });
 
   app.get<{
@@ -190,7 +191,7 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
   // }
   const BuildS3Schema = z.object({
     response: z.any(),
-    tags: z.record(z.string()),
+    tags: z.optional(z.record(z.string())),
     url: z.string().url(),
   });
 
