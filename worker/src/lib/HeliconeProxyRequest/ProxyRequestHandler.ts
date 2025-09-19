@@ -155,6 +155,14 @@ export async function handleProxyRequest(
   responseHeaders.set("Helicone-Status", "success");
   responseHeaders.set("Helicone-Id", proxyRequest.requestId);
 
+  // Add AI Gateway specific headers if this is a gateway request
+  const gatewayAttempt = proxyRequest.requestWrapper.getGatewayAttempt();
+  if (gatewayAttempt) {
+    responseHeaders.set("X-Helicone-Gateway-Mode", gatewayAttempt.authType.toUpperCase());
+    responseHeaders.set("X-Helicone-Provider", gatewayAttempt.endpoint.provider);
+    responseHeaders.set("X-Helicone-Model", gatewayAttempt.endpoint.providerModelId);
+  }
+
   let status = response.status;
   if (status < 200 || status >= 600) {
     console.error("Invalid status code: ", status);
