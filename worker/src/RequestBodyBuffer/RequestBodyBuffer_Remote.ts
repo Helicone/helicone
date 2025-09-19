@@ -152,7 +152,12 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   }
 
   async bodyLength(): Promise<number> {
-    return this.metadata.size ?? 0;
+    const size = this.metadata.size ?? 0;
+    // Track actual request body size for DataDog metrics
+    if (this.dataDogClient && size > 0) {
+      this.dataDogClient.trackRequestSize(size);
+    }
+    return size;
   }
 
   public async tempSetBody(body: string): Promise<void> {
