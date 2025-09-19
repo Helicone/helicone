@@ -381,7 +381,7 @@ completion = client.chat.completions.create(
                                           rate limits are reached to ensure
                                           uninterrupted service. Credits shown
                                           are worst-case escrow; actual charges
-                                          match OpenRouter's pricing.
+                                          match OpenRouter&apos;s pricing.
                                         </p>
                                       </TooltipContent>
                                     </Tooltip>
@@ -506,7 +506,7 @@ completion = client.chat.completions.create(
                                     OpenRouter routes to multiple providers with
                                     different costs. Prices shown are the
                                     maximum (worst-case) for credit escrow.
-                                    You'll be charged actual costs, which are
+                                    You&apos;ll be charged actual costs, which are
                                     typically lower.
                                   </p>
                                 </div>
@@ -640,7 +640,7 @@ completion = client.chat.completions.create(
           </div>
 
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Use {model.name} through Helicone's AI Gateway with automatic
+            Use {model.name} through Helicone&apos;s AI Gateway with automatic
             logging and monitoring.
           </p>
 
