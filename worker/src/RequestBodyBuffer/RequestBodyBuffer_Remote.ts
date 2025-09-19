@@ -9,7 +9,7 @@ const BASE_URL = "https://thisdoesntmatter.helicone.ai";
 /**
  * Containers are OOMing so let's load 5 containers to be safe.
  */
-const CONTAINER_LOAD_COUNT = 5;
+const CONTAINER_LOAD_COUNT = 10;
 
 function fnvHash(str: string): number {
   let hash = 2166136261; // FNV offset basis
@@ -67,6 +67,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     isStream?: boolean;
     userId?: string;
     model?: string;
+    size?: number;
   } = {};
 
   constructor(
@@ -133,6 +134,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
               isStream?: boolean;
               userId?: string;
               model?: string;
+              size?: number;
             }>()
             .then((json) => {
               this.metadata = json;
@@ -150,27 +152,12 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
   }
 
   async bodyLength(): Promise<number> {
-    try {
-      await this.ingestPromise.catch(() => undefined);
-      const response = await this.requestBodyBuffer.fetch(
-        `${BASE_URL}/${this.uniqueId}/body-length`,
-        { method: "GET" }
-      );
-      if (!response.ok) {
-        return 0;
-      }
-      const json = await response.json<{ length: number }>();
-
-      // Track actual request body size for remote buffer
-      if (this.dataDogClient && json.length > 0) {
-        this.dataDogClient.trackRequestSize(json.length);
-      }
-
-      return json.length;
-    } catch (e) {
-      console.error("RequestBodyBuffer_Remote bodyLength error", e);
-      return 0;
+    const size = this.metadata.size ?? 0;
+    // Track actual request body size for DataDog metrics
+    if (this.dataDogClient && size > 0) {
+      this.dataDogClient.trackRequestSize(size);
     }
+    return size;
   }
 
   public async tempSetBody(body: string): Promise<void> {

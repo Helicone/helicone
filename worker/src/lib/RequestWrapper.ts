@@ -600,11 +600,11 @@ export class RequestWrapper {
     await this.requestBodyBuffer.tempSetBody(body);
   }
 
-  setSuccessfulAttempt(attempt: Attempt): void {
+  setGatewayAttempt(attempt: Attempt): void {
     this.gatewayAttempt = attempt;
   }
 
-  getSuccessfulAttempt(): Attempt | undefined {
+  getGatewayAttempt(): Attempt | undefined {
     return this.gatewayAttempt;
   }
 }

@@ -130,6 +130,84 @@ export const endpoints = {
       "*": {},
     },
   },
+  "o3:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/o3",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000211, // $2.11/1M - worst-case: $2.00/1M (OpenAI) * 1.055
+        output: 0.00000844, // $8.44/1M - worst-case: $8.00/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 200_000,
+    maxCompletionTokens: 100_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "o3-mini:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/o3-mini",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000116, // $1.16/1M - worst-case: $1.10/1M (OpenAI) * 1.055
+        output: 0.00000464, // $4.64/1M - worst-case: $4.40/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 200_000,
+    maxCompletionTokens: 100_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "o3-pro:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/o3-pro",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000211, // $21.10/1M - worst-case: $20.00/1M (OpenAI) * 1.055
+        output: 0.0000844, // $84.40/1M - worst-case: $80.00/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 200_000,
+    maxCompletionTokens: 100_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${O3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

@@ -1,0 +1,76 @@
+{
+  "choices": [
+    {
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      },
+      "finish_reason": "length",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+        "annotations": [],
+        "content": "That's wonderful! Paris is full of incredible sights, experiences, and neighborhoods to explore. Here are some top things you shouldn't miss:\n\n**Iconic Landmarks**\n- **Eiffel Tower** – Go up for amazing views or picnic in the park below.\n- **Louvre Museum** – See the Mona Lisa, Venus de Milo, and countless other masterpieces.\n- **Notre-Dame Cathedral** – While it's currently under restoration, the exterior and the nearby Ile de la Cité are beautiful.\n",
+        "refusal": null,
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1758225260,
+  "id": "chatcmpl-CHEzsQvLnKpkvWKxLns8lByIi9FwD",
+  "model": "gpt-4.1-2025-04-14",
+  "object": "chat.completion",
+  "prompt_filter_results": [
+    {
+      "prompt_index": 0,
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      }
+    }
+  ],
+  "system_fingerprint": "fp_9ab7d013ff",
+  "usage": {
+    "completion_tokens": 100,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": 0
+    },
+    "prompt_tokens": 18,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cached_tokens": 0
+    },
+    "total_tokens": 118
+  }
+}

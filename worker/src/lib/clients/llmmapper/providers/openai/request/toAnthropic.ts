@@ -67,9 +67,50 @@ function openAIContentToAnthropicContent(content: string | HeliconeChatCompletio
       case "text":
         return { type: "text", text: part.text, cache_control: part.cache_control };
       case "image_url":
+        // expected format: { type: "image_url", image_url: { url: string } }
+        // where url: is either a link, or `data:image/{format};base64,{base64_encoded_image}`
+        const url = part.image_url.url;
+        if (url.startsWith('data:')) {
+          // format: data:image/jpeg;base64,{base64_data}
+          const parts = url.split(',');
+          if (parts.length !== 2) {
+            throw new Error(`Invalid data URI format: ${url}`);
+          }
+          const [mimeType, base64Data] = parts;
+          const mediaParts = mimeType.split(':');
+          if (mediaParts.length < 2) {
+            throw new Error(`Invalid data URI MIME type: ${mimeType}`);
+          }
+          const mediaType = mediaParts[1].split(';')[0];
+          return {
+            type: "image",
+            source: {
+              type: "base64",
+              media_type: mediaType,
+              data: base64Data,
+            },
+            cache_control: part.cache_control,
+          };
+        } else {
+          return {
+            type: "image",
+            source: {
+              type: "url",
+              url: url,
+            },
+            cache_control: part.cache_control,
+          };
+        }
       case "input_audio":
+        // expected format: { type: "input_audio", input_audio: { data: base64str, format: "wav" }}
+        throw new Error(`${part.type} is not supported by Anthropic Messages.`)
       case "file":
+        // TODO: Chat Completions API does not support files whereas Anthropic Messages API does
+        // would need to extend the HeliconeChatCreateParams types to support files, and map it to the Anthropic format:
+        // { type: "image", source: { type: "file", file_id: string }}
         throw new Error(`Unsupported content type: ${part.type}`);
+      default:
+        throw new Error(`Unsupported content type: ${(part as any).type}`);
     }
   });
 }

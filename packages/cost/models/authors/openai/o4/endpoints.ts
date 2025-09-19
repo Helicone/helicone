@@ -67,6 +67,32 @@ export const endpoints = {
       "*": {},
     },
   },
+  "o4-mini:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/o4-mini",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000116, // $1.16/1M - worst-case: $1.10/1M (OpenAI) * 1.055
+        output: 0.00000464, // $4.64/1M - worst-case: $4.40/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 200_000,
+    maxCompletionTokens: 100_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${O4ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

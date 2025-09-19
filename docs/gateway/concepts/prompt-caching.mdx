@@ -1,22 +1,164 @@
 ---
 title: "Prompt Caching"
-description: "Understanding prompt caching pricing and mechanics across LLM providers"
+description: "Cache frequently-used context across LLM providers for reduced costs and faster responses"
 ---
 
-Prompt caching allows you to cache frequently-used context (system prompts, examples, documents) and reuse it across multiple requests at a discounted rate. This guide explains how caching works and is priced across different providers.
+Prompt caching allows you to cache frequently-used context (system prompts, examples, documents) and reuse it across multiple requests at significantly reduced costs.
 
-## Overview
+## Why Prompt Caching
 
-When you cache content:
-1. **Cache Write**: You pay to store content in the cache (first use)
-2. **Cache Read**: You pay a discounted rate when reusing cached content
-3. **Storage** (Google only): Additional hourly storage costs
+<CardGroup cols={3}>
+<Card title="Reduce Token Costs" icon="dollar-sign">
+  Cached prompts are processed at significantly reduced rates by providers (up to 90% savings)
+</Card>
+<Card title="Faster Processing" icon="bolt">
+  Providers skip re-processing cached prompt segments for faster response times
+</Card>
+<Card title="Automatic Optimization" icon="puzzle-piece">
+  Works out-of-the-box with OpenAI compatible AI Gateway across all providers
+</Card>
+</CardGroup>
+
+---
+
+## OpenAI and Compatible Providers
+
+**Automatic caching** for prompts over 1024 tokens. Use the `prompt_cache_key` parameter for better cache hit control.
+
+**Compatible providers:** OpenAI, Grok, Groq, Deepseek, Moonshot AI, Azure OpenAI
+
+### Quick Start
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    {
+      role: "system",
+      content: "Very long system prompt that will be automatically cached..." // 1024+ tokens
+    },
+    {
+      role: "user", 
+      content: "What is machine learning?"
+    }
+  ],
+  prompt_cache_key: `doc-analysis-${documentId}` // Optional: control caching keys
+});
+```
+
+### Pricing
+
+OpenAI charges standard rates for cache writes and offers significant discounts for cache reads. Exact pricing varies by model.
+
+<CardGroup cols={2}>
+    <Card title="Helicone Model Registry" href="https://helicone.ai/models">
+    View supported models and their caching capabilities
+    </Card>
+
+    <Card title="OpenAI Prompt Caching Documentation" href="https://platform.openai.com/docs/guides/prompt-caching">
+    Official OpenAI prompt caching guide
+    </Card>
+</CardGroup>
+
+---
 
 ## Anthropic (Claude)
 
-Anthropic uses a simple multiplier-based pricing model for prompt caching.
+Anthropic provides advanced caching with **cache control breakpoints** (up to 4 per request) and TTL control.
+
+### Using OpenAI SDK with Helicone Types
+
+The `@helicone/helpers` SDK extends OpenAI types to support Anthropic's cache control through the OpenAI-compatible interface:
+
+```bash
+npm install @helicone/helpers
+```
+
+```typescript
+import OpenAI from "openai";
+import { HeliconeChatCreateParams } from "@helicone/helpers";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "claude-3.5-haiku",
+  messages: [
+    {
+      role: "system",
+      content: "You are a helpful assistant...",
+      cache_control: {
+        type: "ephemeral",
+        ttl: "1h"
+      }
+    },
+    {
+        role: "assistant",
+        content: "Example assistant message.",
+        cache_control: { type: "ephemeral" }
+    },
+    {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: "This content will be cached.",
+          cache_control: {
+            type: "ephemeral",
+            ttl: "5m"
+          }
+        },
+        {
+          type: "image_url",
+          image_url: {
+            url: "https://example.com/image.jpg",
+            detail: "low"
+          },
+          cache_control: { type: "ephemeral" }
+        }
+      ]
+    }
+  ],
+  temperature: 0.7
+} as HeliconeChatCreateParams);
+```
+
+### Cache Key Mapping
+
+Anthropic uses `user_id` as a cache key on their servers. When using the OpenAI-compatible AI Gateway, these parameters automatically map to Anthropic's `user_id`:
+
+- `prompt_cache_key`
+- `safety_identifier` 
+- `user`
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "claude-3.5-haiku",
+  messages: [/* your messages */],
+  prompt_cache_key: "doc-analysis-v1", // Maps to Anthropic's user_id for cache keying
+  cache_control: {
+    type: "ephemeral", 
+    ttl: "1h"
+  }
+} as HeliconeChatCreateParams);
+```
+
+<Note>
+**Current Limitation**: Anthropic cache control is currently enabled for caching messages only. Support for caching tools is coming soon.
+</Note>
 
 ### Pricing Structure
+
+Anthropic uses a simple multiplier-based pricing model for prompt caching.
 
 | Operation | Multiplier | Example (Claude Sonnet @ $3/MTok) |
 |-----------|------------|-----------------------------------|
@@ -37,6 +179,12 @@ Base input price: $3/MTok
 1-hour cache write: $3 × 2.0 = $6.00/MTok
 Cache read: $3 × 0.1 = $0.30/MTok
 ```
+
+<Card title="Learn More" href="https://docs.claude.com/en/docs/build-with-claude/prompt-caching">
+  Anthropic Prompt Caching Documentation
+</Card>
+
+---
 
 ## Google Gemini
 

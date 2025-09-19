@@ -2574,6 +2574,7 @@ const models: TsoaRoute.Models = {
             "author": {"ref":"AuthorName","required":true},
             "providerModelId": {"dataType":"string","required":true},
             "supportedParameters": {"dataType":"array","array":{"dataType":"refAlias","ref":"StandardParameter"},"required":true},
+            "priority": {"dataType":"double"},
         },
         "additionalProperties": false,
     },

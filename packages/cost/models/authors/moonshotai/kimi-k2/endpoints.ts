@@ -91,6 +91,72 @@ export const endpoints = {
       "*": {},
     },
   },
+  "kimi-k2:openrouter": {
+    provider: "openrouter",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000105, // $1.05/1M - worst-case: $1.00/1M (Together) * 1.055
+        output: 0.00000316, // $3.16/1M - worst-case: $3.00/1M (Together) * 1.055
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "frequency_penalty",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-0905:openrouter": {
+    provider: "openrouter",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2-0905",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000142, // $1.42/1M - worst-case: $1.35/1M (WandB) * 1.055
+        output: 0.00000528, // $5.28/1M - worst-case: $5.00/1M (Moonshot AI) * 1.055
+      },
+    ],
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144, // Same as context when not specified
+    supportedParameters: [
+      "frequency_penalty",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${KimiK2ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

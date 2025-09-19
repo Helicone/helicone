@@ -2930,6 +2930,8 @@ Json: JsonObject;
       author: components["schemas"]["AuthorName"];
       providerModelId: string;
       supportedParameters: components["schemas"]["StandardParameter"][];
+      /** Format: double */
+      priority?: number;
     };
     SimplifiedPricing: {
       /** Format: double */

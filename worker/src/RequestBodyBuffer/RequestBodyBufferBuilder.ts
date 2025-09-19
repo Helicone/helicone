@@ -37,31 +37,27 @@ async function isOver(
  * @returns
  */
 function tryInitRemote(
-  bodyStream: ReadableStream | null,
+  request: Request | null,
   dataDogClient: DataDogClient | undefined,
   env: Env
 ) {
   try {
     if (env.REQUEST_BODY_BUFFER) {
       return new RequestBodyBuffer_Remote(
-        bodyStream ?? null,
+        request?.body ?? null,
         dataDogClient,
         env.REQUEST_BODY_BUFFER,
         env
       );
     } else {
       return new RequestBodyBuffer_InMemory(
-        bodyStream ?? null,
+        request ?? null,
         dataDogClient,
         env
       );
     }
   } catch (e) {
-    return new RequestBodyBuffer_InMemory(
-      bodyStream ?? null,
-      dataDogClient,
-      env
-    );
+    return new RequestBodyBuffer_InMemory(request ?? null, dataDogClient, env);
   }
 }
 
@@ -90,11 +86,7 @@ export async function RequestBodyBufferBuilder(
 
   if (["GET", "HEAD"].includes(method) || request.body === null) {
     dataDogClient?.trackBufferDecision("get_head");
-    return new RequestBodyBuffer_InMemory(
-      request.body ?? null,
-      dataDogClient,
-      env
-    );
+    return new RequestBodyBuffer_InMemory(request, dataDogClient, env);
   }
 
   // Threshold for routing: small → InMemory, large → Remote.
@@ -110,14 +102,10 @@ export async function RequestBodyBufferBuilder(
     const sizeMB = contentLength / (1024 * 1024);
     if (contentLength > MAX_INMEMORY_BYTES) {
       dataDogClient?.trackBufferDecision("known_large", sizeMB);
-      return tryInitRemote(request.body, dataDogClient, env);
+      return tryInitRemote(request, dataDogClient, env);
     } else {
       dataDogClient?.trackBufferDecision("known_small", sizeMB);
-      return new RequestBodyBuffer_InMemory(
-        request.body ?? null,
-        dataDogClient,
-        env
-      );
+      return new RequestBodyBuffer_InMemory(request, dataDogClient, env);
     }
   }
   dataDogClient?.trackBufferDecision("size_unknown");
@@ -125,27 +113,25 @@ export async function RequestBodyBufferBuilder(
   // If container is not bound and size is unknown, default to in-memory.
   if (!env.REQUEST_BODY_BUFFER) {
     dataDogClient?.trackBufferDecision("unknown_no_container");
-    return new RequestBodyBuffer_InMemory(
-      request.body ?? null,
-      dataDogClient,
-      env
-    );
+    return new RequestBodyBuffer_InMemory(request, dataDogClient, env);
   }
 
   // Size unknown, container available - must use tee() to check size
-  const originalBody = request.body!;
-  const [mainBodyToConsume, streamToCheckSize] = originalBody.tee();
-  const exceeded = await isOver(streamToCheckSize, MAX_INMEMORY_BYTES);
 
-  if (exceeded) {
-    dataDogClient?.trackBufferDecision("tee_large");
-    return tryInitRemote(mainBodyToConsume, dataDogClient, env);
-  } else {
-    dataDogClient?.trackBufferDecision("tee_small");
-    return new RequestBodyBuffer_InMemory(
-      mainBodyToConsume,
-      dataDogClient,
-      env
-    );
-  }
+  return new RequestBodyBuffer_InMemory(request, dataDogClient, env);
+  // const originalBody = request.body!;
+  // const [mainBodyToConsume, streamToCheckSize] = originalBody.tee();
+  // const exceeded = await isOver(streamToCheckSize, MAX_INMEMORY_BYTES);
+
+  // if (exceeded) {
+  //   dataDogClient?.trackBufferDecision("tee_large");
+  //   return tryInitRemote(mainBodyToConsume, dataDogClient, env);
+  // } else {
+  //   dataDogClient?.trackBufferDecision("tee_small");
+  //   return new RequestBodyBuffer_InMemory(
+  //     mainBodyToConsume,
+  //     dataDogClient,
+  //     env
+  //   );
+  // }
 }
