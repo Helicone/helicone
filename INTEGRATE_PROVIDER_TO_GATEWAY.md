@@ -37,6 +37,8 @@ packages/cost/models/
 
 We will use `DeepInfra` as our example.
 
+If the provider your model needs is already set up in the `providers` directory, you can skip this step.
+
 ### For OpenAI-Compatible Providers
 
 Create a new file in `packages/cost/models/providers/[provider-name].ts`:
@@ -214,7 +216,7 @@ export const endpoints = {
 
 Two important things to note here:
 
-- Some providers have multiple deployment regions:
+- Some providers have multiple deployment regions. You can use examples from Bedrock and Azure as a reference:
 
     ```tsx
     endpointConfigs: {
