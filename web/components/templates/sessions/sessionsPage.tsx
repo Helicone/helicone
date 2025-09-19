@@ -38,7 +38,7 @@ import {
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { getRequestsByIdsWithBodies } from "../../../services/hooks/requests";
-import { useSessionNames, useSessions, useSessionsCount } from "../../../services/hooks/sessions";
+import { useSessionNames, useSessions, useSessionsAggregateMetrics } from "../../../services/hooks/sessions";
 import {
   columnDefsToDragColumnItems,
   DragColumnItem,
@@ -149,7 +149,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     pageSize: currentPageSize,
   });
 
-  const { count, isLoading: isCountLoading } = useSessionsCount({
+  const { aggregateMetrics, isLoading: isCountLoading } = useSessionsAggregateMetrics({
     timeFilter,
     sessionIdSearch: debouncedSessionIdSearch ?? "",
     selectedName,
@@ -252,46 +252,24 @@ const SessionsPage = (props: SessionsPageProps) => {
     [isShiftPressed, toggleSelection],
   );
 
-  // Calculate aggregated stats
   const aggregatedStats = useMemo(() => {
-    if (!sessions || sessions.length === 0) {
+    if (!aggregateMetrics) {
       return {
-        lastUsed: "-",
         avgCost: "-",
         avgLatency: "-",
         totalCost: "-",
         totalSessions: 0,
-        createdOn: "-",
       };
     }
 
-    const totalCost = sessions.reduce((sum, s) => sum + s.total_cost, 0);
-    const avgCost = totalCost / sessions.length;
-    const lastUsed = new Date(
-      Math.max(
-        ...sessions.map((s) => new Date(s.latest_request_created_at).getTime()),
-      ),
-    ).toLocaleString();
-    const createdOn = new Date(
-      Math.min(...sessions.map((s) => new Date(s.created_at).getTime())),
-    ).toLocaleDateString();
-
-    // Calculate simple average of session average latencies
-    const totalAvgLatency = sessions.reduce((sum, s) => sum + s.avg_latency, 0);
-    const avgLatency =
-      sessions.length > 0 ? totalAvgLatency / sessions.length : 0;
-
     return {
-      lastUsed,
-      avgCost: `$${avgCost.toFixed(4)}`,
-      avgLatency: `${(avgLatency * 1000).toFixed(0)}ms`,
-      totalCost: `$${totalCost.toFixed(4)}`,
-      totalSessions: sessions.length,
-      createdOn,
+      avgCost: `$${aggregateMetrics.avg_cost.toFixed(4)}`,
+      avgLatency: `${(aggregateMetrics.avg_latency * 1000).toFixed(0)}ms`,
+      totalCost: `$${aggregateMetrics.total_cost.toFixed(4)}`,
+      totalSessions: aggregateMetrics.count,
     };
-  }, [sessions]);
+  }, [aggregateMetrics]);
   const statsToDisplay = [
-    { label: "Last Used", value: aggregatedStats.lastUsed },
     { label: "Avg Cost", value: aggregatedStats.avgCost },
     { label: "Avg Latency", value: aggregatedStats.avgLatency },
     { label: "Total Cost", value: aggregatedStats.totalCost },
@@ -299,7 +277,6 @@ const SessionsPage = (props: SessionsPageProps) => {
       label: "Total Sessions",
       value: aggregatedStats.totalSessions.toString(),
     },
-    { label: "Created On", value: aggregatedStats.createdOn },
   ];
 
   useEffect(() => {
@@ -495,7 +472,7 @@ const SessionsPage = (props: SessionsPageProps) => {
             currentPage={page}
             pageSize={currentPageSize}
             isCountLoading={isCountLoading}
-            count={count}
+            count={aggregateMetrics?.count || 0}
             onPageChange={(n) => handlePageChange(n)}
             onPageSizeChange={(n) => setCurrentPageSize(n)}
             pageSizeOptions={[25, 50, 100, 250, 500]}

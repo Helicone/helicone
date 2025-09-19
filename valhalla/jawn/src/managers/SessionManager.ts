@@ -35,6 +35,14 @@ export interface SessionResult {
   avg_latency: number;
 }
 
+export interface SessionsAggregateMetrics {
+  count: number;
+  total_cost: number;
+  avg_cost: number;
+  avg_latency: number;
+  avg_requests: number;
+}
+
 export interface SessionNameResult {
   name: string;
   created_at: string;
@@ -396,7 +404,7 @@ export class SessionManager {
 
   async getSessionsCount(
     requestBody: SessionQueryParams
-  ): Promise<Result<number, string>> {
+  ): Promise<Result<SessionsAggregateMetrics, string>> {
     const { timezoneDifference } = requestBody;
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
@@ -406,7 +414,8 @@ export class SessionManager {
     const { builtFilter, havingFilter } = await this.buildSessionFilters(requestBody);
 
     const countQuery = `
-    SELECT count(DISTINCT (properties['Helicone-Session-Id'], properties['Helicone-Session-Name'])) as count 
+    SELECT
+      count(DISTINCT (properties['Helicone-Session-Id'], properties['Helicone-Session-Name'])) as count
     FROM request_response_rmt
     WHERE (
         has(properties, 'Helicone-Session-Id')
@@ -426,7 +435,45 @@ export class SessionManager {
       return err(countResult.error ?? "Error getting sessions count");
     }
 
-    return ok(+countResult.data[0].count);
+    const sessionsCount = +countResult.data[0].count;
+
+    const metricsQuery = `
+    SELECT
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as total_cost,
+      (sum(cost) / ${COST_PRECISION_MULTIPLIER}) / ${sessionsCount} as avg_cost,
+      (sum(latency) / ${sessionsCount}) as avg_latency,
+      count(*) / ${sessionsCount} as avg_requests
+    FROM request_response_rmt
+    WHERE (
+        has(properties, 'Helicone-Session-Id')
+        AND (
+          ${builtFilter.filter}
+        )
+    )
+    HAVING (${havingFilter.filter})
+    `;
+
+    const metricsResult = await clickhouseDb.dbQuery<{
+      total_cost: number,
+      avg_cost: number,
+      avg_latency: number,
+      avg_requests: number,
+    }>(
+      metricsQuery,
+      builtFilter.argsAcc
+    );
+
+    if (!metricsResult.data) {
+      return err(metricsResult.error ?? "Error getting sessions metrics");
+    }
+
+    return ok({
+      count: sessionsCount,
+      total_cost: +metricsResult.data[0].total_cost,
+      avg_cost: +metricsResult.data[0].avg_cost,
+      avg_latency: +metricsResult.data[0].avg_latency,
+      avg_requests: +metricsResult.data[0].avg_requests,
+    });
   }
 
   async updateSessionFeedback(

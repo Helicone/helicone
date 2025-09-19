@@ -2365,6 +2365,24 @@ Json: JsonObject;
       /** Format: double */
       limit?: number;
     };
+    SessionsAggregateMetrics: {
+      /** Format: double */
+      count: number;
+      /** Format: double */
+      total_cost: number;
+      /** Format: double */
+      avg_cost: number;
+      /** Format: double */
+      avg_latency: number;
+      /** Format: double */
+      avg_requests: number;
+    };
+    ResultSuccess_SessionsAggregateMetrics_: {
+      data: components["schemas"]["SessionsAggregateMetrics"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionsAggregateMetrics.string_": components["schemas"]["ResultSuccess_SessionsAggregateMetrics_"] | components["schemas"]["ResultError_string_"];
     SessionNameResult: {
       name: string;
       created_at: string;
@@ -6069,7 +6087,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_number.string_"];
+          "application/json": components["schemas"]["Result_SessionsAggregateMetrics.string_"];
         };
       };
     };

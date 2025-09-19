@@ -16,6 +16,7 @@ import {
   SessionMetrics,
   SessionNameResult,
   SessionResult,
+  SessionsAggregateMetrics,
 } from "../../managers/SessionManager";
 import { err, ok, Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
@@ -90,7 +91,7 @@ export class SessionController extends Controller {
         if (result.error || !result.data) {
           return err("Error finding sessions");
         } else {
-          if (result.data > 0) {
+          if (result.data?.count > 0) {
             return ok(true);
           } else {
             return err("No sessions found");
@@ -131,7 +132,7 @@ export class SessionController extends Controller {
     @Body()
     requestBody: SessionQueryParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<number, string>> {
+  ): Promise<Result<SessionsAggregateMetrics, string>> {
     const sessionManager = new SessionManager(request.authParams);
 
     const result = await sessionManager.getSessionsCount(requestBody);

@@ -83,7 +83,7 @@ const useSessions = ({
   };
 };
 
-const useSessionsCount = ({
+const useSessionsAggregateMetrics = ({
   timeFilter,
   sessionIdSearch,
   selectedName,
@@ -137,7 +137,7 @@ const useSessionsCount = ({
   });
 
   return {
-    count: data?.data?.data || 0,
+    aggregateMetrics: data?.data?.data,
     refetch,
     isLoading,
     isRefetching,
@@ -283,5 +283,5 @@ export {
   useSessionMetrics,
   useSessionNames,
   useSessions,
-  useSessionsCount,
+  useSessionsAggregateMetrics,
 };
