@@ -357,8 +357,6 @@ completion = client.chat.completions.create(
                   hasTiers && pricingArray ? pricingArray[0] : endpoint.pricing;
                 const isExpanded = expandedProviders.has(endpoint.provider);
 
-                // Debug provider name
-                console.log("Provider:", endpoint.provider);
 
                 return (
                   <div key={endpoint.provider}>
@@ -688,6 +686,7 @@ completion = client.chat.completions.create(
             {highlightedCode ? (
               <div
                 className="overflow-x-auto rounded-lg bg-gray-900 text-gray-100 [&_pre]:!p-4"
+                // Safe: Using Shiki library output with controlled input
                 dangerouslySetInnerHTML={{ __html: highlightedCode }}
               />
             ) : (
