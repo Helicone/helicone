@@ -32,7 +32,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -49,7 +49,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -72,7 +72,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -96,7 +96,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -117,7 +117,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -145,7 +145,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -167,7 +167,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -198,7 +198,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -215,7 +215,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -242,7 +242,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "DeepInfra service unavailable",
@@ -258,7 +258,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -274,7 +274,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 401,
                 errorMessage: "Invalid API key",
@@ -290,7 +290,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 404,
                 errorMessage: "Model not found",
@@ -306,7 +306,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 403,
                 errorMessage: "Quota exceeded",
@@ -322,7 +322,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Invalid request parameters",
@@ -338,7 +338,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 408,
                 errorMessage: "Request timeout",
@@ -359,7 +359,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 422,
                 errorMessage: "Content filtering violation",
@@ -384,7 +384,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -412,7 +412,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -436,7 +436,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -457,7 +457,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -479,7 +479,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506", // Should map to the correct provider model ID
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -501,7 +501,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Messages array cannot be empty",
@@ -525,7 +525,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -550,7 +550,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
                 data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
@@ -567,7 +567,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Invalid JSON in request body",
@@ -583,7 +583,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 502,
                 errorMessage: "Bad gateway - upstream server error",
@@ -603,7 +603,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -620,7 +620,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -643,7 +643,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -667,7 +667,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -688,7 +688,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -716,7 +716,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -735,7 +735,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "DeepInfra service unavailable",
@@ -751,7 +751,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -767,7 +767,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 401,
                 errorMessage: "Invalid API key",
@@ -783,7 +783,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 404,
                 errorMessage: "Model not found",
@@ -799,7 +799,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 403,
                 errorMessage: "Quota exceeded",
@@ -815,7 +815,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Invalid request parameters",
@@ -831,7 +831,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 408,
                 errorMessage: "Request timeout",
@@ -852,7 +852,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 422,
                 errorMessage: "Content filtering violation",
@@ -877,7 +877,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -905,7 +905,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -936,7 +936,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -953,7 +953,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -969,7 +969,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -996,7 +996,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -1018,7 +1018,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407", // Should map to the correct provider model ID
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -1040,7 +1040,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Messages array cannot be empty",
@@ -1064,7 +1064,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -1089,7 +1089,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
                 data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
@@ -1106,7 +1106,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Invalid JSON in request body",
@@ -1122,7 +1122,7 @@ describe("Mistral Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 502,
                 errorMessage: "Bad gateway - upstream server error",
