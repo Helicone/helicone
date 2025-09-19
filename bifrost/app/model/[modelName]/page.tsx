@@ -105,7 +105,7 @@ export default async function ModelPage({
           </div>
         }
       >
-        <ModelDetailPage initialModel={model} />
+        <ModelDetailPage initialModel={model} modelName={decodedModelName} />
       </Suspense>
     </Layout>
   );

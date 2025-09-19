@@ -32,6 +32,7 @@ type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
 
 interface ModelDetailPageProps {
   initialModel: ModelRegistryItem | null;
+  modelName: string;
 }
 
 const formatContext = (value: number) => {
@@ -54,10 +55,7 @@ const formatCost = (value: number) => {
   return `$${value.toFixed(2)}`;
 };
 
-export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
-  const decodedModelName = decodeURIComponent(
-    window.location.pathname.split("/").pop() || ""
-  );
+export function ModelDetailPage({ initialModel, modelName }: ModelDetailPageProps) {
 
   const [model, setModel] = useState<ModelRegistryItem | null>(initialModel);
   const [loading, setLoading] = useState(!initialModel);
@@ -95,7 +93,7 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
 
           if (response.data?.data?.models) {
             const foundModel = response.data.data.models.find(
-              (m: ModelRegistryItem) => m.id === decodedModelName
+              (m: ModelRegistryItem) => m.id === modelName
             );
             setModel(foundModel || null);
           }
@@ -108,7 +106,7 @@ export function ModelDetailPage({ initialModel }: ModelDetailPageProps) {
 
       fetchModel();
     }
-  }, [decodedModelName, initialModel]);
+  }, [modelName, initialModel]);
 
   // Update highlighted code when language or model changes
   useEffect(() => {
@@ -180,7 +178,7 @@ completion = client.chat.completions.create(
               Model not found
             </h1>
             <p className="text-muted-foreground">
-              The model &quot;{decodedModelName}&quot; could not be found.
+              The model &quot;{modelName}&quot; could not be found.
             </p>
           </div>
         </div>
@@ -235,10 +233,10 @@ completion = client.chat.completions.create(
                   )}
                 </button>
               </div>
-              {(model as any).created && (
+              {(model as ModelRegistryItem & { created?: string }).created && (
                 <span className="text-gray-500 dark:text-gray-400">
                   Released{" "}
-                  {new Date((model as any).created).toLocaleDateString(
+                  {new Date((model as ModelRegistryItem & { created?: string }).created!).toLocaleDateString(
                     "en-US",
                     { month: "short", year: "numeric" }
                   )}
