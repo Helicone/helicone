@@ -49,7 +49,7 @@ export const endpoints = {
       {
         threshold: 0,
         input: 0.00000027, // $0.27 per 1M tokens
-        output: 0.00000100, // $1.00 per 1M tokens
+        output: 0.000001, // $1.00 per 1M tokens
       },
     ],
     contextLength: 128_000,
@@ -67,9 +67,13 @@ export const endpoints = {
       "top_k",
       "seed",
       "min_p",
-      "response_format"
+      "response_format",
     ],
     ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "deepseek-v3:openrouter": {
     provider: "openrouter",
     author: "deepseek",
