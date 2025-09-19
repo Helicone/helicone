@@ -19,14 +19,7 @@ import {
 } from "@/components/ui/tooltip";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
-import { createHighlighter } from "shiki";
 import { StandardParameter } from "@helicone-package/cost/models/types";
-
-// Create a singleton highlighter instance
-const highlighterPromise = createHighlighter({
-  themes: ["github-light", "github-dark"],
-  langs: ["javascript", "python"],
-});
 
 type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
 
@@ -112,11 +105,23 @@ export function ModelDetailPage({ initialModel, modelName }: ModelDetailPageProp
   useEffect(() => {
     if (!model) return;
 
-    const updateHighlightedCode = async () => {
-      const highlighter = await highlighterPromise;
+    let mounted = true;
 
-      const codeSnippets = {
-        typescript: `import OpenAI from "openai";
+    const highlightCode = async () => {
+      try {
+        const { createHighlighter } = await import("shiki");
+
+        if (!mounted) return;
+
+        const highlighter = await createHighlighter({
+          themes: ["github-dark"],
+          langs: ["javascript", "python"],
+        });
+
+        if (!mounted) return;
+
+        const codeSnippets = {
+          typescript: `import OpenAI from "openai";
 
 const client = new OpenAI({
   baseURL: "https://ai-gateway.helicone.ai",
@@ -127,7 +132,7 @@ const completion = await client.chat.completions.create({
   model: "${model.id}",
   messages: [{ role: "user", content: "Hello!" }],
 });`,
-        python: `from openai import OpenAI
+          python: `from openai import OpenAI
 import os
 
 client = OpenAI(
@@ -139,16 +144,26 @@ completion = client.chat.completions.create(
     model="${model.id}",
     messages=[{"role": "user", "content": "Hello!"}],
 )`,
-      };
+        };
 
-      const html = highlighter.codeToHtml(codeSnippets[currentLanguage], {
-        lang: currentLanguage === "typescript" ? "javascript" : "python",
-        theme: "github-dark",
-      });
-      setHighlightedCode(html);
+        const html = highlighter.codeToHtml(codeSnippets[currentLanguage], {
+          lang: currentLanguage === "typescript" ? "javascript" : "python",
+          theme: "github-dark",
+        });
+
+        if (mounted) {
+          setHighlightedCode(html);
+        }
+      } catch (error) {
+        console.error("Failed to highlight code:", error);
+      }
     };
 
-    updateHighlightedCode();
+    highlightCode();
+
+    return () => {
+      mounted = false;
+    };
   }, [model, currentLanguage]);
 
   if (loading) {
@@ -381,7 +396,7 @@ completion = client.chat.completions.create(
                                           rate limits are reached to ensure
                                           uninterrupted service. Credits shown
                                           are worst-case escrow; actual charges
-                                          match OpenRouter&apos;s pricing.
+                                          match OpenRouter's pricing.
                                         </p>
                                       </TooltipContent>
                                     </Tooltip>
@@ -670,10 +685,14 @@ completion = client.chat.completions.create(
 
           {/* Code Block */}
           <div className="relative group">
-            <div
-              className="overflow-x-auto rounded-lg bg-gray-900 text-gray-100 [&_pre]:!p-4"
-              dangerouslySetInnerHTML={{ __html: highlightedCode }}
-            />
+            {highlightedCode ? (
+              <div
+                className="overflow-x-auto rounded-lg bg-gray-900 text-gray-100 [&_pre]:!p-4"
+                dangerouslySetInnerHTML={{ __html: highlightedCode }}
+              />
+            ) : (
+              <div className="bg-gray-900 rounded-lg h-40 animate-pulse" />
+            )}
             <button
               onClick={() => {
                 const codeSnippets = {
