@@ -158,9 +158,15 @@ export async function handleProxyRequest(
   // Add AI Gateway specific headers if this is a gateway request
   const gatewayAttempt = proxyRequest.requestWrapper.getGatewayAttempt();
   if (gatewayAttempt) {
-    responseHeaders.set("X-Helicone-Gateway-Mode", gatewayAttempt.authType.toUpperCase());
-    responseHeaders.set("X-Helicone-Provider", gatewayAttempt.endpoint.provider);
-    responseHeaders.set("X-Helicone-Model", gatewayAttempt.endpoint.providerModelId);
+    responseHeaders.set(
+      "Helicone-Gateway-Mode",
+      gatewayAttempt.authType.toUpperCase()
+    );
+    responseHeaders.set("Helicone-Provider", gatewayAttempt.endpoint.provider);
+    responseHeaders.set(
+      "Helicone-Model",
+      gatewayAttempt.endpoint.providerModelId
+    );
   }
 
   let status = response.status;
