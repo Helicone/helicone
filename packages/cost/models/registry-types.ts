@@ -17,7 +17,6 @@ import { googleModels } from "./authors/google";
 import { grokModels } from "./authors/xai";
 import { deepseekModels } from "./authors/deepseek";
 
-
 // Combine all models for type derivation
 const allModels = {
   ...anthropicModels,
