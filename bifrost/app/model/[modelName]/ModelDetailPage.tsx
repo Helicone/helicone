@@ -396,7 +396,7 @@ completion = client.chat.completions.create(
                                           rate limits are reached to ensure
                                           uninterrupted service. Credits shown
                                           are worst-case escrow; actual charges
-                                          match OpenRouter's pricing.
+                                          match OpenRouter&apos;s pricing.
                                         </p>
                                       </TooltipContent>
                                     </Tooltip>
