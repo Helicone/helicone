@@ -28,7 +28,7 @@ export function FeatureWaitlist({
   const email = user.user?.email ?? "";
   const [error, setError] = useState<string | null>(null);
   const { data: isOnWaitlist, refetch: refetchIsOnWaitlist } =
-    $JAWN_API.useQuery("get", "/v1/public/waitlist/feature/status", {
+    $JAWN_API.useQuery("get", "/v1/waitlist/feature/status", {
       params: {
         query: {
           email,
@@ -40,7 +40,7 @@ export function FeatureWaitlist({
 
   const { mutateAsync: addToWaitlist, isPending } = $JAWN_API.useMutation(
     "post",
-    "/v1/public/waitlist/feature",
+    "/v1/waitlist/feature",
     {
       onSuccess: () => {
         refetchIsOnWaitlist();

@@ -1,6 +1,13 @@
 import {
+  ChatCompletionContentPart,
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionCreateParamsStreaming,
+  ChatCompletionDeveloperMessageParam,
+  ChatCompletionFunctionMessageParam,
+  ChatCompletionSystemMessageParam,
+  ChatCompletionToolMessageParam,
+  ChatCompletionUserMessageParam,
+  ChatCompletionAssistantMessageParam,
 } from "openai/resources/chat/completions";
 
 export type ALLOWED_VARIABLE_TYPE = "string" | "boolean" | "number";
@@ -52,11 +59,65 @@ export interface Prompt2025Input {
   inputs: Record<string, any>;
 }
 
-// OpenAI chat completion types where messages is optional
-// this is because we can generally assume that prompts contain messages themselves, and so after merging the params, the messages will be present
-// and OpenAI compatible endpoints will not complain about messages being omitted.
-type ChatCompletionCreateParamsNonStreamingPartialMessages = Omit<ChatCompletionCreateParamsNonStreaming, 'messages'> & Partial<Pick<ChatCompletionCreateParamsNonStreaming, 'messages'>>;
-type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCreateParamsStreaming, 'messages'> & Partial<Pick<ChatCompletionCreateParamsStreaming, 'messages'>>;
+/**
+ * Cache control configuration for Anthropic's prompt caching feature.
+ * 
+ * When using Anthropic models through the Helicone AI Gateway, you can enable
+ * prompt caching to reduce costs and latency for repeated prompts.
+ * 
+ * @example
+ * ```typescript
+ * const message = {
+ *   role: "user",
+ *   content: "Analyze this document...",
+ *   cache_control: { type: "ephemeral", ttl: "5m" }
+ * };
+ * ```
+ */
+export interface CacheControl {
+  /** Cache type - currently only ephemeral caching is supported */
+  type: "ephemeral";
+  /** Time-to-live for the cached content */
+  ttl?: "5m" | "1h"
+}
+
+/**
+ * OpenAI content part extended with optional cache control.
+ * Allows individual content parts within a message to have cache control.
+ */
+export type HeliconeChatCompletionContentPart = ChatCompletionContentPart & {
+  cache_control?: CacheControl;
+};
+
+/**
+ * OpenAI message with optional cache control support
+ */
+type HeliconeMessageParam<T> = Omit<T, 'content'> & {
+  content: string | HeliconeChatCompletionContentPart[] | null;
+  cache_control?: CacheControl;
+};
+
+export type HeliconeChatCompletionMessageParam = 
+  | HeliconeMessageParam<ChatCompletionDeveloperMessageParam>
+  | HeliconeMessageParam<ChatCompletionSystemMessageParam>
+  | HeliconeMessageParam<ChatCompletionUserMessageParam>
+  | HeliconeMessageParam<ChatCompletionAssistantMessageParam>
+  | HeliconeMessageParam<ChatCompletionToolMessageParam>
+  | HeliconeMessageParam<ChatCompletionFunctionMessageParam>
+
+/**
+ * Non-streaming completion params with optional messages
+ */
+type ChatCompletionCreateParamsNonStreamingPartialMessages = Omit<ChatCompletionCreateParamsNonStreaming, 'messages'> & { 
+  messages?: HeliconeChatCompletionMessageParam[] 
+};
+
+/**
+ * Streaming completion params with optional messages
+ */
+type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCreateParamsStreaming, 'messages'> & { 
+  messages?: HeliconeChatCompletionMessageParam[] 
+};
 
 /**
  * Parameters for using Helicone prompt templates.
@@ -76,7 +137,7 @@ type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCre
  */
 export type HeliconePromptParams = {
   /** The unique identifier for your Helicone prompt template */
-  prompt_id: string;
+  prompt_id?: string;
   /** The deployment environment to target for the prompt */
   environment?: string;
   /** Optional version ID. If not provided, uses the latest version */
@@ -95,14 +156,36 @@ export type HeliconePromptParams = {
  * @example
  * ```typescript
  * const response = await openai.chat.completions.create({
- *   prompt_id: "XXXXXX",
- *   model: "gpt-4",
- *   messages: [{ role: "user", content: "Hello!" }], // optional
+ *   prompt_id: "123",
+ *   model: "gpt-4o",
+ *   messages: [
+ *     // Message-level cache control (string content)
+ *     {
+ *       role: "user",
+ *       content: "Hello!",
+ *       cache_control: { type: "ephemeral", ttl: "5m" },
+ *     },
+ *     // Content-part-level cache control (array content, no message-level cache)
+ *     {
+ *       role: "user",
+ *       content: [
+ *         {
+ *           type: "text",
+ *           text: "Analyze this document",
+ *           cache_control: { type: "ephemeral", ttl: "1h" },
+ *         },
+ *         {
+ *           type: "text",
+ *           text: "Additional context",
+ *         },
+ *       ],
+ *     },
+ *   ],
  *   inputs: {
  *     name: "John",
  *     age: 20,
- *   }
- * } as HeliconeChatCreateCompletion);
+ *   },
+ * } as HeliconeChatCreateParams);
  * ```
  */
 export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreamingPartialMessages &
@@ -115,15 +198,31 @@ export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreamingPar
  * @example
  * ```typescript
  * const stream = await openai.chat.completions.create({
- *   prompt_id: "XXXXXX",
- *   model: "gpt-4",
- *   messages: [{ role: "user", content: "Hello!" }], // optional
+ *   prompt_id: "123",
+ *   model: "gpt-4o",
+ *   messages: [
+ *     // Content-part-level cache control only (no message-level cache allowed)
+ *     {
+ *       role: "user",
+ *       content: [
+ *         {
+ *           type: "text",
+ *           text: "Process this data",
+ *           cache_control: { type: "ephemeral", ttl: "5m" },
+ *         },
+ *         {
+ *           type: "text",
+ *           text: "Additional data without cache",
+ *         },
+ *       ],
+ *     },
+ *   ],
  *   stream: true,
  *   inputs: {
  *     name: "John",
  *     age: 20,
- *   }
- * } as HeliconePromptChatCompletionStreaming);
+ *   },
+ * } as HeliconeChatCreateParamsStreaming);
  * ```
  */
 export type HeliconeChatCreateParamsStreaming =

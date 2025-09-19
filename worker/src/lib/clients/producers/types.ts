@@ -22,6 +22,7 @@ export type HeliconeMeta = {
   promptInputs?: Record<string, any>;
   promptEnvironment?: string;
   isPassthroughBilling?: boolean;
+  providerModelId?: string;
 };
 export type MessageData = {
   id: string;

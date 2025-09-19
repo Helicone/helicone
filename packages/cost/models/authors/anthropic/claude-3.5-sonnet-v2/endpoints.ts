@@ -102,6 +102,34 @@ export const endpoints = {
       "us-east-1": {},
     },
   },
+  "claude-3.5-sonnet-v2:openrouter": {
+    provider: "openrouter",
+    author: "anthropic",
+    providerModelId: "anthropic/claude-3.5-sonnet",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000003165, // $3.17/1M - worst-case: $3.00/1M (Anthropic/Amazon Bedrock) * 1.055
+        output: 0.00001583, // $15.83/1M - worst-case: $15.00/1M (Anthropic/Amazon Bedrock) * 1.055
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 8192,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "stop",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<
     `${Claude35SonnetV2ModelName}:${ModelProviderName}`,

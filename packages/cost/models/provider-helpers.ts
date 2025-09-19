@@ -9,6 +9,67 @@ import type {
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
+import { Provider } from "@helicone-package/llm-mapper/types";
+
+export function heliconeProviderToModelProviderName(
+  provider: Provider
+): ModelProviderName | null {
+  if (provider === "CUSTOM") {
+    return null;
+  }
+
+  switch (provider) {
+    case "OPENAI":
+      return "openai";
+    case "ANTHROPIC":
+      return "anthropic";
+    case "GOOGLE":
+      return "google-ai-studio";
+    case "GROQ":
+      return "groq";
+    case "X":
+      return "xai";
+    case "AZURE":
+      return "azure";
+    case "AWS":
+    case "BEDROCK":
+      return "bedrock";
+    case "PERPLEXITY":
+      return "perplexity";
+    case "DEEPSEEK":
+      return "deepseek";
+    case "COHERE":
+      return "cohere";
+    case "OPENROUTER":
+      return "openrouter";
+    // new registry does not have
+    case "LOCAL":
+    case "HELICONE":
+    case "AMDBARTEK":
+    case "ANYSCALE":
+    case "CLOUDFLARE":
+    case "2YFV":
+    case "TOGETHER":
+    case "LEMONFOX":
+    case "FIREWORKS":
+    case "WISDOMINANUTSHELL":
+    case "MISTRAL":
+    case "DEEPINFRA":
+    case "QSTASH":
+    case "FIRECRAWL":
+    case "AVIAN":
+    case "NEBIUS":
+    case "NOVITA":
+    case "OPENPIPE":
+    case "CHUTES":
+    case "LLAMA":
+    case "NVIDIA":
+    case "VERCEL":
+      return null;
+    default:
+      return null;
+  }
+}
 
 // Helper function to get provider instance
 export function getProvider(providerName: string): Result<BaseProvider> {
@@ -35,7 +96,11 @@ export const dbProviderToProvider = (
   if (provider === "anthropic" || provider === "Anthropic") {
     return "anthropic";
   }
-  if (provider === "bedrock" || provider === "AWS Bedrock") {
+  if (
+    provider === "bedrock" ||
+    provider === "AWS Bedrock" ||
+    provider === "aws"
+  ) {
     return "bedrock";
   }
   if (provider === "vertex" || provider === "Vertex AI") {
@@ -49,6 +114,12 @@ export const dbProviderToProvider = (
   }
   if (provider === "Azure OpenAI") {
     return "azure";
+  }
+  if (provider === "deepseek" || provider === "DeepSeek") {
+    return "deepseek";
+  }
+  if (provider === "openrouter" || provider === "OpenRouter") {
+    return "openrouter";
   }
   return null;
 };
@@ -179,4 +250,21 @@ export async function buildRequestBody(
       error instanceof Error ? error.message : "Failed to build request body"
     );
   }
+}
+
+export async function buildErrorMessage(
+  endpoint: Endpoint,
+  response: Response
+): Promise<Result<string>> {
+  const providerResult = getProvider(endpoint.provider);
+  if (providerResult.error) {
+    return err(providerResult.error);
+  }
+
+  const provider = providerResult.data;
+  if (!provider) {
+    return err(`Provider data is null for: ${endpoint.provider}`);
+  }
+
+  return ok(await provider.buildErrorMessage(response));
 }

@@ -170,13 +170,16 @@ export const useSaveQueryMutation = (
       sql: string;
     }) => {
       if (savedQuery.id) {
-        const response = await $JAWN_API.PUT("/v1/helicone-sql/saved-query", {
-          body: {
-            id: savedQuery.id,
-            name: savedQuery.name,
-            sql: savedQuery.sql,
+        const response = await $JAWN_API.PUT(
+          "/v1/helicone-sql/saved-query/{queryId}",
+          {
+            params: { path: { queryId: savedQuery.id } },
+            body: {
+              name: savedQuery.name,
+              sql: savedQuery.sql,
+            },
           },
-        });
+        );
         return response;
       } else {
         const response = await $JAWN_API.POST("/v1/helicone-sql/saved-query", {

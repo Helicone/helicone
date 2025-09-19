@@ -8,8 +8,9 @@
     "securityDefinitions": {
       "api_key": {
         "type": "apiKey",
-        "name": "authorization",
-        "in": "header"
+        "name": "Authorization",
+        "in": "header",
+        "description": "Bearer token authentication. Format: 'Bearer YOUR_API_KEY'"
       }
     },
     "spec": {

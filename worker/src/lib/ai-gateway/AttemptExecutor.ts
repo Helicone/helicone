@@ -1,6 +1,7 @@
 import {
   buildRequestBody,
   authenticateRequest,
+  buildErrorMessage,
 } from "@helicone-package/cost/models/provider-helpers";
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
@@ -49,7 +50,6 @@ export class AttemptExecutor {
       escrowInfo = {
         escrowId: escrowResult.data.escrowId,
         endpoint: endpoint,
-        model: endpoint.providerModelId,
       };
     }
 
@@ -127,7 +127,7 @@ export class AttemptExecutor {
       );
       requestWrapper.resetObject();
       requestWrapper.setUrl(endpoint.baseUrl ?? requestWrapper.url.toString());
-      requestWrapper.setBody(bodyResult.data);
+      await requestWrapper.setBody(bodyResult.data);
 
       // Apply auth headers from provider
       for (const [key, value] of Object.entries(
@@ -140,9 +140,18 @@ export class AttemptExecutor {
       const response = await forwarder(endpoint.baseUrl, escrowInfo);
 
       if (!response.ok) {
+        const errorMessageResult = await buildErrorMessage(endpoint, response);
+        if (isErr(errorMessageResult)) {
+          return err({
+            type: "request_failed",
+            message: errorMessageResult.error,
+            statusCode: response.status,
+          });
+        }
+
         return err({
           type: "request_failed",
-          message: `Request failed with status ${response.status}`,
+          message: errorMessageResult.data,
           statusCode: response.status,
         });
       }

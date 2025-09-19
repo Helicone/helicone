@@ -4,12 +4,13 @@ import {
 } from "../models/HeliconeProxyRequest";
 import retry from "async-retry";
 import { llmmapper } from "./llmmapper/llmmapper";
+import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
 export interface CallProps {
   headers: Headers;
   method: string;
   apiBase: string;
-  body: string | null;
+  body: ValidRequestBody;
   increaseTimeout: boolean;
   originalUrl: URL;
   extraHeaders: Headers | null;
@@ -20,7 +21,7 @@ export function callPropsFromProxyRequest(
 ): CallProps {
   return {
     apiBase: proxyRequest.api_base,
-    body: proxyRequest.bodyText,
+    body: proxyRequest.body,
     headers: proxyRequest.requestWrapper.getHeaders(),
     method: proxyRequest.requestWrapper.getMethod(),
     increaseTimeout:

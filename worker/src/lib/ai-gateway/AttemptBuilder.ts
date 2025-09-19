@@ -9,15 +9,20 @@ import {
   Endpoint,
 } from "@helicone-package/cost/models/types";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
+import { FeatureFlagManager } from "../managers/FeatureFlagManager";
 import { isErr, Result, ok, err } from "../util/results";
 import { Attempt, ModelSpec } from "./types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 
 export class AttemptBuilder {
+  private readonly featureFlagManager: FeatureFlagManager;
+
   constructor(
     private readonly providerKeysManager: ProviderKeysManager,
     private readonly env: Env
-  ) {}
+  ) {
+    this.featureFlagManager = new FeatureFlagManager(env);
+  }
 
   async buildAttempts(
     modelStrings: string[],
@@ -25,6 +30,12 @@ export class AttemptBuilder {
     bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI"
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
+
+    // Check if credits feature is enabled for this organization once
+    const hasCreditsFeature = await this.featureFlagManager.hasFeature(
+      orgId,
+      "credits"
+    );
 
     for (const modelString of modelStrings) {
       const modelSpec = this.parseModelString(modelString);
@@ -43,6 +54,7 @@ export class AttemptBuilder {
           modelSpec.data.provider,
           orgId,
           bodyMapping,
+          hasCreditsFeature,
           modelSpec.data.customUid
         );
         allAttempts.push(...providerAttempts);
@@ -51,7 +63,8 @@ export class AttemptBuilder {
         const attempts = await this.buildAttemptsForAllProviders(
           modelSpec.data.modelName,
           orgId,
-          bodyMapping
+          bodyMapping,
+          hasCreditsFeature
         );
         allAttempts.push(...attempts);
       }
@@ -65,7 +78,8 @@ export class AttemptBuilder {
   private async buildAttemptsForAllProviders(
     modelName: string,
     orgId: string,
-    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI"
+    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
+    hasCreditsFeature: boolean
   ): Promise<Attempt[]> {
     // Get all provider data in one query
     const providerDataResult =
@@ -75,12 +89,20 @@ export class AttemptBuilder {
     // Process all providers in parallel (we know model exists because parseModelString validated it)
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
-        const [byokAttempts, ptbAttempts] = await Promise.all([
-          this.buildByokAttempts(modelName, data, orgId, bodyMapping),
-          this.buildPtbAttempts(modelName, data),
-        ]);
+        const byokAttempts = await this.buildByokAttempts(
+          modelName,
+          data,
+          orgId,
+          bodyMapping
+        );
 
-        return [...byokAttempts, ...ptbAttempts];
+        // Only build PTB attempts if credits feature is enabled
+        if (hasCreditsFeature) {
+          const ptbAttempts = await this.buildPtbAttempts(modelName, data);
+          return [...byokAttempts, ...ptbAttempts];
+        }
+
+        return byokAttempts;
       })
     );
 
@@ -92,6 +114,7 @@ export class AttemptBuilder {
     provider: ModelProviderName,
     orgId: string,
     bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
+    hasCreditsFeature: boolean,
     customUid?: string
   ): Promise<Attempt[]> {
     // Get provider data once
@@ -113,19 +136,22 @@ export class AttemptBuilder {
 
     const providerData = providerDataResult.data;
 
-    // Get both BYOK and PTB attempts with provider data
-    const [byokAttempts, ptbAttempts] = await Promise.all([
-      this.buildByokAttempts(
-        modelName,
-        providerData,
-        orgId,
-        bodyMapping,
-        customUid
-      ),
-      this.buildPtbAttempts(modelName, providerData),
-    ]);
+    // Get BYOK attempts
+    const byokAttempts = await this.buildByokAttempts(
+      modelName,
+      providerData,
+      orgId,
+      bodyMapping,
+      customUid
+    );
 
-    return [...byokAttempts, ...ptbAttempts];
+    // Only build PTB attempts if credits feature is enabled
+    if (hasCreditsFeature) {
+      const ptbAttempts = await this.buildPtbAttempts(modelName, providerData);
+      return [...byokAttempts, ...ptbAttempts];
+    }
+
+    return byokAttempts;
   }
 
   private async buildByokAttempts(
@@ -166,7 +192,7 @@ export class AttemptBuilder {
         endpoint: endpointResult.data,
         providerKey: userKey,
         authType: "byok",
-        priority: 1,
+        priority: endpointResult.data.priority ?? 1,
         source: `${modelName}/${providerData.provider}/byok${customUid ? `/${customUid}` : ""}`,
       },
     ];
@@ -208,7 +234,7 @@ export class AttemptBuilder {
           endpoint: passthroughResult.data,
           providerKey: userKey,
           authType: "byok",
-          priority: 1,
+          priority: passthroughResult.data.priority ?? 1,
           source: `${modelName}/${provider}/byok${customUid ? `/${customUid}` : ""}`,
         },
       ];
@@ -258,7 +284,7 @@ export class AttemptBuilder {
           endpoint,
           providerKey,
           authType: "ptb",
-          priority: 2,
+          priority: endpoint.priority ?? 2,
           source: `${modelName}/${provider}/ptb`,
         }) as Attempt
     );

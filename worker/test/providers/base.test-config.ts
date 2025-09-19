@@ -17,6 +17,7 @@ export interface TestCase {
   failProviders?: string[];
   byokEnabled?: boolean;
   currentCredits?: number;
+  creditsEnabled?: boolean;
   orgId?: string;
 }
 
@@ -33,7 +34,7 @@ export abstract class BaseTestConfig {
   }
 
   // Override this if provider needs custom mock response
-  generateMockResponse(modelId: string) {
+  generateMockResponse(modelId: string): any {
     const config = registry.getModelProviderConfig(modelId, this.provider);
     const providerModelId = config.data?.providerModelId || modelId;
 
@@ -155,6 +156,7 @@ export abstract class BaseTestConfig {
         byokConfig: this.getByokConfig("*"),
         byokEnabled: false,
         currentCredits: 100,
+        creditsEnabled: true,
         orgId: "test-org-id",
       });
 
@@ -179,6 +181,7 @@ export abstract class BaseTestConfig {
             byokConfig: this.getByokConfig("*"),
             byokEnabled: false,
             currentCredits: 100,
+            creditsEnabled: true,
             orgId: "test-org-id",
           });
         }
@@ -205,6 +208,7 @@ export abstract class BaseTestConfig {
               byokConfig: this.getByokConfig(configKey),
               byokEnabled: false,
               currentCredits: 100,
+              creditsEnabled: true,
               orgId: "test-org-id",
             });
           }
@@ -234,6 +238,7 @@ export abstract class BaseTestConfig {
         byokConfig: this.getByokConfig("*"),
         byokEnabled: false,
         currentCredits: 1,
+        creditsEnabled: true,
         orgId: "test-org-id",
       });
 
@@ -258,6 +263,7 @@ export abstract class BaseTestConfig {
             byokConfig: this.getByokConfig("*"),
             byokEnabled: false,
             currentCredits: 1,
+            creditsEnabled: true,
             orgId: "test-org-id",
           });
         }

@@ -218,7 +218,11 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   };
 
   return (
-    <ScrollArea className="sentry-mask-me h-full w-full" orientation="both">
+    <ScrollArea
+      className="sentry-mask-me h-full w-full"
+      orientation="both"
+      width="thin"
+    >
       {children && <div className="flex-shrink-0">{children}</div>}
       <div className="h-full bg-slate-50 dark:bg-slate-950">
         {skeletonLoading ? (

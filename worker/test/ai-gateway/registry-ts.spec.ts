@@ -6,6 +6,7 @@ import { type TestCase } from "../providers/base.test-config";
 import { anthropicTestConfig } from "../providers/anthropic.test-config";
 import { setSupabaseTestCase } from "../setup";
 import { openaiTestConfig } from "../providers/openai.test-config";
+import { groqTestConfig } from "../providers/groq.test-config";
 
 const TEST_HELICONE_API_KEY = "sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234";
 
@@ -56,8 +57,12 @@ function mockProviderEndpoint(
   const url = new URL(endpoint.baseUrl);
 
   if (statusCode === 200) {
-    // For now just use anthropic config, in future we'll have a map of providers
-    const testConfig = anthropicTestConfig;
+    let testConfig;
+    if (provider === "anthropic") {
+      testConfig = anthropicTestConfig;
+    } else {
+      testConfig = openaiTestConfig;
+    }
 
     fetchMock
       .get(`${url.protocol}//${url.host}`)
@@ -148,6 +153,7 @@ describe("Registry Tests", () => {
         // TODO add back anthropic
         // ...anthropicTestConfig.generateSuccessfulPtbTestCases(),
         ...openaiTestConfig.generateSuccessfulPtbTestCases(),
+        ...groqTestConfig.generateSuccessfulPtbTestCases(),
       ];
 
       ptbTestCases.forEach((testCase) => {
@@ -233,6 +239,7 @@ describe("Registry Tests", () => {
         // TODO add back anthropic
         // ...anthropicTestConfig.generateUnsuccessfulPtbTestCases(),
         ...openaiTestConfig.generateUnsuccessfulPtbTestCases(),
+        ...groqTestConfig.generateUnsuccessfulPtbTestCases(),
       ];
 
       ptbTestCases.forEach((testCase) => {

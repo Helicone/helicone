@@ -23,6 +23,10 @@ import { anthropicModels, anthropicEndpointConfig } from "./authors/anthropic";
 import { openaiModels, openaiEndpointConfig } from "./authors/openai";
 import { googleModels, googleEndpointConfig } from "./authors/google";
 import { grokModels, grokEndpointConfig } from "./authors/xai";
+import { metaModels, metaEndpointConfig } from "./authors/meta";
+import { moonshotaiModels, moonshotaiEndpointConfig } from "./authors/moonshotai";
+import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
+import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
 
 // Combine all models
 const allModels = {
@@ -30,6 +34,10 @@ const allModels = {
   ...openaiModels,
   ...googleModels,
   ...grokModels,
+  ...metaModels,
+  ...moonshotaiModels,
+  ...alibabaModels,
+  ...deepseekModels
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -38,6 +46,10 @@ const modelProviderConfigs = {
   ...openaiEndpointConfig,
   ...googleEndpointConfig,
   ...grokEndpointConfig,
+  ...metaEndpointConfig,
+  ...moonshotaiEndpointConfig,
+  ...alibabaEndpointConfig,
+  ...deepseekEndpointConfig
 } satisfies Record<string, ModelProviderConfig>;
 
 const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
@@ -121,6 +133,7 @@ function buildEndpoint(
     maxCompletionTokens: endpointConfig.maxCompletionTokens,
     ptbEnabled: false,
     version: endpointConfig.version,
+    priority: endpointConfig.priority,
   });
 }
 
@@ -131,6 +144,13 @@ function getModelProviderConfig(
   const configId = `${model}:${provider}` as ModelProviderConfigId;
   const config = indexes.endpointConfigIdToEndpointConfig.get(configId);
   return config ? ok(config) : err(`Config not found: ${configId}`);
+}
+
+function getModelProviderConfigByProviderModelId(
+  providerModelId: string
+): Result<ModelProviderConfig> {
+  const result = indexes.providerModelIdToConfig.get(providerModelId);
+  return result ? ok(result) : err(`Config not found for providerModelId: ${providerModelId}`);
 }
 
 function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {
@@ -192,6 +212,7 @@ export const registry = {
   getProviderModels,
   buildEndpoint,
   getModelProviderConfig,
+  getModelProviderConfigByProviderModelId,
   getPtbEndpointsForProvider,
   getModelProviderConfigs,
   getModelProviders,

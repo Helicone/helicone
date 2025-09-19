@@ -1,5 +1,7 @@
+import { ModelProviderName } from "../../packages/cost/models/providers";
+
 export interface Provider {
-  id: string;
+  id: ModelProviderName;
   name: string;
   logoUrl: string;
   description: string;
@@ -24,7 +26,7 @@ export interface ProviderConfiguration {
 // Interface for provider keys
 export interface ProviderKey {
   id: string;
-  provider_name: string;
+  provider_name: ModelProviderName;
   provider_key_name: string;
   created_at?: string;
   soft_delete: boolean;

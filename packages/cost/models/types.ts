@@ -25,6 +25,7 @@ export const AUTHORS = [
   "xai",
   "moonshotai",
   "perplexity",
+  "alibaba",
 ] as const;
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
@@ -52,6 +53,7 @@ export type Tokenizer =
 
 export type StandardParameter =
   | "max_tokens"
+  | "max_completion_tokens"
   | "temperature"
   | "top_p"
   | "top_k"
@@ -80,6 +82,7 @@ export type StandardParameter =
 
 export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   max_tokens: "Max Tokens",
+  max_completion_tokens: "Max Completion Tokens",
   temperature: "Temperature",
   top_p: "Top-P",
   top_k: "Top-K",
@@ -158,6 +161,7 @@ export interface ModelProviderConfig extends BaseConfig {
   rateLimits?: RateLimits;
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;
+  priority?: number;
 }
 
 export interface EndpointConfig extends UserEndpointConfig {
@@ -168,6 +172,7 @@ export interface EndpointConfig extends UserEndpointConfig {
   ptbEnabled?: boolean;
   version?: string;
   rateLimits?: RateLimits;
+  priority?: number;
 }
 
 export interface Endpoint extends BaseConfig {
@@ -176,6 +181,7 @@ export interface Endpoint extends BaseConfig {
   author: AuthorName;
   providerModelId: string;
   supportedParameters: StandardParameter[];
+  priority?: number; // Lower number = higher priority
 }
 
 export interface UserEndpointConfig {

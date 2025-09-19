@@ -7,12 +7,12 @@ export const models = {
     description:
       "Speedy and economical reasoning model that excels at agentic coding. Features function calling, structured outputs, and reasoning capabilities.",
     contextLength: 256000,
-    maxOutputTokens: 256000,
+    maxOutputTokens: 10000,
     created: "2024-08-25T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "Grok",
   },
-  "grok-4-0709": {
+  "grok-4": {
     name: "xAI: Grok 4",
     author: "xai",
     description:

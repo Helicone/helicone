@@ -22,7 +22,7 @@ export const endpoints = {
       },
     ],
     contextLength: 256000,
-    maxCompletionTokens: 256000,
+    maxCompletionTokens: 10000,
     supportedParameters: [
       "frequency_penalty",
       "logit_bias",
@@ -38,13 +38,13 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "grok-4-0709:xai": {
-    providerModelId: "grok-4-0709",
+  "grok-4:xai": {
+    providerModelId: "grok-4",
     provider: "xai",
     author: "xai",
     pricing: [
@@ -90,7 +90,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -130,7 +130,7 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -170,7 +170,143 @@ export const endpoints = {
       "top_logprobs",
       "top_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "grok-3-mini:openrouter": {
+    provider: "openrouter",
+    author: "xai",
+    providerModelId: "x-ai/grok-3-mini",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000000633, // $0.63/1M - worst-case: $0.60/1M (xAI) * 1.055
+        output: 0.00000422, // $4.22/1M - worst-case: $4.00/1M (xAI) * 1.055
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "frequency_penalty",
+      "logit_bias",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "grok-3:openrouter": {
+    provider: "openrouter",
+    author: "xai",
+    providerModelId: "x-ai/grok-3",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000528, // $5.28/1M - worst-case: $5.00/1M (xAI) * 1.055
+        output: 0.00002638, // $26.38/1M - worst-case: $25.00/1M (xAI) * 1.055
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "frequency_penalty",
+      "logit_bias",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "grok-4:openrouter": {
+    provider: "openrouter",
+    author: "xai",
+    providerModelId: "x-ai/grok-4",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000633, // $6.33/1M - worst-case: $6.00/1M (xAI >128K) * 1.055
+        output: 0.00003165, // $31.65/1M - worst-case: $30.00/1M (xAI >128K) * 1.055
+      },
+    ],
+    contextLength: 256_000,
+    maxCompletionTokens: 256_000,
+    supportedParameters: [
+      "frequency_penalty",
+      "logit_bias",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "grok-code-fast-1:openrouter": {
+    provider: "openrouter",
+    author: "xai",
+    providerModelId: "x-ai/grok-code-fast-1",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000021, // $0.21/1M - worst-case: $0.20/1M (xAI) * 1.055
+        output: 0.00000158, // $1.58/1M - worst-case: $1.50/1M (xAI) * 1.055
+      },
+    ],
+    contextLength: 256_000,
+    maxCompletionTokens: 10_000,
+    supportedParameters: [
+      "frequency_penalty",
+      "logit_bias",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
     endpointConfigs: {
       "*": {},
     },
