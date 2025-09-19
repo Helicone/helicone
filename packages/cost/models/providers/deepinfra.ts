@@ -1,4 +1,5 @@
 import { BaseProvider } from "./base";
+import type { ModelProviderConfig, UserEndpointConfig } from "../types";
 
 export class DeepInfraProvider extends BaseProvider {
   readonly displayName = "DeepInfra";
@@ -7,7 +8,7 @@ export class DeepInfraProvider extends BaseProvider {
   readonly pricingPages = ["https://deepinfra.com/pricing/"];
   readonly modelPages = ["https://deepinfra.com/models/"];
 
-  buildUrl(): string {
-    return `${this.baseUrl}v1/openai`;
+  buildUrl(endpoint: ModelProviderConfig, config: UserEndpointConfig): string {
+    return `${this.baseUrl}v1/openai/chat/completions`;
   }
 }

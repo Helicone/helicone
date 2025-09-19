@@ -32,7 +32,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -49,7 +49,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -72,7 +72,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -96,7 +96,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -117,7 +117,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -145,7 +145,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -164,7 +164,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "DeepInfra service unavailable",
@@ -180,7 +180,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -196,7 +196,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 401,
                 errorMessage: "Invalid API key",
@@ -212,7 +212,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 404,
                 errorMessage: "Model not found",
@@ -228,7 +228,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 403,
                 errorMessage: "Quota exceeded",
@@ -244,7 +244,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Invalid request parameters",
@@ -260,7 +260,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 408,
                 errorMessage: "Request timeout",
@@ -281,7 +281,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 422,
                 errorMessage: "Content filtering violation",
@@ -306,7 +306,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -334,7 +334,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -365,7 +365,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -382,7 +382,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -398,7 +398,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -425,7 +425,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -447,7 +447,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B", // Should map to the correct provider model ID
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -469,7 +469,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Messages array cannot be empty",
@@ -493,7 +493,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -518,7 +518,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-30B-A3B",
                 data: createOpenAIMockResponse("Qwen/Qwen3-30B-A3B"),
@@ -535,7 +535,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Invalid JSON in request body",
@@ -551,7 +551,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai",
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 502,
                 errorMessage: "Bad gateway - upstream server error",
