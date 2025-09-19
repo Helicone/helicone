@@ -63,6 +63,13 @@ const maxResponseLength = 100_000;
 const MAX_CONTENT_LENGTH = maxContentLength * avgTokenLength; // 2 MB
 const MAX_RESPONSE_LENGTH = maxResponseLength * avgTokenLength; // 100k
 
+type BatchMeta = {
+  batchId?: string;
+  partition?: number;
+  lastOffset?: string;
+  messageCount?: number;
+};
+
 export class LoggingHandler extends AbstractLogHandler {
   private batchPayload: BatchPayload;
   private logStore: LogStore;
@@ -198,7 +205,7 @@ export class LoggingHandler extends AbstractLogHandler {
     }
   }
 
-  public async handleResults(): Promise<
+  public async handleResults(meta?: BatchMeta): Promise<
     Result<
       string,
       {
@@ -210,7 +217,7 @@ export class LoggingHandler extends AbstractLogHandler {
   > {
     const [pgResult, s3Result, chResult] = await Promise.all([
       this.logStore.insertLogBatch(this.batchPayload),
-      this.uploadToS3(),
+      this.uploadToS3(meta),
       this.logToClickhouse(),
     ]);
 
@@ -235,14 +242,19 @@ export class LoggingHandler extends AbstractLogHandler {
     return ok("Successfully inserted logs");
   }
 
-  async uploadToS3(): PromiseGenericResult<string> {
+  async uploadToS3(meta?: BatchMeta): PromiseGenericResult<string> {
+    const batchEnabled = (process.env.S3_BATCH_PUT_ENABLED ?? "false") === "true";
+    if (batchEnabled) {
+      return await this.uploadBatchToS3(meta);
+    }
+
+    // Legacy per-request behavior
     const uploadPromises = this.batchPayload.s3Records.map(async (s3Record) => {
       const key = this.s3Client.getRequestResponseKey(
         s3Record.requestId,
         s3Record.organizationId
       );
 
-      // Upload request and response body
       const uploadRes = await this.s3Client.store(
         key,
         JSON.stringify({
@@ -257,7 +269,6 @@ export class LoggingHandler extends AbstractLogHandler {
         );
       }
 
-      // Optionally upload assets if they exist
       if (s3Record.assets && s3Record.assets.size > 0) {
         const imageUploadRes = await this.storeRequestResponseImage(
           s3Record.organizationId,
@@ -276,10 +287,147 @@ export class LoggingHandler extends AbstractLogHandler {
     });
 
     await Promise.all(uploadPromises);
-
-    // TODO: How to handle errors here?
-
     return ok("All S3 uploads successful");
+  }
+
+  private async uploadBatchToS3(meta?: BatchMeta): PromiseGenericResult<string> {
+    try {
+      const includeImages = (process.env.S3_BATCH_INCLUDE_IMAGES ?? "true") === "true";
+      const maxImageBytes = parseInt(process.env.S3_BATCH_MAX_EMBEDDED_IMAGE_BYTES ?? "1048576", 10); // 1MB default
+      const maxTotalBytes = parseInt(process.env.S3_BATCH_MAX_TOTAL_BYTES ?? "52428800", 10); // 50MB default
+      const concurrency = Math.max(1, Math.min(16, parseInt(process.env.S3_BATCH_FETCH_CONCURRENCY ?? "6", 10)));
+
+      type BatchItem = {
+        organizationId: string;
+        requestId: string;
+        body: { request: string; response: string };
+        assets?: { assetId: string; contentType: string; dataBase64: string }[];
+        skippedAssets?: string[];
+      };
+
+      const limiter: { run: <T>(fn: () => Promise<T>) => Promise<T> } = (() => {
+        let active = 0;
+        const queue: (() => void)[] = [];
+        const run = async <T>(fn: () => Promise<T>): Promise<T> => {
+          if (active >= concurrency) {
+            await new Promise<void>((resolve) => queue.push(resolve));
+          }
+          active++;
+          try {
+            return await fn();
+          } finally {
+            active--;
+            const next = queue.shift();
+            if (next) next();
+          }
+        };
+        return { run };
+      })();
+
+      const items: BatchItem[] = [];
+      let totalBytes = 0;
+
+      const toBase64 = async (url: string): Promise<{ contentType: string; dataBase64: string } | null> => {
+        try {
+          const resp = await fetch(url, { headers: { "User-Agent": "Helicone-Worker (https://helicone.ai)" } });
+          if (!resp.ok) return null;
+          const contentType = resp.headers.get("content-type") ?? "application/octet-stream";
+          const arrBuf = await resp.arrayBuffer();
+          if (arrBuf.byteLength > maxImageBytes) return null;
+          const b64 = Buffer.from(arrBuf).toString("base64");
+          return { contentType, dataBase64: b64 };
+        } catch {
+          return null;
+        }
+      };
+
+      for (const s3Record of this.batchPayload.s3Records) {
+        const batchItem: BatchItem = {
+          organizationId: s3Record.organizationId,
+          requestId: s3Record.requestId,
+          body: { request: s3Record.requestBody, response: s3Record.responseBody },
+        };
+
+        if (includeImages && s3Record.assets && s3Record.assets.size > 0) {
+          const embeds: { assetId: string; contentType: string; dataBase64: string }[] = [];
+          const skipped: string[] = [];
+
+          const entries = Array.from(s3Record.assets.entries());
+          await Promise.all(
+            entries.map(([assetId, imageUrl]) =>
+              limiter.run(async () => {
+                if (totalBytes > maxTotalBytes) {
+                  skipped.push(assetId);
+                  return;
+                }
+                // Base64 inline
+                if (this.isBase64Image(imageUrl)) {
+                  const [contentType, base64Data] = this.extractBase64Data(imageUrl);
+                  if (!contentType || !base64Data) {
+                    skipped.push(assetId);
+                    return;
+                  }
+                  const est = Buffer.byteLength(base64Data, "base64");
+                  if (est > maxImageBytes || totalBytes + est > maxTotalBytes) {
+                    skipped.push(assetId);
+                    return;
+                  }
+                  embeds.push({ assetId, contentType, dataBase64: base64Data });
+                  totalBytes += est;
+                } else {
+                  const fetched = await toBase64(imageUrl);
+                  if (!fetched) {
+                    skipped.push(assetId);
+                    return;
+                  }
+                  const est = Buffer.byteLength(fetched.dataBase64, "base64");
+                  if (totalBytes + est > maxTotalBytes) {
+                    skipped.push(assetId);
+                    return;
+                  }
+                  embeds.push({ assetId, ...fetched });
+                  totalBytes += est;
+                }
+              })
+            )
+          );
+
+          if (embeds.length > 0) batchItem.assets = embeds;
+          if (skipped.length > 0) batchItem.skippedAssets = skipped;
+        }
+
+        items.push(batchItem);
+      }
+
+      const payload = {
+        version: 1,
+        meta: {
+          batchId: meta?.batchId ?? "",
+          partition: meta?.partition ?? null,
+          lastOffset: meta?.lastOffset ?? "",
+          messageCount: meta?.messageCount ?? items.length,
+          createdAt: new Date().toISOString(),
+        },
+        items,
+      };
+
+      const key = this.s3Client.getBatchKey(meta?.batchId);
+      const res = await this.s3Client.store(key, JSON.stringify(payload));
+      if (res.error) {
+        const fallback = (process.env.S3_BATCH_FALLBACK_LEGACY ?? "true") === "true";
+        if (fallback) {
+          return await this.uploadToS3(undefined);
+        }
+        return err(`Failed to store batch payload: ${res.error}`);
+      }
+      return ok("Batch S3 upload successful");
+    } catch (e: any) {
+      const fallback = (process.env.S3_BATCH_FALLBACK_LEGACY ?? "true") === "true";
+      if (fallback) {
+        return await this.uploadToS3(undefined);
+      }
+      return err(`Failed to upload S3 batch: ${e?.message ?? e}`);
+    }
   }
 
   private async storeRequestResponseImage(

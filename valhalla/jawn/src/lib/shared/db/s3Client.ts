@@ -380,4 +380,20 @@ export class S3Client {
   getRequestResponseRawUrl = (requestId: string, orgId: string) => {
     return `organizations/${orgId}/requests/${requestId}/raw_request_response_body`;
   };
+
+  /**
+   * Returns a key for storing a mini-batch payload containing
+   * many request/response bodies (and optionally assets).
+   * We do not nest by org since batches may span orgs.
+   */
+  getBatchKey = (
+    batchId: string | undefined,
+    now: Date = new Date()
+  ) => {
+    const yyyy = now.getUTCFullYear();
+    const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(now.getUTCDate()).padStart(2, "0");
+    const safeBatchId = batchId && batchId.length > 0 ? batchId : `${yyyy}${mm}${dd}-${now.getTime()}`;
+    return `batches/${yyyy}/${mm}/${dd}/${safeBatchId}.json`;
+  };
 }

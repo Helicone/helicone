@@ -251,7 +251,7 @@ export class LogManager {
     logMessages: KafkaMessageContents[]
   ): Promise<void> {
     const start = performance.now();
-    const result = await handler.handleResults();
+    const result = await handler.handleResults(logMetaData);
     const end = performance.now();
     const executionTimeMs = end - start;
 
