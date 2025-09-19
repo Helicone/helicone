@@ -38,7 +38,11 @@ import {
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { getRequestsByIdsWithBodies } from "../../../services/hooks/requests";
-import { useSessionNames, useSessions, useSessionsAggregateMetrics } from "../../../services/hooks/sessions";
+import {
+  useSessionNames,
+  useSessions,
+  useSessionsAggregateMetrics,
+} from "../../../services/hooks/sessions";
 import {
   columnDefsToDragColumnItems,
   DragColumnItem,
@@ -103,7 +107,9 @@ const SessionsPage = (props: SessionsPageProps) => {
     columnDefsToDragColumnItems(getColumns()),
   );
 
-  const [currentPageSize, setCurrentPageSize] = useState<number>(props.pageSize);
+  const [currentPageSize, setCurrentPageSize] = useState<number>(
+    props.pageSize,
+  );
   const [page, setPage] = useState<number>(props.currentPage);
 
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
@@ -149,11 +155,12 @@ const SessionsPage = (props: SessionsPageProps) => {
     pageSize: currentPageSize,
   });
 
-  const { aggregateMetrics, isLoading: isCountLoading } = useSessionsAggregateMetrics({
-    timeFilter,
-    sessionIdSearch: debouncedSessionIdSearch ?? "",
-    selectedName,
-  });
+  const { aggregateMetrics, isLoading: isCountLoading } =
+    useSessionsAggregateMetrics({
+      timeFilter,
+      sessionIdSearch: debouncedSessionIdSearch ?? "",
+      selectedName,
+    });
 
   const sessionsWithId = useMemo(() => {
     return sessions.map((session, index) => ({
@@ -199,7 +206,8 @@ const SessionsPage = (props: SessionsPageProps) => {
     [router],
   );
 
-  const isSessionsLoading = isLoading || allNames.isLoading || names.isLoading || hasSessions.isLoading;
+  const isSessionsLoading =
+    isLoading || allNames.isLoading || names.isLoading || hasSessions.isLoading;
 
   // Helper function to get TimeFilter object
   const getTimeFilterObject = (start: Date, end: Date): TimeFilter => ({
@@ -443,8 +451,11 @@ const SessionsPage = (props: SessionsPageProps) => {
           />
         )}
 
-        <TabsContent value="sessions" className="min-h-0 w-full flex-1 flex flex-col">
-          <div className="flex-1 min-h-0">
+        <TabsContent
+          value="sessions"
+          className="flex min-h-0 w-full flex-1 flex-col"
+        >
+          <div className="min-h-0 flex-1">
             <ThemedTable
               id="sessions-table"
               tableRef={tableRef}
