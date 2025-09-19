@@ -61,6 +61,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-32b:openrouter": {
+      "context": 40960,
+      "crossRegion": false,
+      "maxTokens": 40960,
+      "modelId": "qwen/qwen3-32b",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "anthropic/claude-3.5-haiku": {
     "claude-3.5-haiku:anthropic": {
@@ -101,6 +125,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": false,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-3.5-haiku:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "anthropic/claude-3.5-haiku",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-3.5-haiku:vertex": {
@@ -165,6 +209,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-3.5-sonnet-v2:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "anthropic/claude-3.5-sonnet",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-3.5-sonnet-v2:vertex": {
       "context": 200000,
       "crossRegion": false,
@@ -225,6 +289,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": false,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-3.7-sonnet:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "anthropic/claude-3.7-sonnet",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-3.7-sonnet:vertex": {
@@ -291,6 +375,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-opus-4:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "anthropic/claude-opus-4",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-opus-4:vertex": {
       "context": 200000,
       "crossRegion": false,
@@ -353,6 +457,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": false,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-opus-4-1:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "anthropic/claude-opus-4.1",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-opus-4-1:vertex": {
@@ -419,6 +543,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-sonnet-4:openrouter": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "anthropic/claude-sonnet-4",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-sonnet-4:vertex": {
       "context": 200000,
       "crossRegion": false,
@@ -465,6 +609,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-reasoner:openrouter": {
+      "context": 163840,
+      "crossRegion": false,
+      "maxTokens": 163840,
+      "modelId": "deepseek/deepseek-r1",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "stream",
+        "temperature",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "deepseek/deepseek-v3": {
     "deepseek-v3:deepseek": {
@@ -495,8 +663,36 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-v3:openrouter": {
+      "context": 163840,
+      "crossRegion": false,
+      "maxTokens": 163840,
+      "modelId": "deepseek/deepseek-chat-v3.1",
+      "parameters": [
+        "frequency_penalty",
+        "function_call",
+        "functions",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "stream",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
-  "deepseek/r1": {
+  "deepseek/r1-distill": {
     "deepseek-r1-distill-llama-70b:groq": {
       "context": 128000,
       "crossRegion": false,
@@ -527,6 +723,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-r1-distill-llama-70b:openrouter": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "deepseek/deepseek-r1-distill-llama-70b",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "google/gemini-2.5-flash": {
     "gemini-2.5-flash:google-ai-studio": {
@@ -549,6 +769,27 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "google-ai-studio",
       "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.5-flash:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65535,
+      "modelId": "google/gemini-2.5-flash",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -603,6 +844,27 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gemini-2.5-flash-lite:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65535,
+      "modelId": "google/gemini-2.5-flash-lite",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gemini-2.5-flash-lite:vertex": {
       "context": 1048576,
       "crossRegion": false,
@@ -649,6 +911,27 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "google-ai-studio",
       "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.5-pro:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "google/gemini-2.5-pro",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -705,6 +988,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gemma2-9b-it:openrouter": {
+      "context": 8192,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "google/gemma-2-9b-it",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "meta/llama": {
     "llama-3.1-8b-instant:groq": {
@@ -727,6 +1034,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.1-8b-instant:openrouter": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "meta-llama/llama-3.1-8b-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -757,6 +1090,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-3.3-70b-instruct:openrouter": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "meta-llama/llama-3.3-70b-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-4-maverick:groq": {
       "context": 131072,
       "crossRegion": false,
@@ -776,6 +1135,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-4-maverick:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "meta-llama/llama-4-maverick",
+      "parameters": [
+        "max_tokens",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -805,6 +1187,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-4-scout:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 1048576,
+      "modelId": "meta-llama/llama-4-scout",
+      "parameters": [
+        "max_tokens",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-guard-4:groq": {
       "context": 131072,
       "crossRegion": false,
@@ -825,6 +1230,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-guard-4:openrouter": {
+      "context": 163840,
+      "crossRegion": false,
+      "maxTokens": 163840,
+      "modelId": "meta-llama/llama-guard-4-12b",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -946,6 +1374,31 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "kimi-k2-0905:openrouter": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-0905",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2:groq": {
       "context": 131072,
       "crossRegion": false,
@@ -971,6 +1424,31 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2:openrouter": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "moonshotai/kimi-k2",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1024,6 +1502,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-4.1-mini:openrouter": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-4.1-mini",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4.1-nano:azure": {
       "context": 1047576,
       "crossRegion": false,
@@ -1065,6 +1566,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4.1-nano:openrouter": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-4.1-nano",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1116,6 +1640,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-4.1:openrouter": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-4.1",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "openai/gpt-4o": {
     "chatgpt-4o-latest:openai": {
@@ -1136,6 +1683,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "chatgpt-4o-latest:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "openai/chatgpt-4o-latest",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1187,6 +1757,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-4o-mini:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "openai/gpt-4o-mini",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4o:azure": {
       "context": 128000,
       "crossRegion": false,
@@ -1233,6 +1826,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-4o:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "openai/gpt-4o",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "openai/gpt-5": {
     "gpt-5-chat-latest:openai": {
@@ -1254,6 +1870,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "verbosity",
       ],
       "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-chat-latest:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "openai/gpt-5-chat",
+      "parameters": [
+        "frequency_penalty",
+        "max_completion_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1283,6 +1922,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5-mini:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5-mini",
+      "parameters": [
+        "frequency_penalty",
+        "max_completion_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5-nano:openai": {
       "context": 400000,
       "crossRegion": false,
@@ -1307,6 +1969,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5-nano:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5-nano",
+      "parameters": [
+        "frequency_penalty",
+        "max_completion_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5:openai": {
       "context": 400000,
       "crossRegion": false,
@@ -1326,6 +2011,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "verbosity",
       ],
       "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5",
+      "parameters": [
+        "frequency_penalty",
+        "max_completion_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1369,6 +2077,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "o3-mini:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "openai/o3-mini",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "o3-pro:openai": {
       "context": 200000,
       "crossRegion": false,
@@ -1387,6 +2113,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "o3-pro:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "openai/o3-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "o3:openai": {
       "context": 200000,
       "crossRegion": false,
@@ -1400,6 +2144,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o3:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "openai/o3",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1443,6 +2205,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "o4-mini:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "openai/o4-mini",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "openai/oss": {
     "gpt-oss-120b:groq": {
@@ -1472,6 +2252,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-oss-120b:openrouter": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "openai/gpt-oss-120b",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1509,8 +2316,61 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-oss-20b:openrouter": {
+      "context": 131000,
+      "crossRegion": false,
+      "maxTokens": 131000,
+      "modelId": "openai/gpt-oss-20b",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "xai/endpoints.ts": {
+    "grok-3-mini:openrouter": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "x-ai/grok-3-mini",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "grok-3-mini:xai": {
       "context": 131072,
       "crossRegion": false,
@@ -1532,6 +2392,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-3:openrouter": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "x-ai/grok-3",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1563,6 +2449,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "grok-4:openrouter": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 256000,
+      "modelId": "x-ai/grok-4",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "grok-4:xai": {
       "context": 256000,
       "crossRegion": false,
@@ -1584,6 +2496,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-code-fast-1:openrouter": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 10000,
+      "modelId": "x-ai/grok-code-fast-1",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1624,60 +2562,74 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "alibaba/qwen": [
     "deepinfra",
     "groq",
+    "openrouter",
   ],
   "anthropic/claude-3.5-haiku": [
     "anthropic",
     "bedrock",
+    "openrouter",
     "vertex",
   ],
   "anthropic/claude-3.5-sonnet-v2": [
     "anthropic",
     "bedrock",
+    "openrouter",
     "vertex",
   ],
   "anthropic/claude-3.7-sonnet": [
     "anthropic",
     "bedrock",
+    "openrouter",
     "vertex",
   ],
   "anthropic/claude-opus-4": [
     "anthropic",
     "bedrock",
+    "openrouter",
     "vertex",
   ],
   "anthropic/claude-opus-4-1": [
     "anthropic",
     "bedrock",
+    "openrouter",
     "vertex",
   ],
   "anthropic/claude-sonnet-4": [
     "anthropic",
     "bedrock",
+    "openrouter",
     "vertex",
   ],
   "deepseek/deepseek-reasoner": [
     "deepseek",
+    "openrouter",
   ],
   "deepseek/deepseek-v3": [
     "deepseek",
+    "openrouter",
   ],
-  "deepseek/r1": [
+  "deepseek/r1-distill": [
     "groq",
+    "openrouter",
   ],
   "google/gemini-2.5-flash": [
     "google-ai-studio",
+    "openrouter",
     "vertex",
   ],
   "google/gemini-2.5-flash-lite": [
     "google-ai-studio",
+    "openrouter",
     "vertex",
   ],
   "google/gemini-2.5-pro": [
     "google-ai-studio",
+    "openrouter",
     "vertex",
   ],
   "google/gemma": [
     "groq",
+    "openrouter",
   ],
   "meta/llama": [
     "groq",
@@ -1687,6 +2639,11 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
   ],
   "mistralai/mistral-nemo": [
     "deepinfra",
@@ -1697,6 +2654,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "moonshotai/kimi-k2": [
     "groq",
     "groq",
+    "openrouter",
+    "openrouter",
   ],
   "openai/gpt-4.1": [
     "azure",
@@ -1705,6 +2664,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openai",
     "openai",
     "openai",
+    "openrouter",
+    "openrouter",
+    "openrouter",
   ],
   "openai/gpt-4o": [
     "azure",
@@ -1712,28 +2674,45 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openai",
     "openai",
     "openai",
+    "openrouter",
+    "openrouter",
+    "openrouter",
   ],
   "openai/gpt-5": [
     "openai",
     "openai",
     "openai",
     "openai",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
   ],
   "openai/o3": [
     "azure",
     "openai",
     "openai",
     "openai",
+    "openrouter",
+    "openrouter",
+    "openrouter",
   ],
   "openai/o4": [
     "azure",
     "openai",
+    "openrouter",
   ],
   "openai/oss": [
     "groq",
     "groq",
+    "openrouter",
+    "openrouter",
   ],
   "xai/endpoints.ts": [
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
     "xai",
     "xai",
     "xai",
@@ -1763,6 +2742,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 4.22e-7,
+        "output": 8.44e-7,
+        "threshold": 0,
+      },
+    ],
   },
   "anthropic/claude-3.5-haiku": {
     "anthropic": [
@@ -1785,6 +2771,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 8e-7,
         "output": 0.000004,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 8.44e-7,
+        "output": 0.00000422,
         "threshold": 0,
       },
     ],
@@ -1824,6 +2817,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 0.000003165,
+        "output": 0.00001583,
+        "threshold": 0,
+      },
+    ],
     "vertex": [
       {
         "cacheMultipliers": {
@@ -1857,6 +2857,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 0.000003,
         "output": 0.000015,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.000003165,
+        "output": 0.00001583,
         "threshold": 0,
       },
     ],
@@ -1896,6 +2903,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 0.00001583,
+        "output": 0.00007913,
+        "threshold": 0,
+      },
+    ],
     "vertex": [
       {
         "cacheMultipliers": {
@@ -1929,6 +2943,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 0.000015,
         "output": 0.000075,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00001583,
+        "output": 0.00007913,
         "threshold": 0,
       },
     ],
@@ -1978,6 +2999,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 200000,
       },
     ],
+    "openrouter": [
+      {
+        "input": 0.00000633,
+        "output": 0.00002374,
+        "threshold": 0,
+      },
+    ],
     "vertex": [
       {
         "cacheMultipliers": {
@@ -2006,6 +3034,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 0.00000316,
+        "output": 0.00000844,
+        "threshold": 0,
+      },
+    ],
   },
   "deepseek/deepseek-v3": {
     "deepseek": [
@@ -2018,8 +3053,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 0.00000316,
+        "output": 0.00000475,
+        "threshold": 0,
+      },
+    ],
   },
-  "deepseek/r1": {
+  "deepseek/r1-distill": {
     "groq": [
       {
         "audio": 0,
@@ -2029,6 +3071,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "request": 0,
         "threshold": 0,
         "web_search": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000211,
+        "output": 0.00000211,
+        "threshold": 0,
       },
     ],
   },
@@ -2044,6 +3093,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "image": 0.001238,
         "input": 3e-7,
         "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 3.2e-7,
+        "output": 0.00000264,
         "threshold": 0,
       },
     ],
@@ -2073,6 +3129,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheStoragePerHour": 0.000001,
         "input": 1e-7,
         "output": 4e-7,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 1.1e-7,
+        "output": 4.2e-7,
         "threshold": 0,
       },
     ],
@@ -2110,6 +3173,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 200000,
       },
     ],
+    "openrouter": [
+      {
+        "input": 0.00000264,
+        "output": 0.00001582,
+        "threshold": 0,
+      },
+    ],
     "vertex": [
       {
         "cacheMultipliers": {
@@ -2139,6 +3209,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 2.1e-7,
+        "output": 2.1e-7,
+        "threshold": 0,
+      },
+    ],
   },
   "meta/llama": {
     "groq": [
@@ -2150,6 +3227,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "request": 0,
         "threshold": 0,
         "web_search": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 2.1e-7,
+        "output": 3.1e-7,
+        "threshold": 0,
       },
     ],
   },
@@ -2186,6 +3270,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 0.00000142,
+        "output": 0.00000528,
+        "threshold": 0,
+      },
+    ],
   },
   "openai/gpt-4.1": {
     "azure": [
@@ -2205,6 +3296,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 1e-7,
         "output": 4e-7,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 1.1e-7,
+        "output": 4.2e-7,
         "threshold": 0,
       },
     ],
@@ -2230,6 +3328,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 0.00000528,
+        "output": 0.00001582,
+        "threshold": 0,
+      },
+    ],
   },
   "openai/gpt-5": {
     "openai": [
@@ -2239,6 +3344,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 0.00000125,
         "output": 0.00001,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000132,
+        "output": 0.00001055,
         "threshold": 0,
       },
     ],
@@ -2264,6 +3376,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 0.0000211,
+        "output": 0.0000844,
+        "threshold": 0,
+      },
+    ],
   },
   "openai/o4": {
     "azure": [
@@ -2286,6 +3405,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 0.00000116,
+        "output": 0.00000464,
+        "threshold": 0,
+      },
+    ],
   },
   "openai/oss": {
     "groq": [
@@ -2299,8 +3425,22 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0,
       },
     ],
+    "openrouter": [
+      {
+        "input": 3.7e-7,
+        "output": 7.9e-7,
+        "threshold": 0,
+      },
+    ],
   },
   "xai/endpoints.ts": {
+    "openrouter": [
+      {
+        "input": 2.1e-7,
+        "output": 0.00000158,
+        "threshold": 0,
+      },
+    ],
     "xai": [
       {
         "audio": 0,
@@ -2326,6 +3466,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "chatgpt-4o-latest",
       "providers": [
         "openai",
+        "openrouter",
       ],
     },
     {
@@ -2333,6 +3474,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "openrouter",
         "vertex",
       ],
     },
@@ -2341,6 +3483,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "openrouter",
         "vertex",
       ],
     },
@@ -2349,6 +3492,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "openrouter",
         "vertex",
       ],
     },
@@ -2357,6 +3501,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "openrouter",
         "vertex",
       ],
     },
@@ -2365,6 +3510,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "openrouter",
         "vertex",
       ],
     },
@@ -2373,6 +3519,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "openrouter",
         "vertex",
       ],
     },
@@ -2380,24 +3527,28 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "deepseek-r1-distill-llama-70b",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
       "model": "deepseek-reasoner",
       "providers": [
         "deepseek",
+        "openrouter",
       ],
     },
     {
       "model": "deepseek-v3",
       "providers": [
         "deepseek",
+        "openrouter",
       ],
     },
     {
       "model": "gemini-2.5-flash",
       "providers": [
         "google-ai-studio",
+        "openrouter",
         "vertex",
       ],
     },
@@ -2405,6 +3556,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "gemini-2.5-flash-lite",
       "providers": [
         "google-ai-studio",
+        "openrouter",
         "vertex",
       ],
     },
@@ -2412,6 +3564,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "gemini-2.5-pro",
       "providers": [
         "google-ai-studio",
+        "openrouter",
         "vertex",
       ],
     },
@@ -2419,6 +3572,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "gemma2-9b-it",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
@@ -2426,6 +3580,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "azure",
         "openai",
+        "openrouter",
       ],
     },
     {
@@ -2433,6 +3588,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "azure",
         "openai",
+        "openrouter",
       ],
     },
     {
@@ -2440,6 +3596,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "azure",
         "openai",
+        "openrouter",
       ],
     },
     {
@@ -2447,6 +3604,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "azure",
         "openai",
+        "openrouter",
       ],
     },
     {
@@ -2454,65 +3612,76 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "azure",
         "openai",
+        "openrouter",
       ],
     },
     {
       "model": "gpt-5",
       "providers": [
         "openai",
+        "openrouter",
       ],
     },
     {
       "model": "gpt-5-chat-latest",
       "providers": [
         "openai",
+        "openrouter",
       ],
     },
     {
       "model": "gpt-5-mini",
       "providers": [
         "openai",
+        "openrouter",
       ],
     },
     {
       "model": "gpt-5-nano",
       "providers": [
         "openai",
+        "openrouter",
       ],
     },
     {
       "model": "gpt-oss-120b",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
       "model": "gpt-oss-20b",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
       "model": "grok-3",
       "providers": [
+        "openrouter",
         "xai",
       ],
     },
     {
       "model": "grok-3-mini",
       "providers": [
+        "openrouter",
         "xai",
       ],
     },
     {
       "model": "grok-4",
       "providers": [
+        "openrouter",
         "xai",
       ],
     },
     {
       "model": "grok-code-fast-1",
       "providers": [
+        "openrouter",
         "xai",
       ],
     },
@@ -2520,42 +3689,49 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "kimi-k2",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
       "model": "kimi-k2-0905",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
       "model": "llama-3.1-8b-instant",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
       "model": "llama-3.3-70b-instruct",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
       "model": "llama-4-maverick",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
       "model": "llama-4-scout",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
       "model": "llama-guard-4",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
     {
@@ -2586,6 +3762,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "o3",
       "providers": [
         "openai",
+        "openrouter",
       ],
     },
     {
@@ -2593,12 +3770,14 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "azure",
         "openai",
+        "openrouter",
       ],
     },
     {
       "model": "o3-pro",
       "providers": [
         "openai",
+        "openrouter",
       ],
     },
     {
@@ -2606,6 +3785,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "providers": [
         "azure",
         "openai",
+        "openrouter",
       ],
     },
     {
@@ -2618,6 +3798,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "qwen3-32b",
       "providers": [
         "groq",
+        "openrouter",
       ],
     },
   ],
@@ -2655,6 +3836,10 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "openai",
     },
     {
+      "modelCount": 41,
+      "provider": "openrouter",
+    },
+    {
       "modelCount": 9,
       "provider": "vertex",
     },
@@ -2665,9 +3850,18 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
   ],
   "ptbEnabledModels": [
     "chatgpt-4o-latest",
+    "claude-3.5-haiku",
+    "claude-3.5-sonnet-v2",
+    "claude-3.7-sonnet",
+    "claude-opus-4",
+    "claude-opus-4-1",
+    "claude-sonnet-4",
     "deepseek-r1-distill-llama-70b",
     "deepseek-reasoner",
     "deepseek-v3",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-pro",
     "gemma2-9b-it",
     "gpt-4.1",
     "gpt-4.1-mini",
@@ -2702,14 +3896,14 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
   ],
   "sampleEndpointIds": [
     "chatgpt-4o-latest:openai:*",
+    "chatgpt-4o-latest:openrouter:*",
     "claude-3.5-haiku:anthropic:*",
     "claude-3.5-haiku:bedrock:us-east-1",
-    "claude-3.5-haiku:vertex:global",
-    "claude-3.5-sonnet-v2:anthropic:*",
+    "claude-3.5-haiku:openrouter:*",
   ],
-  "totalEndpoints": 68,
-  "totalModelProviderConfigs": 68,
-  "totalModelsWithPtb": 35,
-  "totalProviders": 10,
+  "totalEndpoints": 109,
+  "totalModelProviderConfigs": 109,
+  "totalModelsWithPtb": 44,
+  "totalProviders": 11,
 }
 `;
