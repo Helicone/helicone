@@ -13,7 +13,7 @@ import type {
 export abstract class BaseProvider {
   abstract readonly displayName: string;
   abstract readonly baseUrl: string;
-  abstract readonly auth: "api-key" | "oauth" | "aws-signature";
+  abstract readonly auth: "api-key" | "oauth" | "aws-signature" | "service_account";
   abstract readonly pricingPages: string[];
   abstract readonly modelPages: string[];
   
