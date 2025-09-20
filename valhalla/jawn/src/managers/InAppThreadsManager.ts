@@ -197,7 +197,7 @@ export class InAppThreadsManager extends BaseManager {
         .join("\n\n");
 
       // Create the stub admin link (to be implemented later)
-      const adminLink = `https://helicone.ai/admin/threads/${sessionId}`;
+      const adminLink = `https://helicone.ai/admin/helix-threads?sessionId=${sessionId}`;
 
       // Check if this was created directly escalated (no prior conversation)
       const wasDirectlyEscalated =
