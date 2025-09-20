@@ -1247,8 +1247,9 @@ WHERE (${builtFilter.filter})`,
 
       try {
         const creditsAmountCents = Math.round(amount * 100);
-        const percentageFeeCents = Math.round(creditsAmountCents * 0.03);
-        const fixedFeeCents = 30;
+        const PERCENT_FEE_RATE = 0.03;
+        const FIXED_FEE_CENTS = 30;
+        const percentageFeeCents = Math.round(creditsAmountCents * PERCENT_FEE_RATE);
         const stripeFeeCents = percentageFeeCents + fixedFeeCents;
         const totalAmountCents = creditsAmountCents + stripeFeeCents;
 
