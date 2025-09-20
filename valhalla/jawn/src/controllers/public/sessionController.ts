@@ -16,6 +16,7 @@ import {
   SessionMetrics,
   SessionNameResult,
   SessionResult,
+  SessionsAggregateMetrics,
 } from "../../managers/SessionManager";
 import { err, ok, Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
@@ -42,6 +43,8 @@ export interface SessionQueryParams {
   nameEquals?: string;
   timezoneDifference: number;
   filter: SessionFilterNode;
+  offset?: number;
+  limit?: number;
 }
 
 export interface SessionNameQueryParams {
@@ -76,7 +79,7 @@ export class SessionController extends Controller {
       `has-session-${request.authParams.organizationId}`,
       async () => {
         const sessionManager = new SessionManager(request.authParams);
-        const result = await sessionManager.getSessions({
+        const result = await sessionManager.getSessionsCount({
           filter: {},
           search: "",
           timeFilter: {
@@ -88,7 +91,7 @@ export class SessionController extends Controller {
         if (result.error || !result.data) {
           return err("Error finding sessions");
         } else {
-          if (result.data.length > 0) {
+          if (result.data?.count > 0) {
             return ok(true);
           } else {
             return err("No sessions found");
@@ -116,6 +119,23 @@ export class SessionController extends Controller {
     const sessionManager = new SessionManager(request.authParams);
 
     const result = await sessionManager.getSessions(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("count")
+  public async getSessionsCount(
+    @Body()
+    requestBody: SessionQueryParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<SessionsAggregateMetrics, string>> {
+    const sessionManager = new SessionManager(request.authParams);
+
+    const result = await sessionManager.getSessionsCount(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {

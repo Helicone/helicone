@@ -48,7 +48,7 @@ export const getServerSideProps = async (
   } = context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
-  const pageSize = parseInt(page_size as string, 10) || 10;
+  const pageSize = parseInt(page_size as string, 10) || 50;
 
   return {
     props: {

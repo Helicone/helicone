@@ -6427,6 +6427,14 @@
 					},
 					"filter": {
 						"$ref": "#/components/schemas/SessionFilterNode"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -6437,6 +6445,69 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"SessionsAggregateMetrics": {
+				"properties": {
+					"count": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_cost": {
+						"type": "number",
+						"format": "double"
+					},
+					"avg_cost": {
+						"type": "number",
+						"format": "double"
+					},
+					"avg_latency": {
+						"type": "number",
+						"format": "double"
+					},
+					"avg_requests": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"count",
+					"total_cost",
+					"avg_cost",
+					"avg_latency",
+					"avg_requests"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_SessionsAggregateMetrics_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/SessionsAggregateMetrics"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SessionsAggregateMetrics.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SessionsAggregateMetrics_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"SessionNameResult": {
 				"properties": {
@@ -17472,6 +17543,42 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_SessionResult-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Session"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SessionQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/session/count": {
+			"post": {
+				"operationId": "GetSessionsCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SessionsAggregateMetrics.string_"
 								}
 							}
 						}
