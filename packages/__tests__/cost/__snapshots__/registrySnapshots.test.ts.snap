@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
@@ -2671,15 +2671,12 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
     "openrouter",
-<<<<<<< HEAD
-=======
   ],
   "mistralai/mistral-nemo": [
     "deepinfra",
   ],
   "mistralai/mistral-small": [
     "deepinfra",
->>>>>>> origin/main
   ],
   "moonshotai/kimi-k2": [
     "groq",
@@ -3273,8 +3270,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
-<<<<<<< HEAD
-=======
   },
   "mistralai/mistral-nemo": {
     "deepinfra": [
@@ -3293,7 +3288,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
->>>>>>> origin/main
   },
   "moonshotai/kimi-k2": {
     "groq": [
@@ -3942,13 +3936,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:bedrock:us-east-1",
     "claude-3.5-haiku:openrouter:*",
   ],
-<<<<<<< HEAD
-  "totalEndpoints": 107,
-  "totalModelProviderConfigs": 107,
-=======
   "totalEndpoints": 110,
   "totalModelProviderConfigs": 110,
->>>>>>> origin/main
   "totalModelsWithPtb": 44,
   "totalProviders": 11,
 }
