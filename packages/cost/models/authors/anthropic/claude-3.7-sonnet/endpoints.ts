@@ -31,7 +31,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -64,7 +64,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       global: {},
     },
@@ -97,7 +97,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "us-east-1": {},
     },

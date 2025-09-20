@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
@@ -102,7 +102,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "anthropic",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -122,7 +122,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -162,7 +162,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -184,7 +184,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "anthropic",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -204,7 +204,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -244,7 +244,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -266,7 +266,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "anthropic",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -286,7 +286,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -326,7 +326,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -348,7 +348,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "anthropic",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -370,7 +370,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -410,7 +410,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -432,7 +432,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "anthropic",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -454,7 +454,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -494,7 +494,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -516,7 +516,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "anthropic",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -538,7 +538,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -578,7 +578,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
