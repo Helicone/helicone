@@ -4,12 +4,14 @@ import type {
   UserEndpointConfig,
   RequestBodyContext,
   Endpoint,
+  AuthContext,
+  AuthResult,
 } from "../types";
 
 export class VertexProvider extends BaseProvider {
   readonly displayName = "Vertex AI";
   readonly baseUrl = "https://{region}-aiplatform.googleapis.com";
-  readonly auth = "oauth" as const;
+  readonly auth = "service_account" as const;
   readonly requiredConfig = ["projectId", "region"] as const;
   readonly pricingPages = [
     "https://cloud.google.com/vertex-ai/generative-ai/pricing",
@@ -18,6 +20,13 @@ export class VertexProvider extends BaseProvider {
   readonly modelPages = [
     "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models",
   ];
+
+  readonly uiConfig = {
+    logoUrl: "/assets/home/providers/gemini.webp",
+    description: "Configure your Google Cloud service account for Vertex AI models",
+    docsUrl: "https://docs.helicone.ai/integrations/gemini/vertex/curl",
+    relevanceScore: 85,
+  };
 
   buildUrl(
     endpoint: ModelProviderConfig,
@@ -46,5 +55,21 @@ export class VertexProvider extends BaseProvider {
       return JSON.stringify(updatedBody);
     }
     return JSON.stringify(context.parsedBody);
+  }
+
+  async authenticate(context: AuthContext): Promise<AuthResult> {
+    // For Vertex AI, we expect the service account JSON to be stored in apiKey
+    // The worker will handle generating the OAuth token
+    if (!context.apiKey) {
+      throw new Error("Service account JSON is required for Vertex AI authentication");
+    }
+
+    // Return a marker header that the worker can detect
+    // The actual OAuth token will be generated in the worker
+    return {
+      headers: {
+        "X-Vertex-Service-Account": context.apiKey,
+      },
+    };
   }
 }

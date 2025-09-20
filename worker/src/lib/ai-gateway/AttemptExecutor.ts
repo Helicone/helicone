@@ -9,6 +9,7 @@ import { isErr, Result, ok, err } from "../util/results";
 import { Attempt, EscrowInfo, AttemptError } from "./types";
 import { Endpoint } from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
+import { getGoogleAccessToken } from "../auth/googleAuth";
 
 export class AttemptExecutor {
   constructor(
@@ -129,10 +130,31 @@ export class AttemptExecutor {
       requestWrapper.setUrl(endpoint.baseUrl ?? requestWrapper.url.toString());
       await requestWrapper.setBody(bodyResult.data);
 
+      // Handle Vertex AI service account authentication
+      let authHeaders = authResult.data?.headers || {};
+      if (authHeaders["X-Vertex-Service-Account"]) {
+        try {
+          // The service account JSON is in the marker header
+          const serviceAccountJson = authHeaders["X-Vertex-Service-Account"];
+          const accessToken = await getGoogleAccessToken(serviceAccountJson);
+
+          // Replace marker with actual Bearer token
+          authHeaders = {
+            ...authHeaders,
+            Authorization: `Bearer ${accessToken}`,
+          };
+          delete authHeaders["X-Vertex-Service-Account"];
+        } catch (error) {
+          return err({
+            type: "request_failed",
+            message: `Vertex AI authentication failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+            statusCode: 401,
+          });
+        }
+      }
+
       // Apply auth headers from provider
-      for (const [key, value] of Object.entries(
-        authResult.data?.headers || {}
-      )) {
+      for (const [key, value] of Object.entries(authHeaders)) {
         requestWrapper.setHeader(key, value);
       }
 
