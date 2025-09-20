@@ -847,7 +847,9 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasUnsavedForm, setHasUnsavedForm] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-  const [saveConfirmCallback, setSaveConfirmCallback] = useState<(() => void) | null>(null);
+  const [saveConfirmCallback, setSaveConfirmCallback] = useState<
+    (() => void) | null
+  >(null);
   const { providerKeys } = useProvider({ provider });
 
   // Filter provider keys for this specific provider
@@ -1010,7 +1012,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
             <AlertDialogTitle>Update Provider Key</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to update this {provider.name} key? This
-              will replace the existing key with the new value you've
+              will replace the existing key with the new value you&apos;ve
               entered.
             </AlertDialogDescription>
           </AlertDialogHeader>
