@@ -49,7 +49,8 @@ export type Tokenizer =
   | "Qwen"
   | "DeepSeek"
   | "Cohere"
-  | "Grok";
+  | "Grok"
+  | "Tekken";
 
 export type StandardParameter =
   | "max_tokens"
@@ -194,6 +195,7 @@ export interface UserEndpointConfig {
   apiVersion?: string; // Azure OpenAI
   crossRegion?: boolean;
   gatewayMapping?: "OPENAI" | "NO_MAPPING";
+  modelName?: string;
 }
 
 export interface AuthContext {

@@ -493,7 +493,7 @@ export function ModelRegistryPage() {
                               )}
                               {model.endpoints.some(ep => ep.supportsPtb) && (
                                 <span className="text-xs font-normal text-blue-800 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5">
-                                  PTB
+                                  Credits
                                 </span>
                               )}
                             </div>

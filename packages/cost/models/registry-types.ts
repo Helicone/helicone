@@ -6,21 +6,21 @@
 import type { ModelProviderName } from "./providers";
 
 // Import configs to derive types
-import { anthropicEndpointConfig } from "./authors/anthropic";
-import { openaiEndpointConfig } from "./authors/openai";
-import { googleEndpointConfig } from "./authors/google";
-import { grokEndpointConfig } from "./authors/xai";
-import { anthropicModels } from "./authors/anthropic";
-import { openaiModels } from "./authors/openai";
-import { googleModels } from "./authors/google";
-import { grokModels } from "./authors/xai";
+import { anthropicEndpointConfig, anthropicModels } from "./authors/anthropic";
+import { deepseekEndpointConfig, deepseekModels } from "./authors/deepseek";
+import { googleEndpointConfig, googleModels } from "./authors/google";
+import { grokEndpointConfig, grokModels } from "./authors/xai";
+import { openaiEndpointConfig, openaiModels } from "./authors/openai";
+import { mistralEndpointConfig, mistralModels } from "./authors/mistralai";
 
 // Combine all models for type derivation
 const allModels = {
   ...anthropicModels,
   ...openaiModels,
   ...googleModels,
-  ...grokModels
+  ...grokModels,
+  ...mistralModels,
+  ...deepseekModels
 };
 
 export type ModelName = keyof typeof allModels;
@@ -30,7 +30,9 @@ const modelProviderConfigs = {
   ...anthropicEndpointConfig,
   ...openaiEndpointConfig,
   ...googleEndpointConfig,
-  ...grokEndpointConfig
+  ...grokEndpointConfig,
+  ...mistralEndpointConfig,
+  ...deepseekEndpointConfig
 };
 
 export type ModelProviderConfigId = keyof typeof modelProviderConfigs;

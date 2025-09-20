@@ -635,6 +635,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "deepseek/deepseek-v3": {
+    "deepseek-v3:deepinfra": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek-ai/DeepSeek-V3.1",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3:deepseek": {
       "context": 128000,
       "crossRegion": false,
@@ -1286,6 +1312,58 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "groq",
       "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "mistralai/mistral-nemo": {
+    "mistral-nemo:deepinfra": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16400,
+      "modelId": "mistralai/Mistral-Nemo-Instruct-2407",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "mistralai/mistral-small": {
+    "mistral-small:deepinfra": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -2553,6 +2631,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/deepseek-v3": [
+    "deepinfra",
     "deepseek",
     "openrouter",
   ],
@@ -2592,6 +2671,15 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
     "openrouter",
+<<<<<<< HEAD
+=======
+  ],
+  "mistralai/mistral-nemo": [
+    "deepinfra",
+  ],
+  "mistralai/mistral-small": [
+    "deepinfra",
+>>>>>>> origin/main
   ],
   "moonshotai/kimi-k2": [
     "groq",
@@ -2985,6 +3073,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/deepseek-v3": {
+    "deepinfra": [
+      {
+        "input": 2.7e-7,
+        "output": 0.000001,
+        "threshold": 0,
+      },
+    ],
     "deepseek": [
       {
         "cacheMultipliers": {
@@ -3178,6 +3273,27 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+<<<<<<< HEAD
+=======
+  },
+  "mistralai/mistral-nemo": {
+    "deepinfra": [
+      {
+        "input": 0.02,
+        "output": 0.04,
+        "threshold": 0,
+      },
+    ],
+  },
+  "mistralai/mistral-small": {
+    "deepinfra": [
+      {
+        "input": 0.05,
+        "output": 0.1,
+        "threshold": 0,
+      },
+    ],
+>>>>>>> origin/main
   },
   "moonshotai/kimi-k2": {
     "groq": [
@@ -3464,6 +3580,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "deepseek-v3",
       "providers": [
+        "deepinfra",
         "deepseek",
         "openrouter",
       ],
@@ -3671,6 +3788,18 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "mistral-nemo",
+      "providers": [
+        "deepinfra",
+      ],
+    },
+    {
+      "model": "mistral-small",
+      "providers": [
+        "deepinfra",
+      ],
+    },
+    {
       "model": "o3",
       "providers": [
         "openai",
@@ -3728,7 +3857,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 1,
+      "modelCount": 4,
       "provider": "deepinfra",
     },
     {
@@ -3813,8 +3942,13 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:bedrock:us-east-1",
     "claude-3.5-haiku:openrouter:*",
   ],
+<<<<<<< HEAD
   "totalEndpoints": 107,
   "totalModelProviderConfigs": 107,
+=======
+  "totalEndpoints": 110,
+  "totalModelProviderConfigs": 110,
+>>>>>>> origin/main
   "totalModelsWithPtb": 44,
   "totalProviders": 11,
 }

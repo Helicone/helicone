@@ -175,6 +175,7 @@ export class AttemptBuilder {
     const userConfig = {
       ...((userKey.config as UserEndpointConfig) || {}),
       gatewayMapping: bodyMapping,
+      modelName: modelName,
     };
 
     // Build endpoint from provider data's config
@@ -219,6 +220,7 @@ export class AttemptBuilder {
     const userConfig = {
       ...((userKey.config as UserEndpointConfig) || {}),
       gatewayMapping: bodyMapping,
+      modelName: modelName,
     };
 
     // Create a dynamic passthrough endpoint for unknown models
