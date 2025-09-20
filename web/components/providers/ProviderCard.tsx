@@ -51,6 +51,7 @@ interface ProviderInstanceProps {
   isMultipleMode?: boolean;
   instanceIndex?: number;
   onSaveSuccess?: () => void;
+  onRequestSaveConfirm?: (confirmCallback: () => void) => void;
 }
 
 // ====== Provider Instance Component ======
@@ -61,6 +62,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   isMultipleMode = false,
   instanceIndex = 0,
   onSaveSuccess,
+  onRequestSaveConfirm,
 }) => {
   const { setNotification } = useNotification();
   const {
@@ -88,7 +90,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   );
   const [configValues, setConfigValues] = useState<Record<string, string>>({});
   const [byokEnabled, setByokEnabled] = useState(false);
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
   // Ref for the name input to programmatically focus it
   const nameInputRef = React.useRef<HTMLInputElement>(null);
@@ -286,8 +287,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
 
   const handleSaveKey = async () => {
     // Show confirmation dialog for editing existing keys
-    if (isEditMode && isEditingKey) {
-      setShowSaveConfirm(true);
+    if (isEditMode && isEditingKey && onRequestSaveConfirm) {
+      onRequestSaveConfirm(() => handleConfirmSave());
       return;
     }
 
@@ -313,8 +314,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   };
 
   const handleConfirmSave = async () => {
-    setShowSaveConfirm(false);
-
     if (!existingKey) return;
 
     // Only update if we're in edit mode and have new values
@@ -426,7 +425,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <Checkbox
-                id={`crossRegion-${existingKey?.id || instanceIndex}`}
+                id={`crossRegion-${provider.id}-${existingKey?.id || instanceIndex}`}
                 checked={configValues.crossRegion === "true"}
                 onCheckedChange={(checked) =>
                   handleUpdateConfigField(
@@ -437,7 +436,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                 disabled={isEditMode && !isEditingKey}
               />
               <Label
-                htmlFor={`crossRegion-${existingKey?.id || instanceIndex}`}
+                htmlFor={`crossRegion-${provider.id}-${existingKey?.id || instanceIndex}`}
                 className="cursor-pointer text-xs font-normal"
               >
                 Cross Region
@@ -714,38 +713,18 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           {/* BYOK toggle */}
           <div className="mt-2 flex items-center gap-2">
             <Checkbox
-              id={`byok-${existingKey?.id || instanceIndex}`}
+              id={`byok-${provider.id}-${existingKey?.id || instanceIndex}`}
               checked={byokEnabled}
               onCheckedChange={(checked) => setByokEnabled(!!checked)}
               disabled={isEditMode && !isEditingKey}
             />
             <Label
-              htmlFor={`byok-${existingKey?.id || instanceIndex}`}
+              htmlFor={`byok-${provider.id}-${existingKey?.id || instanceIndex}`}
               className="cursor-pointer text-xs font-normal"
             >
               Enable for AI Gateway (BYOK)
             </Label>
           </div>
-
-          {/* Save Key Confirmation Dialog */}
-          <AlertDialog open={showSaveConfirm} onOpenChange={setShowSaveConfirm}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Update Provider Key</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to update this {provider.name} key? This
-                  will replace the existing key with the new value you&apos;ve
-                  entered.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleConfirmSave}>
-                  Update Key
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
 
           {/* Advanced config fields */}
           {hasAdvancedConfig && renderConfigFields()}
@@ -867,6 +846,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
 export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasUnsavedForm, setHasUnsavedForm] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [saveConfirmCallback, setSaveConfirmCallback] = useState<(() => void) | null>(null);
   const { providerKeys } = useProvider({ provider });
 
   // Filter provider keys for this specific provider
@@ -878,6 +859,21 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   const handleAddInstance = () => {
     setIsExpanded(true);
     setHasUnsavedForm(true);
+  };
+
+  // Handle save confirmation request from instances
+  const handleRequestSaveConfirm = (confirmCallback: () => void) => {
+    setSaveConfirmCallback(() => confirmCallback);
+    setShowSaveConfirm(true);
+  };
+
+  // Handle confirmation
+  const handleConfirmSave = () => {
+    setShowSaveConfirm(false);
+    if (saveConfirmCallback) {
+      saveConfirmCallback();
+      setSaveConfirmCallback(null);
+    }
   };
 
   const handleRemoveInstance = (_keyId: string) => {
@@ -946,6 +942,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
               <ProviderInstance
                 provider={provider}
                 existingKey={existingKeys[0]}
+                onRequestSaveConfirm={handleRequestSaveConfirm}
               />
             )}
 
@@ -961,6 +958,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                     onRemove={() => handleRemoveInstance(key.id)}
                     isMultipleMode={true}
                     instanceIndex={index}
+                    onRequestSaveConfirm={handleRequestSaveConfirm}
                   />
                 ))}
 
@@ -976,6 +974,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
                       instanceIndex={existingKeys.length}
                       onRemove={() => setHasUnsavedForm(false)}
                       onSaveSuccess={() => setHasUnsavedForm(false)}
+                      onRequestSaveConfirm={handleRequestSaveConfirm}
                     />
                   </div>
                 )}
@@ -1003,6 +1002,26 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           </div>
         </div>
       )}
+
+      {/* Single shared Save Key Confirmation Dialog */}
+      <AlertDialog open={showSaveConfirm} onOpenChange={setShowSaveConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Update Provider Key</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to update this {provider.name} key? This
+              will replace the existing key with the new value you've
+              entered.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSave}>
+              Update Key
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
