@@ -82,7 +82,7 @@ import DeployDialog from "./DeployDialog";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 import { ProviderCard } from "@/components/providers/ProviderCard";
-import { providers } from "@/data/providers";
+import { getAllProviders } from "@/lib/providers/getProviders";
 import { useProvider } from "@/hooks/useProvider";
 import {
   Dialog,
@@ -131,7 +131,7 @@ export default function PromptEditor({
   /*                                    Hooks                                   */
   /* -------------------------------------------------------------------------- */
   const { existingKey: hasOpenRouter } = useProvider({
-    provider: providers.find((p) => p.id === "openrouter")!,
+    provider: getAllProviders().find((p) => p.id === "openrouter")!,
   });
   // - Router
   const router = useRouter();
@@ -1262,7 +1262,7 @@ export default function PromptEditor({
                 available models in the prompt editor.
               </div>
               <ProviderCard
-                provider={providers.find((p) => p.id === "openrouter")!}
+                provider={getAllProviders().find((p) => p.id === "openrouter")!}
               />
             </DialogContent>
           </Dialog>

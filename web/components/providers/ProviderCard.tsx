@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Provider, ProviderKey } from "@/types/provider";
 import { useProvider } from "@/hooks/useProvider";
+import { getAuthTypeConfig } from "@/lib/providers/authTypeUI";
 import {
   Tooltip,
   TooltipContent,
@@ -89,16 +90,15 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   const [configValues, setConfigValues] = useState<Record<string, string>>({});
   const [byokEnabled, setByokEnabled] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [serviceAccountFileName, setServiceAccountFileName] = useState<string | null>(null);
 
   // Ref for the name input to programmatically focus it
   const nameInputRef = React.useRef<HTMLInputElement>(null);
 
   // ====== Derived state ======
   const isEditMode = !!existingKey;
-  const hasAdvancedConfig =
-    provider.id === "azure" ||
-    provider.id === "bedrock" ||
-    provider.id === "vertex";
+  const authConfig = getAuthTypeConfig(provider.auth);
+  const hasAdvancedConfig = provider.requiredConfig && provider.requiredConfig.length > 0;
 
   // Track if there are unsaved changes
   const hasUnsavedChanges =
@@ -123,12 +123,12 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
         apiVersion: "",
         deploymentName: "",
       };
-    } else if (provider.id === "bedrock") {
+    } else if (provider.auth === "aws-signature") {
       initialConfig = {
         region: "",
         crossRegion: "false",
       };
-    } else if (provider.id === "vertex") {
+    } else if (provider.auth === "service_account") {
       initialConfig = {
         region: "",
         projectId: "",
@@ -194,6 +194,39 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   }, [hasUnsavedChanges]);
 
   // ====== Event handlers ======
+  const handleServiceAccountUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target?.result as string);
+
+        // Validate it's a service account JSON
+        if (!json.type || json.type !== "service_account" || !json.private_key || !json.client_email) {
+          setNotification("Invalid service account JSON file", "error");
+          return;
+        }
+
+        // Store the entire JSON as the key value
+        setKeyValue(JSON.stringify(json));
+        setServiceAccountFileName(file.name);
+
+        // Extract project ID and set in config if present
+        if (json.project_id && provider.auth === "service_account") {
+          setConfigValues(prev => ({
+            ...prev,
+            projectId: json.project_id
+          }));
+        }
+      } catch (error) {
+        setNotification("Failed to parse service account JSON", "error");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleToggleKeyVisibility = async () => {
     if (isViewingKey) {
       setIsViewingKey(false);
@@ -320,8 +353,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     // Only update if we're in edit mode and have new values
     if (
       !isEditingKey ||
-      (provider.id === "bedrock" && !keyValue && !secretKeyValue) ||
-      (provider.id !== "bedrock" && !keyValue)
+      (authConfig.inputType === "multi" && !keyValue && !secretKeyValue) ||
+      (authConfig.inputType !== "multi" && !keyValue)
     ) {
       setNotification("Please enter at least one key value", "error");
       return;
@@ -383,7 +416,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           placeholder: "gpt-35-turbo",
         },
       ];
-    } else if (provider.id === "bedrock") {
+    } else if (provider.auth === "aws-signature") {
       configFields = [
         { label: "Region", key: "region", placeholder: "us-west-2" },
         {
@@ -393,7 +426,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           type: "boolean",
         },
       ];
-    } else if (provider.id === "vertex") {
+    } else if (provider.auth === "service_account") {
       configFields = [
         { label: "Region", key: "region", placeholder: "us-east5" },
         {
@@ -406,7 +439,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
 
     return (
       <div className="mt-3 flex flex-col gap-2">
-        {provider.id === "bedrock" ? (
+        {provider.auth === "aws-signature" ? (
           // Special layout for AWS Bedrock to put cross region below region
           <div className="flex flex-col gap-2">
             <div className="flex gap-3">
@@ -553,84 +586,126 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           {/* Key input row */}
           <div className="flex items-end gap-1">
             <div className="relative flex-1">
-              {provider.id === "bedrock" && <Label>Access key</Label>}
-              <Input
-                type={isViewingKey || isEditingKey ? "text" : "password"}
-                placeholder={
-                  isEditMode && !isEditingKey
-                    ? "••••••••••••••••"
-                    : isEditingKey
-                      ? "Enter new API key..."
-                      : provider.apiKeyPlaceholder
-                }
-                value={isViewingKey && decryptedKey ? decryptedKey : keyValue}
-                onChange={(e) => handleKeyValueChange(e.target.value)}
-                className="h-7 flex-1 py-1 pr-16 text-xs"
-                disabled={isEditMode && !isEditingKey}
-              />
-              {/* Copy and Eye buttons inside input */}
-              <div
-                className={cn(
-                  "absolute right-1 flex -translate-y-1/2 items-center gap-1",
-                  provider.id === "bedrock"
-                    ? "top-[calc(50%+12px)]"
-                    : "top-1/2",
-                )}
-              >
-                {/* Copy button - always visible for existing keys, disabled when no value */}
-                {isEditMode ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleCopyToClipboard(
-                        isViewingKey && decryptedKey ? decryptedKey : keyValue,
-                      )
-                    }
-                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
-                    disabled={
-                      !(
-                        (isViewingKey && decryptedKey) ||
-                        (isEditingKey && keyValue)
-                      )
-                    }
-                    title="Copy"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </button>
-                ) : (
-                  // For new keys, only show when there's a value
-                  keyValue && (
+              {provider.auth === "aws-signature" && <Label>Access key</Label>}
+              {authConfig.inputType === "file" && !isEditMode && (
+                <div>
+                  <Label>Service Account JSON</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept=".json"
+                      onChange={handleServiceAccountUpload}
+                      className="h-7 text-xs"
+                      disabled={isEditMode && !isEditingKey}
+                    />
+                    {serviceAccountFileName && (
+                      <Small className="text-muted-foreground">
+                        {serviceAccountFileName}
+                      </Small>
+                    )}
+                  </div>
+                  {keyValue && (
+                    <Small className="mt-1 text-xs text-muted-foreground">
+                      Service account loaded ✓
+                    </Small>
+                  )}
+                  {!keyValue && (
+                    <Small className="mt-1 text-xs text-muted-foreground">
+                      Upload a service account JSON file from Google Cloud Console
+                    </Small>
+                  )}
+                </div>
+              )}
+              {authConfig.inputType !== "file" && (
+                <Input
+                  type={isViewingKey || isEditingKey ? "text" : "password"}
+                  placeholder={
+                    isEditMode && !isEditingKey
+                      ? "••••••••••••••••"
+                      : isEditingKey
+                        ? "Enter new API key..."
+                        : provider.apiKeyPlaceholder
+                  }
+                  value={isViewingKey && decryptedKey ? decryptedKey : keyValue}
+                  onChange={(e) => handleKeyValueChange(e.target.value)}
+                  className="h-7 flex-1 py-1 pr-16 text-xs"
+                  disabled={isEditMode && !isEditingKey}
+                />
+              )}
+              {authConfig.inputType === "file" && isEditMode && (
+                <Input
+                  type="password"
+                  placeholder="Service account configured"
+                  value="••••••••••••••••"
+                  className="h-7 flex-1 py-1 pr-16 text-xs"
+                  disabled={true}
+                />
+              )}
+              {/* Copy and Eye buttons inside input - not for file uploads */}
+              {authConfig.inputType !== "file" && (
+                <div
+                  className={cn(
+                    "absolute right-1 flex -translate-y-1/2 items-center gap-1",
+                    provider.auth === "aws-signature"
+                      ? "top-[calc(50%+12px)]"
+                      : "top-1/2",
+                  )}
+                >
+                  {/* Copy button - always visible for existing keys, disabled when no value */}
+                  {isEditMode ? (
                     <button
                       type="button"
-                      onClick={() => handleCopyToClipboard(keyValue)}
-                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      onClick={() =>
+                        handleCopyToClipboard(
+                          isViewingKey && decryptedKey ? decryptedKey : keyValue,
+                        )
+                      }
+                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+                      disabled={
+                        !(
+                          (isViewingKey && decryptedKey) ||
+                          (isEditingKey && keyValue)
+                        )
+                      }
                       title="Copy"
                     >
                       <Copy className="h-3 w-3" />
                     </button>
-                  )
-                )}
-                {/* View/Hide button - only for existing keys */}
-                {isEditMode && !isEditingKey && (
-                  <button
-                    type="button"
-                    onClick={handleToggleKeyVisibility}
-                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                    disabled={isLoading}
-                    title={isViewingKey ? "Hide" : "View"}
-                  >
-                    {isLoading ? (
-                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    ) : isViewingKey ? (
-                      <EyeOff className="h-3 w-3" />
-                    ) : (
-                      <Eye className="h-3 w-3" />
-                    )}
-                  </button>
-                )}
-              </div>
+                  ) : (
+                    // For new keys, only show when there's a value
+                    keyValue && (
+                      <button
+                        type="button"
+                        onClick={() => handleCopyToClipboard(keyValue)}
+                        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        title="Copy"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </button>
+                    )
+                  )}
+                  {/* View/Hide button - only for existing keys */}
+                  {isEditMode && !isEditingKey && (
+                    <button
+                      type="button"
+                      onClick={handleToggleKeyVisibility}
+                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      disabled={isLoading}
+                      title={isViewingKey ? "Hide" : "View"}
+                    >
+                      {isLoading ? (
+                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : isViewingKey ? (
+                        <EyeOff className="h-3 w-3" />
+                      ) : (
+                        <Eye className="h-3 w-3" />
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-            {provider.id === "bedrock" && (
+            {provider.auth === "aws-signature" && (
               <div className="relative flex-1">
                 <Label>Secret key</Label>
                 <Input

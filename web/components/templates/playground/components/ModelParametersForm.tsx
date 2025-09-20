@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { DialogTrigger } from "@/components/ui/dialog";
 import { Dialog } from "@/components/ui/dialog";
-import { providers } from "@/data/providers";
+import { getAllProviders } from "@/lib/providers/getProviders";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import Image from "next/image";
 import { ModelParameters } from "@/lib/api/llm/generate";
@@ -622,7 +622,7 @@ export default function ModelParametersForm({
                   available models in the prompt editor.
                 </div>
                 <ProviderCard
-                  provider={providers.find((p) => p.id === "openrouter")!}
+                  provider={getAllProviders().find((p) => p.id === "openrouter")!}
                 />
               </DialogContent>
             </Dialog>

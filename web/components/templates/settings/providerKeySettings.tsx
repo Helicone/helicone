@@ -10,9 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SortOption } from "@/types/provider";
-import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
-import { filterProviders, sortProviders } from "@/utils/providerUtils";
+import { getAllProviders, filterAndSortProviders } from "@/lib/providers/getProviders";
 
 interface ProviderKeySettingsProps {
   className?: string;
@@ -24,10 +23,12 @@ export const ProviderKeySettings: React.FC<ProviderKeySettingsProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("relevance");
 
-  const filteredProviders = sortProviders(
-    filterProviders(providers, searchQuery),
+  const providers = getAllProviders();
+  const filteredProviders = filterAndSortProviders(
+    providers,
+    searchQuery,
     sortOption,
-    recentlyUsedProviderIds,
+    [], // TODO: Get recentlyUsedIds from user data
   );
 
   return (

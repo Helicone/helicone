@@ -21,6 +21,13 @@ export class BedrockProvider extends BaseProvider {
     "https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html",
   ];
 
+  readonly uiConfig = {
+    logoUrl: "/assets/home/providers/bedrock.png",
+    description: "Configure your AWS credentials for Bedrock models",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods/bedrock",
+    relevanceScore: 75,
+  };
+
   private getModelId(
     endpoint: ModelProviderConfig,
     config: UserEndpointConfig = {}

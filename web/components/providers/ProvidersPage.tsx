@@ -10,9 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SortOption } from "@/types/provider";
-import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
-import { filterProviders, sortProviders } from "@/utils/providerUtils";
+import { getAllProviders, filterAndSortProviders } from "@/lib/providers/getProviders";
 import FoldedHeader from "../shared/FoldedHeader";
 
 export const ProvidersPage: React.FC = () => {
@@ -20,11 +19,16 @@ export const ProvidersPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("relevance");
 
+  // Get all providers from backend
+  const providers = getAllProviders();
+
   // Filter and sort the providers based on user selections
-  const filteredProviders = sortProviders(
-    filterProviders(providers, searchQuery),
+  // TODO: Get recentlyUsedIds from user data
+  const filteredProviders = filterAndSortProviders(
+    providers,
+    searchQuery,
     sortOption,
-    recentlyUsedProviderIds,
+    [], // recentlyUsedIds - should come from user data
   );
 
   return (

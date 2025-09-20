@@ -18,6 +18,14 @@ export class AzureOpenAIProvider extends BaseProvider {
     "https://learn.microsoft.com/azure/ai-services/openai/concepts/models",
   ];
 
+  readonly uiConfig = {
+    logoUrl: "/assets/home/providers/azure.webp",
+    description: "Configure your Azure OpenAI API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods/azure",
+    relevanceScore: 90,
+    multipleAllowed: true,
+  };
+
   buildUrl(endpoint: ModelProviderConfig, config: UserEndpointConfig): string {
     // Determine base URI - use provided or Helicone gateway for PTB
     const baseUri = config.baseUri ||

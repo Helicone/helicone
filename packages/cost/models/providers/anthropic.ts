@@ -19,6 +19,13 @@ export class AnthropicProvider extends BaseProvider {
     "https://docs.anthropic.com/en/docs/about-claude/models/all-models",
   ];
 
+  readonly uiConfig = {
+    logoUrl: "/assets/providers/anthropic.webp",
+    description: "Configure your Anthropic API keys for Claude models",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods/anthropic",
+    relevanceScore: 95,
+  };
+
   buildUrl(
     _modelProviderConfig: ModelProviderConfig,
     userConfig: UserEndpointConfig
