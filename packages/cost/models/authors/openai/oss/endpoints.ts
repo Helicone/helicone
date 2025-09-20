@@ -158,6 +158,43 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-oss-120b:deepinfra": {
+    providerModelId: "openai/gpt-oss-120b",
+    provider: "deepinfra",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00009,
+        output: 0.00045,
+        request: 0.0,
+        image: 0.0,
+        audio: 0.0,
+        web_search: 0.0,
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPTOSSModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
