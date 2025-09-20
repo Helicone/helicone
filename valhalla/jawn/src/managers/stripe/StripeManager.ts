@@ -1246,25 +1246,44 @@ WHERE (${builtFilter.filter})`,
       const tokenUsageProductId = stripeProductSettings.cloudGatewayTokenUsageProduct;
 
       try {
-        const unitAmount = amount * 100;
+        const creditsAmountCents = Math.round(amount * 100);
+        const percentageFeeCents = Math.round(creditsAmountCents * 0.03);
+        const fixedFeeCents = 30;
+        const stripeFeeCents = percentageFeeCents + fixedFeeCents;
+        const totalAmountCents = creditsAmountCents + stripeFeeCents;
 
         const checkoutResult = await this.stripe.checkout.sessions.create({
           customer: customerId.data,
           success_url: `${origin}/credits`,
           cancel_url: `${origin}/credits`,
           mode: "payment",
-          line_items: [{
-            price_data: {
-                currency: "usd", 
-                unit_amount: unitAmount,
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                unit_amount: creditsAmountCents,
                 product: tokenUsageProductId,
+              },
+              quantity: 1,
             },
-            quantity: 1,
-          }],
+            {
+              price_data: {
+                currency: "usd",
+                unit_amount: stripeFeeCents,
+                product_data: {
+                  name: "Stripe fee",
+                },
+              },
+              quantity: 1,
+            },
+          ],
           payment_intent_data: {
             metadata: {
               orgId: this.authParams.organizationId,
               productId: tokenUsageProductId,
+              creditsAmountCents: creditsAmountCents.toString(),
+              stripeFeeCents: stripeFeeCents.toString(),
+              totalAmountCents: totalAmountCents.toString(),
             }
           }
         })
@@ -1472,4 +1491,3 @@ WHERE (${builtFilter.filter})`,
     }
   }
 }
-
