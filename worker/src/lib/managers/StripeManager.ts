@@ -59,16 +59,22 @@ export class StripeManager {
         ? paymentIntent.amount_received
         : 0;
 
+    const hasBreakdownMetadata =
+      creditsFromMetadata !== null ||
+      feeFromMetadata !== null ||
+      totalFromMetadata !== null;
+
     const totalCents = totalFromMetadata ?? fallbackTotal;
-    const creditsCents = Math.max(
-      creditsFromMetadata ??
-        (totalCents - (feeFromMetadata ?? 0)),
-      0
-    );
-    const feeCents = Math.max(
-      feeFromMetadata ?? totalCents - creditsCents,
-      0
-    );
+    const creditsCents = hasBreakdownMetadata
+      ? Math.max(
+          creditsFromMetadata ??
+            (totalCents - Math.max(feeFromMetadata ?? 0, 0)),
+          0
+        )
+      : totalCents;
+    const feeCents = hasBreakdownMetadata
+      ? Math.max(feeFromMetadata ?? totalCents - creditsCents, 0)
+      : 0;
 
     return {
       creditsCents,
