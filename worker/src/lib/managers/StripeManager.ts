@@ -28,6 +28,55 @@ export class StripeManager {
     this.env = env;
   }
 
+  private parseMetadataInt(value?: string | null): number | null {
+    if (value === undefined || value === null) {
+      return null;
+    }
+
+    const parsed = Number.parseInt(value, 10);
+    if (Number.isNaN(parsed)) {
+      return null;
+    }
+
+    return parsed;
+  }
+
+  private getPaymentIntentBreakdown(paymentIntent: Stripe.PaymentIntent) {
+    const creditsFromMetadata = this.parseMetadataInt(
+      paymentIntent.metadata?.creditsAmountCents
+    );
+    const feeFromMetadata = this.parseMetadataInt(
+      paymentIntent.metadata?.stripeFeeCents
+    );
+    const totalFromMetadata = this.parseMetadataInt(
+      paymentIntent.metadata?.totalAmountCents
+    );
+
+    const fallbackTotal =
+      typeof paymentIntent.amount === "number"
+        ? paymentIntent.amount
+        : typeof paymentIntent.amount_received === "number"
+        ? paymentIntent.amount_received
+        : 0;
+
+    const totalCents = totalFromMetadata ?? fallbackTotal;
+    const creditsCents = Math.max(
+      creditsFromMetadata ??
+        (totalCents - (feeFromMetadata ?? 0)),
+      0
+    );
+    const feeCents = Math.max(
+      feeFromMetadata ?? totalCents - creditsCents,
+      0
+    );
+
+    return {
+      creditsCents,
+      feeCents,
+      totalCents,
+    };
+  }
+
   async verifyAndConstructEvent(
     body: string,
     signature: string
@@ -178,15 +227,16 @@ export class StripeManager {
     walletStub: DurableObjectStub<Wallet>,
     orgId: string
   ): Promise<Result<void, string>> {
-    const amount = paymentIntent.amount_received;
+    const { creditsCents, totalCents } =
+      this.getPaymentIntentBreakdown(paymentIntent);
     try {
-      await walletStub.addCredits(amount, eventId);
+      await walletStub.addCredits(creditsCents, eventId);
       console.log(
-        `Added ${amount} to wallet for org ${orgId} for payment intent ${paymentIntent.id} event ${eventId}`
+        `Added ${creditsCents} cents of credits (total collected ${totalCents} cents) to wallet for org ${orgId} for payment intent ${paymentIntent.id} event ${eventId}`
       );
       return ok(undefined);
     } catch (e) {
-      const errorMessage = `Failed to process payment intent ${paymentIntent.id} for org ${orgId} with amount ${amount}: ${e instanceof Error ? e.message : "Unknown error"}`;
+      const errorMessage = `Failed to process payment intent ${paymentIntent.id} for org ${orgId} with credits amount ${creditsCents}: ${e instanceof Error ? e.message : "Unknown error"}`;
       console.error(errorMessage);
       return err(errorMessage);
     }
@@ -298,10 +348,20 @@ export class StripeManager {
       return ok(undefined);
     }
 
+    const { creditsCents, feeCents } =
+      this.getPaymentIntentBreakdown(paymentIntent);
+    const refundAmountCents = refund.amount;
+    const feePortionRefunded = Math.min(refundAmountCents, feeCents);
+    const creditsPortionRefunded = Math.max(
+      refundAmountCents - feePortionRefunded,
+      0
+    );
+    const creditsToDeduct = Math.min(creditsCents, creditsPortionRefunded);
+
     // Deduct the refund amount from the wallet
     try {
       const deductResult = await walletStub.deductCredits(
-        refund.amount,
+        creditsToDeduct,
         eventId,
         orgId
       );
@@ -314,7 +374,7 @@ export class StripeManager {
       }
 
       console.log(
-        `Deducted ${refund.amount} cents from wallet for org ${orgId} for refund ${refund.id} event ${eventId}`
+        `Deducted ${creditsToDeduct} cents of credits (refund ${refundAmountCents} cents total, fee portion refunded ${feePortionRefunded} cents) from wallet for org ${orgId} for refund ${refund.id} event ${eventId}`
       );
       return ok(undefined);
     } catch (e) {
