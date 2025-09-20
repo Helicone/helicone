@@ -499,6 +499,9 @@ export interface paths {
     /** @description Backfill costs in Clickhouse with updated cost package data. */
     post: operations["BackfillCosts"];
   };
+  "/v1/admin/helix-thread/{sessionId}": {
+    get: operations["GetHelixThread"];
+  };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
@@ -15764,6 +15767,25 @@ Json: JsonObject;
       modelRow: components["schemas"]["ModelRow"];
       provider: string;
     };
+    InAppThread: {
+      id: string;
+      chat: unknown;
+      user_id: string;
+      org_id: string;
+      /** Format: date-time */
+      created_at: string;
+      escalated: boolean;
+      metadata: unknown;
+      /** Format: date-time */
+      updated_at: string;
+      soft_delete: boolean;
+    };
+    ResultSuccess_InAppThread_: {
+      data: components["schemas"]["InAppThread"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_InAppThread.string_": components["schemas"]["ResultSuccess_InAppThread_"] | components["schemas"]["ResultError_string_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -18878,6 +18900,21 @@ export interface operations {
           "application/json": {
             query: string;
           };
+        };
+      };
+    };
+  };
+  GetHelixThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
         };
       };
     };

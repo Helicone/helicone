@@ -28,6 +28,7 @@ import {
 } from "@helicone-package/cost";
 
 import { err, ok, Result } from "../../packages/common/result";
+import { InAppThread } from "../../managers/InAppThreadsManager";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -1493,5 +1494,24 @@ export class AdminController extends Controller {
     }
 
     return { query };
+  }
+
+  @Get("/helix-thread/{sessionId}")
+  public async getHelixThread(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() sessionId: string
+  ): Promise<Result<InAppThread, string>> {
+    await authCheckThrow(request.authParams.userId);
+    const thread = await dbExecute<InAppThread>(
+      `SELECT * FROM in_app_threads WHERE id = $1`,
+      [sessionId]
+    );
+    if (thread.error) {
+      return err(thread.error);
+    }
+    if (!thread.data?.[0]) {
+      return err("Thread not found");
+    }
+    return ok(thread.data?.[0]);
   }
 }

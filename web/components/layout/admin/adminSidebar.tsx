@@ -9,6 +9,7 @@ import {
   Users,
   Settings,
   DollarSign,
+  MessageCircle,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import {
@@ -38,6 +39,11 @@ const navigation = [
       { name: "Top Orgs", href: "/admin/top-orgs", icon: BarChart },
       { name: "Projections", href: "/admin/projections", icon: BarChart },
       { name: "Feature Flags", href: "/admin/feature-flags", icon: Flag },
+      {
+        name: "Helix Threads",
+        href: "/admin/helix-threads",
+        icon: MessageCircle,
+      },
     ],
   },
 ];
