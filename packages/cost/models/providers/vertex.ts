@@ -36,7 +36,7 @@ export class VertexProvider extends BaseProvider {
     if (endpoint.author === "anthropic") {
       const anthropicBody =
         context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(context.parsedBody)
+          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
           : context.parsedBody;
       const updatedBody = {
         ...anthropicBody,

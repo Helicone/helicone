@@ -100,7 +100,7 @@ export class BedrockProvider extends BaseProvider {
     if (endpoint.providerModelId.includes("claude-")) {
       const anthropicBody =
         context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(context.parsedBody)
+          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
           : context.parsedBody;
       const updatedBody = {
         ...anthropicBody,
