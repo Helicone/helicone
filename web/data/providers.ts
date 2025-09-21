@@ -41,11 +41,12 @@ export const providers: Provider[] = [
     name: "Vertex AI",
     logoUrl: "/assets/home/providers/gemini.webp",
     description:
-      "Configure your Google Cloud Access Token for Vertex AI models",
+      "Configure your Google Cloud service account for Vertex AI models",
     docsUrl: "https://docs.helicone.ai/integrations/gemini/vertex/curl",
-    apiKeyLabel: "Google Cloud Access Token",
-    apiKeyPlaceholder: "...",
+    apiKeyLabel: "Service Account JSON",
+    apiKeyPlaceholder: "Upload service account JSON file",
     relevanceScore: 85,
+    auth: "service_account",
   },
   {
     id: "google-ai-studio",

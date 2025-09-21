@@ -44,8 +44,8 @@ function str2ab(str: string): ArrayBuffer {
 function arrayBufferToBase64Url(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let str = "";
-  for (const byte of bytes) {
-    str += String.fromCharCode(byte);
+  for (let i = 0; i < bytes.length; i++) {
+    str += String.fromCharCode(bytes[i]);
   }
   return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
@@ -155,7 +155,7 @@ export async function getGoogleAccessToken(
     );
   }
 
-  const tokenData: GoogleTokenResponse = await tokenResponse.json();
+  const tokenData = (await tokenResponse.json()) as GoogleTokenResponse;
 
   // Cache the token (expire 5 minutes early to be safe)
   tokenCache.set(cacheKey, {

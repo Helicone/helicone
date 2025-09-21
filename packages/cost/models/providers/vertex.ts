@@ -7,6 +7,7 @@ import type {
   AuthContext,
   AuthResult,
 } from "../types";
+import { getGoogleAccessToken } from "../../auth/gcpServiceAccountAuth";
 
 export class VertexProvider extends BaseProvider {
   readonly displayName = "Vertex AI";
@@ -23,7 +24,8 @@ export class VertexProvider extends BaseProvider {
 
   readonly uiConfig = {
     logoUrl: "/assets/home/providers/gemini.webp",
-    description: "Configure your Google Cloud service account for Vertex AI models",
+    description:
+      "Configure your Google Cloud service account for Vertex AI models",
     docsUrl: "https://docs.helicone.ai/integrations/gemini/vertex/curl",
     relevanceScore: 85,
   };
@@ -32,13 +34,18 @@ export class VertexProvider extends BaseProvider {
     endpoint: ModelProviderConfig,
     config: UserEndpointConfig = {}
   ): string {
-    if (!config.projectId || !config.region) {
-      throw new Error("Vertex AI requires projectId and region");
+    const projectId = config.projectId;
+    const region = config.region || "us-central1"; // Default region
+
+    if (!projectId || !region) {
+      throw new Error("Vertex AI requires projectId and region in config");
     }
+
     const modelId = endpoint.providerModelId || "";
     const publisher = endpoint.author || "anthropic";
-    const baseUrlWithRegion = this.baseUrl.replace("{region}", config.region);
-    return `${baseUrlWithRegion}/v1/projects/${config.projectId}/locations/${config.region}/publishers/${publisher}/models/${modelId}:streamRawPredict`;
+    const baseUrlWithRegion = this.baseUrl.replace("{region}", region);
+
+    return `${baseUrlWithRegion}/v1/projects/${projectId}/locations/${region}/publishers/${publisher}/models/${modelId}:streamRawPredict`;
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
@@ -58,17 +65,17 @@ export class VertexProvider extends BaseProvider {
   }
 
   async authenticate(context: AuthContext): Promise<AuthResult> {
-    // For Vertex AI, we expect the service account JSON to be stored in apiKey
-    // The worker will handle generating the OAuth token
     if (!context.apiKey) {
-      throw new Error("Service account JSON is required for Vertex AI authentication");
+      throw new Error(
+        "Service account JSON is required for Vertex AI authentication"
+      );
     }
 
-    // Return a marker header that the worker can detect
-    // The actual OAuth token will be generated in the worker
+    const accessToken = await getGoogleAccessToken(context.apiKey);
+
     return {
       headers: {
-        "X-Vertex-Service-Account": context.apiKey,
+        Authorization: `Bearer ${accessToken}`,
       },
     };
   }

@@ -13,10 +13,14 @@ import type {
 export abstract class BaseProvider {
   abstract readonly displayName: string;
   abstract readonly baseUrl: string;
-  abstract readonly auth: "api-key" | "oauth" | "aws-signature" | "service_account";
+  abstract readonly auth:
+    | "api-key"
+    | "oauth"
+    | "aws-signature"
+    | "service_account";
   abstract readonly pricingPages: string[];
   abstract readonly modelPages: string[];
-  
+
   readonly requiredConfig?: ReadonlyArray<keyof UserEndpointConfig>;
 
   abstract buildUrl(
@@ -51,7 +55,7 @@ export abstract class BaseProvider {
 
   async buildErrorMessage(response: Response): Promise<string> {
     try {
-      const respJson = await response.json() as any;
+      const respJson = (await response.json()) as any;
       if (respJson.error?.message) {
         return respJson.error.message;
       }

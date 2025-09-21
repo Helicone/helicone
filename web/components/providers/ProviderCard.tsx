@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Check,
   Copy,
@@ -131,7 +132,6 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     } else if (provider.id === "vertex") {
       initialConfig = {
         region: "",
-        projectId: "",
       };
     }
 
@@ -226,6 +226,10 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     }
   };
 
+  const handleServiceAccountJsonChange = (value: string) => {
+    setKeyValue(value);
+  };
+
   const handleEnterEditMode = async () => {
     // Fetch the current key value first
     if (existingKey) {
@@ -284,6 +288,24 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     }
   };
 
+  const enrichConfigForProvider = (config: Record<string, string>) => {
+    const enrichedConfig = { ...config };
+
+    // For Vertex, extract projectId from service account JSON
+    if (provider.id === "vertex" && keyValue) {
+      try {
+        const serviceAccount = JSON.parse(keyValue);
+        if (serviceAccount.project_id) {
+          enrichedConfig.projectId = serviceAccount.project_id;
+        }
+      } catch (e) {
+        // Invalid JSON, let it fail on the backend
+      }
+    }
+
+    return enrichedConfig;
+  };
+
   const handleSaveKey = async () => {
     // Show confirmation dialog for editing existing keys
     if (isEditMode && isEditingKey) {
@@ -299,7 +321,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           key: keyValue,
           secretKey: secretKeyValue,
           providerKeyName: keyName || defaultKeyName,
-          config: configValues,
+          config: enrichConfigForProvider(configValues),
           byokEnabled,
         });
       } catch (error) {
@@ -333,7 +355,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
         key: keyValue || undefined, // Only send if there's a value
         secretKey: secretKeyValue || undefined,
         keyId: existingKey.id,
-        config: configValues,
+        config: enrichConfigForProvider(configValues),
         byokEnabled,
       });
       setIsEditingKey(false); // Exit edit mode after saving
@@ -395,11 +417,10 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
       ];
     } else if (provider.id === "vertex") {
       configFields = [
-        { label: "Region", key: "region", placeholder: "us-east5" },
         {
-          label: "Project ID",
-          key: "projectId",
-          placeholder: "your-project-id",
+          label: "Region",
+          key: "region",
+          placeholder: "us-central1, us-east1, europe-west4, etc.",
         },
       ];
     }
@@ -554,81 +575,151 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           <div className="flex items-end gap-1">
             <div className="relative flex-1">
               {provider.id === "bedrock" && <Label>Access key</Label>}
-              <Input
-                type={isViewingKey || isEditingKey ? "text" : "password"}
-                placeholder={
-                  isEditMode && !isEditingKey
-                    ? "••••••••••••••••"
-                    : isEditingKey
-                      ? "Enter new API key..."
-                      : provider.apiKeyPlaceholder
-                }
-                value={isViewingKey && decryptedKey ? decryptedKey : keyValue}
-                onChange={(e) => handleKeyValueChange(e.target.value)}
-                className="h-7 flex-1 py-1 pr-16 text-xs"
-                disabled={isEditMode && !isEditingKey}
-              />
-              {/* Copy and Eye buttons inside input */}
-              <div
-                className={cn(
-                  "absolute right-1 flex -translate-y-1/2 items-center gap-1",
-                  provider.id === "bedrock"
-                    ? "top-[calc(50%+12px)]"
-                    : "top-1/2",
-                )}
-              >
-                {/* Copy button - always visible for existing keys, disabled when no value */}
-                {isEditMode ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleCopyToClipboard(
-                        isViewingKey && decryptedKey ? decryptedKey : keyValue,
-                      )
+              {provider.auth === "service_account" && !isEditMode && (
+                <div>
+                  <Label>Service Account JSON</Label>
+                  <Textarea
+                    placeholder="Paste your service account JSON here..."
+                    value={keyValue}
+                    onChange={(e) =>
+                      handleServiceAccountJsonChange(e.target.value)
                     }
-                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
-                    disabled={
-                      !(
-                        (isViewingKey && decryptedKey) ||
-                        (isEditingKey && keyValue)
-                      )
-                    }
-                    title="Copy"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </button>
-                ) : (
-                  // For new keys, only show when there's a value
-                  keyValue && (
+                    className="font-mono min-h-[120px] resize-y text-xs"
+                    disabled={isEditMode && !isEditingKey}
+                  />
+                  {keyValue && (
+                    <Small className="mt-2 text-xs text-muted-foreground">
+                      Service account loaded ✓
+                    </Small>
+                  )}
+                  {!keyValue && (
+                    <Small className="mt-1 text-xs text-muted-foreground">
+                      Paste your service account JSON from Google Cloud Console
+                    </Small>
+                  )}
+                </div>
+              )}
+              {provider.auth !== "service_account" && (
+                <Input
+                  type={isViewingKey || isEditingKey ? "text" : "password"}
+                  placeholder={
+                    isEditMode && !isEditingKey
+                      ? "••••••••••••••••"
+                      : isEditingKey
+                        ? "Enter new API key..."
+                        : provider.apiKeyPlaceholder
+                  }
+                  value={isViewingKey && decryptedKey ? decryptedKey : keyValue}
+                  onChange={(e) => handleKeyValueChange(e.target.value)}
+                  className="h-7 flex-1 py-1 pr-16 text-xs"
+                  disabled={isEditMode && !isEditingKey}
+                />
+              )}
+              {provider.auth === "service_account" && isEditMode && (
+                <div>
+                  <Label>Service Account JSON</Label>
+                  {isEditingKey ? (
+                    <>
+                      <Textarea
+                        placeholder="Paste new service account JSON here..."
+                        value={keyValue}
+                        onChange={(e) =>
+                          handleServiceAccountJsonChange(e.target.value)
+                        }
+                        className="font-mono min-h-[120px] resize-y text-xs"
+                      />
+                      {keyValue && (
+                        <Small className="mt-1 text-xs text-muted-foreground">
+                          Service account loaded ✓
+                        </Small>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Input
+                        type="password"
+                        placeholder="Service account configured"
+                        value="••••••••••••••••"
+                        className="h-7 flex-1 py-1 text-xs"
+                        disabled={true}
+                      />
+                      {configValues.projectId && (
+                        <Small className="mt-1 text-xs text-muted-foreground">
+                          Project ID:{" "}
+                          <span className="font-mono">
+                            {configValues.projectId}
+                          </span>
+                        </Small>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+              {/* Copy and Eye buttons inside input - not for service account file uploads */}
+              {provider.auth !== "service_account" && (
+                <div
+                  className={cn(
+                    "absolute right-1 flex -translate-y-1/2 items-center gap-1",
+                    provider.id === "bedrock"
+                      ? "top-[calc(50%+12px)]"
+                      : "top-1/2",
+                  )}
+                >
+                  {/* Copy button - always visible for existing keys, disabled when no value */}
+                  {isEditMode ? (
                     <button
                       type="button"
-                      onClick={() => handleCopyToClipboard(keyValue)}
-                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      onClick={() =>
+                        handleCopyToClipboard(
+                          isViewingKey && decryptedKey
+                            ? decryptedKey
+                            : keyValue,
+                        )
+                      }
+                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+                      disabled={
+                        !(
+                          (isViewingKey && decryptedKey) ||
+                          (isEditingKey && keyValue)
+                        )
+                      }
                       title="Copy"
                     >
                       <Copy className="h-3 w-3" />
                     </button>
-                  )
-                )}
-                {/* View/Hide button - only for existing keys */}
-                {isEditMode && !isEditingKey && (
-                  <button
-                    type="button"
-                    onClick={handleToggleKeyVisibility}
-                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                    disabled={isLoading}
-                    title={isViewingKey ? "Hide" : "View"}
-                  >
-                    {isLoading ? (
-                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    ) : isViewingKey ? (
-                      <EyeOff className="h-3 w-3" />
-                    ) : (
-                      <Eye className="h-3 w-3" />
-                    )}
-                  </button>
-                )}
-              </div>
+                  ) : (
+                    // For new keys, only show when there's a value
+                    keyValue && (
+                      <button
+                        type="button"
+                        onClick={() => handleCopyToClipboard(keyValue)}
+                        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        title="Copy"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </button>
+                    )
+                  )}
+                  {/* View/Hide button - only for existing keys */}
+                  {isEditMode && !isEditingKey && (
+                    <button
+                      type="button"
+                      onClick={handleToggleKeyVisibility}
+                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      disabled={isLoading}
+                      title={isViewingKey ? "Hide" : "View"}
+                    >
+                      {isLoading ? (
+                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : isViewingKey ? (
+                        <EyeOff className="h-3 w-3" />
+                      ) : (
+                        <Eye className="h-3 w-3" />
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             {provider.id === "bedrock" && (
               <div className="relative flex-1">
