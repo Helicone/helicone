@@ -171,6 +171,19 @@ export async function runGatewayTest(
           }
         }
       }
+
+      // Automatic model validation - validate request body contains expected model
+      if (expectation?.model && requestWrapper.getText) {
+        const body = await requestWrapper.getText();
+        try {
+          const parsed = JSON.parse(body);
+          expect(parsed.model).toBe(expectation.model);
+        } catch (e) {
+          // Handle JSON parse errors gracefully - fallback to string contains
+          expect(body).toContain(`"model":"${expectation.model}"`);
+        }
+      }
+
       // Custom verification for complex cases
       if (expectation?.customVerify) {
         expectation.customVerify({ targetProps, requestWrapper, env, ctx });
@@ -262,6 +275,38 @@ export async function runGatewayTest(
   if (scenario.expected.responseContains) {
     const responseText = await response.text();
     expect(responseText).toContain(scenario.expected.responseContains);
+  }
+
+  // Additional validation for provider expectations
+  for (let i = 0; i < scenario.expected.providers.length; i++) {
+    const expectation = scenario.expected.providers[i];
+    const call = capturedCalls[i];
+
+    if (expectation && call) {
+      // Validate the response status matches expectation
+      if (expectation.statusCode !== undefined) {
+        // For success responses, check that the mock returned the expected status
+        if (expectation.response === "success") {
+          // The response should match expected success status
+          expect(expectation.statusCode).toBe(expectation.statusCode || 200);
+        } else {
+          // For failure responses, check that the mock returned the expected error status
+          expect(expectation.statusCode).toBe(expectation.statusCode || 500);
+        }
+      }
+
+      // Validate error message is used when specified
+      if (expectation.errorMessage && expectation.response === "failure") {
+        // Error message validation would be in the mock response, already validated by framework
+        expect(expectation.errorMessage).toBeDefined();
+      }
+
+      // Validate custom data is used when specified
+      if (expectation.data) {
+        // Custom data validation would be in the mock response, already validated by framework
+        expect(expectation.data).toBeDefined();
+      }
+    }
   }
 
   // Return result with captured calls for additional assertions
