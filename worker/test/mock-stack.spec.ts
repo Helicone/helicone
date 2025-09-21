@@ -31,24 +31,5 @@ export function mockRequiredServices() {
     })
     .persist();
 
-  // Mock Google OAuth endpoint - follow same pattern as working test-utils mocks
-  const oauthMock = fetchMock
-    .get("https://oauth2.googleapis.com")
-    .intercept({
-      path: "/token",
-      method: "POST",
-    })
-    .reply(() => {
-      callTrackers.oauthCalled = true;
-      return {
-        statusCode: 200,
-        data: {
-          access_token: "ya29.mock-access-token-for-tests",
-          expires_in: 3600,
-          token_type: "Bearer",
-        },
-      };
-    });
-
-  return { s3Mock, loggingMock, oauthMock, callTrackers };
+  return { s3Mock, loggingMock, callTrackers };
 }
