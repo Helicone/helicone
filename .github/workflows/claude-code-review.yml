@@ -42,24 +42,35 @@ jobs:
 
           # Direct prompt for automated review (no @claude mention needed)
           direct_prompt: |
-            Review this PR focusing on:
-            - Critical bugs or security issues only
-            - Major performance problems
+            Review this PR and provide constructive feedback focusing on:
+            - Critical bugs or security issues
+            - Performance improvements and optimizations
+            - Code quality and best practices
+            - Potential refactoring opportunities
             - Breaking changes or API issues
 
-            Keep feedback concise. Only mention high-impact issues.
-            Use inline comments for specific code suggestions.
+            For each issue found, provide:
+            1. Clear explanation of the problem
+            2. Specific suggestions for improvement
+            3. Code examples when helpful
+
+            Use inline comments for specific code suggestions and improvements.
+            Provide actionable recommendations, not just issue identification.
 
             Provide a confidence score (0-10):
             - 0-3: Critical issues, do not merge
-            - 4-7: Minor issues, merge with caution
-            - 8-10: Good to merge
+            - 4-7: Minor issues or improvements suggested, merge with consideration
+            - 8-10: Good to merge, minor or no suggestions
 
             Summary format:
             **Score: X/10** - Brief reason
 
-          # Disable sticky comments to allow inline suggestions
-          use_sticky_comment: false
+            **Suggestions Summary:**
+            - List key improvement suggestions
+            - Highlight any critical fixes needed
+
+          # Enable sticky comments to update existing comments instead of creating new ones
+          use_sticky_comment: true
 
           # Enable inline suggestions for specific code improvements
           review_mode: "inline"
