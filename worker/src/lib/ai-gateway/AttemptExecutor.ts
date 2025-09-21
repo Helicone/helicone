@@ -129,9 +129,9 @@ export class AttemptExecutor {
       requestWrapper.setUrl(endpoint.baseUrl ?? requestWrapper.url.toString());
       await requestWrapper.setBody(bodyResult.data);
 
-      // Apply auth headers from provider directly
-      const authHeaders = authResult.data?.headers || {};
-      for (const [key, value] of Object.entries(authHeaders)) {
+      for (const [key, value] of Object.entries(
+        authResult.data?.headers || {}
+      )) {
         requestWrapper.setHeader(key, value);
       }
 
