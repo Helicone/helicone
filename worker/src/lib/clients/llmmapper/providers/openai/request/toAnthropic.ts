@@ -1,11 +1,23 @@
-import { AnthropicRequestBody, AnthropicContentBlock, AnthropicTool, AnthropicToolChoice } from "../../../types/anthropic";
-import { HeliconeChatCompletionContentPart, HeliconeChatCreateParams } from "@helicone-package/prompts/types";
+import {
+  AnthropicRequestBody,
+  AnthropicContentBlock,
+  AnthropicTool,
+  AnthropicToolChoice,
+} from "../../../types/anthropic";
+import {
+  HeliconeChatCompletionContentPart,
+  HeliconeChatCreateParams,
+} from "@helicone-package/prompts/types";
 
-export function toAnthropic(openAIBody: HeliconeChatCreateParams): AnthropicRequestBody {
+export function toAnthropic(
+  openAIBody: HeliconeChatCreateParams,
+  providerModelId?: string
+): AnthropicRequestBody {
   const antBody: AnthropicRequestBody = {
-    model: mapModel(openAIBody.model),
+    model: providerModelId || openAIBody.model,
     messages: [],
-    max_tokens: openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 1024,
+    max_tokens:
+      openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 1024,
     temperature: openAIBody.temperature ?? undefined,
     top_p: openAIBody.top_p ?? undefined,
 
@@ -16,8 +28,8 @@ export function toAnthropic(openAIBody: HeliconeChatCreateParams): AnthropicRequ
     antBody.stop_sequences = Array.isArray(openAIBody.stop)
       ? openAIBody.stop
       : openAIBody.stop
-      ? [openAIBody.stop]
-      : [];
+        ? [openAIBody.stop]
+        : [];
   }
 
   const { messages, system } = extractSystemMessage(openAIBody.messages);
@@ -26,7 +38,10 @@ export function toAnthropic(openAIBody: HeliconeChatCreateParams): AnthropicRequ
     antBody.system = system;
   }
 
-  const user_id = openAIBody.safety_identifier || openAIBody.prompt_cache_key || openAIBody.user;
+  const user_id =
+    openAIBody.safety_identifier ||
+    openAIBody.prompt_cache_key ||
+    openAIBody.user;
   if (user_id) {
     antBody.metadata = { user_id };
   }
@@ -43,7 +58,9 @@ export function toAnthropic(openAIBody: HeliconeChatCreateParams): AnthropicRequ
 
   // Legacy function_call/functions not supported
   if (openAIBody.function_call || openAIBody.functions) {
-    throw new Error("Legacy function_call and functions are not supported. Use tools instead.");
+    throw new Error(
+      "Legacy function_call and functions are not supported. Use tools instead."
+    );
   }
 
   if (openAIBody.logit_bias) {
@@ -53,11 +70,13 @@ export function toAnthropic(openAIBody: HeliconeChatCreateParams): AnthropicRequ
   return antBody;
 }
 
-function openAIContentToAnthropicContent(content: string | HeliconeChatCompletionContentPart[] | null): string | AnthropicContentBlock[] {
+function openAIContentToAnthropicContent(
+  content: string | HeliconeChatCompletionContentPart[] | null
+): string | AnthropicContentBlock[] {
   if (content === null) {
     return "";
   }
-  
+
   if (typeof content === "string") {
     return content;
   }
@@ -65,23 +84,27 @@ function openAIContentToAnthropicContent(content: string | HeliconeChatCompletio
   return content.map((part) => {
     switch (part.type) {
       case "text":
-        return { type: "text", text: part.text, cache_control: part.cache_control };
+        return {
+          type: "text",
+          text: part.text,
+          cache_control: part.cache_control,
+        };
       case "image_url":
         // expected format: { type: "image_url", image_url: { url: string } }
         // where url: is either a link, or `data:image/{format};base64,{base64_encoded_image}`
         const url = part.image_url.url;
-        if (url.startsWith('data:')) {
+        if (url.startsWith("data:")) {
           // format: data:image/jpeg;base64,{base64_data}
-          const parts = url.split(',');
+          const parts = url.split(",");
           if (parts.length !== 2) {
             throw new Error(`Invalid data URI format: ${url}`);
           }
           const [mimeType, base64Data] = parts;
-          const mediaParts = mimeType.split(':');
+          const mediaParts = mimeType.split(":");
           if (mediaParts.length < 2) {
             throw new Error(`Invalid data URI MIME type: ${mimeType}`);
           }
-          const mediaType = mediaParts[1].split(';')[0];
+          const mediaType = mediaParts[1].split(";")[0];
           return {
             type: "image",
             source: {
@@ -103,7 +126,7 @@ function openAIContentToAnthropicContent(content: string | HeliconeChatCompletio
         }
       case "input_audio":
         // expected format: { type: "input_audio", input_audio: { data: base64str, format: "wav" }}
-        throw new Error(`${part.type} is not supported by Anthropic Messages.`)
+        throw new Error(`${part.type} is not supported by Anthropic Messages.`);
       case "file":
         // TODO: Chat Completions API does not support files whereas Anthropic Messages API does
         // would need to extend the HeliconeChatCreateParams types to support files, and map it to the Anthropic format:
@@ -125,7 +148,10 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
   const systemMessages = messages.filter((msg) => msg.role === "system");
   const otherMessages = messages.filter((msg) => msg.role !== "system");
 
-  if (systemMessages.length === 1 && typeof systemMessages[0].content === "string") {
+  if (
+    systemMessages.length === 1 &&
+    typeof systemMessages[0].content === "string"
+  ) {
     const content = systemMessages[0].content;
     if (!systemMessages[0].cache_control) {
       return {
@@ -135,12 +161,14 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
     }
     return {
       messages: otherMessages,
-      system: [{
-        type: "text",
-        text: systemMessages[0].content,
-        cache_control: systemMessages[0].cache_control,
-      }],
-    }
+      system: [
+        {
+          type: "text",
+          text: systemMessages[0].content,
+          cache_control: systemMessages[0].cache_control,
+        },
+      ],
+    };
   }
 
   const systemMessageBlocks: AnthropicContentBlock[] = [];
@@ -163,25 +191,13 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
   };
 }
 
-function mapModel(model: string): string {
-  // TODO: move model maps to AnthropicProvider
-  if (model.includes('claude-3.5-haiku')) {
-    return 'claude-3-5-haiku-20241022'; // version with most features
-  } else if (model.includes('claude-3.5-sonnet')) {
-    return 'claude-3-5-sonnet-latest';
-  } else if (model.includes('claude-3.7-sonnet')) {
-    return 'claude-3-7-sonnet-20250219'; // version with most features
-  }
-  return model;
-}
-
 function mapMessages(
   messages: HeliconeChatCreateParams["messages"]
 ): AnthropicRequestBody["messages"] {
   if (!messages) {
     return [];
   }
-  
+
   return messages.map((message): AnthropicRequestBody["messages"][0] => {
     if (message.role === "function") {
       throw new Error("Function messages are not supported");
@@ -210,7 +226,9 @@ function mapMessages(
       const contentBlocks: AnthropicContentBlock[] = [];
 
       if (message.content) {
-        const convertedContent = openAIContentToAnthropicContent(message.content);
+        const convertedContent = openAIContentToAnthropicContent(
+          message.content
+        );
         if (typeof convertedContent === "string") {
           contentBlocks.push({
             type: "text",
@@ -221,7 +239,7 @@ function mapMessages(
           contentBlocks.push(...convertedContent);
         }
       }
-      
+
       message.tool_calls.forEach((toolCall) => {
         if (toolCall.type === "function") {
           contentBlocks.push({
@@ -233,7 +251,7 @@ function mapMessages(
           });
         }
       });
-      
+
       antMessage.content = contentBlocks;
       return antMessage;
     }
@@ -245,13 +263,13 @@ function mapMessages(
 
 function mapTools(tools: HeliconeChatCreateParams["tools"]): AnthropicTool[] {
   if (!tools) return [];
-  
+
   return tools.map((tool) => {
     if (tool.type !== "function") {
       throw new Error(`Unsupported tool type: ${tool.type}`);
     }
 
-    const inputSchema = tool.function.parameters as any || {
+    const inputSchema = (tool.function.parameters as any) || {
       type: "object",
       properties: {},
     };
@@ -268,7 +286,9 @@ function mapTools(tools: HeliconeChatCreateParams["tools"]): AnthropicTool[] {
   });
 }
 
-function mapToolChoice(toolChoice: HeliconeChatCreateParams["tool_choice"]): AnthropicToolChoice {
+function mapToolChoice(
+  toolChoice: HeliconeChatCreateParams["tool_choice"]
+): AnthropicToolChoice {
   if (!toolChoice) {
     return { type: "auto" };
   }

@@ -216,5 +216,5 @@ export interface AuthResult {
 export interface RequestBodyContext {
   parsedBody: any;
   bodyMapping: "OPENAI" | "NO_MAPPING";
-  toAnthropic: (body: any) => any;
+  toAnthropic: (body: any, providerModelId?: string) => any;
 }
