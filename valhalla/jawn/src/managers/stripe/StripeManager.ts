@@ -1249,8 +1249,8 @@ WHERE (${builtFilter.filter})`,
         const creditsAmountCents = Math.round(amount * 100);
         const PERCENT_FEE_RATE = 0.03;
         const FIXED_FEE_CENTS = 30;
-        const percentageFeeCents = Math.round(creditsAmountCents * PERCENT_FEE_RATE);
-        const stripeFeeCents = percentageFeeCents + fixedFeeCents;
+        const percentageFeeCents = Math.ceil(creditsAmountCents * PERCENT_FEE_RATE);
+        const stripeFeeCents = percentageFeeCents + FIXED_FEE_CENTS;
         const totalAmountCents = creditsAmountCents + stripeFeeCents;
 
         const checkoutResult = await this.stripe.checkout.sessions.create({
