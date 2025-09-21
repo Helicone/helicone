@@ -203,6 +203,7 @@ export interface AuthContext {
   config: UserEndpointConfig;
   apiKey?: string;
   secretKey?: string;
+  orgId?: string;
   bodyMapping?: "OPENAI" | "NO_MAPPING";
   requestMethod?: string;
   requestUrl?: string;

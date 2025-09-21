@@ -6,6 +6,7 @@ import type {
   RequestBodyContext,
   Endpoint,
 } from "../types";
+import { CacheProvider } from "../../../common/cache/provider";
 
 /**
  * Base Provider class - all methods are pure, no state mutation
@@ -35,7 +36,7 @@ export abstract class BaseProvider {
     return endpoint.providerModelId;
   }
 
-  authenticate(context: AuthContext): AuthResult | Promise<AuthResult> {
+  authenticate(context: AuthContext, cacheProvider?: CacheProvider): AuthResult | Promise<AuthResult> {
     return {
       headers: {
         Authorization: `Bearer ${context.apiKey || ""}`,

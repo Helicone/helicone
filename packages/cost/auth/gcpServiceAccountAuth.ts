@@ -3,6 +3,12 @@
  * Based on: https://gist.github.com/markelliot/6627143be1fc8209c9662c504d0ff205
  */
 
+import {
+  CacheProvider,
+  Result,
+  TokenWithTTL,
+} from "../../common/cache/provider";
+
 interface ServiceAccount {
   type: string;
   project_id: string;
@@ -22,9 +28,6 @@ interface GoogleTokenResponse {
   expires_in: number;
   token_type: string;
 }
-
-// Cache for access tokens (in-memory per worker instance)
-const tokenCache = new Map<string, { token: string; expiresAt: number }>();
 
 /**
  * Convert string to ArrayBuffer
@@ -95,24 +98,82 @@ async function signJWT(content: string, privateKey: string): Promise<string> {
 }
 
 /**
+ * Hash a string using SHA-256
+ */
+async function hashString(str: string): Promise<string> {
+  const hashBuffer = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(str)
+  );
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
  * Get Google OAuth2 access token from service account
  * @param serviceAccountJson - The service account JSON as a string
+ * @param orgId - Organization ID for cache isolation
  * @param scopes - Optional scopes, defaults to cloud-platform
+ * @param cacheProvider - Required CacheProvider for distributed caching
  * @returns Access token string
  */
 export async function getGoogleAccessToken(
   serviceAccountJson: string,
-  scopes: string[] = ["https://www.googleapis.com/auth/cloud-platform"]
+  orgId?: string,
+  scopes: string[] = ["https://www.googleapis.com/auth/cloud-platform"],
+  cacheProvider?: CacheProvider
 ): Promise<string> {
   const serviceAccount: ServiceAccount = JSON.parse(serviceAccountJson);
-  const cacheKey = `${serviceAccount.client_email}:${scopes.join(",")}`;
+  const serviceAccountHash = await hashString(serviceAccountJson);
+  const cacheKey = `gcp-token:${orgId || "no-org"}:${serviceAccountHash}:${scopes.join(",")}`;
 
-  // Check cache first
-  const cached = tokenCache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) {
-    return cached.token;
+  if (!cacheProvider) {
+    const tokenData = await generateGoogleAccessToken(serviceAccount, scopes);
+    return tokenData.access_token;
   }
 
+  const tokenGenerator = async (): Promise<
+    Result<TokenWithTTL<string>, string>
+  > => {
+    try {
+      const tokenData = await generateGoogleAccessToken(serviceAccount, scopes);
+      // Use actual expiration time minus 5 minutes for safety
+      const ttl = Math.max(0, tokenData.expires_in - 300);
+      const expiresAt = Date.now() + tokenData.expires_in * 1000;
+      return {
+        data: {
+          value: tokenData.access_token,
+          ttl: ttl,
+          expiresAt: expiresAt,
+        },
+        error: null,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        error:
+          error instanceof Error ? error.message : "Failed to generate token",
+      };
+    }
+  };
+
+  const result = await cacheProvider.getAndStoreToken(cacheKey, tokenGenerator);
+
+  if (result.error) {
+    throw new Error(result.error);
+  }
+
+  return result.data!;
+}
+
+/**
+ * Generate a new Google access token
+ */
+async function generateGoogleAccessToken(
+  serviceAccount: ServiceAccount,
+  scopes: string[]
+): Promise<GoogleTokenResponse> {
   // Create JWT header
   const header = objectToBase64url({
     alg: "RS256",
@@ -156,19 +217,5 @@ export async function getGoogleAccessToken(
   }
 
   const tokenData = (await tokenResponse.json()) as GoogleTokenResponse;
-
-  // Cache the token (expire 5 minutes early to be safe)
-  tokenCache.set(cacheKey, {
-    token: tokenData.access_token,
-    expiresAt: Date.now() + (tokenData.expires_in - 300) * 1000,
-  });
-
-  return tokenData.access_token;
-}
-
-/**
- * Clear the token cache (useful for testing or force refresh)
- */
-export function clearGoogleTokenCache(): void {
-  tokenCache.clear();
+  return tokenData;
 }

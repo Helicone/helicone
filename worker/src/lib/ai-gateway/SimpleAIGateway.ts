@@ -14,6 +14,7 @@ import { Attempt, DisallowListEntry, EscrowInfo } from "./types";
 import { oai2antResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { oai2antStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import { SecureCacheProvider } from "../util/cache/secureCache";
 
 export interface AuthContext {
   orgId: string;
@@ -43,8 +44,15 @@ export class SimpleAIGateway {
       env
     );
 
+    // Create SecureCacheProvider for distributed caching
+    const cacheProvider = new SecureCacheProvider({
+      SECURE_CACHE: env.SECURE_CACHE,
+      REQUEST_CACHE_KEY: env.REQUEST_CACHE_KEY,
+      REQUEST_CACHE_KEY_2: env.REQUEST_CACHE_KEY_2,
+    });
+
     this.attemptBuilder = new AttemptBuilder(providerKeysManager, env);
-    this.attemptExecutor = new AttemptExecutor(env, ctx);
+    this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider);
   }
 
   async handle(): Promise<Response> {

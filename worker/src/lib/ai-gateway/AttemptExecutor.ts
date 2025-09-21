@@ -9,11 +9,13 @@ import { isErr, Result, ok, err } from "../util/results";
 import { Attempt, EscrowInfo, AttemptError } from "./types";
 import { Endpoint } from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
+import { CacheProvider } from "../../../../packages/common/cache/provider";
 
 export class AttemptExecutor {
   constructor(
     private readonly env: Env,
-    private readonly ctx: ExecutionContext
+    private readonly ctx: ExecutionContext,
+    private readonly cacheProvider?: CacheProvider
   ) {}
 
   async execute(
@@ -58,6 +60,7 @@ export class AttemptExecutor {
       providerKey,
       parsedBody,
       requestWrapper,
+      orgId,
       forwarder,
       escrowInfo
     );
@@ -79,6 +82,7 @@ export class AttemptExecutor {
     providerKey: ProviderKey,
     parsedBody: any,
     requestWrapper: RequestWrapper,
+    orgId: string,
     forwarder: (
       targetBaseUrl: string | null,
       escrowInfo?: EscrowInfo
@@ -102,15 +106,20 @@ export class AttemptExecutor {
       }
 
       // Set up authentication headers using provider helpers
-      const authResult = await authenticateRequest(endpoint, {
-        config: (providerKey.config as any) || {},
-        apiKey: providerKey.decrypted_provider_key,
-        secretKey: providerKey.decrypted_provider_secret_key || undefined,
-        bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        requestMethod: requestWrapper.getMethod(),
-        requestUrl: endpoint.baseUrl ?? requestWrapper.url.toString(),
-        requestBody: bodyResult.data,
-      });
+      const authResult = await authenticateRequest(
+        endpoint,
+        {
+          config: (providerKey.config as any) || {},
+          apiKey: providerKey.decrypted_provider_key,
+          secretKey: providerKey.decrypted_provider_secret_key || undefined,
+          orgId: orgId,
+          bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+          requestMethod: requestWrapper.getMethod(),
+          requestUrl: endpoint.baseUrl ?? requestWrapper.url.toString(),
+          requestBody: bodyResult.data,
+        },
+        this.cacheProvider
+      );
 
       if (authResult.error) {
         return err({

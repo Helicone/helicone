@@ -8,6 +8,7 @@ import type {
   AuthResult,
 } from "../types";
 import { getGoogleAccessToken } from "../../auth/gcpServiceAccountAuth";
+import { CacheProvider } from "../../../common/cache/provider";
 
 export class VertexProvider extends BaseProvider {
   readonly displayName = "Vertex AI";
@@ -64,14 +65,19 @@ export class VertexProvider extends BaseProvider {
     return JSON.stringify(context.parsedBody);
   }
 
-  async authenticate(context: AuthContext): Promise<AuthResult> {
+  async authenticate(context: AuthContext, cacheProvider?: CacheProvider): Promise<AuthResult> {
     if (!context.apiKey) {
       throw new Error(
         "Service account JSON is required for Vertex AI authentication"
       );
     }
 
-    const accessToken = await getGoogleAccessToken(context.apiKey);
+    const accessToken = await getGoogleAccessToken(
+      context.apiKey,
+      context.orgId,
+      ["https://www.googleapis.com/auth/cloud-platform"],
+      cacheProvider
+    );
 
     return {
       headers: {

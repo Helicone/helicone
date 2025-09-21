@@ -10,6 +10,7 @@ import type {
 import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
 import { Provider } from "@helicone-package/llm-mapper/types";
+import { CacheProvider } from "../../common/cache/provider";
 
 export function heliconeProviderToModelProviderName(
   provider: Provider
@@ -184,7 +185,8 @@ export function buildModelId(
 // Helper function to authenticate requests for an endpoint
 export async function authenticateRequest(
   endpoint: Endpoint,
-  context: Omit<AuthContext, "endpoint">
+  context: Omit<AuthContext, "endpoint">,
+  cacheProvider?: CacheProvider
 ): Promise<Result<AuthResult>> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
@@ -210,7 +212,7 @@ export async function authenticateRequest(
       ...context,
       endpoint,
     };
-    const result = await provider.authenticate(authContext);
+    const result = await provider.authenticate(authContext, cacheProvider);
     return ok(result);
   } catch (error) {
     return err(
