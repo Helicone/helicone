@@ -56,8 +56,8 @@ export class StripeManager {
       typeof paymentIntent.amount === "number"
         ? paymentIntent.amount
         : typeof paymentIntent.amount_received === "number"
-        ? paymentIntent.amount_received
-        : 0;
+          ? paymentIntent.amount_received
+          : 0;
 
     const hasBreakdownMetadata =
       creditsFromMetadata !== null ||
@@ -67,8 +67,7 @@ export class StripeManager {
     const totalCents = totalFromMetadata ?? fallbackTotal;
     const creditsCents = hasBreakdownMetadata
       ? Math.max(
-          creditsFromMetadata ??
-            (totalCents - Math.max(feeFromMetadata ?? 0, 0)),
+          creditsFromMetadata ?? totalCents - Math.max(feeFromMetadata ?? 0, 0),
           0
         )
       : totalCents;
@@ -252,144 +251,157 @@ export class StripeManager {
     eventId: string,
     refund: Stripe.Refund
   ): Promise<Result<void, string>> {
-    // Only process succeeded refunds
-    if (refund.status !== "succeeded") {
-      console.log(
-        `Skipping refund ${refund.id} with status ${refund.status}, only processing succeeded refunds`
-      );
-      return ok(undefined);
-    }
+    // TEMP DISABLE while in beta. If someone wants to refund, we probably want to manually
+    // refund them and manage their wallet on the admin side, rather tahn automatically refunding them
+    return ok(undefined);
 
-    // Only process USD refunds
-    if (refund.currency.toUpperCase() !== "USD") {
-      console.log(
-        `Skipping refund ${refund.id} with currency ${refund.currency}, only processing USD refunds`
-      );
-      return ok(undefined);
-    }
+    // // Only process succeeded refunds
+    // if (refund.status !== "succeeded") {
+    //   console.log(
+    //     `Skipping refund ${refund.id} with status ${refund.status}, only processing succeeded refunds`
+    //   );
+    //   return ok(undefined);
+    // }
 
-    // Get the payment intent to find the customer
-    if (!refund.payment_intent) {
-      console.log(`Skipping refund ${refund.id} with no payment_intent`);
-      return ok(undefined);
-    }
+    // // Only process USD refunds
+    // if (refund.currency.toUpperCase() !== "USD") {
+    //   console.log(
+    //     `Skipping refund ${refund.id} with currency ${refund.currency}, only processing USD refunds`
+    //   );
+    //   return ok(undefined);
+    // }
 
-    let customerId: string | null = null;
-    let paymentIntent: Stripe.PaymentIntent;
+    // // Get the payment intent to find the customer
+    // if (!refund.payment_intent) {
+    //   console.log(`Skipping refund ${refund.id} with no payment_intent`);
+    //   return ok(undefined);
+    // }
 
-    // Check if payment_intent is already an expanded object
-    if (typeof refund.payment_intent === "object") {
-      paymentIntent = refund.payment_intent as Stripe.PaymentIntent;
+    // let customerId: string | null = null;
+    // let paymentIntent: Stripe.PaymentIntent;
 
-      if (typeof paymentIntent.customer === "string") {
-        customerId = paymentIntent.customer;
-      } else if (
-        typeof paymentIntent.customer === "object" &&
-        paymentIntent.customer !== null &&
-        "id" in paymentIntent.customer
-      ) {
-        customerId = paymentIntent.customer.id;
-      }
-    } else {
-      // Payment intent is just an ID string, need to fetch it
-      try {
-        paymentIntent = await this.stripe.paymentIntents.retrieve(
-          refund.payment_intent
-        );
+    // // Check if payment_intent is already an expanded object
+    // if (typeof refund.payment_intent === "object") {
+    //   paymentIntent = refund.payment_intent as Stripe.PaymentIntent;
 
-        if (typeof paymentIntent.customer === "string") {
-          customerId = paymentIntent.customer;
-        } else if (
-          typeof paymentIntent.customer === "object" &&
-          paymentIntent.customer !== null &&
-          "id" in paymentIntent.customer
-        ) {
-          customerId = paymentIntent.customer.id;
-        }
-      } catch (e) {
-        console.error(
-          `Failed to retrieve payment intent ${refund.payment_intent} for refund ${refund.id}:`,
-          e
-        );
-        return err("Failed to retrieve payment intent");
-      }
-    }
+    //   if (typeof paymentIntent.customer === "string") {
+    //     customerId = paymentIntent.customer;
+    //   } else if (
+    //     typeof paymentIntent.customer === "object" &&
+    //     paymentIntent.customer !== null &&
+    //     "id" in paymentIntent.customer
+    //   ) {
+    //     customerId = paymentIntent.customer.id;
+    //   }
+    // } else {
+    //   // Payment intent is just an ID string, need to fetch it
+    //   try {
+    //     paymentIntent = await this.stripe.paymentIntents.retrieve(
+    //       refund.payment_intent
+    //     );
 
-    // Check if payment intent has the correct productId
-    if (!paymentIntent.metadata?.productId) {
-      console.log(
-        `Skipping refund ${refund.id} - payment intent has no productId in metadata`
-      );
-      return ok(undefined);
-    }
+    //     if (typeof paymentIntent.customer === "string") {
+    //       customerId = paymentIntent.customer;
+    //     } else if (
+    //       typeof paymentIntent.customer === "object" &&
+    //       paymentIntent.customer !== null &&
+    //       "id" in paymentIntent.customer
+    //     ) {
+    //       customerId = paymentIntent.customer.id;
+    //     }
+    //   } catch (e) {
+    //     console.error(
+    //       `Failed to retrieve payment intent ${refund.payment_intent} for refund ${refund.id}:`,
+    //       e
+    //     );
+    //     return err("Failed to retrieve payment intent");
+    //   }
+    // }
 
-    if (
-      paymentIntent.metadata.productId !==
-      this.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT
-    ) {
-      console.log(
-        `Skipping refund ${refund.id} - productId ${paymentIntent.metadata.productId} does not match STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT`
-      );
-      return ok(undefined);
-    }
+    // // Check if payment intent has the correct productId
+    // if (!paymentIntent.metadata?.productId) {
+    //   console.log(
+    //     `Skipping refund ${refund.id} - payment intent has no productId in metadata`
+    //   );
+    //   return ok(undefined);
+    // }
 
-    if (!customerId) {
-      console.error(`Unable to get Stripe customer id for refund ${refund.id}`);
-      return err("Unable to get Stripe customer id from refund");
-    }
+    // if (
+    //   paymentIntent.metadata.productId !==
+    //   this.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT
+    // ) {
+    //   console.log(
+    //     `Skipping refund ${refund.id} - productId ${paymentIntent.metadata.productId} does not match STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT`
+    //   );
+    //   return ok(undefined);
+    // }
 
-    const orgId = await getOrgIdFromStripeCustomerId(this.env, customerId);
-    if (!orgId) {
-      return err("Unable to get org id from refund");
-    }
+    // if (!customerId) {
+    //   console.error(`Unable to get Stripe customer id for refund ${refund.id}`);
+    //   return err("Unable to get Stripe customer id from refund");
+    // }
 
-    const walletId = this.wallet.idFromName(orgId);
-    const walletStub = this.wallet.get(walletId);
+    // const orgId = await getOrgIdFromStripeCustomerId(this.env, customerId);
+    // if (!orgId) {
+    //   return err("Unable to get org id from refund");
+    // }
 
-    const processedCheck = await this.checkEventProcessed(walletStub, eventId);
-    if (processedCheck.error) {
-      return err(processedCheck.error);
-    }
-    if (processedCheck.data === true) {
-      return ok(undefined);
-    }
+    // const walletId = this.wallet.idFromName(orgId);
+    // const walletStub = this.wallet.get(walletId);
 
-    const { creditsCents, feeCents } =
-      this.getPaymentIntentBreakdown(paymentIntent);
-    const refundAmountCents = refund.amount;
-    const feePortionRefunded = Math.min(refundAmountCents, feeCents);
-    const creditsPortionRefunded = Math.max(
-      refundAmountCents - feePortionRefunded,
-      0
-    );
-    const creditsToDeduct = Math.min(creditsCents, creditsPortionRefunded);
+    // const processedCheck = await this.checkEventProcessed(walletStub, eventId);
+    // if (processedCheck.error) {
+    //   return err(processedCheck.error);
+    // }
+    // if (processedCheck.data === true) {
+    //   return ok(undefined);
+    // }
 
-    // Deduct the refund amount from the wallet
-    try {
-      const deductResult = await walletStub.deductCredits(
-        creditsToDeduct,
-        eventId,
-        orgId
-      );
+    // const { creditsCents, totalCents } =
+    //   this.getPaymentIntentBreakdown(paymentIntent);
+    // const refundAmountCents = refund.amount;
 
-      if (deductResult.error) {
-        console.error(
-          `Failed to deduct credits for refund ${refund.id} for org ${orgId}: ${deductResult.error}`
-        );
-        return err(deductResult.error);
-      }
+    // let creditsToDeduct: number;
+    // if (totalCents > 0 && creditsCents > 0) {
+    //   const proportionalCredits = Math.round(
+    //     (refundAmountCents * creditsCents) / totalCents
+    //   );
 
-      console.log(
-        `Deducted ${creditsToDeduct} cents of credits (refund ${refundAmountCents} cents total, fee portion refunded ${feePortionRefunded} cents) from wallet for org ${orgId} for refund ${refund.id} event ${eventId}`
-      );
-      return ok(undefined);
-    } catch (e) {
-      const errorMessage = `Failed to process refund ${refund.id} for org ${orgId} with amount ${refund.amount}: ${
-        e instanceof Error ? e.message : "Unknown error"
-      }`;
-      console.error(errorMessage);
-      return err(errorMessage);
-    }
+    //   creditsToDeduct = Math.min(
+    //     creditsCents,
+    //     refundAmountCents,
+    //     Math.max(proportionalCredits, 0)
+    //   );
+    // } else {
+    //   creditsToDeduct = Math.min(creditsCents, refundAmountCents);
+    // }
+
+    // // Deduct the refund amount from the wallet
+    // try {
+    //   const deductResult = await walletStub.deductCredits(
+    //     creditsToDeduct,
+    //     eventId,
+    //     orgId
+    //   );
+
+    //   if (deductResult.error) {
+    //     console.error(
+    //       `Failed to deduct credits for refund ${refund.id} for org ${orgId}: ${deductResult.error}`
+    //     );
+    //     return err(deductResult.error);
+    //   }
+
+    //   console.log(
+    //     `Deducted ${creditsToDeduct} cents of credits (refund ${refundAmountCents} cents total, fee portion refunded ${feePortionRefunded} cents) from wallet for org ${orgId} for refund ${refund.id} event ${eventId}`
+    //   );
+    //   return ok(undefined);
+    // } catch (e) {
+    //   const errorMessage = `Failed to process refund ${refund.id} for org ${orgId} with amount ${refund.amount}: ${
+    //     e instanceof Error ? e.message : "Unknown error"
+    //   }`;
+    //   console.error(errorMessage);
+    //   return err(errorMessage);
+    // }
   }
 
   private async handleDisputeCreated(
