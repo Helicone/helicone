@@ -5,6 +5,7 @@ import type {
   AuthContext,
   AuthResult,
   RequestParams,
+  ResponseFormat,
 } from "../types";
 import { getGoogleAccessToken } from "../../auth/gcpServiceAccountAuth";
 import { CacheProvider } from "../../../common/cache/provider";
@@ -125,4 +126,11 @@ export class VertexProvider extends BaseProvider {
       return `Request failed with status ${response.status}`;
     }
   }
+
+  determineResponseFormat(endpoint: Endpoint): ResponseFormat {
+    if (endpoint.author === "anthropic" || endpoint.providerModelId.includes("claude-")) {
+      return "ANTHROPIC";
+    }
+    return "OPENAI";
+  } 
 }
