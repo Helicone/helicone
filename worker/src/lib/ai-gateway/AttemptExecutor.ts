@@ -94,11 +94,10 @@ export class AttemptExecutor {
     escrowInfo: EscrowInfo | undefined
   ): Promise<Result<Response, AttemptError>> {
     try {
-      // Build request body using provider helpers
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: toAnthropic, // TODO: This is global, don't pass it in
+        toAnthropic: toAnthropic,
       });
 
       if (isErr(bodyResult) || !bodyResult.data) {
@@ -123,7 +122,7 @@ export class AttemptExecutor {
       const authResult = await authenticateRequest(
         endpoint,
         {
-          config: (providerKey.config as any) || {},
+          // config: (providerKey.config as any) || {},
           apiKey: providerKey.decrypted_provider_key,
           secretKey: providerKey.decrypted_provider_secret_key || undefined,
           orgId: orgId,

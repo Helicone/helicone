@@ -51,24 +51,31 @@ export class BedrockProvider extends BaseProvider {
     return this.getModelId(endpoint, config);
   }
 
-  async authenticate(context: AuthContext): Promise<AuthResult> {
-    if (!context.apiKey || !context.secretKey) {
+  async authenticate(
+    authContext: AuthContext,
+    endpoint: Endpoint
+  ): Promise<AuthResult> {
+    if (!authContext.apiKey || !authContext.secretKey) {
       throw new Error("Bedrock requires both apiKey and secretKey");
     }
 
-    if (!context.requestMethod || !context.requestUrl || !context.requestBody) {
+    if (
+      !authContext.requestMethod ||
+      !authContext.requestUrl ||
+      !authContext.requestBody
+    ) {
       throw new Error(
         "Bedrock authentication requires requestMethod, requestUrl, and requestBody"
       );
     }
 
-    const awsRegion = context.config?.region || "us-west-1";
+    const awsRegion = endpoint.userConfig.region || "us-west-1";
     const sigv4 = new SignatureV4({
       service: "bedrock",
       region: awsRegion,
       credentials: {
-        accessKeyId: context.apiKey,
-        secretAccessKey: context.secretKey,
+        accessKeyId: authContext.apiKey,
+        secretAccessKey: authContext.secretKey,
       },
       sha256: Sha256,
     });
@@ -78,14 +85,14 @@ export class BedrockProvider extends BaseProvider {
     headers.set("host", forwardToHost);
     headers.set("content-type", "application/json");
 
-    const url = new URL(context.requestUrl);
+    const url = new URL(authContext.requestUrl);
     const request = new HttpRequest({
-      method: context.requestMethod,
+      method: authContext.requestMethod,
       protocol: url.protocol,
       hostname: forwardToHost,
       path: url.pathname + url.search,
       headers: Object.fromEntries(headers.entries()),
-      body: context.requestBody,
+      body: authContext.requestBody,
     });
 
     const signedRequest = await sigv4.sign(request);

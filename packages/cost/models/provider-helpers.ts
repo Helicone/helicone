@@ -141,7 +141,11 @@ export function buildEndpointUrl(
   }
 
   try {
-    const url = provider.buildUrl(endpoint.modelConfig, endpoint.userConfig, requestParams);
+    const url = provider.buildUrl(
+      endpoint.modelConfig,
+      endpoint.userConfig,
+      requestParams
+    );
     return ok(url);
   } catch (error) {
     return err(error instanceof Error ? error.message : "Failed to build URL");
@@ -186,7 +190,7 @@ export function buildModelId(
 // Helper function to authenticate requests for an endpoint
 export async function authenticateRequest(
   endpoint: Endpoint,
-  context: Omit<AuthContext, "endpoint">,
+  authContext: AuthContext,
   cacheProvider?: CacheProvider
 ): Promise<Result<AuthResult>> {
   const providerResult = getProvider(endpoint.provider);
@@ -203,17 +207,17 @@ export async function authenticateRequest(
     // Default authentication for providers without custom auth
     return ok({
       headers: {
-        Authorization: `Bearer ${context.apiKey || ""}`,
+        Authorization: `Bearer ${authContext.apiKey || ""}`,
       },
     });
   }
 
   try {
-    const authContext: AuthContext = {
-      ...context,
+    const result = await provider.authenticate(
+      authContext,
       endpoint,
-    };
-    const result = await provider.authenticate(authContext, cacheProvider);
+      cacheProvider
+    );
     return ok(result);
   } catch (error) {
     return err(

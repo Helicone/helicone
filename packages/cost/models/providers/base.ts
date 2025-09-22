@@ -38,10 +38,14 @@ export abstract class BaseProvider {
     return endpoint.providerModelId;
   }
 
-  authenticate(context: AuthContext, cacheProvider?: CacheProvider): AuthResult | Promise<AuthResult> {
+  authenticate(
+    authContext: AuthContext,
+    endpoint: Endpoint,
+    cacheProvider?: CacheProvider
+  ): AuthResult | Promise<AuthResult> {
     return {
       headers: {
-        Authorization: `Bearer ${context.apiKey || ""}`,
+        Authorization: `Bearer ${authContext.apiKey || ""}`,
       },
     };
   }

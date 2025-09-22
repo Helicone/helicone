@@ -94,18 +94,19 @@ export class VertexProvider extends BaseProvider {
   }
 
   async authenticate(
-    context: AuthContext,
+    authContext: AuthContext,
+    endpoint: Endpoint,
     cacheProvider?: CacheProvider
   ): Promise<AuthResult> {
-    if (!context.apiKey) {
+    if (!authContext.apiKey) {
       throw new Error(
         "Service account JSON is required for Vertex AI authentication"
       );
     }
 
     const accessToken = await getGoogleAccessToken(
-      context.apiKey,
-      context.orgId,
+      authContext.apiKey,
+      authContext.orgId,
       ["https://www.googleapis.com/auth/cloud-platform"],
       cacheProvider
     );

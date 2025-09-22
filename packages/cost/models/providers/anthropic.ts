@@ -28,10 +28,10 @@ export class AnthropicProvider extends BaseProvider {
     return "https://api.anthropic.com/v1/messages";
   }
 
-  authenticate(context: AuthContext): AuthResult {
+  authenticate(authContext: AuthContext): AuthResult {
     const headers: Record<string, string> = {};
-    headers["x-api-key"] = context.apiKey || "";
-    if (context.bodyMapping === "OPENAI" || !headers["anthropic-version"]) {
+    headers["x-api-key"] = authContext.apiKey || "";
+    if (authContext.bodyMapping === "OPENAI" || !headers["anthropic-version"]) {
       headers["anthropic-version"] = "2023-06-01";
     }
     return { headers };

@@ -204,8 +204,6 @@ export interface UserEndpointConfig {
 }
 
 export interface AuthContext {
-  endpoint: Endpoint;
-  config: UserEndpointConfig;
   apiKey?: string;
   secretKey?: string;
   orgId?: string;

@@ -53,10 +53,10 @@ export class AzureOpenAIProvider extends BaseProvider {
     return `${normalizedBaseUri}openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`;
   }
 
-  authenticate(context: AuthContext): AuthResult {
+  authenticate(authContext: AuthContext): AuthResult {
     return {
       headers: {
-        "api-key": context.apiKey || "",
+        "api-key": authContext.apiKey || "",
       },
     };
   }
