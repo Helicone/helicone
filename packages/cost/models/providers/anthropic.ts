@@ -5,6 +5,7 @@ import type {
   Endpoint,
   RequestBodyContext,
   RequestParams,
+  ResponseFormat,
 } from "../types";
 
 export class AnthropicProvider extends BaseProvider {
@@ -40,5 +41,12 @@ export class AnthropicProvider extends BaseProvider {
     }
     const anthropicBody = context.toAnthropic(context.parsedBody, endpoint.providerModelId);
     return JSON.stringify(anthropicBody);
+  }
+
+  determineResponseFormat(endpoint: Endpoint): ResponseFormat {
+    if (endpoint.author === "anthropic" || endpoint.providerModelId.includes("claude-")) {
+      return "ANTHROPIC";
+    }
+    return "OPENAI";
   }
 }

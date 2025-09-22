@@ -10,6 +10,7 @@ import type {
   RequestParams,
   ModelProviderConfig,
   UserEndpointConfig,
+  ResponseFormat,
 } from "../types";
 
 export class BedrockProvider extends BaseProvider {
@@ -120,5 +121,12 @@ export class BedrockProvider extends BaseProvider {
       stream: undefined,
       stream_options: undefined,
     });
+  }
+
+  determineResponseFormat(endpoint: Endpoint): ResponseFormat {
+    if (endpoint.author === "anthropic" || endpoint.providerModelId.includes("claude-")) {
+      return "ANTHROPIC";
+    }
+    return "OPENAI";
   }
 }

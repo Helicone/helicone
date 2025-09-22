@@ -38,6 +38,8 @@ export interface Modality {
   outputs: OutputModality[];
 }
 
+export type ResponseFormat = "ANTHROPIC" | "OPENAI";
+
 export type Tokenizer =
   | "Claude"
   | "GPT"

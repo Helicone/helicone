@@ -13,9 +13,9 @@ import { AttemptExecutor } from "./AttemptExecutor";
 import { Attempt, DisallowListEntry, EscrowInfo } from "./types";
 import { oai2antResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { oai2antStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
-import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { RequestParams } from "@helicone-package/cost/models/types";
 import { SecureCacheProvider } from "../util/cache/secureCache";
+import { determineResponseFormat } from "@helicone-package/cost/models/provider-helpers";
 
 export interface AuthContext {
   orgId: string;
@@ -303,21 +303,6 @@ export class SimpleAIGateway {
     );
   }
 
-  private determineResponseFormat(
-    provider: ModelProviderName,
-    modelId: string
-  ): "ANTHROPIC" | "OPENAI" {
-    // TODO: make enum type when there's more map formats
-    if (
-      provider === "anthropic" ||
-      (provider === "bedrock" && modelId.includes("claude-"))
-    ) {
-      return "ANTHROPIC";
-    }
-
-    return "OPENAI";
-  }
-
   private async mapResponse(
     attempt: Attempt,
     response: Response,
@@ -327,17 +312,14 @@ export class SimpleAIGateway {
       return ok(response); // do not map response
     }
 
-    const mappingType = this.determineResponseFormat(
-      attempt.endpoint.provider,
-      attempt.endpoint.providerModelId
-    ); // finds format of the response that we are mapping to OPENAI
+    const mappingType = determineResponseFormat(attempt.endpoint);
 
-    if (mappingType === "OPENAI") {
+    if (mappingType.data === "OPENAI") {
       return ok(response); // already in OPENAI format
     }
 
     try {
-      if (mappingType === "ANTHROPIC") {
+      if (mappingType.data === "ANTHROPIC") {
         const contentType = response.headers.get("content-type");
         const isStream = contentType?.includes("text/event-stream");
 

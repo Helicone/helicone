@@ -6,6 +6,7 @@ import type {
   Endpoint,
   RequestParams,
   ModelProviderConfig,
+  ResponseFormat,
 } from "../types";
 import { CacheProvider } from "../../../common/cache/provider";
 
@@ -66,5 +67,9 @@ export abstract class BaseProvider {
     } catch (error) {
       return `Request failed with status ${response.status}`;
     }
+  }
+
+  determineResponseFormat(endpoint: Endpoint): ResponseFormat {
+    return "OPENAI";
   }
 }
