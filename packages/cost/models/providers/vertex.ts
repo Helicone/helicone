@@ -80,7 +80,7 @@ export class VertexProvider extends BaseProvider {
       const updatedBody = {
         ...anthropicBody,
         anthropic_version: "vertex-2023-10-16",
-        model: endpoint.providerModelId,
+        model: undefined, // model is not needed in Vertex inputs (as its defined via URL)
       };
       return JSON.stringify(updatedBody);
     }
@@ -114,5 +114,19 @@ export class VertexProvider extends BaseProvider {
         Authorization: `Bearer ${accessToken}`,
       },
     };
+  }
+
+  async buildErrorMessage(response: Response): Promise<string> {
+    try {
+      const respJson = (await response.json()) as any;
+      if (respJson.error?.message) { // Anthropic error format
+        return respJson.error.message;
+      } else if (respJson[0]?.error?.message) { // Gemini error format
+        return respJson[0].error.message;
+      }
+      return `Request failed with status ${response.status}`;
+    } catch (error) {
+      return `Request failed with status ${response.status}`;
+    }
   }
 }
