@@ -1,11 +1,11 @@
 import type {
-  ModelProviderConfig,
   UserEndpointConfig,
   AuthContext,
   AuthResult,
   RequestBodyContext,
   Endpoint,
   RequestParams,
+  ModelProviderConfig,
 } from "../types";
 import { CacheProvider } from "../../../common/cache/provider";
 
@@ -25,17 +25,13 @@ export abstract class BaseProvider {
 
   readonly requiredConfig?: ReadonlyArray<keyof UserEndpointConfig>;
 
-  abstract buildUrl(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig,
-    requestParams: RequestParams
-  ): string;
+  abstract buildUrl(endpoint: Endpoint, requestParams: RequestParams): string;
 
   buildModelId(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig
+    modelProviderConfig: ModelProviderConfig,
+    userEndpointConfig: UserEndpointConfig
   ): string {
-    return endpoint.providerModelId;
+    return modelProviderConfig.providerModelId;
   }
 
   authenticate(

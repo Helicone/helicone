@@ -3,13 +3,13 @@ import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
 import { BaseProvider } from "./base";
 import type {
-  ModelProviderConfig,
-  UserEndpointConfig,
   AuthContext,
   AuthResult,
   RequestBodyContext,
   Endpoint,
   RequestParams,
+  ModelProviderConfig,
+  UserEndpointConfig,
 } from "../types";
 
 export class BedrockProvider extends BaseProvider {
@@ -23,31 +23,27 @@ export class BedrockProvider extends BaseProvider {
   ];
 
   private getModelId(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig = {}
+    modelProviderConfig: ModelProviderConfig,
+    userEndpointConfig: UserEndpointConfig
   ): string {
-    if (config.crossRegion && config.region && endpoint.crossRegion) {
-      const regionPrefix = config.region.split("-")[0];
-      return `${regionPrefix}.${endpoint.providerModelId}`;
+    if (userEndpointConfig.crossRegion && userEndpointConfig.region) {
+      const regionPrefix = userEndpointConfig.region.split("-")[0];
+      return `${regionPrefix}.${modelProviderConfig.providerModelId}`;
     }
-    return endpoint.providerModelId;
+    return modelProviderConfig.providerModelId;
   }
 
-  buildUrl(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig = {},
-    requestParams: RequestParams
-  ): string {
-    const region = config.region || "us-east-1";
-    const modelId = this.getModelId(endpoint, config);
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
+    const region = endpoint.userConfig.region || "us-east-1";
+    const modelId = this.getModelId(endpoint.modelConfig, endpoint.userConfig);
     return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke`;
   }
 
   buildModelId(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig = {}
+    modelProviderConfig: ModelProviderConfig,
+    userEndpointConfig: UserEndpointConfig
   ): string {
-    return this.getModelId(endpoint, config);
+    return this.getModelId(modelProviderConfig, userEndpointConfig);
   }
 
   async authenticate(

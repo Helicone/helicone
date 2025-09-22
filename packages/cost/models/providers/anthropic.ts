@@ -2,8 +2,6 @@ import { BaseProvider } from "./base";
 import type {
   AuthContext,
   AuthResult,
-  ModelProviderConfig,
-  UserEndpointConfig,
   Endpoint,
   RequestBodyContext,
   RequestParams,
@@ -20,11 +18,7 @@ export class AnthropicProvider extends BaseProvider {
     "https://docs.anthropic.com/en/docs/about-claude/models/all-models",
   ];
 
-  buildUrl(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig,
-    requestParams: RequestParams
-  ): string {
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     return "https://api.anthropic.com/v1/messages";
   }
 

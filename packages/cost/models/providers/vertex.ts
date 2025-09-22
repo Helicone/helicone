@@ -1,7 +1,5 @@
 import { BaseProvider } from "./base";
 import type {
-  ModelProviderConfig,
-  UserEndpointConfig,
   RequestBodyContext,
   Endpoint,
   AuthContext,
@@ -32,14 +30,10 @@ export class VertexProvider extends BaseProvider {
     relevanceScore: 85,
   };
 
-  buildUrl(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig = {},
-    requestParams: RequestParams
-  ): string {
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     const modelId = endpoint.providerModelId || "";
-    const projectId = config.projectId;
-    const region = config.region || "us-central1";
+    const projectId = endpoint.userConfig.projectId;
+    const region = endpoint.userConfig.region || "us-central1";
 
     if (modelId.toLowerCase().includes("gemini")) {
       if (!projectId) {

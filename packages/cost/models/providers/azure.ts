@@ -1,10 +1,9 @@
 import { BaseProvider } from "./base";
 import type {
-  ModelProviderConfig,
-  UserEndpointConfig,
   AuthContext,
   AuthResult,
   RequestParams,
+  Endpoint,
 } from "../types";
 
 export class AzureOpenAIProvider extends BaseProvider {
@@ -19,14 +18,10 @@ export class AzureOpenAIProvider extends BaseProvider {
     "https://learn.microsoft.com/azure/ai-services/openai/concepts/models",
   ];
 
-  buildUrl(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig,
-    requestParams: RequestParams
-  ): string {
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     // Determine base URI - use provided or Helicone gateway for PTB
     const baseUri =
-      config.baseUri ||
+      endpoint.userConfig.baseUri ||
       (endpoint.ptbEnabled
         ? "https://helicone-gateway.cognitiveservices.azure.com"
         : null);
@@ -36,9 +31,11 @@ export class AzureOpenAIProvider extends BaseProvider {
     }
 
     // Get deployment name - fallback chain: deploymentName -> providerModelId -> modelName
-    const deploymentName = config.deploymentName?.trim();
+    const deploymentName = endpoint.userConfig.deploymentName?.trim();
     const deployment =
-      deploymentName || endpoint.providerModelId || config.modelName;
+      deploymentName ||
+      endpoint.providerModelId ||
+      endpoint.userConfig.modelName;
 
     if (!deployment) {
       throw new Error(
@@ -48,7 +45,7 @@ export class AzureOpenAIProvider extends BaseProvider {
 
     // Build URL with normalized base URI and API version
     const normalizedBaseUri = baseUri.endsWith("/") ? baseUri : `${baseUri}/`;
-    const apiVersion = config.apiVersion || "2025-01-01-preview";
+    const apiVersion = endpoint.userConfig.apiVersion || "2025-01-01-preview";
 
     return `${normalizedBaseUri}openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`;
   }

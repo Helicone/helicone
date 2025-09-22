@@ -1,9 +1,5 @@
 import { BaseProvider } from "./base";
-import type {
-  ModelProviderConfig,
-  UserEndpointConfig,
-  RequestParams,
-} from "../types";
+import type { RequestParams, Endpoint } from "../types";
 
 export class DeepInfraProvider extends BaseProvider {
   readonly displayName = "DeepInfra";
@@ -12,11 +8,7 @@ export class DeepInfraProvider extends BaseProvider {
   readonly pricingPages = ["https://deepinfra.com/pricing/"];
   readonly modelPages = ["https://deepinfra.com/models/"];
 
-  buildUrl(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig,
-    requestParams: RequestParams
-  ): string {
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     return `${this.baseUrl}v1/openai/chat/completions`;
   }
 }

@@ -141,11 +141,7 @@ export function buildEndpointUrl(
   }
 
   try {
-    const url = provider.buildUrl(
-      endpoint.modelConfig,
-      endpoint.userConfig,
-      requestParams
-    );
+    const url = provider.buildUrl(endpoint, requestParams);
     return ok(url);
   } catch (error) {
     return err(error instanceof Error ? error.message : "Failed to build URL");
@@ -154,31 +150,25 @@ export function buildEndpointUrl(
 
 // Helper function to build model ID for an endpoint
 export function buildModelId(
-  endpointConfig: ModelProviderConfig,
+  modelProviderConfig: ModelProviderConfig,
   userConfig: UserEndpointConfig = {}
 ): Result<string> {
-  const providerResult = getProvider(endpointConfig.provider);
+  const providerResult = getProvider(modelProviderConfig.provider);
   if (providerResult.error) {
     return err(providerResult.error);
   }
 
   const provider = providerResult.data;
   if (!provider) {
-    return err(`Provider data is null for: ${endpointConfig.provider}`);
+    return err(`Provider data is null for: ${modelProviderConfig.provider}`);
   }
 
   if (!provider.buildModelId) {
-    return ok(endpointConfig.providerModelId);
+    return ok(modelProviderConfig.providerModelId);
   }
 
   try {
-    // Merge endpoint deployment/region with user config
-    const config: UserEndpointConfig = {
-      ...userConfig,
-      region: userConfig?.region || "",
-    };
-
-    const modelId = provider.buildModelId(endpointConfig, config);
+    const modelId = provider.buildModelId(modelProviderConfig, userConfig);
     return ok(modelId);
   } catch (error) {
     return err(

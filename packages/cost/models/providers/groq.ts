@@ -1,9 +1,5 @@
 import { BaseProvider } from "./base";
-import type {
-  ModelProviderConfig,
-  UserEndpointConfig,
-  RequestParams,
-} from "../types";
+import type { Endpoint, RequestParams } from "../types";
 
 export class GroqProvider extends BaseProvider {
   readonly displayName = "Groq";
@@ -15,11 +11,7 @@ export class GroqProvider extends BaseProvider {
   ];
   readonly modelPages = ["https://console.groq.com/docs/models"];
 
-  buildUrl(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig,
-    requestParams: RequestParams
-  ): string {
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     return "https://api.groq.com/openai/v1/chat/completions";
   }
 }

@@ -1,9 +1,5 @@
 import { BaseProvider } from "./base";
-import type {
-  ModelProviderConfig,
-  UserEndpointConfig,
-  RequestParams,
-} from "../types";
+import type { RequestParams, Endpoint } from "../types";
 
 export class XAIProvider extends BaseProvider {
   readonly displayName = "xAI";
@@ -12,11 +8,7 @@ export class XAIProvider extends BaseProvider {
   readonly pricingPages = ["https://docs.x.ai/docs/pricing"];
   readonly modelPages = ["https://docs.x.ai/docs/models"];
 
-  buildUrl(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig,
-    requestParams: RequestParams
-  ): string {
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     return "https://api.x.ai/v1/chat/completions";
   }
 }
