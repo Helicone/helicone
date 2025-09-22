@@ -16,8 +16,11 @@ describe("VertexProvider", () => {
     describe("Gemini models", () => {
       it("should build OpenAI-compatible URL for Gemini models", () => {
         const url = provider.buildUrl(
-          { providerModelId: "gemini-1.5-pro", author: "google" } as any,
-          { projectId: "test-project", region: "us-central1" },
+          {
+            providerModelId: "gemini-1.5-pro",
+            author: "google",
+            userConfig: { projectId: "test-project", region: "us-central1" },
+          } as any,
           { isStreaming: false }
         );
 
@@ -28,14 +31,20 @@ describe("VertexProvider", () => {
 
       it("should use the same URL for streaming and non-streaming Gemini models", () => {
         const nonStreamingUrl = provider.buildUrl(
-          { providerModelId: "gemini-1.5-flash", author: "google" } as any,
-          { projectId: "test-project", region: "eu-west1" },
+          {
+            providerModelId: "gemini-1.5-flash",
+            author: "google",
+            userConfig: { projectId: "test-project", region: "eu-west1" },
+          } as any,
           { isStreaming: false }
         );
 
         const streamingUrl = provider.buildUrl(
-          { providerModelId: "gemini-1.5-flash", author: "google" } as any,
-          { projectId: "test-project", region: "eu-west1" },
+          {
+            providerModelId: "gemini-1.5-flash",
+            author: "google",
+            userConfig: { projectId: "test-project", region: "eu-west1" },
+          } as any,
           { isStreaming: true }
         );
 
@@ -48,8 +57,11 @@ describe("VertexProvider", () => {
       it("should throw error when projectId is missing for Gemini models", () => {
         expect(() =>
           provider.buildUrl(
-            { providerModelId: "gemini-1.5-pro", author: "google" } as any,
-            { region: "us-central1" },
+            {
+              providerModelId: "gemini-1.5-pro",
+              author: "google",
+              userConfig: { region: "us-central1" },
+            } as any,
             { isStreaming: false }
           )
         ).toThrow("Vertex AI requires projectId in config for Gemini models");
@@ -57,8 +69,11 @@ describe("VertexProvider", () => {
 
       it("should handle case-insensitive Gemini model detection", () => {
         const url = provider.buildUrl(
-          { providerModelId: "GEMINI-1.5-PRO", author: "google" } as any,
-          { projectId: "test-project", region: "us-central1" },
+          {
+            providerModelId: "GEMINI-1.5-PRO",
+            author: "google",
+            userConfig: { projectId: "test-project", region: "us-central1" },
+          } as any,
           { isStreaming: false }
         );
 
@@ -71,8 +86,11 @@ describe("VertexProvider", () => {
     describe("Claude/Anthropic models", () => {
       it("should build predict URL for non-streaming Claude models", () => {
         const url = provider.buildUrl(
-          { providerModelId: "claude-3-5-haiku@20241022", author: "anthropic" } as any,
-          { projectId: "test-project", region: "us-central1" },
+          {
+            providerModelId: "claude-3-5-haiku@20241022",
+            author: "anthropic",
+            userConfig: { projectId: "test-project", region: "us-central1" },
+          } as any,
           { isStreaming: false }
         );
 
@@ -83,8 +101,11 @@ describe("VertexProvider", () => {
 
       it("should build streamRawPredict URL for streaming Claude models", () => {
         const url = provider.buildUrl(
-          { providerModelId: "claude-3-5-sonnet@20241022", author: "anthropic" } as any,
-          { projectId: "test-project", region: "us-central1" },
+          {
+            providerModelId: "claude-3-5-sonnet@20241022",
+            author: "anthropic",
+            userConfig: { projectId: "test-project", region: "us-central1" },
+          } as any,
           { isStreaming: true }
         );
 
@@ -95,8 +116,11 @@ describe("VertexProvider", () => {
 
       it("should handle different regions for Claude models", () => {
         const url = provider.buildUrl(
-          { providerModelId: "claude-3-opus@20240229", author: "anthropic" } as any,
-          { projectId: "my-project", region: "europe-west1" },
+          {
+            providerModelId: "claude-3-opus@20240229",
+            author: "anthropic",
+            userConfig: { projectId: "my-project", region: "europe-west1" },
+          } as any,
           { isStreaming: false }
         );
 
@@ -108,8 +132,11 @@ describe("VertexProvider", () => {
       it("should throw error when projectId is missing for non-Gemini models", () => {
         expect(() =>
           provider.buildUrl(
-            { providerModelId: "claude-3-5-haiku", author: "anthropic" } as any,
-            { region: "us-central1" },
+            {
+              providerModelId: "claude-3-5-haiku",
+              author: "anthropic",
+              userConfig: { region: "us-central1" },
+            } as any,
             { isStreaming: false }
           )
         ).toThrow("Vertex AI requires projectId and region in config for non-Gemini models");
@@ -117,8 +144,10 @@ describe("VertexProvider", () => {
 
       it("should default author to anthropic if not provided", () => {
         const url = provider.buildUrl(
-          { providerModelId: "claude-3-haiku" } as any,
-          { projectId: "test-project", region: "us-central1" },
+          {
+            providerModelId: "claude-3-haiku",
+            userConfig: { projectId: "test-project", region: "us-central1" },
+          } as any,
           { isStreaming: false }
         );
 
@@ -131,8 +160,11 @@ describe("VertexProvider", () => {
     describe("Default region handling", () => {
       it("should use us-central1 as default region for Gemini models", () => {
         const url = provider.buildUrl(
-          { providerModelId: "gemini-pro", author: "google" } as any,
-          { projectId: "test-project" },
+          {
+            providerModelId: "gemini-pro",
+            author: "google",
+            userConfig: { projectId: "test-project" },
+          } as any,
           { isStreaming: false }
         );
 
@@ -143,8 +175,11 @@ describe("VertexProvider", () => {
 
       it("should use us-central1 as default region for Claude models", () => {
         const url = provider.buildUrl(
-          { providerModelId: "claude-3", author: "anthropic" } as any,
-          { projectId: "test-project" },
+          {
+            providerModelId: "claude-3",
+            author: "anthropic",
+            userConfig: { projectId: "test-project" },
+          } as any,
           { isStreaming: false }
         );
 
@@ -298,8 +333,10 @@ describe("VertexProvider", () => {
     it("should handle empty model ID", () => {
       // Empty model ID doesn't match "gemini", so it's treated as non-Gemini and builds a URL
       const url = provider.buildUrl(
-        { providerModelId: "" } as any,
-        { projectId: "test-project", region: "us-central1" },
+        {
+          providerModelId: "",
+          userConfig: { projectId: "test-project", region: "us-central1" },
+        } as any,
         { isStreaming: false }
       );
 
@@ -311,8 +348,9 @@ describe("VertexProvider", () => {
     it("should handle undefined model ID", () => {
       // Undefined model ID doesn't match "gemini", so it's treated as non-Gemini and builds a URL
       const url = provider.buildUrl(
-        {} as any,
-        { projectId: "test-project", region: "us-central1" },
+        {
+          userConfig: { projectId: "test-project", region: "us-central1" },
+        } as any,
         { isStreaming: false }
       );
 
@@ -323,8 +361,11 @@ describe("VertexProvider", () => {
 
     it("should handle special characters in project ID", () => {
       const url = provider.buildUrl(
-        { providerModelId: "gemini-pro", author: "google" } as any,
-        { projectId: "my-project-123", region: "us-central1" },
+        {
+          providerModelId: "gemini-pro",
+          author: "google",
+          userConfig: { projectId: "my-project-123", region: "us-central1" },
+        } as any,
         { isStreaming: false }
       );
 
