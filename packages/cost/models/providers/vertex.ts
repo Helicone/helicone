@@ -115,7 +115,7 @@ export class VertexProvider extends BaseProvider {
   async buildErrorMessage(response: Response): Promise<string> {
     try {
       const respJson = (await response.json()) as any;
-      console.log(respJson);
+      // const respJson = (await response.json()) as any;
       if (respJson.error?.message) { // Anthropic error format
         return respJson.error.message;
       } else if (respJson[0]?.error?.message) { // Gemini error format
