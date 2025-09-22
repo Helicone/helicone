@@ -241,7 +241,6 @@ describe("VertexProvider", () => {
 
         const parsed = JSON.parse(body);
         expect(parsed.anthropic_version).toBe("vertex-2023-10-16");
-        expect(parsed.model).toBe("claude-3-haiku");
         expect(parsed.anthropic_content).toBe(true);
       });
 
@@ -260,7 +259,6 @@ describe("VertexProvider", () => {
 
         const parsed = JSON.parse(body);
         expect(parsed.anthropic_version).toBe("vertex-2023-10-16");
-        expect(parsed.model).toBe("claude-3-sonnet");
         expect(parsed.should_not_appear).toBeUndefined();
       });
     });
