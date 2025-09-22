@@ -10,8 +10,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.00005,
-        output: 0.0001,
+        input: 0.00000005,
+        output: 0.00000010,
       },
     ],
     rateLimits: {
