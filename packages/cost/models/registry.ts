@@ -13,10 +13,10 @@ import {
   ModelIndexes,
   ModelProviderEntry,
 } from "./build-indexes";
-import { buildEndpointUrl, buildModelId } from "./provider-helpers";
+import { buildModelId } from "./provider-helpers";
 import { ModelProviderName } from "./providers";
 import { Result, ok, err } from "../../common/result";
-import { ModelName, ModelProviderConfigId, EndpointId } from "./registry-types";
+import { ModelName, ModelProviderConfigId } from "./registry-types";
 
 // Import all models and endpoints from authors
 import { anthropicModels, anthropicEndpointConfig } from "./authors/anthropic";
@@ -122,18 +122,14 @@ function buildEndpoint(
   endpointConfig: ModelProviderConfig,
   userEndpointConfig: UserEndpointConfig
 ): Result<Endpoint> {
-  const baseUrlResult = buildEndpointUrl(endpointConfig, userEndpointConfig);
-  if (baseUrlResult.error) {
-    return err(baseUrlResult.error);
-  }
-
   const modelIdResult = buildModelId(endpointConfig, userEndpointConfig);
   if (modelIdResult.error) {
     return err(modelIdResult.error);
   }
 
   return ok({
-    baseUrl: baseUrlResult.data ?? "",
+    modelConfig: endpointConfig,
+    userConfig: userEndpointConfig,
     provider: endpointConfig.provider,
     author: endpointConfig.author,
     providerModelId: modelIdResult.data ?? "",

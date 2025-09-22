@@ -5,6 +5,12 @@ import {
   createOpenAIMockResponse,
 } from "../test-utils";
 
+// Mock Google OAuth authentication - this will be hoisted
+vi.mock("../../../packages/cost/auth/gcpServiceAccountAuth", () => ({
+  getGoogleAccessToken: vi.fn().mockResolvedValue("ya29.mock-access-token-for-tests"),
+  clearGoogleTokenCache: vi.fn(),
+}));
+
 // Mock gatewayRouter - this will be hoisted
 vi.mock("../../src/routers/gatewayRouter", () => ({
   gatewayForwarder: vi.fn(),

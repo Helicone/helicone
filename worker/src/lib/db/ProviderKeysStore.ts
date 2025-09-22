@@ -97,8 +97,10 @@ export class ProviderKeysStore {
       return null;
     }
 
+    const mappedProvider = dbProviderToProvider(data[0].provider_name ?? "");
+
     return {
-      provider: dbProviderToProvider(data[0].provider_name ?? "") ?? provider,
+      provider: mappedProvider ?? provider,
       org_id: orgId,
       decrypted_provider_key: data[0].decrypted_provider_key ?? "",
       decrypted_provider_secret_key:

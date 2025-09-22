@@ -1,11 +1,11 @@
 import { describe, it, expect } from "@jest/globals";
 import { AzureOpenAIProvider } from "../../../cost/models/providers/azure";
-import type { ModelProviderConfig, UserEndpointConfig } from "../../../cost/models/types";
+import type { ModelProviderConfig, UserEndpointConfig, Endpoint } from "../../../cost/models/types";
 
 describe("AzureOpenAIProvider", () => {
   const provider = new AzureOpenAIProvider();
 
-  const mockEndpoint: ModelProviderConfig = {
+  const createMockEndpoint = (userConfig: UserEndpointConfig): Endpoint => ({
     providerModelId: "gpt-4o",
     provider: "azure",
     author: "openai",
@@ -18,10 +18,27 @@ describe("AzureOpenAIProvider", () => {
     maxCompletionTokens: 16384,
     ptbEnabled: false,
     supportedParameters: ["temperature", "max_tokens"],
-    endpointConfigs: {
-      "*": {},
-    },
-  };
+    userConfig,
+    modelConfig: {
+      providerModelId: "gpt-4o",
+      provider: "azure",
+      author: "openai",
+      supportedParameters: ["temperature", "max_tokens"],
+      pricing: [{
+        threshold: 0,
+        input: 0.0000025,
+        output: 0.00001,
+      }],
+      contextLength: 128000,
+      maxCompletionTokens: 16384,
+      ptbEnabled: false,
+      endpointConfigs: {
+        "*": {}
+      }
+    }
+  });
+
+  const mockEndpoint = createMockEndpoint({});
 
   describe("buildUrl", () => {
     describe("deployment name fallback chain", () => {
@@ -32,7 +49,8 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const endpoint = createMockEndpoint(config);
+        const url = provider.buildUrl(endpoint, { isStreaming: false });
 
         // Should use providerModelId (gpt-4o) since deploymentName is empty
         expect(url).toBe(
@@ -46,7 +64,8 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const endpoint = createMockEndpoint(config);
+        const url = provider.buildUrl(endpoint, { isStreaming: false });
 
         // Should trim and fallback to providerModelId
         expect(url).toBe(
@@ -60,7 +79,8 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const endpoint = createMockEndpoint(config);
+        const url = provider.buildUrl(endpoint, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"
@@ -73,7 +93,8 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const endpoint = createMockEndpoint(config);
+        const url = provider.buildUrl(endpoint, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"
@@ -86,7 +107,8 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const endpoint = createMockEndpoint(config);
+        const url = provider.buildUrl(endpoint, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/my-custom-deployment/chat/completions?api-version=2025-01-01-preview"
@@ -94,18 +116,16 @@ describe("AzureOpenAIProvider", () => {
       });
 
       it("should fallback to modelName when deploymentName and providerModelId are empty", () => {
-        const endpointNoModelId: ModelProviderConfig = {
-          ...mockEndpoint,
-          providerModelId: "",
-        };
-
         const config: UserEndpointConfig = {
           deploymentName: "",
           modelName: "fallback-model-name",
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(endpointNoModelId, config);
+        const endpointNoModelId = createMockEndpoint(config);
+        endpointNoModelId.providerModelId = "";
+
+        const url = provider.buildUrl(endpointNoModelId, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/fallback-model-name/chat/completions?api-version=2025-01-01-preview"
@@ -113,18 +133,16 @@ describe("AzureOpenAIProvider", () => {
       });
 
       it("should throw error when no deployment name option is available", () => {
-        const endpointNoModelId: ModelProviderConfig = {
-          ...mockEndpoint,
-          providerModelId: "",
-        };
-
         const config: UserEndpointConfig = {
           deploymentName: "",
           modelName: "",
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        expect(() => provider.buildUrl(endpointNoModelId, config)).toThrow(
+        const endpointNoModelId = createMockEndpoint(config);
+        endpointNoModelId.providerModelId = "";
+
+        expect(() => provider.buildUrl(endpointNoModelId, { isStreaming: false })).toThrow(
           "Azure OpenAI requires a deployment name, provider model ID, or model name"
         );
       });
@@ -132,16 +150,14 @@ describe("AzureOpenAIProvider", () => {
 
     describe("base URI handling", () => {
       it("should use PTB gateway URL when ptbEnabled and no baseUri provided", () => {
-        const ptbEndpoint: ModelProviderConfig = {
-          ...mockEndpoint,
-          ptbEnabled: true,
-        };
-
         const config: UserEndpointConfig = {
           deploymentName: "test-deployment",
         };
 
-        const url = provider.buildUrl(ptbEndpoint, config);
+        const ptbEndpoint = createMockEndpoint(config);
+        ptbEndpoint.ptbEnabled = true;
+
+        const url = provider.buildUrl(ptbEndpoint, { isStreaming: false });
 
         expect(url).toBe(
           "https://helicone-gateway.cognitiveservices.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview"
@@ -149,17 +165,15 @@ describe("AzureOpenAIProvider", () => {
       });
 
       it("should prefer provided baseUri over PTB gateway", () => {
-        const ptbEndpoint: ModelProviderConfig = {
-          ...mockEndpoint,
-          ptbEnabled: true,
-        };
-
         const config: UserEndpointConfig = {
           deploymentName: "test-deployment",
           baseUri: "https://custom.openai.azure.com",
         };
 
-        const url = provider.buildUrl(ptbEndpoint, config);
+        const ptbEndpoint = createMockEndpoint(config);
+        ptbEndpoint.ptbEnabled = true;
+
+        const url = provider.buildUrl(ptbEndpoint, { isStreaming: false });
 
         expect(url).toBe(
           "https://custom.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview"
@@ -171,7 +185,8 @@ describe("AzureOpenAIProvider", () => {
           deploymentName: "test-deployment",
         };
 
-        expect(() => provider.buildUrl(mockEndpoint, config)).toThrow(
+        const endpoint = createMockEndpoint(config);
+        expect(() => provider.buildUrl(endpoint, { isStreaming: false })).toThrow(
           "Azure OpenAI requires baseUri"
         );
       });
@@ -182,7 +197,8 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com/",  // Trailing slash
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const endpoint = createMockEndpoint(config);
+        const url = provider.buildUrl(endpoint, { isStreaming: false });
 
         // Should not have double slash
         expect(url).toBe(
@@ -196,7 +212,8 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",  // No trailing slash
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const endpoint = createMockEndpoint(config);
+        const url = provider.buildUrl(endpoint, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview"
@@ -211,7 +228,8 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const endpoint = createMockEndpoint(config);
+        const url = provider.buildUrl(endpoint, { isStreaming: false });
 
         expect(url).toContain("api-version=2025-01-01-preview");
       });
@@ -223,7 +241,8 @@ describe("AzureOpenAIProvider", () => {
           apiVersion: "2024-06-01",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const endpoint = createMockEndpoint(config);
+        const url = provider.buildUrl(endpoint, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2024-06-01"

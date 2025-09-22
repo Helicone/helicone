@@ -1,7 +1,8 @@
 import { SELF, fetchMock, env, runInDurableObject } from "cloudflare:test";
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { registry } from "@helicone-package/cost/models/registry";
-import { UserEndpointConfig } from "@helicone-package/cost/models/types";
+import { UserEndpointConfig, RequestParams } from "@helicone-package/cost/models/types";
+import { buildEndpointUrl } from "@helicone-package/cost/models/provider-helpers";
 import { type TestCase } from "../providers/base.test-config";
 import { anthropicTestConfig } from "../providers/anthropic.test-config";
 import { setSupabaseTestCase } from "../setup";
@@ -54,7 +55,12 @@ function mockProviderEndpoint(
   const endpoint = registry.buildEndpoint(config, byokConfig).data;
   if (!endpoint) return;
 
-  const url = new URL(endpoint.baseUrl);
+  // Build URL dynamically with default request params (non-streaming)
+  const requestParams: RequestParams = { isStreaming: false };
+  const urlResult = buildEndpointUrl(endpoint, requestParams);
+  if (urlResult.error || !urlResult.data) return;
+
+  const url = new URL(urlResult.data);
 
   if (statusCode === 200) {
     let testConfig;
@@ -170,7 +176,12 @@ describe("Registry Tests", () => {
           const endpoints = endpointsResult.data || [];
 
           endpoints.forEach((endpoint) => {
-            const url = new URL(endpoint.baseUrl);
+            // Build URL dynamically with default request params (non-streaming)
+            const requestParams: RequestParams = { isStreaming: false };
+            const urlResult = buildEndpointUrl(endpoint, requestParams);
+            if (urlResult.error || !urlResult.data) return;
+
+            const url = new URL(urlResult.data);
             const baseUrl = `${url.protocol}//${url.host}`;
             const path = url.pathname;
 
@@ -308,5 +319,4 @@ describe("Registry Tests", () => {
       });
     });
   });
-
 });

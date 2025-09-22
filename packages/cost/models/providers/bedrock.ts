@@ -3,12 +3,13 @@ import { Sha256 } from "@aws-crypto/sha256-js";
 import { HttpRequest } from "@smithy/protocol-http";
 import { BaseProvider } from "./base";
 import type {
-  ModelProviderConfig,
-  UserEndpointConfig,
   AuthContext,
   AuthResult,
   RequestBodyContext,
   Endpoint,
+  RequestParams,
+  ModelProviderConfig,
+  UserEndpointConfig,
 } from "../types";
 
 export class BedrockProvider extends BaseProvider {
@@ -22,50 +23,54 @@ export class BedrockProvider extends BaseProvider {
   ];
 
   private getModelId(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig = {}
+    modelProviderConfig: ModelProviderConfig,
+    userEndpointConfig: UserEndpointConfig
   ): string {
-    if (config.crossRegion && config.region && endpoint.crossRegion) {
-      const regionPrefix = config.region.split("-")[0];
-      return `${regionPrefix}.${endpoint.providerModelId}`;
+    if (userEndpointConfig.crossRegion && userEndpointConfig.region) {
+      const regionPrefix = userEndpointConfig.region.split("-")[0];
+      return `${regionPrefix}.${modelProviderConfig.providerModelId}`;
     }
-    return endpoint.providerModelId;
+    return modelProviderConfig.providerModelId;
   }
 
-  buildUrl(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig = {}
-  ): string {
-    const region = config.region || "us-east-1";
-    const modelId = this.getModelId(endpoint, config);
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
+    const region = endpoint.userConfig.region || "us-east-1";
+    const modelId = this.getModelId(endpoint.modelConfig, endpoint.userConfig);
     return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke`;
   }
 
   buildModelId(
-    endpoint: ModelProviderConfig,
-    config: UserEndpointConfig = {}
+    modelProviderConfig: ModelProviderConfig,
+    userEndpointConfig: UserEndpointConfig
   ): string {
-    return this.getModelId(endpoint, config);
+    return this.getModelId(modelProviderConfig, userEndpointConfig);
   }
 
-  async authenticate(context: AuthContext): Promise<AuthResult> {
-    if (!context.apiKey || !context.secretKey) {
+  async authenticate(
+    authContext: AuthContext,
+    endpoint: Endpoint
+  ): Promise<AuthResult> {
+    if (!authContext.apiKey || !authContext.secretKey) {
       throw new Error("Bedrock requires both apiKey and secretKey");
     }
 
-    if (!context.requestMethod || !context.requestUrl || !context.requestBody) {
+    if (
+      !authContext.requestMethod ||
+      !authContext.requestUrl ||
+      !authContext.requestBody
+    ) {
       throw new Error(
         "Bedrock authentication requires requestMethod, requestUrl, and requestBody"
       );
     }
 
-    const awsRegion = context.config?.region || "us-west-1";
+    const awsRegion = endpoint.userConfig.region || "us-west-1";
     const sigv4 = new SignatureV4({
       service: "bedrock",
       region: awsRegion,
       credentials: {
-        accessKeyId: context.apiKey,
-        secretAccessKey: context.secretKey,
+        accessKeyId: authContext.apiKey,
+        secretAccessKey: authContext.secretKey,
       },
       sha256: Sha256,
     });
@@ -75,14 +80,14 @@ export class BedrockProvider extends BaseProvider {
     headers.set("host", forwardToHost);
     headers.set("content-type", "application/json");
 
-    const url = new URL(context.requestUrl);
+    const url = new URL(authContext.requestUrl);
     const request = new HttpRequest({
-      method: context.requestMethod,
+      method: authContext.requestMethod,
       protocol: url.protocol,
       hostname: forwardToHost,
       path: url.pathname + url.search,
       headers: Object.fromEntries(headers.entries()),
-      body: context.requestBody,
+      body: authContext.requestBody,
     });
 
     const signedRequest = await sigv4.sign(request);

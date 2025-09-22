@@ -154,7 +154,7 @@ describe("Pass-Through Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/passthrough/models/gemini-1.5-pro:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
                 response: "success",
                 model: "gemini-1.5-pro",
                 data: {
