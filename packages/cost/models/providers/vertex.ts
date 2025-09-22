@@ -41,10 +41,13 @@ export class VertexProvider extends BaseProvider {
       const updatedBody = {
         ...anthropicBody,
         anthropic_version: "vertex-2023-10-16",
-        model: undefined,
       };
       return JSON.stringify(updatedBody);
     }
-    return JSON.stringify(context.parsedBody);
+
+    return JSON.stringify({
+      ...context.parsedBody,
+      model: endpoint.providerModelId,
+    });
   }
 }

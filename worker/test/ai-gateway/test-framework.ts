@@ -164,8 +164,8 @@ export async function runGatewayTest(
           expect(requestWrapper.getMethod()).toBe(method);
         }
 
-        if (bodyContains && requestWrapper.getText) {
-          const body = await requestWrapper.getText();
+        if (bodyContains && requestWrapper.unsafeGetText) {
+          const body = await requestWrapper.unsafeGetText();
           for (const text of bodyContains) {
             expect(body).toContain(text);
           }
@@ -173,8 +173,8 @@ export async function runGatewayTest(
       }
 
       // Automatic model validation - validate request body contains expected model
-      if (expectation?.model && requestWrapper.getText) {
-        const body = await requestWrapper.getText();
+      if (expectation?.model && requestWrapper.unsafeGetText) {
+        const body = await requestWrapper.unsafeGetText();
         try {
           const parsed = JSON.parse(body);
           expect(parsed.model).toBe(expectation.model);
@@ -191,6 +191,7 @@ export async function runGatewayTest(
 
       // Return mock response based on expectation
       if (!expectation) {
+        console.log(`[DEBUG] No expectation found for call ${callIndex}`);
         return new Response("Unexpected call to provider", {
           status: 500,
           headers: { "content-type": "application/json" },
@@ -250,7 +251,8 @@ export async function runGatewayTest(
 
   // Add custom headers like NO_MAPPING if specified
   if (scenario.request?.bodyMapping) {
-    (requestOptions.headers as any)["Helicone-Gateway-Body-Mapping"] = scenario.request.bodyMapping;
+    (requestOptions.headers as any)["Helicone-Gateway-Body-Mapping"] =
+      scenario.request.bodyMapping;
   }
 
   // Add any additional custom headers

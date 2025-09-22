@@ -58,7 +58,7 @@ describe("xAI Registry Tests", () => {
               {
                 url: "https://api.x.ai/v1/chat/completions",
                 response: "success",
-                model: "grok-4-0709",
+                model: "grok-4",
                 expects: xaiAuthExpectations,
               },
             ],
@@ -74,7 +74,7 @@ describe("xAI Registry Tests", () => {
               {
                 url: "https://api.x.ai/v1/chat/completions",
                 response: "success",
-                model: "grok-4-0709",
+                model: "grok-4",
                 expects: xaiAuthExpectations,
               },
             ],

@@ -598,8 +598,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.openai.com/v1/chat/completions",
                 response: "success",
-                model: "o3",
-                data: createOpenAIMockResponse("o3"),
+                model: "o3-2025-04-16",
+                data: createOpenAIMockResponse("o3-2025-04-16"),
                 expects: openaiAuthExpectations,
               },
             ],
@@ -615,8 +615,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.openai.com/v1/chat/completions",
                 response: "success",
-                model: "o3",
-                data: createOpenAIMockResponse("o3"),
+                model: "o3-2025-04-16",
+                data: createOpenAIMockResponse("o3-2025-04-16"),
                 expects: openaiAuthExpectations,
               },
             ],
@@ -634,8 +634,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.openai.com/v1/chat/completions",
                 response: "success",
-                model: "o3-pro",
-                data: createOpenAIMockResponse("o3-pro"),
+                model: "o3-pro-2025-06-10",
+                data: createOpenAIMockResponse("o3-pro-2025-06-10"),
                 expects: openaiAuthExpectations,
               },
             ],
@@ -651,8 +651,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.openai.com/v1/chat/completions",
                 response: "success",
-                model: "o3-pro",
-                data: createOpenAIMockResponse("o3-pro"),
+                model: "o3-pro-2025-06-10",
+                data: createOpenAIMockResponse("o3-pro-2025-06-10"),
                 expects: openaiAuthExpectations,
               },
             ],

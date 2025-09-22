@@ -105,7 +105,6 @@ export class BedrockProvider extends BaseProvider {
       const updatedBody = {
         ...anthropicBody,
         anthropic_version: "bedrock-2023-05-31",
-        model: undefined,
       };
       return JSON.stringify(updatedBody);
     }

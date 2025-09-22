@@ -24,7 +24,10 @@ import { openaiModels, openaiEndpointConfig } from "./authors/openai";
 import { googleModels, googleEndpointConfig } from "./authors/google";
 import { grokModels, grokEndpointConfig } from "./authors/xai";
 import { metaModels, metaEndpointConfig } from "./authors/meta";
-import { moonshotaiModels, moonshotaiEndpointConfig } from "./authors/moonshotai";
+import {
+  moonshotaiModels,
+  moonshotaiEndpointConfig,
+} from "./authors/moonshotai";
 import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
 import { mistralModels, mistralEndpointConfig } from "./authors/mistralai";
@@ -39,7 +42,7 @@ const allModels = {
   ...moonshotaiModels,
   ...alibabaModels,
   ...deepseekModels,
-  ...mistralModels
+  ...mistralModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -52,7 +55,7 @@ const modelProviderConfigs = {
   ...moonshotaiEndpointConfig,
   ...alibabaEndpointConfig,
   ...deepseekEndpointConfig,
-  ...mistralEndpointConfig
+  ...mistralEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
@@ -75,8 +78,12 @@ function createPassthroughEndpoint(
   provider: ModelProviderName,
   userEndpointConfig: UserEndpointConfig
 ): Result<Endpoint> {
+  // Strip the provider suffix from the model name for passthrough
+  // e.g., "gemini-1.5-pro/vertex" -> "gemini-1.5-pro"
+  const cleanModelName = modelName.split("/")[0];
+
   const endpointConfig: ModelProviderConfig = {
-    providerModelId: modelName,
+    providerModelId: cleanModelName,
     ptbEnabled: false,
     provider,
     author: "passthrough",
@@ -153,7 +160,9 @@ function getModelProviderConfigByProviderModelId(
   providerModelId: string
 ): Result<ModelProviderConfig> {
   const result = indexes.providerModelIdToConfig.get(providerModelId);
-  return result ? ok(result) : err(`Config not found for providerModelId: ${providerModelId}`);
+  return result
+    ? ok(result)
+    : err(`Config not found for providerModelId: ${providerModelId}`);
 }
 
 function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {
