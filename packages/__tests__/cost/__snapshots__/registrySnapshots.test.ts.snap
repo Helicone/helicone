@@ -3283,8 +3283,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "google/gemma-3": {
     "deepinfra": [
       {
-        "input": 0.00005,
-        "output": 0.0001,
+        "input": 5e-8,
+        "output": 1e-7,
         "threshold": 0,
       },
     ],
