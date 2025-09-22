@@ -1039,6 +1039,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemma-3": {
+    "gemma-3-12b-it:deepinfra": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "google/gemma-3-12b-it",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "meta/llama": {
     "llama-3.1-8b-instant:groq": {
       "context": 131072,
@@ -2658,6 +2684,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "openrouter",
   ],
+  "google/gemma-3": [
+    "deepinfra",
+  ],
   "meta/llama": [
     "groq",
     "groq",
@@ -3251,6 +3280,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "google/gemma-3": {
+    "deepinfra": [
+      {
+        "input": 0.00005,
+        "output": 0.0001,
+        "threshold": 0,
+      },
+    ],
+  },
   "meta/llama": {
     "groq": [
       {
@@ -3604,6 +3642,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "gemma-3-12b-it",
+      "providers": [
+        "deepinfra",
+      ],
+    },
+    {
       "model": "gemma2-9b-it",
       "providers": [
         "groq",
@@ -3851,7 +3895,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 4,
+      "modelCount": 5,
       "provider": "deepinfra",
     },
     {
@@ -3936,8 +3980,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:bedrock:us-east-1",
     "claude-3.5-haiku:openrouter:*",
   ],
-  "totalEndpoints": 110,
-  "totalModelProviderConfigs": 110,
+  "totalEndpoints": 111,
+  "totalModelProviderConfigs": 111,
   "totalModelsWithPtb": 44,
   "totalProviders": 11,
 }
