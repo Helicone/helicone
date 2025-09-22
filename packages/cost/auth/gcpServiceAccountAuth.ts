@@ -106,7 +106,7 @@ async function hashString(str: string): Promise<string> {
     new TextEncoder().encode(str)
   );
   return Array.from(new Uint8Array(hashBuffer))
-    .map(b => b.toString(16).padStart(2, "0"))
+    .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
 
@@ -124,7 +124,14 @@ export async function getGoogleAccessToken(
   scopes: string[] = ["https://www.googleapis.com/auth/cloud-platform"],
   cacheProvider?: CacheProvider
 ): Promise<string> {
-  const serviceAccount: ServiceAccount = JSON.parse(serviceAccountJson);
+  let serviceAccount: ServiceAccount;
+  try {
+    serviceAccount = JSON.parse(serviceAccountJson);
+  } catch (error) {
+    throw new Error(
+      `Invalid service account JSON: ${error instanceof Error ? error.message : "Parse error"}`
+    );
+  }
   const serviceAccountHash = await hashString(serviceAccountJson);
   const cacheKey = `gcp-token:${orgId || "no-org"}:${serviceAccountHash}:${scopes.join(",")}`;
 
