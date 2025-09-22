@@ -4,6 +4,8 @@ import { GroqUsageProcessor } from "./groqUsageProcessor";
 import { XAIUsageProcessor } from "./xaiUsageProcessor";
 import { OpenRouterUsageProcessor } from "./openRouterUsageProcessor";
 import { DeepSeekUsageProcessor } from "./deepseekUsageProcessor";
+import { VertexUsageProcessor } from "./vertexUsageProcessor";
+import { GoogleUsageProcessor } from "./googleUsageProcessor";
 import { IUsageProcessor } from "./IUsageProcessor";
 import { ModelProviderName } from "../models/providers";
 
@@ -24,6 +26,10 @@ export function getUsageProcessor(
       return new OpenRouterUsageProcessor();
     case "deepseek":
       return new DeepSeekUsageProcessor();
+    case "vertex":
+      return new VertexUsageProcessor();
+    case "google-ai-studio":
+      return new GoogleUsageProcessor();
     default:
       return null;
   }

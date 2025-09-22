@@ -2,10 +2,9 @@ import { BaseProvider } from "./base";
 import type {
   AuthContext,
   AuthResult,
-  ModelProviderConfig,
-  UserEndpointConfig,
   Endpoint,
   RequestBodyContext,
+  RequestParams,
 } from "../types";
 
 export class AnthropicProvider extends BaseProvider {
@@ -19,17 +18,14 @@ export class AnthropicProvider extends BaseProvider {
     "https://docs.anthropic.com/en/docs/about-claude/models/all-models",
   ];
 
-  buildUrl(
-    _modelProviderConfig: ModelProviderConfig,
-    userConfig: UserEndpointConfig
-  ): string {
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     return "https://api.anthropic.com/v1/messages";
   }
 
-  authenticate(context: AuthContext): AuthResult {
+  authenticate(authContext: AuthContext): AuthResult {
     const headers: Record<string, string> = {};
-    headers["x-api-key"] = context.apiKey || "";
-    if (context.bodyMapping === "OPENAI" || !headers["anthropic-version"]) {
+    headers["x-api-key"] = authContext.apiKey || "";
+    if (authContext.bodyMapping === "OPENAI" || !headers["anthropic-version"]) {
       headers["anthropic-version"] = "2023-06-01";
     }
     return { headers };

@@ -176,8 +176,13 @@ export interface EndpointConfig extends UserEndpointConfig {
   priority?: number;
 }
 
+export interface RequestParams {
+  isStreaming?: boolean;
+}
+
 export interface Endpoint extends BaseConfig {
-  baseUrl: string;
+  modelConfig: ModelProviderConfig;
+  userConfig: UserEndpointConfig;
   provider: ModelProviderName;
   author: AuthorName;
   providerModelId: string;
@@ -199,10 +204,9 @@ export interface UserEndpointConfig {
 }
 
 export interface AuthContext {
-  endpoint: Endpoint;
-  config: UserEndpointConfig;
   apiKey?: string;
   secretKey?: string;
+  orgId?: string;
   bodyMapping?: "OPENAI" | "NO_MAPPING";
   requestMethod?: string;
   requestUrl?: string;

@@ -13,10 +13,10 @@ import {
   ModelIndexes,
   ModelProviderEntry,
 } from "./build-indexes";
-import { buildEndpointUrl, buildModelId } from "./provider-helpers";
+import { buildModelId } from "./provider-helpers";
 import { ModelProviderName } from "./providers";
 import { Result, ok, err } from "../../common/result";
-import { ModelName, ModelProviderConfigId, EndpointId } from "./registry-types";
+import { ModelName, ModelProviderConfigId } from "./registry-types";
 
 // Import all models and endpoints from authors
 import { anthropicModels, anthropicEndpointConfig } from "./authors/anthropic";
@@ -24,7 +24,10 @@ import { openaiModels, openaiEndpointConfig } from "./authors/openai";
 import { googleModels, googleEndpointConfig } from "./authors/google";
 import { grokModels, grokEndpointConfig } from "./authors/xai";
 import { metaModels, metaEndpointConfig } from "./authors/meta";
-import { moonshotaiModels, moonshotaiEndpointConfig } from "./authors/moonshotai";
+import {
+  moonshotaiModels,
+  moonshotaiEndpointConfig,
+} from "./authors/moonshotai";
 import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
 import { mistralModels, mistralEndpointConfig } from "./authors/mistralai";
@@ -39,7 +42,7 @@ const allModels = {
   ...moonshotaiModels,
   ...alibabaModels,
   ...deepseekModels,
-  ...mistralModels
+  ...mistralModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -52,7 +55,7 @@ const modelProviderConfigs = {
   ...moonshotaiEndpointConfig,
   ...alibabaEndpointConfig,
   ...deepseekEndpointConfig,
-  ...mistralEndpointConfig
+  ...mistralEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
@@ -115,18 +118,14 @@ function buildEndpoint(
   endpointConfig: ModelProviderConfig,
   userEndpointConfig: UserEndpointConfig
 ): Result<Endpoint> {
-  const baseUrlResult = buildEndpointUrl(endpointConfig, userEndpointConfig);
-  if (baseUrlResult.error) {
-    return err(baseUrlResult.error);
-  }
-
   const modelIdResult = buildModelId(endpointConfig, userEndpointConfig);
   if (modelIdResult.error) {
     return err(modelIdResult.error);
   }
 
   return ok({
-    baseUrl: baseUrlResult.data ?? "",
+    modelConfig: endpointConfig,
+    userConfig: userEndpointConfig,
     provider: endpointConfig.provider,
     author: endpointConfig.author,
     providerModelId: modelIdResult.data ?? "",
@@ -153,7 +152,9 @@ function getModelProviderConfigByProviderModelId(
   providerModelId: string
 ): Result<ModelProviderConfig> {
   const result = indexes.providerModelIdToConfig.get(providerModelId);
-  return result ? ok(result) : err(`Config not found for providerModelId: ${providerModelId}`);
+  return result
+    ? ok(result)
+    : err(`Config not found for providerModelId: ${providerModelId}`);
 }
 
 function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {

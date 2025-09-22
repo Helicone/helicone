@@ -11,6 +11,7 @@ export interface Provider {
   relevanceScore: number; // Hidden score for sorting by relevance
   note?: string;
   multipleAllowed?: boolean;
+  auth?: "api-key" | "oauth" | "aws-signature" | "service_account";
 }
 
 // Interface for provider configuration from API

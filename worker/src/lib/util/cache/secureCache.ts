@@ -1,6 +1,10 @@
 import { hash } from "../../..";
 import { safePut } from "../../safePut";
 import { Result, ok } from "../results";
+import {
+  CacheProvider,
+  TokenWithTTL,
+} from "../../../../../packages/common/cache/provider";
 
 const hashWithHmac = async (key: string, hmac_key: 1 | 2) => {
   const hashedKey = await hash(hmac_key === 1 ? key : `${key}_2`);
@@ -168,7 +172,10 @@ async function storeInCacheWithHmac({
     console.error("Error storing in cache", e);
   }
   if (useMemoryCache) {
-    InMemoryCache.getInstance<string>().set(hashedKey, JSON.stringify(encrypted));
+    InMemoryCache.getInstance<string>().set(
+      hashedKey,
+      JSON.stringify(encrypted)
+    );
   }
 }
 
@@ -319,7 +326,85 @@ export async function getAndStoreInCache<T, K>(
     );
     return value;
   } else {
-    await storeInCache(key, JSON.stringify(value.data), env, expirationTtl, useMemoryCache);
+    await storeInCache(
+      key,
+      JSON.stringify(value.data),
+      env,
+      expirationTtl,
+      useMemoryCache
+    );
   }
   return value;
+}
+
+/**
+ * SecureCacheProvider implements the CacheProvider interface
+ * to provide caching capabilities across the worker instances
+ */
+export class SecureCacheProvider implements CacheProvider {
+  constructor(
+    private readonly env: SecureCacheEnv,
+    private readonly useMemoryCache: boolean = true
+  ) {}
+
+  async getAndStoreToken<T, K>(
+    key: string,
+    fn: () => Promise<Result<TokenWithTTL<T>, K>>
+  ): Promise<Result<T, K>> {
+    // Check cache first
+    const cached = await getFromCache({
+      key,
+      env: this.env,
+      useMemoryCache: this.useMemoryCache,
+      expirationTtl: 60, // 1 minute for checking
+    });
+
+    if (cached !== null) {
+      try {
+        const cachedResult = JSON.parse(cached);
+
+        // Check if token is expired
+        if (cachedResult.expiresAt && cachedResult.expiresAt <= Date.now()) {
+          console.log(`Token expired for key ${key}, regenerating...`);
+          // Token is expired, fall through to regenerate
+        } else {
+          // Token is still valid
+          if (cachedResult._helicone_cached_string) {
+            return ok(cachedResult._helicone_cached_string);
+          }
+          if (cachedResult.value) {
+            return ok(cachedResult.value as T);
+          }
+          return ok(cachedResult as T);
+        }
+      } catch (e) {
+        console.error("Error parsing cached result", e);
+      }
+    }
+
+    // Generate new token with TTL
+    const result = await fn();
+    if (result.error !== null) {
+      return { data: null, error: result.error };
+    }
+
+    const { value, ttl, expiresAt } = result.data!;
+
+    // Store with expiration timestamp and dynamic TTL
+    const dataToCache = {
+      value: value,
+      expiresAt: expiresAt,
+      _helicone_cached_string: typeof value === "string" ? value : undefined,
+    };
+
+    await storeInCache(
+      key,
+      JSON.stringify(dataToCache),
+      this.env,
+      ttl,
+      this.useMemoryCache
+    );
+
+    return ok(value);
+  }
 }
