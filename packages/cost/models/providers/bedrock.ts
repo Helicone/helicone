@@ -40,7 +40,6 @@ export class BedrockProvider extends BaseProvider {
   ): string {
     const region = config.region || "us-east-1";
     const modelId = this.getModelId(endpoint, config);
-    // Bedrock always uses the same endpoint regardless of runtime params
     return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke`;
   }
 
