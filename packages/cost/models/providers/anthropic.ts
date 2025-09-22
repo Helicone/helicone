@@ -6,6 +6,7 @@ import type {
   UserEndpointConfig,
   Endpoint,
   RequestBodyContext,
+  RequestParams,
 } from "../types";
 
 export class AnthropicProvider extends BaseProvider {
@@ -20,8 +21,9 @@ export class AnthropicProvider extends BaseProvider {
   ];
 
   buildUrl(
-    _modelProviderConfig: ModelProviderConfig,
-    userConfig: UserEndpointConfig
+    endpoint: ModelProviderConfig,
+    config: UserEndpointConfig,
+    requestParams: RequestParams
   ): string {
     return "https://api.anthropic.com/v1/messages";
   }

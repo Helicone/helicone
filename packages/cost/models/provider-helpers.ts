@@ -6,6 +6,7 @@ import type {
   AuthContext,
   AuthResult,
   RequestBodyContext,
+  RequestParams,
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
@@ -126,21 +127,21 @@ export const dbProviderToProvider = (
 };
 
 export function buildEndpointUrl(
-  endpointConfig: ModelProviderConfig,
-  userConfig: UserEndpointConfig = {}
+  endpoint: Endpoint,
+  requestParams: RequestParams
 ): Result<string> {
-  const providerResult = getProvider(endpointConfig.provider);
+  const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
     return err(providerResult.error);
   }
 
   const provider = providerResult.data;
   if (!provider) {
-    return err(`Provider data is null for: ${endpointConfig.provider}`);
+    return err(`Provider data is null for: ${endpoint.provider}`);
   }
 
   try {
-    const url = provider.buildUrl(endpointConfig, userConfig);
+    const url = provider.buildUrl(endpoint.modelConfig, endpoint.userConfig, requestParams);
     return ok(url);
   } catch (error) {
     return err(error instanceof Error ? error.message : "Failed to build URL");

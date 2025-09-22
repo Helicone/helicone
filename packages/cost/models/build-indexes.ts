@@ -1,25 +1,25 @@
-import { buildEndpointUrl } from "./provider-helpers";
 import { ModelProviderName } from "./providers";
 import { ModelProviderConfigId, EndpointId, ModelName } from "./registry-types";
-import type { Endpoint, ModelProviderConfig, EndpointConfig } from "./types";
+import type { Endpoint, ModelProviderConfig, EndpointConfig, UserEndpointConfig } from "./types";
 
 function mergeConfigs(
   modelProviderConfig: ModelProviderConfig,
   endpointConfig: EndpointConfig,
   deploymentId: string
 ): Endpoint {
-  const baseUrl = buildEndpointUrl(modelProviderConfig, {
+  const userConfig: UserEndpointConfig = {
     region: deploymentId,
     location: deploymentId,
     projectId: endpointConfig.projectId,
     deploymentName: endpointConfig.deploymentName,
     resourceName: endpointConfig.resourceName,
     crossRegion: endpointConfig.crossRegion,
-  });
+  };
 
   return {
     author: modelProviderConfig.author,
-    baseUrl: baseUrl.data ?? "",
+    modelConfig: modelProviderConfig,
+    userConfig: userConfig,
     provider: modelProviderConfig.provider,
     providerModelId:
       endpointConfig.providerModelId ?? modelProviderConfig.providerModelId,

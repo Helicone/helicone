@@ -9,6 +9,7 @@ import type {
   AuthResult,
   RequestBodyContext,
   Endpoint,
+  RequestParams,
 } from "../types";
 
 export class BedrockProvider extends BaseProvider {
@@ -34,10 +35,12 @@ export class BedrockProvider extends BaseProvider {
 
   buildUrl(
     endpoint: ModelProviderConfig,
-    config: UserEndpointConfig = {}
+    config: UserEndpointConfig = {},
+    requestParams: RequestParams
   ): string {
     const region = config.region || "us-east-1";
     const modelId = this.getModelId(endpoint, config);
+    // Bedrock always uses the same endpoint regardless of runtime params
     return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke`;
   }
 

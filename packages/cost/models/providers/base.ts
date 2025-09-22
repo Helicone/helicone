@@ -5,6 +5,7 @@ import type {
   AuthResult,
   RequestBodyContext,
   Endpoint,
+  RequestParams,
 } from "../types";
 import { CacheProvider } from "../../../common/cache/provider";
 
@@ -26,7 +27,8 @@ export abstract class BaseProvider {
 
   abstract buildUrl(
     endpoint: ModelProviderConfig,
-    config: UserEndpointConfig
+    config: UserEndpointConfig,
+    requestParams: RequestParams
   ): string;
 
   buildModelId(

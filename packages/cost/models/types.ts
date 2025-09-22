@@ -176,8 +176,13 @@ export interface EndpointConfig extends UserEndpointConfig {
   priority?: number;
 }
 
+export interface RequestParams {
+  isStreaming?: boolean;
+}
+
 export interface Endpoint extends BaseConfig {
-  baseUrl: string;
+  modelConfig: ModelProviderConfig;
+  userConfig: UserEndpointConfig;
   provider: ModelProviderName;
   author: AuthorName;
   providerModelId: string;

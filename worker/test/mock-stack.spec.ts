@@ -4,7 +4,6 @@ export function mockRequiredServices() {
   const callTrackers = {
     s3Called: false,
     loggingCalled: false,
-    oauthCalled: false,
   };
 
   const s3Mock = fetchMock

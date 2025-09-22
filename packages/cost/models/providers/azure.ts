@@ -4,6 +4,7 @@ import type {
   UserEndpointConfig,
   AuthContext,
   AuthResult,
+  RequestParams,
 } from "../types";
 
 export class AzureOpenAIProvider extends BaseProvider {
@@ -18,10 +19,17 @@ export class AzureOpenAIProvider extends BaseProvider {
     "https://learn.microsoft.com/azure/ai-services/openai/concepts/models",
   ];
 
-  buildUrl(endpoint: ModelProviderConfig, config: UserEndpointConfig): string {
+  buildUrl(
+    endpoint: ModelProviderConfig,
+    config: UserEndpointConfig,
+    requestParams: RequestParams
+  ): string {
     // Determine base URI - use provided or Helicone gateway for PTB
-    const baseUri = config.baseUri ||
-      (endpoint.ptbEnabled ? "https://helicone-gateway.cognitiveservices.azure.com" : null);
+    const baseUri =
+      config.baseUri ||
+      (endpoint.ptbEnabled
+        ? "https://helicone-gateway.cognitiveservices.azure.com"
+        : null);
 
     if (!baseUri) {
       throw new Error("Azure OpenAI requires baseUri");
@@ -29,10 +37,13 @@ export class AzureOpenAIProvider extends BaseProvider {
 
     // Get deployment name - fallback chain: deploymentName -> providerModelId -> modelName
     const deploymentName = config.deploymentName?.trim();
-    const deployment = deploymentName || endpoint.providerModelId || config.modelName;
+    const deployment =
+      deploymentName || endpoint.providerModelId || config.modelName;
 
     if (!deployment) {
-      throw new Error("Azure OpenAI requires a deployment name, provider model ID, or model name");
+      throw new Error(
+        "Azure OpenAI requires a deployment name, provider model ID, or model name"
+      );
     }
 
     // Build URL with normalized base URI and API version

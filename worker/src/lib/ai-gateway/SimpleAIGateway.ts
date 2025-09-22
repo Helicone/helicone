@@ -14,6 +14,7 @@ import { Attempt, DisallowListEntry, EscrowInfo } from "./types";
 import { oai2antResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { oai2antStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import { RequestParams } from "@helicone-package/cost/models/types";
 import { SecureCacheProvider } from "../util/cache/secureCache";
 
 export interface AuthContext {
@@ -63,7 +64,10 @@ export class SimpleAIGateway {
     }
     const { modelStrings, body: parsedBody } = parseResult.data;
 
-    // Step 2: Handle prompt expansion if needed
+    const requestParams: RequestParams = {
+      isStreaming: parsedBody.stream === true,
+    };
+
     let finalBody = parsedBody;
     if (this.hasPromptFields(parsedBody)) {
       const expandResult = await this.expandPrompt(parsedBody);
@@ -136,6 +140,7 @@ export class SimpleAIGateway {
         attempt,
         this.requestWrapper,
         finalBody,
+        requestParams,
         this.orgId,
         forwarder
       );
@@ -154,12 +159,12 @@ export class SimpleAIGateway {
           result.data,
           this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping
         );
-        
+
         if (isErr(mappedResponse)) {
           console.error("Failed to map response:", mappedResponse.error);
           return result.data;
         }
-        
+
         return mappedResponse.data;
       }
     }
@@ -300,8 +305,9 @@ export class SimpleAIGateway {
 
   private determineResponseFormat(
     provider: ModelProviderName,
-    modelId: string,
-  ): "ANTHROPIC" | "OPENAI" { // TODO: make enum type when there's more map formats
+    modelId: string
+  ): "ANTHROPIC" | "OPENAI" {
+    // TODO: make enum type when there's more map formats
     if (
       provider === "anthropic" ||
       (provider === "bedrock" && modelId.includes("claude-"))
@@ -323,9 +329,9 @@ export class SimpleAIGateway {
 
     const mappingType = this.determineResponseFormat(
       attempt.endpoint.provider,
-      attempt.endpoint.providerModelId,
+      attempt.endpoint.providerModelId
     ); // finds format of the response that we are mapping to OPENAI
-    
+
     if (mappingType === "OPENAI") {
       return ok(response); // already in OPENAI format
     }

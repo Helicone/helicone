@@ -32,7 +32,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const url = provider.buildUrl(mockEndpoint, config, { isStreaming: false });
 
         // Should use providerModelId (gpt-4o) since deploymentName is empty
         expect(url).toBe(
@@ -46,7 +46,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const url = provider.buildUrl(mockEndpoint, config, { isStreaming: false });
 
         // Should trim and fallback to providerModelId
         expect(url).toBe(
@@ -60,7 +60,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const url = provider.buildUrl(mockEndpoint, config, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"
@@ -73,7 +73,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const url = provider.buildUrl(mockEndpoint, config, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"
@@ -86,7 +86,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const url = provider.buildUrl(mockEndpoint, config, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/my-custom-deployment/chat/completions?api-version=2025-01-01-preview"
@@ -105,7 +105,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(endpointNoModelId, config);
+        const url = provider.buildUrl(endpointNoModelId, config, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/fallback-model-name/chat/completions?api-version=2025-01-01-preview"
@@ -124,7 +124,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        expect(() => provider.buildUrl(endpointNoModelId, config)).toThrow(
+        expect(() => provider.buildUrl(endpointNoModelId, config, { isStreaming: false })).toThrow(
           "Azure OpenAI requires a deployment name, provider model ID, or model name"
         );
       });
@@ -141,7 +141,7 @@ describe("AzureOpenAIProvider", () => {
           deploymentName: "test-deployment",
         };
 
-        const url = provider.buildUrl(ptbEndpoint, config);
+        const url = provider.buildUrl(ptbEndpoint, config, { isStreaming: false });
 
         expect(url).toBe(
           "https://helicone-gateway.cognitiveservices.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview"
@@ -159,7 +159,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://custom.openai.azure.com",
         };
 
-        const url = provider.buildUrl(ptbEndpoint, config);
+        const url = provider.buildUrl(ptbEndpoint, config, { isStreaming: false });
 
         expect(url).toBe(
           "https://custom.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview"
@@ -171,7 +171,7 @@ describe("AzureOpenAIProvider", () => {
           deploymentName: "test-deployment",
         };
 
-        expect(() => provider.buildUrl(mockEndpoint, config)).toThrow(
+        expect(() => provider.buildUrl(mockEndpoint, config, { isStreaming: false })).toThrow(
           "Azure OpenAI requires baseUri"
         );
       });
@@ -182,7 +182,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com/",  // Trailing slash
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const url = provider.buildUrl(mockEndpoint, config, { isStreaming: false });
 
         // Should not have double slash
         expect(url).toBe(
@@ -196,7 +196,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",  // No trailing slash
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const url = provider.buildUrl(mockEndpoint, config, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview"
@@ -211,7 +211,7 @@ describe("AzureOpenAIProvider", () => {
           baseUri: "https://test-resource.openai.azure.com",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const url = provider.buildUrl(mockEndpoint, config, { isStreaming: false });
 
         expect(url).toContain("api-version=2025-01-01-preview");
       });
@@ -223,7 +223,7 @@ describe("AzureOpenAIProvider", () => {
           apiVersion: "2024-06-01",
         };
 
-        const url = provider.buildUrl(mockEndpoint, config);
+        const url = provider.buildUrl(mockEndpoint, config, { isStreaming: false });
 
         expect(url).toBe(
           "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2024-06-01"

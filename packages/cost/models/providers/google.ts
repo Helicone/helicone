@@ -1,4 +1,9 @@
 import { BaseProvider } from "./base";
+import type {
+  ModelProviderConfig,
+  UserEndpointConfig,
+  RequestParams,
+} from "../types";
 
 export class GoogleProvider extends BaseProvider {
   readonly displayName = "Google AI Studio";
@@ -7,7 +12,11 @@ export class GoogleProvider extends BaseProvider {
   readonly pricingPages = ["https://ai.google.dev/gemini-api/docs/pricing"];
   readonly modelPages = ["https://ai.google.dev/gemini-api/docs/models"];
 
-  buildUrl(): string {
+  buildUrl(
+    endpoint: ModelProviderConfig,
+    config: UserEndpointConfig,
+    requestParams: RequestParams
+  ): string {
     return "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
   }
 }

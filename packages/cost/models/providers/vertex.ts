@@ -6,6 +6,7 @@ import type {
   Endpoint,
   AuthContext,
   AuthResult,
+  RequestParams,
 } from "../types";
 import { getGoogleAccessToken } from "../../auth/gcpServiceAccountAuth";
 import { CacheProvider } from "../../../common/cache/provider";
@@ -33,23 +34,50 @@ export class VertexProvider extends BaseProvider {
 
   buildUrl(
     endpoint: ModelProviderConfig,
-    config: UserEndpointConfig = {}
+    config: UserEndpointConfig = {},
+    requestParams: RequestParams
   ): string {
+    const modelId = endpoint.providerModelId || "";
     const projectId = config.projectId;
-    const region = config.region || "us-central1"; // Default region
+    const region = config.region || "us-central1";
 
-    if (!projectId || !region) {
-      throw new Error("Vertex AI requires projectId and region in config");
+    if (modelId.toLowerCase().includes("gemini")) {
+      if (!projectId) {
+        throw new Error(
+          "Vertex AI requires projectId in config for Gemini models"
+        );
+      }
+
+      const baseUrlWithRegion = this.baseUrl.replace("{region}", region);
+      return `${baseUrlWithRegion}/v1beta1/projects/${projectId}/locations/${region}/endpoints/openapi/chat/completions`;
     }
 
-    const modelId = endpoint.providerModelId || "";
+    if (!projectId || !region) {
+      throw new Error(
+        "Vertex AI requires projectId and region in config for non-Gemini models"
+      );
+    }
+
     const publisher = endpoint.author || "anthropic";
     const baseUrlWithRegion = this.baseUrl.replace("{region}", region);
+    const baseEndpointUrl = `${baseUrlWithRegion}/v1/projects/${projectId}/locations/${region}/publishers/${publisher}/models/${modelId}`;
 
-    return `${baseUrlWithRegion}/v1/projects/${projectId}/locations/${region}/publishers/${publisher}/models/${modelId}:streamRawPredict`;
+    // Determine the endpoint based on streaming
+    const isStreaming = requestParams.isStreaming === true;
+    return `${baseEndpointUrl}:${isStreaming ? "streamRawPredict" : "predict"}`;
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
+    const modelId = endpoint.providerModelId || "";
+
+    if (modelId.toLowerCase().includes("gemini")) {
+      const updatedBody = {
+        ...context.parsedBody,
+        model: `google/${modelId}`,
+      };
+      return JSON.stringify(updatedBody);
+    }
+
     if (endpoint.author === "anthropic") {
       const anthropicBody =
         context.bodyMapping === "OPENAI"
@@ -58,14 +86,17 @@ export class VertexProvider extends BaseProvider {
       const updatedBody = {
         ...anthropicBody,
         anthropic_version: "vertex-2023-10-16",
-        model: undefined,
+        model: endpoint.providerModelId,
       };
       return JSON.stringify(updatedBody);
     }
     return JSON.stringify(context.parsedBody);
   }
 
-  async authenticate(context: AuthContext, cacheProvider?: CacheProvider): Promise<AuthResult> {
+  async authenticate(
+    context: AuthContext,
+    cacheProvider?: CacheProvider
+  ): Promise<AuthResult> {
     if (!context.apiKey) {
       throw new Error(
         "Service account JSON is required for Vertex AI authentication"

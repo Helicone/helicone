@@ -2,12 +2,13 @@ import {
   buildRequestBody,
   authenticateRequest,
   buildErrorMessage,
+  buildEndpointUrl,
 } from "@helicone-package/cost/models/provider-helpers";
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
 import { isErr, Result, ok, err } from "../util/results";
 import { Attempt, EscrowInfo, AttemptError } from "./types";
-import { Endpoint } from "@helicone-package/cost/models/types";
+import { Endpoint, RequestParams } from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { CacheProvider } from "../../../../packages/common/cache/provider";
 
@@ -22,13 +23,14 @@ export class AttemptExecutor {
     attempt: Attempt,
     requestWrapper: RequestWrapper,
     parsedBody: any,
+    requestParams: RequestParams,
     orgId: string,
     forwarder: (
       targetBaseUrl: string | null,
       escrowInfo?: EscrowInfo
     ) => Promise<Response>
   ): Promise<Result<Response, AttemptError>> {
-    const { endpoint, providerKey, source } = attempt;
+    const { endpoint, providerKey } = attempt;
 
     let escrowInfo: EscrowInfo | undefined;
 
@@ -59,6 +61,7 @@ export class AttemptExecutor {
       endpoint,
       providerKey,
       parsedBody,
+      requestParams,
       requestWrapper,
       orgId,
       forwarder,
@@ -81,6 +84,7 @@ export class AttemptExecutor {
     endpoint: Endpoint,
     providerKey: ProviderKey,
     parsedBody: any,
+    requestParams: RequestParams,
     requestWrapper: RequestWrapper,
     orgId: string,
     forwarder: (
@@ -105,6 +109,16 @@ export class AttemptExecutor {
         });
       }
 
+      const urlResult = buildEndpointUrl(endpoint, requestParams);
+
+      if (isErr(urlResult)) {
+        return err({
+          type: "request_failed",
+          message: urlResult.error,
+          statusCode: 400,
+        });
+      }
+
       // Set up authentication headers using provider helpers
       const authResult = await authenticateRequest(
         endpoint,
@@ -115,7 +129,7 @@ export class AttemptExecutor {
           orgId: orgId,
           bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
           requestMethod: requestWrapper.getMethod(),
-          requestUrl: endpoint.baseUrl ?? requestWrapper.url.toString(),
+          requestUrl: urlResult.data,
           requestBody: bodyResult.data,
         },
         this.cacheProvider
@@ -135,7 +149,7 @@ export class AttemptExecutor {
         requestWrapper.getAuthorization() ?? ""
       );
       requestWrapper.resetObject();
-      requestWrapper.setUrl(endpoint.baseUrl ?? requestWrapper.url.toString());
+      requestWrapper.setUrl(urlResult.data);
       await requestWrapper.setBody(bodyResult.data);
 
       for (const [key, value] of Object.entries(
@@ -144,7 +158,7 @@ export class AttemptExecutor {
         requestWrapper.setHeader(key, value);
       }
 
-      const response = await forwarder(endpoint.baseUrl, escrowInfo);
+      const response = await forwarder(urlResult.data, escrowInfo);
 
       if (!response.ok) {
         const errorMessageResult = await buildErrorMessage(endpoint, response);
