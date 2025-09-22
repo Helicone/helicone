@@ -3479,8 +3479,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "audio": 0,
         "image": 0,
-        "input": 0.00009,
-        "output": 0.00045,
+        "input": 4e-8,
+        "output": 1.6e-7,
         "request": 0,
         "threshold": 0,
         "web_search": 0,
