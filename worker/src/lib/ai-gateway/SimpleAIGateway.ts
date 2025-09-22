@@ -310,7 +310,8 @@ export class SimpleAIGateway {
     // TODO: make enum type when there's more map formats
     if (
       provider === "anthropic" ||
-      (provider === "bedrock" && modelId.includes("claude-"))
+      (provider === "bedrock" && modelId.includes("claude-")) ||
+      (provider === "vertex" && modelId.includes("claude-"))
     ) {
       return "ANTHROPIC";
     }
