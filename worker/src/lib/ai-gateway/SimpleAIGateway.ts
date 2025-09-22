@@ -314,6 +314,10 @@ export class SimpleAIGateway {
 
     const mappingType = determineResponseFormat(attempt.endpoint);
 
+    if (isErr(mappingType)) {
+      return err(`Failed to determine response format: ${mappingType.error}`);
+    }
+
     if (mappingType.data === "OPENAI") {
       return ok(response); // already in OPENAI format
     }
