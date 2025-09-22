@@ -8,7 +8,11 @@ import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
 import { isErr, Result, ok, err } from "../util/results";
 import { Attempt, EscrowInfo, AttemptError } from "./types";
-import { Endpoint, RequestParams } from "@helicone-package/cost/models/types";
+import {
+  AuthContext,
+  Endpoint,
+  RequestParams,
+} from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { CacheProvider } from "../../../../packages/common/cache/provider";
 
@@ -118,19 +122,19 @@ export class AttemptExecutor {
         });
       }
 
-      // Set up authentication headers using provider helpers
+      const authContext: AuthContext = {
+        apiKey: providerKey.decrypted_provider_key,
+        secretKey: providerKey.decrypted_provider_secret_key || undefined,
+        orgId: orgId,
+        bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+        requestMethod: requestWrapper.getMethod(),
+        requestUrl: urlResult.data,
+        requestBody: bodyResult.data,
+      };
+
       const authResult = await authenticateRequest(
         endpoint,
-        {
-          // config: (providerKey.config as any) || {},
-          apiKey: providerKey.decrypted_provider_key,
-          secretKey: providerKey.decrypted_provider_secret_key || undefined,
-          orgId: orgId,
-          bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-          requestMethod: requestWrapper.getMethod(),
-          requestUrl: urlResult.data,
-          requestBody: bodyResult.data,
-        },
+        authContext,
         this.cacheProvider
       );
 
