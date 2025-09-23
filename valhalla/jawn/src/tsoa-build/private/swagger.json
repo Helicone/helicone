@@ -46940,6 +46940,78 @@
 				],
 				"type": "object"
 			},
+			"InAppThread": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"chat": {},
+					"user_id": {
+						"type": "string"
+					},
+					"org_id": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"escalated": {
+						"type": "boolean"
+					},
+					"metadata": {},
+					"updated_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"soft_delete": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"id",
+					"chat",
+					"user_id",
+					"org_id",
+					"created_at",
+					"escalated",
+					"metadata",
+					"updated_at",
+					"soft_delete"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_InAppThread_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/InAppThread"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_InAppThread.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_InAppThread_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ConvertToWavResponse": {
 				"properties": {
 					"data": {
@@ -55308,6 +55380,41 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/admin/helix-thread/{sessionId}": {
+			"get": {
+				"operationId": "GetHelixThread",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_InAppThread.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/audio/convert-to-wav": {
