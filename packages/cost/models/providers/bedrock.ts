@@ -112,6 +112,7 @@ export class BedrockProvider extends BaseProvider {
         ...anthropicBody,
         anthropic_version: "bedrock-2023-05-31",
         model: undefined,
+        stream: undefined,
       };
       return JSON.stringify(updatedBody);
     }
@@ -128,5 +129,13 @@ export class BedrockProvider extends BaseProvider {
       return "ANTHROPIC";
     }
     return "OPENAI";
+  }
+
+  async buildErrorMessage(response: Response): Promise<string> {
+    const respJson = (await response.json()) as any;
+    if (respJson.message) {
+      return respJson.message;
+    }
+    return `Failed request with status ${response.status}`;
   }
 }
