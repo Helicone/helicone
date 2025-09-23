@@ -33,8 +33,18 @@ export class VertexProvider extends BaseProvider {
 
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     const modelId = endpoint.providerModelId || "";
+    const modelSupportsCrossRegion = endpoint.modelConfig.crossRegion;
+    const userCrossRegionEnabled = endpoint.userConfig.crossRegion;
     const projectId = endpoint.userConfig.projectId;
-    const region = endpoint.userConfig.region || "us-central1";
+
+    let region: string;
+    if (userCrossRegionEnabled && modelSupportsCrossRegion) {
+      region = "global";
+    } else if (userCrossRegionEnabled && !modelSupportsCrossRegion) {
+      region = endpoint.userConfig.region || "us-east5";
+    } else {
+      region = endpoint.userConfig.region || "us-central1";
+    }
 
     if (modelId.toLowerCase().includes("gemini")) {
       if (!projectId) {
