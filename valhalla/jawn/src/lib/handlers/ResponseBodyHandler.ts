@@ -213,11 +213,16 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   private getModelFromPath(path: string): string {
     const regex1 = /\/engines\/([^/]+)/;
     const regex2 = /models\/([^/:]+)/;
+    const regex3 = /\/model\/([^/:]+)/; // Add regex for Bedrock runtime paths
 
     let match = path.match(regex1);
 
     if (!match) {
       match = path.match(regex2);
+    }
+
+    if (!match) {
+      match = path.match(regex3);
     }
 
     if (match && match[1]) {
