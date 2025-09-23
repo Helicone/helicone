@@ -418,7 +418,11 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
       ];
     } else if (provider.id === "vertex") {
       configFields = [
-        { label: "Region", key: "region", placeholder: "us-central1, us-east1, europe-west4, etc." },
+        {
+          label: "Region",
+          key: "region",
+          placeholder: "us-central1, us-east1, europe-west4, etc.",
+        },
         {
           label: "Cross Region",
           key: "crossRegion",
@@ -453,8 +457,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                     htmlFor={`${field.key}-${provider.id}-${existingKey?.id || instanceIndex}`}
                     className="cursor-pointer text-xs font-normal"
                   >
-                    {field.key === "crossRegion" 
-                      ? provider.id === "vertex" 
+                    {field.key === "crossRegion"
+                      ? provider.id === "vertex"
                         ? "Auto-route globally"
                         : "Cross Region"
                       : field.label}
