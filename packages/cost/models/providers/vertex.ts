@@ -64,9 +64,14 @@ export class VertexProvider extends BaseProvider {
 
     const baseEndpointUrl = `${baseUrlWithRegion}/v1/projects/${projectId}/locations/${region}/publishers/${publisher}/models/${modelId}`;
 
-    // Determine the endpoint based on streaming
+    // Gemini models use Google's predict format; all others use rawPredict for native format
     const isStreaming = requestParams.isStreaming === true;
-    return `${baseEndpointUrl}:${isStreaming ? "streamRawPredict" : "predict"}`;
+    const isGemini = modelId.toLowerCase().includes("gemini");
+    const endpointMethod = isGemini
+      ? (isStreaming ? "streamPredict" : "predict")
+      : (isStreaming ? "streamRawPredict" : "rawPredict");
+
+    return `${baseEndpointUrl}:${endpointMethod}`;
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
