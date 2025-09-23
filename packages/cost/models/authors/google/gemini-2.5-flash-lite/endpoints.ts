@@ -48,6 +48,7 @@ export const endpoints = {
     providerModelId: "gemini-2.5-flash-lite",
     provider: "vertex",
     author: "google",
+    crossRegion: true,
     pricing: [
       {
         threshold: 0,

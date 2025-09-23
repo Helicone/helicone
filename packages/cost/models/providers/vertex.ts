@@ -33,8 +33,18 @@ export class VertexProvider extends BaseProvider {
 
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     const modelId = endpoint.providerModelId || "";
+    const modelSupportsCrossRegion = endpoint.modelConfig.crossRegion;
+    const userCrossRegionEnabled = endpoint.userConfig.crossRegion;
     const projectId = endpoint.userConfig.projectId;
-    const region = endpoint.userConfig.region || "us-central1";
+
+    let region: string;
+    if (userCrossRegionEnabled && modelSupportsCrossRegion) {
+      region = "global";
+    } else if (userCrossRegionEnabled && !modelSupportsCrossRegion) {
+      region = endpoint.userConfig.region || "us-east5";
+    } else {
+      region = endpoint.userConfig.region || "us-central1";
+    }
 
     if (modelId.toLowerCase().includes("gemini")) {
       if (!projectId) {
@@ -42,8 +52,11 @@ export class VertexProvider extends BaseProvider {
           "Vertex AI requires projectId in config for Gemini models"
         );
       }
+      const baseUrlWithRegion =
+        region === "global"
+          ? "https://aiplatform.googleapis.com"
+          : this.baseUrl.replace("{region}", region);
 
-      const baseUrlWithRegion = this.baseUrl.replace("{region}", region);
       return `${baseUrlWithRegion}/v1beta1/projects/${projectId}/locations/${region}/endpoints/openapi/chat/completions`;
     }
 
@@ -54,38 +67,57 @@ export class VertexProvider extends BaseProvider {
     }
 
     const publisher = endpoint.author || "anthropic";
-    const baseUrlWithRegion = this.baseUrl.replace("{region}", region);
+    const baseUrlWithRegion =
+      region === "global"
+        ? "https://aiplatform.googleapis.com"
+        : this.baseUrl.replace("{region}", region);
+
     const baseEndpointUrl = `${baseUrlWithRegion}/v1/projects/${projectId}/locations/${region}/publishers/${publisher}/models/${modelId}`;
 
-    // Determine the endpoint based on streaming
+    // Gemini models use Google's predict format; all others use rawPredict for native format
     const isStreaming = requestParams.isStreaming === true;
-    return `${baseEndpointUrl}:${isStreaming ? "streamRawPredict" : "predict"}`;
+    const isGemini = modelId.toLowerCase().includes("gemini");
+    const endpointMethod = isGemini
+      ? isStreaming
+        ? "streamPredict"
+        : "predict"
+      : isStreaming
+        ? "streamRawPredict"
+        : "rawPredict";
+
+    return `${baseEndpointUrl}:${endpointMethod}`;
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
     const modelId = endpoint.providerModelId || "";
 
-    if (modelId.toLowerCase().includes("gemini")) {
-      const updatedBody = {
-        ...context.parsedBody,
-        model: `google/${modelId}`,
-      };
-      return JSON.stringify(updatedBody);
+    if (endpoint.author !== "passthrough") {
+      if (modelId.toLowerCase().includes("gemini")) {
+        const updatedBody = {
+          ...context.parsedBody,
+          model: `google/${modelId}`,
+        };
+        return JSON.stringify(updatedBody);
+      }
+
+      if (endpoint.author === "anthropic") {
+        const anthropicBody =
+          context.bodyMapping === "OPENAI"
+            ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
+            : context.parsedBody;
+        const updatedBody = {
+          ...anthropicBody,
+          anthropic_version: "vertex-2023-10-16",
+          model: undefined, // model is not needed in Vertex inputs (as its defined via URL)
+        };
+        return JSON.stringify(updatedBody);
+      }
     }
 
-    if (endpoint.author === "anthropic") {
-      const anthropicBody =
-        context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
-          : context.parsedBody;
-      const updatedBody = {
-        ...anthropicBody,
-        anthropic_version: "vertex-2023-10-16",
-        model: undefined, // model is not needed in Vertex inputs (as its defined via URL)
-      };
-      return JSON.stringify(updatedBody);
-    }
-    return JSON.stringify(context.parsedBody);
+    return JSON.stringify({
+      ...context.parsedBody,
+      model: endpoint.providerModelId,
+    });
   }
 
   async authenticate(
@@ -116,9 +148,11 @@ export class VertexProvider extends BaseProvider {
   async buildErrorMessage(response: Response): Promise<string> {
     try {
       const respJson = (await response.json()) as any;
-      if (respJson.error?.message) { // Anthropic error format
+      if (respJson.error?.message) {
+        // Anthropic error format
         return respJson.error.message;
-      } else if (respJson[0]?.error?.message) { // Gemini error format
+      } else if (respJson[0]?.error?.message) {
+        // Gemini error format
         return respJson[0].error.message;
       }
       return `Request failed with status ${response.status}`;
@@ -128,9 +162,12 @@ export class VertexProvider extends BaseProvider {
   }
 
   determineResponseFormat(endpoint: Endpoint): ResponseFormat {
-    if (endpoint.author === "anthropic" || endpoint.providerModelId.includes("claude-")) {
+    if (
+      endpoint.author === "anthropic" ||
+      endpoint.providerModelId.includes("claude-")
+    ) {
       return "ANTHROPIC";
     }
     return "OPENAI";
-  } 
+  }
 }

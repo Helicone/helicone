@@ -48,6 +48,7 @@ export const endpoints = {
     providerModelId: "claude-sonnet-4@20250514",
     version: "vertex-2023-10-16",
     ptbEnabled: true,
+    crossRegion: true,
     pricing: [
       {
         threshold: 0,

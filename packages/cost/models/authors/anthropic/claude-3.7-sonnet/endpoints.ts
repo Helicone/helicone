@@ -42,6 +42,7 @@ export const endpoints = {
     author: "anthropic",
     providerModelId: "claude-3-7-sonnet@20250219",
     version: "vertex-2023-10-16",
+    crossRegion: true,
     pricing: [
       {
         threshold: 0,

@@ -313,7 +313,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
     "claude-3.7-sonnet:vertex": {
       "context": 200000,
-      "crossRegion": false,
+      "crossRegion": true,
       "maxTokens": 64000,
       "modelId": "claude-3-7-sonnet@20250219",
       "parameters": [
@@ -397,7 +397,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
     "claude-opus-4:vertex": {
       "context": 200000,
-      "crossRegion": false,
+      "crossRegion": true,
       "maxTokens": 32000,
       "modelId": "claude-opus-4@20250514",
       "parameters": [
@@ -481,7 +481,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
     "claude-opus-4-1:vertex": {
       "context": 200000,
-      "crossRegion": false,
+      "crossRegion": true,
       "maxTokens": 32000,
       "modelId": "claude-opus-4-1@20250805",
       "parameters": [
@@ -565,7 +565,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
     "claude-sonnet-4:vertex": {
       "context": 200000,
-      "crossRegion": false,
+      "crossRegion": true,
       "maxTokens": 64000,
       "modelId": "claude-sonnet-4@20250514",
       "parameters": [
@@ -822,7 +822,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
     "gemini-2.5-flash:vertex": {
       "context": 1048576,
-      "crossRegion": false,
+      "crossRegion": true,
       "maxTokens": 65535,
       "modelId": "gemini-2.5-flash",
       "parameters": [
@@ -893,7 +893,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
     "gemini-2.5-flash-lite:vertex": {
       "context": 1048576,
-      "crossRegion": false,
+      "crossRegion": true,
       "maxTokens": 65535,
       "modelId": "gemini-2.5-flash-lite",
       "parameters": [
@@ -964,7 +964,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
     "gemini-2.5-pro:vertex": {
       "context": 1048576,
-      "crossRegion": false,
+      "crossRegion": true,
       "maxTokens": 65536,
       "modelId": "gemini-2.5-pro",
       "parameters": [
