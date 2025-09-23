@@ -54,6 +54,7 @@ export const endpoints = {
     providerModelId: "gemini-2.5-pro",
     provider: "vertex",
     author: "google",
+    crossRegion: true,
     pricing: [
       {
         threshold: 0,

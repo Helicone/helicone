@@ -7,6 +7,7 @@ import type {
   AuthResult,
   RequestBodyContext,
   RequestParams,
+  ResponseFormat,
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
@@ -264,4 +265,18 @@ export async function buildErrorMessage(
   }
 
   return ok(await provider.buildErrorMessage(response));
+}
+
+export function determineResponseFormat(endpoint: Endpoint): Result<ResponseFormat> {
+  const providerResult = getProvider(endpoint.provider);
+  if (providerResult.error) {
+    return err(providerResult.error);
+  }
+
+  const provider = providerResult.data;
+  if (!provider) {
+    return err(`Provider data is null for: ${endpoint.provider}`);
+  }
+
+  return ok(provider.determineResponseFormat(endpoint));
 }

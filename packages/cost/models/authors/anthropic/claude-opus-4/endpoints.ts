@@ -43,6 +43,7 @@ export const endpoints = {
     author: "anthropic",
     version: "vertex-2023-10-16",
     ptbEnabled: true,
+    crossRegion: true,
     pricing: [
       {
         threshold: 0,

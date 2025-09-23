@@ -19,6 +19,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "gemini-1.5-pro",
             author: "google",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
           { isStreaming: false }
@@ -34,6 +35,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "gemini-1.5-flash",
             author: "google",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "eu-west1" },
           } as any,
           { isStreaming: false }
@@ -43,6 +45,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "gemini-1.5-flash",
             author: "google",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "eu-west1" },
           } as any,
           { isStreaming: true }
@@ -60,6 +63,7 @@ describe("VertexProvider", () => {
             {
               providerModelId: "gemini-1.5-pro",
               author: "google",
+              modelConfig: { crossRegion: false } as any,
               userConfig: { region: "us-central1" },
             } as any,
             { isStreaming: false }
@@ -72,6 +76,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "GEMINI-1.5-PRO",
             author: "google",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
           { isStreaming: false }
@@ -84,18 +89,19 @@ describe("VertexProvider", () => {
     });
 
     describe("Claude/Anthropic models", () => {
-      it("should build predict URL for non-streaming Claude models", () => {
+      it("should build rawPredict URL for non-streaming Claude models", () => {
         const url = provider.buildUrl(
           {
             providerModelId: "claude-3-5-haiku@20241022",
             author: "anthropic",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
           { isStreaming: false }
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:predict"
+          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:rawPredict"
         );
       });
 
@@ -104,6 +110,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "claude-3-5-sonnet@20241022",
             author: "anthropic",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
           { isStreaming: true }
@@ -119,13 +126,14 @@ describe("VertexProvider", () => {
           {
             providerModelId: "claude-3-opus@20240229",
             author: "anthropic",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "my-project", region: "europe-west1" },
           } as any,
           { isStreaming: false }
         );
 
         expect(url).toBe(
-          "https://europe-west1-aiplatform.googleapis.com/v1/projects/my-project/locations/europe-west1/publishers/anthropic/models/claude-3-opus@20240229:predict"
+          "https://europe-west1-aiplatform.googleapis.com/v1/projects/my-project/locations/europe-west1/publishers/anthropic/models/claude-3-opus@20240229:rawPredict"
         );
       });
 
@@ -135,6 +143,7 @@ describe("VertexProvider", () => {
             {
               providerModelId: "claude-3-5-haiku",
               author: "anthropic",
+              modelConfig: { crossRegion: false } as any,
               userConfig: { region: "us-central1" },
             } as any,
             { isStreaming: false }
@@ -146,13 +155,14 @@ describe("VertexProvider", () => {
         const url = provider.buildUrl(
           {
             providerModelId: "claude-3-haiku",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
           { isStreaming: false }
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-haiku:predict"
+          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-haiku:rawPredict"
         );
       });
     });
@@ -163,6 +173,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "gemini-pro",
             author: "google",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project" },
           } as any,
           { isStreaming: false }
@@ -178,13 +189,14 @@ describe("VertexProvider", () => {
           {
             providerModelId: "claude-3",
             author: "anthropic",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project" },
           } as any,
           { isStreaming: false }
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3:predict"
+          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3:rawPredict"
         );
       });
     });
@@ -241,7 +253,6 @@ describe("VertexProvider", () => {
 
         const parsed = JSON.parse(body);
         expect(parsed.anthropic_version).toBe("vertex-2023-10-16");
-        expect(parsed.model).toBe("claude-3-haiku");
         expect(parsed.anthropic_content).toBe(true);
       });
 
@@ -260,7 +271,6 @@ describe("VertexProvider", () => {
 
         const parsed = JSON.parse(body);
         expect(parsed.anthropic_version).toBe("vertex-2023-10-16");
-        expect(parsed.model).toBe("claude-3-sonnet");
         expect(parsed.should_not_appear).toBeUndefined();
       });
     });
@@ -335,13 +345,14 @@ describe("VertexProvider", () => {
       const url = provider.buildUrl(
         {
           providerModelId: "",
+          modelConfig: { crossRegion: false } as any,
           userConfig: { projectId: "test-project", region: "us-central1" },
         } as any,
         { isStreaming: false }
       );
 
       expect(url).toBe(
-        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:predict"
+        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:rawPredict"
       );
     });
 
@@ -349,13 +360,14 @@ describe("VertexProvider", () => {
       // Undefined model ID doesn't match "gemini", so it's treated as non-Gemini and builds a URL
       const url = provider.buildUrl(
         {
+          modelConfig: { crossRegion: false } as any,
           userConfig: { projectId: "test-project", region: "us-central1" },
         } as any,
         { isStreaming: false }
       );
 
       expect(url).toBe(
-        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:predict"
+        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:rawPredict"
       );
     });
 
@@ -364,6 +376,7 @@ describe("VertexProvider", () => {
         {
           providerModelId: "gemini-pro",
           author: "google",
+          modelConfig: { crossRegion: false } as any,
           userConfig: { projectId: "my-project-123", region: "us-central1" },
         } as any,
         { isStreaming: false }
