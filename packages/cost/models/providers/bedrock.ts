@@ -103,18 +103,18 @@ export class BedrockProvider extends BaseProvider {
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
-    if (endpoint.author === "passthrough") {
-      if (endpoint.providerModelId.includes("claude-")) {
-        const anthropicBody =
-          context.bodyMapping === "OPENAI"
-            ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
-            : context.parsedBody;
-        const updatedBody = {
-          ...anthropicBody,
-          anthropic_version: "bedrock-2023-05-31",
-        };
-        return JSON.stringify(updatedBody);
-      }
+    if (endpoint.providerModelId.includes("claude-")) {
+      const anthropicBody =
+        context.bodyMapping === "OPENAI"
+          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
+          : context.parsedBody;
+      const updatedBody = {
+        ...anthropicBody,
+        anthropic_version: "bedrock-2023-05-31",
+        model: undefined,
+        stream: undefined,
+      };
+      return JSON.stringify(updatedBody);
     }
 
     // Pass through
@@ -125,9 +125,20 @@ export class BedrockProvider extends BaseProvider {
   }
 
   determineResponseFormat(endpoint: Endpoint): ResponseFormat {
-    if (endpoint.author === "anthropic" || endpoint.providerModelId.includes("claude-")) {
+    if (
+      endpoint.author === "anthropic" ||
+      endpoint.providerModelId.includes("claude-")
+    ) {
       return "ANTHROPIC";
     }
     return "OPENAI";
+  }
+
+  async buildErrorMessage(response: Response): Promise<string> {
+    const respJson = (await response.json()) as any;
+    if (respJson.message) {
+      return respJson.message;
+    }
+    return `Failed request with status ${response.status}`;
   }
 }

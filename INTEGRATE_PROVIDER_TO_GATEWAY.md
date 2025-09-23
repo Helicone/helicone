@@ -37,6 +37,8 @@ packages/cost/models/
 
 We will use `DeepInfra` as our example.
 
+If the provider your model needs is already set up in the `providers` directory, you can skip this step.
+
 ### For OpenAI-Compatible Providers
 
 Create a new file in `packages/cost/models/providers/[provider-name].ts`:
@@ -121,8 +123,8 @@ Create author definitions in `packages/cost/models/authors/[author-name]/`:
 ### Folder Structure
 
 ```
-authors/qwen/         # Author name
-└── qwen3             # Model family
+authors/mistralai/         # Author name
+└── mistralai3             # Model family
 	└── endpoints.ts    # Model-provider combinations
 	└── models.ts       # Model definitions
 └── index.ts          # Exports
@@ -179,7 +181,7 @@ export const endpoints = {
       {
         threshold: 0,
         input: 0.0000002,
-        output: 0.00000-4,
+        output: 0.0000004,
       },
     ],
     rateLimits: {
@@ -214,7 +216,7 @@ export const endpoints = {
 
 Two important things to note here:
 
-- Some providers have multiple deployment regions:
+- Some providers have multiple deployment regions. You can use examples from Bedrock and Azure as a reference:
 
     ```tsx
     endpointConfigs: {
@@ -313,8 +315,8 @@ export const mistralMetadata = {
 Add your new model to `packages/cost/models/registry-types.ts`:
 
 ```tsx
-import { mistralEndpointConfig } from "./authors/qwen";
-import { mistralModels } from "./authors/qwen";
+import { mistralEndpointConfig } from "./authors/mistralai";
+import { mistralModels } from "./authors/mistralai";
 
 const allModels = {
 	...,
@@ -355,7 +357,7 @@ We map out the provider errors so we don't pass them to the user directly. You'l
 
 Make sure to rerun snapshots before deploying by running this command in your console.
 
-`cd <your-path-to-the-repo>/helicone/helicone/packages && npx jest --updateSnapshot **tests**/cost/registrySnapshots.test.ts`
+`cd <your-path-to-the-repo>/helicone/helicone/packages && npx jest --updateSnapshot __tests__/cost/registrySnapshots.test.ts`
 
 ## Common Issues & Solutions
 

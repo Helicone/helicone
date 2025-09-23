@@ -213,11 +213,16 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   private getModelFromPath(path: string): string {
     const regex1 = /\/engines\/([^/]+)/;
     const regex2 = /models\/([^/:]+)/;
+    const regex3 = /\/model\/([^/:]+)/; // Add regex for Bedrock runtime paths
 
     let match = path.match(regex1);
 
     if (!match) {
       match = path.match(regex2);
+    }
+
+    if (!match) {
+      match = path.match(regex3);
     }
 
     if (match && match[1]) {
@@ -322,8 +327,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         provider,
         responseBody,
         model,
-        log.request.requestReferrer,
-        log.request.targetUrl
       );
       return await parser.parse({
         responseBody: responseBody,
@@ -410,14 +413,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     provider: string,
     responseBody: any,
     model?: string,
-    requestReferrer?: string,
-    targetUrl?: string
   ): IBodyProcessor {
-    const isAIGateway = requestReferrer?.includes("ai-gateway");
     if (!isStream) {
-      if (provider === "OPENAI" || isAIGateway) {
-        return new OpenAIBodyProcessor();
-      }
       if (provider === "ANTHROPIC" && responseBody) {
         return new AnthropicBodyProcessor();
       }
@@ -441,9 +438,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     if (isStream) {
-      if (isAIGateway && !targetUrl?.includes("anthropic.com/v1/messages")) {
-        return new OpenAIStreamProcessor();
-      }
       if (provider === "ANTHROPIC" || model?.includes("claude")) {
         return new AnthropicStreamBodyProcessor();
       }
