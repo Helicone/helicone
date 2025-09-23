@@ -236,6 +236,7 @@ routes = [
 	{ pattern = "llmmapper.staging.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "ai-gateway.staging.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 	{ pattern = "bedrock.staging.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
+	{ pattern = "perplexity.staging.helicone.ai", custom_domain = true, zone_name = "helicone.ai" },
 
 	{ pattern = "oai.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
 	{ pattern = "anthropic.staging.eu.hconeai.com", custom_domain = true, zone_name = "hconeai.com" },
