@@ -102,22 +102,24 @@ export class BedrockProvider extends BaseProvider {
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
-    if (endpoint.providerModelId.includes("claude-")) {
-      const anthropicBody =
-        context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
-          : context.parsedBody;
-      const updatedBody = {
-        ...anthropicBody,
-        anthropic_version: "bedrock-2023-05-31",
-      };
-      return JSON.stringify(updatedBody);
+    if (endpoint.author === "passthrough") {
+      if (endpoint.providerModelId.includes("claude-")) {
+        const anthropicBody =
+          context.bodyMapping === "OPENAI"
+            ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
+            : context.parsedBody;
+        const updatedBody = {
+          ...anthropicBody,
+          anthropic_version: "bedrock-2023-05-31",
+        };
+        return JSON.stringify(updatedBody);
+      }
     }
 
+    // Pass through
     return JSON.stringify({
       ...context.parsedBody,
-      stream: undefined,
-      stream_options: undefined,
+      model: endpoint.providerModelId,
     });
   }
 }

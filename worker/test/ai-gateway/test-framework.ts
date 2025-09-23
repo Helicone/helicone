@@ -7,7 +7,9 @@ import {
 
 // Mock Google OAuth authentication - this will be hoisted
 vi.mock("../../../packages/cost/auth/gcpServiceAccountAuth", () => ({
-  getGoogleAccessToken: vi.fn().mockResolvedValue("ya29.mock-access-token-for-tests"),
+  getGoogleAccessToken: vi
+    .fn()
+    .mockResolvedValue("ya29.mock-access-token-for-tests"),
   clearGoogleTokenCache: vi.fn(),
 }));
 
@@ -94,6 +96,7 @@ export type GatewayTestScenario = {
     stream?: boolean;
     headers?: Record<string, string>;
     bodyMapping?: "NO_MAPPING" | "OPENAI";
+    body?: Record<string, any>;
   };
   expected: {
     /** Ordered list of provider calls expected */
@@ -131,7 +134,6 @@ export async function runGatewayTest(
       env: GatewayEnv,
       ctx: GatewayContext
     ) => {
-      // Capture the call
       capturedCalls.push({ targetProps, requestWrapper, env, ctx });
 
       const expectation = scenario.expected.providers[callIndex];

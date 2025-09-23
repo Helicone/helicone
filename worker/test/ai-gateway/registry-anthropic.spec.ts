@@ -58,7 +58,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:predict",
                 response: "success",
-                model: "claude-3-5-haiku@20241022",
                 data: createAnthropicMockResponse("claude-3.5-haiku"),
                 expects: vertexAuthExpectations,
               },
@@ -158,7 +157,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-sonnet-v2@20241022:predict",
                 response: "success",
-                model: "claude-3-5-sonnet-v2@20241022",
                 data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
                 expects: vertexAuthExpectations,
               },
@@ -258,7 +256,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-7-sonnet@20250219:predict",
                 response: "success",
-                model: "claude-3-7-sonnet@20250219",
                 data: createAnthropicMockResponse("claude-3.7-sonnet"),
                 expects: vertexAuthExpectations,
               },
@@ -358,7 +355,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-opus-4@20250514:predict",
                 response: "success",
-                model: "claude-opus-4@20250514",
                 data: createAnthropicMockResponse("claude-opus-4"),
                 expects: vertexAuthExpectations,
               },
@@ -458,7 +454,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-opus-4-1@20250805:predict",
                 response: "success",
-                model: "claude-opus-4-1@20250805",
                 data: createAnthropicMockResponse("claude-opus-4-1"),
                 expects: vertexAuthExpectations,
               },
@@ -558,7 +553,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-sonnet-4@20250514:predict",
                 response: "success",
-                model: "claude-sonnet-4@20250514",
                 data: createAnthropicMockResponse("claude-sonnet-4"),
                 expects: vertexAuthExpectations,
               },

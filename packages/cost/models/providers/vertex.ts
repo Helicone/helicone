@@ -64,27 +64,30 @@ export class VertexProvider extends BaseProvider {
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
     const modelId = endpoint.providerModelId || "";
 
-    if (modelId.toLowerCase().includes("gemini")) {
-      const updatedBody = {
-        ...context.parsedBody,
-        model: `google/${modelId}`,
-      };
-      return JSON.stringify(updatedBody);
+    if (endpoint.author !== "passthrough") {
+      if (modelId.toLowerCase().includes("gemini")) {
+        const updatedBody = {
+          ...context.parsedBody,
+          model: modelId,
+        };
+        return JSON.stringify(updatedBody);
+      }
+
+      if (endpoint.author === "anthropic") {
+        const anthropicBody =
+          context.bodyMapping === "OPENAI"
+            ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
+            : context.parsedBody;
+        const updatedBody = {
+          ...anthropicBody,
+          anthropic_version: "vertex-2023-10-16",
+          model: undefined, // model is not needed in Vertex inputs (as its defined via URL)
+        };
+        return JSON.stringify(updatedBody);
+      }
     }
 
-    if (endpoint.author === "anthropic") {
-      const anthropicBody =
-        context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
-          : context.parsedBody;
-      const updatedBody = {
-        ...anthropicBody,
-        anthropic_version: "vertex-2023-10-16",
-        model: undefined, // model is not needed in Vertex inputs (as its defined via URL)
-      };
-      return JSON.stringify(updatedBody);
-    }
-
+    // Pass through
     return JSON.stringify({
       ...context.parsedBody,
       model: endpoint.providerModelId,
@@ -119,9 +122,11 @@ export class VertexProvider extends BaseProvider {
   async buildErrorMessage(response: Response): Promise<string> {
     try {
       const respJson = (await response.json()) as any;
-      if (respJson.error?.message) { // Anthropic error format
+      if (respJson.error?.message) {
+        // Anthropic error format
         return respJson.error.message;
-      } else if (respJson[0]?.error?.message) { // Gemini error format
+      } else if (respJson[0]?.error?.message) {
+        // Gemini error format
         return respJson[0].error.message;
       }
       return `Request failed with status ${response.status}`;
