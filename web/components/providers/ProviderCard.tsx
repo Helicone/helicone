@@ -133,6 +133,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     } else if (provider.id === "vertex") {
       initialConfig = {
         region: "",
+        crossRegion: "false",
+        note: "Auto-routing sets the default region to global, which optimizes for latency and availability. If cross region is not enabled, or the model does not support global routing, the selected region will be used.",
       };
     }
 
@@ -416,60 +418,49 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
       ];
     } else if (provider.id === "vertex") {
       configFields = [
+        { label: "Region", key: "region", placeholder: "us-central1, us-east1, europe-west4, etc." },
         {
-          label: "Region",
-          key: "region",
-          placeholder: "us-central1, us-east1, europe-west4, etc.",
+          label: "Cross Region",
+          key: "crossRegion",
+          placeholder: "false",
+          type: "boolean",
         },
       ];
     }
 
     return (
       <div className="mt-3 flex flex-col gap-2">
-        {provider.id === "bedrock" ? (
-          // Special layout for AWS Bedrock to put cross region below region
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-3">
-              <div className="flex flex-1 flex-col gap-1">
-                <Small className="text-xs">Region</Small>
-                <Input
-                  type="text"
-                  placeholder="us-west-2"
-                  value={configValues.region || ""}
-                  onChange={(e) =>
-                    handleUpdateConfigField("region", e.target.value)
-                  }
-                  className="h-7 text-xs"
-                  disabled={isEditMode && !isEditingKey}
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id={`crossRegion-${provider.id}-${existingKey?.id || instanceIndex}`}
-                checked={configValues.crossRegion === "true"}
-                onCheckedChange={(checked) =>
-                  handleUpdateConfigField(
-                    "crossRegion",
-                    checked ? "true" : "false",
-                  )
-                }
-                disabled={isEditMode && !isEditingKey}
-              />
-              <Label
-                htmlFor={`crossRegion-${provider.id}-${existingKey?.id || instanceIndex}`}
-                className="cursor-pointer text-xs font-normal"
-              >
-                Cross Region
-              </Label>
-            </div>
-          </div>
-        ) : (
-          // Default layout for other providers
-          <div className="flex gap-3">
-            {configFields.map((field) => (
-              <div key={field.key} className="flex flex-1 flex-col gap-1">
+        <div className="flex flex-col gap-2">
+          {configFields.map((field) => (
+            <div key={field.key} className="flex flex-1 flex-col gap-1">
+              {field.type !== "boolean" && (
                 <Small className="text-xs">{field.label}</Small>
+              )}
+              {field.type === "boolean" ? (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id={`${field.key}-${provider.id}-${existingKey?.id || instanceIndex}`}
+                    checked={configValues[field.key] === "true"}
+                    onCheckedChange={(checked) =>
+                      handleUpdateConfigField(
+                        field.key,
+                        checked ? "true" : "false",
+                      )
+                    }
+                    disabled={isEditMode && !isEditingKey}
+                  />
+                  <Label
+                    htmlFor={`${field.key}-${provider.id}-${existingKey?.id || instanceIndex}`}
+                    className="cursor-pointer text-xs font-normal"
+                  >
+                    {field.key === "crossRegion" 
+                      ? provider.id === "vertex" 
+                        ? "Auto-route globally"
+                        : "Cross Region"
+                      : field.label}
+                  </Label>
+                </div>
+              ) : (
                 <Input
                   type={field.type ?? "text"}
                   placeholder={field.placeholder}
@@ -480,10 +471,10 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                   className="h-7 text-xs"
                   disabled={isEditMode && !isEditingKey}
                 />
-              </div>
-            ))}
-          </div>
-        )}
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
@@ -819,6 +810,13 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
 
           {/* Advanced config fields */}
           {hasAdvancedConfig && renderConfigFields()}
+
+          {/* Explanation text for Vertex */}
+          {configValues.note && (
+            <Small className="mt-3 text-xs text-muted-foreground">
+              {configValues.note}
+            </Small>
+          )}
 
           {/* Action buttons at bottom right */}
           <div className="mt-3 flex justify-end gap-2">
