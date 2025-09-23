@@ -84,7 +84,7 @@ describe("VertexProvider", () => {
     });
 
     describe("Claude/Anthropic models", () => {
-      it("should build predict URL for non-streaming Claude models", () => {
+      it("should build rawPredict URL for non-streaming Claude models", () => {
         const url = provider.buildUrl(
           {
             providerModelId: "claude-3-5-haiku@20241022",
@@ -95,7 +95,7 @@ describe("VertexProvider", () => {
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:predict"
+          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:rawPredict"
         );
       });
 
@@ -125,7 +125,7 @@ describe("VertexProvider", () => {
         );
 
         expect(url).toBe(
-          "https://europe-west1-aiplatform.googleapis.com/v1/projects/my-project/locations/europe-west1/publishers/anthropic/models/claude-3-opus@20240229:predict"
+          "https://europe-west1-aiplatform.googleapis.com/v1/projects/my-project/locations/europe-west1/publishers/anthropic/models/claude-3-opus@20240229:rawPredict"
         );
       });
 
@@ -152,7 +152,7 @@ describe("VertexProvider", () => {
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-haiku:predict"
+          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-haiku:rawPredict"
         );
       });
     });
@@ -184,7 +184,7 @@ describe("VertexProvider", () => {
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3:predict"
+          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3:rawPredict"
         );
       });
     });
@@ -339,7 +339,7 @@ describe("VertexProvider", () => {
       );
 
       expect(url).toBe(
-        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:predict"
+        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:rawPredict"
       );
     });
 
@@ -353,7 +353,7 @@ describe("VertexProvider", () => {
       );
 
       expect(url).toBe(
-        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:predict"
+        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:rawPredict"
       );
     });
 
