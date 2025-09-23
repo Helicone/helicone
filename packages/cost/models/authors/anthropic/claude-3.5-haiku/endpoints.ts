@@ -39,6 +39,7 @@ export const endpoints = {
     provider: "vertex",
     author: "anthropic",
     providerModelId: "claude-3-5-haiku@20241022",
+    crossRegion: false,
     pricing: [
       {
         threshold: 0,

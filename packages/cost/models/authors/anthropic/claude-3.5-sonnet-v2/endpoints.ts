@@ -40,6 +40,7 @@ export const endpoints = {
     provider: "vertex",
     author: "anthropic",
     version: "vertex-2023-10-16",
+    crossRegion: false,
     pricing: [
       {
         threshold: 0,
