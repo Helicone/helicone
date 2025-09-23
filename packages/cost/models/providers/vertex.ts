@@ -42,8 +42,11 @@ export class VertexProvider extends BaseProvider {
           "Vertex AI requires projectId in config for Gemini models"
         );
       }
+      const baseUrlWithRegion =
+        region === "global"
+          ? "https://aiplatform.googleapis.com"
+          : this.baseUrl.replace("{region}", region);
 
-      const baseUrlWithRegion = this.baseUrl.replace("{region}", region);
       return `${baseUrlWithRegion}/v1beta1/projects/${projectId}/locations/${region}/endpoints/openapi/chat/completions`;
     }
 
@@ -54,7 +57,11 @@ export class VertexProvider extends BaseProvider {
     }
 
     const publisher = endpoint.author || "anthropic";
-    const baseUrlWithRegion = this.baseUrl.replace("{region}", region);
+    const baseUrlWithRegion =
+      region === "global"
+        ? "https://aiplatform.googleapis.com"
+        : this.baseUrl.replace("{region}", region);
+
     const baseEndpointUrl = `${baseUrlWithRegion}/v1/projects/${projectId}/locations/${region}/publishers/${publisher}/models/${modelId}`;
 
     // Determine the endpoint based on streaming
@@ -116,9 +123,11 @@ export class VertexProvider extends BaseProvider {
   async buildErrorMessage(response: Response): Promise<string> {
     try {
       const respJson = (await response.json()) as any;
-      if (respJson.error?.message) { // Anthropic error format
+      if (respJson.error?.message) {
+        // Anthropic error format
         return respJson.error.message;
-      } else if (respJson[0]?.error?.message) { // Gemini error format
+      } else if (respJson[0]?.error?.message) {
+        // Gemini error format
         return respJson[0].error.message;
       }
       return `Request failed with status ${response.status}`;
@@ -128,9 +137,12 @@ export class VertexProvider extends BaseProvider {
   }
 
   determineResponseFormat(endpoint: Endpoint): ResponseFormat {
-    if (endpoint.author === "anthropic" || endpoint.providerModelId.includes("claude-")) {
+    if (
+      endpoint.author === "anthropic" ||
+      endpoint.providerModelId.includes("claude-")
+    ) {
       return "ANTHROPIC";
     }
     return "OPENAI";
-  } 
+  }
 }
