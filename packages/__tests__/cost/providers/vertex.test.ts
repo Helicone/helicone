@@ -19,6 +19,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "gemini-1.5-pro",
             author: "google",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
           { isStreaming: false }
@@ -34,6 +35,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "gemini-1.5-flash",
             author: "google",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "eu-west1" },
           } as any,
           { isStreaming: false }
@@ -43,6 +45,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "gemini-1.5-flash",
             author: "google",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "eu-west1" },
           } as any,
           { isStreaming: true }
@@ -60,6 +63,7 @@ describe("VertexProvider", () => {
             {
               providerModelId: "gemini-1.5-pro",
               author: "google",
+              modelConfig: { crossRegion: false } as any,
               userConfig: { region: "us-central1" },
             } as any,
             { isStreaming: false }
@@ -72,6 +76,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "GEMINI-1.5-PRO",
             author: "google",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
           { isStreaming: false }
@@ -89,6 +94,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "claude-3-5-haiku@20241022",
             author: "anthropic",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
           { isStreaming: false }
@@ -104,6 +110,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "claude-3-5-sonnet@20241022",
             author: "anthropic",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
           { isStreaming: true }
@@ -119,6 +126,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "claude-3-opus@20240229",
             author: "anthropic",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "my-project", region: "europe-west1" },
           } as any,
           { isStreaming: false }
@@ -135,6 +143,7 @@ describe("VertexProvider", () => {
             {
               providerModelId: "claude-3-5-haiku",
               author: "anthropic",
+              modelConfig: { crossRegion: false } as any,
               userConfig: { region: "us-central1" },
             } as any,
             { isStreaming: false }
@@ -146,6 +155,7 @@ describe("VertexProvider", () => {
         const url = provider.buildUrl(
           {
             providerModelId: "claude-3-haiku",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
           { isStreaming: false }
@@ -163,6 +173,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "gemini-pro",
             author: "google",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project" },
           } as any,
           { isStreaming: false }
@@ -178,6 +189,7 @@ describe("VertexProvider", () => {
           {
             providerModelId: "claude-3",
             author: "anthropic",
+            modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project" },
           } as any,
           { isStreaming: false }
@@ -333,6 +345,7 @@ describe("VertexProvider", () => {
       const url = provider.buildUrl(
         {
           providerModelId: "",
+          modelConfig: { crossRegion: false } as any,
           userConfig: { projectId: "test-project", region: "us-central1" },
         } as any,
         { isStreaming: false }
@@ -347,6 +360,7 @@ describe("VertexProvider", () => {
       // Undefined model ID doesn't match "gemini", so it's treated as non-Gemini and builds a URL
       const url = provider.buildUrl(
         {
+          modelConfig: { crossRegion: false } as any,
           userConfig: { projectId: "test-project", region: "us-central1" },
         } as any,
         { isStreaming: false }
@@ -362,6 +376,7 @@ describe("VertexProvider", () => {
         {
           providerModelId: "gemini-pro",
           author: "google",
+          modelConfig: { crossRegion: false } as any,
           userConfig: { projectId: "my-project-123", region: "us-central1" },
         } as any,
         { isStreaming: false }
