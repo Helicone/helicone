@@ -114,6 +114,7 @@ export class VertexProvider extends BaseProvider {
       }
     }
 
+    // Pass through
     return JSON.stringify({
       ...context.parsedBody,
       model: endpoint.providerModelId,

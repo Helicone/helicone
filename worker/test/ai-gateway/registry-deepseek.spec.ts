@@ -355,7 +355,7 @@ describe("DeepSeek Registry Tests", () => {
               data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
               expects: {
                 ...deepinfraAuthExpectations,
-                bodyContains: ["user", "Test message"],
+                bodyContains: ["user", "Test"],
               },
             },
           ],

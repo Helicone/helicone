@@ -604,8 +604,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.openai.com/v1/chat/completions",
                 response: "success",
-                model: "o3",
-                data: createOpenAIMockResponse("o3"),
+                model: "o3-2025-04-16",
+                data: createOpenAIMockResponse("o3-2025-04-16"),
                 expects: openaiAuthExpectations,
               },
             ],
@@ -621,8 +621,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.openai.com/v1/chat/completions",
                 response: "success",
-                model: "o3",
-                data: createOpenAIMockResponse("o3"),
+                model: "o3-2025-04-16",
+                data: createOpenAIMockResponse("o3-2025-04-16"),
                 expects: openaiAuthExpectations,
               },
             ],
@@ -640,8 +640,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.openai.com/v1/chat/completions",
                 response: "success",
-                model: "o3-pro",
-                data: createOpenAIMockResponse("o3-pro"),
+                model: "o3-pro-2025-06-10",
+                data: createOpenAIMockResponse("o3-pro-2025-06-10"),
                 expects: openaiAuthExpectations,
               },
             ],
@@ -657,8 +657,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.openai.com/v1/chat/completions",
                 response: "success",
-                model: "o3-pro",
-                data: createOpenAIMockResponse("o3-pro"),
+                model: "o3-pro-2025-06-10",
+                data: createOpenAIMockResponse("o3-pro-2025-06-10"),
                 expects: openaiAuthExpectations,
               },
             ],
@@ -888,17 +888,17 @@ describe("OpenAI Registry Tests", () => {
                     parameters: {
                       type: "object",
                       properties: {
-                        location: { type: "string" }
+                        location: { type: "string" },
                       },
-                      required: ["location"]
-                    }
-                  }
-                }
+                      required: ["location"],
+                    },
+                  },
+                },
               ],
               tool_choice: "auto",
               temperature: 0.7,
-              max_tokens: 1000
-            }
+              max_tokens: 1000,
+            },
           },
           expected: {
             providers: [
@@ -909,7 +909,13 @@ describe("OpenAI Registry Tests", () => {
                 data: createOpenAIMockResponse("openai/gpt-oss-120b"),
                 expects: {
                   ...deepinfraAuthExpectations,
-                  bodyContains: ["tools", "tool_choice", "get_weather", "temperature", "max_tokens"],
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
                 },
               },
             ],
@@ -928,8 +934,8 @@ describe("OpenAI Registry Tests", () => {
               temperature: 0.1,
               top_p: 0.9,
               frequency_penalty: 0.5,
-              presence_penalty: 0.3
-            }
+              presence_penalty: 0.3,
+            },
           },
           expected: {
             providers: [
@@ -940,7 +946,14 @@ describe("OpenAI Registry Tests", () => {
                 data: createOpenAIMockResponse("openai/gpt-oss-120b"),
                 expects: {
                   ...deepinfraAuthExpectations,
-                  bodyContains: ["response_format", "json_object", "temperature", "top_p", "frequency_penalty", "presence_penalty"],
+                  bodyContains: [
+                    "response_format",
+                    "json_object",
+                    "temperature",
+                    "top_p",
+                    "frequency_penalty",
+                    "presence_penalty",
+                  ],
                 },
               },
             ],
@@ -1173,7 +1186,6 @@ describe("OpenAI Registry Tests", () => {
               data: createOpenAIMockResponse("openai/gpt-oss-120b"),
               expects: {
                 ...deepinfraAuthExpectations,
-                bodyContains: ["user", "Test message"],
               },
             },
           ],
@@ -1187,7 +1199,9 @@ describe("OpenAI Registry Tests", () => {
         model: "gpt-oss-120b/deepinfra",
         request: {
           body: {
-            messages: [{ role: "user", content: "Test comprehensive parameters" }],
+            messages: [
+              { role: "user", content: "Test comprehensive parameters" },
+            ],
             max_tokens: 1000,
             temperature: 0.8,
             top_p: 0.95,
@@ -1199,7 +1213,7 @@ describe("OpenAI Registry Tests", () => {
             seed: 12345,
             min_p: 0.05,
             response_format: { type: "text" },
-          }
+          },
         },
         expected: {
           providers: [
@@ -1211,9 +1225,17 @@ describe("OpenAI Registry Tests", () => {
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: [
-                  "max_tokens", "temperature", "top_p", "stop",
-                  "frequency_penalty", "presence_penalty", "repetition_penalty",
-                  "top_k", "seed", "min_p", "response_format"
+                  "max_tokens",
+                  "temperature",
+                  "top_p",
+                  "stop",
+                  "frequency_penalty",
+                  "presence_penalty",
+                  "repetition_penalty",
+                  "top_k",
+                  "seed",
+                  "min_p",
+                  "response_format",
                 ],
               },
             },

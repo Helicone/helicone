@@ -7,7 +7,9 @@ import {
 
 // Mock Google OAuth authentication - this will be hoisted
 vi.mock("../../../packages/cost/auth/gcpServiceAccountAuth", () => ({
-  getGoogleAccessToken: vi.fn().mockResolvedValue("ya29.mock-access-token-for-tests"),
+  getGoogleAccessToken: vi
+    .fn()
+    .mockResolvedValue("ya29.mock-access-token-for-tests"),
   clearGoogleTokenCache: vi.fn(),
 }));
 
@@ -94,6 +96,7 @@ export type GatewayTestScenario = {
     stream?: boolean;
     headers?: Record<string, string>;
     bodyMapping?: "NO_MAPPING" | "OPENAI";
+    body?: Record<string, any>;
   };
   expected: {
     /** Ordered list of provider calls expected */
@@ -131,7 +134,6 @@ export async function runGatewayTest(
       env: GatewayEnv,
       ctx: GatewayContext
     ) => {
-      // Capture the call
       capturedCalls.push({ targetProps, requestWrapper, env, ctx });
 
       const expectation = scenario.expected.providers[callIndex];
@@ -170,8 +172,8 @@ export async function runGatewayTest(
           expect(requestWrapper.getMethod()).toBe(method);
         }
 
-        if (bodyContains && requestWrapper.getText) {
-          const body = await requestWrapper.getText();
+        if (bodyContains && requestWrapper.unsafeGetText) {
+          const body = await requestWrapper.unsafeGetText();
           for (const text of bodyContains) {
             expect(body).toContain(text);
           }
@@ -179,8 +181,8 @@ export async function runGatewayTest(
       }
 
       // Automatic model validation - validate request body contains expected model
-      if (expectation?.model && requestWrapper.getText) {
-        const body = await requestWrapper.getText();
+      if (expectation?.model && requestWrapper.unsafeGetText) {
+        const body = await requestWrapper.unsafeGetText();
         try {
           const parsed = JSON.parse(body);
           expect(parsed.model).toBe(expectation.model);
@@ -256,7 +258,8 @@ export async function runGatewayTest(
 
   // Add custom headers like NO_MAPPING if specified
   if (scenario.request?.bodyMapping) {
-    (requestOptions.headers as any)["Helicone-Gateway-Body-Mapping"] = scenario.request.bodyMapping;
+    (requestOptions.headers as any)["Helicone-Gateway-Body-Mapping"] =
+      scenario.request.bodyMapping;
   }
 
   // Add any additional custom headers
