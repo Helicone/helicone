@@ -78,12 +78,8 @@ function createPassthroughEndpoint(
   provider: ModelProviderName,
   userEndpointConfig: UserEndpointConfig
 ): Result<Endpoint> {
-  // Strip the provider suffix from the model name for passthrough
-  // e.g., "gemini-1.5-pro/vertex" -> "gemini-1.5-pro"
-  const cleanModelName = modelName.split("/")[0];
-
   const endpointConfig: ModelProviderConfig = {
-    providerModelId: cleanModelName,
+    providerModelId: modelName,
     ptbEnabled: false,
     provider,
     author: "passthrough",

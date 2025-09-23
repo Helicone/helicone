@@ -95,7 +95,7 @@ export class VertexProvider extends BaseProvider {
       if (modelId.toLowerCase().includes("gemini")) {
         const updatedBody = {
           ...context.parsedBody,
-          model: modelId,
+          model: `google/${modelId}`,
         };
         return JSON.stringify(updatedBody);
       }
