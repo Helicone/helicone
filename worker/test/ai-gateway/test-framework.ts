@@ -199,7 +199,6 @@ export async function runGatewayTest(
 
       // Return mock response based on expectation
       if (!expectation) {
-        console.log(`[DEBUG] No expectation found for call ${callIndex}`);
         return new Response("Unexpected call to provider", {
           status: 500,
           headers: { "content-type": "application/json" },
