@@ -129,4 +129,12 @@ export class BedrockProvider extends BaseProvider {
     }
     return "OPENAI";
   }
+
+  async buildErrorMessage(response: Response): Promise<string> {
+    const respJson = (await response.json()) as any;
+    if (respJson.message) {
+      return respJson.message;
+    }
+    return `Failed request with status ${response.status}`;
+  }
 }
