@@ -322,8 +322,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         provider,
         responseBody,
         model,
-        log.request.requestReferrer,
-        log.request.targetUrl
       );
       return await parser.parse({
         responseBody: responseBody,
@@ -410,14 +408,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     provider: string,
     responseBody: any,
     model?: string,
-    requestReferrer?: string,
-    targetUrl?: string
   ): IBodyProcessor {
-    const isAIGateway = requestReferrer?.includes("ai-gateway");
     if (!isStream) {
-      if (provider === "OPENAI" || isAIGateway) {
-        return new OpenAIBodyProcessor();
-      }
       if (provider === "ANTHROPIC" && responseBody) {
         return new AnthropicBodyProcessor();
       }
@@ -441,9 +433,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     if (isStream) {
-      if (isAIGateway && !targetUrl?.includes("anthropic.com/v1/messages")) {
-        return new OpenAIStreamProcessor();
-      }
       if (provider === "ANTHROPIC" || model?.includes("claude")) {
         return new AnthropicStreamBodyProcessor();
       }
