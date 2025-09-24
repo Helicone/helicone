@@ -125,8 +125,12 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
     const model = typeof rawModel === 'string' ? rawModel.trim() : "unknown";
     const provider = typeof rawProvider === 'string' ? rawProvider.trim().toLowerCase() : "unknown";
 
+    // Sanitize model and provider strings to prevent injection attacks
+    const sanitizedModel = model.replace(/[^a-zA-Z0-9_\-\/\.]/g, '').substring(0, 50);
+    const sanitizedProvider = provider.replace(/[^a-zA-Z0-9_\-]/g, '').substring(0, 20);
+
     // Format model as "provider/model" with validation
-    const formattedModel = `${provider}/${model}`.substring(0, 100); // Limit length
+    const formattedModel = `${sanitizedProvider}/${sanitizedModel}`.substring(0, 100); // Limit length
 
     // Initialize organization array if it doesn't exist
     if (!this.stripeTraceUsages[organizationId]) {
@@ -192,6 +196,8 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
         totalEvents += events.length;
 
         if (events.length === 0) {
+          // Clear empty organization arrays immediately
+          delete this.stripeTraceUsages[organizationId];
           continue;
         }
 
@@ -208,8 +214,15 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
             results.push(`Org ${organizationId}: ${result.data}`);
             totalProcessed += events.length;
           }
+
+          // Clear processed organization data immediately after processing
+          // to prevent memory accumulation across batches
+          delete this.stripeTraceUsages[organizationId];
+
         } catch (orgError) {
           errors.push(`Org ${organizationId}: Unexpected error - ${orgError}`);
+          // Clear failed organization data to prevent retry accumulation
+          delete this.stripeTraceUsages[organizationId];
         }
       }
 
@@ -227,7 +240,8 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
     } catch (error) {
       return err(`Unexpected error processing stripe meter events: ${error}`);
     } finally {
-      // Clear all organization data to prevent memory leaks
+      // Final cleanup - ensure all organization data is cleared
+      // This is a safety net in case individual deletions failed
       this.stripeTraceUsages = {};
     }
   }

@@ -53,6 +53,11 @@ export class StripeIntegrationManager extends BaseManager {
         return err("Stripe API key not found in vault");
       }
 
+      // Validate API key format (basic check)
+      if (!stripeKey.provider_key.startsWith('sk_')) {
+        return err("Invalid Stripe API key format");
+      }
+
       // 3. Create test meter event
       const testEvent: StripeMeterEvent = {
         identifier: `helicone-test-${Date.now()}`,
@@ -75,8 +80,9 @@ export class StripeIntegrationManager extends BaseManager {
         });
 
         return ok("Test meter event sent successfully");
-      } catch (stripeError: any) {
-        return err(`Failed to send meter event to Stripe: ${stripeError.message}`);
+      } catch (stripeError) {
+        const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown Stripe API error';
+        return err(`Failed to send meter event to Stripe: ${errorMessage}`);
       }
     } catch (error) {
       return err(`Error testing meter event: ${error}`);
@@ -119,6 +125,11 @@ export class StripeIntegrationManager extends BaseManager {
         return err("Stripe API key not found in vault");
       }
 
+      // Validate API key format (basic check)
+      if (!stripeKey.provider_key.startsWith('sk_')) {
+        return err("Invalid Stripe API key format");
+      }
+
       // 3. Create Stripe client with user's key
       const stripe = new Stripe(stripeKey.provider_key);
 
@@ -139,8 +150,9 @@ export class StripeIntegrationManager extends BaseManager {
             events: batch
           });
           totalProcessed += batch.length;
-        } catch (stripeError: any) {
-          errors.push(`Batch failed: ${stripeError.message}`);
+        } catch (stripeError) {
+          const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown Stripe API error';
+          errors.push(`Batch failed: ${errorMessage}`);
         }
       }
 

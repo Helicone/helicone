@@ -253,9 +253,6 @@ export class LogManager {
     stripeIntegrationHandler: StripeIntegrationHandler,
     logMetaData: LogMetaData
   ): Promise<void> {
-    if (!SecretManager.getSecret("STRIPE_SECRET_KEY")) {
-      return;
-    }
     const start = performance.now();
     await stripeIntegrationHandler.handleResults();
     const end = performance.now();
