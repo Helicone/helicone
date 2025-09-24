@@ -23,6 +23,10 @@ import SidebarQuickstepCard from "../SidebarQuickstartCard";
 import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 import { useCredits } from "@/services/hooks/useCredits";
 
+// Sidebar width constants
+const SIDEBAR_WIDTH_COLLAPSED = "w-12"; // 48px
+const SIDEBAR_WIDTH_EXPANDED = "w-52"; // 208px
+
 export interface NavigationItem {
   name: string;
   href: string;
@@ -72,7 +76,7 @@ const DesktopSidebar = ({
     );
   };
   const largeWith = useMemo(
-    () => cn(isCollapsed ? "w-16" : "w-52"),
+    () => cn(isCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED),
     [isCollapsed],
   );
 
@@ -140,7 +144,7 @@ const DesktopSidebar = ({
       }
     };
 
-    const sidebarWidth = isCollapsed ? 64 : 208;
+    const sidebarWidth = isCollapsed ? 48 : 208;
     document.documentElement.style.setProperty(
       "--sidebar-width",
       `${sidebarWidth}px`,
@@ -251,7 +255,7 @@ const DesktopSidebar = ({
               variant="ghost"
               size="icon"
               onClick={handleCollapseToggle}
-              className="flex shrink-0 items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800"
+              className="flex h-8 w-8 shrink-0 items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800"
             >
               {isCollapsed ? (
                 <ChevronRightIcon className="h-4 w-4" />
@@ -264,7 +268,7 @@ const DesktopSidebar = ({
           {/* Main content area */}
           <div className="flex min-h-0 flex-1 flex-col">
             <ScrollArea
-              className="mb-2 flex h-full flex-1 flex-col justify-between"
+              className="flex h-full flex-1 flex-col justify-between"
               width="thin"
               type="scroll"
             >
@@ -366,28 +370,29 @@ const DesktopSidebar = ({
                 ))}
             </ScrollArea>
 
-            <div className="flex flex-col space-y-1 px-2 pb-2">
+            <div
+              className={cn(
+                "flex flex-col border-t border-slate-200 bg-slate-50 px-2 pb-2 pt-2 dark:border-slate-800 dark:bg-slate-900/50",
+                isCollapsed && "items-center",
+              )}
+            >
               <Button
                 variant="ghost"
                 size="none"
                 onClick={() => setAgentChatOpen(!agentChatOpen)}
                 className={cn(
-                  "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                  "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
                   isCollapsed
                     ? "h-8 w-8 justify-center"
                     : "h-8 w-full justify-start gap-2 px-3",
-                  agentChatOpen
-                    ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
-                    : "text-muted-foreground",
                 )}
               >
-                <MessageCircle
-                  size={16}
-                  className={cn(
-                    "text-muted-foreground",
-                    agentChatOpen && "text-blue-700 dark:text-blue-300",
+                <div className="relative">
+                  <MessageCircle size={16} className="text-muted-foreground" />
+                  {agentChatOpen && (
+                    <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
                   )}
-                />
+                </div>
                 {!isCollapsed && <span>Support</span>}
               </Button>
 
