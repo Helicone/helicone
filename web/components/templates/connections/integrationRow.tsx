@@ -16,13 +16,17 @@ const IntegrationRow: React.FC<IntegrationRowProps> = ({
   const Logo = LOGOS[integration.title as keyof typeof LOGOS];
 
   const getStatusText = () => {
-    if (integration.enabled === undefined) return "No configuration";
-    return integration.enabled ? "Configuration active" : "No configuration";
+    if (!integration.configured) return "No configuration";
+    return integration.enabled
+      ? "Configuration active"
+      : "Configuration - not active";
   };
 
   const getStatusColor = () => {
-    if (integration.enabled === undefined) return "text-muted-foreground";
-    return integration.enabled ? "text-green-600 dark:text-green-400" : "text-muted-foreground";
+    if (!integration.configured) return "text-muted-foreground";
+    return integration.enabled
+      ? "text-green-600 dark:text-green-400"
+      : "text-yellow-600 dark:text-yellow-400";
   };
 
   return (

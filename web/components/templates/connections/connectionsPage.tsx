@@ -33,6 +33,9 @@ const ConnectionsPage: React.FC = () => {
       {
         title: "Stripe",
         type: "destination",
+        configured: !!integrations?.find(
+          (integration) => integration.integration_name === "stripe",
+        ),
         enabled:
           integrations?.find(
             (integration) => integration.integration_name === "stripe",
@@ -41,6 +44,9 @@ const ConnectionsPage: React.FC = () => {
       {
         title: "Segment",
         type: "destination",
+        configured: !!integrations?.find(
+          (integration) => integration.integration_name === "segment",
+        ),
         enabled:
           integrations?.find(
             (integration) => integration.integration_name === "segment",
@@ -49,6 +55,9 @@ const ConnectionsPage: React.FC = () => {
       {
         title: "OpenPipe",
         type: "fine-tuning",
+        configured: !!integrations?.find(
+          (integration) => integration.integration_name === "open_pipe",
+        ),
         enabled:
           integrations?.find(
             (integration) => integration.integration_name === "open_pipe",
@@ -114,7 +123,7 @@ const ConnectionsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl space-y-6 pt-8 pl-6">
+    <div className="max-w-4xl space-y-6 pl-6 pt-8">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">Connections</h1>
         <p className="text-sm text-muted-foreground">
