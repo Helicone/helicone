@@ -31,7 +31,7 @@ const ConnectionsPage: React.FC = () => {
   const { integrations, isLoadingIntegrations, refetchIntegrations } =
     useIntegrations();
 
-  const { data: hasStripeFeatureFlag, isLoading: isStripeFeatureFlagLoading } =
+  const { data: hasStripeFeatureFlag } =
     useFeatureFlag("stripe", org?.currentOrg?.id ?? "");
 
   const allItems: Integration[] = useMemo(() => {

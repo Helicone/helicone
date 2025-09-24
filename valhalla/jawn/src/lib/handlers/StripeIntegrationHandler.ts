@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { StripeManager } from "../../managers/stripe/StripeManager";
+import { StripeIntegrationManager } from "../../managers/stripe/StripeIntegrationManager";
 import {
   PromiseGenericResult,
   Result,
@@ -16,7 +16,7 @@ import { IntegrationManager } from "../../managers/IntegrationManager";
 const DEFAULT_CACHE_REFERENCE_ID = "00000000-0000-0000-0000-000000000000";
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 
-const cache = new KVCache(60 * 1000); // 1 minute
+const cache = new KVCache(60 * 60 * 1000); // 1 hour
 
 const getStripeCustomerId = async (
   organizationId: string
@@ -57,9 +57,10 @@ const getStripeIntegrationSettings = async (
   let eventName = "helicone_request";
 
   if (integration.data.settings && typeof integration.data.settings === 'object' && !Array.isArray(integration.data.settings)) {
-    const settings = integration.data.settings as Record<string, any>;
-    if (settings.event_name && typeof settings.event_name === 'string') {
-      eventName = settings.event_name;
+    const settings = integration.data.settings as Record<string, unknown>;
+    const eventNameSetting = settings.event_name;
+    if (eventNameSetting && typeof eventNameSetting === 'string' && eventNameSetting.trim()) {
+      eventName = eventNameSetting.trim();
     }
   }
 
@@ -70,7 +71,9 @@ const getStripeIntegrationSettings = async (
 };
 
 export class StripeIntegrationHandler extends AbstractLogHandler {
-  private stripeTraceUsages: StripeMeterEvent[] = [];
+  // organization_id to events mapping
+  private stripeTraceUsages: Record<string, StripeMeterEvent[]> = {};
+  private readonly maxEventsPerBatch = 1000; // Stripe API limit per organization
   constructor() {
     super();
   }
@@ -111,14 +114,29 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    // Get token counts and model information
-    const promptTokens = context.legacyUsage?.promptTokens || 0;
-    const completionTokens = context.legacyUsage?.completionTokens || 0;
-    const model = context.processedLog?.model || context.processedLog?.request?.model || "unknown";
-    const provider = context.message.log.request.provider || "unknown";
+    // Get token counts and model information with validation
+    const promptTokens = Math.max(0, Math.floor(context.legacyUsage?.promptTokens || 0));
+    const completionTokens = Math.max(0, Math.floor(context.legacyUsage?.completionTokens || 0));
 
-    // Format model as "provider/model"
-    const formattedModel = `${provider.toLowerCase()}/${model}`;
+    // Validate and sanitize model and provider names
+    const rawModel = context.processedLog?.model || context.processedLog?.request?.model || "unknown";
+    const rawProvider = context.message.log.request.provider || "unknown";
+
+    const model = typeof rawModel === 'string' ? rawModel.trim() : "unknown";
+    const provider = typeof rawProvider === 'string' ? rawProvider.trim().toLowerCase() : "unknown";
+
+    // Format model as "provider/model" with validation
+    const formattedModel = `${provider}/${model}`.substring(0, 100); // Limit length
+
+    // Initialize organization array if it doesn't exist
+    if (!this.stripeTraceUsages[organizationId]) {
+      this.stripeTraceUsages[organizationId] = [];
+    }
+
+    // Prevent memory growth by limiting array size per organization
+    if (this.stripeTraceUsages[organizationId].length >= this.maxEventsPerBatch) {
+      return await super.handle(context);
+    }
 
     // Create events for prompt tokens (input)
     if (promptTokens > 0) {
@@ -133,7 +151,7 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
           model: formattedModel,
         },
       };
-      this.stripeTraceUsages.push(promptEvent);
+      this.stripeTraceUsages[organizationId].push(promptEvent);
     }
 
     // Create events for completion tokens (output)
@@ -149,23 +167,68 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
           model: formattedModel,
         },
       };
-      this.stripeTraceUsages.push(completionEvent);
+      this.stripeTraceUsages[organizationId].push(completionEvent);
     }
 
     return await super.handle(context);
   }
 
   public async handleResults(): PromiseGenericResult<string> {
-    const stripeManager = new StripeManager({
-      organizationId: "",
-    });
+    const organizationIds = Object.keys(this.stripeTraceUsages);
 
-    const result = await stripeManager.trackStripeMeter(this.stripeTraceUsages);
-
-    if (result.error) {
-      return err(`Error tracking stripe meter: ${result.error}`);
+    if (organizationIds.length === 0) {
+      return ok("No stripe meter events to process");
     }
 
-    return ok("Successfully handled stripe integration logs");
+    const results: string[] = [];
+    const errors: string[] = [];
+    let totalProcessed = 0;
+    let totalEvents = 0;
+
+    try {
+      // Process each organization independently
+      for (const organizationId of organizationIds) {
+        const events = this.stripeTraceUsages[organizationId];
+        totalEvents += events.length;
+
+        if (events.length === 0) {
+          continue;
+        }
+
+        try {
+          const stripeIntegrationManager = new StripeIntegrationManager({
+            organizationId: organizationId,
+          });
+
+          const result = await stripeIntegrationManager.sendMeterEvents(events);
+
+          if (result.error) {
+            errors.push(`Org ${organizationId}: ${result.error}`);
+          } else {
+            results.push(`Org ${organizationId}: ${result.data}`);
+            totalProcessed += events.length;
+          }
+        } catch (orgError) {
+          errors.push(`Org ${organizationId}: Unexpected error - ${orgError}`);
+        }
+      }
+
+      // Generate summary result
+      if (errors.length > 0 && results.length === 0) {
+        // All organizations failed
+        return err(`Failed to process events for all organizations. Errors: ${errors.join('; ')}`);
+      } else if (errors.length > 0) {
+        // Partial success
+        return err(`Processed ${totalProcessed}/${totalEvents} events. Successes: ${results.length} orgs, Failures: ${errors.length} orgs. Errors: ${errors.join('; ')}`);
+      } else {
+        // All successful
+        return ok(`Successfully processed ${totalProcessed} stripe meter events across ${results.length} organizations`);
+      }
+    } catch (error) {
+      return err(`Unexpected error processing stripe meter events: ${error}`);
+    } finally {
+      // Clear all organization data to prevent memory leaks
+      this.stripeTraceUsages = {};
+    }
   }
 }
