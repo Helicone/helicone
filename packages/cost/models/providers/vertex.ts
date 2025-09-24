@@ -76,12 +76,7 @@ export class VertexProvider extends BaseProvider {
 
     // Gemini models use Google's predict format; all others use rawPredict for native format
     const isStreaming = requestParams.isStreaming === true;
-    const isGemini = modelId.toLowerCase().includes("gemini");
-    const endpointMethod = isGemini
-      ? isStreaming
-        ? "streamPredict"
-        : "predict"
-      : isStreaming
+    const endpointMethod = isStreaming
         ? "streamRawPredict"
         : "rawPredict";
 
