@@ -14,6 +14,7 @@ interface StripeConfigProps {
 const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
   const [apiKey, setApiKey] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
+  const [eventName, setEventName] = useState("helicone_request");
 
   const { existingKey, isLoadingVault, saveKey, isSavingKey } = useStripeKey();
   const {
@@ -25,6 +26,9 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
 
   useEffect(() => {
     if (existingKey?.provider_key) setApiKey(existingKey.provider_key);
+    if (integration?.settings?.event_name && typeof integration.settings.event_name === 'string') {
+      setEventName(integration.settings.event_name);
+    }
   }, [existingKey, integration]);
 
   const isSaving = isSavingKey || isUpdatingIntegration;
@@ -34,13 +38,12 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
     try {
       await saveKey(apiKey);
 
-      // Enable integration if not already active
-      if (!integration?.active) {
-        updateIntegration({
-          autoDatasetSync: false,
-          active: true,
-        });
-      }
+      // Update integration settings with event_name and enable if not already active
+      updateIntegration({
+        autoDatasetSync: false,
+        active: true,
+        event_name: eventName,
+      });
 
       onClose();
     } catch (error) {
@@ -66,6 +69,8 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
             updateIntegration({
               autoDatasetSync: false,
               active: !integration?.active,
+              event_name: eventName,
+              showNotification: false,
             })
           }
           disabled={isLoading}
@@ -80,6 +85,24 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
         </h3>
         <div className="space-y-2 text-sm text-muted-foreground">
           <p>Instructions for obtaining your Stripe RAK will be added here.</p>
+        </div>
+      </div>
+
+      <div className="space-y-4 rounded-lg border border-border bg-card p-4">
+        <h3 className="text-sm font-medium">Meter Settings</h3>
+        <div className="space-y-2">
+          <Label htmlFor="eventName">Event Name</Label>
+          <Input
+            id="eventName"
+            type="text"
+            value={eventName}
+            onChange={(e) => setEventName(e.target.value)}
+            placeholder="helicone_request"
+            disabled={isLoading}
+          />
+          <p className="text-xs text-muted-foreground">
+            The event name to use when sending data to Stripe
+          </p>
         </div>
       </div>
 
