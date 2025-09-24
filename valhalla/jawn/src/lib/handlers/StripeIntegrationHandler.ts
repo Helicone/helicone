@@ -16,7 +16,7 @@ import { IntegrationManager } from "../../managers/IntegrationManager";
 const DEFAULT_CACHE_REFERENCE_ID = "00000000-0000-0000-0000-000000000000";
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 
-const cache = new KVCache(60 * 1000); // 1 hour
+const cache = new KVCache(60 * 1000); // 1 minute
 
 const getStripeCustomerId = async (
   organizationId: string
