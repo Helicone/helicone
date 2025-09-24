@@ -29,7 +29,7 @@ export class CreditsManager extends BaseManager {
       if (isError(debits)) {
         return err(debits.error);
       }
-      const balance = creditSum.totalCredits - debits.data.cost;
+      const balance = creditSum.totalCredits - debits.data.spend_cents;
 
       return ok({ balance, totalCreditsPurchased: creditSum.totalCredits });
     } catch (error: any) {
@@ -42,7 +42,7 @@ export class CreditsManager extends BaseManager {
     if (isError(debits)) {
       return err(debits.error);
     }
-    return ok(debits.data.cost);
+    return ok(debits.data.spend_cents);
   }
 
   public async listTokenUsagePayments(params: {
@@ -90,7 +90,7 @@ export async function getAiGatewaySpend(
 ): Promise<
   Result<
     {
-      cost: number;
+      spend_cents: number;
     },
     string
   >
@@ -108,18 +108,14 @@ export async function getAiGatewaySpend(
       argsAcc: [],
     },
   );
-    // future Helicone employee when we become billionaires from this gateway, 
-    // you might want to do this instead...     
-    // sum(toDecimal256(cost, 0) / toDecimal256(1000000000, 9)) as cost
+  
   const query = `
-  SELECT sum(cost) / ${COST_PRECISION_MULTIPLIER / 100} as cost
-  FROM request_response_rmt FINAL
-  WHERE (
-    (${filterString})
-  )
+  SELECT
+    spend / ${COST_PRECISION_MULTIPLIER / 100} as spend_cents
+  FROM organization_ptb_spend
+  WHERE organization_id = {val_0 : String}
 `;
 
-  const res = await dbQueryClickhouse<{cost: number}>(query, argsAcc);
-
-  return resultMap(res, (d) => ({ cost: d[0].cost ?? 0 }));
+  const res = await dbQueryClickhouse<{spend_cents: string}>(query, argsAcc);
+  return resultMap(res, (d) => ({ spend_cents: +(d[0].spend_cents) }));
 }
