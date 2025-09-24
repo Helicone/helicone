@@ -4,8 +4,7 @@ import {
   HeliconeScoresMessage,
   KafkaMessageContents,
 } from "../handlers/HandlerContext";
-import { DualWriteProducer } from "../producers/DualProducer";
-import { KafkaProducer } from "../producers/KafkaProducerImpl";
+
 import { SQSProducer } from "../producers/SQSProducer";
 import {
   MessageProducer,
@@ -17,11 +16,9 @@ class MessageProducerFactory {
   static createProducer(): MessageProducer | null {
     const queueProvider = process.env.QUEUE_PROVIDER;
     if (queueProvider === "dual") {
-      return new DualWriteProducer(new KafkaProducer(), new SQSProducer());
+      throw new Error("DualWriteProducer is not supported");
     } else if (queueProvider === "sqs") {
       return new SQSProducer();
-    } else if (queueProvider === "kafka") {
-      return new KafkaProducer();
     }
 
     return null;
