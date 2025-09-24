@@ -30,15 +30,23 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
   const isSaving = isSavingKey || isUpdatingIntegration;
   const isLoading = isLoadingVault || isLoadingIntegration;
 
-  const handleSave = () => {
-    saveKey(apiKey);
-    if (!integration?.active) {
-      updateIntegration({
-        autoDatasetSync: false,
-        active: true,
-      });
+  const handleSave = async () => {
+    try {
+      await saveKey(apiKey);
+
+      // Enable integration if not already active
+      if (!integration?.active) {
+        updateIntegration({
+          autoDatasetSync: false,
+          active: true,
+        });
+      }
+
+      onClose();
+    } catch (error) {
+      // Error notifications are already handled in the hooks
+      console.error("Failed to save Stripe configuration:", error);
     }
-    onClose();
   };
 
   return (
@@ -67,7 +75,9 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
       </div>
 
       <div className="space-y-4 rounded-lg border border-border bg-muted/50 p-4">
-        <h3 className="text-sm font-medium">How to get your Stripe Restricted Access Key</h3>
+        <h3 className="text-sm font-medium">
+          How to get your Stripe Restricted Access Key
+        </h3>
         <div className="space-y-2 text-sm text-muted-foreground">
           <p>Instructions for obtaining your Stripe RAK will be added here.</p>
         </div>

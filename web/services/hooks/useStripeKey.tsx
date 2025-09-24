@@ -21,7 +21,7 @@ export function useStripeKey() {
     (key) => key.provider_name === STRIPE_PROVIDER_NAME
   );
 
-  const { mutate: saveKey, isPending: isSavingKey } = $JAWN_API.useMutation(
+  const saveKeyMutation = $JAWN_API.useMutation(
     "post",
     "/v1/vault/add",
     {
@@ -37,7 +37,7 @@ export function useStripeKey() {
     }
   );
 
-  const { mutate: updateKey, isPending: isUpdatingKey } = $JAWN_API.useMutation(
+  const updateKeyMutation = $JAWN_API.useMutation(
     "patch",
     "/v1/vault/update/{id}",
     {
@@ -53,14 +53,14 @@ export function useStripeKey() {
     }
   );
 
-  const handleSaveKey = (newKey: string) => {
+  const saveKey = async (newKey: string) => {
     if (existingKey?.id) {
-      updateKey({
+      return updateKeyMutation.mutateAsync({
         params: { path: { id: existingKey.id } },
         body: { key: newKey, name: "Stripe Restricted Access Key" },
       });
     } else {
-      saveKey({
+      return saveKeyMutation.mutateAsync({
         body: {
           key: newKey,
           provider: STRIPE_PROVIDER_NAME,
@@ -73,7 +73,7 @@ export function useStripeKey() {
   return {
     existingKey,
     isLoadingVault,
-    saveKey: handleSaveKey,
-    isSavingKey: isSavingKey || isUpdatingKey,
+    saveKey,
+    isSavingKey: saveKeyMutation.isPending || updateKeyMutation.isPending,
   };
 }
