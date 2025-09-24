@@ -23,8 +23,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
 
   const creditsAmountCents = Math.round(amount * 100);
   const percentageFeeCents = Math.ceil(creditsAmountCents * PERCENT_FEE_RATE);
-  const stripeFeeCents =
-    amount >= MIN_AMOUNT ? percentageFeeCents + FIXED_FEE_CENTS : 0;
+  const stripeFeeCents = percentageFeeCents + FIXED_FEE_CENTS;
   const totalDueCents = creditsAmountCents + stripeFeeCents;
 
   const formatCurrency = (cents: number) => (cents / 100).toFixed(2);
