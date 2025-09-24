@@ -8,5 +8,5 @@ SELECT
 FROM request_response_rmt
 WHERE is_passthrough_billing = true
 AND request_created_at <= now()
-AND request_created_at >= now() - INTERVAL 30 DAY
+AND request_created_at >= now() - INTERVAL 15 DAY
 GROUP BY organization_id;
