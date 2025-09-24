@@ -1,7 +1,5 @@
 import React from "react";
-import { Switch } from "@/components/ui/switch";
 import { ChevronRight } from "lucide-react";
-import { Small, Muted } from "@/components/ui/typography";
 import { Integration } from "./types";
 import { LOGOS } from "./connectionSVG";
 
@@ -9,58 +7,48 @@ interface IntegrationRowProps {
   integration: Integration;
   onIntegrationClick: (title: string) => void;
   onToggleEnabled?: (title: string, enabled: boolean) => void;
-  isLast?: boolean;
 }
 
 const IntegrationRow: React.FC<IntegrationRowProps> = ({
   integration,
   onIntegrationClick,
-  onToggleEnabled,
-  isLast = false,
 }) => {
   const Logo = LOGOS[integration.title as keyof typeof LOGOS];
 
   const getStatusText = () => {
-    if (integration.enabled === undefined) return "";
-    return integration.enabled ? "Enabled" : "No configuration";
+    if (integration.enabled === undefined) return "No configuration";
+    return integration.enabled ? "Configuration active" : "No configuration";
   };
 
-  const handleToggle = (checked: boolean) => {
-    if (onToggleEnabled) {
-      onToggleEnabled(integration.title, checked);
-    }
+  const getStatusColor = () => {
+    if (integration.enabled === undefined) return "text-muted-foreground";
+    return integration.enabled ? "text-green-600 dark:text-green-400" : "text-muted-foreground";
   };
 
   return (
-    <div
-      className={`flex cursor-pointer items-center justify-between p-4 hover:bg-muted/50 ${
-        !isLast ? "border-b border-border" : ""
-      }`}
-      onClick={() => onIntegrationClick(integration.title)}
-    >
-      <div className="flex items-center gap-3">
-        {Logo && (
-          <div className="flex h-6 w-6 items-center justify-center">
-            <Logo className="h-5 w-5" />
+    <div className="border-b border-border bg-background transition-colors last:border-b-0">
+      <button
+        onClick={() => onIntegrationClick(integration.title)}
+        className="w-full p-3 transition-colors hover:bg-muted/50"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-md bg-muted">
+              {Logo && <Logo className="h-4 w-4 object-contain" />}
+            </div>
+            <div className="text-sm font-medium">{integration.title}</div>
+            <div className={`text-xs ${getStatusColor()}`}>
+              {getStatusText()}
+            </div>
           </div>
-        )}
-        <div className="flex flex-col items-start gap-0.5">
-          <Small className="font-medium">{integration.title}</Small>
-          <Muted className="text-xs">{getStatusText()}</Muted>
-        </div>
-      </div>
 
-      <div className="flex items-center gap-4">
-        {integration.enabled !== undefined && (
-          <Switch
-            checked={integration.enabled}
-            onCheckedChange={handleToggle}
-            onClick={(e) => e.stopPropagation()}
-            className="data-[state=checked]:bg-green-500"
-          />
-        )}
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-      </div>
+          <div className="flex items-center gap-2">
+            <div className="text-muted-foreground">
+              <ChevronRight className="h-4 w-4" />
+            </div>
+          </div>
+        </div>
+      </button>
     </div>
   );
 };

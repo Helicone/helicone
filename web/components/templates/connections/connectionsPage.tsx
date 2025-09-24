@@ -114,7 +114,7 @@ const ConnectionsPage: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 pt-8">
+    <div className="max-w-4xl space-y-6 pt-8 pl-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">Connections</h1>
         <p className="text-sm text-muted-foreground">
@@ -162,7 +162,7 @@ const ConnectionsPage: React.FC = () => {
         </DropdownMenu>
       </div>
 
-      <div className="rounded-lg border border-border bg-card">
+      <div className="space-y-0">
         {filteredItems.length === 0 ? (
           <div className="border-2 border-dashed border-border bg-muted p-8 text-center">
             <Muted className="font-medium">
@@ -170,12 +170,11 @@ const ConnectionsPage: React.FC = () => {
             </Muted>
           </div>
         ) : (
-          filteredItems.map((integration, index) => (
+          filteredItems.map((integration) => (
             <IntegrationRow
               key={integration.title}
               integration={integration}
               onIntegrationClick={handleIntegrationClick}
-              isLast={index === filteredItems.length - 1}
             />
           ))
         )}
