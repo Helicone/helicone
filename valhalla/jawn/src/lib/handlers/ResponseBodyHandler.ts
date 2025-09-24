@@ -12,7 +12,6 @@ import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropic
 import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
 import { LlamaBodyProcessor } from "../shared/bodyProcessors/llamaBodyProcessor";
 import { LlamaStreamBodyProcessor } from "../shared/bodyProcessors/llamaStreamBodyProcessor";
-import { OpenAIBodyProcessor } from "../shared/bodyProcessors/openaiBodyProcessor";
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
 import { GroqStreamProcessor } from "../shared/bodyProcessors/groqStreamProcessor";
@@ -168,9 +167,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       }
 
       // Parse structured usage via the registry-aware processors when available
-      const provider = heliconeProviderToModelProviderName(
-        context.message.log.request.provider
-      );
+      const gatewayProvider = context.message.heliconeMeta.gatewayProvider;
+      const provider = gatewayProvider ?? heliconeProviderToModelProviderName(context.message.log.request.provider);
       const rawResponse = context.rawLog.rawResponseBody;
       if (provider && rawResponse) {
         const usageProcessor = getUsageProcessor(provider);
@@ -178,6 +176,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           const parsedUsage = await usageProcessor.parse({
             responseBody: rawResponse,
             isStream: context.message.log.request.isStream,
+            model: context.processedLog.model ?? "",
           });
           if (parsedUsage.error !== null) {
             console.error(

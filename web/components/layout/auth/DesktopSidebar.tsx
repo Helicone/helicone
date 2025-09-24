@@ -379,7 +379,7 @@ const DesktopSidebar = ({
               <Button
                 variant="ghost"
                 size="none"
-                onClick={() => setAgentChatOpen(true)}
+                onClick={() => setAgentChatOpen(!agentChatOpen)}
                 className={cn(
                   "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
                   isCollapsed

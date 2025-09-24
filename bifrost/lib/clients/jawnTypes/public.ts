@@ -2912,6 +2912,14 @@ Json: JsonObject;
     AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "passthrough";
     /** @enum {string} */
     StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
+    RateLimits: {
+      /** Format: double */
+      rpm?: number;
+      /** Format: double */
+      tpm?: number;
+      /** Format: double */
+      tpd?: number;
+    };
     ModelPricing: {
       /** Format: double */
       threshold: number;
@@ -2942,6 +2950,65 @@ Json: JsonObject;
       /** Format: double */
       web_search?: number;
     };
+    EndpointConfig: {
+      region?: string;
+      location?: string;
+      projectId?: string;
+      baseUri?: string;
+      deploymentName?: string;
+      resourceName?: string;
+      apiVersion?: string;
+      crossRegion?: boolean;
+      /** @enum {string} */
+      gatewayMapping?: "OPENAI" | "NO_MAPPING";
+      modelName?: string;
+      providerModelId?: string;
+      pricing?: components["schemas"]["ModelPricing"][];
+      /** Format: double */
+      contextLength?: number;
+      /** Format: double */
+      maxCompletionTokens?: number;
+      ptbEnabled?: boolean;
+      version?: string;
+      rateLimits?: components["schemas"]["RateLimits"];
+      /** Format: double */
+      priority?: number;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.EndpointConfig_": {
+      [key: string]: components["schemas"]["EndpointConfig"];
+    };
+    ModelProviderConfig: {
+      pricing: components["schemas"]["ModelPricing"][];
+      /** Format: double */
+      contextLength: number;
+      /** Format: double */
+      maxCompletionTokens: number;
+      ptbEnabled: boolean;
+      version?: string;
+      providerModelId: string;
+      provider: components["schemas"]["ModelProviderName"];
+      author: components["schemas"]["AuthorName"];
+      supportedParameters: components["schemas"]["StandardParameter"][];
+      rateLimits?: components["schemas"]["RateLimits"];
+      endpointConfigs: components["schemas"]["Record_string.EndpointConfig_"];
+      crossRegion?: boolean;
+      /** Format: double */
+      priority?: number;
+    };
+    UserEndpointConfig: {
+      region?: string;
+      location?: string;
+      projectId?: string;
+      baseUri?: string;
+      deploymentName?: string;
+      resourceName?: string;
+      apiVersion?: string;
+      crossRegion?: boolean;
+      /** @enum {string} */
+      gatewayMapping?: "OPENAI" | "NO_MAPPING";
+      modelName?: string;
+    };
     Endpoint: {
       pricing: components["schemas"]["ModelPricing"][];
       /** Format: double */
@@ -2950,7 +3017,8 @@ Json: JsonObject;
       maxCompletionTokens: number;
       ptbEnabled: boolean;
       version?: string;
-      baseUrl: string;
+      modelConfig: components["schemas"]["ModelProviderConfig"];
+      userConfig: components["schemas"]["UserEndpointConfig"];
       provider: components["schemas"]["ModelProviderName"];
       author: components["schemas"]["AuthorName"];
       providerModelId: string;

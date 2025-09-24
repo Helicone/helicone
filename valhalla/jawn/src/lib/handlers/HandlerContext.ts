@@ -6,6 +6,7 @@ import { OrgParams } from "../../packages/common/auth/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { ModelUsage } from "@helicone-package/cost";
 import { CostBreakdown } from "@helicone-package/cost/models/calculate-cost";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
 export class HandlerContext extends SetOnce {
   public message: KafkaMessageContents;
@@ -128,6 +129,7 @@ export type HeliconeMeta = {
   gatewayDeploymentTarget?: string;
   isPassthroughBilling?: boolean;
   providerModelId?: string;
+  gatewayProvider?: ModelProviderName;
 };
 
 export type KafkaMessageContents = {
