@@ -90,5 +90,127 @@ describe("PTB request validation", () => {
       },
     });
   });
+
+  it("returns 400 when PTB payload contains web_search_options", async () => {
+    setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+    const { response } = await runGatewayTest({
+      model: "gpt-4o-mini/openai",
+      request: {
+        body: {
+          messages: [
+            { role: "user", content: "Search the web for information" },
+          ],
+          model: "gpt-4o-mini",
+          web_search_options: {
+            user_location: {
+              type: "approximate",
+              approximate: {
+                country: "US",
+                region: "CA",
+              },
+            },
+            search_context_size: "medium",
+          },
+        },
+      },
+      expected: {
+        providers: [],
+        finalStatus: 400,
+      },
+    });
+
+    const body = await response.json() as any;
+    expect(body.error).toContain("web_search_options");
+  });
+
+  it("returns 400 when PTB payload contains audio modality", async () => {
+    setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+    const { response } = await runGatewayTest({
+      model: "gpt-4o-mini/openai",
+      request: {
+        body: {
+          messages: [
+            { role: "user", content: "Hello" },
+          ],
+          model: "gpt-4o-mini",
+          modalities: ["text", "audio"],
+        },
+      },
+      expected: {
+        providers: [],
+        finalStatus: 400,
+      },
+    });
+
+    const body = await response.json() as any;
+    expect(body.error).toContain("modalities");
+  });
+
+  it("returns 400 when PTB payload contains audio response format", async () => {
+    setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+    const { response } = await runGatewayTest({
+      model: "gpt-4o-mini/openai",
+      request: {
+        body: {
+          messages: [
+            { role: "user", content: "Say hello" },
+          ],
+          model: "gpt-4o-mini",
+          audio: {
+            voice: "alloy",
+            format: "mp3",
+          },
+        },
+      },
+      expected: {
+        providers: [],
+        finalStatus: 400,
+      },
+    });
+
+    const body = await response.json() as any;
+    expect(body.error).toContain("audio");
+  });
+
+  it("returns 400 when PTB payload contains audio input in messages", async () => {
+    setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+    const { response } = await runGatewayTest({
+      model: "gpt-4o-mini/openai",
+      request: {
+        body: {
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: "What do you hear in this audio?"
+                },
+                {
+                  type: "input_audio",
+                  input_audio: {
+                    data: "base64-audio-data",
+                    format: "wav"
+                  }
+                }
+              ]
+            },
+          ],
+          model: "gpt-4o-mini"
+        },
+      },
+      expected: {
+        providers: [],
+        finalStatus: 400,
+      },
+    });
+
+    const body = await response.json() as any;
+    expect(body.error).toContain("Invalid input");
+  });
 });
 
