@@ -17,6 +17,7 @@ import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
 import { StripeLogHandler } from "../lib/handlers/StripeLogHandler";
+import { StripeIntegrationHandler } from "../lib/handlers/StripeIntegrationHandler";
 import { WebhookHandler } from "../lib/handlers/WebhookHandler";
 import { KAFKA_ENABLED } from "../lib/producers/KafkaProducerImpl";
 import { S3Client } from "../lib/shared/db/s3Client";
@@ -98,6 +99,7 @@ export class LogManager {
     const webhookHandler = new WebhookHandler(new WebhookStore());
     const segmentHandler = new SegmentLogHandler();
     const stripeLogHandler = new StripeLogHandler();
+    const stripeIntegrationHandler = new StripeIntegrationHandler();
 
     authHandler
       .setNext(rateLimitHandler)
@@ -111,7 +113,8 @@ export class LogManager {
       .setNext(lytixHandler)
       .setNext(webhookHandler)
       .setNext(segmentHandler)
-      .setNext(stripeLogHandler);
+      .setNext(stripeLogHandler)
+      .setNext(stripeIntegrationHandler);
 
     const globalTimingMetrics: Map<string, number> = new Map();
 
@@ -216,6 +219,7 @@ export class LogManager {
     await this.logRateLimits(rateLimitHandler, logMetaData);
     await this.logHandlerResults(loggingHandler, logMetaData, logMessages);
     await this.logStripeMeter(stripeLogHandler, logMetaData);
+    await this.logStripeIntegration(stripeIntegrationHandler, logMetaData);
 
     // BEST EFFORT LOGGING
     this.logPosthogEvents(posthogHandler, logMetaData);
@@ -242,6 +246,27 @@ export class LogManager {
       methodName: "handleResults",
       messageCount: logMetaData.messageCount ?? 0,
       message: "Stripe meter",
+    });
+  }
+
+  private async logStripeIntegration(
+    stripeIntegrationHandler: StripeIntegrationHandler,
+    logMetaData: LogMetaData
+  ): Promise<void> {
+    if (!SecretManager.getSecret("STRIPE_SECRET_KEY")) {
+      return;
+    }
+    const start = performance.now();
+    await stripeIntegrationHandler.handleResults();
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: stripeIntegrationHandler.constructor.name,
+      methodName: "handleResults",
+      messageCount: logMetaData.messageCount ?? 0,
+      message: "Stripe integration",
     });
   }
 
