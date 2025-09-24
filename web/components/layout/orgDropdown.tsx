@@ -104,9 +104,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
     <>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <button
-            className="flex w-full flex-row items-center justify-start gap-2 rounded-md px-2 py-1 text-sm transition-colors hover:bg-slate-200 dark:hover:bg-slate-800"
-          >
+          <button className="flex w-full flex-row items-center justify-start gap-2 rounded-md px-2 py-1 text-sm transition-colors hover:bg-slate-200 dark:hover:bg-slate-800">
             <div className="flex flex-row gap-2">
               {currentIcon && (
                 <div className="flex items-center">

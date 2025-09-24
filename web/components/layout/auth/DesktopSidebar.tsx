@@ -366,10 +366,12 @@ const DesktopSidebar = ({
                 ))}
             </ScrollArea>
 
-            <div className={cn(
-              "flex flex-col border-t border-slate-200 bg-slate-50 px-2 pb-2 pt-2 dark:border-slate-800 dark:bg-slate-900/50",
-              isCollapsed && "items-center"
-            )}>
+            <div
+              className={cn(
+                "flex flex-col border-t border-slate-200 bg-slate-50 px-2 pb-2 pt-2 dark:border-slate-800 dark:bg-slate-900/50",
+                isCollapsed && "items-center",
+              )}
+            >
               <Button
                 variant="ghost"
                 size="none"
@@ -382,10 +384,7 @@ const DesktopSidebar = ({
                 )}
               >
                 <div className="relative">
-                  <MessageCircle
-                    size={16}
-                    className="text-muted-foreground"
-                  />
+                  <MessageCircle size={16} className="text-muted-foreground" />
                   {agentChatOpen && (
                     <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
                   )}
