@@ -10,6 +10,7 @@ import {
   IntegrationSection as IntegrationSectionType,
 } from "./types";
 import SegmentConfig from "./segmentConfig";
+import StripeConfig from "./stripeConfig";
 
 const INTEGRATION_SECTIONS: IntegrationSectionType[] = [
   { title: "LLM Providers", type: "provider" },
@@ -56,6 +57,14 @@ const ConnectionsPage: React.FC = () => {
         enabled:
           integrations?.find(
             (integration) => integration.integration_name === "segment",
+          )?.active ?? false,
+      },
+      {
+        title: "Stripe",
+        type: "destination",
+        enabled:
+          integrations?.find(
+            (integration) => integration.integration_name === "stripe",
           )?.active ?? false,
       },
       // { title: "Datadog", type: "destination", enabled: false },
@@ -119,6 +128,9 @@ const ConnectionsPage: React.FC = () => {
         )}
         {activeDrawer === "Segment" && (
           <SegmentConfig onClose={handleCloseDrawer} />
+        )}
+        {activeDrawer === "Stripe" && (
+          <StripeConfig onClose={handleCloseDrawer} />
         )}
         {/* Add more configuration components for other integrations here */}
       </ThemedDrawer>
