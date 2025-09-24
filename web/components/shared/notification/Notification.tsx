@@ -103,47 +103,47 @@ const Notification = () => {
       className="pointer-events-none fixed inset-x-0 top-0 z-[9999] flex justify-center pt-6"
     >
       <div className="pointer-events-auto mx-auto w-full px-2 sm:max-w-[33vw] sm:px-6 lg:px-8">
-          <div
-            className={clsx(
-              variantBgColor(),
-              variantBorderColor(),
-              "rounded-lg border px-2 py-1 shadow-xl",
-            )}
-          >
-            <div className="flex flex-wrap items-center justify-between">
-              <div className="flex w-0 flex-1 items-center">
-                <span className="flex rounded-lg p-2">{variantIcon()}</span>
-                <p
+        <div
+          className={clsx(
+            variantBgColor(),
+            variantBorderColor(),
+            "rounded-lg border px-2 py-1 shadow-xl",
+          )}
+        >
+          <div className="flex flex-wrap items-center justify-between">
+            <div className="flex w-0 flex-1 items-center">
+              <span className="flex rounded-lg p-2">{variantIcon()}</span>
+              <p
+                className={clsx(
+                  variantTextColor(),
+                  "ml-3 py-1 text-sm font-medium",
+                )}
+              >
+                <span>{title}</span>
+              </p>
+            </div>
+            <div className="ml-auto mr-2">
+              <div className="-mx-1.5 -my-1.5">
+                <button
+                  onClick={() => {
+                    setShow(false);
+                    setTimeout(() => {
+                      clearNotification();
+                    }, 150);
+                  }}
                   className={clsx(
+                    variantBgColor(),
                     variantTextColor(),
-                    "ml-3 py-1 text-sm font-medium",
+                    "inline-flex rounded-md p-1.5 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50",
                   )}
                 >
-                  <span>{title}</span>
-                </p>
-              </div>
-              <div className="ml-auto mr-2">
-                <div className="-mx-1.5 -my-1.5">
-                  <button
-                    onClick={() => {
-                      setShow(false);
-                      setTimeout(() => {
-                        clearNotification();
-                      }, 150);
-                    }}
-                    className={clsx(
-                      variantBgColor(),
-                      variantTextColor(),
-                      "inline-flex rounded-md p-1.5 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50",
-                    )}
-                  >
-                    <span className="sr-only">Dismiss</span>
-                    <XMarkIcon className="h-5 w-5" aria-hidden="true" />
-                  </button>
-                </div>
+                  <span className="sr-only">Dismiss</span>
+                  <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                </button>
               </div>
             </div>
           </div>
+        </div>
       </div>
     </Transition>
   );

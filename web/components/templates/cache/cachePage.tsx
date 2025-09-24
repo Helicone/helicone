@@ -205,7 +205,7 @@ const CachePage = (props: CachePageProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+      <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
         <div className="text-muted-foreground">Loading cache data...</div>
       </div>
     );

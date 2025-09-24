@@ -14,7 +14,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
-import { InfoIcon, Check, ChevronsUpDown, Crown, SquareArrowOutUpRight } from "lucide-react";
+import {
+  InfoIcon,
+  Check,
+  ChevronsUpDown,
+  Crown,
+  SquareArrowOutUpRight,
+} from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
@@ -90,7 +96,7 @@ export default function PromptForm({
         <Button
           variant="outline"
           className={cn(
-            "border-none relative",
+            "relative border-none",
             isScrolled &&
               "bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-900",
           )}
@@ -98,8 +104,8 @@ export default function PromptForm({
           Save Prompt
           {autoOpen && (
             <span className="absolute -right-1 -top-1 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-sky-500"></span>
             </span>
           )}
         </Button>
