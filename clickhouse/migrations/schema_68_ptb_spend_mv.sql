@@ -1,5 +1,5 @@
-CREATE MATERIALIZED VIEW IF NOT EXISTS organization_ptb_spending_mv
-TO organization_ptb_spending AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS organization_ptb_spend_mv
+TO organization_ptb_spend AS
 SELECT
     organization_id,
     sum(cost) as spend -- UInt64, can hold up to ~18 billion in cost per organization
