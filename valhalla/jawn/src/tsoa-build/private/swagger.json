@@ -6382,8 +6382,30 @@
 					}
 				]
 			},
+			"ModelProviderName": {
+				"type": "string",
+				"enum": [
+					"anthropic",
+					"openai",
+					"bedrock",
+					"vertex",
+					"azure",
+					"perplexity",
+					"groq",
+					"deepseek",
+					"cohere",
+					"xai",
+					"deepinfra",
+					"google-ai-studio",
+					"openrouter"
+				],
+				"nullable": false
+			},
 			"HeliconeMeta": {
 				"properties": {
+					"gatewayProvider": {
+						"$ref": "#/components/schemas/ModelProviderName"
+					},
 					"providerModelId": {
 						"type": "string"
 					},

@@ -537,6 +537,7 @@ async function log(
           const usage = await usageProcessor.parse({
             responseBody: rawResponse,
             isStream: proxyRequest.isStream,
+            model: attemptModel,
           });
 
           if (usage.data) {
@@ -593,6 +594,7 @@ async function log(
               const usage = await usageProcessor.parse({
                 responseBody: rawResponse,
                 isStream: proxyRequest.isStream,
+                model: model,
               });
 
               if (usage.data) {

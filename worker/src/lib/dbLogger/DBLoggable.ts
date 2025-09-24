@@ -723,6 +723,7 @@ export class DBLoggable {
         promptEnvironment: this.request.prompt2025Settings.environment,
         isPassthroughBilling: this.request.escrowInfo ? true : false,
         providerModelId: this.request.attempt?.endpoint.providerModelId ?? undefined,
+        gatewayProvider: this.request.attempt?.endpoint.provider ?? undefined,
       },
       log: {
         request: {

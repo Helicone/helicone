@@ -1,6 +1,7 @@
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { Provider } from "../../..";
 import { Result } from "../../util/results";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
 export interface MessageProducer {
   sendMessage(msg: MessageData): Promise<Result<null, string>>;
@@ -23,6 +24,7 @@ export type HeliconeMeta = {
   promptEnvironment?: string;
   isPassthroughBilling?: boolean;
   providerModelId?: string;
+  gatewayProvider?: ModelProviderName;
 };
 export type MessageData = {
   id: string;
