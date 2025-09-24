@@ -467,6 +467,9 @@ export interface paths {
   "/v1/integration/slack/channels": {
     get: operations["GetSlackChannels"];
   };
+  "/v1/integration/{integrationId}/stripe/test-meter-event": {
+    post: operations["TestStripeMeterEvent"];
+  };
   "/v1/helicone-sql/schema": {
     /**
      * Get database schema
@@ -3225,6 +3228,10 @@ Json: JsonObject;
       error: null;
     };
     "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
+    TestStripeMeterEventRequest: {
+      event_name: string;
+      customer_id: string;
+    };
     ClickHouseTableColumn: {
       name: string;
       type: string;
@@ -6609,6 +6616,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
+        };
+      };
+    };
+  };
+  TestStripeMeterEvent: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TestStripeMeterEventRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };

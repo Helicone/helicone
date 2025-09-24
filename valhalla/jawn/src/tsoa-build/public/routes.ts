@@ -2912,6 +2912,15 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Array__id-string--name-string___"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TestStripeMeterEventRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "event_name": {"dataType":"string","required":true},
+            "customer_id": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ClickHouseTableColumn": {
         "dataType": "refObject",
         "properties": {
@@ -9181,6 +9190,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getSlackChannels',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsIntegrationController_testStripeMeterEvent: Record<string, TsoaRoute.ParameterSchema> = {
+                integrationId: {"in":"path","name":"integrationId","required":true,"dataType":"string"},
+                body: {"in":"body","name":"body","required":true,"ref":"TestStripeMeterEventRequest"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/integration/:integrationId/stripe/test-meter-event',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController)),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController.prototype.testStripeMeterEvent)),
+
+            async function IntegrationController_testStripeMeterEvent(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsIntegrationController_testStripeMeterEvent, request, response });
+
+                const controller = new IntegrationController();
+
+              await templateService.apiHandler({
+                methodName: 'testStripeMeterEvent',
                 controller,
                 response,
                 next,

@@ -9098,6 +9098,22 @@
 					}
 				]
 			},
+			"TestStripeMeterEventRequest": {
+				"properties": {
+					"event_name": {
+						"type": "string"
+					},
+					"customer_id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"event_name",
+					"customer_id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ClickHouseTableColumn": {
 				"properties": {
 					"name": {
@@ -18990,6 +19006,51 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/integration/{integrationId}/stripe/test-meter-event": {
+			"post": {
+				"operationId": "TestStripeMeterEvent",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TestStripeMeterEventRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/helicone-sql/schema": {
