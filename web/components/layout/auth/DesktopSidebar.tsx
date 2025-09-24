@@ -366,11 +366,11 @@ const DesktopSidebar = ({
                 ))}
             </ScrollArea>
 
-            <div className="flex flex-col px-2 pb-2">
+            <div className="flex flex-col space-y-1 px-2 pb-2">
               <Button
                 variant="ghost"
                 size="none"
-                onClick={() => setAgentChatOpen(true)}
+                onClick={() => setAgentChatOpen(!agentChatOpen)}
                 className={cn(
                   "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
                   isCollapsed
