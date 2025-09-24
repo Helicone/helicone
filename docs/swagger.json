@@ -7971,6 +7971,24 @@
 					"verbosity"
 				]
 			},
+			"RateLimits": {
+				"properties": {
+					"rpm": {
+						"type": "number",
+						"format": "double"
+					},
+					"tpm": {
+						"type": "number",
+						"format": "double"
+					},
+					"tpd": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ModelPricing": {
 				"properties": {
 					"threshold": {
@@ -8042,6 +8060,189 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"EndpointConfig": {
+				"properties": {
+					"region": {
+						"type": "string"
+					},
+					"location": {
+						"type": "string"
+					},
+					"projectId": {
+						"type": "string"
+					},
+					"baseUri": {
+						"type": "string"
+					},
+					"deploymentName": {
+						"type": "string"
+					},
+					"resourceName": {
+						"type": "string"
+					},
+					"apiVersion": {
+						"type": "string"
+					},
+					"crossRegion": {
+						"type": "boolean"
+					},
+					"gatewayMapping": {
+						"type": "string",
+						"enum": [
+							"OPENAI",
+							"NO_MAPPING"
+						]
+					},
+					"modelName": {
+						"type": "string"
+					},
+					"providerModelId": {
+						"type": "string"
+					},
+					"pricing": {
+						"items": {
+							"$ref": "#/components/schemas/ModelPricing"
+						},
+						"type": "array"
+					},
+					"contextLength": {
+						"type": "number",
+						"format": "double"
+					},
+					"maxCompletionTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"ptbEnabled": {
+						"type": "boolean"
+					},
+					"version": {
+						"type": "string"
+					},
+					"rateLimits": {
+						"$ref": "#/components/schemas/RateLimits"
+					},
+					"priority": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Record_string.EndpointConfig_": {
+				"properties": {},
+				"additionalProperties": {
+					"$ref": "#/components/schemas/EndpointConfig"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ModelProviderConfig": {
+				"properties": {
+					"pricing": {
+						"items": {
+							"$ref": "#/components/schemas/ModelPricing"
+						},
+						"type": "array"
+					},
+					"contextLength": {
+						"type": "number",
+						"format": "double"
+					},
+					"maxCompletionTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"ptbEnabled": {
+						"type": "boolean"
+					},
+					"version": {
+						"type": "string"
+					},
+					"providerModelId": {
+						"type": "string"
+					},
+					"provider": {
+						"$ref": "#/components/schemas/ModelProviderName"
+					},
+					"author": {
+						"$ref": "#/components/schemas/AuthorName"
+					},
+					"supportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					},
+					"rateLimits": {
+						"$ref": "#/components/schemas/RateLimits"
+					},
+					"endpointConfigs": {
+						"$ref": "#/components/schemas/Record_string.EndpointConfig_"
+					},
+					"crossRegion": {
+						"type": "boolean"
+					},
+					"priority": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"pricing",
+					"contextLength",
+					"maxCompletionTokens",
+					"ptbEnabled",
+					"providerModelId",
+					"provider",
+					"author",
+					"supportedParameters",
+					"endpointConfigs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserEndpointConfig": {
+				"properties": {
+					"region": {
+						"type": "string"
+					},
+					"location": {
+						"type": "string"
+					},
+					"projectId": {
+						"type": "string"
+					},
+					"baseUri": {
+						"type": "string"
+					},
+					"deploymentName": {
+						"type": "string"
+					},
+					"resourceName": {
+						"type": "string"
+					},
+					"apiVersion": {
+						"type": "string"
+					},
+					"crossRegion": {
+						"type": "boolean"
+					},
+					"gatewayMapping": {
+						"type": "string",
+						"enum": [
+							"OPENAI",
+							"NO_MAPPING"
+						]
+					},
+					"modelName": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Endpoint": {
 				"properties": {
 					"pricing": {
@@ -8064,8 +8265,11 @@
 					"version": {
 						"type": "string"
 					},
-					"baseUrl": {
-						"type": "string"
+					"modelConfig": {
+						"$ref": "#/components/schemas/ModelProviderConfig"
+					},
+					"userConfig": {
+						"$ref": "#/components/schemas/UserEndpointConfig"
 					},
 					"provider": {
 						"$ref": "#/components/schemas/ModelProviderName"
@@ -8092,7 +8296,8 @@
 					"contextLength",
 					"maxCompletionTokens",
 					"ptbEnabled",
-					"baseUrl",
+					"modelConfig",
+					"userConfig",
 					"provider",
 					"author",
 					"providerModelId",

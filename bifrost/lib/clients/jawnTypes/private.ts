@@ -2121,7 +2121,10 @@ Json: JsonObject;
       error: null;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
     HeliconeMeta: {
+      gatewayProvider?: components["schemas"]["ModelProviderName"];
       providerModelId?: string;
       isPassthroughBilling?: boolean;
       gatewayDeploymentTarget?: string;
