@@ -14,7 +14,10 @@ export class AlertManager {
   private utilityKv: Env["UTILITY_KV"];
   private resendApiKey: Env["RESEND_API_KEY"];
 
-  constructor(private alertStore: AlertStore, private env: Env) {
+  constructor(
+    private alertStore: AlertStore,
+    private env: Env
+  ) {
     this.utilityKv = env.UTILITY_KV;
     this.resendApiKey = env.RESEND_API_KEY;
   }
@@ -90,17 +93,15 @@ export class AlertManager {
         console.error(`Failed to trigger alerts: ${triggerAlertsErr}`);
       }
 
-      const { error: sendEmailErr } = await this.sendAlertEmails(
-        triggeredAlerts
-      );
+      const { error: sendEmailErr } =
+        await this.sendAlertEmails(triggeredAlerts);
 
       if (sendEmailErr) {
         console.error(`Failed to send alert emails: ${sendEmailErr}`);
       }
 
-      const { error: sendSlackErr } = await this.sendAlertSlacks(
-        triggeredAlerts
-      );
+      const { error: sendSlackErr } =
+        await this.sendAlertSlacks(triggeredAlerts);
 
       if (sendSlackErr) {
         console.error(`Failed to send alert slacks: ${sendSlackErr}`);
@@ -117,17 +118,15 @@ export class AlertManager {
         console.error(`Failed to resolve alerts: ${resolvedAlertsErr}`);
       }
 
-      const { error: sendEmailErr } = await this.sendAlertEmails(
-        resolvedAlerts
-      );
+      const { error: sendEmailErr } =
+        await this.sendAlertEmails(resolvedAlerts);
 
       if (sendEmailErr) {
         console.error(`Failed to send resolve emails: ${sendEmailErr}`);
       }
 
-      const { error: sendSlackErr } = await this.sendAlertSlacks(
-        resolvedAlerts
-      );
+      const { error: sendSlackErr } =
+        await this.sendAlertSlacks(resolvedAlerts);
 
       if (sendSlackErr) {
         console.error(`Failed to send resolve slacks: ${sendSlackErr}`);
@@ -329,9 +328,8 @@ export class AlertManager {
   ): Promise<Result<null, string>> {
     const promises = alertStatusUpdates.map(async (alertStatusUpdate) => {
       if (alertStatusUpdate.alert.emails.length > 0) {
-        const { error: emailResErr } = await this.sendAlertEmail(
-          alertStatusUpdate
-        );
+        const { error: emailResErr } =
+          await this.sendAlertEmail(alertStatusUpdate);
         if (emailResErr) {
           console.error(`Error sending email: ${emailResErr}`);
           return err(emailResErr);
@@ -367,9 +365,7 @@ export class AlertManager {
 
     if (!res.ok) {
       return err(
-        `Error sending emails: ${res.status} ${
-          res.statusText
-        } ${await res.text()}`
+        `Error sending emails: ${res.status} ${res.statusText} ${await res.text()}`
       );
     }
 
@@ -381,9 +377,8 @@ export class AlertManager {
   ): Promise<Result<null, string>> {
     const promises = alertStatusUpdates.map(async (alertStatusUpdate) => {
       if (alertStatusUpdate.alert.slack_channels.length > 0) {
-        const { error: slackResErr } = await this.sendAlertSlack(
-          alertStatusUpdate
-        );
+        const { error: slackResErr } =
+          await this.sendAlertSlack(alertStatusUpdate);
         if (slackResErr) {
           console.error(`Error sending slack: ${slackResErr}`);
           return err(slackResErr);
@@ -432,9 +427,7 @@ export class AlertManager {
 
       if (!res.ok) {
         return err(
-          `Error sending slack messages: ${res.status} ${
-            res.statusText
-          } ${await res.text()}`
+          `Error sending slack messages: ${res.status} ${res.statusText} ${await res.text()}`
         );
       }
 
@@ -508,10 +501,10 @@ export class AlertManager {
                     }%* in the last *${formatTimespan(alert.time_window)}*.`
                   : `Error rate is now back within *${alert.threshold}%*.`
                 : alertStatusUpdate.status === "triggered"
-                ? `Cost has exceeded *$${
-                    alert.threshold
-                  }* in the last *${formatTimespan(alert.time_window)}*.`
-                : `Cost is now under *$${alert.threshold}*`) +
+                  ? `Cost has exceeded *$${
+                      alert.threshold
+                    }* in the last *${formatTimespan(alert.time_window)}*.`
+                  : `Cost is now under *$${alert.threshold}*`) +
               (alertStatusUpdate.status === "triggered"
                 ? `\nPlease take the necessary action.`
                 : `\nNo further action is required.`),
@@ -610,9 +603,7 @@ export class AlertManager {
                                         ? `$${alert.threshold}`
                                         : `${alert.threshold}%`
                                     }</li>
-                                    <li><strong>Metric:</strong> ${
-                                      alert.metric
-                                    }</li>
+                                    <li><strong>Metric:</strong> ${alert.metric}</li>
                                     <li><strong>Time Window:</strong> ${formatTimespan(
                                       alert.time_window
                                     )}

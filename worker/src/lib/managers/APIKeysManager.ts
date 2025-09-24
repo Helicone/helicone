@@ -14,7 +14,6 @@ export class APIKeysManager {
   async setAPIKeys() {
     const apiKeys = await this.store.getAPIKeys();
     if (apiKeys) {
-
       await Promise.all(
         apiKeys.map(async (key) => {
           if (key.soft_delete) {

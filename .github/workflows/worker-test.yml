@@ -45,6 +45,10 @@ jobs:
             echo "❌ Cache miss - installed dependencies"
           fi
 
+      - name: Lint check
+        working-directory: worker
+        run: yarn lint
+
       - name: Run tests
         working-directory: worker
         run: yarn test

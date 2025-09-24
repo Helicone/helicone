@@ -14,9 +14,7 @@ export class RateLimitManager {
       const allPoliciesResult = await dbWrapper.getAllRateLimitPolicies();
       if (allPoliciesResult.error !== null || !allPoliciesResult.data) {
         return err(
-          `Failed to retrieve rate limit policies: ${
-            allPoliciesResult.error || "No data returned"
-          }`
+          `Failed to retrieve rate limit policies: ${allPoliciesResult.error || "No data returned"}`
         );
       }
       const allPolicies = allPoliciesResult.data;

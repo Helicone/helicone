@@ -17,7 +17,11 @@ export class PromptStore {
     }
 
     if (environment) {
-      const envVersionId = await this.getEnvironmentVersionId(prompt_id, environment, orgId);
+      const envVersionId = await this.getEnvironmentVersionId(
+        prompt_id,
+        environment,
+        orgId
+      );
       if (envVersionId) {
         return ok(envVersionId);
       }
@@ -30,7 +34,10 @@ export class PromptStore {
       }
     }
 
-    const productionVersionId = await this.getProductionVersionId(prompt_id, orgId);
+    const productionVersionId = await this.getProductionVersionId(
+      prompt_id,
+      orgId
+    );
     if (!productionVersionId) {
       return err("Invalid prompt ID - no valid version found");
     }
@@ -95,4 +102,4 @@ export class PromptStore {
 
     return data.production_version;
   }
-} 
+}

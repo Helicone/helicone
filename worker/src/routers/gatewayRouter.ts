@@ -192,7 +192,7 @@ export const gatewayForwarder = async (
     env,
     ctx,
     provderResults.provider,
-    targetProps.escrowInfo,
+    targetProps.escrowInfo
   );
 };
 
@@ -279,4 +279,3 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
 
   return router;
 };
-

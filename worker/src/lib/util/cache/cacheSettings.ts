@@ -24,8 +24,8 @@ function buildCacheControl(cacheControl: string): string {
       sMaxAgeInSeconds = sMaxAge
         ? parseInt(sMaxAge)
         : maxAge
-        ? parseInt(maxAge)
-        : 0;
+          ? parseInt(maxAge)
+          : 0;
     } catch (e) {
       console.error("Error parsing s-maxage or max-age", e);
     }

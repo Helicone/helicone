@@ -1,12 +1,12 @@
-import { 
-  Role, 
-  OpenAIFinishReason, 
-  OpenAIUsage, 
-  OpenAIToolCall, 
+import {
+  Role,
+  OpenAIFinishReason,
+  OpenAIUsage,
+  OpenAIToolCall,
   OpenAIFunctionCall,
   OpenAIStreamingToolCall,
-  BaseOpenAIEvent 
-} from './common';
+  BaseOpenAIEvent,
+} from "./common";
 
 // === RESPONSE TYPES ===
 export interface OpenAIResponseBody {
@@ -82,11 +82,11 @@ export interface OpenAILogProbFunctionCall {
 export type OpenAIStreamEvent = ChatCompletionChunk;
 
 // Re-export common types for convenience
-export type { 
-  OpenAIFinishReason, 
-  OpenAIUsage, 
-  OpenAIToolChoice, 
-  OpenAIToolCall, 
+export type {
+  OpenAIFinishReason,
+  OpenAIUsage,
+  OpenAIToolChoice,
+  OpenAIToolCall,
   OpenAIFunctionCall,
-  OpenAIStreamingToolCall 
-} from './common'; 
+  OpenAIStreamingToolCall,
+} from "./common";
