@@ -12,7 +12,7 @@ export type Integration = {
   id: string;
 };
 
-type IntegrationNames = "open_pipe" | "segment";
+type IntegrationNames = "open_pipe" | "segment" | "stripe";
 
 export function useIntegration(integrationName: IntegrationNames) {
   const org = useOrg();
@@ -63,7 +63,7 @@ export function useIntegration(integrationName: IntegrationNames) {
       },
       onSuccess: () => {
         setNotification(
-          "OpenPipe integration settings updated successfully",
+          "Integration settings updated successfully",
           "success",
         );
         queryClient.invalidateQueries({
@@ -72,7 +72,7 @@ export function useIntegration(integrationName: IntegrationNames) {
       },
       onError: (error) => {
         setNotification(
-          `Failed to update OpenPipe integration settings: ${error}`,
+          `Failed to update integration settings: ${error}`,
           "error",
         );
       },
