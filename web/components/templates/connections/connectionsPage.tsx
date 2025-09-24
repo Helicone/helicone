@@ -56,6 +56,9 @@ const ConnectionsPage: React.FC = () => {
       {
         title: "Segment",
         type: "destination",
+        configured: !!integrations?.find(
+          (integration) => integration.integration_name === "segment",
+        ),
         enabled:
           integrations?.find(
             (integration) => integration.integration_name === "segment",
