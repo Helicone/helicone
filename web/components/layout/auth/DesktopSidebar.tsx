@@ -23,6 +23,10 @@ import SidebarQuickstepCard from "../SidebarQuickstartCard";
 import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 import { useCredits } from "@/services/hooks/useCredits";
 
+// Sidebar width constants
+const SIDEBAR_WIDTH_COLLAPSED = "w-12"; // 48px
+const SIDEBAR_WIDTH_EXPANDED = "w-52"; // 208px
+
 export interface NavigationItem {
   name: string;
   href: string;
@@ -72,7 +76,7 @@ const DesktopSidebar = ({
     );
   };
   const largeWith = useMemo(
-    () => cn(isCollapsed ? "w-12" : "w-52"),
+    () => cn(isCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED),
     [isCollapsed],
   );
 
