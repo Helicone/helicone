@@ -18,6 +18,16 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
 
   const presetAmounts = [5, 20, 100, 500];
   const MIN_AMOUNT = 5;
+  const PERCENT_FEE_RATE = 0.03;
+  const FIXED_FEE_CENTS = 30;
+
+  const creditsAmountCents = Math.round(amount * 100);
+  const percentageFeeCents = Math.ceil(creditsAmountCents * PERCENT_FEE_RATE);
+  const stripeFeeCents =
+    amount >= MIN_AMOUNT ? percentageFeeCents + FIXED_FEE_CENTS : 0;
+  const totalDueCents = creditsAmountCents + stripeFeeCents;
+
+  const formatCurrency = (cents: number) => (cents / 100).toFixed(2);
 
   const handlePresetClick = (value: number) => {
     setAmount(value);
@@ -79,7 +89,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
           {/* Amount Display */}
           <div className="rounded-lg border border-border bg-muted/20 p-6 text-center">
             <div className="mb-2 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              Amount
+              Credits
             </div>
             <div
               className="text-5xl font-bold text-foreground"
@@ -139,16 +149,28 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
 
           {/* Total Display */}
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">
-                Total (USD)
+            <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
+              <span>Credits</span>
+              <span className="text-foreground">${amount.toFixed(2)}</span>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-sm font-medium text-muted-foreground">
+              <span>Stripe fee (3% + $0.30)</span>
+              <span className="text-foreground">
+                ${formatCurrency(stripeFeeCents)}
               </span>
-              <span
-                className="text-2xl font-bold text-foreground"
-                style={{ fontFamily: "monospace" }}
-              >
-                ${amount.toFixed(2)}
-              </span>
+            </div>
+            <div className="mt-3 border-t border-border pt-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-muted-foreground">
+                  Total due
+                </span>
+                <span
+                  className="text-2xl font-bold text-foreground"
+                  style={{ fontFamily: "monospace" }}
+                >
+                  ${formatCurrency(totalDueCents)}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -184,7 +206,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
 
           {/* Min Info */}
           <div className="text-center text-xs text-muted-foreground">
-            Min: ${MIN_AMOUNT}
+            Min: ${MIN_AMOUNT} (fees calculated separately)
           </div>
         </div>
       </div>
