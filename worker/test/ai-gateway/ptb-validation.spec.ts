@@ -1,4 +1,5 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import { env, runInDurableObject } from "cloudflare:test";
 import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { setSupabaseTestCase } from "../setup";
@@ -55,6 +56,16 @@ describe("PTB request validation", () => {
 
   it("accepts valid PTB payloads", async () => {
     setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+    // Set up credits for the wallet
+    const orgId = "test-org-id";
+    const walletId = env.WALLET.idFromName(orgId);
+    const walletStub = env.WALLET.get(walletId);
+
+    // @ts-ignore
+    await runInDurableObject(walletStub, async (wallet: any) => {
+      await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+    });
 
     await runGatewayTest({
       model: "gpt-4o-mini/openai",

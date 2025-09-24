@@ -84,8 +84,10 @@ const ChatCompletionRequestMessageContentPartFile = z
 const ChatCompletionRequestUserMessageContentPart = z.union([
   ChatCompletionRequestMessageContentPartText,
   ChatCompletionRequestMessageContentPartImage,
-  ChatCompletionRequestMessageContentPartAudio,
-  ChatCompletionRequestMessageContentPartFile,
+
+  // HELICONE_DISABLED
+  // ChatCompletionRequestMessageContentPartAudio,
+  // ChatCompletionRequestMessageContentPartFile,
 ]);
 const ChatCompletionRequestUserMessage = z
   .object({
@@ -176,73 +178,16 @@ const ChatCompletionRequestMessage = z.union([
   ChatCompletionRequestToolMessage,
   ChatCompletionRequestFunctionMessage,
 ]);
-const ChatModel = z.enum([
-  "gpt-5",
-  "gpt-5-mini",
-  "gpt-5-nano",
-  "gpt-5-2025-08-07",
-  "gpt-5-mini-2025-08-07",
-  "gpt-5-nano-2025-08-07",
-  "gpt-5-chat-latest",
-  "gpt-4.1",
-  "gpt-4.1-mini",
-  "gpt-4.1-nano",
-  "gpt-4.1-2025-04-14",
-  "gpt-4.1-mini-2025-04-14",
-  "gpt-4.1-nano-2025-04-14",
-  "o4-mini",
-  "o4-mini-2025-04-16",
-  "o3",
-  "o3-2025-04-16",
-  "o3-mini",
-  "o3-mini-2025-01-31",
-  "o1",
-  "o1-2024-12-17",
-  "o1-preview",
-  "o1-preview-2024-09-12",
-  "o1-mini",
-  "o1-mini-2024-09-12",
-  "gpt-4o",
-  "gpt-4o-2024-11-20",
-  "gpt-4o-2024-08-06",
-  "gpt-4o-2024-05-13",
-  "gpt-4o-audio-preview",
-  "gpt-4o-audio-preview-2024-10-01",
-  "gpt-4o-audio-preview-2024-12-17",
-  "gpt-4o-audio-preview-2025-06-03",
-  "gpt-4o-mini-audio-preview",
-  "gpt-4o-mini-audio-preview-2024-12-17",
-  "gpt-4o-search-preview",
-  "gpt-4o-mini-search-preview",
-  "gpt-4o-search-preview-2025-03-11",
-  "gpt-4o-mini-search-preview-2025-03-11",
-  "chatgpt-4o-latest",
-  "codex-mini-latest",
-  "gpt-4o-mini",
-  "gpt-4o-mini-2024-07-18",
-  "gpt-4-turbo",
-  "gpt-4-turbo-2024-04-09",
-  "gpt-4-0125-preview",
-  "gpt-4-turbo-preview",
-  "gpt-4-1106-preview",
-  "gpt-4-vision-preview",
-  "gpt-4",
-  "gpt-4-0314",
-  "gpt-4-0613",
-  "gpt-4-32k",
-  "gpt-4-32k-0314",
-  "gpt-4-32k-0613",
-  "gpt-3.5-turbo",
-  "gpt-3.5-turbo-16k",
-  "gpt-3.5-turbo-0301",
-  "gpt-3.5-turbo-0613",
-  "gpt-3.5-turbo-1106",
-  "gpt-3.5-turbo-0125",
-  "gpt-3.5-turbo-16k-0613",
-]);
-const ModelIdsShared = z.union([z.string(), ChatModel]);
+
+const ModelIdsShared = z.string();
 const ResponseModalities = z.union([
-  z.array(z.enum(["text", "audio"])),
+  z.array(
+    z.enum([
+      "text",
+      // HELICONE_DISABLED
+      //  "audio"
+    ])
+  ),
   z.null(),
 ]);
 const Verbosity = z.union([z.enum(["low", "medium", "high"]), z.null()]);
@@ -399,21 +344,23 @@ const CreateChatCompletionRequest = CreateModelResponseProperties.and(
       max_completion_tokens: z.number().int().nullish(),
       frequency_penalty: z.number().gte(-2).lte(2).nullish().default(0),
       presence_penalty: z.number().gte(-2).lte(2).nullish().default(0),
-      web_search_options: z
-        .object({
-          user_location: z
-            .object({
-              type: z.literal("approximate"),
-              approximate: WebSearchLocation,
-            })
-            .passthrough()
-            .nullable(),
-          search_context_size:
-            WebSearchContextSize.optional().default("medium"),
-        })
-        .partial()
-        .passthrough()
-        .optional(),
+
+      // HELICONE_DISABLED
+      // web_search_options: z
+      //   .object({
+      //     user_location: z
+      //       .object({
+      //         type: z.literal("approximate"),
+      //         approximate: WebSearchLocation,
+      //       })
+      //       .passthrough()
+      //       .nullable(),
+      //     search_context_size:
+      //       WebSearchContextSize.optional().default("medium"),
+      //   })
+      //   .partial()
+      //   .passthrough()
+      //   .optional(),
       top_logprobs: z.number().int().gte(0).lte(20).nullish(),
       response_format: z
         .union([
@@ -422,13 +369,15 @@ const CreateChatCompletionRequest = CreateModelResponseProperties.and(
           ResponseFormatJsonObject,
         ])
         .optional(),
-      audio: z
-        .object({
-          voice: VoiceIdsShared,
-          format: z.enum(["wav", "aac", "mp3", "flac", "opus", "pcm16"]),
-        })
-        .passthrough()
-        .nullish(),
+
+      // HELICONE_DISABLED
+      // audio: z
+      //   .object({
+      //     voice: VoiceIdsShared,
+      //     format: z.enum(["wav", "aac", "mp3", "flac", "opus", "pcm16"]),
+      //   })
+      //   .passthrough()
+      //   .nullish(),
       store: z.boolean().nullish().default(false),
       stream: z.boolean().nullish().default(false),
       stop: StopConfiguration.nullish(),
