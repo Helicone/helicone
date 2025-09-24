@@ -22,6 +22,20 @@ export const models = {
     created: "2025-06-01T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "Qwen",
+  },
+  "qwen3-coder": {
+    name: "Qwen3-Coder-480B-A35B-Instruct-Turbo",
+    author: "qwen",
+    description:
+      "Qwen3-Coder-480B-A35B-Instruct is the Qwen3's most agentic code model, featuring significant performance on agentic coding, agentic browser-use and other foundational coding tasks, achieving results comparable to Claude Sonnet. This model supports multimodal capabilities including text, images, audio, video, and audio-visual reasoning.",
+    contextLength: 262_144,
+    maxOutputTokens: 16_384,
+    created: "2025-07-23T00:00:00.000Z",
+    modality: {
+      inputs: ["text", "image", "audio", "video"],
+      outputs: ["text"]
+    },
+    tokenizer: "Qwen",
   }
 } satisfies Record<string, ModelConfig>;
 
