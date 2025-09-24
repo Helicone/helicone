@@ -85,6 +85,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-coder:deepinfra": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "anthropic/claude-3.5-haiku": {
     "claude-3.5-haiku:anthropic": {
@@ -2613,6 +2639,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
 {
   "alibaba/qwen": [
     "deepinfra",
+    "deepinfra",
     "groq",
     "openrouter",
   ],
@@ -2780,9 +2807,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "alibaba/qwen": {
     "deepinfra": [
       {
-        "input": 8e-8,
-        "output": 2.9e-7,
+        "audio": 0,
+        "image": 0,
+        "input": 2.9e-7,
+        "output": 0.0000012,
+        "request": 0,
         "threshold": 0,
+        "web_search": 0,
       },
     ],
     "groq": [
@@ -3875,6 +3906,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
         "openrouter",
       ],
     },
+    {
+      "model": "qwen3-coder",
+      "providers": [
+        "deepinfra",
+      ],
+    },
   ],
   "providerBreakdown": [
     {
@@ -3890,7 +3927,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 5,
+      "modelCount": 6,
       "provider": "deepinfra",
     },
     {
@@ -3967,6 +4004,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "o4-mini",
     "qwen3-30b-a3b",
     "qwen3-32b",
+    "qwen3-coder",
   ],
   "sampleEndpointIds": [
     "chatgpt-4o-latest:openai:*",
@@ -3975,9 +4013,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:bedrock:us-east-1",
     "claude-3.5-haiku:openrouter:*",
   ],
-  "totalEndpoints": 111,
-  "totalModelProviderConfigs": 111,
-  "totalModelsWithPtb": 44,
+  "totalEndpoints": 112,
+  "totalModelProviderConfigs": 112,
+  "totalModelsWithPtb": 45,
   "totalProviders": 11,
 }
 `;

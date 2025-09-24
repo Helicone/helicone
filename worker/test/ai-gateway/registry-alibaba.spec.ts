@@ -561,5 +561,261 @@ describe("Alibaba Registry Tests", () => {
           },
         }));
     });
+
+    describe("qwen3-coder", () => {
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select deepinfra provider when none specified", () =>
+        runGatewayTest({
+          model: "qwen3-coder",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle successful request with custom parameters", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          request: {
+            messages: [
+              { role: "user", content: "Write a Python function to calculate fibonacci numbers" },
+            ],
+            maxTokens: 1000
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: ["Write a Python function to calculate fibonacci numbers"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tools parameter support for coding tasks", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Create a web scraper that can extract data from a website"
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle streaming requests for code generation", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Generate a React component for a todo list"
+              },
+            ],
+            stream: true,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: ['"stream":true'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle multimodal input (text, image, audio, video)", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Analyze this code screenshot and explain what it does"
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters correctly", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          request: {
+            messages: [
+              { role: "user", content: "Test with all supported parameters" },
+            ],
+            maxTokens: 1000,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify context length limits are respected (262k tokens)", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test message within 262k context limit",
+              },
+            ],
+            maxTokens: 16384, // Should be within the 16,384 completion token limit
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("qwen3-coder Error scenarios", () => {
+      it("should handle DeepInfra provider failure", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "DeepInfra service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from DeepInfra", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle authentication failure", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+
+      it("should handle model not found", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
   });
 });
