@@ -31,6 +31,7 @@ interface PlaygroundActionsProps {
   requestId?: string;
   isScrolled: boolean;
   isLoading?: boolean;
+  createPrompt?: boolean;
 }
 const PlaygroundActions = ({
   mappedContent,
@@ -45,6 +46,7 @@ const PlaygroundActions = ({
   requestId,
   isScrolled,
   isLoading = false,
+  createPrompt,
 }: PlaygroundActionsProps) => {
   const organization = useOrg();
   const resetToDefault = () => {
@@ -109,6 +111,7 @@ const PlaygroundActions = ({
         saveAndVersion={!!promptVersionId}
         onCreatePrompt={onCreatePrompt}
         onSavePrompt={onSavePrompt}
+        autoOpen={createPrompt}
       />
       <Tooltip>
         <TooltipTrigger asChild>

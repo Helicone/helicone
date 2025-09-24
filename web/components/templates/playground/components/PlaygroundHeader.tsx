@@ -48,6 +48,7 @@ interface PlaygroundHeaderProps {
   setUseAIGateway: (_useAIGateway: boolean) => void;
   error: string | null;
   isLoading?: boolean;
+  createPrompt?: boolean;
 }
 
 const PlaygroundHeader = ({
@@ -71,6 +72,7 @@ const PlaygroundHeader = ({
   setUseAIGateway,
   error,
   isLoading,
+  createPrompt,
 }: PlaygroundHeaderProps) => {
   const [modelListOpen, setModelListOpen] = useState<boolean>(false);
   return (
@@ -172,6 +174,7 @@ const PlaygroundHeader = ({
           onRun={onRun}
           isScrolled={isScrolled}
           isLoading={isLoading}
+          createPrompt={createPrompt}
         />
       </div>
     </div>

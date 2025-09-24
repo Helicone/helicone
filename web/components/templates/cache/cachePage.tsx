@@ -199,19 +199,19 @@ const CachePage = (props: CachePageProps) => {
     return avgLatency && avgLatencyCached ? avgLatency - avgLatencyCached : 0;
   }, [chMetrics.avgLatency.data?.data, chMetrics.avgLatencyCached.data?.data]);
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-  //       <LoadingAnimation title="Loading cache data..." />
-  //     </div>
-  //   );
-  // }
-
   if (!org?.currentOrg?.tier) {
     return null;
   }
 
-  if (hasCache === false) {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+        <div className="text-muted-foreground">Loading cache data...</div>
+      </div>
+    );
+  }
+
+  if (hasCache === false && !isLoading) {
     return (
       <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
         <div className="flex h-full flex-1">
@@ -294,13 +294,6 @@ const CachePage = (props: CachePageProps) => {
           </section>
         }
       />
-
-      <section className="w-full px-4 pt-2">
-        <div className="w-full rounded-lg border border-orange-300 bg-orange-50 p-4 text-sm text-orange-800 dark:border-orange-700 dark:bg-orange-950 dark:text-orange-200">
-          We reworked our caching system on May 22nd, 2025 at 4:30PM PST. Reach
-          out to us to restore any cache data prior to the change.
-        </div>
-      </section>
 
       <section className={`w-full px-4 pb-2 dark:border-border`}>
         <div className="py-4">

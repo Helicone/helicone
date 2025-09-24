@@ -212,7 +212,7 @@ const convertOpenAIChatRequestToMappedLLMRequest = (
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { setToolHandler } = useHeliconeAgent();
-  const { requestId, promptVersionId } = props;
+  const { requestId, promptVersionId, createPrompt } = props;
   const { setNotification } = useNotification();
   const router = useRouter();
   const { initializeColorMap } = useVariableColorMapStore();
@@ -1037,6 +1037,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 setUseAIGateway={setUseAIGateway}
                 error={error}
                 isLoading={isStreaming}
+                createPrompt={createPrompt}
               />
             )}
           </ResizablePanel>
@@ -1079,4 +1080,5 @@ export default PlaygroundPage;
 interface PlaygroundPageProps {
   requestId?: string;
   promptVersionId?: string;
+  createPrompt?: boolean;
 }
