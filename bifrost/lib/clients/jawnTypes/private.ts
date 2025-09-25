@@ -2124,8 +2124,9 @@ Json: JsonObject;
     /** @enum {string} */
     ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
     HeliconeMeta: {
-      gatewayProvider?: components["schemas"]["ModelProviderName"];
       providerModelId?: string;
+      gatewayModel?: string;
+      gatewayProvider?: components["schemas"]["ModelProviderName"];
       isPassthroughBilling?: boolean;
       gatewayDeploymentTarget?: string;
       gatewayRouterId?: string;

@@ -6403,11 +6403,14 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
-					"gatewayProvider": {
-						"$ref": "#/components/schemas/ModelProviderName"
-					},
 					"providerModelId": {
 						"type": "string"
+					},
+					"gatewayModel": {
+						"type": "string"
+					},
+					"gatewayProvider": {
+						"$ref": "#/components/schemas/ModelProviderName"
 					},
 					"isPassthroughBilling": {
 						"type": "boolean"

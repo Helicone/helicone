@@ -25,8 +25,10 @@ export type HeliconeMeta = {
   
   // AI Gateway metadata
   isPassthroughBilling?: boolean;
-  providerModelId?: string;
   gatewayProvider?: ModelProviderName;
+  
+  gatewayModel?: string; // registry format
+  providerModelId?: string; // provider format
 };
 export type MessageData = {
   id: string;
