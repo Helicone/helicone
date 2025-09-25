@@ -125,8 +125,12 @@ export type HeliconeMeta = {
   promptVersionId?: string;
   promptInputs?: Record<string, any>;
   heliconeManualAccessKey?: string;
+  
+  // Deprecated gateway metadata
   gatewayRouterId?: string;
   gatewayDeploymentTarget?: string;
+
+  // AI Gateway metadata
   isPassthroughBilling?: boolean;
   providerModelId?: string;
   gatewayProvider?: ModelProviderName;

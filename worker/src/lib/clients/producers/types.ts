@@ -22,6 +22,8 @@ export type HeliconeMeta = {
   promptVersionId?: string;
   promptInputs?: Record<string, any>;
   promptEnvironment?: string;
+  
+  // AI Gateway metadata
   isPassthroughBilling?: boolean;
   providerModelId?: string;
   gatewayProvider?: ModelProviderName;
