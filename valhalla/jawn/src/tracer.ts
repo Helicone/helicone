@@ -17,7 +17,7 @@ tracer.init({
       enabled: true,
       hooks: {
         request: (span, req) => {
-          span.setTag('http.request.size', req.headers['content-length'] || 0);
+          span.setTag('http.request.size', parseInt(req.headers['content-length'] as string) || 0);
         },
         response: (span, res) => {
           span.setTag('http.response.size', res.headers['content-length'] || 0);
