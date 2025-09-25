@@ -1,3 +1,3 @@
 import tracer from "dd-trace";
-// tracer.init(); // DISABLED - was causing high egress costs to Datadog
+tracer.init(); // Re-enabled for Universal Service Monitoring
 export default tracer;
