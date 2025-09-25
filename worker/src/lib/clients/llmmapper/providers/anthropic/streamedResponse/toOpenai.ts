@@ -10,7 +10,16 @@ export class AnthropicToOpenAIStreamConverter {
   private model: string = "";
   private created: number = 0;
   private finalUsage: ChatCompletionChunk["usage"] | null = null;
-  private toolCallState: Map<number, { id: string; name: string; arguments: string; toolCallIndex: number; hasNonEmptyDelta: boolean }> = new Map();
+  private toolCallState: Map<
+    number,
+    {
+      id: string;
+      name: string;
+      arguments: string;
+      toolCallIndex: number;
+      hasNonEmptyDelta: boolean;
+    }
+  > = new Map();
   private nextToolCallIndex: number = 0;
 
   constructor() {
@@ -26,18 +35,22 @@ export class AnthropicToOpenAIStreamConverter {
         this.model = event.message.model;
         this.toolCallState.clear();
         this.nextToolCallIndex = 0;
-        
-        chunks.push(this.createChunk({
-          choices: [{
-            index: 0,
-            delta: { 
-              role: "assistant",
-              content: ""
-            },
-            logprobs: null,
-            finish_reason: null,
-          }]
-        }));
+
+        chunks.push(
+          this.createChunk({
+            choices: [
+              {
+                index: 0,
+                delta: {
+                  role: "assistant",
+                  content: "",
+                },
+                logprobs: null,
+                finish_reason: null,
+              },
+            ],
+          })
+        );
         break;
 
       case "content_block_start":
@@ -48,41 +61,51 @@ export class AnthropicToOpenAIStreamConverter {
             name: event.content_block.name || "",
             arguments: "{}",
             toolCallIndex: this.nextToolCallIndex++,
-            hasNonEmptyDelta: false
+            hasNonEmptyDelta: false,
           };
           this.toolCallState.set(event.index, toolCall);
 
-          chunks.push(this.createChunk({
-            choices: [{
-              index: 0,
-              delta: {
-                tool_calls: [{
-                  index: toolCall.toolCallIndex,
-                  id: toolCall.id,
-                  type: "function",
-                  function: {
-                    name: toolCall.name,
-                    arguments: ""
-                  }
-                }]
-              },
-              logprobs: null,
-              finish_reason: null,
-            }]
-          }));
+          chunks.push(
+            this.createChunk({
+              choices: [
+                {
+                  index: 0,
+                  delta: {
+                    tool_calls: [
+                      {
+                        index: toolCall.toolCallIndex,
+                        id: toolCall.id,
+                        type: "function",
+                        function: {
+                          name: toolCall.name,
+                          arguments: "",
+                        },
+                      },
+                    ],
+                  },
+                  logprobs: null,
+                  finish_reason: null,
+                },
+              ],
+            })
+          );
         }
         break;
 
       case "content_block_delta":
         if (event.delta.type === "text_delta") {
-          chunks.push(this.createChunk({
-            choices: [{
-              index: 0,
-              delta: { content: event.delta.text },
-              logprobs: null,
-              finish_reason: null,
-            }]
-          }));
+          chunks.push(
+            this.createChunk({
+              choices: [
+                {
+                  index: 0,
+                  delta: { content: event.delta.text },
+                  logprobs: null,
+                  finish_reason: null,
+                },
+              ],
+            })
+          );
         } else if (event.delta.type === "input_json_delta") {
           const toolCall = this.toolCallState.get(event.index);
           if (toolCall) {
@@ -90,28 +113,34 @@ export class AnthropicToOpenAIStreamConverter {
             if (event.delta.partial_json !== "") {
               toolCall.hasNonEmptyDelta = true;
             }
-            
+
             // don't send chunks unless we have non-empty input
             if (toolCall.hasNonEmptyDelta) {
               toolCall.arguments += event.delta.partial_json;
-              
-              chunks.push(this.createChunk({
-                choices: [{
-                  index: 0,
-                  delta: {
-                    tool_calls: [{
-                      index: toolCall.toolCallIndex,
-                      id: toolCall.id,
-                      type: "function",
-                      function: {
-                        arguments: event.delta.partial_json
-                      }
-                    }]
-                  },
-                  logprobs: null,
-                  finish_reason: null,
-                }]
-              }));
+
+              chunks.push(
+                this.createChunk({
+                  choices: [
+                    {
+                      index: 0,
+                      delta: {
+                        tool_calls: [
+                          {
+                            index: toolCall.toolCallIndex,
+                            id: toolCall.id,
+                            type: "function",
+                            function: {
+                              arguments: event.delta.partial_json,
+                            },
+                          },
+                        ],
+                      },
+                      logprobs: null,
+                      finish_reason: null,
+                    },
+                  ],
+                })
+              );
             }
           }
         }
@@ -128,7 +157,7 @@ export class AnthropicToOpenAIStreamConverter {
       case "message_delta":
         // if we have any tool calls with empty arguments, emit them with the {} pattern
         this.finalizePendingToolCalls(chunks);
-        
+
         const cachedTokens = event.usage.cache_read_input_tokens ?? 0;
 
         this.finalUsage = {
@@ -139,7 +168,7 @@ export class AnthropicToOpenAIStreamConverter {
             prompt_tokens_details: {
               cached_tokens: cachedTokens,
               audio_tokens: 0,
-            }
+            },
           }),
           completion_tokens_details: {
             reasoning_tokens: 0,
@@ -150,22 +179,28 @@ export class AnthropicToOpenAIStreamConverter {
         };
 
         const finishReason = this.mapStopReason(event.delta.stop_reason);
-        
-        chunks.push(this.createChunk({
-          choices: [{
-            index: 0,
-            delta: {},
-            logprobs: null,
-            finish_reason: finishReason,
-          }]
-        }));
+
+        chunks.push(
+          this.createChunk({
+            choices: [
+              {
+                index: 0,
+                delta: {},
+                logprobs: null,
+                finish_reason: finishReason,
+              },
+            ],
+          })
+        );
         break;
 
       case "message_stop":
-        chunks.push(this.createChunk({
-          choices: [],
-          usage: this.finalUsage || undefined
-        }));
+        chunks.push(
+          this.createChunk({
+            choices: [],
+            usage: this.finalUsage || undefined,
+          })
+        );
         break;
 
       case "ping":
@@ -178,7 +213,9 @@ export class AnthropicToOpenAIStreamConverter {
     return chunks;
   }
 
-  private createChunk(overrides: Partial<ChatCompletionChunk>): ChatCompletionChunk {
+  private createChunk(
+    overrides: Partial<ChatCompletionChunk>
+  ): ChatCompletionChunk {
     return {
       id: this.messageId,
       object: "chat.completion.chunk",
@@ -186,11 +223,13 @@ export class AnthropicToOpenAIStreamConverter {
       model: this.model,
       system_fingerprint: "",
       choices: [],
-      ...overrides
+      ...overrides,
     };
   }
 
-  private mapStopReason(reason: string | null): OpenAIStreamChoice["finish_reason"] {
+  private mapStopReason(
+    reason: string | null
+  ): OpenAIStreamChoice["finish_reason"] {
     switch (reason) {
       case "max_tokens":
         return "length";
@@ -202,48 +241,66 @@ export class AnthropicToOpenAIStreamConverter {
   }
 
   private emitEmptyToolCallArguments(
-    toolCall: { id: string; name: string; arguments: string; toolCallIndex: number; hasNonEmptyDelta: boolean }, 
+    toolCall: {
+      id: string;
+      name: string;
+      arguments: string;
+      toolCallIndex: number;
+      hasNonEmptyDelta: boolean;
+    },
     chunks: OpenAIStreamEvent[]
   ): void {
     // this was a tool call made with empty arguments, so emit the {} pattern
     // When tools are called with empty args, Anthropic just does nothing
     // OpenAI clients expect something like this: (two chunks, { and } deltas)
-    chunks.push(this.createChunk({
-      choices: [{
-        index: 0,
-        delta: {
-          tool_calls: [{
-            index: toolCall.toolCallIndex,
-            id: toolCall.id,
-            type: "function",
-            function: {
-              arguments: "{"
-            }
-          }]
-        },
-        logprobs: null,
-        finish_reason: null,
-      }]
-    }));
-    
-    chunks.push(this.createChunk({
-      choices: [{
-        index: 0,
-        delta: {
-          tool_calls: [{
-            index: toolCall.toolCallIndex,
-            id: toolCall.id,
-            type: "function",
-            function: {
-              arguments: "}"
-            }
-          }]
-        },
-        logprobs: null,
-        finish_reason: null,
-      }]
-    }));
-    
+    chunks.push(
+      this.createChunk({
+        choices: [
+          {
+            index: 0,
+            delta: {
+              tool_calls: [
+                {
+                  index: toolCall.toolCallIndex,
+                  id: toolCall.id,
+                  type: "function",
+                  function: {
+                    arguments: "{",
+                  },
+                },
+              ],
+            },
+            logprobs: null,
+            finish_reason: null,
+          },
+        ],
+      })
+    );
+
+    chunks.push(
+      this.createChunk({
+        choices: [
+          {
+            index: 0,
+            delta: {
+              tool_calls: [
+                {
+                  index: toolCall.toolCallIndex,
+                  id: toolCall.id,
+                  type: "function",
+                  function: {
+                    arguments: "}",
+                  },
+                },
+              ],
+            },
+            logprobs: null,
+            finish_reason: null,
+          },
+        ],
+      })
+    );
+
     toolCall.arguments = "{}";
     toolCall.hasNonEmptyDelta = true; // mark as handled
   }

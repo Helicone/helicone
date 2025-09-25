@@ -47,18 +47,14 @@ export class SlackAlertManager {
 
       if (!res.ok) {
         return err(
-          `Error sending slack message: ${res.status} ${
-            res.statusText
-          } ${await res.text()}`
+          `Error sending slack message: ${res.status} ${res.statusText} ${await res.text()}`
         );
       }
 
       return ok(null);
     } catch (error) {
       return err(
-        `Failed to send slack message: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
+        `Failed to send slack message: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     }
   }

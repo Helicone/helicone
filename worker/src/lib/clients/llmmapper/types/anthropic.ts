@@ -1,12 +1,12 @@
-import { 
-  Role, 
-  AnthropicStopReason, 
-  AnthropicUsage, 
-  AnthropicContentBlock, 
-  AnthropicTool, 
+import {
+  Role,
+  AnthropicStopReason,
+  AnthropicUsage,
+  AnthropicContentBlock,
+  AnthropicTool,
   AnthropicToolChoice,
-  BaseStreamEvent 
-} from './common';
+  BaseStreamEvent,
+} from "./common";
 
 // === REQUEST TYPES ===
 export interface AnthropicRequestBody {
@@ -55,24 +55,27 @@ export interface MessageStartEvent extends BaseStreamEvent {
     model: string;
     stop_reason: string | null;
     stop_sequence: string | null;
-    usage: Omit<AnthropicUsage, 'service_tier'>; // service_tier not in streaming start (?)
+    usage: Omit<AnthropicUsage, "service_tier">; // service_tier not in streaming start (?)
   };
 }
 
 export interface ContentBlockStartEvent extends BaseStreamEvent {
   type: "content_block_start";
   index: number;
-  content_block: Pick<AnthropicContentBlock, 'type' | 'text' | 'id' | 'name' | 'input' | 'thinking'>;
+  content_block: Pick<
+    AnthropicContentBlock,
+    "type" | "text" | "id" | "name" | "input" | "thinking"
+  >;
 }
 
 export interface ContentBlockDeltaEvent extends BaseStreamEvent {
   type: "content_block_delta";
   index: number;
-  delta: 
-    | { type: "text_delta"; text: string; }
-    | { type: "input_json_delta"; partial_json: string; }
-    | { type: "thinking_delta"; thinking: string; }
-    | { type: "signature_delta"; signature: string; };
+  delta:
+    | { type: "text_delta"; text: string }
+    | { type: "input_json_delta"; partial_json: string }
+    | { type: "thinking_delta"; thinking: string }
+    | { type: "signature_delta"; signature: string };
 }
 
 export interface ContentBlockStopEvent extends BaseStreamEvent {
@@ -86,7 +89,7 @@ export interface MessageDeltaEvent extends BaseStreamEvent {
     stop_reason: string | null;
     stop_sequence: string | null;
   };
-  usage: Omit<AnthropicUsage, 'service_tier'>; // service_tier not in streaming delta
+  usage: Omit<AnthropicUsage, "service_tier">; // service_tier not in streaming delta
 }
 
 export interface MessageStopEvent extends BaseStreamEvent {
@@ -115,10 +118,10 @@ export type AnthropicStreamEvent =
   | PingEvent
   | ErrorEvent;
 
-export type { 
-  AnthropicStopReason, 
-  AnthropicUsage, 
-  AnthropicContentBlock, 
-  AnthropicTool, 
-  AnthropicToolChoice 
-} from './common'; 
+export type {
+  AnthropicStopReason,
+  AnthropicUsage,
+  AnthropicContentBlock,
+  AnthropicTool,
+  AnthropicToolChoice,
+} from "./common";

@@ -120,7 +120,7 @@ export async function updateLoopUsers(env: Env) {
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  let allUsers = await getAllUser(supabaseServer);
+  const allUsers = await getAllUser(supabaseServer);
 
   if (!allUsers || allUsers.length === 0) {
     console.log("LoopsManager: No matching users found, exiting early");

@@ -12,7 +12,7 @@ export class APIKeysStore {
 
   async getAPIKeys(): Promise<APIKey[] | null> {
     const pageSize = 1000;
-    let allData: APIKey[] = [];
+    const allData: APIKey[] = [];
     let offset = 0;
 
     while (true) {
