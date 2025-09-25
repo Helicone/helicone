@@ -1065,6 +1065,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemma-3": {
+    "gemma-3-12b-it:deepinfra": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "google/gemma-3-12b-it",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "meta/llama": {
     "llama-3.1-8b-instant:groq": {
       "context": 131072,
@@ -2711,6 +2737,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "openrouter",
   ],
+  "google/gemma-3": [
+    "deepinfra",
+  ],
   "meta/llama": [
     "groq",
     "groq",
@@ -3305,6 +3334,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "google/gemma-3": {
+    "deepinfra": [
+      {
+        "input": 5e-8,
+        "output": 1e-7,
+        "threshold": 0,
+      },
+    ],
+  },
   "meta/llama": {
     "groq": [
       {
@@ -3666,6 +3704,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
         "google-ai-studio",
         "openrouter",
         "vertex",
+      ],
+    },
+    {
+      "model": "gemma-3-12b-it",
+      "providers": [
+        "deepinfra",
       ],
     },
     {
