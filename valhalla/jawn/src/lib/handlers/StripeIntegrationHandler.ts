@@ -7,7 +7,6 @@ import {
   ok,
 } from "../../packages/common/result";
 import { KVCache } from "../cache/kvCache";
-import { dbExecute } from "../shared/db/dbExecute";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import { cacheResultCustom } from "../../utils/cacheResult";
@@ -17,25 +16,6 @@ const DEFAULT_CACHE_REFERENCE_ID = "00000000-0000-0000-0000-000000000000";
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 
 const cache = new KVCache(60 * 60 * 1000); // 1 hour
-
-const getStripeCustomerId = async (
-  organizationId: string
-): Promise<Result<string, string>> => {
-  const result = await dbExecute<{ stripe_customer_id: string }>(
-    `SELECT stripe_customer_id FROM organization where id = $1 limit 1`,
-    [organizationId]
-  );
-
-  if (result.error) {
-    return err(`Error fetching stripe customer id: ${result.error}`);
-  }
-
-  if (!result.data?.[0]?.stripe_customer_id) {
-    return err("Stripe customer id not found");
-  }
-
-  return ok(result.data[0].stripe_customer_id);
-};
 
 const getStripeIntegrationSettings = async (
   organizationId: string
@@ -104,13 +84,11 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    const stripe_customer_id = await cacheResultCustom(
-      "stripe_customer_id_" + organizationId,
-      async () => getStripeCustomerId(organizationId),
-      cache
-    );
+    // Get Stripe customer ID from request properties (passed via x-stripe-customer-id header)
+    const stripeCustomerId = context.message.log.request.properties?.["stripe_customer_id"];
 
-    if (stripe_customer_id.error || !stripe_customer_id.data) {
+    if (!stripeCustomerId) {
+      // Skip processing if no Stripe customer ID provided
       return await super.handle(context);
     }
 
@@ -149,7 +127,7 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
         event_name: integrationSettings.data.event_name,
         timestamp: context.message.log.request.requestCreatedAt.toISOString(),
         payload: {
-          stripe_customer_id: stripe_customer_id.data,
+          stripe_customer_id: stripeCustomerId,
           value: promptTokens.toString(),
           token_type: "input",
           model: formattedModel,
@@ -165,7 +143,7 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
         event_name: integrationSettings.data.event_name,
         timestamp: context.message.log.request.requestCreatedAt.toISOString(),
         payload: {
-          stripe_customer_id: stripe_customer_id.data,
+          stripe_customer_id: stripeCustomerId,
           value: completionTokens.toString(),
           token_type: "output",
           model: formattedModel,

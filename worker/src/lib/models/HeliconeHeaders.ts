@@ -444,6 +444,12 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         .map(([key, value]) => [key.substring(propTag.length), value])
     );
 
+    // Capture Stripe customer ID if provided
+    const stripeCustomerId = this.headers.get("x-stripe-customer-id");
+    if (stripeCustomerId) {
+      heliconePropertyHeaders["stripe_customer_id"] = stripeCustomerId;
+    }
+
     if (this.headers.get("Helicone-Posthog-Key")) {
       heliconePropertyHeaders["Helicone-Sent-To-Posthog"] = "true";
     }
