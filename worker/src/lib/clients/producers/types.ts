@@ -22,9 +22,13 @@ export type HeliconeMeta = {
   promptVersionId?: string;
   promptInputs?: Record<string, any>;
   promptEnvironment?: string;
+  
+  // AI Gateway metadata
   isPassthroughBilling?: boolean;
-  providerModelId?: string;
   gatewayProvider?: ModelProviderName;
+  
+  gatewayModel?: string; // registry format
+  providerModelId?: string; // provider format
 };
 export type MessageData = {
   id: string;

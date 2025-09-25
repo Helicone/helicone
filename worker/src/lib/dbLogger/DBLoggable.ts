@@ -36,6 +36,7 @@ import {
   IRequestBodyBuffer,
   ValidRequestBody,
 } from "../../RequestBodyBuffer/IRequestBodyBuffer";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
 export interface DBLoggableProps {
   response: {
@@ -703,6 +704,17 @@ export class DBLoggable {
         ? cachedHeaders.get("Helicone-Id")
         : DEFAULT_UUID;
 
+    let gatewayProvider: ModelProviderName | undefined;
+    let gatewayModel: string | undefined;
+    if (this.request.attempt?.source) {
+      const sourceParts = this.request.attempt?.source.split("/");
+      const model = sourceParts[0];
+      const provider = sourceParts[1];
+
+      gatewayProvider = provider as ModelProviderName;
+      gatewayModel = model as string;
+    }
+    
     const kafkaMessage: MessageData = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,
@@ -722,9 +734,9 @@ export class DBLoggable {
         promptInputs: this.request.prompt2025Settings.promptInputs,
         promptEnvironment: this.request.prompt2025Settings.environment,
         isPassthroughBilling: this.request.escrowInfo ? true : false,
-        providerModelId:
-          this.request.attempt?.endpoint.providerModelId ?? undefined,
-        gatewayProvider: this.request.attempt?.endpoint.provider ?? undefined,
+        gatewayProvider: gatewayProvider ?? undefined,
+        gatewayModel: gatewayModel ?? undefined,
+        providerModelId: this.request.attempt?.endpoint.providerModelId ?? undefined,
       },
       log: {
         request: {
