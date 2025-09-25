@@ -1,29 +1,3 @@
 import tracer from "dd-trace";
-tracer.init({
-  // Enable HTTP size tracking only (no body capture)
-  plugins: {
-    http: {
-      enabled: true,
-      hooks: {
-        request: (span, req) => {
-          span.setTag('http.request.size', req.headers['content-length'] || 0);
-        },
-        response: (span, res) => {
-          span.setTag('http.response.size', res.headers['content-length'] || 0);
-        }
-      }
-    },
-    https: {
-      enabled: true,
-      hooks: {
-        request: (span, req) => {
-          span.setTag('http.request.size', req.headers['content-length'] || 0);
-        },
-        response: (span, res) => {
-          span.setTag('http.response.size', res.headers['content-length'] || 0);
-        }
-      }
-    }
-  }
-}); // Enhanced for Universal Service Monitoring + size tracking
+tracer.init(); // Re-enabled for Universal Service Monitoring
 export default tracer;
