@@ -333,6 +333,13 @@ const ChatCompletionFunctions = z
     parameters: FunctionParameters.optional(),
   })
   ;
+const HeliceoneCacheControl = z
+  .object({
+    type: z.enum(["ephemeral"]),
+    ttl: z.string(),
+  })
+  .partial()
+  ;
 // Create a strict version by defining all fields in one object schema
 const CreateChatCompletionRequest = z.object({
   // Fields from CreateModelResponseProperties (ModelResponseProperties)
@@ -343,6 +350,7 @@ const CreateChatCompletionRequest = z.object({
   user: z.string().optional(),
   safety_identifier: z.string().optional(),
   prompt_cache_key: z.string().optional(),
+  cache_control: HeliceoneCacheControl.optional(),
   service_tier: ServiceTier.optional(),
 
   // Main request fields

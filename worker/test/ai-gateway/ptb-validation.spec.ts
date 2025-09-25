@@ -212,5 +212,232 @@ describe("PTB request validation", () => {
     const body = await response.json() as any;
     expect(body.error).toContain("Invalid input");
   });
+
+  describe("Helicone field support", () => {
+    it("accepts PTB requests with prompt_cache_key", async () => {
+      setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+      // Set up credits for the wallet
+      const orgId = "test-org-id";
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      // @ts-ignore
+      await runInDurableObject(walletStub, async (wallet: any) => {
+        await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+      });
+
+      await runGatewayTest({
+        model: "gpt-4o-mini/openai",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Hello" },
+            ],
+            model: "gpt-4o-mini",
+            prompt_cache_key: "doc-analysis-123",
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.openai.com/v1/chat/completions",
+              response: "success",
+              model: "gpt-4o-mini",
+              expects: {
+                escrowInfo: true,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      });
+    });
+
+    it("accepts PTB requests with cache_control", async () => {
+      setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+      // Set up credits for the wallet
+      const orgId = "test-org-id";
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      // @ts-ignore
+      await runInDurableObject(walletStub, async (wallet: any) => {
+        await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+      });
+
+      await runGatewayTest({
+        model: "gpt-4o-mini/openai",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Hello" },
+            ],
+            model: "gpt-4o-mini",
+            cache_control: {
+              type: "ephemeral",
+              ttl: "5m",
+            },
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.openai.com/v1/chat/completions",
+              response: "success",
+              model: "gpt-4o-mini",
+              expects: {
+                escrowInfo: true,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      });
+    });
+
+    it("accepts PTB requests with user and safety_identifier", async () => {
+      setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+      // Set up credits for the wallet
+      const orgId = "test-org-id";
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      // @ts-ignore
+      await runInDurableObject(walletStub, async (wallet: any) => {
+        await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+      });
+
+      await runGatewayTest({
+        model: "gpt-4o-mini/openai",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Hello" },
+            ],
+            model: "gpt-4o-mini",
+            user: "user-123",
+            safety_identifier: "safe-session-456",
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.openai.com/v1/chat/completions",
+              response: "success",
+              model: "gpt-4o-mini",
+              expects: {
+                escrowInfo: true,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      });
+    });
+
+    it("accepts PTB requests with all Helicone fields", async () => {
+      setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+      // Set up credits for the wallet
+      const orgId = "test-org-id";
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      // @ts-ignore
+      await runInDurableObject(walletStub, async (wallet: any) => {
+        await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+      });
+
+      await runGatewayTest({
+        model: "gpt-4o-mini/openai",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Hello" },
+            ],
+            model: "gpt-4o-mini",
+            prompt_cache_key: "doc-analysis-123",
+            user: "user-123",
+            safety_identifier: "safe-session-456",
+            cache_control: {
+              type: "ephemeral",
+              ttl: "10m",
+            },
+            metadata: {
+              session_id: "abc123",
+              user_tier: "premium",
+            },
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.openai.com/v1/chat/completions",
+              response: "success",
+              model: "gpt-4o-mini",
+              expects: {
+                escrowInfo: true,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      });
+    });
+
+    it("returns 400 when PTB payload has invalid cache_control type", async () => {
+      setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+      const { response } = await runGatewayTest({
+        model: "gpt-4o-mini/openai",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Hello" },
+            ],
+            model: "gpt-4o-mini",
+            cache_control: {
+              type: "permanent", // Should be 'ephemeral'
+              ttl: "5m",
+            },
+          },
+        },
+        expected: {
+          providers: [],
+          finalStatus: 400,
+        },
+      });
+
+      const body = await response.json() as any;
+      expect(body.error).toContain("cache_control");
+    });
+
+    it("returns 400 when PTB payload has invalid cache_control structure", async () => {
+      setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+      const { response } = await runGatewayTest({
+        model: "gpt-4o-mini/openai",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Hello" },
+            ],
+            model: "gpt-4o-mini",
+            cache_control: "invalid-string", // Should be object
+          },
+        },
+        expected: {
+          providers: [],
+          finalStatus: 400,
+        },
+      });
+
+      const body = await response.json() as any;
+      expect(body.error).toContain("cache_control");
+    });
+  });
 });
 
