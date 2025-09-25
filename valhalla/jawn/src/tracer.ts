@@ -9,7 +9,7 @@ tracer.init({
           span.setTag('http.request.size', parseInt(req.headers['content-length'] as string) || 0);
         },
         response: (span, res) => {
-          span.setTag('http.response.size', res.headers['content-length'] || 0);
+          span.setTag('http.response.size', parseInt(res.headers['content-length'] as string) || 0);
         }
       }
     },
