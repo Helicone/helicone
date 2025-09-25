@@ -11,6 +11,7 @@ import { gatewayForwarder } from "../../routers/gatewayRouter";
 import { AttemptBuilder } from "./AttemptBuilder";
 import { AttemptExecutor } from "./AttemptExecutor";
 import { Attempt, DisallowListEntry, EscrowInfo } from "./types";
+import { validateOpenAIChatPayload } from "./validators/openaiRequestValidator";
 import { oai2antResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { oai2antStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { RequestParams } from "@helicone-package/cost/models/types";
@@ -122,6 +123,19 @@ export class SimpleAIGateway {
     }> = [];
 
     for (const attempt of attempts) {
+      if (attempt.authType === "ptb") {
+        const validationResult = validateOpenAIChatPayload(finalBody);
+        if (isErr(validationResult)) {
+          errors.push({
+            attempt: attempt.source,
+            error: validationResult.error,
+            type: "invalid_format",
+            statusCode: 400,
+          });
+          continue;
+        }
+      }
+
       // Check disallow list
       if (this.isDisallowed(attempt, disallowList)) {
         errors.push({
@@ -370,6 +384,9 @@ export class SimpleAIGateway {
     const has429 = errors.some((e) => e.statusCode === 429);
     const has401 = errors.some((e) => e.statusCode === 401);
     const first403 = errors.find((e) => e.statusCode === 403);
+    const firstInvalid = errors.find(
+      (e) => e.statusCode === 400 && e.type === "invalid_format"
+    );
     const allDisallowed =
       errors.length > 0 && errors.every((e) => e.type === "disallowed");
 
@@ -384,6 +401,10 @@ export class SimpleAIGateway {
     } else if (first403) {
       statusCode = 403;
       message = first403.error;
+      code = "request_failed";
+    } else if (firstInvalid) {
+      statusCode = 400;
+      message = firstInvalid.error;
       code = "request_failed";
     } else if (allDisallowed) {
       statusCode = 400;
