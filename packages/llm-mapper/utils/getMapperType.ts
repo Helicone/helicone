@@ -53,6 +53,7 @@ export const getMapperTypeFromHeliconeRequest = (
     path: heliconeRequest.request_path,
     isAssistant: isAssistantRequest(heliconeRequest),
     targetUrl: heliconeRequest.target_url,
+    requestReferrer: heliconeRequest.request_referrer,
   });
 };
 
@@ -71,6 +72,10 @@ export const getMapperType = ({
   targetUrl?: string | null;
   requestReferrer?: string | null;
 }): MapperType => {
+  if (requestReferrer === "ai-gateway") {
+    return "ai-gateway";
+  }
+
   if (
     targetUrl &&
     targetUrl.includes("chat/completions") &&
