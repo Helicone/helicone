@@ -2123,7 +2123,10 @@ Json: JsonObject;
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
+    /** @enum {string} */
+    ResponseFormat: "ANTHROPIC" | "OPENAI";
     HeliconeMeta: {
+      gatewayResponseFormat?: components["schemas"]["ResponseFormat"];
       providerModelId?: string;
       gatewayModel?: string;
       gatewayProvider?: components["schemas"]["ModelProviderName"];

@@ -6401,8 +6401,18 @@
 				],
 				"nullable": false
 			},
+			"ResponseFormat": {
+				"type": "string",
+				"enum": [
+					"ANTHROPIC",
+					"OPENAI"
+				]
+			},
 			"HeliconeMeta": {
 				"properties": {
+					"gatewayResponseFormat": {
+						"$ref": "#/components/schemas/ResponseFormat"
+					},
 					"providerModelId": {
 						"type": "string"
 					},

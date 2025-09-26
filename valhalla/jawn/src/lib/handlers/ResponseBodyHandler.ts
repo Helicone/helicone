@@ -35,7 +35,8 @@ import {
   modelCost,
   modelCostBreakdownFromRegistry,
 } from "@helicone-package/cost/costCalc";
-import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
+import { getProvider, heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
+import { ResponseFormat } from "@helicone-package/cost/models/types";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -292,7 +293,15 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     const isStream =
       log.request.isStream || context.processedLog.request.body?.stream;
 
-    const provider = log.request.provider;
+    const isAIGateway = log.request.requestReferrer === "ai-gateway";
+    // gatewayProvider and gatewayResponseFromat are always set for AI Gateway requests
+    // but tie all values to the isAIGateway flag to avoid edge cases
+    const provider = isAIGateway 
+      ? context.message.heliconeMeta.gatewayProvider ?? log.request.provider 
+      : log.request.provider;
+    const gatewayResponseFormat = isAIGateway
+      ? context.message.heliconeMeta.gatewayResponseFormat
+      : undefined;
 
     let responseBody = context.rawLog.rawResponseBody;
     const requestBody = context.rawLog.rawRequestBody;
@@ -325,6 +334,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         isStream,
         provider,
         responseBody,
+        isAIGateway,
+        gatewayResponseFormat,
         model,
       );
       return await parser.parse({
@@ -409,21 +420,31 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
   getBodyProcessor(
     isStream: boolean,
-    provider: string,
+    providerString: string,
     responseBody: any,
+    isAIGateway: boolean,
+    gatewayResponseFormat: ResponseFormat | undefined,
     model?: string,
   ): IBodyProcessor {
     if (!isStream) {
-      if (provider === "ANTHROPIC" && responseBody) {
+      if (isAIGateway && gatewayResponseFormat) {
+        switch (gatewayResponseFormat) {
+          case "ANTHROPIC":
+            return new AnthropicBodyProcessor();
+          default:
+            return new GenericBodyProcessor();
+        }
+      }
+      if (providerString === "ANTHROPIC" && responseBody) {
         return new AnthropicBodyProcessor();
       }
-      if (provider === "LLAMA") {
+      if (providerString === "LLAMA") {
         return new LlamaBodyProcessor();
       }
-      if (provider === "GOOGLE") {
+      if (providerString === "GOOGLE") {
         return new GoogleBodyProcessor();
       }
-      if (provider === "VERCEL") {
+      if (providerString === "VERCEL") {
         // Check if it's actually a stream by content
         if (
           typeof responseBody === "string" &&
@@ -437,25 +458,33 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     if (isStream) {
-      if (provider === "ANTHROPIC" || model?.includes("claude")) {
+      if (isAIGateway && gatewayResponseFormat) {
+        switch (gatewayResponseFormat) {
+          case "ANTHROPIC":
+            return new AnthropicStreamBodyProcessor();
+          default:
+            return new OpenAIStreamProcessor();
+        }
+      }
+      if (providerString === "ANTHROPIC" || model?.includes("claude")) {
         return new AnthropicStreamBodyProcessor();
       }
-      if (provider === "LLAMA") {
+      if (providerString === "LLAMA") {
         return new LlamaStreamBodyProcessor();
       }
-      if (provider === "GOOGLE") {
+      if (providerString === "GOOGLE") {
         return new GoogleStreamBodyProcessor();
       }
-      if (provider === "TOGETHER") {
+      if (providerString === "TOGETHER") {
         return new TogetherAIStreamProcessor();
       }
-      if (provider === "GROQ") {
+      if (providerString === "GROQ") {
         return new GroqStreamProcessor();
       }
-      if (provider === "VERCEL") {
+      if (providerString === "VERCEL") {
         return new VercelStreamProcessor();
       }
-      if (provider === "AWS" || provider === "BEDROCK") {
+      if (providerString === "AWS" || providerString === "BEDROCK") {
         return new BedrockStreamProcessor();
       }
       return new OpenAIStreamProcessor();

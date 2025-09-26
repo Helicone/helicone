@@ -1904,9 +1904,14 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"enum","enums":["anthropic","openai","bedrock","vertex","azure","perplexity","groq","deepseek","cohere","xai","deepinfra","google-ai-studio","openrouter"],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResponseFormat": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["ANTHROPIC"]},{"dataType":"enum","enums":["OPENAI"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "HeliconeMeta": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"providerModelId":{"dataType":"string"},"gatewayModel":{"dataType":"string"},"gatewayProvider":{"ref":"ModelProviderName"},"isPassthroughBilling":{"dataType":"boolean"},"gatewayDeploymentTarget":{"dataType":"string"},"gatewayRouterId":{"dataType":"string"},"heliconeManualAccessKey":{"dataType":"string"},"promptInputs":{"ref":"Record_string.any_"},"promptVersionId":{"dataType":"string"},"promptEnvironment":{"dataType":"string"},"promptId":{"dataType":"string"},"lytixHost":{"dataType":"string"},"lytixKey":{"dataType":"string"},"posthogHost":{"dataType":"string"},"posthogApiKey":{"dataType":"string"},"webhookEnabled":{"dataType":"boolean","required":true},"omitResponseLog":{"dataType":"boolean","required":true},"omitRequestLog":{"dataType":"boolean","required":true},"modelOverride":{"dataType":"string"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"gatewayResponseFormat":{"ref":"ResponseFormat"},"providerModelId":{"dataType":"string"},"gatewayModel":{"dataType":"string"},"gatewayProvider":{"ref":"ModelProviderName"},"isPassthroughBilling":{"dataType":"boolean"},"gatewayDeploymentTarget":{"dataType":"string"},"gatewayRouterId":{"dataType":"string"},"heliconeManualAccessKey":{"dataType":"string"},"promptInputs":{"ref":"Record_string.any_"},"promptVersionId":{"dataType":"string"},"promptEnvironment":{"dataType":"string"},"promptId":{"dataType":"string"},"lytixHost":{"dataType":"string"},"lytixKey":{"dataType":"string"},"posthogHost":{"dataType":"string"},"posthogApiKey":{"dataType":"string"},"webhookEnabled":{"dataType":"boolean","required":true},"omitResponseLog":{"dataType":"boolean","required":true},"omitRequestLog":{"dataType":"boolean","required":true},"modelOverride":{"dataType":"string"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "TemplateWithInputs": {
