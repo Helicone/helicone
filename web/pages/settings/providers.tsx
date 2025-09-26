@@ -51,7 +51,7 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
         />
         <SettingsSectionContent>
           <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-border bg-muted/50 p-8">
-            <ShieldAlert className="h-12 w-12 text-muted-foreground" />
+            <ShieldAlert size={48} className="text-muted-foreground" />
             <div className="flex flex-col items-center gap-2 text-center">
               <P className="font-semibold">Admin Access Required</P>
               <P className="text-sm text-muted-foreground">
