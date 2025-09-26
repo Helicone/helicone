@@ -152,8 +152,8 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
 
     // Validate and sanitize model and provider names
     const rawModel =
-      context.processedLog?.model ||
       context.processedLog?.request?.model ||
+      context.processedLog?.model ||
       "unknown";
     const rawProvider = context.message.log.request.provider || "unknown";
 
@@ -216,7 +216,8 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
     // Create events for completion tokens (output)
     if (completionTokens > 0) {
       // Use response timestamp for completion events for accurate billing timing
-      const completionTimestamp = context.message.log.response?.responseCreatedAt
+      const completionTimestamp = context.message.log.response
+        ?.responseCreatedAt
         ? context.message.log.response.responseCreatedAt.toISOString()
         : context.message.log.request.requestCreatedAt.toISOString();
 

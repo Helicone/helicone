@@ -357,6 +357,26 @@ export interface paths {
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
   };
+  "/v1/integration": {
+    get: operations["GetIntegrations"];
+    post: operations["CreateIntegration"];
+  };
+  "/v1/integration/{integrationId}": {
+    get: operations["GetIntegration"];
+    post: operations["UpdateIntegration"];
+  };
+  "/v1/integration/type/{type}": {
+    get: operations["GetIntegrationByType"];
+  };
+  "/v1/integration/slack/settings": {
+    get: operations["GetSlackSettings"];
+  };
+  "/v1/integration/slack/channels": {
+    get: operations["GetSlackChannels"];
+  };
+  "/v1/integration/{integrationId}/stripe/test-meter-event": {
+    post: operations["TestStripeMeterEvent"];
+  };
   "/v1/trace/custom/v1/log": {
     post: operations["LogCustomTraceLegacy"];
   };
@@ -449,26 +469,6 @@ export interface paths {
   };
   "/v1/public/security": {
     post: operations["GetSecurity"];
-  };
-  "/v1/integration": {
-    get: operations["GetIntegrations"];
-    post: operations["CreateIntegration"];
-  };
-  "/v1/integration/{integrationId}": {
-    get: operations["GetIntegration"];
-    post: operations["UpdateIntegration"];
-  };
-  "/v1/integration/type/{type}": {
-    get: operations["GetIntegrationByType"];
-  };
-  "/v1/integration/slack/settings": {
-    get: operations["GetSlackSettings"];
-  };
-  "/v1/integration/slack/channels": {
-    get: operations["GetSlackChannels"];
-  };
-  "/v1/integration/{integrationId}/stripe/test-meter-event": {
-    post: operations["TestStripeMeterEvent"];
   };
   "/v1/helicone-sql/schema": {
     /**
@@ -2222,6 +2222,47 @@ Json: JsonObject;
       /** Format: double */
       count: number;
     };
+    IntegrationCreateParams: {
+      integration_name: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+    };
+    Integration: {
+      integration_name?: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+      id: string;
+    };
+    ResultSuccess_Array_Integration__: {
+      data: components["schemas"]["Integration"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
+    IntegrationUpdateParams: {
+      integration_name?: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+    };
+    ResultSuccess_Integration_: {
+      data: components["schemas"]["Integration"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Array__id-string--name-string___": {
+      data: {
+          name: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
+    TestStripeMeterEventRequest: {
+      event_name: string;
+      customer_id: string;
+    };
     ValidationError: {
       field: string;
       message: string;
@@ -3191,47 +3232,6 @@ Json: JsonObject;
       error: null;
     };
     "Result__unsafe-boolean_.string_": components["schemas"]["ResultSuccess__unsafe-boolean__"] | components["schemas"]["ResultError_string_"];
-    IntegrationCreateParams: {
-      integration_name: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-    };
-    Integration: {
-      integration_name?: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-      id: string;
-    };
-    ResultSuccess_Array_Integration__: {
-      data: components["schemas"]["Integration"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
-    IntegrationUpdateParams: {
-      integration_name?: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-    };
-    ResultSuccess_Integration_: {
-      data: components["schemas"]["Integration"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Array__id-string--name-string___": {
-      data: {
-          name: string;
-          id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
-    TestStripeMeterEventRequest: {
-      event_name: string;
-      customer_id: string;
-    };
     ClickHouseTableColumn: {
       name: string;
       type: string;
@@ -6060,6 +6060,121 @@ export interface operations {
       };
     };
   };
+  GetIntegrations: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array_Integration_.string_"];
+        };
+      };
+    };
+  };
+  CreateIntegration: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IntegrationCreateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  GetIntegration: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  UpdateIntegration: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IntegrationUpdateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetIntegrationByType: {
+    parameters: {
+      path: {
+        type: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  GetSlackSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  GetSlackChannels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
+        };
+      };
+    };
+  };
+  TestStripeMeterEvent: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TestStripeMeterEventRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
   LogCustomTraceLegacy: {
     requestBody: {
       content: {
@@ -6521,121 +6636,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__unsafe-boolean_.string_"];
-        };
-      };
-    };
-  };
-  GetIntegrations: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Array_Integration_.string_"];
-        };
-      };
-    };
-  };
-  CreateIntegration: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["IntegrationCreateParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string_.string_"];
-        };
-      };
-    };
-  };
-  GetIntegration: {
-    parameters: {
-      path: {
-        integrationId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Integration.string_"];
-        };
-      };
-    };
-  };
-  UpdateIntegration: {
-    parameters: {
-      path: {
-        integrationId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["IntegrationUpdateParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetIntegrationByType: {
-    parameters: {
-      path: {
-        type: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Integration.string_"];
-        };
-      };
-    };
-  };
-  GetSlackSettings: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Integration.string_"];
-        };
-      };
-    };
-  };
-  GetSlackChannels: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
-        };
-      };
-    };
-  };
-  TestStripeMeterEvent: {
-    parameters: {
-      path: {
-        integrationId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TestStripeMeterEventRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };

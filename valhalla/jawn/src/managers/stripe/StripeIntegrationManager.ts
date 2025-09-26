@@ -11,25 +11,25 @@ type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 function sanitizeStripeError(error: unknown): string {
   if (error instanceof Error) {
     // Common Stripe error patterns that are safe to expose
-    if (error.message.includes('Invalid API key')) {
-      return 'Invalid Stripe API key configuration';
+    if (error.message.includes("Invalid API key")) {
+      return "Invalid Stripe API key configuration";
     }
-    if (error.message.includes('No such customer')) {
-      return 'Invalid Stripe customer ID';
+    if (error.message.includes("No such customer")) {
+      return "Invalid Stripe customer ID";
     }
-    if (error.message.includes('meter event')) {
-      return 'Meter event configuration error';
+    if (error.message.includes("meter event")) {
+      return "Meter event configuration error";
     }
-    if (error.message.includes('rate limit')) {
-      return 'Stripe API rate limit exceeded';
+    if (error.message.includes("rate limit")) {
+      return "Stripe API rate limit exceeded";
     }
-    if (error.message.includes('network')) {
-      return 'Network error connecting to Stripe';
+    if (error.message.includes("network")) {
+      return "Network error connecting to Stripe";
     }
     // Generic error for other cases
-    return 'Stripe API error occurred';
+    return "Stripe API error occurred";
   }
-  return 'Unknown error occurred';
+  return "Unknown error occurred";
 }
 
 export class StripeIntegrationManager extends BaseManager {
@@ -100,9 +100,7 @@ export class StripeIntegrationManager extends BaseManager {
       const stripe = new Stripe(stripeKey.provider_key);
 
       try {
-        await stripe.v2.billing.meterEventStream.create({
-          events: [testEvent]
-        });
+        await stripe.v2.billing.meterEvents.create(testEvent);
 
         return ok("Test meter event sent successfully");
       } catch (stripeError) {
@@ -123,7 +121,8 @@ export class StripeIntegrationManager extends BaseManager {
       }
 
       // 1. Get Stripe integration for this organization to verify it's active
-      const integration = await this.integrationManager.getIntegrationByType("stripe");
+      const integration =
+        await this.integrationManager.getIntegrationByType("stripe");
       if (integration.error) {
         return err(`Stripe integration not found: ${integration.error}`);
       }
@@ -137,7 +136,8 @@ export class StripeIntegrationManager extends BaseManager {
       }
 
       // 2. Get Stripe key from vault
-      const stripeKeys = await this.vaultManager.getDecryptedProviderKeysByOrgId();
+      const stripeKeys =
+        await this.vaultManager.getDecryptedProviderKeysByOrgId();
       if (stripeKeys.error) {
         return err(`Failed to get vault keys: ${stripeKeys.error}`);
       }
@@ -169,11 +169,30 @@ export class StripeIntegrationManager extends BaseManager {
       let totalProcessed = 0;
       const errors = [];
 
+      const meterEventSession =
+        await stripe.v2.billing.meterEventSession.create();
+
       for (const batch of batches) {
         try {
-          await stripe.v2.billing.meterEventStream.create({
-            events: batch
-          });
+          const response = await fetch(
+            "https://meter-events.stripe.com/v2/billing/meter_event_stream",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${meterEventSession.authentication_token}`,
+                "Content-Type": "application/json",
+                "Stripe-Version": "2025-03-31.preview",
+              },
+              body: JSON.stringify({ events: batch }),
+            }
+          );
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(
+              `Error response from Stripe: ${response.status} ${errorText}`
+            );
+          }
+
           totalProcessed += batch.length;
         } catch (stripeError) {
           const errorMessage = sanitizeStripeError(stripeError);
@@ -182,7 +201,9 @@ export class StripeIntegrationManager extends BaseManager {
       }
 
       if (errors.length > 0) {
-        return err(`Processed ${totalProcessed}/${events.length} events. Errors: ${errors.join(', ')}`);
+        return err(
+          `Processed ${totalProcessed}/${events.length} events. Errors: ${errors.join(", ")}`
+        );
       }
 
       return ok(`Successfully sent ${totalProcessed} meter events to Stripe`);

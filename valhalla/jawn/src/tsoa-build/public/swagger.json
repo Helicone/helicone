@@ -5919,6 +5919,184 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IntegrationCreateParams": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"integration_name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Integration": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Array_Integration__": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Integration"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array_Integration_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array_Integration__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"IntegrationUpdateParams": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Integration_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/Integration"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Integration.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Integration_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_Array__id-string--name-string___": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"name",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array__id-string--name-string__.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array__id-string--name-string___"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TestStripeMeterEventRequest": {
+				"properties": {
+					"event_name": {
+						"type": "string"
+					},
+					"customer_id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"event_name",
+					"customer_id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ValidationError": {
 				"properties": {
 					"field": {
@@ -8935,184 +9113,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"IntegrationCreateParams": {
-				"properties": {
-					"integration_name": {
-						"type": "string"
-					},
-					"settings": {
-						"$ref": "#/components/schemas/Json"
-					},
-					"active": {
-						"type": "boolean"
-					}
-				},
-				"required": [
-					"integration_name"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Integration": {
-				"properties": {
-					"integration_name": {
-						"type": "string"
-					},
-					"settings": {
-						"$ref": "#/components/schemas/Json"
-					},
-					"active": {
-						"type": "boolean"
-					},
-					"id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"id"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_Array_Integration__": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/Integration"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_Array_Integration_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_Array_Integration__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"IntegrationUpdateParams": {
-				"properties": {
-					"integration_name": {
-						"type": "string"
-					},
-					"settings": {
-						"$ref": "#/components/schemas/Json"
-					},
-					"active": {
-						"type": "boolean"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_Integration_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/Integration"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_Integration.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_Integration_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess_Array__id-string--name-string___": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"name": {
-									"type": "string"
-								},
-								"id": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"name",
-								"id"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_Array__id-string--name-string__.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_Array__id-string--name-string___"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"TestStripeMeterEventRequest": {
-				"properties": {
-					"event_name": {
-						"type": "string"
-					},
-					"customer_id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"event_name",
-					"customer_id"
-				],
-				"type": "object",
-				"additionalProperties": false
 			},
 			"ClickHouseTableColumn": {
 				"properties": {
@@ -17577,6 +17577,276 @@
 				"parameters": []
 			}
 		},
+		"/v1/integration": {
+			"post": {
+				"operationId": "CreateIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IntegrationCreateParams"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetIntegrations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array_Integration_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/{integrationId}": {
+			"post": {
+				"operationId": "UpdateIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IntegrationUpdateParams"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/integration/type/{type}": {
+			"get": {
+				"operationId": "GetIntegrationByType",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/integration/slack/settings": {
+			"get": {
+				"operationId": "GetSlackSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/slack/channels": {
+			"get": {
+				"operationId": "GetSlackChannels",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array__id-string--name-string__.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/{integrationId}/stripe/test-meter-event": {
+			"post": {
+				"operationId": "TestStripeMeterEvent",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TestStripeMeterEventRequest"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/trace/custom/v1/log": {
 			"post": {
 				"operationId": "LogCustomTraceLegacy",
@@ -18777,276 +19047,6 @@
 									"advanced"
 								],
 								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/integration": {
-			"post": {
-				"operationId": "CreateIntegration",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__id-string_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/IntegrationCreateParams"
-							}
-						}
-					}
-				}
-			},
-			"get": {
-				"operationId": "GetIntegrations",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Array_Integration_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/integration/{integrationId}": {
-			"post": {
-				"operationId": "UpdateIntegration",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "integrationId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/IntegrationUpdateParams"
-							}
-						}
-					}
-				}
-			},
-			"get": {
-				"operationId": "GetIntegration",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Integration.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "integrationId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/integration/type/{type}": {
-			"get": {
-				"operationId": "GetIntegrationByType",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Integration.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "type",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/integration/slack/settings": {
-			"get": {
-				"operationId": "GetSlackSettings",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Integration.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/integration/slack/channels": {
-			"get": {
-				"operationId": "GetSlackChannels",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Array__id-string--name-string__.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/integration/{integrationId}/stripe/test-meter-event": {
-			"post": {
-				"operationId": "TestStripeMeterEvent",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_string.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "integrationId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/TestStripeMeterEventRequest"
 							}
 						}
 					}
