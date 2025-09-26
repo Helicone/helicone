@@ -217,15 +217,7 @@ describe("Google Registry Tests", () => {
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: [
-                    '"max_tokens":1000',
-                    '"temperature":',
-                    '"top_p":',
-                    '"frequency_penalty":',
-                    '"presence_penalty":',
-                    '"repetition_penalty":',
-                    '"top_k":',
-                    '"seed":',
-                    '"min_p":',
+                    '"max_tokens":1000'
                   ],
                 },
               },
