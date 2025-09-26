@@ -18,7 +18,7 @@ const ProvidersSettings: NextPageWithLayout<void> = () => {
   const org = useOrg();
   const { user } = useHeliconeAuthClient();
   const { data: members, isLoading } = useGetOrgMembers(
-    org?.currentOrg?.id || ""
+    org?.currentOrg?.id || "",
   );
 
   const isOwner = org?.currentOrg?.owner === user?.id;
