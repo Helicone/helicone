@@ -165,7 +165,7 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
               </span>
             </li>
             <li>
-              Give your key a descriptive name like "Helicone Integration"
+              Give your key a descriptive name like &quot;Helicone Integration&quot;
             </li>
             <li>
               Set the following permissions:
@@ -191,7 +191,7 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
               <span className="font-medium text-foreground">Create key</span>
             </li>
             <li>
-              Copy the key (it starts with "rk_live_" or "rk_test_") and paste
+              Copy the key (it starts with &quot;rk_live_&quot; or &quot;rk_test_&quot;) and paste
               it below
             </li>
           </ol>
