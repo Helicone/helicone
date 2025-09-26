@@ -2,6 +2,7 @@ import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { Provider } from "../../..";
 import { Result } from "../../util/results";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import { ResponseFormat } from "@helicone-package/cost/models/types";
 
 export interface MessageProducer {
   sendMessage(msg: MessageData): Promise<Result<null, string>>;
@@ -29,6 +30,7 @@ export type HeliconeMeta = {
   
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
+  gatewayResponseFormat?: ResponseFormat;
 };
 export type MessageData = {
   id: string;

@@ -7,6 +7,7 @@ import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { ModelUsage } from "@helicone-package/cost";
 import { CostBreakdown } from "@helicone-package/cost/models/calculate-cost";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import { ResponseFormat } from "@helicone-package/cost/models/types";
 
 export class HandlerContext extends SetOnce {
   public message: KafkaMessageContents;
@@ -136,6 +137,7 @@ export type HeliconeMeta = {
   
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
+  gatewayResponseFormat?: ResponseFormat;
 };
 
 export type KafkaMessageContents = {
