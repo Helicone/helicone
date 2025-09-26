@@ -46,7 +46,8 @@
       "mcp__playwright__browser_console_messages",
       "mcp__playwright__browser_network_requests",
       "mcp__playwright__browser_evaluate",
-      "Bash(yarn build)"
+      "Bash(yarn build)",
+      "Bash(gh api:*)"
     ],
     "deny": []
   }
