@@ -198,7 +198,7 @@ describe("Google Registry Tests", () => {
           },
         }));
 
-      it.skip("should handle supported parameters", () =>
+      it("should handle supported parameters", () =>
         runGatewayTest({
           model: "gemma-3-12b-it/deepinfra",
           request: {
@@ -216,9 +216,7 @@ describe("Google Registry Tests", () => {
                 data: createOpenAIMockResponse("google/gemma-3-12b-it"),
                 expects: {
                   ...deepinfraAuthExpectations,
-                  bodyContains: [
-                    '"max_tokens":1000'
-                  ],
+                  bodyContains: ['"max_tokens":1000'],
                 },
               },
             ],
