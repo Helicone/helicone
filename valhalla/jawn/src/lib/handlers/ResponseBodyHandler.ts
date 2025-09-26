@@ -420,7 +420,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
   getBodyProcessor(
     isStream: boolean,
-    providerString: string,
+    provider: string,
     responseBody: any,
     isAIGateway: boolean,
     gatewayResponseFormat: ResponseFormat | undefined,
@@ -435,16 +435,16 @@ export class ResponseBodyHandler extends AbstractLogHandler {
             return new GenericBodyProcessor();
         }
       }
-      if (providerString === "ANTHROPIC" && responseBody) {
+      if (provider === "ANTHROPIC" && responseBody) {
         return new AnthropicBodyProcessor();
       }
-      if (providerString === "LLAMA") {
+      if (provider === "LLAMA") {
         return new LlamaBodyProcessor();
       }
-      if (providerString === "GOOGLE") {
+      if (provider === "GOOGLE") {
         return new GoogleBodyProcessor();
       }
-      if (providerString === "VERCEL") {
+      if (provider === "VERCEL") {
         // Check if it's actually a stream by content
         if (
           typeof responseBody === "string" &&
@@ -466,25 +466,25 @@ export class ResponseBodyHandler extends AbstractLogHandler {
             return new OpenAIStreamProcessor();
         }
       }
-      if (providerString === "ANTHROPIC" || model?.includes("claude")) {
+      if (provider === "ANTHROPIC" || model?.includes("claude")) {
         return new AnthropicStreamBodyProcessor();
       }
-      if (providerString === "LLAMA") {
+      if (provider === "LLAMA") {
         return new LlamaStreamBodyProcessor();
       }
-      if (providerString === "GOOGLE") {
+      if (provider === "GOOGLE") {
         return new GoogleStreamBodyProcessor();
       }
-      if (providerString === "TOGETHER") {
+      if (provider === "TOGETHER") {
         return new TogetherAIStreamProcessor();
       }
-      if (providerString === "GROQ") {
+      if (provider === "GROQ") {
         return new GroqStreamProcessor();
       }
-      if (providerString === "VERCEL") {
+      if (provider === "VERCEL") {
         return new VercelStreamProcessor();
       }
-      if (providerString === "AWS" || providerString === "BEDROCK") {
+      if (provider === "AWS" || provider === "BEDROCK") {
         return new BedrockStreamProcessor();
       }
       return new OpenAIStreamProcessor();
