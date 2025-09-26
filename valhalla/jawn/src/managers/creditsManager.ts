@@ -29,9 +29,12 @@ export class CreditsManager extends BaseManager {
       if (isError(debits)) {
         return err(debits.error);
       }
-      const balance = creditSum.totalCredits - debits.data.spend_cents;
 
-      return ok({ balance, totalCreditsPurchased: creditSum.totalCredits });
+      const totalCredits = creditSum.totalCredits || 0;
+      const spendCents = debits.data?.spend_cents || 0;
+      const balance = totalCredits - spendCents;
+
+      return ok({ balance, totalCreditsPurchased: totalCredits });
     } catch (error: any) {
       return err(`Error retrieving credit balance: ${error.message}`);
     }
