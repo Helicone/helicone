@@ -54,7 +54,7 @@ export class StripeIntegrationManager extends BaseManager {
       }
 
       // Validate API key format (basic check)
-      if (!stripeKey.provider_key.startsWith('sk_')) {
+      if (!stripeKey.provider_key.match(/^(sk_|rk_)/)) {
         return err("Invalid Stripe API key format");
       }
 
