@@ -16,6 +16,7 @@ import { Valhalla } from "../db/valhalla";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { S3Client } from "../clients/S3Client";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
+import { AttemptError } from "../ai-gateway/types";
 
 export async function errorForwarder(
   request: RequestWrapper,
@@ -24,7 +25,7 @@ export async function errorForwarder(
   error: {
     code: string;
     message: string;
-    details?: string;
+    details?: Array<AttemptError>;
     statusCode?: number;
   }
 ) {
@@ -42,6 +43,7 @@ export async function errorForwarder(
         code: error.code,
         message: error.message,
         details: error.details,
+        param: null,
       },
     }),
     status: error.statusCode ?? 500,
@@ -90,6 +92,7 @@ export async function errorForwarder(
             code: error.code,
             message: error.message,
             details: error.details,
+            param: null,
           },
         }),
         {
