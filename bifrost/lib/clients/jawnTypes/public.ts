@@ -3022,6 +3022,8 @@ Json: JsonObject;
     "Record_string.EndpointConfig_": {
       [key: string]: components["schemas"]["EndpointConfig"];
     };
+    /** @enum {string} */
+    ResponseFormat: "ANTHROPIC" | "OPENAI";
     ModelProviderConfig: {
       pricing: components["schemas"]["ModelPricing"][];
       /** Format: double */
@@ -3039,6 +3041,7 @@ Json: JsonObject;
       crossRegion?: boolean;
       /** Format: double */
       priority?: number;
+      responseFormat?: components["schemas"]["ResponseFormat"];
     };
     UserEndpointConfig: {
       region?: string;

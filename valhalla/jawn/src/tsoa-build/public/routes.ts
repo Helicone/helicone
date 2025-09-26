@@ -2711,6 +2711,11 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"EndpointConfig"},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResponseFormat": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["ANTHROPIC"]},{"dataType":"enum","enums":["OPENAI"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelProviderConfig": {
         "dataType": "refObject",
         "properties": {
@@ -2727,6 +2732,7 @@ const models: TsoaRoute.Models = {
             "endpointConfigs": {"ref":"Record_string.EndpointConfig_","required":true},
             "crossRegion": {"dataType":"boolean"},
             "priority": {"dataType":"double"},
+            "responseFormat": {"ref":"ResponseFormat"},
         },
         "additionalProperties": false,
     },

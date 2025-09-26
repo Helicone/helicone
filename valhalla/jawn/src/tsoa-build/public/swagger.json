@@ -8316,6 +8316,13 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
+			"ResponseFormat": {
+				"type": "string",
+				"enum": [
+					"ANTHROPIC",
+					"OPENAI"
+				]
+			},
 			"ModelProviderConfig": {
 				"properties": {
 					"pricing": {
@@ -8365,6 +8372,9 @@
 					"priority": {
 						"type": "number",
 						"format": "double"
+					},
+					"responseFormat": {
+						"$ref": "#/components/schemas/ResponseFormat"
 					}
 				},
 				"required": [
