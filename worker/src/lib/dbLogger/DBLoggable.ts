@@ -725,6 +725,7 @@ export class DBLoggable {
         providerModelId:
           this.request.attempt?.endpoint.providerModelId ?? undefined,
         gatewayProvider: this.request.attempt?.endpoint.provider ?? undefined,
+        stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
       },
       log: {
         request: {

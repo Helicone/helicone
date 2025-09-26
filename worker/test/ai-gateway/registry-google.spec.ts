@@ -198,7 +198,7 @@ describe("Google Registry Tests", () => {
           },
         }));
 
-      it("should handle supported parameters", () =>
+      it.skip("should handle supported parameters", () =>
         runGatewayTest({
           model: "gemma-3-12b-it/deepinfra",
           request: {

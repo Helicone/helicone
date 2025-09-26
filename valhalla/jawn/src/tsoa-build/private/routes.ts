@@ -28,6 +28,8 @@ import { PromptController } from './../../controllers/public/promptController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ExperimentV2Controller } from './../../controllers/public/experimentV2Controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { IntegrationController } from './../../controllers/public/integrationController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { LogController } from './../../controllers/private/logController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { GovOrganizationController } from './../../controllers/private/govOrganizationController';
@@ -1899,6 +1901,88 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ScoreV2-or-null_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IntegrationCreateParams": {
+        "dataType": "refObject",
+        "properties": {
+            "integration_name": {"dataType":"string","required":true},
+            "settings": {"ref":"Json"},
+            "active": {"dataType":"boolean"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Integration": {
+        "dataType": "refObject",
+        "properties": {
+            "integration_name": {"dataType":"string"},
+            "settings": {"ref":"Json"},
+            "active": {"dataType":"boolean"},
+            "id": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_Array_Integration__": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"Integration"},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_Array_Integration_.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Array_Integration__"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IntegrationUpdateParams": {
+        "dataType": "refObject",
+        "properties": {
+            "integration_name": {"dataType":"string"},
+            "settings": {"ref":"Json"},
+            "active": {"dataType":"boolean"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_Integration_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"Integration","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_Integration.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Integration_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_Array__id-string--name-string___": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_Array__id-string--name-string__.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Array__id-string--name-string___"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TestStripeMeterEventRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "event_name": {"dataType":"string","required":true},
+            "customer_id": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelProviderName": {
         "dataType": "refAlias",
         "type": {"dataType":"enum","enums":["anthropic","openai","bedrock","vertex","azure","perplexity","groq","deepseek","cohere","xai","deepinfra","google-ai-studio","openrouter"],"validators":{}},
@@ -1906,7 +1990,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "HeliconeMeta": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"gatewayProvider":{"ref":"ModelProviderName"},"providerModelId":{"dataType":"string"},"isPassthroughBilling":{"dataType":"boolean"},"gatewayDeploymentTarget":{"dataType":"string"},"gatewayRouterId":{"dataType":"string"},"heliconeManualAccessKey":{"dataType":"string"},"promptInputs":{"ref":"Record_string.any_"},"promptVersionId":{"dataType":"string"},"promptEnvironment":{"dataType":"string"},"promptId":{"dataType":"string"},"lytixHost":{"dataType":"string"},"lytixKey":{"dataType":"string"},"posthogHost":{"dataType":"string"},"posthogApiKey":{"dataType":"string"},"webhookEnabled":{"dataType":"boolean","required":true},"omitResponseLog":{"dataType":"boolean","required":true},"omitRequestLog":{"dataType":"boolean","required":true},"modelOverride":{"dataType":"string"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"stripeCustomerId":{"dataType":"string"},"gatewayProvider":{"ref":"ModelProviderName"},"providerModelId":{"dataType":"string"},"isPassthroughBilling":{"dataType":"boolean"},"gatewayDeploymentTarget":{"dataType":"string"},"gatewayRouterId":{"dataType":"string"},"heliconeManualAccessKey":{"dataType":"string"},"promptInputs":{"ref":"Record_string.any_"},"promptVersionId":{"dataType":"string"},"promptEnvironment":{"dataType":"string"},"promptId":{"dataType":"string"},"lytixHost":{"dataType":"string"},"lytixKey":{"dataType":"string"},"posthogHost":{"dataType":"string"},"posthogApiKey":{"dataType":"string"},"webhookEnabled":{"dataType":"boolean","required":true},"omitResponseLog":{"dataType":"boolean","required":true},"omitRequestLog":{"dataType":"boolean","required":true},"modelOverride":{"dataType":"string"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "TemplateWithInputs": {
@@ -18746,6 +18830,261 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getExperimentScore',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsIntegrationController_createIntegration: Record<string, TsoaRoute.ParameterSchema> = {
+                params: {"in":"body","name":"params","required":true,"ref":"IntegrationCreateParams"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/integration',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController)),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController.prototype.createIntegration)),
+
+            async function IntegrationController_createIntegration(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsIntegrationController_createIntegration, request, response });
+
+                const controller = new IntegrationController();
+
+              await templateService.apiHandler({
+                methodName: 'createIntegration',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsIntegrationController_getIntegrations: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/integration',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController)),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController.prototype.getIntegrations)),
+
+            async function IntegrationController_getIntegrations(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsIntegrationController_getIntegrations, request, response });
+
+                const controller = new IntegrationController();
+
+              await templateService.apiHandler({
+                methodName: 'getIntegrations',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsIntegrationController_updateIntegration: Record<string, TsoaRoute.ParameterSchema> = {
+                integrationId: {"in":"path","name":"integrationId","required":true,"dataType":"string"},
+                params: {"in":"body","name":"params","required":true,"ref":"IntegrationUpdateParams"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/integration/:integrationId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController)),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController.prototype.updateIntegration)),
+
+            async function IntegrationController_updateIntegration(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsIntegrationController_updateIntegration, request, response });
+
+                const controller = new IntegrationController();
+
+              await templateService.apiHandler({
+                methodName: 'updateIntegration',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsIntegrationController_getIntegration: Record<string, TsoaRoute.ParameterSchema> = {
+                integrationId: {"in":"path","name":"integrationId","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/integration/:integrationId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController)),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController.prototype.getIntegration)),
+
+            async function IntegrationController_getIntegration(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsIntegrationController_getIntegration, request, response });
+
+                const controller = new IntegrationController();
+
+              await templateService.apiHandler({
+                methodName: 'getIntegration',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsIntegrationController_getIntegrationByType: Record<string, TsoaRoute.ParameterSchema> = {
+                type: {"in":"path","name":"type","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/integration/type/:type',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController)),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController.prototype.getIntegrationByType)),
+
+            async function IntegrationController_getIntegrationByType(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsIntegrationController_getIntegrationByType, request, response });
+
+                const controller = new IntegrationController();
+
+              await templateService.apiHandler({
+                methodName: 'getIntegrationByType',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsIntegrationController_getSlackSettings: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/integration/slack/settings',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController)),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController.prototype.getSlackSettings)),
+
+            async function IntegrationController_getSlackSettings(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsIntegrationController_getSlackSettings, request, response });
+
+                const controller = new IntegrationController();
+
+              await templateService.apiHandler({
+                methodName: 'getSlackSettings',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsIntegrationController_getSlackChannels: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/integration/slack/channels',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController)),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController.prototype.getSlackChannels)),
+
+            async function IntegrationController_getSlackChannels(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsIntegrationController_getSlackChannels, request, response });
+
+                const controller = new IntegrationController();
+
+              await templateService.apiHandler({
+                methodName: 'getSlackChannels',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsIntegrationController_testStripeMeterEvent: Record<string, TsoaRoute.ParameterSchema> = {
+                integrationId: {"in":"path","name":"integrationId","required":true,"dataType":"string"},
+                body: {"in":"body","name":"body","required":true,"ref":"TestStripeMeterEventRequest"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/integration/:integrationId/stripe/test-meter-event',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController)),
+            ...(fetchMiddlewares<RequestHandler>(IntegrationController.prototype.testStripeMeterEvent)),
+
+            async function IntegrationController_testStripeMeterEvent(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsIntegrationController_testStripeMeterEvent, request, response });
+
+                const controller = new IntegrationController();
+
+              await templateService.apiHandler({
+                methodName: 'testStripeMeterEvent',
                 controller,
                 response,
                 next,

@@ -63,6 +63,7 @@ export interface IHeliconeHeaders {
     path: Nullable<string>;
     name: Nullable<string>;
   };
+  stripeCustomerId: Nullable<string>;
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
@@ -107,6 +108,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   openaiBaseUrl: Nullable<string>;
   targetBaseUrl: Nullable<string>;
   promptFormat: Nullable<string>;
+  stripeCustomerId: Nullable<string>;
   requestId: string;
   promptHeaders: {
     promptId: Nullable<string>;
@@ -191,6 +193,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.posthogHost = heliconeHeaders.posthogHost;
     this.webhookEnabled = heliconeHeaders.webhookEnabled;
     this.gatewayConfig = heliconeHeaders.gatewayConfig;
+    this.stripeCustomerId = heliconeHeaders.stripeCustomerId;
 
     this.experimentHeaders = {
       columnId: heliconeHeaders.experimentHeaders.columnId,
@@ -332,6 +335,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       retryHeaders: this.getRetryHeaders(),
       promptFormat: this.headers.get("Helicone-Prompt-Format") ?? null,
       requestId: requestId,
+      stripeCustomerId: this.headers.get("x-stripe-customer-id") ?? null,
       promptHeaders: {
         promptId: this.headers.get("Helicone-Prompt-Id") ?? null,
         promptMode: this.headers.get("Helicone-Prompt-Mode") ?? null,
@@ -443,6 +447,12 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         )
         .map(([key, value]) => [key.substring(propTag.length), value])
     );
+
+    // Capture Stripe customer ID if provided
+    const stripeCustomerId = this.headers.get("x-stripe-customer-id");
+    if (stripeCustomerId) {
+      heliconePropertyHeaders["stripe_customer_id"] = stripeCustomerId;
+    }
 
     if (this.headers.get("Helicone-Posthog-Key")) {
       heliconePropertyHeaders["Helicone-Sent-To-Posthog"] = "true";

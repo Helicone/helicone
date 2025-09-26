@@ -17,6 +17,8 @@ import OpenPipeConfig from "./openPipeConfig";
 import { Integration } from "./types";
 import SegmentConfig from "./segmentConfig";
 import StripeConfig from "./stripeConfig";
+import { useFeatureFlag } from "@/services/hooks/admin";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 type SortOption = "relevance" | "alphabetical" | "type" | "status";
 
@@ -25,12 +27,21 @@ const ConnectionsPage: React.FC = () => {
   const [sortOption, setSortOption] = useState<SortOption>("relevance");
   const [activeDrawer, setActiveDrawer] = useState<string | null>(null);
 
+  const org = useOrg();
   const { integrations, isLoadingIntegrations, refetchIntegrations } =
     useIntegrations();
 
-  const allItems: Integration[] = useMemo(
-    () => [
-      {
+  const { data: hasStripeFeatureFlag } = useFeatureFlag(
+    "stripe",
+    org?.currentOrg?.id ?? "",
+  );
+
+  const allItems: Integration[] = useMemo(() => {
+    const items: Integration[] = [];
+
+    // Only include Stripe if the feature flag is enabled
+    if (hasStripeFeatureFlag?.data) {
+      items.push({
         title: "Stripe",
         type: "destination",
         configured: !!integrations?.find(
@@ -40,7 +51,10 @@ const ConnectionsPage: React.FC = () => {
           integrations?.find(
             (integration) => integration.integration_name === "stripe",
           )?.active ?? false,
-      },
+      });
+    }
+
+    items.push(
       {
         title: "Segment",
         type: "destination",
@@ -63,9 +77,10 @@ const ConnectionsPage: React.FC = () => {
             (integration) => integration.integration_name === "open_pipe",
           )?.active ?? false,
       },
-    ],
-    [integrations],
-  );
+    );
+
+    return items;
+  }, [integrations, hasStripeFeatureFlag?.data]);
 
   const fuse = useMemo(
     () => new Fuse(allItems, { keys: ["title"], threshold: 0.4 }),
