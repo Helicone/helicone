@@ -215,10 +215,15 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
 
     // Create events for completion tokens (output)
     if (completionTokens > 0) {
+      // Use response timestamp for completion events for accurate billing timing
+      const completionTimestamp = context.message.log.response?.responseCreatedAt
+        ? context.message.log.response.responseCreatedAt.toISOString()
+        : context.message.log.request.requestCreatedAt.toISOString();
+
       const completionEvent: StripeMeterEvent = {
         identifier: `org_${organizationId}_request_${context.message.log.request.id}_completion`,
         event_name: integrationSettings.data.event_name,
-        timestamp: context.message.log.request.requestCreatedAt.toISOString(),
+        timestamp: completionTimestamp,
         payload: {
           stripe_customer_id: stripeCustomerId,
           value: completionTokens.toString(),

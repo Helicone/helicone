@@ -7,6 +7,31 @@ import Stripe from "stripe";
 
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 
+// Sanitize error messages to prevent sensitive information leakage
+function sanitizeStripeError(error: unknown): string {
+  if (error instanceof Error) {
+    // Common Stripe error patterns that are safe to expose
+    if (error.message.includes('Invalid API key')) {
+      return 'Invalid Stripe API key configuration';
+    }
+    if (error.message.includes('No such customer')) {
+      return 'Invalid Stripe customer ID';
+    }
+    if (error.message.includes('meter event')) {
+      return 'Meter event configuration error';
+    }
+    if (error.message.includes('rate limit')) {
+      return 'Stripe API rate limit exceeded';
+    }
+    if (error.message.includes('network')) {
+      return 'Network error connecting to Stripe';
+    }
+    // Generic error for other cases
+    return 'Stripe API error occurred';
+  }
+  return 'Unknown error occurred';
+}
+
 export class StripeIntegrationManager extends BaseManager {
   private integrationManager: IntegrationManager;
   private vaultManager: VaultManager;
@@ -81,7 +106,7 @@ export class StripeIntegrationManager extends BaseManager {
 
         return ok("Test meter event sent successfully");
       } catch (stripeError) {
-        const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown Stripe API error';
+        const errorMessage = sanitizeStripeError(stripeError);
         return err(`Failed to send meter event to Stripe: ${errorMessage}`);
       }
     } catch (error) {
@@ -151,7 +176,7 @@ export class StripeIntegrationManager extends BaseManager {
           });
           totalProcessed += batch.length;
         } catch (stripeError) {
-          const errorMessage = stripeError instanceof Error ? stripeError.message : 'Unknown Stripe API error';
+          const errorMessage = sanitizeStripeError(stripeError);
           errors.push(`Batch failed: ${errorMessage}`);
         }
       }
