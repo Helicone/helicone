@@ -12,14 +12,56 @@ import { HandlerContext } from "./HandlerContext";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { IntegrationManager } from "../../managers/IntegrationManager";
 
+const AVAILABLE_MODELS_IN_STRIPE = [
+  "anthropic/claude-3-5-haiku",
+  "anthropic/claude-3-7-sonnet",
+  "anthropic/claude-3-haiku",
+  "anthropic/claude-opus-4",
+  "anthropic/claude-opus-4-1",
+  "anthropic/claude-sonnet-4",
+  "anthropic/claude-sonnet-4-above200k",
+  "google/gemini-2.0-flash",
+  "google/gemini-2.0-flash-lite",
+  "google/gemini-2.5-flash",
+  "google/gemini-2.5-flash-audio",
+  "google/gemini-2.5-flash-image-preview",
+  "google/gemini-2.5-flash-lite",
+  "google/gemini-2.5-flash-lite-audio",
+  "google/gemini-2.5-flash-preview-native-audio-dialog",
+  "google/gemini-2.5-flash-preview-native-audio-dialog-audio",
+  "google/gemini-2.5-flash-preview-native-audio-dialog-audio-video",
+  "google/gemini-2.5-flash-preview-tts",
+  "google/gemini-2.5-pro",
+  "google/gemini-2.5-pro-above200k",
+  "google/gemini-2.5-pro-preview-tts",
+  "google/gemini-live-2.5-flash-preview",
+  "google/gemini-live-2.5-flash-preview-audio",
+  "google/gemini-live-2.5-flash-preview-audio-video",
+  "openai/gpt-4.1",
+  "openai/gpt-4.1-mini",
+  "openai/gpt-4.1-nano",
+  "openai/gpt-4o",
+  "openai/gpt-4o-mini",
+  "openai/gpt-5",
+  "openai/gpt-5-mini",
+  "openai/gpt-5-nano",
+  "openai/o1",
+  "openai/o1-mini",
+  "openai/o1-pro",
+  "openai/o3",
+  "openai/o3-mini",
+  "openai/o3-pro",
+  "openai/o4-mini",
+];
+
 const DEFAULT_CACHE_REFERENCE_ID = "00000000-0000-0000-0000-000000000000";
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 
-const cache = new KVCache(60 * 60 * 1000); // 1 hour
+const cache = new KVCache(60 * 1000); // 1 minute
 
 const getStripeIntegrationSettings = async (
   organizationId: string
-): Promise<Result<{ event_name: string, active: boolean }, string>> => {
+): Promise<Result<{ event_name: string; active: boolean }, string>> => {
   const integrationManager = new IntegrationManager({
     organizationId: organizationId,
   });
@@ -34,19 +76,14 @@ const getStripeIntegrationSettings = async (
     return err("Stripe integration not found");
   }
 
-  let eventName = "helicone_request";
-
-  if (integration.data.settings && typeof integration.data.settings === 'object' && !Array.isArray(integration.data.settings)) {
-    const settings = integration.data.settings as Record<string, unknown>;
-    const eventNameSetting = settings.event_name;
-    if (eventNameSetting && typeof eventNameSetting === 'string' && eventNameSetting.trim()) {
-      eventName = eventNameSetting.trim();
-    }
+  let eventName = (integration.data.settings as any)?.event_name;
+  if (!eventName) {
+    return err("Stripe integration not found");
   }
 
   return ok({
     event_name: eventName,
-    active: integration.data.active || false
+    active: integration.data.active || false,
   });
 };
 
@@ -69,7 +106,11 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    if (context.message.log.request.cacheReferenceId && (context.message.log.request.cacheReferenceId !== DEFAULT_CACHE_REFERENCE_ID)) {
+    if (
+      context.message.log.request.cacheReferenceId &&
+      context.message.log.request.cacheReferenceId !==
+        DEFAULT_CACHE_REFERENCE_ID
+    ) {
       return await super.handle(context);
     }
 
@@ -80,35 +121,66 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
       cache
     );
 
-    if (integrationSettings.error || !integrationSettings.data || !integrationSettings.data.active) {
+    if (
+      integrationSettings.error ||
+      !integrationSettings.data ||
+      !integrationSettings.data.active
+    ) {
       return await super.handle(context);
     }
 
     // Get Stripe customer ID from request properties (passed via x-stripe-customer-id header)
-    const stripeCustomerId = context.message.log.request.properties?.["stripe_customer_id"];
+    const stripeCustomerId = context.message.heliconeMeta.stripeCustomerId;
 
     if (!stripeCustomerId) {
       // Skip processing if no Stripe customer ID provided
+
+      // TODO: Add logging for the user so that they know it was not processed
       return await super.handle(context);
     }
 
     // Get token counts and model information with validation
-    const promptTokens = Math.max(0, Math.floor(context.legacyUsage?.promptTokens || 0));
-    const completionTokens = Math.max(0, Math.floor(context.legacyUsage?.completionTokens || 0));
+    const promptTokens = Math.max(
+      0,
+      Math.floor(context.legacyUsage?.promptTokens || 0)
+    );
+
+    const completionTokens = Math.max(
+      0,
+      Math.floor(context.legacyUsage?.completionTokens || 0)
+    );
 
     // Validate and sanitize model and provider names
-    const rawModel = context.processedLog?.model || context.processedLog?.request?.model || "unknown";
+    const rawModel =
+      context.processedLog?.model ||
+      context.processedLog?.request?.model ||
+      "unknown";
     const rawProvider = context.message.log.request.provider || "unknown";
 
-    const model = typeof rawModel === 'string' ? rawModel.trim() : "unknown";
-    const provider = typeof rawProvider === 'string' ? rawProvider.trim().toLowerCase() : "unknown";
+    const model = typeof rawModel === "string" ? rawModel.trim() : "unknown";
+    const provider =
+      typeof rawProvider === "string"
+        ? rawProvider.trim().toLowerCase()
+        : "unknown";
 
     // Sanitize model and provider strings to prevent injection attacks
-    const sanitizedModel = model.replace(/[^a-zA-Z0-9_\-\/\.]/g, '').substring(0, 50);
-    const sanitizedProvider = provider.replace(/[^a-zA-Z0-9_\-]/g, '').substring(0, 20);
+    const sanitizedModel = model
+      .replace(/[^a-zA-Z0-9_\-\/\.]/g, "")
+      .substring(0, 50);
+    const sanitizedProvider = provider
+      .replace(/[^a-zA-Z0-9_\-]/g, "")
+      .substring(0, 20);
 
     // Format model as "provider/model" with validation
-    const formattedModel = `${sanitizedProvider}/${sanitizedModel}`.substring(0, 100); // Limit length
+    const formattedModel = `${sanitizedProvider}/${sanitizedModel}`.substring(
+      0,
+      100
+    ); // Limit length
+
+    if (!AVAILABLE_MODELS_IN_STRIPE.includes(formattedModel)) {
+      // TODO: Add logging for the user so that they know it was not processed
+      return await super.handle(context);
+    }
 
     // Initialize organization array if it doesn't exist
     if (!this.stripeTraceUsages[organizationId]) {
@@ -116,7 +188,10 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
     }
 
     // Prevent memory growth by limiting array size per organization
-    if (this.stripeTraceUsages[organizationId].length >= this.maxEventsPerBatch) {
+    if (
+      this.stripeTraceUsages[organizationId].length >= this.maxEventsPerBatch
+    ) {
+      // TODO: Add logging for the user so that they know it was not processed
       return await super.handle(context);
     }
 
@@ -134,6 +209,8 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
         },
       };
       this.stripeTraceUsages[organizationId].push(promptEvent);
+    } else {
+      // TODO: Add logging for the user so that they know it was not processed
     }
 
     // Create events for completion tokens (output)
@@ -150,6 +227,8 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
         },
       };
       this.stripeTraceUsages[organizationId].push(completionEvent);
+    } else {
+      // TODO: Add logging for the user so that they know it was not processed
     }
 
     return await super.handle(context);
@@ -196,7 +275,6 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
           // Clear processed organization data immediately after processing
           // to prevent memory accumulation across batches
           delete this.stripeTraceUsages[organizationId];
-
         } catch (orgError) {
           errors.push(`Org ${organizationId}: Unexpected error - ${orgError}`);
           // Clear failed organization data to prevent retry accumulation
@@ -207,13 +285,19 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
       // Generate summary result
       if (errors.length > 0 && results.length === 0) {
         // All organizations failed
-        return err(`Failed to process events for all organizations. Errors: ${errors.join('; ')}`);
+        return err(
+          `Failed to process events for all organizations. Errors: ${errors.join("; ")}`
+        );
       } else if (errors.length > 0) {
         // Partial success
-        return err(`Processed ${totalProcessed}/${totalEvents} events. Successes: ${results.length} orgs, Failures: ${errors.length} orgs. Errors: ${errors.join('; ')}`);
+        return err(
+          `Processed ${totalProcessed}/${totalEvents} events. Successes: ${results.length} orgs, Failures: ${errors.length} orgs. Errors: ${errors.join("; ")}`
+        );
       } else {
         // All successful
-        return ok(`Successfully processed ${totalProcessed} stripe meter events across ${results.length} organizations`);
+        return ok(
+          `Successfully processed ${totalProcessed} stripe meter events across ${results.length} organizations`
+        );
       }
     } catch (error) {
       return err(`Unexpected error processing stripe meter events: ${error}`);

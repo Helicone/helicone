@@ -724,6 +724,7 @@ export class DBLoggable {
         isPassthroughBilling: this.request.escrowInfo ? true : false,
         providerModelId: this.request.attempt?.endpoint.providerModelId ?? undefined,
         gatewayProvider: this.request.attempt?.endpoint.provider ?? undefined,
+        stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
       },
       log: {
         request: {
