@@ -451,12 +451,17 @@ export class InAppThreadsManager extends BaseManager {
                     .split(";")[0]
                     .split("/")[1];
                   const fileID = uuid();
-                  const uploaded = await slackService.uploadFile(
-                    buffer,
-                    `${fileID}.${extension}`,
-                    slackThreadTs
-                  );
-                  if (!uploaded) {
+                  try {
+                    const uploaded = await slackService.uploadFile(
+                      buffer,
+                      `${fileID}.${extension}`,
+                      slackThreadTs
+                    );
+                    if (!uploaded) {
+                      continue;
+                    }
+                  } catch (error) {
+                    console.error("Error uploading image to Slack:", error);
                     continue;
                   }
                 }
