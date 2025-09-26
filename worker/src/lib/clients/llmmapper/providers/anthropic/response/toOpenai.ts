@@ -1,24 +1,31 @@
-import { OpenAIResponseBody, OpenAIChoice, OpenAIToolCall } from "../../../types/openai";
-import { AnthropicResponseBody, AnthropicContentBlock } from "../../../types/anthropic";
+import {
+  OpenAIResponseBody,
+  OpenAIChoice,
+  OpenAIToolCall,
+} from "../../../types/openai";
+import {
+  AnthropicResponseBody,
+  AnthropicContentBlock,
+} from "../../../types/anthropic";
 
 // Anthropic Response Body -> OpenAI Response Body
 export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
-  const textBlocks = response.content.filter(block => block.type === "text");
-  const toolUseBlocks = response.content.filter(block => block.type === "tool_use");
-  
-  const content = textBlocks
-    .map((block) => blockToString(block))
-    .join("");
+  const textBlocks = response.content.filter((block) => block.type === "text");
+  const toolUseBlocks = response.content.filter(
+    (block) => block.type === "tool_use"
+  );
+
+  const content = textBlocks.map((block) => blockToString(block)).join("");
 
   const tool_calls: OpenAIToolCall[] = toolUseBlocks
-    .filter(block => block.type === "tool_use" && block.id && block.name)
-    .map(block => ({
+    .filter((block) => block.type === "tool_use" && block.id && block.name)
+    .map((block) => ({
       id: block.id!,
       type: "function",
       function: {
         name: block.name!,
-        arguments: JSON.stringify(block.input || {})
-      }
+        arguments: JSON.stringify(block.input || {}),
+      },
     }));
 
   const choice: OpenAIChoice = {
@@ -26,7 +33,7 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
     message: {
       role: "assistant",
       content: content || null,
-      ...(tool_calls.length > 0 && { tool_calls })
+      ...(tool_calls.length > 0 && { tool_calls }),
     },
     finish_reason: mapStopReason(response.stop_reason),
     logprobs: null,
@@ -47,7 +54,7 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
         prompt_tokens_details: {
           cached_tokens: cachedTokens,
           audio_tokens: 0,
-        }
+        },
       }),
       completion_tokens_details: {
         reasoning_tokens: 0,

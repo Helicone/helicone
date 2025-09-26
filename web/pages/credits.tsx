@@ -110,7 +110,7 @@ const Credits: NextPageWithLayout<void> = () => {
       />
 
       <div className="flex flex-1 justify-center">
-        <div className="flex w-full max-w-6xl flex-col border-l border-r border-border">
+        <div className="flex w-full flex-col">
           <div className="flex-1 overflow-auto">
             {/* Waitlist Experience - Show when no access */}
             {!hasAccess ? (

@@ -5,8 +5,21 @@ import { CacheControl } from "@helicone-package/prompts/types";
 export type Role = "system" | "user" | "assistant" | "function" | "tool";
 
 // Stop/Finish reasons
-export type AnthropicStopReason = "end_turn" | "max_tokens" | "stop_sequence" | "tool_use" | "pause_turn" | "refusal" | null;
-export type OpenAIFinishReason = "stop" | "length" | "function_call" | "content_filter" | "tool_calls" | null;
+export type AnthropicStopReason =
+  | "end_turn"
+  | "max_tokens"
+  | "stop_sequence"
+  | "tool_use"
+  | "pause_turn"
+  | "refusal"
+  | null;
+export type OpenAIFinishReason =
+  | "stop"
+  | "length"
+  | "function_call"
+  | "content_filter"
+  | "tool_calls"
+  | null;
 
 // Usage types for Anthropic (shared across request, response, and streaming)
 export interface AnthropicUsage {
@@ -43,10 +56,16 @@ export interface OpenAIUsage {
 
 // Content block types (shared between Anthropic request and response)
 export interface AnthropicContentBlock {
-  type: "text" | "image" | "tool_use" | "tool_result" | "thinking" | "server_tool_use";
+  type:
+    | "text"
+    | "image"
+    | "tool_use"
+    | "tool_result"
+    | "thinking"
+    | "server_tool_use";
   text?: string;
   // Image fields
-  source?: 
+  source?:
     | {
         type: "base64";
         media_type: string;
@@ -81,12 +100,15 @@ export interface AnthropicTool {
 }
 
 // Tool choice types
-export type AnthropicToolChoice = 
+export type AnthropicToolChoice =
   | { type: "auto" }
   | { type: "any" }
   | { type: "tool"; name: string };
 
-export type OpenAIToolChoice = "auto" | "none" | { type: string; function: { name: string } };
+export type OpenAIToolChoice =
+  | "auto"
+  | "none"
+  | { type: string; function: { name: string } };
 
 // Tool call types
 export interface OpenAIToolCall {
@@ -122,4 +144,4 @@ export interface BaseStreamEvent {
 
 export interface BaseOpenAIEvent {
   object: "chat.completion.chunk";
-} 
+}

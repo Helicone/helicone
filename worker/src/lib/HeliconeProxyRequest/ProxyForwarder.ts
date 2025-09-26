@@ -525,8 +525,7 @@ async function log(
       let cost: number | undefined = undefined;
 
       // handle all AI Gateway requests (both BYOK and PTB)
-      const gatewayAttempt =
-        proxyRequest.requestWrapper.getGatewayAttempt();
+      const gatewayAttempt = proxyRequest.requestWrapper.getGatewayAttempt();
       if (rawResponse && gatewayAttempt) {
         const attemptModel = gatewayAttempt.endpoint.providerModelId;
         const attemptProvider = gatewayAttempt.endpoint.provider;

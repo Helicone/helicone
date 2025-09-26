@@ -204,7 +204,10 @@ export class Wallet extends DurableObject<Env> {
     const count = this.ctx.storage.sql
       .exec<{
         count: number;
-      }>("SELECT COALESCE(count(*), 0) as count FROM processed_webhook_events WHERE id = ?", eventId)
+      }>(
+        "SELECT COALESCE(count(*), 0) as count FROM processed_webhook_events WHERE id = ?",
+        eventId
+      )
       .one().count;
     return count > 0;
   }
@@ -266,7 +269,10 @@ export class Wallet extends DurableObject<Env> {
       const totalDebits = this.ctx.storage.sql
         .exec<{
           total: number;
-        }>("SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?", orgId)
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
         .one().total;
 
       const escrowSum = this.ctx.storage.sql
@@ -313,7 +319,9 @@ export class Wallet extends DurableObject<Env> {
     const result = this.ctx.storage.sql
       .exec<{
         totalCredits: number;
-      }>("SELECT COALESCE(SUM(credits), 0) as totalCredits FROM credit_purchases")
+      }>(
+        "SELECT COALESCE(SUM(credits), 0) as totalCredits FROM credit_purchases"
+      )
       .one().totalCredits;
     return { totalCredits: result / SCALE_FACTOR };
   }
@@ -323,7 +331,10 @@ export class Wallet extends DurableObject<Env> {
       const debits = this.ctx.storage.sql
         .exec<{
           total: number;
-        }>("SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?", orgId)
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
         .one().total;
 
       const alertState =
@@ -368,19 +379,27 @@ export class Wallet extends DurableObject<Env> {
       const debits = this.ctx.storage.sql
         .exec<{
           total: number;
-        }>("SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?", orgId)
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
         .one().total;
 
       const totalCreditsPurchased = this.ctx.storage.sql
         .exec<{
           totalCreditsPurchased: number;
-        }>("SELECT COALESCE(SUM(credits), 0) as totalCreditsPurchased FROM credit_purchases")
+        }>(
+          "SELECT COALESCE(SUM(credits), 0) as totalCreditsPurchased FROM credit_purchases"
+        )
         .one().totalCreditsPurchased;
 
       const activeDisputesCount = this.ctx.storage.sql
         .exec<{
           count: number;
-        }>(`SELECT COUNT(*) as count FROM disputes WHERE status IN (${UNRESOLVED_DISPUTE_STATUSES.map(() => "?").join(", ")})`, ...UNRESOLVED_DISPUTE_STATUSES)
+        }>(
+          `SELECT COUNT(*) as count FROM disputes WHERE status IN (${UNRESOLVED_DISPUTE_STATUSES.map(() => "?").join(", ")})`,
+          ...UNRESOLVED_DISPUTE_STATUSES
+        )
         .one().count;
 
       const disputeStatus =
@@ -438,7 +457,10 @@ export class Wallet extends DurableObject<Env> {
       const activeDisputesCount = this.ctx.storage.sql
         .exec<{
           count: number;
-        }>(`SELECT COUNT(*) as count FROM disputes WHERE status IN (${UNRESOLVED_DISPUTE_STATUSES.map(() => "?").join(", ")})`, ...UNRESOLVED_DISPUTE_STATUSES)
+        }>(
+          `SELECT COUNT(*) as count FROM disputes WHERE status IN (${UNRESOLVED_DISPUTE_STATUSES.map(() => "?").join(", ")})`,
+          ...UNRESOLVED_DISPUTE_STATUSES
+        )
         .one().count;
 
       if (activeDisputesCount > 0) {
@@ -463,14 +485,17 @@ export class Wallet extends DurableObject<Env> {
       const totalDebits = this.ctx.storage.sql
         .exec<{
           total: number;
-        }>("SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?", orgId)
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
         .one().total;
       const availableBalance =
         totalCreditsPurchased - totalEscrow - totalDebits;
 
       if (availableBalance - amountToReserveScaled < MINIMUM_RESERVE) {
         const availableScaled = availableBalance / SCALE_FACTOR;
-        const neededScaled = amountToReserve + (MINIMUM_RESERVE / SCALE_FACTOR);
+        const neededScaled = amountToReserve + MINIMUM_RESERVE / SCALE_FACTOR;
         return err({
           statusCode: 429,
           message: `Insufficient balance for escrow. Available: ${availableScaled} cents, needed: ${neededScaled} cents`,
@@ -517,7 +542,10 @@ export class Wallet extends DurableObject<Env> {
       const result = this.ctx.storage.sql
         .exec<{
           checked_at: number;
-        }>("SELECT ch_last_checked_at as checked_at FROM aggregated_debits WHERE org_id = ?", orgId)
+        }>(
+          "SELECT ch_last_checked_at as checked_at FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
         .one();
       return { clickhouseLastCheckedAt: result.checked_at };
     });

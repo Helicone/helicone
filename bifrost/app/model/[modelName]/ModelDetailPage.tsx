@@ -62,6 +62,7 @@ export function ModelDetailPage({ initialModel, modelName }: ModelDetailPageProp
   const [highlightedCode, setHighlightedCode] = useState<string>("");
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedModelId, setCopiedModelId] = useState(false);
+  const [copiedProviders, setCopiedProviders] = useState<Set<string>>(new Set());
 
   const toggleProviderExpansion = (provider: string) => {
     setExpandedProviders((prev) => {
@@ -73,6 +74,19 @@ export function ModelDetailPage({ initialModel, modelName }: ModelDetailPageProp
       }
       return newSet;
     });
+  };
+
+  const copyProviderSlug = (provider: string) => {
+    const providerSlug = `${model?.id}/${provider}`;
+    navigator.clipboard.writeText(providerSlug);
+    setCopiedProviders((prev) => new Set(prev).add(provider));
+    setTimeout(() => {
+      setCopiedProviders((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(provider);
+        return newSet;
+      });
+    }, 2000);
   };
 
   useEffect(() => {
@@ -376,6 +390,20 @@ completion = client.chat.completions.create(
                             <span className="text-base font-medium text-gray-900 dark:text-gray-100">
                               {endpoint.provider}
                             </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyProviderSlug(endpoint.provider);
+                              }}
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                              title="Copy model/provider slug"
+                            >
+                              {copiedProviders.has(endpoint.provider) ? (
+                                <Check className="h-3 w-3 text-green-500" />
+                              ) : (
+                                <Copy className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                              )}
+                            </button>
                             {endpoint.supportsPtb && (
                               <div className="flex items-center gap-1">
                                 <span className="text-xs font-normal text-blue-800 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5">

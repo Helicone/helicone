@@ -15,8 +15,11 @@ export class PosthogClient {
     distinctId?: string
   ): Promise<void> {
     // Use userId from properties if available, otherwise fallback to random UUID
-    const finalDistinctId = distinctId || 
-      (properties.userId && properties.userId.trim() !== "" ? properties.userId : crypto.randomUUID());
+    const finalDistinctId =
+      distinctId ||
+      (properties.userId && properties.userId.trim() !== ""
+        ? properties.userId
+        : crypto.randomUUID());
 
     const url = `${this.posthogHost}/capture/`;
     const body = JSON.stringify({

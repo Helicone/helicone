@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -105,10 +104,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
     <>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="flex h-full w-full flex-row justify-start gap-2 px-2 py-2 hover:bg-sidebar-background"
-          >
+          <button className="flex w-full flex-row items-center justify-start gap-2 rounded-md px-2 py-1 text-sm transition-colors hover:bg-slate-200 dark:hover:bg-slate-800">
             <div className="flex flex-row gap-2">
               {currentIcon && (
                 <div className="flex items-center">
@@ -130,7 +126,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
                 </p>
               </div>
             </div>
-          </Button>
+          </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="ml-2 mt-2 flex max-h-[90vh] w-[15rem] flex-col border-slate-200">
           <DropdownMenuGroup>

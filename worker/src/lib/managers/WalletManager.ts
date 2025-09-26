@@ -44,7 +44,8 @@ export class WalletManager {
 
       if (
         cost === undefined &&
-        statusCode >= 200 && statusCode < 300 &&
+        statusCode >= 200 &&
+        statusCode < 300 &&
         // anthropic, and other providers, may return a 200 status code for streams
         // even when an error occurs in the middle of the event stream. Therefore,
         // we cannot use those events to add the (provider, model) to the disallow list.
@@ -56,7 +57,8 @@ export class WalletManager {
         await this.walletStub.addToDisallowList(
           proxyRequest.requestId,
           proxyRequest.escrowInfo.endpoint.provider,
-          proxyRequest.requestWrapper.getGatewayAttempt()?.endpoint.providerModelId ?? "*"
+          proxyRequest.requestWrapper.getGatewayAttempt()?.endpoint
+            .providerModelId ?? "*"
         );
       }
 

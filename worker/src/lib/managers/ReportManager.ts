@@ -4,7 +4,10 @@ import { Integration, ReportStore } from "../db/ReportStore";
 export class ReportManager {
   private resendApiKey: Env["RESEND_API_KEY"];
 
-  constructor(private reportStore: ReportStore, private env: Env) {
+  constructor(
+    private reportStore: ReportStore,
+    private env: Env
+  ) {
     this.resendApiKey = env.RESEND_API_KEY;
   }
 
@@ -81,9 +84,7 @@ export class ReportManager {
 
     if (!res.ok) {
       return err(
-        `Error sending emails: ${res.status} ${
-          res.statusText
-        } ${await res.text()}`
+        `Error sending emails: ${res.status} ${res.statusText} ${await res.text()}`
       );
     }
 
@@ -151,9 +152,7 @@ export class ReportManager {
 
       if (!res.ok) {
         return err(
-          `Error sending slack messages: ${res.status} ${
-            res.statusText
-          } ${await res.text()}`
+          `Error sending slack messages: ${res.status} ${res.statusText} ${await res.text()}`
         );
       }
 
@@ -546,66 +545,62 @@ export class ReportManager {
                               <tr style="vertical-align:middle;" valign="middle">
                                 <td class="content">
                                   <ul>
-                                    <li>Cost: $${cost.data?.value.toFixed(
-                                      2
-                                    )} (${
-      this.formatChangeData(cost.data?.value || 0, cost.data?.previous || 0)[1]
-    } by ${
-      this.formatChangeData(cost.data?.value || 0, cost.data?.previous || 0)[0]
-    })</li>
-                                    <li>Requests: ${numberOfRequests.data?.value.toFixed(
-                                      2
-                                    )} (${
-      this.formatChangeData(
-        numberOfRequests.data?.value || 0,
-        numberOfRequests.data?.previous || 0
-      )[1]
-    } by ${
-      this.formatChangeData(
-        numberOfRequests.data?.value || 0,
-        numberOfRequests.data?.previous || 0
-      )[0]
-    })</li>
-                                    <li>Error Rate: ${errorRate.data?.value.toFixed(
-                                      2
-                                    )} (${
-      this.formatChangeData(
-        errorRate.data?.value || 0,
-        errorRate.data?.previous || 0,
-        true
-      )[1]
-    } by ${
-      this.formatChangeData(
-        errorRate.data?.value || 0,
-        errorRate.data?.previous || 0
-      )[0]
-    })</li>
-                                    <li>Users: ${numberOfUsers.data?.value.toFixed(
-                                      2
-                                    )} (${
-      this.formatChangeData(
-        numberOfUsers.data?.value || 0,
-        numberOfUsers.data?.previous || 0
-      )[1]
-    } by ${
-      this.formatChangeData(
-        numberOfUsers.data?.value || 0,
-        numberOfUsers.data?.previous || 0
-      )[0]
-    })</li>
-                                    <li>Threats: ${numberOfThreats.data?.value.toFixed(
-                                      2
-                                    )} (${
-      this.formatChangeData(
-        numberOfThreats.data?.value || 0,
-        numberOfThreats.data?.previous || 0
-      )[1]
-    } by ${
-      this.formatChangeData(
-        numberOfThreats.data?.value || 0,
-        numberOfThreats.data?.previous || 0
-      )[0]
-    })</li>
+                                    <li>Cost: $${cost.data?.value.toFixed(2)} (${
+                                      this.formatChangeData(
+                                        cost.data?.value || 0,
+                                        cost.data?.previous || 0
+                                      )[1]
+                                    } by ${
+                                      this.formatChangeData(
+                                        cost.data?.value || 0,
+                                        cost.data?.previous || 0
+                                      )[0]
+                                    })</li>
+                                    <li>Requests: ${numberOfRequests.data?.value.toFixed(2)} (${
+                                      this.formatChangeData(
+                                        numberOfRequests.data?.value || 0,
+                                        numberOfRequests.data?.previous || 0
+                                      )[1]
+                                    } by ${
+                                      this.formatChangeData(
+                                        numberOfRequests.data?.value || 0,
+                                        numberOfRequests.data?.previous || 0
+                                      )[0]
+                                    })</li>
+                                    <li>Error Rate: ${errorRate.data?.value.toFixed(2)} (${
+                                      this.formatChangeData(
+                                        errorRate.data?.value || 0,
+                                        errorRate.data?.previous || 0,
+                                        true
+                                      )[1]
+                                    } by ${
+                                      this.formatChangeData(
+                                        errorRate.data?.value || 0,
+                                        errorRate.data?.previous || 0
+                                      )[0]
+                                    })</li>
+                                    <li>Users: ${numberOfUsers.data?.value.toFixed(2)} (${
+                                      this.formatChangeData(
+                                        numberOfUsers.data?.value || 0,
+                                        numberOfUsers.data?.previous || 0
+                                      )[1]
+                                    } by ${
+                                      this.formatChangeData(
+                                        numberOfUsers.data?.value || 0,
+                                        numberOfUsers.data?.previous || 0
+                                      )[0]
+                                    })</li>
+                                    <li>Threats: ${numberOfThreats.data?.value.toFixed(2)} (${
+                                      this.formatChangeData(
+                                        numberOfThreats.data?.value || 0,
+                                        numberOfThreats.data?.previous || 0
+                                      )[1]
+                                    } by ${
+                                      this.formatChangeData(
+                                        numberOfThreats.data?.value || 0,
+                                        numberOfThreats.data?.previous || 0
+                                      )[0]
+                                    })</li>
     <li>Sessions: ${numberOfSessions.data?.value.toFixed(2)} (${
       this.formatChangeData(
         numberOfSessions.data?.value || 0,
@@ -683,10 +678,11 @@ export class ReportManager {
 
     const text = `Here's a summary of your usage this week
       - Cost: $${cost.data?.value.toFixed(2)} (${
-      this.formatChangeData(cost.data?.value || 0, cost.data?.previous || 0)[1]
-    } by ${
-      this.formatChangeData(cost.data?.value || 0, cost.data?.previous || 0)[0]
-    })</li>
+        this.formatChangeData(
+          cost.data?.value || 0,
+          cost.data?.previous || 0
+        )[1]
+      } by ${this.formatChangeData(cost.data?.value || 0, cost.data?.previous || 0)[0]})</li>
     - Requests: ${numberOfRequests.data?.value.toFixed(2)} (${
       this.formatChangeData(
         numberOfRequests.data?.value || 0,

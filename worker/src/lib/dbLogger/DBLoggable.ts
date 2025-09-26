@@ -722,7 +722,8 @@ export class DBLoggable {
         promptInputs: this.request.prompt2025Settings.promptInputs,
         promptEnvironment: this.request.prompt2025Settings.environment,
         isPassthroughBilling: this.request.escrowInfo ? true : false,
-        providerModelId: this.request.attempt?.endpoint.providerModelId ?? undefined,
+        providerModelId:
+          this.request.attempt?.endpoint.providerModelId ?? undefined,
         gatewayProvider: this.request.attempt?.endpoint.provider ?? undefined,
         stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
       },
