@@ -25,6 +25,7 @@ export type HeliconeMeta = {
   isPassthroughBilling?: boolean;
   providerModelId?: string;
   gatewayProvider?: ModelProviderName;
+  stripeCustomerId?: string;
 };
 export type MessageData = {
   id: string;

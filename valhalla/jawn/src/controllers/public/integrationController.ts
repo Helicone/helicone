@@ -11,6 +11,7 @@ import {
 } from "tsoa";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { IntegrationManager } from "../../managers/IntegrationManager";
+import { StripeIntegrationManager } from "../../managers/stripe/StripeIntegrationManager";
 import { Result } from "../../packages/common/result";
 import { Json } from "../../lib/db/database.types";
 
@@ -28,6 +29,11 @@ export interface IntegrationUpdateParams {
 
 export interface Integration extends IntegrationUpdateParams {
   id: string;
+}
+
+export interface TestStripeMeterEventRequest {
+  event_name: string;
+  customer_id: string;
 }
 
 @Route("v1/integration")
@@ -93,5 +99,26 @@ export class IntegrationController extends Controller {
   ): Promise<Result<Array<{ id: string; name: string }>, string>> {
     const integrationManager = new IntegrationManager(request.authParams);
     return await integrationManager.getSlackChannels();
+  }
+
+  @Post("/{integrationId}/stripe/test-meter-event")
+  public async testStripeMeterEvent(
+    @Path() integrationId: string,
+    @Body() body: TestStripeMeterEventRequest,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string, string>> {
+    const stripeIntegrationManager = new StripeIntegrationManager(
+      request.authParams
+    );
+
+    const result = await stripeIntegrationManager.testMeterEvent(
+      integrationId,
+      body.event_name,
+      body.customer_id
+    );
+    if (result.error) {
+      this.setStatus(500);
+    }
+    return result;
   }
 }

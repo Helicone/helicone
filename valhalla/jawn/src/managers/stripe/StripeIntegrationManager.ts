@@ -1,0 +1,214 @@
+import { BaseManager } from "../BaseManager";
+import { AuthParams } from "../../packages/common/auth/types";
+import { Result, err, ok } from "../../packages/common/result";
+import { IntegrationManager } from "../IntegrationManager";
+import { VaultManager } from "../VaultManager";
+import Stripe from "stripe";
+
+type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
+
+// Sanitize error messages to prevent sensitive information leakage
+function sanitizeStripeError(error: unknown): string {
+  if (error instanceof Error) {
+    // Common Stripe error patterns that are safe to expose
+    if (error.message.includes("Invalid API key")) {
+      return "Invalid Stripe API key configuration";
+    }
+    if (error.message.includes("No such customer")) {
+      return "Invalid Stripe customer ID";
+    }
+    if (error.message.includes("meter event")) {
+      return "Meter event configuration error";
+    }
+    if (error.message.includes("rate limit")) {
+      return "Stripe API rate limit exceeded";
+    }
+    if (error.message.includes("network")) {
+      return "Network error connecting to Stripe";
+    }
+    // Generic error for other cases
+    return "Stripe API error occurred";
+  }
+  return "Unknown error occurred";
+}
+
+export class StripeIntegrationManager extends BaseManager {
+  private integrationManager: IntegrationManager;
+  private vaultManager: VaultManager;
+
+  constructor(authParams: AuthParams) {
+    super(authParams);
+    this.integrationManager = new IntegrationManager(authParams);
+    this.vaultManager = new VaultManager(authParams);
+  }
+
+  public async testMeterEvent(
+    integrationId: string,
+    eventName: string,
+    customerId: string
+  ): Promise<Result<string, string>> {
+    try {
+      // 1. Validate integration exists and is active for this organization
+      const integration =
+        await this.integrationManager.getIntegration(integrationId);
+      if (integration.error) {
+        return err(`Integration not found: ${integration.error}`);
+      }
+
+      if (!integration.data?.active) {
+        return err("Integration is not active");
+      }
+
+      if (integration.data.integration_name !== "stripe") {
+        return err("Integration is not a Stripe integration");
+      }
+
+      // 2. Get Stripe key from vault
+      const stripeKeys =
+        await this.vaultManager.getDecryptedProviderKeysByOrgId();
+      if (stripeKeys.error) {
+        return err(`Failed to get vault keys: ${stripeKeys.error}`);
+      }
+
+      const stripeKey = stripeKeys.data?.find(
+        (key) => key.provider_name === "HELICONE_STRIPE_KEY"
+      );
+
+      if (!stripeKey || !stripeKey.provider_key) {
+        return err("Stripe API key not found in vault");
+      }
+
+      // Validate API key format (basic check)
+      if (!stripeKey.provider_key.match(/^(sk_|rk_)/)) {
+        return err("Invalid Stripe API key format");
+      }
+
+      // 3. Create test meter event
+      const testEvent: StripeMeterEvent = {
+        identifier: `helicone-test-${Date.now()}`,
+        event_name: eventName,
+        timestamp: new Date().toISOString(),
+        payload: {
+          stripe_customer_id: customerId,
+          value: "60",
+          token_type: "output",
+          model: "openai/gpt-4o",
+        },
+      };
+
+      // 4. Create Stripe client with user's key and send meter event
+      const stripe = new Stripe(stripeKey.provider_key);
+
+      try {
+        await stripe.v2.billing.meterEvents.create(testEvent);
+
+        return ok("Test meter event sent successfully");
+      } catch (stripeError) {
+        const errorMessage = sanitizeStripeError(stripeError);
+        return err(`Failed to send meter event to Stripe: ${errorMessage}`);
+      }
+    } catch (error) {
+      return err(`Error testing meter event: ${error}`);
+    }
+  }
+
+  public async sendMeterEvents(
+    events: StripeMeterEvent[]
+  ): Promise<Result<string, string>> {
+    try {
+      if (events.length === 0) {
+        return ok("No events to send");
+      }
+
+      // 1. Get Stripe integration for this organization to verify it's active
+      const integration =
+        await this.integrationManager.getIntegrationByType("stripe");
+      if (integration.error) {
+        return err(`Stripe integration not found: ${integration.error}`);
+      }
+
+      if (!integration.data) {
+        return err("Stripe integration not configured");
+      }
+
+      if (!integration.data.active) {
+        return err("Stripe integration is not active");
+      }
+
+      // 2. Get Stripe key from vault
+      const stripeKeys =
+        await this.vaultManager.getDecryptedProviderKeysByOrgId();
+      if (stripeKeys.error) {
+        return err(`Failed to get vault keys: ${stripeKeys.error}`);
+      }
+
+      const stripeKey = stripeKeys.data?.find(
+        (key) => key.provider_name === "HELICONE_STRIPE_KEY"
+      );
+
+      if (!stripeKey || !stripeKey.provider_key) {
+        return err("Stripe API key not found in vault");
+      }
+
+      // Validate API key format (basic check)
+      if (!stripeKey.provider_key.match(/^(sk_|rk_)/)) {
+        return err("Invalid Stripe API key format");
+      }
+
+      // 3. Create Stripe client with user's key
+      const stripe = new Stripe(stripeKey.provider_key);
+
+      // 4. Send meter events in batches (Stripe has limits)
+      const batchSize = 100; // Conservative batch size
+      const batches = [];
+
+      for (let i = 0; i < events.length; i += batchSize) {
+        batches.push(events.slice(i, i + batchSize));
+      }
+
+      let totalProcessed = 0;
+      const errors = [];
+
+      const meterEventSession =
+        await stripe.v2.billing.meterEventSession.create();
+
+      for (const batch of batches) {
+        try {
+          const response = await fetch(
+            "https://meter-events.stripe.com/v2/billing/meter_event_stream",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${meterEventSession.authentication_token}`,
+                "Content-Type": "application/json",
+                "Stripe-Version": "2025-03-31.preview",
+              },
+              body: JSON.stringify({ events: batch }),
+            }
+          );
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(
+              `Error response from Stripe: ${response.status} ${errorText}`
+            );
+          }
+
+          totalProcessed += batch.length;
+        } catch (stripeError) {
+          const errorMessage = sanitizeStripeError(stripeError);
+          errors.push(`Batch failed: ${errorMessage}`);
+        }
+      }
+
+      if (errors.length > 0) {
+        return err(
+          `Processed ${totalProcessed}/${events.length} events. Errors: ${errors.join(", ")}`
+        );
+      }
+
+      return ok(`Successfully sent ${totalProcessed} meter events to Stripe`);
+    } catch (error) {
+      return err(`Error sending meter events: ${error}`);
+    }
+  }
+}
