@@ -34,6 +34,7 @@ export const endpoints = {
     endpointConfigs: {
       "*": {},
     },
+    responseFormat: "ANTHROPIC",
   },
   "claude-3.5-haiku:vertex": {
     provider: "vertex",
@@ -66,6 +67,7 @@ export const endpoints = {
     endpointConfigs: {
       global: {},
     },
+    responseFormat: "ANTHROPIC",
   },
   "claude-3.5-haiku:bedrock": {
     provider: "bedrock",
@@ -99,6 +101,7 @@ export const endpoints = {
     endpointConfigs: {
       "us-east-1": {},
     },
+    responseFormat: "ANTHROPIC",
   },
   "claude-3.5-haiku:openrouter": {
     provider: "openrouter",

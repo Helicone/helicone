@@ -58,7 +58,12 @@ const modelProviderConfigs = {
   ...mistralEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
-const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
+// Combine all archived endpoints
+const archivedModelProviderConfigs = {
+  // TODO: if any archived endpoints are added, make sure they are included here
+} satisfies Record<string, ModelProviderConfig>;
+
+const indexes: ModelIndexes = buildIndexes(modelProviderConfigs, archivedModelProviderConfigs);
 
 function getAllModelIds(): Result<ModelName[]> {
   return ok(Object.keys(allModels) as ModelName[]);
@@ -207,6 +212,17 @@ function getPtbEndpointsForProvider(
   return ok(topLevelEndpoints);
 }
 
+function getArchivedModelProviderConfig(
+  model: string,
+  provider: ModelProviderName,
+  version: string
+): Result<ModelProviderConfig | null> {
+  const versionKey = `${model}:${provider}:${version}`;
+  const archivedConfig = indexes.modelToArchivedEndpointConfigs.get(versionKey);
+
+  return ok(archivedConfig || null);
+}
+
 export const registry = {
   getAllModelIds,
   getAllModelsWithIds,
@@ -223,4 +239,5 @@ export const registry = {
   getEndpointsByModel,
   getModelProviderEntriesByModel,
   getModelProviderEntry,
+  getArchivedModelProviderConfig,
 };

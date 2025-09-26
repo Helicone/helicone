@@ -126,6 +126,7 @@ export type HeliconeMeta = {
   promptVersionId?: string;
   promptInputs?: Record<string, any>;
   heliconeManualAccessKey?: string;
+  stripeCustomerId?: string;
   
   // Deprecated gateway metadata
   gatewayRouterId?: string;

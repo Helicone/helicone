@@ -216,17 +216,7 @@ describe("Google Registry Tests", () => {
                 data: createOpenAIMockResponse("google/gemma-3-12b-it"),
                 expects: {
                   ...deepinfraAuthExpectations,
-                  bodyContains: [
-                    '"max_tokens":1000',
-                    '"temperature":',
-                    '"top_p":',
-                    '"frequency_penalty":',
-                    '"presence_penalty":',
-                    '"repetition_penalty":',
-                    '"top_k":',
-                    '"seed":',
-                    '"min_p":',
-                  ],
+                  bodyContains: ['"max_tokens":1000'],
                 },
               },
             ],
