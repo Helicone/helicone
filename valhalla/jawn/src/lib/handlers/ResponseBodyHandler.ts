@@ -294,7 +294,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       log.request.isStream || context.processedLog.request.body?.stream;
 
     const isAIGateway = log.request.requestReferrer === "ai-gateway";
-    // gatewayProvider and gatewayResponseFromat are always set for AI Gateway requests
+    // gatewayProvider and gatewayResponseFormat are always set for AI Gateway requests
     // but tie all values to the isAIGateway flag to avoid edge cases
     const provider = isAIGateway 
       ? context.message.heliconeMeta.gatewayProvider ?? log.request.provider 

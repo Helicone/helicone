@@ -717,9 +717,9 @@ export class DBLoggable {
       gatewayProvider = provider as ModelProviderName;
       gatewayModel = model as string;
 
-      const providerInstance = getProvider(provider).data;
-      if (providerInstance) {
-        gatewayResponseFormat = providerInstance.determineResponseFormat(this.request.attempt?.endpoint);
+      const providerResult = getProvider(provider);
+      if (providerResult.data) {
+        gatewayResponseFormat = providerResult.data?.determineResponseFormat(this.request.attempt?.endpoint);
       }
     }
     
