@@ -222,7 +222,7 @@ function getModelProviderConfigByVersion(
   if (
     (!currentEntry.data?.config.version && !version) ||
     (currentEntry.data?.config.version === version)
-  ) { 
+  ) {
     return ok(currentEntry.data?.config ?? null);
   }
 
