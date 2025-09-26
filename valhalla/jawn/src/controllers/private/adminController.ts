@@ -59,7 +59,7 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Security("api_key")
 export class AdminController extends Controller {
   @Post("/gateway/dashboard_data")
-  public async stripeSync(@Request() request: JawnAuthenticatedRequest) {
+  public async getGatewayDashboardData(@Request() request: JawnAuthenticatedRequest) {
     await authCheckThrow(request.authParams.userId);
     const settingsManager = new SettingsManager();
     const stripeProductSettings =
@@ -128,13 +128,14 @@ export class AdminController extends Controller {
       total_cost: number;
     }>(
       `
-      SELECT 
+      SELECT
         organization_id,
         SUM(cost) as total_cost
       FROM request_response_rmt
+      WHERE organization_id IN (${orgIds.map(() => '?').join(',')})
       GROUP BY organization_id
       `,
-      []
+      orgIds
     );
 
     const clickhouseSpendMap = new Map<string, number>();
