@@ -122,12 +122,23 @@ export class RequestManager extends BaseManager {
   ): Promise<Result<HeliconeRequest, string>> {
     const requestClickhouse = await this.getRequestsClickhouse({
       filter: {
-        request_response_rmt: {
-          request_id: {
-            equals: requestId,
+        operator: "and",
+        left: {
+          request_response_rmt: {
+            request_created_at: {
+              gte: deltaTime(new Date(), -24 * 60 * 90), // last 90 days
+            },
+          },
+        },
+        right: {
+          request_response_rmt: {
+            request_id: {
+              equals: requestId,
+            },
           },
         },
       },
+      limit: 1,
     });
 
     return resultMap(requestClickhouse, (data) => {
