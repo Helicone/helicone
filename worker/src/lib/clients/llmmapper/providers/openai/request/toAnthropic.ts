@@ -2,6 +2,7 @@ import {
   AnthropicRequestBody,
   AnthropicContentBlock,
   AnthropicTool,
+  AnthropicWebSearchTool,
   AnthropicToolChoice,
 } from "../../../types/anthropic";
 import {
@@ -261,7 +262,7 @@ function mapMessages(
   });
 }
 
-function mapTools(tools: HeliconeChatCreateParams["tools"]): AnthropicTool[] {
+function mapTools(tools: HeliconeChatCreateParams["tools"]): (AnthropicTool | AnthropicWebSearchTool)[] {
   if (!tools) return [];
 
   return tools.map((tool) => {
@@ -269,6 +270,29 @@ function mapTools(tools: HeliconeChatCreateParams["tools"]): AnthropicTool[] {
       throw new Error(`Unsupported tool type: ${tool.type}`);
     }
 
+    // Check if this is a web search tool
+    if (tool.function.name === "web_search") {
+      const params = (tool.function.parameters as any) || {};
+      const webSearchTool: AnthropicWebSearchTool = {
+        type: "web_search_20250305",
+        name: "web_search",
+      };
+
+      // Map optional parameters
+      if (params.max_uses !== undefined) {
+        webSearchTool.max_uses = params.max_uses;
+      }
+      if (params.allowed_domains !== undefined) {
+        webSearchTool.allowed_domains = params.allowed_domains;
+      }
+      if (params.user_location !== undefined) {
+        webSearchTool.user_location = params.user_location;
+      }
+
+      return webSearchTool;
+    }
+
+    // Regular tool mapping
     const inputSchema = (tool.function.parameters as any) || {
       type: "object",
       properties: {},
