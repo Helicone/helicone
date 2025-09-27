@@ -605,4 +605,83 @@ export class Wallet extends DurableObject<Env> {
       };
     });
   }
+
+  addDispute(
+    disputeId: string,
+    chargeId: string,
+    amount: number,
+    currency: string,
+    reason: string,
+    status: string,
+    eventId: string
+  ): Result<void, string> {
+    const scaledAmount = amount * SCALE_FACTOR;
+
+    return this.ctx.storage.transactionSync(() => {
+      try {
+        // Check if dispute already exists
+        const existingDispute = this.ctx.storage.sql
+          .exec<{ count: number }>(
+            "SELECT COUNT(*) as count FROM disputes WHERE id = ?",
+            disputeId
+          )
+          .one();
+
+        if (existingDispute.count > 0) {
+          return err(`Dispute ${disputeId} already exists`);
+        }
+
+        // Insert the dispute
+        this.ctx.storage.sql.exec(
+          "INSERT INTO disputes (id, charge_id, amount, currency, reason, status, created_at, event_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+          disputeId,
+          chargeId,
+          scaledAmount,
+          currency,
+          reason,
+          status,
+          Date.now(),
+          eventId
+        );
+
+        return ok(undefined);
+      } catch (error) {
+        return err(`Failed to add dispute: ${error}`);
+      }
+    });
+  }
+
+  updateDispute(
+    disputeId: string,
+    status: string,
+    eventId: string
+  ): Result<void, string> {
+    return this.ctx.storage.transactionSync(() => {
+      try {
+        // Check if dispute exists
+        const existingDispute = this.ctx.storage.sql
+          .exec<{ count: number }>(
+            "SELECT COUNT(*) as count FROM disputes WHERE id = ?",
+            disputeId
+          )
+          .one();
+
+        if (existingDispute.count === 0) {
+          return err(`Dispute ${disputeId} not found`);
+        }
+
+        // Update the dispute status
+        this.ctx.storage.sql.exec(
+          "UPDATE disputes SET status = ?, event_id = ? WHERE id = ?",
+          status,
+          eventId,
+          disputeId
+        );
+
+        return ok(undefined);
+      } catch (error) {
+        return err(`Failed to update dispute: ${error}`);
+      }
+    });
+  }
 }
