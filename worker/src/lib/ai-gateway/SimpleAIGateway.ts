@@ -15,7 +15,6 @@ import { oai2antResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { oai2antStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { RequestParams } from "@helicone-package/cost/models/types";
 import { SecureCacheProvider } from "../util/cache/secureCache";
-import { determineResponseFormat } from "@helicone-package/cost/models/provider-helpers";
 
 export interface AuthContext {
   orgId: string;
@@ -307,18 +306,13 @@ export class SimpleAIGateway {
       return ok(response); // do not map response
     }
 
-    const mappingType = determineResponseFormat(attempt.endpoint);
-
-    if (isErr(mappingType)) {
-      return err(`Failed to determine response format: ${mappingType.error}`);
-    }
-
-    if (mappingType.data === "OPENAI") {
+    const mappingType = attempt.endpoint.modelConfig.responseFormat ?? "OPENAI";
+    if (mappingType === "OPENAI") {
       return ok(response); // already in OPENAI format
     }
 
     try {
-      if (mappingType.data === "ANTHROPIC") {
+      if (mappingType === "ANTHROPIC") {
         const contentType = response.headers.get("content-type");
         const isStream = contentType?.includes("text/event-stream");
 

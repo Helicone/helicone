@@ -32,6 +32,7 @@ export type HeliconeMeta = {
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
   gatewayResponseFormat?: ResponseFormat;
+  gatewayEndpointVersion?: string; // endpoint config version
 };
 export type MessageData = {
   id: string;

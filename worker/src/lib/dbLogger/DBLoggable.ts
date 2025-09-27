@@ -37,7 +37,6 @@ import {
   ValidRequestBody,
 } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
-import { getProvider } from "@helicone-package/cost/models/provider-helpers";
 import { ResponseFormat } from "@helicone-package/cost/models/types";
 
 export interface DBLoggableProps {
@@ -709,18 +708,17 @@ export class DBLoggable {
     let gatewayProvider: ModelProviderName | undefined;
     let gatewayModel: string | undefined;
     let gatewayResponseFormat: ResponseFormat | undefined;
+    let gatewayEndpointVersion: string | undefined;
     if (this.request.attempt?.source && this.request.attempt?.endpoint) {
+      const endpoint = this.request.attempt?.endpoint;
       const sourceParts = this.request.attempt?.source.split("/");
       const model = sourceParts[0];
       const provider = sourceParts[1];
 
       gatewayProvider = provider as ModelProviderName;
       gatewayModel = model as string;
-
-      const providerResult = getProvider(provider);
-      if (providerResult.data) {
-        gatewayResponseFormat = providerResult.data?.determineResponseFormat(this.request.attempt?.endpoint);
-      }
+      gatewayResponseFormat = endpoint.modelConfig.responseFormat;
+      gatewayEndpointVersion = endpoint.modelConfig.version;
     }
     
     const kafkaMessage: MessageData = {
@@ -747,6 +745,7 @@ export class DBLoggable {
         providerModelId: this.request.attempt?.endpoint.providerModelId ?? undefined,
         gatewayResponseFormat: gatewayResponseFormat ?? undefined,
         stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
+        gatewayEndpointVersion: gatewayEndpointVersion ?? undefined,
       },
       log: {
         request: {

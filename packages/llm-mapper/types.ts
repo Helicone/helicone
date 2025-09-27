@@ -1,4 +1,5 @@
 import { ProviderName } from "../cost/providers/mappings";
+import { ModelProviderName } from "../cost/models/providers";
 
 export const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -20,7 +21,8 @@ export type MapperType =
   | "vector-db"
   | "tool"
   | "unknown";
-export type Provider = ProviderName | "CUSTOM";
+// Legacy and AI Gateway type for Provider slugs
+export type Provider = ProviderName | "CUSTOM" | ModelProviderName;
 export type LlmType = "chat" | "completion";
 
 /* -------------------------------------------------------------------------- */
@@ -358,4 +360,5 @@ export interface HeliconeRequest {
   cache_enabled: boolean;
   updated_at?: string;
   request_referrer?: string | null;
+  gateway_endpoint_version: string | null;
 }

@@ -22,6 +22,8 @@ import { MapperFn } from "../mappers/types";
 import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 import { mapOpenAIResponse } from "../mappers/openai/responses";
+import { registry } from "@helicone-package/cost/models/registry";
+import { ModelProviderName } from "@/cost/models/providers";
 
 const MAX_PREVIEW_LENGTH = 1_000;
 
@@ -118,10 +120,15 @@ const getUnsanitizedMappedContent = ({
   let responseBody = heliconeRequest.response_body;
 
   if (mapperType === "ai-gateway" || heliconeRequest.request_referrer === "ai-gateway") {
-    // TODO: determine response format
-    // kinda crudely, we have to:
-    // 1. get provider + model to get endpoint, then determineResponseFormat
-    // 2. if response format is not OPENAI, we need to convert the request-response to openai format
+    // const modelProviderConfig = registry.getModelProviderConfigByVersion(
+    //   heliconeRequest.model,
+    //   heliconeRequest.provider as ModelProviderName,
+    //   heliconeRequest.gateway_endpoint_version ?? ""
+    // );
+    // if (modelProviderConfig.data) {
+    //   const responseFormat = modelProviderConfig.data.responseFormat ?? "OPENAI";
+    //   // TODO: if response format is not OPENAI, we need to convert the request-response to openai format
+    // }
   }
 
   try {

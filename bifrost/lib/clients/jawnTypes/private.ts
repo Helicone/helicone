@@ -1555,7 +1555,9 @@ Json: JsonObject;
     };
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
-    Provider: components["schemas"]["ProviderName"] | "CUSTOM";
+    /** @enum {string} */
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
+    Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
@@ -1781,6 +1783,7 @@ Json: JsonObject;
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
+      gateway_endpoint_version: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2183,10 +2186,9 @@ Json: JsonObject;
       customer_id: string;
     };
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
-    /** @enum {string} */
     ResponseFormat: "ANTHROPIC" | "OPENAI";
     HeliconeMeta: {
+      gatewayEndpointVersion?: string;
       gatewayResponseFormat?: components["schemas"]["ResponseFormat"];
       providerModelId?: string;
       gatewayModel?: string;

@@ -43,10 +43,4 @@ export class AnthropicProvider extends BaseProvider {
     return JSON.stringify(anthropicBody);
   }
 
-  determineResponseFormat(endpoint: Endpoint): ResponseFormat {
-    if (endpoint.author === "anthropic" || endpoint.providerModelId.includes("claude-")) {
-      return "ANTHROPIC";
-    }
-    return "OPENAI";
-  }
 }
