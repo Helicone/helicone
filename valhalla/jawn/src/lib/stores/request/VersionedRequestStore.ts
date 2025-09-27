@@ -138,6 +138,8 @@ export class VersionedRequestStore {
         completion_audio_tokens: row.completion_audio_tokens,
         cache_enabled: row.cache_enabled,
         cache_reference_id: row.cache_reference_id,
+        is_passthrough_billing: row.is_passthrough_billing,
+        gateway_endpoint_version: row.gateway_endpoint_version,
       },
     ]);
 
