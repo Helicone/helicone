@@ -23,7 +23,7 @@ import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 import { mapOpenAIResponse } from "../mappers/openai/responses";
 import { registry } from "@helicone-package/cost/models/registry";
-import { ModelProviderName } from "@/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
 const MAX_PREVIEW_LENGTH = 1_000;
 
