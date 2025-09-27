@@ -368,10 +368,10 @@ const featureGroups: FeatureGroup[] = [
       },
       {
         name: "Data encryption",
-        hobby: false,
-        pro: false,
-        team: false,
-        enterprise: "Optional",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
       },
       {
         name: "RBAC",
