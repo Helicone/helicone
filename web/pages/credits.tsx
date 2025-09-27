@@ -256,12 +256,12 @@ const Credits: NextPageWithLayout<void> = () => {
                           return balance.toFixed(2);
                         }
                         if (balance >= 100) {
-                          return balance.toFixed(4);
+                          return balance.toFixed(5);
                         }
                         if (balance >= 10) {
-                          return balance.toFixed(3);
+                          return balance.toFixed(4);
                         }
-                        const formattedBalance = balance.toFixed(5);
+                        const formattedBalance = balance.toFixed(6);
                         return formattedBalance;
                       })()}`
                     )}

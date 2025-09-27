@@ -42,7 +42,12 @@
       "Bash(gh run watch:*)",
       "Bash(curl:*)",
       "Bash(yarn lint:*)",
-      "mcp__linear-server__list_comments"
+      "mcp__linear-server__list_comments",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_evaluate",
+      "Bash(yarn build)",
+      "Bash(gh api:*)"
     ],
     "deny": []
   }

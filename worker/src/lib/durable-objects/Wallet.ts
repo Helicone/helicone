@@ -18,13 +18,6 @@ export const ALERT_ID = "total_spend_delta_alert";
 export const ALERT_STATE_ON = "on";
 export const ALERT_STATE_OFF = "off";
 
-// Stripe dispute status values that indicate a resolved/closed dispute
-// These are the official Stripe dispute status values for closed disputes
-const RESOLVED_DISPUTE_STATUSES: Stripe.Dispute.Status[] = [
-  "won",
-  "lost",
-  "warning_closed",
-];
 
 // Stripe dispute status values that indicate an unresolved/active dispute
 // These are the official Stripe dispute status values for active disputes
@@ -568,9 +561,47 @@ export class Wallet extends DurableObject<Env> {
     );
   }
 
+  getTableData(
+    tableName: string,
+    page: number,
+    pageSize: number
+  ): { data: any[]; total: number } {
+    // Whitelist of allowed table names to prevent SQL injection
+    const allowedTables = [
+      "processed_webhook_events",
+      "disallow_list",
+      "escrows",
+      "credit_purchases",
+      "aggregated_debits",
+      "alert_state",
+    ];
+
+    if (!allowedTables.includes(tableName)) {
+      throw new Error(`Invalid table name: ${tableName}`);
+    }
+
+    return this.ctx.storage.transactionSync(() => {
+      // Get total count first
+      const countResult = this.ctx.storage.sql
+        .exec<{ count: number }>(`SELECT COUNT(*) as count FROM ${tableName}`)
+        .one();
+
+      // Get paginated data
+      const offset = page * pageSize;
+      const rows = this.ctx.storage.sql
+        .exec(`SELECT * FROM ${tableName} LIMIT ? OFFSET ?`, pageSize, offset)
+        .toArray();
+
+      return {
+        data: rows,
+        total: countResult.count,
+      };
+    });
+  }
+
   addDispute(
     disputeId: string,
-    charge: string | Stripe.Charge,
+    chargeId: string,
     amount: number,
     currency: string,
     reason: string,
@@ -578,28 +609,35 @@ export class Wallet extends DurableObject<Env> {
     eventId: string
   ): Result<void, string> {
     const scaledAmount = amount * SCALE_FACTOR;
+
     return this.ctx.storage.transactionSync(() => {
       try {
-        const now = Date.now();
-        const chargeId = typeof charge === "string" ? charge : charge.id;
+        // Check if dispute already exists
+        const existingDispute = this.ctx.storage.sql
+          .exec<{
+            count: number;
+          }>("SELECT COUNT(*) as count FROM disputes WHERE id = ?", disputeId)
+          .one();
 
-        // Add the dispute record (wallet is automatically suspended due to active dispute)
+        if (existingDispute.count > 0) {
+          return err(`Dispute ${disputeId} already exists`);
+        }
+
+        // Insert the dispute
         this.ctx.storage.sql.exec(
-          `INSERT INTO disputes (id, charge_id, amount, currency, reason, status, created_at, event_id) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          "INSERT INTO disputes (id, charge_id, amount, currency, reason, status, created_at, event_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
           disputeId,
           chargeId,
           scaledAmount,
           currency,
           reason,
           status,
-          now,
+          Date.now(),
           eventId
         );
 
         return ok(undefined);
       } catch (error) {
-        console.error("Error adding dispute:", error);
         return err(`Failed to add dispute: ${error}`);
       }
     });
@@ -607,57 +645,34 @@ export class Wallet extends DurableObject<Env> {
 
   updateDispute(
     disputeId: string,
-    status: Stripe.Dispute.Status,
+    status: string,
     eventId: string
   ): Result<void, string> {
     return this.ctx.storage.transactionSync(() => {
       try {
-        this.ctx.storage.sql.exec(
-          "UPDATE disputes SET status = ? WHERE id = ?",
-          status,
-          disputeId
-        );
+        // Check if dispute exists
+        const existingDispute = this.ctx.storage.sql
+          .exec<{
+            count: number;
+          }>("SELECT COUNT(*) as count FROM disputes WHERE id = ?", disputeId)
+          .one();
 
-        // Mark event as processed
+        if (existingDispute.count === 0) {
+          return err(`Dispute ${disputeId} not found`);
+        }
+
+        // Update the dispute status
         this.ctx.storage.sql.exec(
-          "INSERT INTO processed_webhook_events (id, processed_at) VALUES (?, ?)",
+          "UPDATE disputes SET status = ?, event_id = ? WHERE id = ?",
+          status,
           eventId,
-          Date.now()
+          disputeId
         );
 
         return ok(undefined);
       } catch (error) {
-        console.error("Error updating dispute:", error);
         return err(`Failed to update dispute: ${error}`);
       }
     });
-  }
-
-  getActiveDisputes(): Dispute[] {
-    return this.ctx.storage.sql
-      .exec<{
-        id: string;
-        charge_id: string;
-        amount: number;
-        currency: string;
-        reason: string;
-        status: Stripe.Dispute.Status;
-        created_at: number;
-        event_id: string;
-      }>(
-        `SELECT id, charge_id, amount, currency, reason, status, created_at, event_id FROM disputes WHERE status IN (${UNRESOLVED_DISPUTE_STATUSES.map(() => "?").join(", ")})`,
-        ...UNRESOLVED_DISPUTE_STATUSES
-      )
-      .toArray()
-      .map((dispute) => ({
-        id: dispute.id,
-        chargeId: dispute.charge_id,
-        amount: dispute.amount / SCALE_FACTOR,
-        currency: dispute.currency,
-        reason: dispute.reason,
-        status: dispute.status,
-        createdAt: dispute.created_at,
-        eventId: dispute.event_id,
-      }));
   }
 }
