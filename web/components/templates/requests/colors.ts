@@ -83,7 +83,9 @@ const providerNameColorMapping: Partial<Record<ProviderName, ColorKey>> = {
   CHUTES: "gray",
 };
 
-const modelProviderNameColorMapping: Partial<Record<ModelProviderName, ColorKey>> = {
+const modelProviderNameColorMapping: Partial<
+  Record<ModelProviderName, ColorKey>
+> = {
   openai: "purple",
   azure: "purple",
   anthropic: "orange",
@@ -129,7 +131,9 @@ export function getProviderColor(provider: Provider): ColorKey {
   }
 
   if (provider in modelProviderNameColorMapping) {
-    return modelProviderNameColorMapping[provider as ModelProviderName] || "blue";
+    return (
+      modelProviderNameColorMapping[provider as ModelProviderName] || "blue"
+    );
   }
 
   return "blue";

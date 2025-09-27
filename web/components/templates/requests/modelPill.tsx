@@ -2,7 +2,12 @@ import { MapperType } from "@helicone-package/llm-mapper/types";
 import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
 import { clsx } from "../../shared/clsx";
 import { Provider } from "@helicone-package/llm-mapper/types";
-import { colourPillStyles, getModelAuthor, getAuthorColor, ColorKey } from "./colors";
+import {
+  colourPillStyles,
+  getModelAuthor,
+  getAuthorColor,
+  ColorKey,
+} from "./colors";
 
 interface ModelPillProps {
   model: string;
