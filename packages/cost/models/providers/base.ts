@@ -69,7 +69,4 @@ export abstract class BaseProvider {
     }
   }
 
-  determineResponseFormat(endpoint: Endpoint): ResponseFormat {
-    return "OPENAI";
-  }
 }

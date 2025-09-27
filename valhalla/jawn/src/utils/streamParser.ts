@@ -3,14 +3,9 @@ export function consolidateTextFields(responseBody: any[]): any {
     const consolidated = responseBody.reduce((acc, cur) => {
       if (!cur) {
         return acc;
-      } else if (cur?.usage) {
-        return recursivelyConsolidate(acc, { usage: cur.usage });
-      } else if (cur?.response?.usage) {
-        // for response api streaming
-        return recursivelyConsolidate(acc, { usage: cur.response.usage });
       } else if (acc?.choices === undefined) {
         return cur;
-      } else {
+      } else if (cur?.choices) {
         // This is to handle the case if the choices array is empty (happens on Azure)
         if (acc.choices.length === 0 && cur.choices?.length !== 0) {
           acc.choices.push(...cur.choices.slice(acc.choices.length));
@@ -19,6 +14,11 @@ export function consolidateTextFields(responseBody: any[]): any {
         // Preserve x_groq field if it contains usage data
         if (cur?.x_groq?.usage) {
           acc.x_groq = cur.x_groq;
+        }
+
+        // Handle usage data in chunks that also have choices (Google AI Studio chat completions endpoint)
+        if (cur?.usage) {
+          acc.usage = cur.usage;
         }
 
         if ("model" in cur && "model" in acc) {
@@ -74,6 +74,13 @@ export function consolidateTextFields(responseBody: any[]): any {
             }
           }),
         };
+      } else if (cur?.usage) {
+        // usage-only chunk
+        return recursivelyConsolidate(acc, { usage: cur.usage });
+      } else if (cur?.response?.usage) {
+        return recursivelyConsolidate(acc, { usage: cur.response.usage });
+      } else {
+        return acc;
       }
     }, {});
 

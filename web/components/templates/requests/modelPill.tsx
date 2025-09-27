@@ -38,8 +38,11 @@ const ModelPill = (props: ModelPillProps) => {
     VERCEL: "purple",
   };
 
+  // TODO: mapping for ai gateway provider
+
   // Default fallback for no provider specified
   const modelMapping: Record<MapperType, keyof typeof colors> = {
+    "ai-gateway": "blue",
     "openai-chat": "purple",
     "gemini-chat": "teal",
     "vercel-chat": "purple",

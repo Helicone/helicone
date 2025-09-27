@@ -183,7 +183,7 @@ function getModelProviderEntriesByModel(
 
 function getModelProviderEntry(
   model: string,
-  provider: string
+  provider: ModelProviderName
 ): Result<ModelProviderEntry | null> {
   const configId = `${model}:${provider}` as ModelProviderConfigId;
   const providerData = indexes.modelProviderToData.get(configId) || null;
@@ -212,11 +212,20 @@ function getPtbEndpointsForProvider(
   return ok(topLevelEndpoints);
 }
 
-function getArchivedModelProviderConfig(
+function getModelProviderConfigByVersion(
   model: string,
   provider: ModelProviderName,
   version: string
 ): Result<ModelProviderConfig | null> {
+  const currentEntry = getModelProviderEntry(model, provider);
+  // if the given version matches the active config version (or both are undefined/empty)
+  if (
+    (!currentEntry.data?.config.version && !version) ||
+    (currentEntry.data?.config.version === version)
+  ) { 
+    return ok(currentEntry.data?.config ?? null);
+  }
+
   const versionKey = `${model}:${provider}:${version}`;
   const archivedConfig = indexes.modelToArchivedEndpointConfigs.get(versionKey);
 
@@ -239,5 +248,5 @@ export const registry = {
   getEndpointsByModel,
   getModelProviderEntriesByModel,
   getModelProviderEntry,
-  getArchivedModelProviderConfig,
+  getModelProviderConfigByVersion,
 };

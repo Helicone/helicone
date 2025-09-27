@@ -563,7 +563,7 @@ export class LoggingHandler extends AbstractLogHandler {
           : String(request.userId),
       request_id: request.id,
       latency: response.delayMs ?? 0,
-      model: context.processedLog.model ?? "",
+      model: context.message.heliconeMeta.gatewayModel ?? context.processedLog.model ?? "",
       completion_tokens: atLeastZero(isCacheHit ? 0 : completionTokens),
       prompt_tokens: atLeastZero(isCacheHit ? 0 : promptTokens),
       prompt_cache_write_tokens: atLeastZero(
@@ -591,7 +591,7 @@ export class LoggingHandler extends AbstractLogHandler {
       threat: request.threat ?? false,
       time_to_first_token: Math.round(response.timeToFirstToken ?? 0),
       target_url: request.targetUrl ?? "",
-      provider: request.provider ?? "",
+      provider: context.message.heliconeMeta.gatewayProvider ?? request.provider ?? "",
       country_code: request.countryCode ?? "",
       properties: context.processedLog.request.properties ?? {},
       assets: context.processedLog.assets
@@ -612,6 +612,7 @@ export class LoggingHandler extends AbstractLogHandler {
       request_referrer: context.message.log.request.requestReferrer ?? "",
       is_passthrough_billing:
         context.message.heliconeMeta.isPassthroughBilling ?? false,
+      gateway_endpoint_version: context.message.heliconeMeta.gatewayEndpointVersion ?? "",
     };
 
     return requestResponseLog;
