@@ -1,9 +1,9 @@
 import { BaseProvider } from "./base";
 import type {
-  ModelProviderConfig,
-  UserEndpointConfig,
   AuthContext,
   AuthResult,
+  RequestParams,
+  Endpoint,
 } from "../types";
 
 export class AzureOpenAIProvider extends BaseProvider {
@@ -18,22 +18,42 @@ export class AzureOpenAIProvider extends BaseProvider {
     "https://learn.microsoft.com/azure/ai-services/openai/concepts/models",
   ];
 
-  buildUrl(endpoint: ModelProviderConfig, config: UserEndpointConfig): string {
-    if (!config.baseUri || !config.deploymentName) {
-      throw new Error("Azure OpenAI requires baseUri and deploymentName");
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
+    // Determine base URI - use provided or Helicone gateway for PTB
+    const baseUri =
+      endpoint.userConfig.baseUri ||
+      (endpoint.ptbEnabled
+        ? "https://helicone-gateway.cognitiveservices.azure.com"
+        : null);
+
+    if (!baseUri) {
+      throw new Error("Azure OpenAI requires baseUri");
     }
-    const apiVersion = config.apiVersion || "2025-01-01-preview";
-    const baseUri = config.baseUri.endsWith("/")
-      ? config.baseUri
-      : `${config.baseUri}/`;
-    const builtUrl = `${baseUri}openai/deployments/${config.deploymentName}/chat/completions?api-version=${apiVersion}`;
-    return builtUrl;
+
+    // Get deployment name - fallback chain: deploymentName -> providerModelId -> modelName
+    const deploymentName = endpoint.userConfig.deploymentName?.trim();
+    const deployment =
+      deploymentName ||
+      endpoint.providerModelId ||
+      endpoint.userConfig.modelName;
+
+    if (!deployment) {
+      throw new Error(
+        "Azure OpenAI requires a deployment name, provider model ID, or model name"
+      );
+    }
+
+    // Build URL with normalized base URI and API version
+    const normalizedBaseUri = baseUri.endsWith("/") ? baseUri : `${baseUri}/`;
+    const apiVersion = endpoint.userConfig.apiVersion || "2025-01-01-preview";
+
+    return `${normalizedBaseUri}openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`;
   }
 
-  authenticate(context: AuthContext): AuthResult {
+  authenticate(authContext: AuthContext): AuthResult {
     return {
       headers: {
-        "api-key": context.apiKey || "",
+        "api-key": authContext.apiKey || "",
       },
     };
   }

@@ -10,7 +10,7 @@ export class S3Client {
     secretKey: string,
     private endpoint: string,
     private bucketName: string,
-    private region: string,
+    private region: string
   ) {
     this.awsClient = new AwsClient({
       accessKeyId: accessKey,

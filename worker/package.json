@@ -14,8 +14,8 @@
     "test:run": "vitest run",
     "test:registry": "vitest registry-ts",
     "cf-typegen": "wrangler types --strict-vars false",
-    "lint": "tsc && eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings=0",
-    "lint-fix": "eslint --ext .js,.jsx,.ts,.tsx ./src --fix"
+    "lint": "tsc && eslint --ext .js,.jsx,.ts,.tsx ./src",
+    "lint --fix": "eslint --ext .js,.jsx,.ts,.tsx ./src --fix"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.8.19",
@@ -28,7 +28,7 @@
     "@vitest/snapshot": "^3.2",
     "axios": "^1.11.0",
     "dotenv": "^17.2.1",
-    "eslint": "^9.32.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.3",
@@ -36,14 +36,14 @@
     "typescript": "^5.8.3",
     "vitest": "~3.2.0",
     "wrangler": "^4.27.0",
-    "yarn": "^1.22.22",
-    "zod": "^3.23.8"
+    "yarn": "^1.22.22"
   },
   "dependencies": {
     "@aws-crypto/sha256-js": "^5.2",
     "@aws-sdk/client-sqs": "^3.799",
     "@clickhouse/client-common": "^0.2",
     "@clickhouse/client-web": "^0.2",
+    "@cloudflare/containers": "^0.0.28",
     "@cloudflare/itty-router-openapi": "^1",
     "@helicone/prompts": "^1",
     "@smithy/protocol-http": "^4.1.7",

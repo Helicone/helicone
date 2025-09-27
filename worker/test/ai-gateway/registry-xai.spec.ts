@@ -49,16 +49,16 @@ describe("xAI Registry Tests", () => {
         }));
     });
 
-    describe("grok-4-0709", () => {
+    describe("grok-4", () => {
       it("should handle xai provider", () =>
         runGatewayTest({
-          model: "grok-4-0709/xai",
+          model: "grok-4/xai",
           expected: {
             providers: [
               {
                 url: "https://api.x.ai/v1/chat/completions",
                 response: "success",
-                model: "grok-4-0709",
+                model: "grok-4",
                 expects: xaiAuthExpectations,
               },
             ],
@@ -68,13 +68,13 @@ describe("xAI Registry Tests", () => {
 
       it("should auto-select xai provider when none specified", () =>
         runGatewayTest({
-          model: "grok-4-0709",
+          model: "grok-4",
           expected: {
             providers: [
               {
                 url: "https://api.x.ai/v1/chat/completions",
                 response: "success",
-                model: "grok-4-0709",
+                model: "grok-4",
                 expects: xaiAuthExpectations,
               },
             ],

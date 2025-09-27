@@ -48,6 +48,7 @@ export const endpoints = {
     providerModelId: "gemini-2.5-flash-lite",
     provider: "vertex",
     author: "google",
+    crossRegion: true,
     pricing: [
       {
         threshold: 0,
@@ -81,6 +82,35 @@ export const endpoints = {
       global: {
         providerModelId: "gemini-2.5-flash-lite",
       },
+    },
+  },
+  "gemini-2.5-flash-lite:openrouter": {
+    provider: "openrouter",
+    author: "google",
+    providerModelId: "google/gemini-2.5-flash-lite",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000011, // $0.11/1M - worst-case: $0.10/1M (Google) * 1.055
+        output: 0.00000042, // $0.42/1M - worst-case: $0.40/1M (Google) * 1.055
+      },
+    ],
+    contextLength: 1_048_576,
+    maxCompletionTokens: 65_535,
+    supportedParameters: [
+      "max_tokens",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
     },
   },
 } satisfies Partial<

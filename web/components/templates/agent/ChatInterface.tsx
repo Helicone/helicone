@@ -33,6 +33,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useHeliconeAgent } from "./HeliconeAgentContext";
 
 interface ChatInterfaceProps {
   messageQueue: QueuedMessage[];
@@ -229,6 +230,22 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
 
     const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
+    const escalateButtonRef = useRef<HTMLButtonElement>(null);
+
+    const { setToolHandler } = useHeliconeAgent();
+
+    useEffect(() => {
+      setToolHandler("escalate", async () => {
+        if (escalateButtonRef.current) {
+          escalateButtonRef.current.click();
+        }
+        return {
+          success: true,
+          message: "Successfully escalated to a human",
+        };
+      });
+    }, []);
+
     return (
       <>
         <div className="mx-2 mb-2 flex flex-col items-center">
@@ -374,29 +391,35 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
 
                 {/* Support button */}
                 {onEscalate && (
-                  <Button
-                    onClick={onEscalate}
-                    disabled={isEscalating || isEscalated}
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 items-center gap-1 rounded-full bg-muted px-3 py-0 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
-                  >
-                    {isEscalating ? (
-                      <>
-                        <BouncingDotsLoader size="xs" />
-                      </>
-                    ) : isEscalated ? (
-                      <>
-                        <CheckCircle size={10} />
-                        <span>Support</span>
-                      </>
-                    ) : (
-                      <>
-                        <Users size={10} />
-                        <span>Support</span>
-                      </>
-                    )}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        ref={escalateButtonRef}
+                        onClick={onEscalate}
+                        disabled={isEscalating || isEscalated}
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 items-center gap-1 rounded-full bg-muted px-3 py-0 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
+                      >
+                        {isEscalating ? (
+                          <>
+                            <BouncingDotsLoader size="xs" />
+                          </>
+                        ) : isEscalated ? (
+                          <>
+                            <CheckCircle size={10} />
+                            <span>Support</span>
+                          </>
+                        ) : (
+                          <>
+                            <Users size={10} />
+                            <span>Support</span>
+                          </>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Talk to a human</TooltipContent>
+                  </Tooltip>
                 )}
               </div>
 

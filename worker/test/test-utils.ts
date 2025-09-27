@@ -205,6 +205,7 @@ export function createAIGatewayRequest(
     messages?: Array<{ role: string; content: string }>;
     maxTokens?: number;
     stream?: boolean;
+    body?: Record<string, any>;
   }
 ) {
   return {
@@ -220,6 +221,7 @@ export function createAIGatewayRequest(
       ],
       max_tokens: options?.maxTokens || TEST_MAX_TOKENS,
       ...(options?.stream !== undefined && { stream: options.stream }),
+      ...options?.body, // Spread any additional body parameters
     }),
   };
 }

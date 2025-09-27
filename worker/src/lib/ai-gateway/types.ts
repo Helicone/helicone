@@ -25,7 +25,6 @@ export interface DisallowListEntry {
 export interface EscrowInfo {
   escrowId: string;
   endpoint: Endpoint;
-  model: string;
 }
 
 // Error type matching the old aiGateway pattern
@@ -35,8 +34,10 @@ export type AttemptError = {
     | "missing_provider_key"
     | "request_failed"
     | "invalid_prompt"
-    | "model_not_supported";
+    | "model_not_supported"
+    | "disallowed";
   message: string;
   statusCode: number;
+  source?: string;
   details?: string;
 };

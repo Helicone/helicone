@@ -19,6 +19,9 @@ import { APIKeysStore } from "./lib/db/APIKeysStore";
 import { APIKeysManager } from "./lib/managers/APIKeysManager";
 import { SecretManagerClass } from "@helicone-package/secrets/SecretManager";
 
+// Needed for migrations
+export { RequestBodyBufferContainer } from "./RequestBodyBuffer/RequestBodyContainer";
+
 const FALLBACK_QUEUE = "fallback-queue";
 
 export type Provider = ProviderName | "CUSTOM";
@@ -89,7 +92,10 @@ async function modifyEnvBasedOnPath(
         env.EU_REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY,
       S3_REGION: "eu-west-1",
       AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
+      HELICONE_ORG_ID: env.EU_HELICONE_ORG_ID,
     };
+
+    request.requestBodyBuffer.resetS3Client(env);
   }
   if (env.WORKER_TYPE) {
     return env;

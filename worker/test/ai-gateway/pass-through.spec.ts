@@ -77,8 +77,8 @@ describe("Pass-Through Tests", () => {
                 errorMessage: "Bedrock failed",
               },
               {
-                // Second attempt: Anthropic succeeds (NO_MAPPING not specified here, so uses /v1/chat/completions)
-                url: "https://api.anthropic.com/v1/chat/completions",
+                // Second attempt: Anthropic succeeds
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-7-sonnet-20250219",
                 data: {
@@ -154,7 +154,7 @@ describe("Pass-Through Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/passthrough/models/gemini-1.5-pro:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
                 response: "success",
                 model: "gemini-1.5-pro",
                 data: {
@@ -376,7 +376,7 @@ describe("Pass-Through Tests", () => {
               },
               {
                 // Third attempt: Anthropic succeeds
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-7-sonnet-20250219",
                 data: {

@@ -32,6 +32,7 @@ interface PlaygroundMessagesPanelProps {
   setUseAIGateway: (_useAIGateway: boolean) => void;
   error: string | null;
   isLoading?: boolean;
+  createPrompt?: boolean;
 }
 
 const PlaygroundMessagesPanel = ({
@@ -54,6 +55,7 @@ const PlaygroundMessagesPanel = ({
   setUseAIGateway,
   error,
   isLoading,
+  createPrompt,
 }: PlaygroundMessagesPanelProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -254,6 +256,7 @@ const PlaygroundMessagesPanel = ({
           setUseAIGateway={setUseAIGateway}
           error={error}
           isLoading={isLoading}
+          createPrompt={createPrompt}
         />
       </div>
     </div>

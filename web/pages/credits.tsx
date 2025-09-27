@@ -110,7 +110,7 @@ const Credits: NextPageWithLayout<void> = () => {
       />
 
       <div className="flex flex-1 justify-center">
-        <div className="flex w-full max-w-6xl flex-col border-l border-r border-border">
+        <div className="flex w-full flex-col">
           <div className="flex-1 overflow-auto">
             {/* Waitlist Experience - Show when no access */}
             {!hasAccess ? (
@@ -381,6 +381,35 @@ const Credits: NextPageWithLayout<void> = () => {
 
                               // Determine status display properties
                               const getStatusDisplay = () => {
+                                // Handle fully refunded transactions
+                                if (status === "refunded") {
+                                  return {
+                                    label: "Refunded",
+                                    icon: AlertCircle,
+                                    className:
+                                      "text-amber-600 dark:text-amber-500",
+                                    showAmount: true,
+                                    showNetAmount: false,
+                                  };
+                                }
+
+                                // Handle partially refunded transactions
+                                if (
+                                  transaction.isRefunded &&
+                                  transaction.refundedAmount &&
+                                  transaction.refundedAmount > 0
+                                ) {
+                                  return {
+                                    label: "Partially refunded",
+                                    icon: AlertCircle,
+                                    className:
+                                      "text-amber-600 dark:text-amber-500",
+                                    showAmount: true,
+                                    showNetAmount: true,
+                                  };
+                                }
+
+                                // Handle regular payments
                                 switch (status) {
                                   case "succeeded":
                                     return {
@@ -389,6 +418,7 @@ const Credits: NextPageWithLayout<void> = () => {
                                       className:
                                         "text-green-600 dark:text-green-500",
                                       showAmount: true,
+                                      showNetAmount: false,
                                     };
                                   case "processing":
                                     return {
@@ -397,6 +427,7 @@ const Credits: NextPageWithLayout<void> = () => {
                                       className:
                                         "text-blue-600 dark:text-blue-500",
                                       showAmount: true,
+                                      showNetAmount: false,
                                     };
                                   case "canceled":
                                     return {
@@ -404,6 +435,7 @@ const Credits: NextPageWithLayout<void> = () => {
                                       icon: XCircle,
                                       className: "text-muted-foreground",
                                       showAmount: false,
+                                      showNetAmount: false,
                                     };
                                   case "requires_action":
                                   case "requires_capture":
@@ -415,6 +447,7 @@ const Credits: NextPageWithLayout<void> = () => {
                                       className:
                                         "text-amber-600 dark:text-amber-500",
                                       showAmount: true,
+                                      showNetAmount: false,
                                     };
                                   default:
                                     return {
@@ -423,12 +456,16 @@ const Credits: NextPageWithLayout<void> = () => {
                                       className:
                                         "text-green-600 dark:text-green-500",
                                       showAmount: true,
+                                      showNetAmount: false,
                                     };
                                 }
                               };
 
                               const statusDisplay = getStatusDisplay();
                               const StatusIcon = statusDisplay.icon;
+                              const refundedAmountCents =
+                                transaction.refundedAmount ?? 0;
+                              const netCents = amount - refundedAmountCents;
 
                               return (
                                 <div
@@ -458,14 +495,62 @@ const Credits: NextPageWithLayout<void> = () => {
                                     </div>
                                   </div>
                                   {statusDisplay.showAmount && (
-                                    <div
-                                      className={`text-sm font-medium ${statusDisplay.className}`}
-                                    >
-                                      {status === "succeeded" ? "+" : ""}
-                                      {(amount / 100).toLocaleString("en-US", {
-                                        style: "currency",
-                                        currency: "usd",
-                                      })}
+                                    <div className="flex flex-col items-end gap-0.5">
+                                      {/* Always show original payment amount */}
+                                      <div
+                                        className={`text-sm font-medium ${
+                                          status === "refunded"
+                                            ? "text-muted-foreground line-through"
+                                            : transaction.isRefunded
+                                              ? "text-green-600 dark:text-green-500"
+                                              : statusDisplay.className
+                                        }`}
+                                      >
+                                        {status !== "refunded" &&
+                                        (status === "succeeded" ||
+                                          status === "processing")
+                                          ? "+"
+                                          : ""}
+                                        {(amount / 100).toLocaleString(
+                                          "en-US",
+                                          {
+                                            style: "currency",
+                                            currency: "usd",
+                                          },
+                                        )}
+                                      </div>
+
+                                      {/* Show refunded amount if there are refunds */}
+                                      {transaction.refundedAmount &&
+                                        transaction.refundedAmount > 0 && (
+                                          <div className="text-sm font-medium text-red-600 dark:text-red-500">
+                                            -
+                                            {(
+                                              transaction.refundedAmount / 100
+                                            ).toLocaleString("en-US", {
+                                              style: "currency",
+                                              currency: "usd",
+                                            })}
+                                          </div>
+                                        )}
+
+                                      {/* Show net amount for partially refunded payments */}
+                                      {statusDisplay.showNetAmount &&
+                                        refundedAmountCents > 0 &&
+                                        netCents > 0 && (
+                                          <div className="mt-0.5 border-t border-border pt-0.5">
+                                            <XSmall className="font-medium text-foreground">
+                                              Net: +
+                                              {(netCents / 100).toLocaleString(
+                                                "en-US",
+                                                {
+                                                  style: "currency",
+                                                  currency: "usd",
+                                                },
+                                              )}
+                                            </XSmall>
+                                          </div>
+                                        )}
                                     </div>
                                   )}
                                 </div>

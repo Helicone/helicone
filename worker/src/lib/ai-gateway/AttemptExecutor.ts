@@ -1,31 +1,40 @@
 import {
   buildRequestBody,
   authenticateRequest,
+  buildErrorMessage,
+  buildEndpointUrl,
 } from "@helicone-package/cost/models/provider-helpers";
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
 import { isErr, Result, ok, err } from "../util/results";
 import { Attempt, EscrowInfo, AttemptError } from "./types";
-import { Endpoint } from "@helicone-package/cost/models/types";
+import {
+  AuthContext,
+  Endpoint,
+  RequestParams,
+} from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
+import { CacheProvider } from "../../../../packages/common/cache/provider";
 
 export class AttemptExecutor {
   constructor(
     private readonly env: Env,
-    private readonly ctx: ExecutionContext
+    private readonly ctx: ExecutionContext,
+    private readonly cacheProvider?: CacheProvider
   ) {}
 
   async execute(
     attempt: Attempt,
     requestWrapper: RequestWrapper,
     parsedBody: any,
+    requestParams: RequestParams,
     orgId: string,
     forwarder: (
       targetBaseUrl: string | null,
       escrowInfo?: EscrowInfo
     ) => Promise<Response>
   ): Promise<Result<Response, AttemptError>> {
-    const { endpoint, providerKey, source } = attempt;
+    const { endpoint, providerKey } = attempt;
 
     let escrowInfo: EscrowInfo | undefined;
 
@@ -49,7 +58,6 @@ export class AttemptExecutor {
       escrowInfo = {
         escrowId: escrowResult.data.escrowId,
         endpoint: endpoint,
-        model: endpoint.providerModelId,
       };
     }
 
@@ -57,7 +65,9 @@ export class AttemptExecutor {
       endpoint,
       providerKey,
       parsedBody,
+      requestParams,
       requestWrapper,
+      orgId,
       forwarder,
       escrowInfo
     );
@@ -78,7 +88,9 @@ export class AttemptExecutor {
     endpoint: Endpoint,
     providerKey: ProviderKey,
     parsedBody: any,
+    requestParams: RequestParams,
     requestWrapper: RequestWrapper,
+    orgId: string,
     forwarder: (
       targetBaseUrl: string | null,
       escrowInfo?: EscrowInfo
@@ -86,11 +98,10 @@ export class AttemptExecutor {
     escrowInfo: EscrowInfo | undefined
   ): Promise<Result<Response, AttemptError>> {
     try {
-      // Build request body using provider helpers
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: toAnthropic, // TODO: This is global, don't pass it in
+        toAnthropic: toAnthropic,
       });
 
       if (isErr(bodyResult) || !bodyResult.data) {
@@ -101,16 +112,31 @@ export class AttemptExecutor {
         });
       }
 
-      // Set up authentication headers using provider helpers
-      const authResult = await authenticateRequest(endpoint, {
-        config: (providerKey.config as any) || {},
+      const urlResult = buildEndpointUrl(endpoint, requestParams);
+
+      if (isErr(urlResult)) {
+        return err({
+          type: "request_failed",
+          message: urlResult.error,
+          statusCode: 400,
+        });
+      }
+
+      const authContext: AuthContext = {
         apiKey: providerKey.decrypted_provider_key,
         secretKey: providerKey.decrypted_provider_secret_key || undefined,
+        orgId: orgId,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
         requestMethod: requestWrapper.getMethod(),
-        requestUrl: endpoint.baseUrl ?? requestWrapper.url.toString(),
+        requestUrl: urlResult.data,
         requestBody: bodyResult.data,
-      });
+      };
+
+      const authResult = await authenticateRequest(
+        endpoint,
+        authContext,
+        this.cacheProvider
+      );
 
       if (authResult.error) {
         return err({
@@ -126,23 +152,30 @@ export class AttemptExecutor {
         requestWrapper.getAuthorization() ?? ""
       );
       requestWrapper.resetObject();
-      requestWrapper.setUrl(endpoint.baseUrl ?? requestWrapper.url.toString());
-      requestWrapper.setBody(bodyResult.data);
+      requestWrapper.setUrl(urlResult.data);
+      await requestWrapper.setBody(bodyResult.data);
 
-      // Apply auth headers from provider
       for (const [key, value] of Object.entries(
         authResult.data?.headers || {}
       )) {
         requestWrapper.setHeader(key, value);
       }
 
-      // Forward the request
-      const response = await forwarder(endpoint.baseUrl, escrowInfo);
+      const response = await forwarder(urlResult.data, escrowInfo);
 
       if (!response.ok) {
+        const errorMessageResult = await buildErrorMessage(endpoint, response);
+        if (isErr(errorMessageResult)) {
+          return err({
+            type: "request_failed",
+            message: errorMessageResult.error,
+            statusCode: response.status,
+          });
+        }
+
         return err({
           type: "request_failed",
-          message: `Request failed with status ${response.status}`,
+          message: errorMessageResult.data,
           statusCode: response.status,
         });
       }

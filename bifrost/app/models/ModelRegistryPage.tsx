@@ -16,14 +16,23 @@ import {
   ArrowUpDown,
   Clipboard,
   Check,
-  ChevronDown,
   X,
   Filter,
+  Info,
 } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
 import { useModelFiltering } from "@/hooks/useModelFiltering";
 import { Model, SortOption } from "@/lib/filters/modelFilters";
 import { components } from "@/lib/clients/jawnTypes/public";
+import { FilterSection } from "@/components/ui/filters/FilterSection";
+import { FilterOption } from "@/components/ui/filters/FilterOption";
+import { SliderFilter } from "@/components/ui/filters/SliderFilter";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type ModelRegistryResponse = components["schemas"]["ModelRegistryResponse"];
 
@@ -56,8 +65,11 @@ export function ModelRegistryPage() {
   const [selectedCapabilities, setSelectedCapabilities] = useState<Set<string>>(
     new Set(searchParams.get("capabilities")?.split(",").filter(Boolean) || [])
   );
+  const [showPtbOnly, setShowPtbOnly] = useState<boolean>(
+    searchParams.get("ptb") === "true"
+  );
   const [sortBy, setSortBy] = useState<SortOption>(
-    (searchParams.get("sort") as SortOption) || "name"
+    (searchParams.get("sort") as SortOption) || "newest"
   );
 
   // Use client-side filtering hook
@@ -69,6 +81,7 @@ export function ModelRegistryPage() {
       priceRange,
       minContextSize,
       selectedCapabilities,
+      showPtbOnly,
       sortBy,
     });
 
@@ -129,7 +142,8 @@ export function ModelRegistryPage() {
         Array.from(selectedCapabilities).sort().join(",")
       );
     }
-    if (sortBy !== "name") params.set("sort", sortBy);
+    if (showPtbOnly) params.set("ptb", "true");
+    if (sortBy !== "newest") params.set("sort", sortBy);
 
     const newUrl = params.toString()
       ? `${window.location.pathname}?${params.toString()}`
@@ -142,6 +156,7 @@ export function ModelRegistryPage() {
     priceRange,
     minContextSize,
     selectedCapabilities,
+    showPtbOnly,
     sortBy,
     router,
   ]);
@@ -169,10 +184,7 @@ export function ModelRegistryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black pt-20 lg:pt-0">
-      <div>
-        {/* Main Layout: Sidebar + Content */}
-        <div className="flex">
+    <div className="h-screen bg-white dark:bg-black pt-20 lg:pt-0 flex overflow-hidden">
           {/* Left Sidebar - Filters */}
           <>
             {/* Mobile overlay */}
@@ -186,8 +198,7 @@ export function ModelRegistryPage() {
             {/* Sidebar */}
             <div className={`${
               sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-            } lg:translate-x-0 fixed lg:relative w-[75vw] lg:w-80 lg:flex-shrink-0 transition-transform duration-300 z-50 lg:z-auto left-0 top-0`}>
-              <div className="bg-white dark:bg-gray-900 lg:border-l lg:border-b border-r border-gray-200 dark:border-gray-800 lg:sticky lg:top-[var(--header-offset)] top-0 h-screen lg:h-[calc(100vh-var(--header-offset))] overflow-y-auto shadow-xl lg:shadow-none">
+            } lg:translate-x-0 fixed lg:relative w-[75vw] lg:w-80 lg:flex-shrink-0 transition-transform duration-300 z-50 lg:z-auto left-0 top-0 h-screen lg:h-full bg-white dark:bg-gray-900 lg:border-r border-gray-200 dark:border-gray-800 overflow-y-auto shadow-xl lg:shadow-none`}>
                 <div className="p-6">
                   {/* Mobile close button */}
                   <div className="lg:hidden flex justify-between items-center mb-4">
@@ -200,190 +211,127 @@ export function ModelRegistryPage() {
                     </button>
                   </div>
                 {/* Provider Filter */}
-                <div className="mb-6">
-                  <button
-                    onClick={() => toggleSection("providers")}
-                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3"
-                  >
-                    <span>Providers</span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        expandedSections.has("providers") ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedSections.has("providers") && (
-                    <div className="space-y-1 max-h-48 overflow-y-auto pr-2">
-                      {availableFilters.providers.map((provider) => {
-                        const providerName =
-                          typeof provider === "string"
-                            ? provider
-                            : provider.name;
-                        const displayName =
-                          typeof provider === "string"
-                            ? provider
-                            : provider.displayName;
-                        const isSelected = selectedProviders.has(providerName);
-                        return (
-                          <div
-                            key={providerName}
-                            onClick={() => {
-                              const newSet = new Set(selectedProviders);
-                              if (isSelected) {
-                                newSet.delete(providerName);
-                              } else {
-                                newSet.add(providerName);
-                              }
-                              setSelectedProviders(newSet);
-                            }}
-                            className={`flex items-center justify-between px-2 py-1.5 text-sm cursor-pointer transition-colors ${
-                              isSelected
-                                ? "bg-sky-50 dark:bg-sky-900/10 text-sky-700 dark:text-sky-400"
-                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                            }`}
-                          >
-                            <span className="truncate flex-1 mr-2">
-                              {displayName}
-                            </span>
-                            {isSelected && <X className="h-3 w-3" />}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                <FilterSection
+                  title="Providers"
+                  expanded={expandedSections.has("providers")}
+                  onToggle={() => toggleSection("providers")}
+                >
+                  <div className="space-y-1 max-h-48 overflow-y-auto pr-2">
+                    {availableFilters.providers.map((provider) => {
+                      const providerName =
+                        typeof provider === "string" ? provider : provider.name;
+                      const displayName =
+                        typeof provider === "string"
+                          ? provider
+                          : provider.displayName;
+                      const isSelected = selectedProviders.has(providerName);
+                      return (
+                        <FilterOption
+                          key={providerName}
+                          label={displayName}
+                          selected={isSelected}
+                          onToggle={() => {
+                            const newSet = new Set(selectedProviders);
+                            if (isSelected) {
+                              newSet.delete(providerName);
+                            } else {
+                              newSet.add(providerName);
+                            }
+                            setSelectedProviders(newSet);
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                </FilterSection>
 
                 {/* Price Range Filter */}
-                <div className="mb-6">
-                  <button
-                    onClick={() => toggleSection("price")}
-                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3"
-                  >
-                    <span>Price Range</span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        expandedSections.has("price") ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedSections.has("price") && (
-                    <div className="px-2 pb-2">
-                      <div className="mb-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                        <span>${priceRange[0].toFixed(2)}</span>
-                        <span>${priceRange[1].toFixed(2)} per M tokens</span>
-                      </div>
-                      <Slider
-                        value={priceRange}
-                        onValueChange={(value) =>
-                          setPriceRange(value as [number, number])
-                        }
-                        min={0}
-                        max={50}
-                        step={0.1}
-                        className="mb-1"
-                      />
-                    </div>
-                  )}
-                </div>
+                <FilterSection
+                  title="Price Range"
+                  expanded={expandedSections.has("price")}
+                  onToggle={() => toggleSection("price")}
+                >
+                  <SliderFilter
+                    value={priceRange}
+                    onChange={(value) => setPriceRange(value as [number, number])}
+                    min={0}
+                    max={50}
+                    step={0.1}
+                    formatLabel={(value) => {
+                      const [min, max] = value as [number, number];
+                      return `$${min.toFixed(2)} - $${max.toFixed(2)} per M tokens`;
+                    }}
+                  />
+                </FilterSection>
 
                 {/* Context Size Filter */}
-                <div className="mb-6">
-                  <button
-                    onClick={() => toggleSection("context")}
-                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3"
-                  >
-                    <span>Context Size</span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        expandedSections.has("context") ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedSections.has("context") && (
-                    <div className="px-2 pb-2">
-                      <div className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-                        Minimum:{" "}
-                        {minContextSize >= 1000
-                          ? `${(minContextSize / 1000).toFixed(0)}K`
-                          : minContextSize}{" "}
-                        tokens
-                      </div>
-                      <Slider
-                        value={[minContextSize]}
-                        onValueChange={([value]) => setMinContextSize(value)}
-                        min={0}
-                        max={1000000}
-                        step={1000}
-                        className="mb-1"
-                      />
-                    </div>
-                  )}
-                </div>
+                <FilterSection
+                  title="Context Size"
+                  expanded={expandedSections.has("context")}
+                  onToggle={() => toggleSection("context")}
+                >
+                  <SliderFilter
+                    value={minContextSize}
+                    onChange={(value) => setMinContextSize(value as number)}
+                    min={0}
+                    max={1000000}
+                    step={1000}
+                    label="Minimum"
+                    formatLabel={(value) => {
+                      const size = value as number;
+                      return size >= 1000
+                        ? `${(size / 1000).toFixed(0)}K tokens`
+                        : `${size} tokens`;
+                    }}
+                  />
+                </FilterSection>
 
                 {/* Capabilities Filter */}
-                <div className="mb-6">
-                  <button
-                    onClick={() => toggleSection("capabilities")}
-                    className="w-full flex items-center justify-between text-sm font-normal text-gray-700 dark:text-gray-300 mb-3"
-                  >
-                    <span>Special Capabilities</span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        expandedSections.has("capabilities") ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedSections.has("capabilities") && (
-                    <div className="space-y-1">
-                      {availableFilters.capabilities.map((capability) => {
-                        const isSelected = selectedCapabilities.has(capability);
-                        const labelMap: Record<string, string> = {
-                          audio: "Audio Processing",
-                          video: "Video Processing",
-                          thinking: "Chain-of-Thought",
-                          web_search: "Web Search",
-                          image: "Image Processing",
-                          caching: "Caching",
-                          reasoning: "Reasoning",
-                        };
+                <FilterSection
+                  title="Special Capabilities"
+                  expanded={expandedSections.has("capabilities")}
+                  onToggle={() => toggleSection("capabilities")}
+                >
+                  <div className="space-y-1">
+                    {availableFilters.capabilities.map((capability) => {
+                      const isSelected = selectedCapabilities.has(capability);
+                      const labelMap: Record<string, string> = {
+                        audio: "Audio Processing",
+                        video: "Video Processing",
+                        thinking: "Chain-of-Thought",
+                        web_search: "Web Search",
+                        image: "Image Processing",
+                        caching: "Caching",
+                        reasoning: "Reasoning",
+                      };
 
-                        return (
-                          <div
-                            key={capability}
-                            onClick={() => {
-                              const newSet = new Set(selectedCapabilities);
-                              if (isSelected) {
-                                newSet.delete(capability);
-                              } else {
-                                newSet.add(capability);
-                              }
-                              setSelectedCapabilities(newSet);
-                            }}
-                            className={`flex items-center justify-between px-2 py-1.5 cursor-pointer transition-colors ${
-                              isSelected
-                                ? "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300"
-                                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
-                            }`}
-                          >
-                            <span className="text-sm font-light truncate flex-1 mr-2">
-                              {labelMap[capability] || capability}
-                            </span>
-                            {isSelected && <X className="h-3 w-3" />}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                      return (
+                        <FilterOption
+                          key={capability}
+                          label={labelMap[capability] || capability}
+                          selected={isSelected}
+                          onToggle={() => {
+                            const newSet = new Set(selectedCapabilities);
+                            if (isSelected) {
+                              newSet.delete(capability);
+                            } else {
+                              newSet.add(capability);
+                            }
+                            setSelectedCapabilities(newSet);
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                </FilterSection>
                 </div>
-                </div>
-              </div>
             </div>
           </>
 
           {/* Right Content - Table */}
-          <div className="flex-1 min-w-0 lg:min-h-[calc(100vh-var(--header-offset))] flex flex-col">
-            {/* Controls Box - Connected to sidebar and table */}
-            <div className="bg-white dark:bg-gray-900 border-r border-b border-gray-200 dark:border-gray-800 lg:sticky lg:top-[var(--header-offset)] z-10 lg:shadow-sm">
+          <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+            {/* Controls Box */}
+            <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
               <div className="p-4 lg:p-6">
                 <div className="flex flex-col gap-4">
                   {/* Title and model count */}
@@ -403,6 +351,7 @@ export function ModelRegistryPage() {
                         setPriceRange([0, 50]);
                         setMinContextSize(0);
                         setSelectedCapabilities(new Set());
+                        setShowPtbOnly(false);
                         setSearchQuery("");
                       }}
                       className={`px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all flex items-center gap-2 ${
@@ -429,45 +378,46 @@ export function ModelRegistryPage() {
                       />
                     </div>
 
-                    {/* Filter and Sort buttons row - mobile only */}
-                    <div className="flex gap-2 lg:hidden">
-                      <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 h-10 border border-gray-200 dark:border-gray-800 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
-                        <Filter className="h-4 w-4" />
-                        <span>Filters</span>
-                      </button>
-                      
-                      <Select
-                        value={sortBy}
-                        onValueChange={(v) => setSortBy(v as SortOption)}
-                      >
-                        <SelectTrigger className="flex-1 h-10">
-                          <ArrowUpDown className="h-4 w-4 mr-2" />
-                          <SelectValue placeholder="Sort" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="name">Name</SelectItem>
-                          <SelectItem value="price-low">
-                            Price: Low to High
-                          </SelectItem>
-                          <SelectItem value="price-high">
-                            Price: High to Low
-                          </SelectItem>
-                          <SelectItem value="context">Context Size</SelectItem>
-                          <SelectItem value="newest">Newest First</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {/* Mobile filter button */}
+                    <button
+                      onClick={() => setSidebarOpen(!sidebarOpen)}
+                      className="lg:hidden flex items-center justify-center gap-2 px-4 h-10 border border-gray-200 dark:border-gray-800 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      <Filter className="h-4 w-4" />
+                      <span>Filters</span>
+                    </button>
 
-                    {/* Sort dropdown - desktop only */}
-                    <div className="hidden lg:block">
-                      <Select
-                        value={sortBy}
-                        onValueChange={(v) => setSortBy(v as SortOption)}
-                      >
-                        <SelectTrigger className="w-[160px] h-10">
+                    {/* PTB Toggle */}
+                    <TooltipProvider>
+                      <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900">
+                        <div className="flex items-center gap-1.5">
+                          <label htmlFor="ptb-toggle" className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                            Credits
+                          </label>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-3.5 w-3.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>Only show models that can be used with Helicone Credits. Add credits to your account to access these models without needing individual provider API keys.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Switch
+                          id="ptb-toggle"
+                          checked={showPtbOnly}
+                          onCheckedChange={setShowPtbOnly}
+                          className="data-[state=checked]:bg-blue-600"
+                        />
+                      </div>
+                    </TooltipProvider>
+
+                    {/* Sort dropdown */}
+                    <Select
+                      value={sortBy}
+                      onValueChange={(v) => setSortBy(v as SortOption)}
+                    >
+                      <SelectTrigger className="w-full lg:w-[160px] h-10">
                         <ArrowUpDown className="h-4 w-4 mr-2" />
                         <SelectValue placeholder="Sort" />
                       </SelectTrigger>
@@ -483,14 +433,13 @@ export function ModelRegistryPage() {
                         <SelectItem value="newest">Newest First</SelectItem>
                       </SelectContent>
                     </Select>
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Models Table - Connected to controls box with divider */}
-            <div className="flex-1 overflow-auto bg-white dark:bg-gray-900 border-r border-b border-gray-200 dark:border-gray-800">
+            {/* Models Table */}
+            <div className="flex-1 overflow-auto bg-white dark:bg-gray-900">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   {filteredModels.map((model, index) => {
@@ -540,6 +489,11 @@ export function ModelRegistryPage() {
                               {isFree && (
                                 <span className="text-xs font-normal text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/40 px-2 py-0.5">
                                   Free
+                                </span>
+                              )}
+                              {model.endpoints.some(ep => ep.supportsPtb) && (
+                                <span className="text-xs font-normal text-blue-800 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5">
+                                  Credits
                                 </span>
                               )}
                             </div>
@@ -628,8 +582,6 @@ export function ModelRegistryPage() {
               </div>
             )}
           </div>
-        </div>
-      </div>
     </div>
   );
 }

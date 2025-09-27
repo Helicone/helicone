@@ -51,15 +51,20 @@ export const EMPTY_STATE_FEATURES: Record<string, EmptyStateFeature> = {
   prompts: {
     title: "Create Your First Prompt",
     description:
-      "Design, test, and version control your AI prompts all in one place.",
+      "Design, version, and deploy prompts through the AI Gateway. No code changes needed.",
     icon: Tag,
     featureImage: {
       type: "code",
-      content: `// 1. Format your prompt with variables
-const prompt = hpf\`Explain \${{ topic }} to a \${{ audience }}\`;
-
-// 2. Send requests with the prompt ID
-headers: { "Helicone-Prompt-Id": "explain_topic" }`,
+      content: `// Deploy your prompt template through the AI Gateway
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  prompt_id: "customer-support",
+  inputs: {
+    customer_name: "Sarah",
+    issue: "refund request",
+    sentiment: "frustrated"
+  }
+});`,
       language: "typescript",
       maxWidth: "2xl",
     },
@@ -71,7 +76,7 @@ headers: { "Helicone-Prompt-Id": "explain_topic" }`,
       },
       secondary: {
         text: "View Docs",
-        link: "https://docs.helicone.ai/features/prompts",
+        link: "https://docs.helicone.ai/features/advanced-usage/prompts",
       },
     },
   },

@@ -35,7 +35,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -73,7 +73,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -111,7 +111,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -148,7 +148,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -185,7 +185,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -222,7 +222,100 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-4.1:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/gpt-4.1",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000211, // $2.11/1M - worst-case: $2.00/1M (OpenAI) * 1.055
+        output: 0.00000844, // $8.44/1M - worst-case: $8.00/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 1_047_576,
+    maxCompletionTokens: 32_768,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-4.1-mini:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/gpt-4.1-mini",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000042, // $0.42/1M - worst-case: $0.40/1M (OpenAI) * 1.055
+        output: 0.00000169, // $1.69/1M - worst-case: $1.60/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 1_047_576,
+    maxCompletionTokens: 32_768,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-4.1-nano:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/gpt-4.1-nano",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000011, // $0.11/1M - worst-case: $0.10/1M (OpenAI) * 1.055
+        output: 0.00000042, // $0.42/1M - worst-case: $0.40/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 1_047_576,
+    maxCompletionTokens: 32_768,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    priority: 3,
     endpointConfigs: {
       "*": {},
     },

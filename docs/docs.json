@@ -245,7 +245,8 @@
                   "getting-started/self-host/kubernetes"
                 ]
               },
-
+              "references/provider-integration",
+              "getting-started/integration-method/posthog",
               "references/how-we-calculate-cost",
               "references/data-autonomy",
               "helicone-headers/header-directory",
@@ -342,9 +343,7 @@
           },
           {
             "group": "Models",
-            "pages": [
-              "rest/models/get-v1public-model-registry-models"
-            ]
+            "pages": ["rest/models/get-v1public-model-registry-models"]
           }
         ]
       },

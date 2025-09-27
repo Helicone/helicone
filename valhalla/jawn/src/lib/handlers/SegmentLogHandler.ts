@@ -6,7 +6,11 @@ import {
   ok,
 } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext } from "./HandlerContext";
+import {
+  getCompletionTokens,
+  getPromptTokens,
+  HandlerContext,
+} from "./HandlerContext";
 import { formatTimeString } from "../stores/request/VersionedRequestStore";
 import { KVCache } from "../cache/kvCache";
 import { cacheResultCustom } from "../../utils/cacheResult";
@@ -159,23 +163,27 @@ export class SegmentLogHandler extends AbstractLogHandler {
   ): SegmentEvent {
     const request = context.message.log.request;
     const response = context.message.log.response;
-    const usage = context.usage;
+    const legacyUsage = context.legacyUsage;
+    const modelUsage = context.usage;
+
+    const promptTokens = getPromptTokens(modelUsage, legacyUsage) ?? 0;
+    const completionTokens = getCompletionTokens(modelUsage, legacyUsage) ?? 0;
 
     return {
       event: "helicone-request",
       properties: {
         requestId: request.id,
-        completionTokens: usage.completionTokens ?? 0,
+        completionTokens,
         latencyMs: response.delayMs ?? 0,
         model: context.processedLog.model ?? "",
-        promptTokens: usage.promptTokens ?? 0,
+        promptTokens,
         timestamp: formatTimeString(request.requestCreatedAt.toISOString()),
         status: response.status ?? 0,
         timeToFirstTokenMs: response.timeToFirstToken ?? 0,
         provider: request.provider ?? "",
         countryCode: request.countryCode ?? "",
         properties: context.processedLog.request.properties ?? {},
-        costUSD: context.usage.cost ?? 0,
+        costUSD: context.costBreakdown?.totalCost ?? legacyUsage.cost ?? 0,
         heliconeUrl: `${process.env.APP_URL || "https://us.helicone.ai"}/requests?requestId=${request.id}`,
       },
       userId: request.userId,

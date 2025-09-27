@@ -7,19 +7,19 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"ResultSuccess__success-boolean--message-string__": {
+			"ResultSuccess__success-boolean--position_63_-number__": {
 				"properties": {
 					"data": {
 						"properties": {
-							"message": {
-								"type": "string"
+							"position": {
+								"type": "number",
+								"format": "double"
 							},
 							"success": {
 								"type": "boolean"
 							}
 						},
 						"required": [
-							"message",
 							"success"
 						],
 						"type": "object"
@@ -59,10 +59,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__success-boolean--message-string_.string_": {
+			"Result__success-boolean--position_63_-number_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__success-boolean--message-string__"
+						"$ref": "#/components/schemas/ResultSuccess__success-boolean--position_63_-number__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -101,6 +101,45 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__isOnWaitlist-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__count-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"count": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"count"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__count-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__count-number__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -685,6 +724,74 @@
 					"amount",
 					"description",
 					"totalCost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaymentIntentRecord": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"created": {
+						"type": "number",
+						"format": "double"
+					},
+					"status": {
+						"type": "string"
+					},
+					"isRefunded": {
+						"type": "boolean"
+					},
+					"refundedAmount": {
+						"type": "number",
+						"format": "double"
+					},
+					"refundIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"amount",
+					"created",
+					"status"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"StripePaymentIntentsResponse": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PaymentIntentRecord"
+						},
+						"type": "array"
+					},
+					"has_more": {
+						"type": "boolean"
+					},
+					"next_page": {
+						"type": "string",
+						"nullable": true
+					},
+					"count": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"has_more",
+					"next_page",
+					"count"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1643,6 +1750,9 @@
 			},
 			"OrganizationMember": {
 				"properties": {
+					"created_at": {
+						"type": "string"
+					},
 					"org_role": {
 						"type": "string"
 					},
@@ -1654,6 +1764,7 @@
 					}
 				},
 				"required": [
+					"created_at",
 					"org_role",
 					"member",
 					"email"
@@ -6271,8 +6382,214 @@
 					}
 				]
 			},
+			"IntegrationCreateParams": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"integration_name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Integration": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Array_Integration__": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Integration"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array_Integration_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array_Integration__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"IntegrationUpdateParams": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Integration_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/Integration"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Integration.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Integration_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_Array__id-string--name-string___": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"name",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array__id-string--name-string__.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array__id-string--name-string___"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TestStripeMeterEventRequest": {
+				"properties": {
+					"event_name": {
+						"type": "string"
+					},
+					"customer_id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"event_name",
+					"customer_id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelProviderName": {
+				"type": "string",
+				"enum": [
+					"anthropic",
+					"openai",
+					"bedrock",
+					"vertex",
+					"azure",
+					"perplexity",
+					"groq",
+					"deepseek",
+					"cohere",
+					"xai",
+					"deepinfra",
+					"google-ai-studio",
+					"openrouter"
+				],
+				"nullable": false
+			},
 			"HeliconeMeta": {
 				"properties": {
+					"stripeCustomerId": {
+						"type": "string"
+					},
+					"gatewayProvider": {
+						"$ref": "#/components/schemas/ModelProviderName"
+					},
+					"providerModelId": {
+						"type": "string"
+					},
 					"isPassthroughBilling": {
 						"type": "boolean"
 					},
@@ -8468,7 +8785,6 @@
 			"SettingName": {
 				"type": "string",
 				"enum": [
-					"stripe:products",
 					"kafka:dlq",
 					"kafka:log",
 					"kafka:score",
@@ -8484,7 +8800,8 @@
 					"sqs:request-response-logs",
 					"sqs:helicone-scores",
 					"sqs:request-response-logs-dlq",
-					"sqs:helicone-scores-dlq"
+					"sqs:helicone-scores-dlq",
+					"stripe:products"
 				],
 				"nullable": false
 			},
@@ -46826,6 +47143,78 @@
 				],
 				"type": "object"
 			},
+			"InAppThread": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"chat": {},
+					"user_id": {
+						"type": "string"
+					},
+					"org_id": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"escalated": {
+						"type": "boolean"
+					},
+					"metadata": {},
+					"updated_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"soft_delete": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"id",
+					"chat",
+					"user_id",
+					"org_id",
+					"created_at",
+					"escalated",
+					"metadata",
+					"updated_at",
+					"soft_delete"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_InAppThread_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/InAppThread"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_InAppThread.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_InAppThread_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ConvertToWavResponse": {
 				"properties": {
 					"data": {
@@ -46913,7 +47302,7 @@
 		"contact": {}
 	},
 	"paths": {
-		"/v1/public/waitlist/feature": {
+		"/v1/waitlist/feature": {
 			"post": {
 				"operationId": "AddToWaitlist",
 				"responses": {
@@ -46922,7 +47311,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__success-boolean--message-string_.string_"
+									"$ref": "#/components/schemas/Result__success-boolean--position_63_-number_.string_"
 								}
 							}
 						}
@@ -46964,7 +47353,7 @@
 				}
 			}
 		},
-		"/v1/public/waitlist/feature/status": {
+		"/v1/waitlist/feature/status": {
 			"get": {
 				"operationId": "IsOnWaitlist",
 				"responses": {
@@ -47007,6 +47396,41 @@
 					{
 						"in": "query",
 						"name": "organizationId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/waitlist/feature/count": {
+			"get": {
+				"operationId": "GetWaitlistCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__count-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Waitlist"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "feature",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -47285,7 +47709,9 @@
 														"deepseek",
 														"cohere",
 														"xai",
-														"google-ai-studio"
+														"deepinfra",
+														"google-ai-studio",
+														"openrouter"
 													]
 												}
 											},
@@ -48480,7 +48906,9 @@
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"$ref": "#/components/schemas/StripePaymentIntentsResponse"
+								}
 							}
 						}
 					}
@@ -49192,6 +49620,59 @@
 								"required": [
 									"memberId",
 									"role"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/{organizationId}/update_owner": {
+			"post": {
+				"operationId": "UpdateOrganizationOwner",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "organizationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"memberId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"memberId"
 								],
 								"type": "object"
 							}
@@ -52871,6 +53352,276 @@
 				]
 			}
 		},
+		"/v1/integration": {
+			"post": {
+				"operationId": "CreateIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IntegrationCreateParams"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetIntegrations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array_Integration_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/{integrationId}": {
+			"post": {
+				"operationId": "UpdateIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IntegrationUpdateParams"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/integration/type/{type}": {
+			"get": {
+				"operationId": "GetIntegrationByType",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/integration/slack/settings": {
+			"get": {
+				"operationId": "GetSlackSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/slack/channels": {
+			"get": {
+				"operationId": "GetSlackChannels",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array__id-string--name-string__.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/{integrationId}/stripe/test-meter-event": {
+			"post": {
+				"operationId": "TestStripeMeterEvent",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TestStripeMeterEventRequest"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/log/request": {
 			"post": {
 				"operationId": "LogRequests",
@@ -53499,39 +54250,6 @@
 					"Alert Banner"
 				],
 				"security": [],
-				"parameters": []
-			}
-		},
-		"/v1/admin/gateway/dashboard_data": {
-			"post": {
-				"operationId": "StripeSync",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_unknown_"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Admin"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
 				"parameters": []
 			}
 		},
@@ -55137,23 +55855,16 @@
 				}
 			}
 		},
-		"/v1/admin/wallet/{orgId}": {
-			"post": {
-				"operationId": "GetWalletDetails",
+		"/v1/admin/helix-thread/{sessionId}": {
+			"get": {
+				"operationId": "GetHelixThread",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_any_"
-										}
-									]
+									"$ref": "#/components/schemas/Result_InAppThread.string_"
 								}
 							}
 						}
@@ -55170,78 +55881,10 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "orgId",
+						"name": "sessionId",
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/admin/wallet/{orgId}/tables/{tableName}": {
-			"post": {
-				"operationId": "GetWalletTableData",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_unknown_"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Admin"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "orgId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "path",
-						"name": "tableName",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "pageSize",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
 						}
 					}
 				]

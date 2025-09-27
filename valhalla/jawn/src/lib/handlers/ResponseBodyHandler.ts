@@ -12,7 +12,6 @@ import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropic
 import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
 import { LlamaBodyProcessor } from "../shared/bodyProcessors/llamaBodyProcessor";
 import { LlamaStreamBodyProcessor } from "../shared/bodyProcessors/llamaStreamBodyProcessor";
-import { OpenAIBodyProcessor } from "../shared/bodyProcessors/openaiBodyProcessor";
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
 import { GroqStreamProcessor } from "../shared/bodyProcessors/groqStreamProcessor";
@@ -31,6 +30,12 @@ import {
 } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
+import { getUsageProcessor } from "@helicone-package/cost";
+import {
+  modelCost,
+  modelCostBreakdownFromRegistry,
+} from "@helicone-package/cost/costCalc";
+import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -124,22 +129,78 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         context.processedLog.model = model;
       }
 
-      // Set usage
-      const usage =
+      // Set legacy usage values captured from body processors
+      const legacyUsage =
         processedResponseBody.data?.usage ??
         processedResponseBody.data?.processedBody?.usage ??
         {};
-      context.usage.completionTokens = usage.completionTokens;
-      context.usage.promptTokens = usage.promptTokens;
-      context.usage.totalTokens = usage.totalTokens;
-      context.usage.heliconeCalculated = usage.heliconeCalculated;
-      context.usage.cost = usage.cost;
-      context.usage.promptCacheWriteTokens = usage.promptCacheWriteTokens;
-      context.usage.promptCacheReadTokens = usage.promptCacheReadTokens;
-      context.usage.promptAudioTokens = usage.promptAudioTokens;
-      context.usage.completionAudioTokens = usage.completionAudioTokens;
-      context.usage.promptCacheWrite5m = usage.promptCacheWrite5m;
-      context.usage.promptCacheWrite1h = usage.promptCacheWrite1h;
+      context.legacyUsage.completionTokens = legacyUsage.completionTokens;
+      context.legacyUsage.promptTokens = legacyUsage.promptTokens;
+      context.legacyUsage.totalTokens = legacyUsage.totalTokens;
+      context.legacyUsage.heliconeCalculated = legacyUsage.heliconeCalculated;
+      context.legacyUsage.promptCacheWriteTokens =
+        legacyUsage.promptCacheWriteTokens;
+      context.legacyUsage.promptCacheReadTokens =
+        legacyUsage.promptCacheReadTokens;
+      context.legacyUsage.promptAudioTokens = legacyUsage.promptAudioTokens;
+      context.legacyUsage.completionAudioTokens =
+        legacyUsage.completionAudioTokens;
+      context.legacyUsage.promptCacheWrite5m = legacyUsage.promptCacheWrite5m;
+      context.legacyUsage.promptCacheWrite1h = legacyUsage.promptCacheWrite1h;
+      if (typeof legacyUsage.cost === "number" && legacyUsage.cost) {
+        context.legacyUsage.cost = legacyUsage.cost;
+      } else {
+        const cost = modelCost({
+          model: context.processedLog.model ?? "",
+          provider: context.message.log.request.provider ?? "",
+          sum_prompt_tokens: legacyUsage.promptTokens ?? 0,
+          prompt_cache_write_tokens: legacyUsage.promptCacheWriteTokens ?? 0,
+          prompt_cache_read_tokens: legacyUsage.promptCacheReadTokens ?? 0,
+          prompt_audio_tokens: legacyUsage.promptAudioTokens ?? 0,
+          sum_completion_tokens: legacyUsage.completionTokens ?? 0,
+          completion_audio_tokens: legacyUsage.completionAudioTokens ?? 0,
+          prompt_cache_write_5m: legacyUsage.promptCacheWrite5m ?? 0,
+          prompt_cache_write_1h: legacyUsage.promptCacheWrite1h ?? 0,
+        });
+
+        context.legacyUsage.cost = cost;
+      }
+
+      // Parse structured usage via the registry-aware processors when available
+      const gatewayProvider = context.message.heliconeMeta.gatewayProvider;
+      const provider = gatewayProvider ?? heliconeProviderToModelProviderName(context.message.log.request.provider);
+      const rawResponse = context.rawLog.rawResponseBody;
+      if (provider && rawResponse) {
+        const usageProcessor = getUsageProcessor(provider);
+        if (usageProcessor) {
+          const parsedUsage = await usageProcessor.parse({
+            responseBody: rawResponse,
+            isStream: context.message.log.request.isStream,
+            model: context.processedLog.model ?? "",
+          });
+          if (parsedUsage.error !== null) {
+            console.error(
+              `Error parsing structured usage for provider ${provider}: ${parsedUsage.error}`
+            );
+          } else if (parsedUsage.data) {
+            context.usage = parsedUsage.data ?? null;
+
+            const providerModelId =
+              context.message.heliconeMeta.providerModelId ?? "";
+
+            const breakdown = modelCostBreakdownFromRegistry({
+              modelUsage: parsedUsage.data,
+              providerModelId,
+              provider,
+            });
+
+            if (breakdown) {
+              context.costBreakdown = breakdown;
+            }
+          }
+        }
+      }
+
       return await super.handle(context);
     } catch (error: any) {
       return err(
@@ -151,11 +212,16 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   private getModelFromPath(path: string): string {
     const regex1 = /\/engines\/([^/]+)/;
     const regex2 = /models\/([^/:]+)/;
+    const regex3 = /\/model\/([^/:]+)/; // Add regex for Bedrock runtime paths
 
     let match = path.match(regex1);
 
     if (!match) {
       match = path.match(regex2);
+    }
+
+    if (!match) {
+      match = path.match(regex3);
     }
 
     if (match && match[1]) {
@@ -260,8 +326,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         provider,
         responseBody,
         model,
-        log.request.requestReferrer,
-        log.request.targetUrl
       );
       return await parser.parse({
         responseBody: responseBody,
@@ -348,14 +412,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     provider: string,
     responseBody: any,
     model?: string,
-    requestReferrer?: string,
-    targetUrl?: string
   ): IBodyProcessor {
-    const isAIGateway = requestReferrer?.includes("ai-gateway");
     if (!isStream) {
-      if (provider === "OPENAI" || isAIGateway) {
-        return new OpenAIBodyProcessor();
-      }
       if (provider === "ANTHROPIC" && responseBody) {
         return new AnthropicBodyProcessor();
       }
@@ -379,9 +437,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     if (isStream) {
-      if (isAIGateway && !targetUrl?.includes("anthropic.com/v1/messages")) {
-        return new OpenAIStreamProcessor();
-      }
       if (provider === "ANTHROPIC" || model?.includes("claude")) {
         return new AnthropicStreamBodyProcessor();
       }

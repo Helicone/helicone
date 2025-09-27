@@ -30,6 +30,7 @@ import {
 import { err, ok, Result } from "../../packages/common/result";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { ENVIRONMENT } from "../../lib/clients/constant";
+import { InAppThread } from "../../managers/InAppThreadsManager";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -59,7 +60,9 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Security("api_key")
 export class AdminController extends Controller {
   @Post("/gateway/dashboard_data")
-  public async getGatewayDashboardData(@Request() request: JawnAuthenticatedRequest) {
+  public async getGatewayDashboardData(
+    @Request() request: JawnAuthenticatedRequest
+  ) {
     await authCheckThrow(request.authParams.userId);
     const settingsManager = new SettingsManager();
     const stripeProductSettings =
@@ -132,7 +135,7 @@ export class AdminController extends Controller {
         organization_id,
         SUM(cost) as total_cost
       FROM request_response_rmt
-      WHERE organization_id IN (${orgIds.map(() => '?').join(',')})
+      WHERE organization_id IN (${orgIds.map(() => "?").join(",")})
       GROUP BY organization_id
       `,
       orgIds
@@ -1728,5 +1731,24 @@ export class AdminController extends Controller {
       console.error("Error fetching table data:", error);
       return err(`Error fetching table data: ${error}`);
     }
+  }
+
+  @Get("/helix-thread/{sessionId}")
+  public async getHelixThread(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() sessionId: string
+  ): Promise<Result<InAppThread, string>> {
+    await authCheckThrow(request.authParams.userId);
+    const thread = await dbExecute<InAppThread>(
+      `SELECT * FROM in_app_threads WHERE id = $1`,
+      [sessionId]
+    );
+    if (thread.error) {
+      return err(thread.error);
+    }
+    if (!thread.data?.[0]) {
+      return err("Thread not found");
+    }
+    return ok(thread.data?.[0]);
   }
 }

@@ -69,12 +69,14 @@ export class ProviderKeysManager {
     keyCuid?: string
   ): Promise<ProviderKey | null> {
     const key = await this.getProviderKey(provider, orgId, keyCuid);
+
     if (!key) {
       const key = await this.store.getProviderKeyWithFetch(
         provider,
         orgId,
         keyCuid
       );
+
       if (!key) return null;
 
       const existingKeys = await getFromKVCacheOnly(

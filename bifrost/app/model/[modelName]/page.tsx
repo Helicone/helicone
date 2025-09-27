@@ -92,20 +92,20 @@ export default async function ModelPage({
       <Suspense
         fallback={
           <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto px-4 py-8">
-            <div className="h-8 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-            <div className="h-4 w-96 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-8 w-64 bg-muted rounded animate-pulse" />
+            <div className="h-4 w-96 bg-muted rounded animate-pulse" />
             <div className="grid gap-4 mt-8">
               {[...Array(5)].map((_, i) => (
                 <div
                   key={i}
-                  className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
+                  className="h-20 bg-muted rounded animate-pulse"
                 />
               ))}
             </div>
           </div>
         }
       >
-        <ModelDetailPage initialModel={model} />
+        <ModelDetailPage initialModel={model} modelName={decodedModelName} />
       </Suspense>
     </Layout>
   );

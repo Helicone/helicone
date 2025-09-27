@@ -1,26 +1,27 @@
 {
   "extends": [
     "eslint:recommended",
-    // "plugin:@typescript-eslint/recommended", // this was throwing some error
+    "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
   ],
   "ignorePatterns": ["/src/lib/db/valhalla.types.ts"],
-  "plugins": ["prettier"],
+  "plugins": ["@typescript-eslint", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
   "rules": {
-    "@typescript-eslint/no-unused-vars": [
-      "warn",
-      { "argsIgnorePattern": "^_" }
-    ],
-    "prettier/prettier": [
-      "error",
-      {
-        "printWidth": 80
-      }
-    ]
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "no-console": "off",
+    "no-constant-condition": "warn",
+    "no-empty": "warn",
+    "no-case-declarations": "warn",
+    "prettier/prettier": "warn"
   }
-  // "parser": "@typescript-eslint/parser",
-  // "parserOptions": {
-  //   "ecmaVersion": 2018,
-  //   "sourceType": "module"
-  // }
 }

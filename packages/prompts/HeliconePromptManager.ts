@@ -32,6 +32,11 @@ export class HeliconePromptManager {
     params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming
   ): Promise<Prompt2025Version> {
     const { prompt_id, version_id, environment } = params;
+    
+    if (!prompt_id) {
+      throw new Error("No prompt ID provided");
+    }
+    
     if (environment) {
       return await this.getEnvironmentVersion(prompt_id, environment);
     }
@@ -171,9 +176,8 @@ export class HeliconePromptManager {
       return { body: openaiParams as ChatCompletionCreateParams, errors: [] };
     }
 
-    const pulledPromptBody = await this.pullPromptBody(params); 
-
     try {
+      const pulledPromptBody = await this.pullPromptBody(params); 
       return await this.mergePromptBody(params, pulledPromptBody);
     } catch (error) {
       console.error("Error getting prompt body:", error);

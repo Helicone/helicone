@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write  # Required for inline comments
       issues: read
       id-token: write
 
@@ -42,28 +42,38 @@ jobs:
 
           # Direct prompt for automated review (no @claude mention needed)
           direct_prompt: |
-
-            Put long feedback in a collapsible section. (<details>...</details>)
-            Please review this pull request and provide feedback on:
+            Review this PR and provide constructive feedback focusing on:
+            - Critical bugs or security issues
+            - Performance improvements and optimizations
             - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
+            - Potential refactoring opportunities
+            - Breaking changes or API issues
 
-            Be constructive and helpful in your feedback.
+            For each issue found, provide:
+            1. Clear explanation of the problem
+            2. Specific suggestions for improvement
+            3. Code examples when helpful
 
-            Add a confidence score to the feedback. (0-10) 
-              - 0: Do not merge this PR
-              - 5: Merge this PR with caution
-              - 10: Merge this PR
+            Use inline comments for specific code suggestions and improvements.
+            Provide actionable recommendations, not just issue identification.
 
-            [Reason why if low score]
+            Provide a confidence score (0-10):
+            - 0-3: Critical issues, do not merge
+            - 4-7: Minor issues or improvements suggested, merge with consideration
+            - 8-10: Good to merge, minor or no suggestions
 
+            Summary format:
+            **Score: X/10** - Brief reason
 
-            Add a summary of the feedback. Highlight the most important feedback, like the most important bugs, or the most important performance improvements.
+            **Suggestions Summary:**
+            - List key improvement suggestions
+            - Highlight any critical fixes needed
 
-          # Optional: Use sticky comments to make Claude reuse the same comment on subsequent pushes to the same PR
+          # Enable sticky comments to update existing comments instead of creating new ones
           use_sticky_comment: true
+
+          # Enable inline suggestions for specific code improvements
+          review_mode: "inline"
 
           # Optional: Different prompts for different authors
           # direct_prompt: |

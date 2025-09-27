@@ -30,7 +30,8 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
     },
@@ -40,6 +41,7 @@ export const endpoints = {
     provider: "vertex",
     author: "anthropic",
     version: "vertex-2023-10-16",
+    crossRegion: false,
     pricing: [
       {
         threshold: 0,
@@ -62,7 +64,8 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       global: {
         providerModelId: "claude-3-5-sonnet-v2@20241022",
@@ -97,9 +100,38 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "us-east-1": {},
+    },
+  },
+  "claude-3.5-sonnet-v2:openrouter": {
+    provider: "openrouter",
+    author: "anthropic",
+    providerModelId: "anthropic/claude-3.5-sonnet",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000003165, // $3.17/1M - worst-case: $3.00/1M (Anthropic/Amazon Bedrock) * 1.055
+        output: 0.00001583, // $15.83/1M - worst-case: $15.00/1M (Anthropic/Amazon Bedrock) * 1.055
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 8192,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "stop",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
     },
   },
 } satisfies Partial<

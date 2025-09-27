@@ -37,7 +37,7 @@ function getAPIRouterV1(
         return new Response("not allowed", { status: 403 });
       }
 
-      const data = await requestWrapper.getJson<{
+      const data = await requestWrapper.unsafeGetJson<{
         apiKeyHash: string;
         orgId: string;
         softDelete?: boolean;
@@ -91,7 +91,7 @@ function getAPIRouterV1(
         return new Response("not allowed", { status: 403 });
       }
 
-      const data = await requestWrapper.getJson<
+      const data = await requestWrapper.unsafeGetJson<
         {
           provider: ModelProviderName;
           decryptedProviderKey: string;
@@ -150,7 +150,7 @@ function getAPIRouterV1(
       if (authParams.error !== null) {
         return client.response.unauthorized();
       }
-      const job = await requestWrapper.getJson<Job>();
+      const job = await requestWrapper.unsafeGetJson<Job>();
 
       if (!job) {
         return client.response.newError("Invalid run", 400);
@@ -208,7 +208,7 @@ function getAPIRouterV1(
       }
 
       const status =
-        (await requestWrapper.getJson<{ status: string }>()).status ?? "";
+        (await requestWrapper.unsafeGetJson<{ status: string }>()).status ?? "";
 
       if (!isValidStatus(status)) {
         return client.response.newError("Invalid status", 400);
@@ -237,7 +237,7 @@ function getAPIRouterV1(
         return client.response.unauthorized();
       }
 
-      const node = await requestWrapper.getJson<HeliconeNode>();
+      const node = await requestWrapper.unsafeGetJson<HeliconeNode>();
       if (!node) {
         return client.response.newError("Invalid task", 400);
       }
@@ -297,7 +297,7 @@ function getAPIRouterV1(
       }
 
       const status =
-        (await requestWrapper.getJson<{ status: string }>()).status ?? "";
+        (await requestWrapper.unsafeGetJson<{ status: string }>()).status ?? "";
 
       if (!isValidStatus(status)) {
         return client.response.newError("Invalid status", 400);
@@ -372,7 +372,7 @@ function getAPIRouterV1(
         value: string;
       }
 
-      const newProperty = await requestWrapper.getJson<Body>();
+      const newProperty = await requestWrapper.unsafeGetJson<Body>();
 
       const auth = await requestWrapper.auth();
 
@@ -433,7 +433,7 @@ function getAPIRouterV1(
       }
 
       const requestData =
-        await requestWrapper.getJson<
+        await requestWrapper.unsafeGetJson<
           Database["public"]["Tables"]["alert"]["Insert"]
         >();
 
@@ -719,7 +719,7 @@ function getAPIRouterV1(
         return new Response("Missing stripe-signature header", { status: 400 });
       }
 
-      const body = await requestWrapper.getRawText();
+      const body = await requestWrapper.requestBodyBuffer.unsafeGetRawText();
       if (!body) {
         return new Response("Missing request body", { status: 400 });
       }
@@ -743,6 +743,12 @@ function getAPIRouterV1(
 
       if (handleError) {
         console.error("Error handling webhook event:", handleError);
+
+        // Check if error is related to insufficient balance (refund exceeds effective balance)
+        if (handleError.includes("Refund amount exceeds effective balance")) {
+          return new Response(handleError, { status: 400 });
+        }
+
         return new Response("", { status: 500 });
       }
 

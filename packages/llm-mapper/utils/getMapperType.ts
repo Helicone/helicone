@@ -25,17 +25,6 @@ export const getMapperTypeFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
   model: string
 ) => {
-  if (heliconeRequest.request_referrer === "ai-gateway") {
-    // catch NO_MAPPING case for Anthropic SDK
-    if (
-      heliconeRequest.provider === "ANTHROPIC" &&
-      heliconeRequest.target_url?.includes("/v1/messages")
-    ) {
-      return "anthropic-chat";
-    }
-    return "openai-chat";
-  }
-
   if (heliconeRequest.request_body?._type === "vector_db") {
     return "vector-db";
   }
@@ -87,10 +76,6 @@ export const getMapperType = ({
     targetUrl.includes("chat/completions") &&
     provider === "GOOGLE"
   ) {
-    return "openai-chat";
-  }
-
-  if (requestReferrer === "ai-gateway") {
     return "openai-chat";
   }
 

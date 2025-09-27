@@ -9,6 +9,8 @@ import { DeepSeekProvider } from "./deepseek";
 import { CohereProvider } from "./cohere";
 import { XAIProvider } from "./xai";
 import { GoogleProvider } from "./google";
+import { DeepInfraProvider } from "./deepinfra";
+import { OpenRouterProvider } from "./openrouter";
 
 // Create singleton instances (stateless, so safe to share)
 export const providers = {
@@ -22,7 +24,9 @@ export const providers = {
   deepseek: new DeepSeekProvider(),
   cohere: new CohereProvider(),
   xai: new XAIProvider(),
+  deepinfra: new DeepInfraProvider(),
   "google-ai-studio": new GoogleProvider(),
+  openrouter: new OpenRouterProvider(),
 } as const;
 
 export type ModelProviderName = keyof typeof providers;

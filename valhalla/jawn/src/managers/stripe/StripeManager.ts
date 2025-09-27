@@ -5,6 +5,7 @@ import {
   UpgradeToTeamBundleRequest,
   StripePaymentIntentsResponse,
   PaymentIntentSearchKind,
+  PaymentIntentRecord,
 } from "../../controllers/public/stripeController";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { Database } from "../../lib/db/database.types";
@@ -1245,25 +1246,45 @@ WHERE (${builtFilter.filter})`,
       const tokenUsageProductId = stripeProductSettings.cloudGatewayTokenUsageProduct;
 
       try {
-        const unitAmount = amount * 100;
+        const creditsAmountCents = Math.round(amount * 100);
+        const PERCENT_FEE_RATE = 0.03;
+        const FIXED_FEE_CENTS = 30;
+        const percentageFeeCents = Math.ceil(creditsAmountCents * PERCENT_FEE_RATE);
+        const stripeFeeCents = percentageFeeCents + FIXED_FEE_CENTS;
+        const totalAmountCents = creditsAmountCents + stripeFeeCents;
 
         const checkoutResult = await this.stripe.checkout.sessions.create({
           customer: customerId.data,
           success_url: `${origin}/credits`,
           cancel_url: `${origin}/credits`,
           mode: "payment",
-          line_items: [{
-            price_data: {
-                currency: "usd", 
-                unit_amount: unitAmount,
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                unit_amount: creditsAmountCents,
                 product: tokenUsageProductId,
+              },
+              quantity: 1,
             },
-            quantity: 1,
-          }],
+            {
+              price_data: {
+                currency: "usd",
+                unit_amount: stripeFeeCents,
+                product_data: {
+                  name: "Stripe fee",
+                },
+              },
+              quantity: 1,
+            },
+          ],
           payment_intent_data: {
             metadata: {
               orgId: this.authParams.organizationId,
               productId: tokenUsageProductId,
+              creditsAmountCents: creditsAmountCents.toString(),
+              stripeFeeCents: stripeFeeCents.toString(),
+              totalAmountCents: totalAmountCents.toString(),
             }
           }
         })
@@ -1389,11 +1410,81 @@ WHERE (${builtFilter.filter})`,
 
       const paymentIntents = await this.stripe.paymentIntents.search(searchParams);
 
+      // Map Stripe PaymentIntent to our custom PaymentIntentRecord type
+      const mappedData: PaymentIntentRecord[] = [];
+      
+      // Process each payment intent and fetch its refunds
+      for (const intent of paymentIntents.data) {
+        let totalRefunded = 0;
+        let isFullyRefunded = false;
+        let latestRefundDate = intent.created;
+        let refundIds: string[] = [];
+        
+        // Fetch refunds for this payment intent
+        try {
+          const refunds = await this.stripe.refunds.list({
+            payment_intent: intent.id,
+            limit: 100, // Get all refunds for this payment intent
+          });
+
+          if (refunds.data.length > 0) {
+            totalRefunded = refunds.data.reduce((sum, refund) => sum + refund.amount, 0);
+            isFullyRefunded = totalRefunded >= intent.amount;
+            refundIds = refunds.data.map(refund => refund.id);
+            
+            // Use the latest refund date for sorting if fully refunded
+            if (isFullyRefunded) {
+              latestRefundDate = Math.max(...refunds.data.map(r => r.created), intent.created);
+            }
+          }
+        } catch (refundError) {
+          console.error(`Error fetching refunds for payment intent ${intent.id}:`, refundError);
+          // Continue processing other payment intents even if one fails
+        }
+
+        // Add consolidated record
+        if (isFullyRefunded) {
+          // Show as fully refunded transaction
+          mappedData.push({
+            id: intent.id, // Always use payment intent ID
+            amount: intent.amount,
+            created: latestRefundDate,
+            status: "refunded",
+            isRefunded: true,
+            refundedAmount: totalRefunded,
+            refundIds: refundIds,
+          });
+        } else if (totalRefunded > 0) {
+          // Show as partially refunded transaction
+          mappedData.push({
+            id: intent.id, // Always use payment intent ID
+            amount: intent.amount,
+            created: intent.created,
+            status: intent.status,
+            isRefunded: true,
+            refundedAmount: totalRefunded,
+            refundIds: refundIds,
+          });
+        } else {
+          // Show as normal transaction
+          mappedData.push({
+            id: intent.id, // Always use payment intent ID
+            amount: intent.amount,
+            created: intent.created,
+            status: intent.status,
+            isRefunded: false,
+          });
+        }
+      }
+
+      // Sort all records by created date (newest first)
+      mappedData.sort((a, b) => b.created - a.created);
+
       return ok({
-        data: paymentIntents.data,
+        data: mappedData,
         has_more: paymentIntents.has_more,
         next_page: paymentIntents.next_page || null,
-        count: paymentIntents.data.length,
+        count: mappedData.length,
       });
     } catch (error: any) {
       console.error("Error searching payment intents:", error);
@@ -1401,4 +1492,3 @@ WHERE (${builtFilter.filter})`,
     }
   }
 }
-

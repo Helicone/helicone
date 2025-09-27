@@ -5,14 +5,19 @@ import { BaseManager } from "./BaseManager";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { dbQueryClickhouse } from "../lib/shared/db/dbExecute";
 import { isError, resultMap } from "../packages/common/result";
-import { CreditBalanceResponse, PaginatedPurchasedCredits } from "../controllers/public/creditsController";
+import {
+  CreditBalanceResponse,
+  PaginatedPurchasedCredits,
+} from "../controllers/public/creditsController";
 
 export class CreditsManager extends BaseManager {
   constructor(authParams: AuthParams) {
     super(authParams);
   }
 
-  public async getCreditsBalance(): Promise<Result<CreditBalanceResponse, string>> {
+  public async getCreditsBalance(): Promise<
+    Result<CreditBalanceResponse, string>
+  > {
     try {
       const creditSumResponse = await fetch(
         `${process.env.HELICONE_WORKER_API}/wallet/credits/total?orgId=${this.authParams.organizationId}`,
@@ -20,7 +25,7 @@ export class CreditsManager extends BaseManager {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.HELICONE_MANUAL_ACCESS_KEY}`,
+            Authorization: `Bearer ${process.env.HELICONE_MANUAL_ACCESS_KEY}`,
           },
         }
       );
@@ -29,9 +34,12 @@ export class CreditsManager extends BaseManager {
       if (isError(debits)) {
         return err(debits.error);
       }
-      const balance = creditSum.totalCredits - debits.data.cost;
 
-      return ok({ balance, totalCreditsPurchased: creditSum.totalCredits });
+      const totalCredits = creditSum.totalCredits || 0;
+      const spendCents = debits.data?.spend_cents || 0;
+      const balance = totalCredits - spendCents;
+
+      return ok({ balance, totalCreditsPurchased: totalCredits });
     } catch (error: any) {
       return err(`Error retrieving credit balance: ${error.message}`);
     }
@@ -42,7 +50,7 @@ export class CreditsManager extends BaseManager {
     if (isError(debits)) {
       return err(debits.error);
     }
-    return ok(debits.data.cost);
+    return ok(debits.data.spend_cents);
   }
 
   public async listTokenUsagePayments(params: {
@@ -79,18 +87,18 @@ export class CreditsManager extends BaseManager {
         pageSize: params.pageSize,
       });
     } catch (error: any) {
-      return err(`Error retrieving credit balance transactions: ${error.message}`);
+      return err(
+        `Error retrieving credit balance transactions: ${error.message}`
+      );
     }
   }
 }
 
 /// returns the total spend in unitary amounts of fiat in USD (aka freedom cents)
-export async function getAiGatewaySpend(
-  org_id: string,
-): Promise<
+export async function getAiGatewaySpend(org_id: string): Promise<
   Result<
     {
-      cost: number;
+      spend_cents: number;
     },
     string
   >
@@ -106,20 +114,16 @@ export async function getAiGatewaySpend(
         },
       },
       argsAcc: [],
-    },
+    }
   );
-    // future Helicone employee when we become billionaires from this gateway, 
-    // you might want to do this instead...     
-    // sum(toDecimal256(cost, 0) / toDecimal256(1000000000, 9)) as cost
+
   const query = `
-  SELECT sum(cost) / ${COST_PRECISION_MULTIPLIER / 100} as cost
-  FROM request_response_rmt FINAL
-  WHERE (
-    (${filterString})
-  )
+  SELECT
+    spend / ${COST_PRECISION_MULTIPLIER / 100} as spend_cents
+  FROM organization_ptb_spend
+  WHERE organization_id = {val_0 : String}
 `;
 
-  const res = await dbQueryClickhouse<{cost: number}>(query, argsAcc);
-
-  return resultMap(res, (d) => ({ cost: d[0].cost ?? 0 }));
+  const res = await dbQueryClickhouse<{ spend_cents: string }>(query, argsAcc);
+  return resultMap(res, (d) => ({ spend_cents: +d[0].spend_cents }));
 }

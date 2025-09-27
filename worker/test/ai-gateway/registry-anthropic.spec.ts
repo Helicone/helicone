@@ -6,7 +6,7 @@ import { createAnthropicMockResponse } from "../test-utils";
 // Define auth expectations for different providers
 const anthropicAuthExpectations = {
   headers: {
-    // Anthropic uses OpenAI compatibility mode with Authorization header for /v1/chat/completions
+    // Anthropic uses OpenAI compatibility mode with Authorization header for /v1/messages
     Authorization: /^Bearer /,
   },
 };
@@ -39,7 +39,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-5-haiku-20241022",
                 data: createAnthropicMockResponse("claude-3.5-haiku"),
@@ -56,9 +56,8 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:rawPredict",
                 response: "success",
-                model: "claude-3-5-haiku@20241022",
                 data: createAnthropicMockResponse("claude-3.5-haiku"),
                 expects: vertexAuthExpectations,
               },
@@ -75,7 +74,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-haiku-20241022-v1:0/invoke",
                 response: "success",
-                model: "anthropic.claude-3-5-haiku-20241022-v1:0",
                 data: createAnthropicMockResponse("claude-3.5-haiku"),
                 expects: bedrockAuthExpectations,
               },
@@ -90,7 +88,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-5-haiku-20241022",
                 data: createAnthropicMockResponse("claude-3.5-haiku"),
@@ -107,13 +105,13 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Anthropic provider failed",
               },
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:rawPredict",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Vertex provider failed",
@@ -121,7 +119,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-haiku-20241022-v1:0/invoke",
                 response: "success",
-                model: "anthropic.claude-3-5-haiku-20241022-v1:0",
                 data: createAnthropicMockResponse("claude-3.5-haiku"),
                 expects: bedrockAuthExpectations,
               },
@@ -139,7 +136,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-5-sonnet-20241022",
                 data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
@@ -156,9 +153,8 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-sonnet-v2@20241022:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-sonnet-v2@20241022:rawPredict",
                 response: "success",
-                model: "claude-3-5-sonnet-v2@20241022",
                 data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
                 expects: vertexAuthExpectations,
               },
@@ -175,7 +171,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke",
                 response: "success",
-                model: "anthropic.claude-3-5-sonnet-20241022-v2:0",
                 data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
                 expects: bedrockAuthExpectations,
               },
@@ -190,7 +185,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-5-sonnet-20241022",
                 data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
@@ -207,13 +202,13 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
               },
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-sonnet-v2@20241022:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-sonnet-v2@20241022:rawPredict",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
@@ -221,7 +216,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-5-sonnet-20241022-v2:0/invoke",
                 response: "success",
-                model: "anthropic.claude-3-5-sonnet-20241022-v2:0",
                 data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
                 expects: bedrockAuthExpectations,
               },
@@ -239,7 +233,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-7-sonnet-20250219",
                 data: createAnthropicMockResponse("claude-3.7-sonnet"),
@@ -256,9 +250,8 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-7-sonnet@20250219:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-7-sonnet@20250219:rawPredict",
                 response: "success",
-                model: "claude-3-7-sonnet@20250219",
                 data: createAnthropicMockResponse("claude-3.7-sonnet"),
                 expects: vertexAuthExpectations,
               },
@@ -275,7 +268,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-7-sonnet-20250219-v1:0/invoke",
                 response: "success",
-                model: "anthropic.claude-3-7-sonnet-20250219-v1:0",
                 data: createAnthropicMockResponse("claude-3.7-sonnet"),
                 expects: bedrockAuthExpectations,
               },
@@ -290,7 +282,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-3-7-sonnet-20250219",
                 data: createAnthropicMockResponse("claude-3.7-sonnet"),
@@ -307,13 +299,13 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
               },
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-7-sonnet@20250219:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-7-sonnet@20250219:rawPredict",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
@@ -321,7 +313,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-7-sonnet-20250219-v1:0/invoke",
                 response: "success",
-                model: "anthropic.claude-3-7-sonnet-20250219-v1:0",
                 data: createAnthropicMockResponse("claude-3.7-sonnet"),
                 expects: bedrockAuthExpectations,
               },
@@ -339,7 +330,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-opus-4-20250514",
                 data: createAnthropicMockResponse("claude-opus-4"),
@@ -356,9 +347,8 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-opus-4@20250514:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-opus-4@20250514:rawPredict",
                 response: "success",
-                model: "claude-opus-4@20250514",
                 data: createAnthropicMockResponse("claude-opus-4"),
                 expects: vertexAuthExpectations,
               },
@@ -375,7 +365,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-opus-4-20250514-v1:0/invoke",
                 response: "success",
-                model: "anthropic.claude-opus-4-20250514-v1:0",
                 data: createAnthropicMockResponse("claude-opus-4"),
                 expects: bedrockAuthExpectations,
               },
@@ -390,7 +379,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-opus-4-20250514",
                 data: createAnthropicMockResponse("claude-opus-4"),
@@ -407,13 +396,13 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
               },
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-opus-4@20250514:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-opus-4@20250514:rawPredict",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
@@ -421,7 +410,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-opus-4-20250514-v1:0/invoke",
                 response: "success",
-                model: "anthropic.claude-opus-4-20250514-v1:0",
                 data: createAnthropicMockResponse("claude-opus-4"),
                 expects: bedrockAuthExpectations,
               },
@@ -439,7 +427,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-opus-4-1-20250805",
                 data: createAnthropicMockResponse("claude-opus-4-1"),
@@ -456,9 +444,8 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-opus-4-1@20250805:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-opus-4-1@20250805:rawPredict",
                 response: "success",
-                model: "claude-opus-4-1@20250805",
                 data: createAnthropicMockResponse("claude-opus-4-1"),
                 expects: vertexAuthExpectations,
               },
@@ -475,7 +462,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-opus-4-1-20250805-v1:0/invoke",
                 response: "success",
-                model: "anthropic.claude-opus-4-1-20250805-v1:0",
                 data: createAnthropicMockResponse("claude-opus-4-1"),
                 expects: bedrockAuthExpectations,
               },
@@ -490,7 +476,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-opus-4-1-20250805",
                 data: createAnthropicMockResponse("claude-opus-4-1"),
@@ -507,13 +493,13 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
               },
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-opus-4-1@20250805:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-opus-4-1@20250805:rawPredict",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
@@ -521,7 +507,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-opus-4-1-20250805-v1:0/invoke",
                 response: "success",
-                model: "anthropic.claude-opus-4-1-20250805-v1:0",
                 data: createAnthropicMockResponse("claude-opus-4-1"),
                 expects: bedrockAuthExpectations,
               },
@@ -539,7 +524,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-sonnet-4-20250514",
                 data: createAnthropicMockResponse("claude-sonnet-4"),
@@ -556,9 +541,8 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-sonnet-4@20250514:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-sonnet-4@20250514:rawPredict",
                 response: "success",
-                model: "claude-sonnet-4@20250514",
                 data: createAnthropicMockResponse("claude-sonnet-4"),
                 expects: vertexAuthExpectations,
               },
@@ -575,7 +559,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-sonnet-4-20250514-v1:0/invoke",
                 response: "success",
-                model: "anthropic.claude-sonnet-4-20250514-v1:0",
                 data: createAnthropicMockResponse("claude-sonnet-4"),
                 expects: bedrockAuthExpectations,
               },
@@ -590,7 +573,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "success",
                 model: "claude-sonnet-4-20250514",
                 data: createAnthropicMockResponse("claude-sonnet-4"),
@@ -607,13 +590,13 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
               },
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-sonnet-4@20250514:streamRawPredict",
+                url: "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-sonnet-4@20250514:rawPredict",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Service unavailable",
@@ -621,7 +604,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-sonnet-4-20250514-v1:0/invoke",
                 response: "success",
-                model: "anthropic.claude-sonnet-4-20250514-v1:0",
                 data: createAnthropicMockResponse("claude-sonnet-4"),
                 expects: bedrockAuthExpectations,
               },
@@ -639,7 +621,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Anthropic service unavailable",
@@ -655,7 +637,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -671,7 +653,7 @@ describe("Anthropic Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.anthropic.com/v1/chat/completions",
+                url: "https://api.anthropic.com/v1/messages",
                 response: "failure",
                 statusCode: 401,
                 errorMessage: "Invalid API key",
