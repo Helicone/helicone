@@ -3945,10 +3945,32 @@
 					"VERCEL"
 				]
 			},
+			"ModelProviderName": {
+				"type": "string",
+				"enum": [
+					"anthropic",
+					"openai",
+					"bedrock",
+					"vertex",
+					"azure",
+					"perplexity",
+					"groq",
+					"deepseek",
+					"cohere",
+					"xai",
+					"deepinfra",
+					"google-ai-studio",
+					"openrouter"
+				],
+				"nullable": false
+			},
 			"Provider": {
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ProviderName"
+					},
+					{
+						"$ref": "#/components/schemas/ModelProviderName"
 					},
 					{
 						"type": "string",
@@ -4794,6 +4816,10 @@
 					"request_referrer": {
 						"type": "string",
 						"nullable": true
+					},
+					"gateway_endpoint_version": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -4833,7 +4859,8 @@
 					"target_url",
 					"model",
 					"cache_reference_id",
-					"cache_enabled"
+					"cache_enabled",
+					"gateway_endpoint_version"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -6560,35 +6587,29 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ModelProviderName": {
+			"ResponseFormat": {
 				"type": "string",
 				"enum": [
-					"anthropic",
-					"openai",
-					"bedrock",
-					"vertex",
-					"azure",
-					"perplexity",
-					"groq",
-					"deepseek",
-					"cohere",
-					"xai",
-					"deepinfra",
-					"google-ai-studio",
-					"openrouter"
-				],
-				"nullable": false
+					"ANTHROPIC",
+					"OPENAI"
+				]
 			},
 			"HeliconeMeta": {
 				"properties": {
-					"stripeCustomerId": {
+					"gatewayEndpointVersion": {
+						"type": "string"
+					},
+					"gatewayResponseFormat": {
+						"$ref": "#/components/schemas/ResponseFormat"
+					},
+					"providerModelId": {
+						"type": "string"
+					},
+					"gatewayModel": {
 						"type": "string"
 					},
 					"gatewayProvider": {
 						"$ref": "#/components/schemas/ModelProviderName"
-					},
-					"providerModelId": {
-						"type": "string"
 					},
 					"isPassthroughBilling": {
 						"type": "boolean"
@@ -6597,6 +6618,9 @@
 						"type": "string"
 					},
 					"gatewayRouterId": {
+						"type": "string"
+					},
+					"stripeCustomerId": {
 						"type": "string"
 					},
 					"heliconeManualAccessKey": {
