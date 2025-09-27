@@ -680,15 +680,18 @@ function getAPIRouterV1(
         const pageSizeNum = Math.min(Math.max(1, pageSize ? parseInt(pageSize as string) : 50), 1000);
 
         // Get table data from the wallet durable object
-        const tableData = await walletStub.getTableData(tableName, pageNum, pageSizeNum);
-        
+        const tableDataResult: any = await walletStub.getTableData(tableName, pageNum, pageSizeNum);
+
+        const data: any[] = Array.isArray(tableDataResult.data) ? tableDataResult.data : [];
+        const total: number = typeof tableDataResult.total === "number" ? tableDataResult.total : 0;
+
         return InternalResponse.successJSON({
           tableName,
           orgId,
           page: pageNum,
           pageSize: pageSizeNum,
-          data: tableData.data || [],
-          total: tableData.total || 0,
+          data,
+          total,
         });
       } catch (e) {
         console.error(`Error fetching table ${tableName} for org ${orgId}:`, e);

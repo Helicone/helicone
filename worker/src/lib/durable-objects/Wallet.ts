@@ -18,13 +18,6 @@ export const ALERT_ID = "total_spend_delta_alert";
 export const ALERT_STATE_ON = "on";
 export const ALERT_STATE_OFF = "off";
 
-// Stripe dispute status values that indicate a resolved/closed dispute
-// These are the official Stripe dispute status values for closed disputes
-const RESOLVED_DISPUTE_STATUSES: Stripe.Dispute.Status[] = [
-  "won",
-  "lost",
-  "warning_closed",
-];
 
 // Stripe dispute status values that indicate an unresolved/active dispute
 // These are the official Stripe dispute status values for active disputes
@@ -621,10 +614,9 @@ export class Wallet extends DurableObject<Env> {
       try {
         // Check if dispute already exists
         const existingDispute = this.ctx.storage.sql
-          .exec<{ count: number }>(
-            "SELECT COUNT(*) as count FROM disputes WHERE id = ?",
-            disputeId
-          )
+          .exec<{
+            count: number;
+          }>("SELECT COUNT(*) as count FROM disputes WHERE id = ?", disputeId)
           .one();
 
         if (existingDispute.count > 0) {
@@ -660,10 +652,9 @@ export class Wallet extends DurableObject<Env> {
       try {
         // Check if dispute exists
         const existingDispute = this.ctx.storage.sql
-          .exec<{ count: number }>(
-            "SELECT COUNT(*) as count FROM disputes WHERE id = ?",
-            disputeId
-          )
+          .exec<{
+            count: number;
+          }>("SELECT COUNT(*) as count FROM disputes WHERE id = ?", disputeId)
           .one();
 
         if (existingDispute.count === 0) {
