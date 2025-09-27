@@ -12,6 +12,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000008,
         output: 0.000004,
+        web_search: 0.00001, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -46,6 +47,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000008,
         output: 0.000004,
+        web_search: 0.00001, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -80,6 +82,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000008,
         output: 0.000004,
+        web_search: 0.00001, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -111,7 +114,7 @@ export const endpoints = {
       {
         threshold: 0,
         input: 0.000000844, // $0.84/1M - worst-case: $0.80/1M (Anthropic/Google) * 1.055
-        output: 0.00000422, // $4.22/1M - worst-case: $4.00/1M (Anthropic/Google) * 1.055
+        output: 0.00000422, // $4.22/1M - worst-case: $4.00/1M (Anthropic/Google) * 1.055,
       },
     ],
     contextLength: 200000,

@@ -99,6 +99,19 @@ export interface AnthropicTool {
   };
 }
 
+// Web search tool definition
+export interface AnthropicWebSearchTool {
+  type: "web_search_20250305";
+  name: "web_search";
+  max_uses?: number;
+  allowed_domains?: string[];
+  user_location?: {
+    type: "approximate";
+    city?: string;
+    country?: string;
+  };
+}
+
 // Tool choice types
 export type AnthropicToolChoice =
   | { type: "auto" }

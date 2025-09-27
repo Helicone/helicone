@@ -14,19 +14,38 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
   const toolUseBlocks = response.content.filter(
     (block) => block.type === "tool_use"
   );
+  const serverToolUseBlocks = response.content.filter(
+    (block) => block.type === "server_tool_use"
+  );
 
   const content = textBlocks.map((block) => blockToString(block)).join("");
 
-  const tool_calls: OpenAIToolCall[] = toolUseBlocks
-    .filter((block) => block.type === "tool_use" && block.id && block.name)
-    .map((block) => ({
-      id: block.id!,
-      type: "function",
-      function: {
-        name: block.name!,
-        arguments: JSON.stringify(block.input || {}),
-      },
-    }));
+  // Map regular tool uses and server tool uses
+  const tool_calls: OpenAIToolCall[] = [
+    ...toolUseBlocks
+      .filter((block) => block.type === "tool_use" && block.id && block.name)
+      .map((block) => ({
+        id: block.id!,
+        type: "function" as const,
+        function: {
+          name: block.name!,
+
+          arguments: JSON.stringify(block.input || {}),
+        },
+      })),
+    ...serverToolUseBlocks
+      .filter(
+        (block) => block.type === "server_tool_use" && block.id && block.name
+      )
+      .map((block) => ({
+        id: block.id!,
+        type: "function" as const,
+        function: {
+          name: block.name!,
+          arguments: JSON.stringify(block.input || {}),
+        },
+      })),
+  ];
 
   const choice: OpenAIChoice = {
     index: 0,
