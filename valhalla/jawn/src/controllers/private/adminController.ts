@@ -1677,13 +1677,18 @@ export class AdminController extends Controller {
     @Query() page?: number,
     @Query() pageSize?: number
   ) {
-      // Validate pagination parameters
-      const validatedPage = Math.max(0, page ?? 0);
-      const validatedPageSize = Math.min(Math.max(1, pageSize ?? 50), 100);
+    // Validate pagination parameters
+    const validatedPage = Math.max(0, page ?? 0);
+    const validatedPageSize = Math.min(Math.max(1, pageSize ?? 50), 100);
 
-      const params = new URLSearchParams();
-      if (validatedPage > 0) params.set("page", validatedPage.toString());
-      params.set("pageSize", validatedPageSize.toString());
+    const params = new URLSearchParams();
+    if (validatedPage > 0) params.set("page", validatedPage.toString());
+    params.set("pageSize", validatedPageSize.toString());
+    const allowedTables = [
+      "transactions",
+      "payment_methods",
+      "subscriptions",
+      "invoices",
       "escrows",
       "disallow_list",
       "processed_webhook_events",
