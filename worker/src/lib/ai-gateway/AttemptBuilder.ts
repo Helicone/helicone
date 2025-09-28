@@ -254,13 +254,11 @@ export class AttemptBuilder {
       return []; // No PTB endpoints available
     }
 
-    console.log("HELICONE_ORG_ID", this.env.HELICONE_ORG_ID);
     // Get Helicone's provider key for PTB
     const heliconeKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
       this.env.HELICONE_ORG_ID
     );
-    console.log("Helicone key", heliconeKey);
 
     if (!heliconeKey) {
       console.error("Can't do PTB without Helicone's key");
