@@ -1677,12 +1677,13 @@ export class AdminController extends Controller {
     @Query() page?: number,
     @Query() pageSize?: number
   ) {
-    await authCheckThrow(request.authParams.userId);
+      // Validate pagination parameters
+      const validatedPage = Math.max(0, page ?? 0);
+      const validatedPageSize = Math.min(Math.max(1, pageSize ?? 50), 100);
 
-    // Validate table name to prevent injection
-    const allowedTables = [
-      "credit_purchases",
-      "aggregated_debits",
+      const params = new URLSearchParams();
+      if (validatedPage > 0) params.set("page", validatedPage.toString());
+      params.set("pageSize", validatedPageSize.toString());
       "escrows",
       "disallow_list",
       "processed_webhook_events",

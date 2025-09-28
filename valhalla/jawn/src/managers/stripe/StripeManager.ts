@@ -1394,18 +1394,21 @@ WHERE (${builtFilter.filter})`,
       switch (searchKind) {
         case PaymentIntentSearchKind.CREDIT_PURCHASES:
           const settingsManager = new SettingsManager();
-          const stripeProductSettings = await settingsManager.getSetting("stripe:products");
-          const productId = stripeProductSettings?.cloudGatewayTokenUsageProduct;
+          const stripeProductSettings =
+            await settingsManager.getSetting("stripe:products");
+          const productId =
+            stripeProductSettings?.cloudGatewayTokenUsageProduct ??
+            process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT;
           if (!productId) {
             console.error(
               "[Stripe API] STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT not configured"
             );
             return err("Stripe product ID not configured");
           }
-          
+
           query = `metadata['productId']:'${productId}' AND metadata['orgId']:'${this.authParams.organizationId}'`;
           break;
-          
+
         default:
           return err(`Unsupported search kind: ${searchKind}`);
       }
