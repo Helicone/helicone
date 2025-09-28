@@ -661,14 +661,17 @@ function getAPIRouterV1(
       // Validate table name to prevent injection
       const allowedTables = [
         "credit_purchases",
-        "aggregated_debits", 
+        "aggregated_debits",
         "escrows",
         "disallow_list",
-        "processed_webhook_events"
+        "processed_webhook_events",
       ];
 
       if (!allowedTables.includes(tableName)) {
-        return InternalResponse.newError(`Invalid table name: ${tableName}`, 400);
+        return InternalResponse.newError(
+          `Invalid table name: ${tableName}`,
+          400
+        );
       }
 
       const walletId = env.WALLET.idFromName(orgId);
@@ -680,10 +683,17 @@ function getAPIRouterV1(
         const pageSizeNum = Math.min(Math.max(1, pageSize ? parseInt(pageSize as string) : 50), 100);
 
         // Get table data from the wallet durable object
-        const tableDataResult: any = await walletStub.getTableData(tableName, pageNum, pageSizeNum);
+        const tableDataResult: any = await walletStub.getTableData(
+          tableName,
+          pageNum,
+          pageSizeNum
+        );
 
-        const data: any[] = Array.isArray(tableDataResult.data) ? tableDataResult.data : [];
-        const total: number = typeof tableDataResult.total === "number" ? tableDataResult.total : 0;
+        const data: any[] = Array.isArray(tableDataResult.data)
+          ? tableDataResult.data
+          : [];
+        const total: number =
+          typeof tableDataResult.total === "number" ? tableDataResult.total : 0;
 
         return InternalResponse.successJSON({
           tableName,

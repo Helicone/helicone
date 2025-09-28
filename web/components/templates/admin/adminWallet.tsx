@@ -91,19 +91,10 @@ export default function AdminWallet() {
   } = useQuery<DashboardData>({
     queryKey: ["admin-wallet-dashboard"],
     queryFn: async () => {
-      console.log("Fetching dashboard data...");
       const response = (await jawn.POST(
         "/v1/admin/gateway/dashboard_data",
         {},
       )) as any;
-      console.log("Dashboard API response:", response);
-      console.log("Response data:", response.data);
-      console.log("Response error:", response.error);
-      console.log("Response data type:", typeof response.data);
-      console.log(
-        "Response data keys:",
-        response.data ? Object.keys(response.data) : "No data",
-      );
       if (response.error || !response.data) {
         throw new Error(
           `Failed to fetch dashboard data: ${response.error || "No data"}`,
@@ -111,7 +102,6 @@ export default function AdminWallet() {
       }
       // The jawn client returns {data: actualData, error: null}, so we need response.data.data
       const actualData = response.data.data || response.data;
-      console.log("Actual dashboard data:", actualData);
       return actualData as DashboardData;
     },
   });
@@ -122,14 +112,10 @@ export default function AdminWallet() {
       queryKey: ["admin-wallet-details", selectedOrg],
       queryFn: async () => {
         if (!selectedOrg) throw new Error("No org selected");
-        console.log("Fetching wallet details for org:", selectedOrg);
         const response = await (jawn as any).POST(
           `/v1/admin/wallet/${selectedOrg}`,
           {},
         );
-        console.log("Wallet details API response:", response);
-        console.log("Wallet response data:", response.data);
-        console.log("Wallet response error:", response.error);
         if (response.error || !response.data) {
           throw new Error(
             `Failed to fetch wallet details: ${response.error || "No data"}`,
@@ -137,7 +123,6 @@ export default function AdminWallet() {
         }
         // Handle nested data structure like dashboard endpoint
         const actualWalletData = (response.data as any).data || response.data;
-        console.log("Actual wallet data:", actualWalletData);
         return actualWalletData as WalletState;
       },
       enabled: !!selectedOrg && walletDetailsOpen,
@@ -149,24 +134,16 @@ export default function AdminWallet() {
     queryFn: async () => {
       if (!selectedOrg || !selectedTable)
         throw new Error("No org or table selected");
-      console.log(
-        "Fetching table data for org:",
-        selectedOrg,
-        "table:",
-        selectedTable,
-      );
       const response = await (jawn as any).POST(
         `/v1/admin/wallet/${selectedOrg}/tables/${selectedTable}?page=${tablePage}&pageSize=50`,
         {},
       );
-      console.log("Table data API response:", response);
       if (response.error || !response.data) {
         throw new Error(
           `Failed to fetch table data: ${response.error || "No data"}`,
         );
       }
       const actualTableData = (response.data as any).data || response.data;
-      console.log("Actual table data:", actualTableData);
       return actualTableData as TableData;
     },
     enabled: !!selectedOrg && !!selectedTable && walletDetailsOpen,

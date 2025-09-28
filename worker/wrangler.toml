@@ -1,9 +1,7 @@
 name = "helicone-worker-dev"
 main = "src/index.ts"
 compatibility_date = "2025-08-03"
-compatibility_flags = [
-	"nodejs_compat_v2"
-]
+compatibility_flags = ["nodejs_compat_v2"]
 logpush = true
 keep_vars = true
 
