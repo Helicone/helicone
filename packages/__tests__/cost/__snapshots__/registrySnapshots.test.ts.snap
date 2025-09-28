@@ -611,30 +611,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "deepseek/deepseek-reasoner": {
-    "deepseek-reasoner:deepinfra": {
-      "context": 128000,
-      "crossRegion": false,
-      "maxTokens": 32000,
-      "modelId": "deepseek-ai/DeepSeek-R1-0528",
-      "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "min_p",
-        "presence_penalty",
-        "repetition_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "top_k",
-        "top_p",
-      ],
-      "provider": "deepinfra",
-      "ptbEnabled": false,
-      "regions": [
-        "*",
-      ],
-    },
     "deepseek-reasoner:deepseek": {
       "context": 128000,
       "crossRegion": false,
@@ -688,7 +664,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "deepseek-v3.1-terminus:deepinfra": {
       "context": 128000,
       "crossRegion": false,
-      "maxTokens": 8192,
+      "maxTokens": 16384,
       "modelId": "deepseek-ai/DeepSeek-V3.1-Terminus",
       "parameters": [
         "frequency_penalty",
@@ -2754,7 +2730,6 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "vertex",
   ],
   "deepseek/deepseek-reasoner": [
-    "deepinfra",
     "deepseek",
     "openrouter",
   ],
@@ -3184,13 +3159,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/deepseek-reasoner": {
-    "deepinfra": [
-      {
-        "input": 5e-7,
-        "output": 0.00000215,
-        "threshold": 0,
-      },
-    ],
     "deepseek": [
       {
         "cacheMultipliers": {
@@ -3730,7 +3698,6 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "deepseek-reasoner",
       "providers": [
-        "deepinfra",
         "deepseek",
         "openrouter",
       ],
@@ -4034,7 +4001,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 9,
+      "modelCount": 8,
       "provider": "deepinfra",
     },
     {
@@ -4119,8 +4086,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:bedrock:us-east-1",
     "claude-3.5-haiku:openrouter:*",
   ],
-  "totalEndpoints": 115,
-  "totalModelProviderConfigs": 115,
+  "totalEndpoints": 114,
+  "totalModelProviderConfigs": 114,
   "totalModelsWithPtb": 44,
   "totalProviders": 11,
 }
