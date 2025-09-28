@@ -18,13 +18,14 @@ import { ProviderKeysStore } from "./lib/db/ProviderKeysStore";
 import { APIKeysStore } from "./lib/db/APIKeysStore";
 import { APIKeysManager } from "./lib/managers/APIKeysManager";
 import { SecretManagerClass } from "@helicone-package/secrets/SecretManager";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
 // Needed for migrations
 export { RequestBodyBufferContainer } from "./RequestBodyBuffer/RequestBodyContainer";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = ProviderName | "CUSTOM";
+export type Provider = ProviderName | "CUSTOM" | ModelProviderName;
 
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();

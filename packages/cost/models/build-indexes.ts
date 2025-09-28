@@ -57,10 +57,12 @@ export interface ModelIndexes {
   modelToProviderData: Map<ModelName, ModelProviderEntry[]>;
   modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry>;
   providerModelIdToConfig: Map<string, ModelProviderConfig>;
+  modelToArchivedEndpointConfigs: Map<string, ModelProviderConfig>;
 }
 
 export function buildIndexes(
-  modelProviderConfigs: Record<string, ModelProviderConfig>
+  modelProviderConfigs: Record<string, ModelProviderConfig>,
+  archivedModelProviderConfigs: Record<string, ModelProviderConfig> = {}
 ): ModelIndexes {
   const endpointIdToEndpoint: Map<EndpointId, Endpoint> = new Map();
   const endpointConfigIdToEndpointConfig: Map<
@@ -78,6 +80,7 @@ export function buildIndexes(
   const modelToProviderData: Map<ModelName, ModelProviderEntry[]> = new Map();
   const modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry> = new Map();
   const providerModelIdToConfig: Map<string, ModelProviderConfig> = new Map();
+  const modelToArchivedEndpointConfigs: Map<string, ModelProviderConfig> = new Map();
 
   for (const [configKey, config] of Object.entries(modelProviderConfigs)) {
     const typedConfigKey = configKey as ModelProviderConfigId;
@@ -159,6 +162,10 @@ export function buildIndexes(
     }
   }
 
+  for (const [versionKey, archivedConfig] of Object.entries(archivedModelProviderConfigs)) {
+    modelToArchivedEndpointConfigs.set(versionKey, archivedConfig);
+  }
+
   // Sort endpoints by cost (ascending)
   const sortByCost = (a: Endpoint, b: Endpoint) => {
     const aCost = (a.pricing[0]?.input ?? 0) + (a.pricing[0]?.output ?? 0);
@@ -188,5 +195,6 @@ export function buildIndexes(
     modelToProviderData,
     modelProviderToData,
     providerModelIdToConfig,
+    modelToArchivedEndpointConfigs,
   };
 }
