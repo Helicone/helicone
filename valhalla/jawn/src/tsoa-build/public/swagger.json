@@ -3238,10 +3238,32 @@
 					"VERCEL"
 				]
 			},
+			"ModelProviderName": {
+				"type": "string",
+				"enum": [
+					"anthropic",
+					"openai",
+					"bedrock",
+					"vertex",
+					"azure",
+					"perplexity",
+					"groq",
+					"deepseek",
+					"cohere",
+					"xai",
+					"deepinfra",
+					"google-ai-studio",
+					"openrouter"
+				],
+				"nullable": false
+			},
 			"Provider": {
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ProviderName"
+					},
+					{
+						"$ref": "#/components/schemas/ModelProviderName"
 					},
 					{
 						"type": "string",
@@ -4087,6 +4109,10 @@
 					"request_referrer": {
 						"type": "string",
 						"nullable": true
+					},
+					"gateway_endpoint_version": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -4126,7 +4152,8 @@
 					"target_url",
 					"model",
 					"cache_reference_id",
-					"cache_enabled"
+					"cache_enabled",
+					"gateway_endpoint_version"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -8077,25 +8104,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ModelProviderName": {
-				"type": "string",
-				"enum": [
-					"anthropic",
-					"openai",
-					"bedrock",
-					"vertex",
-					"azure",
-					"perplexity",
-					"groq",
-					"deepseek",
-					"cohere",
-					"xai",
-					"deepinfra",
-					"google-ai-studio",
-					"openrouter"
-				],
-				"nullable": false
-			},
 			"AuthorName": {
 				"type": "string",
 				"enum": [
@@ -8316,6 +8324,13 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
+			"ResponseFormat": {
+				"type": "string",
+				"enum": [
+					"ANTHROPIC",
+					"OPENAI"
+				]
+			},
 			"ModelProviderConfig": {
 				"properties": {
 					"pricing": {
@@ -8365,6 +8380,9 @@
 					"priority": {
 						"type": "number",
 						"format": "double"
+					},
+					"responseFormat": {
+						"$ref": "#/components/schemas/ResponseFormat"
 					}
 				},
 				"required": [

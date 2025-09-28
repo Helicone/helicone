@@ -32,6 +32,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
     },
@@ -66,6 +67,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       global: {},
     },
@@ -99,6 +101,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "us-east-1": {},
     },
