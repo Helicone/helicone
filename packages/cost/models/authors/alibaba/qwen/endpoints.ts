@@ -167,7 +167,7 @@ export const endpoints = {
       },
     ],
     rateLimits: {
-      rpm: 12000, // Standard DeepInfra rate limits
+      rpm: 12000, 
       tpm: 60000000,
       tpd: 6000000000,
     },
