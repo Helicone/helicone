@@ -732,5 +732,67 @@ describe("DeepSeek Registry Tests", () => {
           finalStatus: 200,
         },
       }));
+
+    it("should construct correct DeepInfra URL for DeepSeek V3.1 Terminus", () =>
+      runGatewayTest({
+        model: "deepseek-v3.1-terminus/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-V3.1-Terminus",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+              expects: deepinfraAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed for V3.1 Terminus
+                // Base URL: https://api.deepinfra.com/
+                // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for DeepInfra V3.1 Terminus", () =>
+      runGatewayTest({
+        model: "deepseek-v3.1-terminus/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-V3.1-Terminus", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+              expects: deepinfraAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for DeepInfra V3.1 Terminus", () =>
+      runGatewayTest({
+        model: "deepseek-v3.1-terminus/deepinfra",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-V3.1-Terminus",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+              expects: {
+                ...deepinfraAuthExpectations,
+                bodyContains: ["user", "Test"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
   });
 });
