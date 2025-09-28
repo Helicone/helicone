@@ -111,6 +111,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-next-80b-a3b-instruct:deepinfra": {
+      "context": 262000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "anthropic/claude-3.5-haiku": {
     "claude-3.5-haiku:anthropic": {
@@ -2666,6 +2692,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "alibaba/qwen": [
     "deepinfra",
     "deepinfra",
+    "deepinfra",
     "groq",
     "openrouter",
   ],
@@ -2836,8 +2863,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "alibaba/qwen": {
     "deepinfra": [
       {
-        "input": 2.9e-7,
-        "output": 0.0000012,
+        "input": 1.4e-7,
+        "output": 0.0000014,
         "threshold": 0,
       },
     ],
@@ -3952,6 +3979,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
         "deepinfra",
       ],
     },
+    {
+      "model": "qwen3-next-80b-a3b-instruct",
+      "providers": [
+        "deepinfra",
+      ],
+    },
   ],
   "providerBreakdown": [
     {
@@ -3967,7 +4000,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 7,
+      "modelCount": 8,
       "provider": "deepinfra",
     },
     {
@@ -4052,8 +4085,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:bedrock:us-east-1",
     "claude-3.5-haiku:openrouter:*",
   ],
-  "totalEndpoints": 113,
-  "totalModelProviderConfigs": 113,
+  "totalEndpoints": 114,
+  "totalModelProviderConfigs": 114,
   "totalModelsWithPtb": 44,
   "totalProviders": 11,
 }
