@@ -18,7 +18,6 @@ export const ALERT_ID = "total_spend_delta_alert";
 export const ALERT_STATE_ON = "on";
 export const ALERT_STATE_OFF = "off";
 
-
 // Stripe dispute status values that indicate an unresolved/active dispute
 // These are the official Stripe dispute status values for active disputes
 const UNRESOLVED_DISPUTE_STATUSES: Stripe.Dispute.Status[] = [
@@ -566,36 +565,113 @@ export class Wallet extends DurableObject<Env> {
     page: number,
     pageSize: number
   ): { data: any[]; total: number } {
-    // Whitelist of allowed table names to prevent SQL injection
-    const allowedTables = [
-      "processed_webhook_events",
-      "disallow_list",
-      "escrows",
-      "credit_purchases",
-      "aggregated_debits",
-      "alert_state",
-    ];
-
-    if (!allowedTables.includes(tableName)) {
-      throw new Error(`Invalid table name: ${tableName}`);
-    }
-
     return this.ctx.storage.transactionSync(() => {
-      // Get total count first
-      const countResult = this.ctx.storage.sql
-        .exec<{ count: number }>(`SELECT COUNT(*) as count FROM ${tableName}`)
-        .one();
-
-      // Get paginated data
       const offset = page * pageSize;
-      const rows = this.ctx.storage.sql
-        .exec(`SELECT * FROM ${tableName} LIMIT ? OFFSET ?`, pageSize, offset)
-        .toArray();
 
-      return {
-        data: rows,
-        total: countResult.count,
-      };
+      // Use hardcoded queries to prevent SQL injection
+      switch (tableName) {
+        case "processed_webhook_events": {
+          const webhookCountResult = this.ctx.storage.sql
+            .exec<{
+              count: number;
+            }>("SELECT COUNT(*) as count FROM processed_webhook_events")
+            .one();
+          const webhookRows = this.ctx.storage.sql
+            .exec(
+              "SELECT * FROM processed_webhook_events LIMIT ? OFFSET ?",
+              pageSize,
+              offset
+            )
+            .toArray();
+          return { data: webhookRows, total: webhookCountResult.count };
+        }
+
+        case "disallow_list": {
+          const disallowCountResult = this.ctx.storage.sql
+            .exec<{
+              count: number;
+            }>("SELECT COUNT(*) as count FROM disallow_list")
+            .one();
+          const disallowRows = this.ctx.storage.sql
+            .exec(
+              "SELECT * FROM disallow_list LIMIT ? OFFSET ?",
+              pageSize,
+              offset
+            )
+            .toArray();
+          return { data: disallowRows, total: disallowCountResult.count };
+        }
+        case "escrows": {
+          const escrowCountResult = this.ctx.storage.sql
+            .exec<{ count: number }>("SELECT COUNT(*) as count FROM escrows")
+            .one();
+          const escrowRows = this.ctx.storage.sql
+            .exec("SELECT * FROM escrows LIMIT ? OFFSET ?", pageSize, offset)
+            .toArray();
+          return { data: escrowRows, total: escrowCountResult.count };
+        }
+
+        case "credit_purchases": {
+          const creditCountResult = this.ctx.storage.sql
+            .exec<{
+              count: number;
+            }>("SELECT COUNT(*) as count FROM credit_purchases")
+            .one();
+          const creditRows = this.ctx.storage.sql
+            .exec(
+              "SELECT * FROM credit_purchases LIMIT ? OFFSET ?",
+              pageSize,
+              offset
+            )
+            .toArray();
+          return { data: creditRows, total: creditCountResult.count };
+        }
+
+        case "aggregated_debits": {
+          const debitCountResult = this.ctx.storage.sql
+            .exec<{
+              count: number;
+            }>("SELECT COUNT(*) as count FROM aggregated_debits")
+            .one();
+          const debitRows = this.ctx.storage.sql
+            .exec(
+              "SELECT * FROM aggregated_debits LIMIT ? OFFSET ?",
+              pageSize,
+              offset
+            )
+            .toArray();
+          return { data: debitRows, total: debitCountResult.count };
+        }
+
+        case "alert_state": {
+          const alertCountResult = this.ctx.storage.sql
+            .exec<{
+              count: number;
+            }>("SELECT COUNT(*) as count FROM alert_state")
+            .one();
+          const alertRows = this.ctx.storage.sql
+            .exec(
+              "SELECT * FROM alert_state LIMIT ? OFFSET ?",
+              pageSize,
+              offset
+            )
+            .toArray();
+          return { data: alertRows, total: alertCountResult.count };
+        }
+
+        case "disputes": {
+          const disputeCountResult = this.ctx.storage.sql
+            .exec<{ count: number }>("SELECT COUNT(*) as count FROM disputes")
+            .one();
+          const disputeRows = this.ctx.storage.sql
+            .exec("SELECT * FROM disputes LIMIT ? OFFSET ?", pageSize, offset)
+            .toArray();
+          return { data: disputeRows, total: disputeCountResult.count };
+        }
+
+        default:
+          throw new Error(`Invalid table name: ${tableName}`);
+      }
     });
   }
 
