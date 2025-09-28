@@ -1684,11 +1684,13 @@ export class AdminController extends Controller {
     const params = new URLSearchParams();
     if (validatedPage > 0) params.set("page", validatedPage.toString());
     params.set("pageSize", validatedPageSize.toString());
+
+    await authCheckThrow(request.authParams.userId);
+
+    // Validate table name to prevent injection
     const allowedTables = [
-      "transactions",
-      "payment_methods",
-      "subscriptions",
-      "invoices",
+      "credit_purchases",
+      "aggregated_debits",
       "escrows",
       "disallow_list",
       "processed_webhook_events",
