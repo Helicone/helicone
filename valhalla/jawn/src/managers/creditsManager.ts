@@ -126,6 +126,6 @@ export async function getAiGatewaySpend(org_id: string): Promise<
 
   const res = await dbQueryClickhouse<{ spend_cents: string }>(query, argsAcc);
   return resultMap(res, (d) => ({
-    spend_cents: d && d.length > 0 ? +d[0].spend_cents : 0
+    spend_cents: +(d?.[0]?.spend_cents ?? 0),
   }));
 }

@@ -575,6 +575,147 @@ function getAPIRouterV1(
     }
   );
 
+  // Admin endpoint to get wallet state for any org
+  router.get(
+    "/admin/wallet/:orgId/state",
+    async (
+      { params: { orgId } },
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      const authHeader = requestWrapper.headers.get("Authorization");
+      if (!authHeader) {
+        return InternalResponse.unauthorized();
+      }
+
+      const providedToken = authHeader.replace("Bearer ", "");
+      const expectedToken = env.HELICONE_MANUAL_ACCESS_KEY;
+
+      if (!expectedToken) {
+        console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
+        return InternalResponse.newError("Server configuration error", 500);
+      }
+
+      const providedBuffer = Buffer.from(providedToken);
+      const expectedBuffer = Buffer.from(expectedToken);
+
+      // Check length first to avoid timingSafeEqual error
+      if (providedBuffer.length !== expectedBuffer.length) {
+        return InternalResponse.unauthorized();
+      }
+
+      if (!timingSafeEqual(providedBuffer, expectedBuffer)) {
+        return InternalResponse.unauthorized();
+      }
+
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      try {
+        const state = await walletStub.getWalletState(orgId);
+        return InternalResponse.successJSON(state);
+      } catch (e) {
+        return InternalResponse.newError(
+          e instanceof Error ? e.message : "Failed to fetch wallet state",
+          500
+        );
+      }
+    }
+  );
+
+  // Admin endpoint to get table data from wallet for any org
+  router.get(
+    "/admin/wallet/:orgId/tables/:tableName",
+    async (
+      { params: { orgId, tableName }, query: { page, pageSize } },
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      const authHeader = requestWrapper.headers.get("Authorization");
+      if (!authHeader) {
+        return InternalResponse.unauthorized();
+      }
+
+      const providedToken = authHeader.replace("Bearer ", "");
+      const expectedToken = env.HELICONE_MANUAL_ACCESS_KEY;
+
+      if (!expectedToken) {
+        console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
+        return InternalResponse.newError("Server configuration error", 500);
+      }
+
+      const providedBuffer = Buffer.from(providedToken);
+      const expectedBuffer = Buffer.from(expectedToken);
+
+      // Check length first to avoid timingSafeEqual error
+      if (providedBuffer.length !== expectedBuffer.length) {
+        return InternalResponse.unauthorized();
+      }
+
+      if (!timingSafeEqual(providedBuffer, expectedBuffer)) {
+        return InternalResponse.unauthorized();
+      }
+
+      // Validate table name to prevent injection
+      const allowedTables = [
+        "credit_purchases",
+        "aggregated_debits",
+        "escrows",
+        "disallow_list",
+        "processed_webhook_events",
+      ];
+
+      if (!allowedTables.includes(tableName)) {
+        return InternalResponse.newError(
+          `Invalid table name: ${tableName}`,
+          400
+        );
+      }
+
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      try {
+        // Parse pagination parameters
+        const pageNum = Math.max(0, page ? parseInt(page as string) : 0);
+        const pageSizeNum = Math.min(
+          Math.max(1, pageSize ? parseInt(pageSize as string) : 50),
+          1000
+        );
+
+        // Get table data from the wallet durable object
+        const tableDataResult: any = await walletStub.getTableData(
+          tableName,
+          pageNum,
+          pageSizeNum
+        );
+
+        const data: any[] = Array.isArray(tableDataResult.data)
+          ? tableDataResult.data
+          : [];
+        const total: number =
+          typeof tableDataResult.total === "number" ? tableDataResult.total : 0;
+
+        return InternalResponse.successJSON({
+          tableName,
+          orgId,
+          page: pageNum,
+          pageSize: pageSizeNum,
+          data,
+          total,
+        });
+      } catch (e) {
+        console.error(`Error fetching table ${tableName} for org ${orgId}:`, e);
+        return InternalResponse.newError(
+          e instanceof Error ? e.message : `Failed to fetch table ${tableName}`,
+          500
+        );
+      }
+    }
+  );
+
   // Stripe Webhook Handler
   router.post(
     "/stripe/webhook",
