@@ -4069,7 +4069,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 9,
+      "modelCount": 10,
       "provider": "deepinfra",
     },
     {
@@ -4156,8 +4156,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 115,
-  "totalModelProviderConfigs": 115,
+  "totalEndpoints": 116,
+  "totalModelProviderConfigs": 116,
   "totalModelsWithPtb": 44,
   "totalProviders": 11,
 }
