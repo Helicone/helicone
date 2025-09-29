@@ -6,6 +6,7 @@ import {
 } from "@helicone-package/cost/models/providers";
 import {
   UserEndpointConfig,
+  Endpoint,
 } from "@helicone-package/cost/models/types";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
 import { FeatureFlagManager } from "../managers/FeatureFlagManager";
@@ -97,7 +98,7 @@ export class AttemptBuilder {
 
         // Only build PTB attempts if credits feature is enabled
         if (hasCreditsFeature) {
-          const ptbAttempts = await this.buildPtbAttempts(modelName, data, bodyMapping);
+          const ptbAttempts = await this.buildPtbAttempts(modelName, data);
           return [...byokAttempts, ...ptbAttempts];
         }
 
@@ -146,7 +147,7 @@ export class AttemptBuilder {
 
     // Only build PTB attempts if credits feature is enabled
     if (hasCreditsFeature) {
-      const ptbAttempts = await this.buildPtbAttempts(modelName, providerData, bodyMapping);
+      const ptbAttempts = await this.buildPtbAttempts(modelName, providerData);
       return [...byokAttempts, ...ptbAttempts];
     }
 
@@ -246,12 +247,11 @@ export class AttemptBuilder {
 
   private async buildPtbAttempts(
     modelName: string,
-    providerData: ModelProviderEntry,
-    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI"
+    providerData: ModelProviderEntry
   ): Promise<Attempt[]> {
-    // Check if PTB is enabled for this model/provider
-    if (!providerData.config.ptbEnabled) {
-      return []; // PTB not enabled
+    // Check if we have PTB endpoints
+    if (providerData.ptbEndpoints.length === 0) {
+      return []; // No PTB endpoints available
     }
 
     // Get Helicone's provider key for PTB
@@ -265,34 +265,45 @@ export class AttemptBuilder {
       return []; // Can't do PTB without Helicone's key
     }
 
-    // Build config from Helicone's key (same pattern as BYOK)
-    const heliconeConfig = {
-      ...((heliconeKey.config as UserEndpointConfig) || {}),
-      gatewayMapping: bodyMapping,
-      modelName: modelName,
-    };
-
-    // Build endpoint dynamically using Helicone's config
-    const endpointResult = registry.buildEndpoint(
-      providerData.config,
-      heliconeConfig
+    // Use the helper method to build PTB attempts
+    return this.buildPtbAttemptsFromEndpoints(
+      modelName,
+      providerData.provider,
+      providerData.ptbEndpoints,
+      heliconeKey
     );
-
-    if (isErr(endpointResult) || !endpointResult.data) {
-      console.error(`Failed to build PTB endpoint for ${providerData.provider}: ${endpointResult.error || 'No endpoint data'}`);
-      return [];
-    }
-
-    // Return PTB attempt with dynamically built endpoint
-    return [{
-      endpoint: endpointResult.data,
-      providerKey: heliconeKey,
-      authType: "ptb",
-      priority: endpointResult.data.priority ?? 2,
-      source: `${modelName}/${providerData.provider}/ptb`,
-    }];
   }
 
+  private buildPtbAttemptsFromEndpoints(
+    modelName: string,
+    provider: ModelProviderName,
+    endpoints: Endpoint[],
+    providerKey: ProviderKey
+  ): Attempt[] {
+    // This is where dynamically injected config is applied
+    const updatedEndpoints = endpoints.map((endpoint) => {
+      return {
+        ...endpoint,
+        userConfig: {
+          ...endpoint.userConfig,
+          projectId:
+            (providerKey.config as UserEndpointConfig)?.projectId ||
+            endpoint.userConfig.projectId,
+        },
+      };
+    });
+
+    return updatedEndpoints.map(
+      (endpoint) =>
+        ({
+          endpoint,
+          providerKey,
+          authType: "ptb",
+          priority: endpoint.priority ?? 2,
+          source: `${modelName}/${provider}/ptb`,
+        }) as Attempt
+    );
+  }
 
   private isByokEnabled(providerKey: ProviderKey): boolean {
     // Legacy support: if byok_enabled is not set, assume true

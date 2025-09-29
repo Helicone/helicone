@@ -65,7 +65,7 @@ export const endpoints = {
     ],
     ptbEnabled: true,
     endpointConfigs: {
-      global: {},
+      "us-east5": {},  // Use specific region for Claude
     },
     responseFormat: "ANTHROPIC",
   },
