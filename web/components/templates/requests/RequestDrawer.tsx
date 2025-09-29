@@ -52,6 +52,7 @@ import { getUSDateFromString } from "@/components/shared/utils/utils";
 import { JsonRenderer } from "./components/chatComponent/single/JsonRenderer";
 import { useGetPromptVersion } from "@/services/hooks/prompts";
 import PromptVersionPill from "@/components/templates/prompts2025/PromptVersionPill";
+import { EMPTY_SESSION_NAME } from "../sessions/sessionId/SessionContent";
 
 const RequestDescTooltip = (props: {
   displayText: string;
@@ -187,6 +188,7 @@ export default function RequestDrawer(props: RequestDivProps) {
   /* -------------------------------------------------------------------------- */
   const isChatRequest = useMemo(
     () =>
+      request?._type === "ai-gateway" ||
       request?._type === "openai-chat" ||
       request?._type === "anthropic-chat" ||
       request?._type === "gemini-chat",
@@ -378,8 +380,9 @@ export default function RequestDrawer(props: RequestDivProps) {
       gatewayRouterId: request?.heliconeMetadata.gatewayRouterId ?? undefined,
       gatewayDeploymentTarget:
         request?.heliconeMetadata.gatewayDeploymentTarget ?? undefined,
-    };
+    } as Record<string, string | undefined>;
   }, [request?.heliconeMetadata.customProperties, newPromptId]);
+  console.log(specialProperties);
 
   // Get current request Properties and Scores
   const currentProperties = useMemo(() => {
@@ -636,16 +639,17 @@ export default function RequestDrawer(props: RequestDivProps) {
               )}
 
               {/* Session */}
-              {specialProperties.sessionId && specialProperties.sessionName && (
+              {specialProperties.sessionId && (
                 <RequestDescTooltip
                   displayText={
                     specialProperties.sessionPath ??
-                    specialProperties.sessionName
+                    specialProperties.sessionName ??
+                    specialProperties.sessionId
                   }
                   icon={<ListTreeIcon className="h-4 w-4" />}
                   copyText={specialProperties.sessionId}
                   href={`/sessions/${encodeURIComponent(
-                    specialProperties.sessionName,
+                    specialProperties.sessionName ?? EMPTY_SESSION_NAME,
                   )}/${specialProperties.sessionId}`}
                   truncateLength={dynamicTruncateLength}
                 />
