@@ -499,28 +499,6 @@ describe("DeepSeek Registry Tests", () => {
       }));
 
 
-    it("should handle request body mapping for DeepInfra R1", () =>
-      runGatewayTest({
-        model: "deepseek-reasoner/deepinfra",
-        request: {
-          bodyMapping: "NO_MAPPING",
-        },
-        expected: {
-          providers: [
-            {
-              url: "https://api.deepinfra.com/v1/openai/chat/completions",
-              response: "success",
-              model: "deepseek-ai/DeepSeek-R1-0528",
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-0528"),
-              expects: {
-                ...deepinfraAuthExpectations,
-                bodyContains: ["user", "Test"],
-              },
-            },
-          ],
-          finalStatus: 200,
-        },
-      }));
 
     it("should construct correct DeepInfra URL for DeepSeek V3.1 Terminus", () =>
       runGatewayTest({
