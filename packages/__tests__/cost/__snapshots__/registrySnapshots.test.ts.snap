@@ -218,7 +218,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "provider": "vertex",
       "ptbEnabled": true,
       "regions": [
-        "global",
+        "us-east5",
       ],
     },
   },
@@ -285,7 +285,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
     "claude-3.5-sonnet-v2:vertex": {
       "context": 200000,
-      "crossRegion": false,
+      "crossRegion": true,
       "maxTokens": 8192,
       "modelId": "claude-3-5-sonnet-v2@20241022",
       "parameters": [
@@ -956,7 +956,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1001,7 +1001,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -1027,7 +1027,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1072,7 +1072,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -1098,7 +1098,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1143,7 +1143,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -1221,7 +1221,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -4240,6 +4240,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
+    "gemma-3-12b-it",
     "gemma2-9b-it",
     "gpt-4.1",
     "gpt-4.1-mini",
@@ -4283,7 +4284,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
   "totalArchivedConfigs": 0,
   "totalEndpoints": 119,
   "totalModelProviderConfigs": 119,
-  "totalModelsWithPtb": 45,
+  "totalModelsWithPtb": 46,
   "totalProviders": 11,
 }
 `;

@@ -280,7 +280,20 @@ export class AttemptBuilder {
     endpoints: Endpoint[],
     providerKey: ProviderKey
   ): Attempt[] {
-    return endpoints.map(
+    // This is where dynamically injected config is applied
+    const updatedEndpoints = endpoints.map((endpoint) => {
+      return {
+        ...endpoint,
+        userConfig: {
+          ...endpoint.userConfig,
+          projectId:
+            (providerKey.config as UserEndpointConfig)?.projectId ||
+            endpoint.userConfig.projectId,
+        },
+      };
+    });
+
+    return updatedEndpoints.map(
       (endpoint) =>
         ({
           endpoint,
