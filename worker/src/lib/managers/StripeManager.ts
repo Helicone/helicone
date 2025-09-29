@@ -508,9 +508,10 @@ export class StripeManager {
 
     // Add dispute to wallet and suspend it
     try {
+      const chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge.id;
       const addResult = await walletStub.addDispute(
         dispute.id,
-        dispute.charge,
+        chargeId,
         dispute.amount,
         dispute.currency,
         dispute.reason,
