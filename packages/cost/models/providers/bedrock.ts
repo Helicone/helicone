@@ -126,16 +126,6 @@ export class BedrockProvider extends BaseProvider {
     });
   }
 
-  determineResponseFormat(endpoint: Endpoint): ResponseFormat {
-    if (
-      endpoint.author === "anthropic" ||
-      endpoint.providerModelId.includes("claude-")
-    ) {
-      return "ANTHROPIC";
-    }
-    return "OPENAI";
-  }
-
   async buildErrorMessage(response: Response): Promise<string> {
     const respJson = (await response.json()) as any;
     if (respJson.message) {

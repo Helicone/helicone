@@ -4,6 +4,7 @@ import { AnthropicUsageProcessor } from "@helicone-package/cost/usage/anthropicU
 import { GroqUsageProcessor } from "@helicone-package/cost/usage/groqUsageProcessor";
 import { XAIUsageProcessor } from "@helicone-package/cost/usage/xaiUsageProcessor";
 import { DeepSeekUsageProcessor } from "@helicone-package/cost/usage/deepseekUsageProcessor";
+import { VertexUsageProcessor, VertexOpenAIUsageProcessor } from "@helicone-package/cost/usage/vertexUsageProcessor";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import * as fs from "fs";
 import * as path from "path";
@@ -57,6 +58,7 @@ describe("OpenAIUsageProcessor", () => {
     const result = await processor.parse({
       responseBody: responseData,
       isStream: false,
+      model: "gpt-4o",
     });
 
     expect(result.error).toBeNull();
@@ -78,6 +80,7 @@ describe("OpenAIUsageProcessor", () => {
     const result = await processor.parse({
       responseBody: streamData,
       isStream: true,
+      model: "gpt-4o",
     });
 
     expect(result.error).toBeNull();
@@ -113,6 +116,7 @@ describe("OpenAIUsageProcessor", () => {
       const result = await processor.parse({
         responseBody: testCase.data,
         isStream: testCase.isStream,
+        model: "gpt-4o",
       });
       results[testCase.name] = result;
     }
@@ -133,6 +137,7 @@ describe("Azure Usage Processing", () => {
     const result = await processor.parse({
       responseBody: responseData,
       isStream: false,
+      model: "gpt-4o",
     });
 
     expect(result.error).toBeNull();
@@ -151,6 +156,7 @@ describe("Azure Usage Processing", () => {
     const result = await processor.parse({
       responseBody: streamData,
       isStream: true,
+      model: "gpt-4o",
     });
 
     expect(result.error).toBeNull();
@@ -187,6 +193,7 @@ describe("Azure Usage Processing", () => {
       const result = await processor.parse({
         responseBody: testCase.data,
         isStream: testCase.isStream,
+        model: "gpt-4o",
       });
       results[testCase.name] = result;
     }
@@ -207,6 +214,7 @@ describe("AnthropicUsageProcessor", () => {
     const result = await processor.parse({
       responseBody: responseData,
       isStream: false,
+      model: "claude-sonnet-4",
     });
 
     expect(result.error).toBeNull();
@@ -229,6 +237,7 @@ describe("AnthropicUsageProcessor", () => {
     const result = await processor.parse({
       responseBody: streamData,
       isStream: true,
+      model: "claude-sonnet-4",
     });
 
     expect(result.error).toBeNull();
@@ -272,6 +281,7 @@ describe("AnthropicUsageProcessor", () => {
       const result = await processor.parse({
         responseBody: testCase.data,
         isStream: testCase.isStream,
+        model: "claude-sonnet-4",
       });
       results[testCase.name] = result;
     }
@@ -292,6 +302,7 @@ describe("XAI/Grok specific features", () => {
     const result = await xaiProcessor.parse({
       responseBody: xaiResponse,
       isStream: false,
+      model: "grok-3",
     });
 
     expect(result.error).toBeNull();
@@ -314,6 +325,7 @@ describe("XAI/Grok specific features", () => {
     const result = await xaiProcessor.parse({
       responseBody: xaiResponse,
       isStream: false,
+      model: "grok-3",
     });
 
     expect(result.error).toBeNull();
@@ -338,6 +350,7 @@ describe("XAI/Grok specific features", () => {
     const result = await xaiProcessor.parse({
       responseBody: streamData,
       isStream: true,
+      model: "grok-3",
     });
 
     expect(result.error).toBeNull();
@@ -364,6 +377,7 @@ describe("Groq specific features", () => {
     const result = await groqProcessor.parse({
       responseBody: groqResponse,
       isStream: false,
+      model: "grok-3",
     });
 
     expect(result.error).toBeNull();
@@ -382,6 +396,7 @@ describe("Groq specific features", () => {
     const result = await groqProcessor.parse({
       responseBody: streamData,
       isStream: true,
+      model: "grok-3",
     });
 
     expect(result.error).toBeNull();
@@ -403,6 +418,7 @@ describe("Groq specific features", () => {
       const result = await deepseekProcessor.parse({
         responseBody: responseData,
         isStream: false,
+        model: "deepseek-r1",
       });
 
       expect(result.error).toBeNull();
@@ -421,6 +437,7 @@ describe("Groq specific features", () => {
       const result = await deepseekProcessor.parse({
         responseBody: responseData,
         isStream: false,
+        model: "deepseek-r1",
       });
 
       expect(result.error).toBeNull();
@@ -442,6 +459,7 @@ describe("Groq specific features", () => {
       const result = await deepseekProcessor.parse({
         responseBody: responseData,
         isStream: false,
+        model: "deepseek-r1",
       });
 
       expect(result.error).toBeNull();
@@ -464,6 +482,7 @@ describe("Groq specific features", () => {
       const result = await deepseekProcessor.parse({
         responseBody: streamData,
         isStream: true,
+        model: "deepseek-r1",
       });
 
       expect(result.error).toBeNull();
@@ -472,5 +491,133 @@ describe("Groq specific features", () => {
         output: 10, // completion_tokens from final chunk
       });
     });
+  });
+});
+
+describe("VertexUsageProcessor", () => {
+  const vertexProcessor = new VertexUsageProcessor();
+
+  it("should return VertexUsageProcessor for vertex provider", () => {
+    const processor = getUsageProcessor("vertex");
+    expect(processor).toBeInstanceOf(VertexUsageProcessor);
+  });
+
+  it("should use AnthropicUsageProcessor for claude models", async () => {
+    const mockAnthropicResponse = {
+      usage: {
+        input_tokens: 100,
+        output_tokens: 50,
+      },
+    };
+
+    const result = await vertexProcessor.parse({
+      responseBody: JSON.stringify(mockAnthropicResponse),
+      isStream: false,
+      model: "claude-3-sonnet",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 100,
+      output: 50,
+    });
+  });
+
+  it("should use VertexOpenAIUsageProcessor for non-claude models", async () => {
+    const mockVertexResponse = {
+      usage: {
+        prompt_tokens: 100,
+        completion_tokens: 50,
+        completion_tokens_details: {
+          reasoning_tokens: 20,
+          audio_tokens: 5,
+        },
+      },
+    };
+
+    const result = await vertexProcessor.parse({
+      responseBody: JSON.stringify(mockVertexResponse),
+      isStream: false,
+      model: "gemini-pro",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 100,
+      output: 45, // completion_tokens (50) - audio_tokens (5)
+      thinking: 20,
+      audio: 5,
+    });
+  });
+});
+
+describe("VertexOpenAIUsageProcessor vs OpenAIUsageProcessor", () => {
+  const vertexProcessor = new VertexOpenAIUsageProcessor();
+  const openaiProcessor = new OpenAIUsageProcessor();
+
+  it("should handle reasoning tokens differently between OpenAI and Vertex", async () => {
+    // This represents a response where reasoning tokens are included
+    const mockResponse = {
+      usage: {
+        prompt_tokens: 100,
+        completion_tokens: 50, // For OpenAI: includes reasoning, For Vertex: excludes reasoning
+        completion_tokens_details: {
+          reasoning_tokens: 20,
+        },
+      },
+    };
+
+    const openaiResult = await openaiProcessor.parse({
+      responseBody: JSON.stringify(mockResponse),
+      isStream: false,
+      model: "gpt-4o",
+    });
+
+    const vertexResult = await vertexProcessor.parse({
+      responseBody: JSON.stringify(mockResponse),
+      isStream: false,
+      model: "gemini-pro",
+    });
+
+    // OpenAI subtracts reasoning tokens from completion_tokens
+    expect(openaiResult.data?.output).toBe(30); // 50 - 20
+    expect(openaiResult.data?.thinking).toBe(20);
+
+    // Vertex uses completion_tokens as-is (already excludes reasoning tokens)
+    expect(vertexResult.data?.output).toBe(50); // 50 (no subtraction)
+    expect(vertexResult.data?.thinking).toBe(20);
+  });
+
+  it("should handle cached tokens consistently", async () => {
+    const mockResponse = {
+      usage: {
+        prompt_tokens: 100,
+        completion_tokens: 50,
+        prompt_tokens_details: {
+          cached_tokens: 30,
+        },
+      },
+    };
+
+    const openaiResult = await openaiProcessor.parse({
+      responseBody: JSON.stringify(mockResponse),
+      isStream: false,
+      model: "gpt-4o",
+    });
+
+    const vertexResult = await vertexProcessor.parse({
+      responseBody: JSON.stringify(mockResponse),
+      isStream: false,
+      model: "gemini-pro",
+    });
+
+    // Both should handle cached tokens the same way
+    expect(openaiResult.data?.input).toBe(70); // 100 - 30
+    expect(openaiResult.data?.output).toBe(50);
+    expect(openaiResult.data?.cacheDetails?.cachedInput).toBe(30);
+
+    expect(vertexResult.data?.input).toBe(70); // 100 - 30
+    expect(vertexResult.data?.output).toBe(50);
+    expect(vertexResult.data?.cacheDetails?.cachedInput).toBe(30);
   });
 });

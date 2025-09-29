@@ -10,12 +10,11 @@ import { errorForwarder } from "../HeliconeProxyRequest/ErrorForwarder";
 import { gatewayForwarder } from "../../routers/gatewayRouter";
 import { AttemptBuilder } from "./AttemptBuilder";
 import { AttemptExecutor } from "./AttemptExecutor";
-import { Attempt, DisallowListEntry, EscrowInfo } from "./types";
+import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
 import { oai2antResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { oai2antStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { RequestParams } from "@helicone-package/cost/models/types";
 import { SecureCacheProvider } from "../util/cache/secureCache";
-import { determineResponseFormat } from "@helicone-package/cost/models/provider-helpers";
 
 export interface AuthContext {
   orgId: string;
@@ -77,6 +76,8 @@ export class SimpleAIGateway {
       finalBody = expandResult.data.body;
     }
 
+    const errors: Array<AttemptError> = [];
+
     // Step 3: Build all attempts
     const attempts = await this.attemptBuilder.buildAttempts(
       modelStrings,
@@ -84,10 +85,13 @@ export class SimpleAIGateway {
       this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping
     );
     if (attempts.length === 0) {
-      return new Response(
-        "No available providers for the requested models. Check provider names and see supported models at https://helicone.ai/models",
-        { status: 400 }
-      );
+      errors.push({
+        source: "No available providers",
+        type: "request_failed",
+        message: "No available providers for the requested models. Check provider names and see supported models at https://helicone.ai/models",
+        statusCode: 400,
+      });
+      return this.createErrorResponse(errors);
     }
 
     // Step 4: Get disallow list
@@ -113,20 +117,12 @@ export class SimpleAIGateway {
     };
 
     // Step 6: Try each attempt in order
-    // TODO: Use Error type in types.ts
-    const errors: Array<{
-      attempt: string;
-      error: string;
-      type?: string;
-      statusCode?: number;
-    }> = [];
-
     for (const attempt of attempts) {
       // Check disallow list
       if (this.isDisallowed(attempt, disallowList)) {
         errors.push({
-          attempt: attempt.source,
-          error:
+          source: attempt.source,
+          message:
             "Cloud billing is disabled for this model and provider. Please contact support@helicone.ai for help",
           type: "disallowed",
           statusCode: 400,
@@ -147,10 +143,8 @@ export class SimpleAIGateway {
 
       if (isErr(result)) {
         errors.push({
-          attempt: attempt.source,
-          error: result.error.message,
-          type: result.error.type,
-          statusCode: result.error.statusCode,
+          ...result.error,
+          source: attempt.source,
         });
         // Continue to next attempt
       } else {
@@ -312,18 +306,13 @@ export class SimpleAIGateway {
       return ok(response); // do not map response
     }
 
-    const mappingType = determineResponseFormat(attempt.endpoint);
-
-    if (isErr(mappingType)) {
-      return err(`Failed to determine response format: ${mappingType.error}`);
-    }
-
-    if (mappingType.data === "OPENAI") {
+    const mappingType = attempt.endpoint.modelConfig.responseFormat ?? "OPENAI";
+    if (mappingType === "OPENAI") {
       return ok(response); // already in OPENAI format
     }
 
     try {
-      if (mappingType.data === "ANTHROPIC") {
+      if (mappingType === "ANTHROPIC") {
         const contentType = response.headers.get("content-type");
         const isStream = contentType?.includes("text/event-stream");
 
@@ -346,12 +335,7 @@ export class SimpleAIGateway {
   }
 
   private async createErrorResponse(
-    errors: Array<{
-      attempt: string;
-      error: string;
-      type?: string;
-      statusCode?: number;
-    }>
+    errors: Array<AttemptError>
   ): Promise<Response> {
     this.requestWrapper.setBaseURLOverride("https://ai-gateway.helicone.ai");
 
@@ -383,7 +367,7 @@ export class SimpleAIGateway {
       code = "request_failed";
     } else if (first403) {
       statusCode = 403;
-      message = first403.error;
+      message = first403.message;
       code = "request_failed";
     } else if (allDisallowed) {
       statusCode = 400;
@@ -400,7 +384,7 @@ export class SimpleAIGateway {
         code,
         message,
         statusCode,
-        details: JSON.stringify(errors),
+        details: errors,
       }
     );
 

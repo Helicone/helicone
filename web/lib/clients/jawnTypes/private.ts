@@ -454,6 +454,9 @@ export interface paths {
   "/v1/alert-banner": {
     get: operations["GetAlertBanners"];
   };
+  "/v1/admin/gateway/dashboard_data": {
+    post: operations["GetGatewayDashboardData"];
+  };
   "/v1/admin/has-feature-flag": {
     post: operations["HasFeatureFlag"];
   };
@@ -518,6 +521,12 @@ export interface paths {
   "/v1/admin/backfill-costs": {
     /** @description Backfill costs in Clickhouse with updated cost package data. */
     post: operations["BackfillCosts"];
+  };
+  "/v1/admin/wallet/{orgId}": {
+    post: operations["GetWalletDetails"];
+  };
+  "/v1/admin/wallet/{orgId}/tables/{tableName}": {
+    post: operations["GetWalletTableData"];
   };
   "/v1/admin/helix-thread/{sessionId}": {
     get: operations["GetHelixThread"];
@@ -1555,7 +1564,9 @@ Json: JsonObject;
     };
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
-    Provider: components["schemas"]["ProviderName"] | "CUSTOM";
+    /** @enum {string} */
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
+    Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
@@ -1781,6 +1792,7 @@ Json: JsonObject;
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
+      gateway_endpoint_version: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2183,14 +2195,17 @@ Json: JsonObject;
       customer_id: string;
     };
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
+    ResponseFormat: "ANTHROPIC" | "OPENAI";
     HeliconeMeta: {
-      stripeCustomerId?: string;
-      gatewayProvider?: components["schemas"]["ModelProviderName"];
+      gatewayEndpointVersion?: string;
+      gatewayResponseFormat?: components["schemas"]["ResponseFormat"];
       providerModelId?: string;
+      gatewayModel?: string;
+      gatewayProvider?: components["schemas"]["ModelProviderName"];
       isPassthroughBilling?: boolean;
       gatewayDeploymentTarget?: string;
       gatewayRouterId?: string;
+      stripeCustomerId?: string;
       heliconeManualAccessKey?: string;
       promptInputs?: components["schemas"]["Record_string.any_"];
       promptVersionId?: string;
@@ -3159,7 +3174,7 @@ Json: JsonObject;
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq" | "stripe:products";
+    SettingName: "stripe:products" | "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq";
     /**
      * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
      *
@@ -18574,6 +18589,16 @@ export interface operations {
       };
     };
   };
+  GetGatewayDashboardData: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_unknown_"];
+        };
+      };
+    };
+  };
   HasFeatureFlag: {
     requestBody: {
       content: {
@@ -19080,6 +19105,41 @@ export interface operations {
           "application/json": {
             query: string;
           };
+        };
+      };
+    };
+  };
+  GetWalletDetails: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
+        };
+      };
+    };
+  };
+  GetWalletTableData: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+      };
+      path: {
+        orgId: string;
+        tableName: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
         };
       };
     };

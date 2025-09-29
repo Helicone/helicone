@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
+
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
   "alibaba/qwen": {
@@ -4045,6 +4047,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "qwen3-30b-a3b",
     "qwen3-32b",
   ],
+  "sampleArchivedKeys": [],
   "sampleEndpointIds": [
     "chatgpt-4o-latest:openai:*",
     "chatgpt-4o-latest:openrouter:*",
@@ -4052,6 +4055,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:bedrock:us-east-1",
     "claude-3.5-haiku:openrouter:*",
   ],
+  "totalArchivedConfigs": 0,
   "totalEndpoints": 113,
   "totalModelProviderConfigs": 113,
   "totalModelsWithPtb": 44,

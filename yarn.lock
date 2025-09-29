@@ -6229,12 +6229,12 @@
   dependencies:
     "@supabase/node-fetch" "^2.6.14"
 
-"@supabase/stripe-sync-engine@^0.41.0":
-  version "0.41.0"
-  resolved "https://registry.yarnpkg.com/@supabase/stripe-sync-engine/-/stripe-sync-engine-0.41.0.tgz#6c7aad24a3fd21ffab25be634cd0c0c827ace7be"
-  integrity sha512-tYI4WQ4Sywl6Tj1TrKWpV8/AHYy/VP1upydmkQQTyzII4mFJAl0iT0HePdUp45rm2HxkaTFMSP2ta43MZRN3IQ==
+"@supabase/stripe-sync-engine@^0.45.0":
+  version "0.45.0"
+  resolved "https://registry.yarnpkg.com/@supabase/stripe-sync-engine/-/stripe-sync-engine-0.45.0.tgz#8fa7278caa118945d5553326007040a06d9e6043"
+  integrity sha512-3yP6Lyqg+jBZdI3MyGM0gBGmVmaaSBI5QO4hwvmsdJmIztU/3Wvu/YF0S8Ga1waWdeG1/9YChvVJV7gRON+t1A==
   dependencies:
-    pg "^8.16.0"
+    pg "^8.16.3"
     pg-node-migrations "0.0.8"
     yesql "^7.0.0"
 
@@ -15181,7 +15181,7 @@ pg-types@2.2.0, pg-types@^2.2.0:
     postgres-date "~1.0.4"
     postgres-interval "^1.1.0"
 
-pg@8.16.3, pg@^8.11.3, pg@^8.16.0, pg@^8.6.0, pg@^8.9.0:
+pg@8.16.3, pg@^8.11.3, pg@^8.16.3, pg@^8.6.0, pg@^8.9.0:
   version "8.16.3"
   resolved "https://registry.yarnpkg.com/pg/-/pg-8.16.3.tgz#160741d0b44fdf64680e45374b06d632e86c99fd"
   integrity sha512-enxc1h0jA/aq5oSDMvqyW3q89ra6XIIDZgCX9vkMrnz5DFTw/Ny3Li2lFQ+pt3L6MCgm/5o2o8HW9hiJji+xvw==

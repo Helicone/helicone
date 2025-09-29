@@ -1571,7 +1571,9 @@ export interface components {
     };
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
-    Provider: components["schemas"]["ProviderName"] | "CUSTOM";
+    /** @enum {string} */
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
+    Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
@@ -1797,6 +1799,7 @@ export interface components {
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
+      gateway_endpoint_version: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2951,8 +2954,6 @@ Json: JsonObject;
       timeZoneDifference: number;
     };
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
-    /** @enum {string} */
     AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "passthrough";
     /** @enum {string} */
     StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
@@ -3022,6 +3023,8 @@ Json: JsonObject;
     "Record_string.EndpointConfig_": {
       [key: string]: components["schemas"]["EndpointConfig"];
     };
+    /** @enum {string} */
+    ResponseFormat: "ANTHROPIC" | "OPENAI";
     ModelProviderConfig: {
       pricing: components["schemas"]["ModelPricing"][];
       /** Format: double */
@@ -3039,6 +3042,7 @@ Json: JsonObject;
       crossRegion?: boolean;
       /** Format: double */
       priority?: number;
+      responseFormat?: components["schemas"]["ResponseFormat"];
     };
     UserEndpointConfig: {
       region?: string;

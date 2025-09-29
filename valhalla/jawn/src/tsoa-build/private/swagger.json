@@ -3945,10 +3945,32 @@
 					"VERCEL"
 				]
 			},
+			"ModelProviderName": {
+				"type": "string",
+				"enum": [
+					"anthropic",
+					"openai",
+					"bedrock",
+					"vertex",
+					"azure",
+					"perplexity",
+					"groq",
+					"deepseek",
+					"cohere",
+					"xai",
+					"deepinfra",
+					"google-ai-studio",
+					"openrouter"
+				],
+				"nullable": false
+			},
 			"Provider": {
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ProviderName"
+					},
+					{
+						"$ref": "#/components/schemas/ModelProviderName"
 					},
 					{
 						"type": "string",
@@ -4794,6 +4816,10 @@
 					"request_referrer": {
 						"type": "string",
 						"nullable": true
+					},
+					"gateway_endpoint_version": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -4833,7 +4859,8 @@
 					"target_url",
 					"model",
 					"cache_reference_id",
-					"cache_enabled"
+					"cache_enabled",
+					"gateway_endpoint_version"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -6560,35 +6587,29 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ModelProviderName": {
+			"ResponseFormat": {
 				"type": "string",
 				"enum": [
-					"anthropic",
-					"openai",
-					"bedrock",
-					"vertex",
-					"azure",
-					"perplexity",
-					"groq",
-					"deepseek",
-					"cohere",
-					"xai",
-					"deepinfra",
-					"google-ai-studio",
-					"openrouter"
-				],
-				"nullable": false
+					"ANTHROPIC",
+					"OPENAI"
+				]
 			},
 			"HeliconeMeta": {
 				"properties": {
-					"stripeCustomerId": {
+					"gatewayEndpointVersion": {
+						"type": "string"
+					},
+					"gatewayResponseFormat": {
+						"$ref": "#/components/schemas/ResponseFormat"
+					},
+					"providerModelId": {
+						"type": "string"
+					},
+					"gatewayModel": {
 						"type": "string"
 					},
 					"gatewayProvider": {
 						"$ref": "#/components/schemas/ModelProviderName"
-					},
-					"providerModelId": {
-						"type": "string"
 					},
 					"isPassthroughBilling": {
 						"type": "boolean"
@@ -6597,6 +6618,9 @@
 						"type": "string"
 					},
 					"gatewayRouterId": {
+						"type": "string"
+					},
+					"stripeCustomerId": {
 						"type": "string"
 					},
 					"heliconeManualAccessKey": {
@@ -8785,6 +8809,7 @@
 			"SettingName": {
 				"type": "string",
 				"enum": [
+					"stripe:products",
 					"kafka:dlq",
 					"kafka:log",
 					"kafka:score",
@@ -8800,8 +8825,7 @@
 					"sqs:request-response-logs",
 					"sqs:helicone-scores",
 					"sqs:request-response-logs-dlq",
-					"sqs:helicone-scores-dlq",
-					"stripe:products"
+					"sqs:helicone-scores-dlq"
 				],
 				"nullable": false
 			},
@@ -54253,6 +54277,39 @@
 				"parameters": []
 			}
 		},
+		"/v1/admin/gateway/dashboard_data": {
+			"post": {
+				"operationId": "GetGatewayDashboardData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/admin/has-feature-flag": {
 			"post": {
 				"operationId": "HasFeatureFlag",
@@ -55853,6 +55910,116 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/admin/wallet/{orgId}": {
+			"post": {
+				"operationId": "GetWalletDetails",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_any_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/{orgId}/tables/{tableName}": {
+			"post": {
+				"operationId": "GetWalletTableData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultError_unknown_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_any_"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "tableName",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
 			}
 		},
 		"/v1/admin/helix-thread/{sessionId}": {

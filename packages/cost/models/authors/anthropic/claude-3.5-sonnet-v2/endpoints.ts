@@ -31,6 +31,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
     },
@@ -64,6 +65,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       global: {
         providerModelId: "claude-3-5-sonnet-v2@20241022",
@@ -99,6 +101,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "us-east-1": {},
     },
