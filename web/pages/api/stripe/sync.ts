@@ -3,7 +3,7 @@ import { StripeSync } from "@supabase/stripe-sync-engine";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
 // Load secrets from environment variables
-const databaseUrl = process.env.DATABASE_URL!;
+const databaseUrl = SecretManager.getSecret("SUPABASE_DATABASE_URL");
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SYNC_SECRET!;
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY!;
 

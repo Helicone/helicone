@@ -110,6 +110,40 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-v3.1-terminus:deepinfra": {
+    provider: "deepinfra",
+    author: "deepseek",
+    providerModelId: "deepseek-ai/DeepSeek-V3.1-Terminus",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000027,
+        output: 0.000001,
+        cacheMultipliers: {
+          cachedInput: 0.8, // $0.216 per 1M tokens (cached) = $0.27 * 0.8
+        },
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format"
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {}
+    },
+  },
 } satisfies Partial<
   Record<`${DeepSeekV3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

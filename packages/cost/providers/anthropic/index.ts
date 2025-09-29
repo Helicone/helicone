@@ -176,6 +176,20 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "claude-sonnet-4-5-20250929",
+    },
+    cost: {
+      prompt_token: 0.000003, // $3 / MTok
+      completion_token: 0.000015, // $15 / MTok
+      prompt_cache_write_token: 0.00000375, // 5m cache write: $3.75 / MTok
+      prompt_cache_read_token: 0.0000003, // Cache hits/refreshes: $0.30 / MTok
+      prompt_cache_creation_5m: 0.00000375, // $3.75 / MTok
+      prompt_cache_creation_1h: 0.000006, // $6 / MTok
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "claude-opus-4-20250514",
     },
     cost: {

@@ -1,3 +1,9 @@
+# Common issues
+
+If you are using OpenAI you might need to include stream usage options: https://docs.helicone.ai/faq/enable-stream-usage
+
+
+
 # Helicone Packages
 
 This directory contains shared packages used across the Helicone ecosystem.

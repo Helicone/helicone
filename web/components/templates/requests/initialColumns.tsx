@@ -15,6 +15,7 @@ import {
 import CostPill from "./costPill";
 import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
 import ModelPill from "./modelPill";
+import ProviderPill from "./providerPill";
 import StatusBadge from "./statusBadge";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
@@ -85,6 +86,16 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
       );
     },
     size: 100,
+  },
+  {
+    id: "provider",
+    accessorKey: "provider",
+    header: "Provider",
+    cell: (info) => {
+      return (
+        <ProviderPill provider={info.row.original.heliconeMetadata.provider} />
+      );
+    },
   },
   {
     id: "requestText",
