@@ -191,6 +191,7 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: false,
+    quantization: "fp4",
     endpointConfigs: {
       "*": {},
     },
