@@ -201,6 +201,42 @@ describe("DeepSeek Registry Tests", () => {
           },
         }));
     });
+
+    describe("deepseek-v3.1-terminus", () => {
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1-Terminus", // Provider model ID on DeepInfra
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select deepinfra provider when none specified", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1-Terminus",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
   });
 
   describe("BYOK Tests - DeepSeek Models on Groq", () => {
