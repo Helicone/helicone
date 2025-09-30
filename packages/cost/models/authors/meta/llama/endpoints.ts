@@ -396,6 +396,71 @@ export const endpoints = {
       "*": {},
     },
   },
+  "llama-3.1-8b-instruct-turbo:deepinfra": {
+    providerModelId: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    provider: "deepinfra",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000002, // $0.02/1M tokens - DeepInfra pricing
+        output: 0.00000003, // $0.03/1M tokens - DeepInfra pricing
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 128_000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+      "tool_choice",
+      "tools",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-3.1-8b-instruct:novita": {
+    providerModelId: "meta-llama/llama-3.1-8b-instruct",
+    provider: "novita",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000002,
+        output: 0.00000005,
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 16_384,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias"
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {}
+    },
+  },
 } satisfies Partial<
   Record<`${LlamaModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

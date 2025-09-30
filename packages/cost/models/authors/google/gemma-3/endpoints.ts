@@ -11,7 +11,7 @@ export const endpoints = {
       {
         threshold: 0,
         input: 0.00000005,
-        output: 0.00000010,
+        output: 0.0000001,
       },
     ],
     rateLimits: {
@@ -34,11 +34,14 @@ export const endpoints = {
       "min_p",
       "response_format",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
 } satisfies Partial<
-  Record<`${Gemma3ModelName}:${ModelProviderName}` | Gemma3ModelName, ModelProviderConfig>
+  Record<
+    `${Gemma3ModelName}:${ModelProviderName}` | Gemma3ModelName,
+    ModelProviderConfig
+  >
 >;

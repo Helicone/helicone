@@ -156,7 +156,6 @@ describe("Pass-Through Tests", () => {
               {
                 url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
                 response: "success",
-                model: "gemini-1.5-pro",
                 data: {
                   candidates: [
                     {
@@ -286,6 +285,7 @@ describe("Pass-Through Tests", () => {
           request: {
             messages: [{ role: "user", content: "Test EU Bedrock" }],
             maxTokens: 100,
+            bodyMapping: "NO_MAPPING",
           },
           expected: {
             providers: [
@@ -293,7 +293,6 @@ describe("Pass-Through Tests", () => {
                 // Note: EU prefix in model doesn't change the region, still uses us-east-1
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/eu.anthropic.claude-3-7-sonnet-20250219-v1:0/invoke",
                 response: "success",
-                model: "eu.anthropic.claude-3-7-sonnet-20250219-v1:0",
                 data: {
                   id: "msg_bedrock_eu",
                   type: "message",
@@ -306,6 +305,7 @@ describe("Pass-Through Tests", () => {
                   headers: {
                     Authorization: /^AWS4-HMAC-SHA256/,
                   },
+                  bodyDoesNotContain: ["model"],
                 },
               },
             ],
@@ -320,6 +320,7 @@ describe("Pass-Through Tests", () => {
           request: {
             messages: [{ role: "user", content: "Test APAC Bedrock" }],
             maxTokens: 100,
+            bodyMapping: "NO_MAPPING",
           },
           expected: {
             providers: [
@@ -327,8 +328,6 @@ describe("Pass-Through Tests", () => {
                 // Note: AP prefix in model doesn't change the region, still uses us-east-1
                 url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/ap-southeast-2.anthropic.claude-3-7-sonnet-20250219-v1:0/invoke",
                 response: "success",
-                model:
-                  "ap-southeast-2.anthropic.claude-3-7-sonnet-20250219-v1:0",
                 data: {
                   id: "msg_bedrock_apac",
                   type: "message",
@@ -341,6 +340,7 @@ describe("Pass-Through Tests", () => {
                   headers: {
                     Authorization: /^AWS4-HMAC-SHA256/,
                   },
+                  bodyDoesNotContain: ["model"],
                 },
               },
             ],

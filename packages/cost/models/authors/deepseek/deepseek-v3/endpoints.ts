@@ -70,6 +70,7 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: false,
+    quantization: "fp4",
     endpointConfigs: {
       "*": {},
     },
@@ -137,11 +138,44 @@ export const endpoints = {
       "top_k",
       "seed",
       "min_p",
-      "response_format"
+      "response_format",
     ],
     ptbEnabled: false,
     endpointConfigs: {
-      "*": {}
+      "*": {},
+    },
+  },
+  "deepseek-v3.2:novita": {
+    provider: "novita",
+    author: "deepseek",
+    providerModelId: "deepseek/deepseek-v3.2-exp",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000027, // $0.27 per 1M tokens
+        output: 0.00000041, // $0.41 per 1M tokens
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
     },
   },
 } satisfies Partial<

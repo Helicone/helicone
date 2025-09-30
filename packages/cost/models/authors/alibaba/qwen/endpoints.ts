@@ -113,6 +113,7 @@ export const endpoints = {
       "min_p",
     ],
     ptbEnabled: true,
+    quantization: "fp8",
     endpointConfigs: {
       "*": {},
     },
@@ -151,6 +152,7 @@ export const endpoints = {
       "response_format"
     ],
     ptbEnabled: false,
+    quantization: "fp4",
     endpointConfigs: {
       "*": {},
     },

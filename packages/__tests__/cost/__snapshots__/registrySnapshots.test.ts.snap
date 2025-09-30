@@ -218,7 +218,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "provider": "vertex",
       "ptbEnabled": true,
       "regions": [
-        "global",
+        "us-east5",
       ],
     },
   },
@@ -285,7 +285,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
     "claude-3.5-sonnet-v2:vertex": {
       "context": 200000,
-      "crossRegion": false,
+      "crossRegion": true,
       "maxTokens": 8192,
       "modelId": "claude-3-5-sonnet-v2@20241022",
       "parameters": [
@@ -797,6 +797,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-v3.2:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek/deepseek-v3.2-exp",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3:deepinfra": {
       "context": 128000,
       "crossRegion": false,
@@ -956,7 +982,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1001,7 +1027,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -1027,7 +1053,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1072,7 +1098,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -1098,7 +1124,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1143,7 +1169,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -1221,7 +1247,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1275,6 +1301,56 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "openrouter",
       "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.1-8b-instruct-turbo:deepinfra": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.1-8b-instruct:novita": {
+      "context": 16384,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "meta-llama/llama-3.1-8b-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -2856,6 +2932,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "deepinfra",
     "deepseek",
+    "novita",
     "openrouter",
   ],
   "deepseek/r1-distill": [
@@ -2885,6 +2962,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
   ],
   "meta/llama": [
+    "deepinfra",
     "groq",
     "groq",
     "groq",
@@ -2892,6 +2970,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "novita",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -3375,6 +3454,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "novita": [
+      {
+        "input": 2.7e-7,
+        "output": 4.1e-7,
+        "threshold": 0,
+      },
+    ],
     "openrouter": [
       {
         "input": 0.00000316,
@@ -3549,6 +3635,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "meta/llama": {
+    "deepinfra": [
+      {
+        "input": 2e-8,
+        "output": 3e-8,
+        "threshold": 0,
+      },
+    ],
     "groq": [
       {
         "audio": 0,
@@ -3558,6 +3651,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "request": 0,
         "threshold": 0,
         "web_search": 0,
+      },
+    ],
+    "novita": [
+      {
+        "input": 2e-8,
+        "output": 5e-8,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -3903,6 +4003,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "deepseek-v3.2",
+      "providers": [
+        "novita",
+      ],
+    },
+    {
       "model": "gemini-2.5-flash",
       "providers": [
         "google-ai-studio",
@@ -4072,6 +4178,18 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "llama-3.1-8b-instruct",
+      "providers": [
+        "novita",
+      ],
+    },
+    {
+      "model": "llama-3.1-8b-instruct-turbo",
+      "providers": [
+        "deepinfra",
+      ],
+    },
+    {
       "model": "llama-3.3-70b-instruct",
       "providers": [
         "groq",
@@ -4193,7 +4311,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 9,
+      "modelCount": 10,
       "provider": "deepinfra",
     },
     {
@@ -4207,6 +4325,10 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "modelCount": 14,
       "provider": "groq",
+    },
+    {
+      "modelCount": 2,
+      "provider": "novita",
     },
     {
       "modelCount": 14,
@@ -4240,6 +4362,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
+    "gemma-3-12b-it",
     "gemma2-9b-it",
     "gpt-4.1",
     "gpt-4.1-mini",
@@ -4281,9 +4404,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 119,
-  "totalModelProviderConfigs": 119,
-  "totalModelsWithPtb": 45,
-  "totalProviders": 11,
+  "totalEndpoints": 122,
+  "totalModelProviderConfigs": 122,
+  "totalModelsWithPtb": 46,
+  "totalProviders": 12,
 }
 `;

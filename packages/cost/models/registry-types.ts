@@ -13,6 +13,7 @@ import { grokEndpointConfig, grokModels } from "./authors/xai";
 import { openaiEndpointConfig, openaiModels } from "./authors/openai";
 import { mistralEndpointConfig, mistralModels } from "./authors/mistralai";
 import { alibabaEndpointConfig, alibabaModels } from "./authors/alibaba";
+import { metaEndpointConfig, metaModels } from "./authors/meta";
 
 // Combine all models for type derivation
 const allModels = {
@@ -22,7 +23,8 @@ const allModels = {
   ...grokModels,
   ...mistralModels,
   ...deepseekModels,
-  ...alibabaModels
+  ...alibabaModels,
+  ...metaModels
 };
 
 export type ModelName = keyof typeof allModels;
@@ -35,7 +37,8 @@ const modelProviderConfigs = {
   ...grokEndpointConfig,
   ...mistralEndpointConfig,
   ...deepseekEndpointConfig,
-  ...alibabaEndpointConfig
+  ...alibabaEndpointConfig,
+  ...metaEndpointConfig
 };
 
 export type ModelProviderConfigId = keyof typeof modelProviderConfigs;
