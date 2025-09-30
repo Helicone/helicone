@@ -33,6 +33,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CopyButton } from "@/components/ui/CopyButton";
 
 type ModelRegistryResponse = components["schemas"]["ModelRegistryResponse"];
 
@@ -46,7 +47,6 @@ export function ModelRegistryPage() {
   // State for all models (fetched once)
   const [allModels, setAllModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copiedModel, setCopiedModel] = useState<string | null>(null);
 
   // Filter states from URL
   const [searchQuery, setSearchQuery] = useState(
@@ -175,12 +175,6 @@ export function ModelRegistryPage() {
       return `${(tokens / 1000).toFixed(0)}K`;
     }
     return tokens.toString();
-  };
-
-  const copyModelId = (modelId: string) => {
-    navigator.clipboard.writeText(modelId);
-    setCopiedModel(modelId);
-    setTimeout(() => setCopiedModel(null), 2000);
   };
 
   return (
@@ -472,20 +466,12 @@ export function ModelRegistryPage() {
                                   ""
                                 )}
                               </span>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  copyModelId(model.id);
-                                }}
-                                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                                title={`Copy model ID: ${model.id}`}
-                              >
-                                {copiedModel === model.id ? (
-                                  <Check className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                ) : (
-                                  <Clipboard className="h-3.5 w-3.5" />
-                                )}
-                              </button>
+                              <CopyButton
+                                textToCopy={model.id}
+                                tooltipContent={`Copy: ${model.id}`}
+                                iconSize={14}
+                                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              />
                               {isFree && (
                                 <span className="text-xs font-normal text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/40 px-2 py-0.5">
                                   Free
