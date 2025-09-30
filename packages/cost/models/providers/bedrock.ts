@@ -44,6 +44,9 @@ export class BedrockProvider extends BaseProvider {
     modelProviderConfig: ModelProviderConfig,
     userEndpointConfig: UserEndpointConfig
   ): string {
+    if (modelProviderConfig.author === "passthrough") {
+      return modelProviderConfig.providerModelId;
+    }
     return this.getModelId(modelProviderConfig, userEndpointConfig);
   }
 
@@ -103,20 +106,19 @@ export class BedrockProvider extends BaseProvider {
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
-    if (endpoint.author !== "passthrough") {
-      if (endpoint.providerModelId.includes("claude-")) {
-        const anthropicBody =
-          context.bodyMapping === "OPENAI"
-            ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
-            : context.parsedBody;
-        const updatedBody = {
-          ...anthropicBody,
-          anthropic_version: "bedrock-2023-05-31",
-          model: undefined, // model is not needed in Bedrock inputs (as its defined via URL)
-          stream: undefined,
-        };
-        return JSON.stringify(updatedBody);
-      }
+    if (endpoint.providerModelId.includes("claude-")) {
+      const anthropicBody =
+        context.bodyMapping === "OPENAI"
+          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
+          : context.parsedBody;
+      
+      const updatedBody = {
+        ...anthropicBody,
+        anthropic_version: "bedrock-2023-05-31",
+        model: undefined, // model is not needed in Bedrock inputs (as its defined via URL)
+        stream: undefined,
+      };
+      return JSON.stringify(updatedBody);
     }
 
     // Pass through
