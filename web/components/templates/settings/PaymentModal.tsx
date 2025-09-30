@@ -24,7 +24,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
   const MIN_AMOUNT = 5;
 
   const creditsAmountCents = Math.round(amount * 100);
-  const percentageFeeCents = Math.ceil(creditsAmountCents * STRIPE_PERCENT_FEE_RATE);
+  const percentageFeeCents = Math.ceil(
+    creditsAmountCents * STRIPE_PERCENT_FEE_RATE,
+  );
   const stripeFeeCents = percentageFeeCents + STRIPE_FIXED_FEE_CENTS;
   const totalDueCents = creditsAmountCents + stripeFeeCents;
 

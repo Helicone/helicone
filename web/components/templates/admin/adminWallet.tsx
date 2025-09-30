@@ -484,11 +484,11 @@ export default function AdminWallet() {
                         ) : tableData ? (
                           <div>
                             {/* DEBUG: Show raw tableData structure */}
-                            <details className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded">
-                              <summary className="font-medium text-sm cursor-pointer text-slate-600 hover:text-slate-800">
+                            <details className="mb-4 rounded border border-slate-200 bg-slate-50 p-3">
+                              <summary className="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-800">
                                 🔍 Debug: Raw API Response
                               </summary>
-                              <pre className="mt-2 text-xs bg-white p-3 rounded border overflow-auto max-h-48 text-slate-700">
+                              <pre className="mt-2 max-h-48 overflow-auto rounded border bg-white p-3 text-xs text-slate-700">
                                 {JSON.stringify(tableData, null, 2)}
                               </pre>
                             </details>
@@ -502,9 +502,9 @@ export default function AdminWallet() {
                             ) : tableData?.data?.data ? (
                               <div>
                                 <div className="mb-4 text-sm text-muted-foreground">
-                                  Total records: {tableData.data?.data?.total} | Page:{" "}
-                                  {tableData.data?.data?.page + 1} | Page size:{" "}
-                                  {tableData.data?.pageSize}
+                                  Total records: {tableData.data?.data?.total} |
+                                  Page: {tableData.data?.data?.page + 1} | Page
+                                  size: {tableData.data?.pageSize}
                                 </div>
                                 {tableData.data.data.data.length > 0 ? (
                                   <div className="overflow-hidden rounded-lg border">
