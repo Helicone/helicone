@@ -268,10 +268,6 @@ export class AdminWalletController extends Controller {
     const validatedPage = Math.max(0, page ?? 0);
     const validatedPageSize = Math.min(Math.max(1, pageSize ?? 50), 100);
 
-    const params = new URLSearchParams();
-    if (validatedPage > 0) params.set("page", validatedPage.toString());
-    params.set("pageSize", validatedPageSize.toString());
-
     await authCheckThrow(request.authParams.userId);
 
     // Validate table name to prevent injection
