@@ -110,6 +110,13 @@ const getUnsanitizedMappedContent = ({
   mapperType: MapperType;
   heliconeRequest: HeliconeRequest;
 }): MappedLLMRequest => {
+  // band-aid solution for now until we fix mappings (see comments below)
+  if (mapperType === "ai-gateway" || heliconeRequest.request_referrer === "ai-gateway") {
+    console.log("heliconeRequest.model", heliconeRequest.model);
+    if (heliconeRequest.model.includes("claude")) {
+      mapperType = "anthropic-chat";
+    }
+  }
   const mapper = MAPPERS[mapperType];
   if (!mapper) {
     throw new Error(`Mapper not found: ${JSON.stringify(mapperType)}`);
