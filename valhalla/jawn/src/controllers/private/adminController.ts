@@ -135,10 +135,11 @@ export class AdminController extends Controller {
         organization_id,
         SUM(cost) as total_cost
       FROM request_response_rmt
-      WHERE organization_id IN (${orgIds.map(() => "?").join(",")})
+      WHERE organization_id IN (${orgIds.map((orgId) => `'${orgId}'`).join(",")})
+      and is_passthrough_billing = true
       GROUP BY organization_id
       `,
-      orgIds
+      []
     );
 
     const clickhouseSpendMap = new Map<string, number>();
@@ -1637,7 +1638,7 @@ export class AdminController extends Controller {
     const workerApiUrl =
       process.env.HELICONE_WORKER_API ||
       process.env.WORKER_API_URL ||
-      "https://api.helicone.ai";
+      "https://api.worker.helicone.ai";
     const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
 
     if (!adminAccessKey) {
@@ -1704,7 +1705,7 @@ export class AdminController extends Controller {
     const workerApiUrl =
       process.env.HELICONE_WORKER_API ||
       process.env.WORKER_API_URL ||
-      "https://api.helicone.ai";
+      "https://api.worker.helicone.ai";
     const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
 
     if (!adminAccessKey) {
