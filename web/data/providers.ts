@@ -176,7 +176,8 @@ export const providers: Provider[] = [
     id: "deepinfra",
     name: "DeepInfra",
     logoUrl: "/assets/home/providers/deepinfra.webp",
-    description: "Configure your DeepInfra API keys for fast and affordable inference",
+    description:
+      "Configure your DeepInfra API keys for fast and affordable inference",
     docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
     apiKeyLabel: "DeepInfra API Key",
     apiKeyPlaceholder: "...",
