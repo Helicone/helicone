@@ -34,6 +34,8 @@ import AuthLayout from "../components/layout/auth/authLayout";
 import { NextPageWithLayout } from "./_app";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
+import { GatewayPromotionBanner } from "@/components/shared/gatewayPromotion/GatewayPromotionBanner";
+import { useGatewayEligibility } from "@/components/shared/gatewayPromotion/useGatewayEligibility";
 
 const Credits: NextPageWithLayout<void> = () => {
   const [currentPageToken, setCurrentPageToken] = useState<string | null>(null);
@@ -68,6 +70,11 @@ const Credits: NextPageWithLayout<void> = () => {
   const currentPageNumber = pageTokenHistory.length + 1;
 
   const hasAccess = hasCreditsFeatureFlag?.data;
+
+  // Check if we should show the gateway promotion
+  const { data: gatewayEligibility } = useGatewayEligibility(
+    org?.currentOrg?.id
+  );
 
   // Show loading state while checking feature flag
   if (isFeatureFlagLoading) {
@@ -237,6 +244,13 @@ const Credits: NextPageWithLayout<void> = () => {
             ) : (
               /* Credits Management Experience - Show when has access */
               <div>
+                {/* Gateway Promotion Banner */}
+                {gatewayEligibility?.shouldShowBanner && (
+                  <div className="px-6 py-4">
+                    <GatewayPromotionBanner />
+                  </div>
+                )}
+
                 {/* Current Balance Section */}
                 <div className="border-b border-border bg-slate-100 px-6 py-8 dark:bg-slate-900">
                   <Small className="text-muted-foreground">

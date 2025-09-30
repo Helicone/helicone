@@ -627,6 +627,9 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/delete": {
     post: operations["DeleteHeliconeDataset"];
   };
+  "/v1/gateway/eligibility": {
+    get: operations["CheckEligibility"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -3640,6 +3643,26 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
+    GatewayEligibilityResponse: {
+      shouldShowBanner: boolean;
+      reason?: string;
+      /** Format: double */
+      monthlyRequests?: number;
+      /** Format: double */
+      monthlyInferenceCost?: number;
+      /** Format: double */
+      monthlyHeliconeeCost?: number;
+      /** Format: double */
+      potentialSavings?: number;
+      /** Format: double */
+      gatewayRevenue?: number;
+    };
+    ResultSuccess_GatewayEligibilityResponse_: {
+      data: components["schemas"]["GatewayEligibilityResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_GatewayEligibilityResponse.string_": components["schemas"]["ResultSuccess_GatewayEligibilityResponse_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -7438,6 +7461,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CheckEligibility: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_GatewayEligibilityResponse.string_"];
         };
       };
     };
