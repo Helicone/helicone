@@ -464,8 +464,8 @@ export const endpoints = {
         output: 0.00000005, // $0.06 per 1M tokens - DeepInfra pricing from https://deepinfra.com/meta-llama/Meta-Llama-3-8B-Instruct
       },
     ],
-    contextLength: 8_000,
-    maxCompletionTokens: 8_000,
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
     supportedParameters: [
       "max_tokens",
       "temperature",
