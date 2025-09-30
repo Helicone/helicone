@@ -396,7 +396,7 @@ export const endpoints = {
       "*": {},
     },
   },
-  "llama-3.1-8b-instruct:deepinfra": {
+  "llama-3.1-8b-instruct-turbo:deepinfra": {
     providerModelId: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
     provider: "deepinfra",
     author: "meta-llama",
@@ -427,6 +427,38 @@ export const endpoints = {
     ptbEnabled: false,
     endpointConfigs: {
       "*": {},
+    },
+  },
+  "llama-3.1-8b-instruct:novita": {
+    providerModelId: "meta-llama/llama-3.1-8b-instruct",
+    provider: "novita",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000002,
+        output: 0.00000005,
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 16_384,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias"
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {}
     },
   },
 } satisfies Partial<

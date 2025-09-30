@@ -1305,7 +1305,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "llama-3.1-8b-instruct:deepinfra": {
+    "llama-3.1-8b-instruct-turbo:deepinfra": {
       "context": 128000,
       "crossRegion": false,
       "maxTokens": 128000,
@@ -1326,6 +1326,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.1-8b-instruct:novita": {
+      "context": 16384,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "meta-llama/llama-3.1-8b-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
       "ptbEnabled": false,
       "regions": [
         "*",
@@ -2946,6 +2970,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "novita",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -3628,6 +3653,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0,
       },
     ],
+    "novita": [
+      {
+        "input": 2e-8,
+        "output": 5e-8,
+        "threshold": 0,
+      },
+    ],
     "openrouter": [
       {
         "input": 2.1e-7,
@@ -4148,6 +4180,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "llama-3.1-8b-instruct",
       "providers": [
+        "novita",
+      ],
+    },
+    {
+      "model": "llama-3.1-8b-instruct-turbo",
+      "providers": [
         "deepinfra",
       ],
     },
@@ -4289,7 +4327,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "novita",
     },
     {
@@ -4366,8 +4404,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 120,
-  "totalModelProviderConfigs": 120,
+  "totalEndpoints": 122,
+  "totalModelProviderConfigs": 122,
   "totalModelsWithPtb": 46,
   "totalProviders": 12,
 }
