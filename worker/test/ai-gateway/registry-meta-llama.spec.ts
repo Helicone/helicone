@@ -33,7 +33,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-                data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -50,7 +52,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-                data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -92,7 +96,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-                data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: [
@@ -129,7 +135,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-                data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: [
@@ -157,8 +165,10 @@ describe("Meta Llama Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
-                model: "meta-llama/Meta-Llama-3-8B-Instruct",
-                data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+                model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+                data: createOpenAIMockResponse(
+                  "meta-llama/Meta-Llama-3.1-8B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -175,7 +185,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "meta-llama/llama-3.1-8b-instruct",
-                data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/llama-3.1-8b-instruct"
+                ),
                 expects: novitaAuthExpectations,
               },
             ],
@@ -192,7 +204,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "meta-llama/llama-3.1-8b-instruct",
-                data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/llama-3.1-8b-instruct"
+                ),
                 expects: novitaAuthExpectations,
               },
             ],
@@ -233,8 +247,10 @@ describe("Meta Llama Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
-                model: "meta-llama/Meta-Llama-3-8B-Instruct",
-                data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+                model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+                data: createOpenAIMockResponse(
+                  "meta-llama/Meta-Llama-3.1-8B-Instruct"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: [
@@ -285,7 +301,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "meta-llama/llama-3.1-8b-instruct",
-                data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/llama-3.1-8b-instruct"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -321,8 +339,10 @@ describe("Meta Llama Registry Tests", () => {
               {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
-                model: "meta-llama/Meta-Llama-3-8B-Instruct",
-                data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+                model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+                data: createOpenAIMockResponse(
+                  "meta-llama/Meta-Llama-3.1-8B-Instruct"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: [
@@ -360,7 +380,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "meta-llama/llama-3.1-8b-instruct",
-                data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/llama-3.1-8b-instruct"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -639,8 +661,10 @@ describe("Meta Llama Registry Tests", () => {
             {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
-              model: "meta-llama/Meta-Llama-3-8B-Instruct",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+              model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct"
+              ),
               expects: deepinfraAuthExpectations,
               customVerify: (call) => {
                 // Verify that the URL is correctly constructed
@@ -661,8 +685,10 @@ describe("Meta Llama Registry Tests", () => {
             {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
-              model: "meta-llama/Meta-Llama-3-8B-Instruct", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+              model: "meta-llama/Meta-Llama-3.1-8B-Instruct", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct"
+              ),
               expects: deepinfraAuthExpectations,
             },
           ],
@@ -681,8 +707,10 @@ describe("Meta Llama Registry Tests", () => {
             {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
-              model: "meta-llama/Meta-Llama-3-8B-Instruct",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+              model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: ["user", "Test"],
@@ -736,8 +764,10 @@ describe("Meta Llama Registry Tests", () => {
             {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
-              model: "meta-llama/Meta-Llama-3-8B-Instruct",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+              model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: [
@@ -768,9 +798,7 @@ describe("Meta Llama Registry Tests", () => {
         model: "llama-3.1-8b-instruct/deepinfra",
         request: {
           body: {
-            messages: [
-              { role: "user", content: "Test context length" },
-            ],
+            messages: [{ role: "user", content: "Test context length" }],
             max_tokens: 8000, // Max completion tokens for this model
           },
         },
@@ -779,8 +807,10 @@ describe("Meta Llama Registry Tests", () => {
             {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
-              model: "meta-llama/Meta-Llama-3-8B-Instruct",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+              model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: ["max_tokens", "8000"],
@@ -800,8 +830,10 @@ describe("Meta Llama Registry Tests", () => {
             {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
-              model: "meta-llama/Meta-Llama-3-8B-Instruct",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+              model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct"
+              ),
               expects: deepinfraAuthExpectations,
               customVerify: (call) => {
                 // Verify that the pricing configuration is correctly applied
@@ -826,7 +858,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+              ),
               expects: deepinfraAuthExpectations,
               customVerify: (call) => {
                 // Verify that the URL is correctly constructed
@@ -848,7 +882,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+              ),
               expects: deepinfraAuthExpectations,
             },
           ],
@@ -868,7 +904,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: ["user", "Test"],
@@ -923,7 +961,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: [
@@ -954,9 +994,7 @@ describe("Meta Llama Registry Tests", () => {
         model: "llama-3.1-8b-instruct-turbo/deepinfra",
         request: {
           body: {
-            messages: [
-              { role: "user", content: "Test context length" },
-            ],
+            messages: [{ role: "user", content: "Test context length" }],
             max_tokens: 128000, // Max completion tokens for this model
           },
         },
@@ -966,7 +1004,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: ["max_tokens", "128000"],
@@ -987,7 +1027,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+              ),
               expects: deepinfraAuthExpectations,
               customVerify: (call) => {
                 // Verify that the pricing configuration is correctly applied
@@ -1010,7 +1052,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+              ),
               expects: deepinfraAuthExpectations,
               customVerify: (call) => {
                 // Verify that the rate limits are correctly applied
@@ -1035,7 +1079,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: novitaAuthExpectations,
               customVerify: (call) => {
                 // Verify that the URL is correctly constructed
@@ -1057,7 +1103,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: novitaAuthExpectations,
             },
           ],
@@ -1077,7 +1125,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["user", "Test"],
@@ -1132,7 +1182,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -1163,9 +1215,7 @@ describe("Meta Llama Registry Tests", () => {
         model: "llama-3.1-8b-instruct/novita",
         request: {
           body: {
-            messages: [
-              { role: "user", content: "Test context length" },
-            ],
+            messages: [{ role: "user", content: "Test context length" }],
             max_tokens: 16384, // Max completion tokens for this model
           },
         },
@@ -1175,7 +1225,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["max_tokens", "16384"],
@@ -1196,7 +1248,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: novitaAuthExpectations,
               customVerify: (call) => {
                 // Verify that the pricing configuration is correctly applied
@@ -1219,7 +1273,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: novitaAuthExpectations,
               customVerify: (call) => {
                 // Verify that the rate limits are correctly applied
@@ -1249,8 +1305,10 @@ describe("Meta Llama Registry Tests", () => {
             {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
-              model: "meta-llama/Meta-Llama-3-8B-Instruct",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+              model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: ["stream", "true"],
@@ -1281,8 +1339,10 @@ describe("Meta Llama Registry Tests", () => {
             {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
-              model: "meta-llama/Meta-Llama-3-8B-Instruct",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+              model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: [
@@ -1316,8 +1376,10 @@ describe("Meta Llama Registry Tests", () => {
             {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
-              model: "meta-llama/Meta-Llama-3-8B-Instruct",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3-8B-Instruct"),
+              model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 headers: {
@@ -1351,7 +1413,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: ["stream", "true"],
@@ -1383,7 +1447,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: [
@@ -1418,7 +1484,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
-              data: createOpenAIMockResponse("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"),
+              data: createOpenAIMockResponse(
+                "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 headers: {
@@ -1452,7 +1520,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["stream", "true"],
@@ -1484,7 +1554,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -1519,7 +1591,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 headers: {
@@ -1553,7 +1627,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["logit_bias", "1234", "5678", "temperature"],
@@ -1569,7 +1645,9 @@ describe("Meta Llama Registry Tests", () => {
         model: "llama-3.1-8b-instruct/novita",
         request: {
           body: {
-            messages: [{ role: "user", content: "Get the weather in New York" }],
+            messages: [
+              { role: "user", content: "Get the weather in New York" },
+            ],
             tools: [
               {
                 type: "function",
@@ -1600,7 +1678,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.1-8b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.1-8b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.1-8b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
