@@ -430,14 +430,14 @@ export const endpoints = {
     },
   },
   "llama-3.1-8b-instruct:novita": {
-    providerModelId: "meta-llama/llama-3.1-8b-instruct", // Source: https://novita.ai/models-console/model-detail/meta-llama-llama-3.1-8b-instruct
+    providerModelId: "meta-llama/llama-3.1-8b-instruct",
     provider: "novita",
     author: "meta-llama",
     pricing: [
       {
         threshold: 0,
-        input: 0.00000002, // $0.02/1M tokens - Source: https://novita.ai/models-console/model-detail/meta-llama-llama-3.1-8b-instruct
-        output: 0.00000005, // $0.05/1M tokens - Source: https://novita.ai/models-console/model-detail/meta-llama-llama-3.1-8b-instruct
+        input: 0.00000002,
+        output: 0.00000005,
       },
     ],
     quantization: "fp8",

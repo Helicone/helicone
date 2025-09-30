@@ -83,8 +83,8 @@ export const models = {
     author: "meta-llama",
     description:
       "Meta's latest class of models, Llama 3.1, launched with a variety of sizes and configurations. The 8B instruct-tuned version is particularly fast and efficient. It has demonstrated strong performance in human evaluations, outperforming several leading closed-source models.",
-    contextLength: 16_384, // Source: https://novita.ai/models-console/model-detail/meta-llama-llama-3.1-8b-instruct, https://openrouter.ai/meta-llama/llama-3.1-8b-instruct
-    maxOutputTokens: 16_384, // Source: https://novita.ai/models-console/model-detail/meta-llama-llama-3.1-8b-instruct
+    contextLength: 16_384,
+    maxOutputTokens: 16_384,
     created: "2024-07-23T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
