@@ -40,7 +40,7 @@ export const endpoints = {
       rpm: 10_000,
       tpm: 8_000_000,
     },
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -79,7 +79,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       global: {
         providerModelId: "gemini-2.5-flash",

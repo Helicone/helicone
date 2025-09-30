@@ -1,6 +1,11 @@
 import { ModelProviderName } from "./providers";
 import { ModelProviderConfigId, EndpointId, ModelName } from "./registry-types";
-import type { Endpoint, ModelProviderConfig, EndpointConfig, UserEndpointConfig } from "./types";
+import type {
+  Endpoint,
+  ModelProviderConfig,
+  EndpointConfig,
+  UserEndpointConfig,
+} from "./types";
 
 function mergeConfigs(
   modelProviderConfig: ModelProviderConfig,
@@ -78,7 +83,8 @@ export function buildIndexes(
   const modelToProviders: Map<ModelName, Set<ModelProviderName>> = new Map();
   const modelToEndpoints: Map<ModelName, Endpoint[]> = new Map();
   const modelToProviderData: Map<ModelName, ModelProviderEntry[]> = new Map();
-  const modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry> = new Map();
+  const modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry> =
+    new Map();
   const providerModelIdToConfig: Map<string, ModelProviderConfig> = new Map();
   const modelToArchivedEndpointConfigs: Map<string, ModelProviderConfig> = new Map();
 
@@ -125,7 +131,7 @@ export function buildIndexes(
       ptbEndpoints: [],
     };
     modelToProviderData.get(modelName)!.push(providerData);
-    
+
     // Also add to direct lookup map
     modelProviderToData.set(typedConfigKey, providerData);
 

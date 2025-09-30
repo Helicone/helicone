@@ -15,6 +15,8 @@ const vertexAuthExpectations = {
   headers: {
     Authorization: /^Bearer /,
   },
+  // Ensure Anthropic models on Vertex include the required anthropic_version field
+  bodyContains: ["anthropic_version", "vertex-2023-10-16"],
 };
 
 const bedrockAuthExpectations = {
