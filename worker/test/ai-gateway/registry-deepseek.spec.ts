@@ -668,7 +668,7 @@ describe("DeepSeek Registry Tests", () => {
               customVerify: (call) => {
                 // Verify that the URL is correctly constructed
                 // Base URL: https://api.novita.ai/
-                // Built URL: https://api.novita.ai/openai/chat/completions
+                // Built URL: https://api.novita.ai/openai/v1/chat/completions
               },
             },
           ],
