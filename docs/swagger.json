@@ -8381,6 +8381,13 @@
 						"type": "number",
 						"format": "double"
 					},
+					"quantization": {
+						"type": "string",
+						"enum": [
+							"fp4",
+							"fp8"
+						]
+					},
 					"responseFormat": {
 						"$ref": "#/components/schemas/ResponseFormat"
 					}
