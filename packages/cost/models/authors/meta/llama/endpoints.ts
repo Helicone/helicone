@@ -403,8 +403,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.00000002, // $0.02/1M tokens - DeepInfra pricing
-        output: 0.00000003, // $0.03/1M tokens - DeepInfra pricing
+        input: 0.00000002, // $0.02/1M tokens
+        output: 0.00000003, // $0.03/1M tokens
       },
     ],
     contextLength: 128_000,
