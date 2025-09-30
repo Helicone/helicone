@@ -2733,6 +2733,7 @@ const models: TsoaRoute.Models = {
             "endpointConfigs": {"ref":"Record_string.EndpointConfig_","required":true},
             "crossRegion": {"dataType":"boolean"},
             "priority": {"dataType":"double"},
+            "quantization": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["fp4"]},{"dataType":"enum","enums":["fp8"]}]},
             "responseFormat": {"ref":"ResponseFormat"},
         },
         "additionalProperties": false,
