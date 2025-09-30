@@ -1332,9 +1332,9 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
     "llama-3.1-8b-instruct:deepinfra": {
-      "context": 8000,
+      "context": 131072,
       "crossRegion": false,
-      "maxTokens": 8000,
+      "maxTokens": 131072,
       "modelId": "meta-llama/Meta-Llama-3.1-8B-Instruct",
       "parameters": [
         "frequency_penalty",
