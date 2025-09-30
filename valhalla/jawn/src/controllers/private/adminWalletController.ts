@@ -34,11 +34,13 @@ interface WalletState {
 }
 
 interface TableDataResponse {
-  data: any[];
-  total: number;
-  page: number;
   pageSize: number;
-  message?: string;
+  data: {
+    data: any[];
+    total: number;
+    page: number;
+    message?: string;
+  };
 }
 
 @Route("v1/admin/wallet")
@@ -147,7 +149,7 @@ export class AdminWalletController extends Controller {
           organization_id,
           SUM(cost) as total_cost
         FROM request_response_rmt
-        WHERE organization_id IN (${orgIds.map(() => "?").join(",")})
+        WHERE organization_id IN (${orgIds.map((orgId) => `'${orgId}'`).join(",")})
         GROUP BY organization_id
         `,
       orgIds
@@ -236,7 +238,18 @@ export class AdminWalletController extends Controller {
       }
 
       const walletState = await response.json();
-      return ok(walletState);
+
+      // Convert values from cents to dollars
+      const convertedWalletState: WalletState = {
+        balance: (walletState.balance || 0) / 100,
+        effectiveBalance: (walletState.effectiveBalance || 0) / 100,
+        totalCredits: (walletState.totalCredits || 0) / 100,
+        totalDebits: (walletState.totalDebits || 0) / 100,
+        totalEscrow: (walletState.totalEscrow || 0) / 100,
+        disallowList: walletState.disallowList || [],
+      };
+
+      return ok(convertedWalletState);
     } catch (error) {
       console.error("Error fetching wallet state:", error);
       return err(`Error fetching wallet state: ${error}`);
@@ -307,8 +320,20 @@ export class AdminWalletController extends Controller {
         return err(`Failed to fetch table data: ${errorText}`);
       }
 
-      const tableData = await response.json();
-      return ok(tableData);
+      const rawTableData = await response.json();
+
+      // Transform the response to match the expected frontend structure
+      const transformedResponse: TableDataResponse = {
+        pageSize: validatedPageSize,
+        data: {
+          data: rawTableData.data || [],
+          total: rawTableData.total || 0,
+          page: rawTableData.page || 0,
+          message: rawTableData.message
+        }
+      };
+
+      return ok(transformedResponse);
     } catch (error) {
       console.error("Error fetching table data:", error);
       return err(`Error fetching table data: ${error}`);

@@ -14434,11 +14434,8 @@ const models: TsoaRoute.Models = {
     "TableDataResponse": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"array","array":{"dataType":"any"},"required":true},
-            "total": {"dataType":"double","required":true},
-            "page": {"dataType":"double","required":true},
             "pageSize": {"dataType":"double","required":true},
-            "message": {"dataType":"string"},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string"},"page":{"dataType":"double","required":true},"total":{"dataType":"double","required":true},"data":{"dataType":"array","array":{"dataType":"any"},"required":true}},"required":true},
         },
         "additionalProperties": false,
     },

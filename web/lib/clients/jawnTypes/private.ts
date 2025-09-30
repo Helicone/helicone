@@ -15921,14 +15921,16 @@ Json: JsonObject;
     };
     "Result_WalletState.string_": components["schemas"]["ResultSuccess_WalletState_"] | components["schemas"]["ResultError_string_"];
     TableDataResponse: {
-      data: unknown[];
-      /** Format: double */
-      total: number;
-      /** Format: double */
-      page: number;
       /** Format: double */
       pageSize: number;
-      message?: string;
+      data: {
+        message?: string;
+        /** Format: double */
+        page: number;
+        /** Format: double */
+        total: number;
+        data: unknown[];
+      };
     };
     ResultSuccess_TableDataResponse_: {
       data: components["schemas"]["TableDataResponse"];

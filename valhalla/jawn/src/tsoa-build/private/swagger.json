@@ -47440,31 +47440,39 @@
 			},
 			"TableDataResponse": {
 				"properties": {
-					"data": {
-						"items": {},
-						"type": "array"
-					},
-					"total": {
-						"type": "number",
-						"format": "double"
-					},
-					"page": {
-						"type": "number",
-						"format": "double"
-					},
 					"pageSize": {
 						"type": "number",
 						"format": "double"
 					},
-					"message": {
-						"type": "string"
+					"data": {
+						"properties": {
+							"message": {
+								"type": "string"
+							},
+							"page": {
+								"type": "number",
+								"format": "double"
+							},
+							"total": {
+								"type": "number",
+								"format": "double"
+							},
+							"data": {
+								"items": {},
+								"type": "array"
+							}
+						},
+						"required": [
+							"page",
+							"total",
+							"data"
+						],
+						"type": "object"
 					}
 				},
 				"required": [
-					"data",
-					"total",
-					"page",
-					"pageSize"
+					"pageSize",
+					"data"
 				],
 				"type": "object",
 				"additionalProperties": false

@@ -483,20 +483,30 @@ export default function AdminWallet() {
                           </div>
                         ) : tableData ? (
                           <div>
-                            {tableData?.data?.data ? (
+                            {/* DEBUG: Show raw tableData structure */}
+                            <details className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded">
+                              <summary className="font-medium text-sm cursor-pointer text-slate-600 hover:text-slate-800">
+                                🔍 Debug: Raw API Response
+                              </summary>
+                              <pre className="mt-2 text-xs bg-white p-3 rounded border overflow-auto max-h-48 text-slate-700">
+                                {JSON.stringify(tableData, null, 2)}
+                              </pre>
+                            </details>
+
+                            {tableData?.data?.data?.message ? (
                               <div className="py-8 text-center">
                                 <p className="text-muted-foreground">
                                   {tableData?.data?.data?.message}
                                 </p>
                               </div>
-                            ) : tableData?.data ? (
+                            ) : tableData?.data?.data ? (
                               <div>
                                 <div className="mb-4 text-sm text-muted-foreground">
-                                  Total records: {tableData.data?.total} | Page:{" "}
-                                  {tableData.data?.page + 1} | Page size:{" "}
-                                  {tableData.pageSize}
+                                  Total records: {tableData.data?.data?.total} | Page:{" "}
+                                  {tableData.data?.data?.page + 1} | Page size:{" "}
+                                  {tableData.data?.pageSize}
                                 </div>
-                                {tableData.data.data.length > 0 ? (
+                                {tableData.data.data.data.length > 0 ? (
                                   <div className="overflow-hidden rounded-lg border">
                                     <pre className="max-h-96 overflow-auto bg-muted p-4 text-xs">
                                       {JSON.stringify(tableData.data, null, 2)}
@@ -509,7 +519,7 @@ export default function AdminWallet() {
                                     </p>
                                   </div>
                                 )}
-                                {tableData.data.total >
+                                {tableData.data.data.total >
                                   tableData.data.pageSize && (
                                   <div className="mt-4 flex justify-center gap-2">
                                     <Button
@@ -531,7 +541,7 @@ export default function AdminWallet() {
                                       disabled={
                                         (tablePage + 1) *
                                           tableData.data.pageSize >=
-                                        tableData.data.total
+                                        tableData.data.data.total
                                       }
                                     >
                                       Next
