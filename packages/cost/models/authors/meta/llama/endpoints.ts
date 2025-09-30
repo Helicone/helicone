@@ -461,6 +461,39 @@ export const endpoints = {
       "*": {}
     },
   },
+  "llama-3.1-8b-instruct:deepinfra": {
+    providerModelId: "meta-llama/Meta-Llama-3-8B-Instruct",
+    provider: "deepinfra",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00003, // $0.03 per 1M tokens - DeepInfra pricing from https://deepinfra.com/meta-llama/Meta-Llama-3-8B-Instruct
+        output: 0.00006, // $0.06 per 1M tokens - DeepInfra pricing from https://deepinfra.com/meta-llama/Meta-Llama-3-8B-Instruct
+      },
+    ],
+    contextLength: 8_000,
+    maxCompletionTokens: 8_000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+      "tool_choice",
+      "tools",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${LlamaModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

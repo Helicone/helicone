@@ -1331,6 +1331,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-3.1-8b-instruct:deepinfra": {
+      "context": 8000,
+      "crossRegion": false,
+      "maxTokens": 8000,
+      "modelId": "meta-llama/Meta-Llama-3-8B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-3.1-8b-instruct:novita": {
       "context": 16384,
       "crossRegion": false,
@@ -2963,6 +2989,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "meta/llama": [
     "deepinfra",
+    "deepinfra",
     "groq",
     "groq",
     "groq",
@@ -3637,8 +3664,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "meta/llama": {
     "deepinfra": [
       {
-        "input": 2e-8,
-        "output": 3e-8,
+        "input": 0.00003,
+        "output": 0.00006,
         "threshold": 0,
       },
     ],
@@ -4180,6 +4207,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "llama-3.1-8b-instruct",
       "providers": [
+        "deepinfra",
         "novita",
       ],
     },
@@ -4311,7 +4339,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 10,
+      "modelCount": 11,
       "provider": "deepinfra",
     },
     {
@@ -4404,8 +4432,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 122,
-  "totalModelProviderConfigs": 122,
+  "totalEndpoints": 123,
+  "totalModelProviderConfigs": 123,
   "totalModelsWithPtb": 46,
   "totalProviders": 12,
 }
