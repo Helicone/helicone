@@ -21,6 +21,12 @@ const deepinfraAuthExpectations = {
   },
 };
 
+const novitaAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("DeepSeek Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -142,6 +148,42 @@ describe("DeepSeek Registry Tests", () => {
                 model: "deepseek-ai/DeepSeek-V3.1-Terminus",
                 data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
                 expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-v3.2", () => {
+      it("should handle novita provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3.2/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.2-exp",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select novita provider when none specified", () =>
+        runGatewayTest({
+          model: "deepseek-v3.2",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.2-exp",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
+                expects: novitaAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -435,6 +477,56 @@ describe("DeepSeek Registry Tests", () => {
       }));
   });
 
+  describe("Error scenarios - Novita Provider with DeepSeek V3.2", () => {
+    it("should handle Novita provider failure", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Novita service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Novita", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Novita", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+  });
+
   describe("Provider URL validation and model mapping", () => {
     it("should construct correct DeepInfra URL for DeepSeek V3", () =>
       runGatewayTest({
@@ -554,6 +646,68 @@ describe("DeepSeek Registry Tests", () => {
               data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
               expects: {
                 ...deepinfraAuthExpectations,
+                bodyContains: ["user", "Test"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should construct correct Novita URL for DeepSeek V3.2", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "deepseek/deepseek-v3.2-exp",
+              data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
+              expects: novitaAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://api.novita.ai/
+                // Built URL: https://api.novita.ai/openai/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for Novita", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "deepseek/deepseek-v3.2-exp", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
+              expects: novitaAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for Novita", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/novita",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "deepseek/deepseek-v3.2-exp",
+              data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
+              expects: {
+                ...novitaAuthExpectations,
                 bodyContains: ["user", "Test"],
               },
             },

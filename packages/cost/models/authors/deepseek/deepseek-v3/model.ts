@@ -7,7 +7,7 @@ export const models = {
     description:
       "DeepSeek-V3.1 (deepseek-chat) is a powerful generalist model with 671B parameters, offering exceptional performance at an economical price. It achieves strong results on mathematical reasoning, coding, and general language tasks. The model supports 128K context length with a default output of 4K tokens (max 8K) and features advanced capabilities like function calling and JSON output.",
     contextLength: 128_000,
-    maxOutputTokens: 8_192,  // Maximum (default 4K)
+    maxOutputTokens: 8_192, // Maximum (default 4K)
     created: "2024-12-26T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "DeepSeek",
@@ -22,6 +22,17 @@ export const models = {
     created: "2025-09-22T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "DeepSeek",
+  },
+  "deepseek-v3.2": {
+    name: "DeepSeek-V3.2",
+    author: "deepseek",
+    description:
+      "DeepSeek-V3.2-Exp is an experimental model introducing the groundbreaking DeepSeek Sparse Attention (DSA) mechanism for enhanced long-context processing efficiency. Built on V3.1-Terminus, DSA achieves fine-grained sparse attention while maintaining identical output quality. This delivers substantial computational efficiency improvements without compromising accuracy. Comprehensive benchmarks confirm V3.2-Exp matches V3.1-Terminus performance, proving efficiency gains don't sacrifice capability. As both a powerful tool and research platform, it establishes new paradigms for efficient long-context AI processing.",
+    contextLength: 163_840,
+    maxOutputTokens: 65_536,
+    created: "2025-09-22T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "DeepSeek"
   },
 } satisfies Record<string, ModelConfig>;
 

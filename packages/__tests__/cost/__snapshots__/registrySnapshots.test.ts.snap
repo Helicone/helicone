@@ -797,6 +797,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-v3.2:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek/deepseek-v3.2-exp",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3:deepinfra": {
       "context": 128000,
       "crossRegion": false,
@@ -2856,6 +2882,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "deepinfra",
     "deepseek",
+    "novita",
     "openrouter",
   ],
   "deepseek/r1-distill": [
@@ -3372,6 +3399,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 5.6e-7,
         "output": 0.00000168,
+        "threshold": 0,
+      },
+    ],
+    "novita": [
+      {
+        "input": 2.7e-7,
+        "output": 4.1e-7,
         "threshold": 0,
       },
     ],
@@ -3903,6 +3937,12 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "deepseek-v3.2",
+      "providers": [
+        "novita",
+      ],
+    },
+    {
       "model": "gemini-2.5-flash",
       "providers": [
         "google-ai-studio",
@@ -4209,6 +4249,10 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "groq",
     },
     {
+      "modelCount": 1,
+      "provider": "novita",
+    },
+    {
       "modelCount": 14,
       "provider": "openai",
     },
@@ -4281,9 +4325,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 119,
-  "totalModelProviderConfigs": 119,
+  "totalEndpoints": 120,
+  "totalModelProviderConfigs": 120,
   "totalModelsWithPtb": 45,
-  "totalProviders": 11,
+  "totalProviders": 12,
 }
 `;
