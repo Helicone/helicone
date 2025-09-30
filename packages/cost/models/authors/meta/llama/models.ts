@@ -78,6 +78,17 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
+  "llama-3.1-8b-instruct": {
+    name: "Meta Llama 3.1 8B Instruct",
+    author: "meta-llama",
+    description:
+      "The Meta Llama 3.1 collection of multilingual large language models (LLMs) is a collection of pretrained and instruction tuned generative models in 8B, 70B and 405B sizes (text in/text out). The Llama 3.1 instruction tuned text only models (8B, 70B, 405B) are optimized for multilingual dialogue use cases and outperform many of the available open source and closed chat models on common industry benchmarks.",
+    contextLength: 128_000,
+    maxOutputTokens: 128_000,
+    created: "2024-07-23T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type LlamaModelName = keyof typeof models;
