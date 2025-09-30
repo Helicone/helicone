@@ -3042,6 +3042,8 @@ Json: JsonObject;
       crossRegion?: boolean;
       /** Format: double */
       priority?: number;
+      /** @enum {string} */
+      quantization?: "fp4" | "fp8";
       responseFormat?: components["schemas"]["ResponseFormat"];
     };
     UserEndpointConfig: {

@@ -8809,7 +8809,6 @@
 			"SettingName": {
 				"type": "string",
 				"enum": [
-					"stripe:products",
 					"kafka:dlq",
 					"kafka:log",
 					"kafka:score",
@@ -8825,7 +8824,8 @@
 					"sqs:request-response-logs",
 					"sqs:helicone-scores",
 					"sqs:request-response-logs-dlq",
-					"sqs:helicone-scores-dlq"
+					"sqs:helicone-scores-dlq",
+					"stripe:products"
 				],
 				"nullable": false
 			},
@@ -47239,6 +47239,266 @@
 					}
 				]
 			},
+			"ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"isProduction": {
+								"type": "boolean"
+							},
+							"summary": {
+								"properties": {
+									"totalCreditsSpent": {
+										"type": "number",
+										"format": "double"
+									},
+									"totalCreditsIssued": {
+										"type": "number",
+										"format": "double"
+									},
+									"totalOrgsWithCredits": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"totalCreditsSpent",
+									"totalCreditsIssued",
+									"totalOrgsWithCredits"
+								],
+								"type": "object"
+							},
+							"organizations": {
+								"items": {
+									"properties": {
+										"ownerEmail": {
+											"type": "string"
+										},
+										"tier": {
+											"type": "string"
+										},
+										"lastPaymentDate": {
+											"type": "number",
+											"format": "double",
+											"nullable": true
+										},
+										"clickhouseTotalSpend": {
+											"type": "number",
+											"format": "double"
+										},
+										"paymentsCount": {
+											"type": "number",
+											"format": "double"
+										},
+										"totalPayments": {
+											"type": "number",
+											"format": "double"
+										},
+										"stripeCustomerId": {
+											"type": "string"
+										},
+										"orgName": {
+											"type": "string"
+										},
+										"orgId": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"ownerEmail",
+										"tier",
+										"lastPaymentDate",
+										"clickhouseTotalSpend",
+										"paymentsCount",
+										"totalPayments",
+										"stripeCustomerId",
+										"orgName",
+										"orgId"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"isProduction",
+							"summary",
+							"organizations"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"WalletState": {
+				"properties": {
+					"balance": {
+						"type": "number",
+						"format": "double"
+					},
+					"effectiveBalance": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalCredits": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalDebits": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalEscrow": {
+						"type": "number",
+						"format": "double"
+					},
+					"disallowList": {
+						"items": {
+							"properties": {
+								"model": {
+									"type": "string"
+								},
+								"provider": {
+									"type": "string"
+								},
+								"helicone_request_id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"model",
+								"provider",
+								"helicone_request_id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"balance",
+					"effectiveBalance",
+					"totalCredits",
+					"totalDebits",
+					"totalEscrow",
+					"disallowList"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_WalletState_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/WalletState"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_WalletState.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_WalletState_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TableDataResponse": {
+				"properties": {
+					"data": {
+						"items": {},
+						"type": "array"
+					},
+					"total": {
+						"type": "number",
+						"format": "double"
+					},
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"data",
+					"total",
+					"page",
+					"pageSize"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_TableDataResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/TableDataResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_TableDataResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_TableDataResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ConvertToWavResponse": {
 				"properties": {
 					"data": {
@@ -54277,39 +54537,6 @@
 				"parameters": []
 			}
 		},
-		"/v1/admin/gateway/dashboard_data": {
-			"post": {
-				"operationId": "GetGatewayDashboardData",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_unknown_"
-										}
-									]
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Admin"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
 		"/v1/admin/has-feature-flag": {
 			"post": {
 				"operationId": "HasFeatureFlag",
@@ -55912,6 +56139,67 @@
 				}
 			}
 		},
+		"/v1/admin/helix-thread/{sessionId}": {
+			"get": {
+				"operationId": "GetHelixThread",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_InAppThread.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/gateway/dashboard_data": {
+			"post": {
+				"operationId": "GetGatewayDashboardData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/admin/wallet/{orgId}": {
 			"post": {
 				"operationId": "GetWalletDetails",
@@ -55921,21 +56209,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_any_"
-										}
-									]
+									"$ref": "#/components/schemas/Result_WalletState.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Admin"
+					"Admin Wallet"
 				],
 				"security": [
 					{
@@ -55963,21 +56244,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_any_"
-										}
-									]
+									"$ref": "#/components/schemas/Result_TableDataResponse.string_"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Admin"
+					"Admin Wallet"
 				],
 				"security": [
 					{
@@ -56017,41 +56291,6 @@
 						"schema": {
 							"format": "double",
 							"type": "number"
-						}
-					}
-				]
-			}
-		},
-		"/v1/admin/helix-thread/{sessionId}": {
-			"get": {
-				"operationId": "GetHelixThread",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_InAppThread.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Admin"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "sessionId",
-						"required": true,
-						"schema": {
-							"type": "string"
 						}
 					}
 				]

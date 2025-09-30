@@ -1,6 +1,10 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  calculateNetAmount,
+  dollarsToCents,
+} from "@helicone-package/common/stripe/feeCalculator";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useJawnClient } from "@/lib/clients/jawnHook";
+import { $JAWN_API } from "@/lib/clients/jawn";
 import {
   Loader2,
   Search,
@@ -29,54 +33,12 @@ import {
 } from "lucide-react";
 import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
 
-const formatCurrency = (amount: number) => {
+const formatCurrency = (amount: number | undefined) => {
+  if (amount === undefined) return "UNDEFINED";
   return remoteFormatCurrency(amount, "USD", 6);
 };
 
-interface DashboardData {
-  organizations: Array<{
-    orgId: string;
-    orgName: string;
-    stripeCustomerId: string;
-    totalPayments: number;
-    clickhouseTotalSpend: number;
-    lastPaymentDate: string;
-    tier: string;
-    ownerEmail: string;
-  }>;
-  summary: {
-    totalOrgsWithCredits: number;
-    totalCreditsIssued: number;
-    totalCreditsSpent: number;
-  };
-  isProduction: boolean;
-}
-
-interface WalletState {
-  balance: number;
-  effectiveBalance: number;
-  totalEscrow: number;
-  totalDebits: number;
-  totalCredits: number;
-  disallowList: Array<{
-    helicone_request_id: string;
-    provider: string;
-    model: string;
-  }>;
-}
-
-interface TableData {
-  tableName: string;
-  orgId: string;
-  page: number;
-  pageSize: number;
-  data: any[];
-  total: number;
-  message?: string;
-}
-
 export default function AdminWallet() {
-  const jawn = useJawnClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const [walletDetailsOpen, setWalletDetailsOpen] = useState(false);
@@ -84,73 +46,50 @@ export default function AdminWallet() {
   const [tablePage, setTablePage] = useState(0);
 
   // Fetch dashboard data
-  const {
-    data: dashboardData,
-    isLoading: dashboardLoading,
-    error: dashboardError,
-  } = useQuery<DashboardData>({
-    queryKey: ["admin-wallet-dashboard"],
-    queryFn: async () => {
-      const response = (await jawn.POST(
-        "/v1/admin/gateway/dashboard_data",
-        {},
-      )) as any;
-      if (response.error || !response.data) {
-        throw new Error(
-          `Failed to fetch dashboard data: ${response.error || "No data"}`,
-        );
-      }
-      // The jawn client returns {data: actualData, error: null}, so we need response.data.data
-      const actualData = response.data.data || response.data;
-      return actualData as DashboardData;
-    },
-  });
+  const { data: dashboardData, isLoading: dashboardLoading } =
+    $JAWN_API.useQuery("post", "/v1/admin/wallet/gateway/dashboard_data", {});
+
+  const dashboardError = dashboardData?.error;
 
   // Fetch wallet details (lazy loaded when org is selected)
-  const { data: walletDetails, isLoading: walletLoading } =
-    useQuery<WalletState>({
-      queryKey: ["admin-wallet-details", selectedOrg],
-      queryFn: async () => {
-        if (!selectedOrg) throw new Error("No org selected");
-        const response = await (jawn as any).POST(
-          `/v1/admin/wallet/${selectedOrg}`,
-          {},
-        );
-        if (response.error || !response.data) {
-          throw new Error(
-            `Failed to fetch wallet details: ${response.error || "No data"}`,
-          );
-        }
-        // Handle nested data structure like dashboard endpoint
-        const actualWalletData = (response.data as any).data || response.data;
-        return actualWalletData as WalletState;
+  const { data: walletDetails, isLoading: walletLoading } = $JAWN_API.useQuery(
+    "post",
+    "/v1/admin/wallet/{orgId}",
+    {
+      params: {
+        path: {
+          orgId: selectedOrg || "",
+        },
       },
+    },
+    {
       enabled: !!selectedOrg && walletDetailsOpen,
-    });
+    },
+  );
 
   // Fetch table data (lazy loaded when table is selected)
-  const { data: tableData, isLoading: tableLoading } = useQuery<TableData>({
-    queryKey: ["admin-wallet-table", selectedOrg, selectedTable, tablePage],
-    queryFn: async () => {
-      if (!selectedOrg || !selectedTable)
-        throw new Error("No org or table selected");
-      const response = await (jawn as any).POST(
-        `/v1/admin/wallet/${selectedOrg}/tables/${selectedTable}?page=${tablePage}&pageSize=50`,
-        {},
-      );
-      if (response.error || !response.data) {
-        throw new Error(
-          `Failed to fetch table data: ${response.error || "No data"}`,
-        );
-      }
-      const actualTableData = (response.data as any).data || response.data;
-      return actualTableData as TableData;
+  const { data: tableData, isLoading: tableLoading } = $JAWN_API.useQuery(
+    "post",
+    "/v1/admin/wallet/{orgId}/tables/{tableName}",
+    {
+      params: {
+        path: {
+          orgId: selectedOrg || "",
+          tableName: selectedTable || "",
+        },
+        query: {
+          page: tablePage,
+          pageSize: 50,
+        },
+      },
     },
-    enabled: !!selectedOrg && !!selectedTable && walletDetailsOpen,
-  });
+    {
+      enabled: !!selectedOrg && !!selectedTable && walletDetailsOpen,
+    },
+  );
 
   const filteredOrgs =
-    dashboardData?.organizations?.filter(
+    dashboardData?.data?.organizations?.filter(
       (org) =>
         org.orgName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         org.orgId.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -187,9 +126,7 @@ export default function AdminWallet() {
         <div className="text-center">
           <AlertCircle className="mx-auto mb-2 h-8 w-8 text-red-500" />
           <p className="text-red-600">Error loading dashboard data</p>
-          <p className="text-sm text-muted-foreground">
-            {dashboardError.message}
-          </p>
+          <p className="text-sm text-muted-foreground">{dashboardError}</p>
         </div>
       </div>
     );
@@ -208,7 +145,7 @@ export default function AdminWallet() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {dashboardData?.summary?.totalOrgsWithCredits || 0}
+              {dashboardData?.data?.summary?.totalOrgsWithCredits || 0}
             </div>
           </CardContent>
         </Card>
@@ -221,7 +158,9 @@ export default function AdminWallet() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(dashboardData?.summary?.totalCreditsIssued || 0)}
+              {formatCurrency(
+                dashboardData?.data?.summary?.totalCreditsIssued || 0,
+              )}
             </div>
           </CardContent>
         </Card>
@@ -234,7 +173,9 @@ export default function AdminWallet() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(dashboardData?.summary?.totalCreditsSpent || 0)}
+              {formatCurrency(
+                dashboardData?.data?.summary?.totalCreditsSpent || 0,
+              )}
             </div>
           </CardContent>
         </Card>
@@ -264,7 +205,9 @@ export default function AdminWallet() {
                   <TableHead>Organization</TableHead>
                   <TableHead>Owner</TableHead>
                   <TableHead>Tier</TableHead>
-                  <TableHead>Total Payments</TableHead>
+                  <TableHead># Payments</TableHead>
+                  <TableHead>Total Gross</TableHead>
+                  <TableHead>Total Net</TableHead>
                   <TableHead>Total Spent (ClickHouse)</TableHead>
                   <TableHead>Balance</TableHead>
                   <TableHead>Last Payment</TableHead>
@@ -273,7 +216,15 @@ export default function AdminWallet() {
               </TableHeader>
               <TableBody>
                 {filteredOrgs?.map((org) => {
-                  const balance = org.totalPayments - org.clickhouseTotalSpend;
+                  // Calculate net amount after removing Stripe fees
+                  const totalGrossCents = dollarsToCents(org.totalPayments);
+                  const totalNetCents = calculateNetAmount(
+                    totalGrossCents,
+                    org.paymentsCount || 1,
+                  );
+                  const totalNetDollars = totalNetCents / 100;
+
+                  const balance = totalNetDollars - org.clickhouseTotalSpend;
                   const isNegativeBalance = balance < 0;
 
                   return (
@@ -296,7 +247,23 @@ export default function AdminWallet() {
                           {org.tier}
                         </span>
                       </TableCell>
-                      <TableCell>{formatCurrency(org.totalPayments)}</TableCell>
+                      <TableCell>{org.paymentsCount || 0}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span>{formatCurrency(org.totalPayments)}</span>
+                          <span className="text-xs text-muted-foreground">
+                            (with fees)
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span>{formatCurrency(totalNetDollars)}</span>
+                          <span className="text-xs text-muted-foreground">
+                            (after fees)
+                          </span>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         {formatCurrency(org.clickhouseTotalSpend)}
                       </TableCell>
@@ -328,7 +295,8 @@ export default function AdminWallet() {
                               size="sm"
                               variant="outline"
                               onClick={() => {
-                                const stripeUrl = dashboardData?.isProduction
+                                const stripeUrl = dashboardData?.data
+                                  ?.isProduction
                                   ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
                                   : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
                                 window.open(stripeUrl, "_blank");
@@ -377,7 +345,7 @@ export default function AdminWallet() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {formatCurrency(walletDetails.balance)}
+                        {formatCurrency(walletDetails?.data?.balance)}
                       </div>
                     </CardContent>
                   </Card>
@@ -389,7 +357,7 @@ export default function AdminWallet() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {formatCurrency(walletDetails.effectiveBalance)}
+                        {formatCurrency(walletDetails?.data?.effectiveBalance)}
                       </div>
                     </CardContent>
                   </Card>
@@ -399,7 +367,7 @@ export default function AdminWallet() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {formatCurrency(walletDetails.totalCredits)}
+                        {formatCurrency(walletDetails?.data?.totalCredits)}
                       </div>
                     </CardContent>
                   </Card>
@@ -409,7 +377,7 @@ export default function AdminWallet() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {formatCurrency(walletDetails.totalDebits)}
+                        {formatCurrency(walletDetails.data?.totalDebits)}
                       </div>
                     </CardContent>
                   </Card>
@@ -423,7 +391,7 @@ export default function AdminWallet() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-xl font-bold">
-                      {formatCurrency(walletDetails.totalEscrow)}
+                      {formatCurrency(walletDetails.data?.totalEscrow)}
                     </div>
                   </CardContent>
                 </Card>
@@ -435,7 +403,7 @@ export default function AdminWallet() {
                     <CardTitle>Disallow List</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {walletDetails?.disallowList?.length > 0 ? (
+                    {(walletDetails?.data?.disallowList?.length ?? 0) > 0 ? (
                       <Table>
                         <TableHeader>
                           <TableRow>
@@ -445,15 +413,17 @@ export default function AdminWallet() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {walletDetails?.disallowList?.map((entry, idx) => (
-                            <TableRow key={idx}>
-                              <TableCell className="font-mono text-sm">
-                                {entry.helicone_request_id}
-                              </TableCell>
-                              <TableCell>{entry.provider}</TableCell>
-                              <TableCell>{entry.model}</TableCell>
-                            </TableRow>
-                          ))}
+                          {walletDetails?.data?.disallowList?.map(
+                            (entry, idx) => (
+                              <TableRow key={idx}>
+                                <TableCell className="font-mono text-sm">
+                                  {entry.helicone_request_id}
+                                </TableCell>
+                                <TableCell>{entry.provider}</TableCell>
+                                <TableCell>{entry.model}</TableCell>
+                              </TableRow>
+                            ),
+                          )}
                         </TableBody>
                       </Table>
                     ) : (
@@ -513,20 +483,20 @@ export default function AdminWallet() {
                           </div>
                         ) : tableData ? (
                           <div>
-                            {tableData.message ? (
+                            {tableData?.data?.data ? (
                               <div className="py-8 text-center">
                                 <p className="text-muted-foreground">
-                                  {tableData.message}
+                                  {tableData?.data?.data?.message}
                                 </p>
                               </div>
-                            ) : (
+                            ) : tableData?.data ? (
                               <div>
                                 <div className="mb-4 text-sm text-muted-foreground">
-                                  Total records: {tableData.total} | Page:{" "}
-                                  {tableData.page + 1} | Page size:{" "}
+                                  Total records: {tableData.data?.total} | Page:{" "}
+                                  {tableData.data?.page + 1} | Page size:{" "}
                                   {tableData.pageSize}
                                 </div>
-                                {tableData.data.length > 0 ? (
+                                {tableData.data.data.length > 0 ? (
                                   <div className="overflow-hidden rounded-lg border">
                                     <pre className="max-h-96 overflow-auto bg-muted p-4 text-xs">
                                       {JSON.stringify(tableData.data, null, 2)}
@@ -539,7 +509,8 @@ export default function AdminWallet() {
                                     </p>
                                   </div>
                                 )}
-                                {tableData.total > tableData.pageSize && (
+                                {tableData.data.total >
+                                  tableData.data.pageSize && (
                                   <div className="mt-4 flex justify-center gap-2">
                                     <Button
                                       variant="outline"
@@ -558,8 +529,9 @@ export default function AdminWallet() {
                                         setTablePage(tablePage + 1)
                                       }
                                       disabled={
-                                        (tablePage + 1) * tableData.pageSize >=
-                                        tableData.total
+                                        (tablePage + 1) *
+                                          tableData.data.pageSize >=
+                                        tableData.data.total
                                       }
                                     >
                                       Next
@@ -567,6 +539,8 @@ export default function AdminWallet() {
                                   </div>
                                 )}
                               </div>
+                            ) : (
+                              <div>No</div>
                             )}
                           </div>
                         ) : (

@@ -454,9 +454,6 @@ export interface paths {
   "/v1/alert-banner": {
     get: operations["GetAlertBanners"];
   };
-  "/v1/admin/gateway/dashboard_data": {
-    post: operations["GetGatewayDashboardData"];
-  };
   "/v1/admin/has-feature-flag": {
     post: operations["HasFeatureFlag"];
   };
@@ -522,14 +519,17 @@ export interface paths {
     /** @description Backfill costs in Clickhouse with updated cost package data. */
     post: operations["BackfillCosts"];
   };
+  "/v1/admin/helix-thread/{sessionId}": {
+    get: operations["GetHelixThread"];
+  };
+  "/v1/admin/wallet/gateway/dashboard_data": {
+    post: operations["GetGatewayDashboardData"];
+  };
   "/v1/admin/wallet/{orgId}": {
     post: operations["GetWalletDetails"];
   };
   "/v1/admin/wallet/{orgId}/tables/{tableName}": {
     post: operations["GetWalletTableData"];
-  };
-  "/v1/admin/helix-thread/{sessionId}": {
-    get: operations["GetHelixThread"];
   };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
@@ -3174,7 +3174,7 @@ Json: JsonObject;
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
     /** @enum {string} */
-    SettingName: "stripe:products" | "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq" | "stripe:products";
     /**
      * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
      *
@@ -15866,6 +15866,76 @@ Json: JsonObject;
       error: null;
     };
     "Result_InAppThread.string_": components["schemas"]["ResultSuccess_InAppThread_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__": {
+      data: {
+        isProduction: boolean;
+        summary: {
+          /** Format: double */
+          totalCreditsSpent: number;
+          /** Format: double */
+          totalCreditsIssued: number;
+          /** Format: double */
+          totalOrgsWithCredits: number;
+        };
+        organizations: ({
+            ownerEmail: string;
+            tier: string;
+            /** Format: double */
+            lastPaymentDate: number | null;
+            /** Format: double */
+            clickhouseTotalSpend: number;
+            /** Format: double */
+            paymentsCount: number;
+            /** Format: double */
+            totalPayments: number;
+            stripeCustomerId: string;
+            orgName: string;
+            orgId: string;
+          })[];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_": components["schemas"]["ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__"] | components["schemas"]["ResultError_string_"];
+    WalletState: {
+      /** Format: double */
+      balance: number;
+      /** Format: double */
+      effectiveBalance: number;
+      /** Format: double */
+      totalCredits: number;
+      /** Format: double */
+      totalDebits: number;
+      /** Format: double */
+      totalEscrow: number;
+      disallowList: {
+          model: string;
+          provider: string;
+          helicone_request_id: string;
+        }[];
+    };
+    ResultSuccess_WalletState_: {
+      data: components["schemas"]["WalletState"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_WalletState.string_": components["schemas"]["ResultSuccess_WalletState_"] | components["schemas"]["ResultError_string_"];
+    TableDataResponse: {
+      data: unknown[];
+      /** Format: double */
+      total: number;
+      /** Format: double */
+      page: number;
+      /** Format: double */
+      pageSize: number;
+      message?: string;
+    };
+    ResultSuccess_TableDataResponse_: {
+      data: components["schemas"]["TableDataResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TableDataResponse.string_": components["schemas"]["ResultSuccess_TableDataResponse_"] | components["schemas"]["ResultError_string_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -18589,16 +18659,6 @@ export interface operations {
       };
     };
   };
-  GetGatewayDashboardData: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_unknown_"];
-        };
-      };
-    };
-  };
   HasFeatureFlag: {
     requestBody: {
       content: {
@@ -19109,6 +19169,31 @@ export interface operations {
       };
     };
   };
+  GetHelixThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  GetGatewayDashboardData: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_"];
+        };
+      };
+    };
+  };
   GetWalletDetails: {
     parameters: {
       path: {
@@ -19119,7 +19204,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
+          "application/json": components["schemas"]["Result_WalletState.string_"];
         };
       };
     };
@@ -19139,22 +19224,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
-        };
-      };
-    };
-  };
-  GetHelixThread: {
-    parameters: {
-      path: {
-        sessionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_InAppThread.string_"];
+          "application/json": components["schemas"]["Result_TableDataResponse.string_"];
         };
       };
     };
