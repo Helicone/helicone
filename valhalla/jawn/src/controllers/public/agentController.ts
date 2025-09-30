@@ -94,7 +94,7 @@ export class AgentController extends Controller {
               frequency_penalty: params.frequency_penalty,
               presence_penalty: params.presence_penalty,
               stop: params.stop,
-              stream: params.stream !== undefined ? (params.stream as false) : false,
+              stream: Boolean(params.stream),
               response_format: params.response_format,
               tools: params.tools,
               reasoning_effort: params.reasoning_effort,
