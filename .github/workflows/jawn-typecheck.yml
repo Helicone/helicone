@@ -1,0 +1,38 @@
+name: Jawn TypeScript Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "valhalla/jawn/**"
+      - "packages/**"
+      - ".github/workflows/jawn-typecheck.yml"
+
+jobs:
+  jawn-typecheck:
+    name: Jawn TypeScript Compilation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: valhalla/jawn
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: .
+
+      - name: Run TypeScript compiler
+        run: yarn tsc
+        working-directory: valhalla/jawn

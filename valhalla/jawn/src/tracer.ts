@@ -5,10 +5,10 @@ tracer.init({
     http: {
       enabled: true,
       hooks: {
-        request: (span, req) => {
+        request: (span: any, req: any) => {
           span.setTag('http.request.size', parseInt(req.headers['content-length'] as string) || 0);
         },
-        response: (span, res) => {
+        response: (span: any, res: any) => {
           span.setTag('http.response.size', parseInt(res.headers['content-length'] as string) || 0);
         }
       }
@@ -16,14 +16,14 @@ tracer.init({
     https: {
       enabled: true,
       hooks: {
-        request: (span, req) => {
+        request: (span: any, req: any) => {
           span.setTag('http.request.size', parseInt(req.headers['content-length'] as string) || 0);
         },
-        response: (span, res) => {
+        response: (span: any, res: any) => {
           span.setTag('http.response.size', parseInt(res.headers['content-length'] as string) || 0);
         }
       }
     }
-  }
+  } as any
 }); // Enhanced for Universal Service Monitoring + size tracking
 export default tracer;

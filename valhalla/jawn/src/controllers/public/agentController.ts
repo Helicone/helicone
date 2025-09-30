@@ -87,14 +87,14 @@ export class AgentController extends Controller {
           const response = await openai.chat.completions.create(
             {
               model: params.model,
-              messages: params.messages,
+              messages: params.messages!,
               temperature: params.temperature,
               max_tokens: params.max_tokens,
               top_p: params.top_p,
               frequency_penalty: params.frequency_penalty,
               presence_penalty: params.presence_penalty,
               stop: params.stop,
-              stream: params.stream !== undefined,
+              stream: params.stream !== undefined ? (params.stream as false) : false,
               response_format: params.response_format,
               tools: params.tools,
               reasoning_effort: params.reasoning_effort,
@@ -105,7 +105,7 @@ export class AgentController extends Controller {
               prompt_id: bodyParams.prompt_id ?? PROMPT_ID,
               environment: bodyParams.environment,
               inputs: bodyParams.inputs,
-            } as HeliconeChatCreateParams,
+            } as any,
             {
               signal: abortController.signal,
             }
