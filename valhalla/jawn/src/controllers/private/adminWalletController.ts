@@ -246,6 +246,9 @@ export class AdminWalletController extends Controller {
 
     try {
       // Use the admin endpoint that can query any org's wallet
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
       const response = await fetch(
         `${workerApiUrl}/admin/wallet/${orgId}/state`,
         {
@@ -253,8 +256,11 @@ export class AdminWalletController extends Controller {
           headers: {
             Authorization: `Bearer ${adminAccessKey}`,
           },
+          signal: controller.signal,
         }
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -276,6 +282,21 @@ export class AdminWalletController extends Controller {
       return ok(convertedWalletState);
     } catch (error) {
       console.error("Error fetching wallet state:", error);
+
+      // Fallback for local development when Durable Objects don't work
+      if (ENVIRONMENT !== "production") {
+        console.warn("Using fallback wallet state for local development");
+        const fallbackState: WalletState = {
+          balance: 0,
+          effectiveBalance: 0,
+          totalCredits: 0,
+          totalDebits: 0,
+          totalEscrow: 0,
+          disallowList: [],
+        };
+        return ok(fallbackState);
+      }
+
       return err(`Error fetching wallet state: ${error}`);
     }
   }
@@ -324,6 +345,9 @@ export class AdminWalletController extends Controller {
       if (page !== undefined) params.set("page", page.toString());
       if (pageSize !== undefined) params.set("pageSize", pageSize.toString());
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
       // Use the admin endpoint that can query any org's table data
       const response = await fetch(
         `${workerApiUrl}/admin/wallet/${orgId}/tables/${tableName}?${params.toString()}`,
@@ -332,8 +356,11 @@ export class AdminWalletController extends Controller {
           headers: {
             Authorization: `Bearer ${adminAccessKey}`,
           },
+          signal: controller.signal,
         }
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -356,6 +383,22 @@ export class AdminWalletController extends Controller {
       return ok(transformedResponse);
     } catch (error) {
       console.error("Error fetching table data:", error);
+
+      // Fallback for local development when Durable Objects don't work
+      if (ENVIRONMENT !== "production") {
+        console.warn("Using fallback table data for local development");
+        const fallbackResponse: TableDataResponse = {
+          pageSize: validatedPageSize,
+          data: {
+            data: [],
+            total: 0,
+            page: validatedPage,
+            message: "No data available (local development mode)"
+          }
+        };
+        return ok(fallbackResponse);
+      }
+
       return err(`Error fetching table data: ${error}`);
     }
   }
@@ -401,6 +444,9 @@ export class AdminWalletController extends Controller {
       // Convert amount to cents for the API
       const amountInCents = Math.round(amount * 100);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
       // Call the worker API to modify the wallet balance
       const response = await fetch(
         `${workerApiUrl}/admin/wallet/${orgId}/modify-balance`,
@@ -417,8 +463,11 @@ export class AdminWalletController extends Controller {
             referenceId,
             adminUserId: request.authParams.userId,
           }),
+          signal: controller.signal,
         }
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -440,6 +489,13 @@ export class AdminWalletController extends Controller {
       return ok(convertedWalletState);
     } catch (error) {
       console.error("Error modifying wallet balance:", error);
+
+      // Fallback for local development when Durable Objects don't work
+      if (ENVIRONMENT !== "production") {
+        console.warn("Wallet modification not available in local development mode");
+        return err("Wallet modification is not available in local development mode. This feature requires production Durable Objects.");
+      }
+
       return err(`Error modifying wallet balance: ${error}`);
     }
   }
