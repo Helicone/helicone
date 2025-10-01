@@ -43,6 +43,7 @@ const formatCurrency = (amount: number | undefined) => {
 
 export default function AdminWallet() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [minSpend, setMinSpend] = useState<string>("");
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const [walletDetailsOpen, setWalletDetailsOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
@@ -85,7 +86,7 @@ export default function AdminWallet() {
   // Mutation for modifying wallet balance
   const modifyBalanceMutation = $JAWN_API.useMutation(
     "post",
-    "/v1/admin/wallet/{orgId}/modify-balance"
+    "/v1/admin/wallet/{orgId}/modify-balance",
   );
 
   // Fetch table data (lazy loaded when table is selected)
@@ -110,15 +111,23 @@ export default function AdminWallet() {
   );
 
   const filteredOrgs =
-    dashboardData?.data?.organizations?.filter(
-      (org) =>
+    dashboardData?.data?.organizations?.filter((org) => {
+      // Text search filter
+      const matchesSearch =
         org.orgName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         org.orgId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         org.stripeCustomerId
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        org.ownerEmail?.toLowerCase().includes(searchTerm.toLowerCase()),
-    ) || [];
+        org.ownerEmail?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Minimum spend filter
+      const minSpendValue = parseFloat(minSpend);
+      const matchesSpend =
+        !minSpend || isNaN(minSpendValue) || org.clickhouseTotalSpend >= minSpendValue;
+
+      return matchesSearch && matchesSpend;
+    }) || [];
 
   const handleOrgClick = (orgId: string) => {
     setSelectedOrg(orgId);
@@ -170,7 +179,7 @@ export default function AdminWallet() {
         setModifyError(result.error);
       } else {
         setModifySuccess(
-          `Successfully ${modifyType === "credit" ? "added" : "deducted"} ${formatCurrency(amount)}`
+          `Successfully ${modifyType === "credit" ? "added" : "deducted"} ${formatCurrency(amount)}`,
         );
         // Reset form
         setModifyAmount("");
@@ -180,7 +189,7 @@ export default function AdminWallet() {
       }
     } catch (error) {
       setModifyError(
-        error instanceof Error ? error.message : "Failed to modify balance"
+        error instanceof Error ? error.message : "Failed to modify balance",
       );
     } finally {
       setIsModifying(false);
@@ -262,14 +271,31 @@ export default function AdminWallet() {
           <CardTitle>Organizations with Pass-Through Billing</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex items-center space-x-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-md"
-            />
+          <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-center">
+            <div className="flex flex-1 items-center space-x-2">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-md"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="minSpend" className="whitespace-nowrap text-sm">
+                Min Spend:
+              </Label>
+              <Input
+                id="minSpend"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="e.g., 100.00"
+                value={minSpend}
+                onChange={(e) => setMinSpend(e.target.value)}
+                className="w-32"
+              />
+            </div>
           </div>
 
           {/* Organizations Table */}
@@ -284,7 +310,14 @@ export default function AdminWallet() {
                   <TableHead>Total Gross</TableHead>
                   <TableHead>Total Net</TableHead>
                   <TableHead>Total Spent (ClickHouse)</TableHead>
-                  <TableHead>Balance</TableHead>
+                  <TableHead>
+                    <div className="flex flex-col">
+                      <span>Balance</span>
+                      <span className="text-xs font-normal text-muted-foreground">
+                        (Net - Spent, not wallet)
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead>Last Payment</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
