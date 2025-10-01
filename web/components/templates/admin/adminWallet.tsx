@@ -85,7 +85,8 @@ export default function AdminWallet() {
   // Mutation for modifying wallet balance
   const modifyBalanceMutation = $JAWN_API.useMutation(
     "post",
-    "/v1/admin/wallet/{orgId}/modify-balance"
+    "/v1/admin/wallet/{orgId}/modify-balance",
+    {}
   );
 
   // Fetch table data (lazy loaded when table is selected)
