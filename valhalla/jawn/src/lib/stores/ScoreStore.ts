@@ -83,7 +83,7 @@ export class ScoreStore extends BaseStore {
           !acc[key] ||
           (row.updated_at &&
             (!acc[key].updated_at ||
-              new Date(row.updated_at) > new Date(acc[key].updated_at)))
+              new Date(row.updated_at) > new Date(acc[key].updated_at!)))
         ) {
           acc[key] = row;
         }

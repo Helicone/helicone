@@ -15,6 +15,7 @@ import {
 } from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { CacheProvider } from "../../../../packages/common/cache/provider";
+import { GatewayMetrics } from "./GatewayMetrics";
 
 export class AttemptExecutor {
   constructor(
@@ -32,7 +33,8 @@ export class AttemptExecutor {
     forwarder: (
       targetBaseUrl: string | null,
       escrowInfo?: EscrowInfo
-    ) => Promise<Response>
+    ) => Promise<Response>,
+    metrics: GatewayMetrics
   ): Promise<Result<Response, AttemptError>> {
     const { endpoint, providerKey } = attempt;
 
@@ -69,7 +71,8 @@ export class AttemptExecutor {
       requestWrapper,
       orgId,
       forwarder,
-      escrowInfo
+      escrowInfo,
+      metrics
     );
 
     // If error, cancel escrow and return the error
@@ -95,7 +98,8 @@ export class AttemptExecutor {
       targetBaseUrl: string | null,
       escrowInfo?: EscrowInfo
     ) => Promise<Response>,
-    escrowInfo: EscrowInfo | undefined
+    escrowInfo: EscrowInfo | undefined,
+    metrics: GatewayMetrics
   ): Promise<Result<Response, AttemptError>> {
     try {
       const bodyResult = await buildRequestBody(endpoint, {
@@ -161,7 +165,12 @@ export class AttemptExecutor {
         requestWrapper.setHeader(key, value);
       }
 
+      metrics.markPreRequestEnd();
+      metrics.markProviderStart();
+
       const response = await forwarder(urlResult.data, escrowInfo);
+
+      metrics.markProviderEnd(response.status);
 
       if (!response.ok) {
         const errorMessageResult = await buildErrorMessage(endpoint, response);

@@ -717,7 +717,7 @@ export class DBLoggable {
 
       gatewayProvider = provider as ModelProviderName;
       gatewayModel = model as string;
-      gatewayResponseFormat = endpoint.modelConfig.responseFormat;
+      gatewayResponseFormat = endpoint.modelConfig.responseFormat ?? "OPENAI";
       gatewayEndpointVersion = endpoint.modelConfig.version;
     }
     
