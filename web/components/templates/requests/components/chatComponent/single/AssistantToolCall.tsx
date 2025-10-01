@@ -174,7 +174,11 @@ export default function AssistantToolCall({
           language="json"
           className="rounded-none bg-white dark:bg-slate-950"
           setText={editPlaygroundToolCall}
-          text={tool.arguments}
+          text={
+            typeof tool.arguments === "string"
+              ? tool.arguments
+              : JSON.stringify(tool.arguments, null, 2)
+          }
         />
       )}
     </div>
