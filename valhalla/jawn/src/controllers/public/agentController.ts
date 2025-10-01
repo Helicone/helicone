@@ -87,7 +87,7 @@ export class AgentController extends Controller {
         try {
           const body = {
             model: params.model as string,
-            messages: params.messages as any, // TODO: type the params better
+            messages: params.messages || [],
             temperature: params.temperature,
             max_tokens: params.max_tokens,
             top_p: params.top_p,
