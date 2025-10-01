@@ -1,5 +1,5 @@
-import { AnthropicToOpenAIStreamConverter } from "../../providers/anthropic/streamedResponse/toOpenai";
-import { toAnthropic } from "../../providers/openai/request/toAnthropic";
+import { AnthropicToOpenAIStreamConverter } from "@helicone-package/llm-mapper/transform/providers/anthropic/streamedResponse/toOpenai";
+import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 
 // transform the readable stream from Anthropic SSE to OpenAI SSE format
@@ -55,33 +55,10 @@ function processBuffer(
   encoder: TextEncoder,
   converter: AnthropicToOpenAIStreamConverter
 ) {
-  const lines = buffer.split("\n");
-
-  for (const line of lines) {
-    if (line.startsWith("data: ")) {
-      try {
-        const jsonStr = line.slice(6);
-
-        // Skip the [DONE] message from Anthropic
-        if (jsonStr.trim() === "[DONE]") {
-          continue;
-        }
-
-        const anthropicEvent = JSON.parse(jsonStr);
-        const openAIEvents = converter.convert(anthropicEvent);
-
-        for (const openAIEvent of openAIEvents) {
-          const sseMessage = `data: ${JSON.stringify(openAIEvent)}\n\n`;
-          controller.enqueue(encoder.encode(sseMessage));
-        }
-      } catch (error) {
-        console.error("Failed to parse SSE data:", error);
-      }
-    } else if (line.startsWith("event:") || line.startsWith(":")) {
-      // Skip event type lines and comments
-      continue;
-    }
-  }
+  converter.processLines(buffer, (chunk) => {
+    const sseMessage = `data: ${JSON.stringify(chunk)}\n\n`;
+    controller.enqueue(encoder.encode(sseMessage));
+  });
 }
 
 // Anthro SSE Response to OpenAI SSE Response

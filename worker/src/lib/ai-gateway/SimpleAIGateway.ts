@@ -15,6 +15,7 @@ import { oai2antResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { oai2antStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { RequestParams } from "@helicone-package/cost/models/types";
 import { SecureCacheProvider } from "../util/cache/secureCache";
+import { GatewayMetrics } from "./GatewayMetrics";
 
 export interface AuthContext {
   orgId: string;
@@ -28,16 +29,19 @@ export class SimpleAIGateway {
   private readonly orgId: string;
   private readonly apiKey: string;
   private readonly supabaseClient: any;
+  private readonly metrics: GatewayMetrics;
 
   constructor(
     private readonly requestWrapper: RequestWrapper,
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
-    authContext: AuthContext
+    authContext: AuthContext,
+    metrics: GatewayMetrics
   ) {
     this.orgId = authContext.orgId;
     this.apiKey = authContext.apiKey;
     this.supabaseClient = authContext.supabaseClient;
+    this.metrics = metrics;
 
     const providerKeysManager = new ProviderKeysManager(
       new ProviderKeysStore(this.supabaseClient),
@@ -138,7 +142,8 @@ export class SimpleAIGateway {
         finalBody,
         requestParams,
         this.orgId,
-        forwarder
+        forwarder,
+        this.metrics
       );
 
       if (isErr(result)) {
@@ -158,6 +163,8 @@ export class SimpleAIGateway {
           console.error("Failed to map response:", mappedResponse.error);
           return result.data;
         }
+
+        this.metrics.markPostRequestEnd();
 
         return mappedResponse.data;
       }

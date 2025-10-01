@@ -12,6 +12,13 @@ const ALLOWED_METRICS = new Set([
   "worker.buffer.decision.tee_small",
   "worker.buffer.decision.tee_large",
   "worker.buffer.decision.size_unknown",
+  // Gateway latency metrics
+  "worker.ai-gateway.latency.pre_request_ms",
+  "worker.ai-gateway.latency.post_request_ms",
+  "worker.ai-gateway.latency.provider_request_ms",
+  "worker.ai-gateway.latency.total_ms",
+  // Gateway error metrics
+  "worker.ai-gateway.provider.rate_limit_429",
 ]);
 
 export interface DataDogConfig {
@@ -85,6 +92,24 @@ export class DataDogClient {
   ): void {
     const value = sizeMB ?? 1; // Use size if provided, otherwise 1
     this.sendMetric(`worker.buffer.decision.${path}`, value);
+  }
+
+  /**
+   * Track gateway latency
+   */
+  trackLatency(
+    phase: "pre_request_ms" | "post_request_ms" | "provider_request_ms" | "total_ms",
+    durationMs: number
+  ): void {
+    if (durationMs < 0) return;
+    this.sendMetric(`worker.ai-gateway.latency.${phase}`, durationMs);
+  }
+
+  /**
+   * Track provider rate limit (429) responses
+   */
+  trackProviderRateLimit(): void {
+    this.sendMetric("worker.ai-gateway.provider.rate_limit_429", 1);
   }
 
   /**
