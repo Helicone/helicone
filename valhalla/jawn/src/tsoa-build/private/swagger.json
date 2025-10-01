@@ -3960,7 +3960,8 @@
 					"xai",
 					"deepinfra",
 					"google-ai-studio",
-					"openrouter"
+					"openrouter",
+					"novita"
 				],
 				"nullable": false
 			},
@@ -48003,7 +48004,8 @@
 														"xai",
 														"deepinfra",
 														"google-ai-studio",
-														"openrouter"
+														"openrouter",
+														"novita"
 													]
 												}
 											},
@@ -56299,6 +56301,70 @@
 						"schema": {
 							"format": "double",
 							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/{orgId}/modify-balance": {
+			"post": {
+				"operationId": "ModifyWalletBalance",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_WalletState.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "amount",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"credit",
+								"debit"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "reason",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]

@@ -7,6 +7,9 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Table,
   TableBody,
@@ -45,6 +48,14 @@ export default function AdminWallet() {
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [tablePage, setTablePage] = useState(0);
 
+  // Wallet modification form state
+  const [modifyAmount, setModifyAmount] = useState<string>("");
+  const [modifyType, setModifyType] = useState<"credit" | "debit">("credit");
+  const [modifyReason, setModifyReason] = useState<string>("");
+  const [isModifying, setIsModifying] = useState(false);
+  const [modifyError, setModifyError] = useState<string | null>(null);
+  const [modifySuccess, setModifySuccess] = useState<string | null>(null);
+
   // Fetch dashboard data
   const { data: dashboardData, isLoading: dashboardLoading } =
     $JAWN_API.useQuery("post", "/v1/admin/wallet/gateway/dashboard_data", {});
@@ -52,7 +63,11 @@ export default function AdminWallet() {
   const dashboardError = dashboardData?.error;
 
   // Fetch wallet details (lazy loaded when org is selected)
-  const { data: walletDetails, isLoading: walletLoading } = $JAWN_API.useQuery(
+  const {
+    data: walletDetails,
+    isLoading: walletLoading,
+    refetch: refetchWalletDetails,
+  } = $JAWN_API.useQuery(
     "post",
     "/v1/admin/wallet/{orgId}",
     {
@@ -65,6 +80,12 @@ export default function AdminWallet() {
     {
       enabled: !!selectedOrg && walletDetailsOpen,
     },
+  );
+
+  // Mutation for modifying wallet balance
+  const modifyBalanceMutation = $JAWN_API.useMutation(
+    "post",
+    "/v1/admin/wallet/{orgId}/modify-balance"
   );
 
   // Fetch table data (lazy loaded when table is selected)
@@ -110,6 +131,60 @@ export default function AdminWallet() {
   const handleTableClick = (tableName: string) => {
     setSelectedTable(tableName);
     setTablePage(0); // Reset to first page when switching tables
+  };
+
+  const handleModifyBalance = async () => {
+    if (!selectedOrg) return;
+
+    // Reset messages
+    setModifyError(null);
+    setModifySuccess(null);
+
+    // Validate inputs
+    const amount = parseFloat(modifyAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setModifyError("Please enter a valid positive amount");
+      return;
+    }
+
+    if (!modifyReason.trim()) {
+      setModifyError("Please provide a reason for this modification");
+      return;
+    }
+
+    setIsModifying(true);
+
+    try {
+      const result = await modifyBalanceMutation.mutateAsync({
+        params: {
+          path: { orgId: selectedOrg },
+          query: {
+            amount,
+            type: modifyType,
+            reason: modifyReason,
+          },
+        },
+      });
+
+      if (result.error) {
+        setModifyError(result.error);
+      } else {
+        setModifySuccess(
+          `Successfully ${modifyType === "credit" ? "added" : "deducted"} ${formatCurrency(amount)}`
+        );
+        // Reset form
+        setModifyAmount("");
+        setModifyReason("");
+        // Refetch wallet details
+        refetchWalletDetails();
+      }
+    } catch (error) {
+      setModifyError(
+        error instanceof Error ? error.message : "Failed to modify balance"
+      );
+    } finally {
+      setIsModifying(false);
+    }
   };
 
   if (dashboardLoading) {
@@ -332,6 +407,7 @@ export default function AdminWallet() {
             <Tabs defaultValue="overview" className="w-full">
               <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="modify">Modify Balance</TabsTrigger>
                 <TabsTrigger value="escrows">Escrows</TabsTrigger>
                 <TabsTrigger value="disallow">Disallow List</TabsTrigger>
                 <TabsTrigger value="tables">Raw Tables</TabsTrigger>
@@ -382,6 +458,97 @@ export default function AdminWallet() {
                     </CardContent>
                   </Card>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="modify" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Modify Wallet Balance</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Amount Input */}
+                    <div className="space-y-2">
+                      <Label htmlFor="amount">Amount (USD)</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="10.00"
+                        value={modifyAmount}
+                        onChange={(e) => setModifyAmount(e.target.value)}
+                        disabled={isModifying}
+                      />
+                    </div>
+
+                    {/* Type Selection */}
+                    <div className="space-y-2">
+                      <Label>Type</Label>
+                      <RadioGroup
+                        value={modifyType}
+                        onValueChange={(value) =>
+                          setModifyType(value as "credit" | "debit")
+                        }
+                        disabled={isModifying}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="credit" id="credit" />
+                          <Label htmlFor="credit" className="font-normal">
+                            Add Credits (Credit)
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="debit" id="debit" />
+                          <Label htmlFor="debit" className="font-normal">
+                            Deduct Credits (Debit)
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    {/* Reason Input */}
+                    <div className="space-y-2">
+                      <Label htmlFor="reason">Reason (for audit trail)</Label>
+                      <Textarea
+                        id="reason"
+                        placeholder="e.g., Manual credit adjustment for promotional offer"
+                        value={modifyReason}
+                        onChange={(e) => setModifyReason(e.target.value)}
+                        disabled={isModifying}
+                        rows={3}
+                      />
+                    </div>
+
+                    {/* Error/Success Messages */}
+                    {modifyError && (
+                      <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                        <AlertCircle className="mr-2 inline h-4 w-4" />
+                        {modifyError}
+                      </div>
+                    )}
+                    {modifySuccess && (
+                      <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-600">
+                        {modifySuccess}
+                      </div>
+                    )}
+
+                    {/* Submit Button */}
+                    <Button
+                      onClick={handleModifyBalance}
+                      disabled={isModifying}
+                      className="w-full"
+                    >
+                      {isModifying ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        `${modifyType === "credit" ? "Add" : "Deduct"} Credits`
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="escrows">

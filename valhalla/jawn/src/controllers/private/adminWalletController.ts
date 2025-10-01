@@ -75,27 +75,14 @@ export class AdminWalletController extends Controller {
     >
   > {
     await authCheckThrow(request.authParams.userId);
-    const settingsManager = new SettingsManager();
-    const stripeProductSettings =
-      await settingsManager.getSetting("stripe:products");
-    if (
-      !stripeProductSettings ||
-      !stripeProductSettings.cloudGatewayTokenUsageProduct
-    ) {
-      return err("stripe:products setting is not configured");
-    }
-    const tokenUsageProductId =
-      stripeProductSettings.cloudGatewayTokenUsageProduct;
 
-    // Get organizations with payments
-    const paymentsResult = await dbExecute<{
+    // Get ALL organizations (not just those with Stripe payments)
+    // This allows admins to manage wallets even without Stripe integration
+    const orgsResult = await dbExecute<{
       org_id: string;
       org_name: string;
       stripe_customer_id: string;
       tier: string;
-      total_amount_received: number;
-      payments_count: number;
-      last_payment_date: string;
       owner_email: string;
     }>(
       `
@@ -104,28 +91,21 @@ export class AdminWalletController extends Controller {
           organization.name as org_name,
           organization.stripe_customer_id,
           organization.tier,
-          SUM(stripe.payment_intents.amount_received) as total_amount_received,
-          COUNT(stripe.payment_intents.id) as payments_count,
-          MAX(stripe.payment_intents.created) as last_payment_date,
           auth.users.email as owner_email
-        FROM stripe.payment_intents
-        LEFT JOIN organization ON organization.stripe_customer_id = stripe.payment_intents.customer
+        FROM organization
         LEFT JOIN auth.users ON organization.owner = auth.users.id
-        WHERE stripe.payment_intents.metadata->>'productId' = $1
-          AND stripe.payment_intents.status = 'succeeded'
-          AND organization.id IS NOT NULL
-        GROUP BY organization.id, organization.name, organization.stripe_customer_id, organization.tier, auth.users.email
-        ORDER BY total_amount_received DESC
+        WHERE organization.soft_delete = false
+        ORDER BY organization.created_at DESC
         LIMIT 1000
         `,
-      [tokenUsageProductId]
+      []
     );
 
-    if (paymentsResult.error) {
-      return err(paymentsResult.error);
+    if (orgsResult.error) {
+      return err(orgsResult.error);
     }
 
-    if (!paymentsResult.data || paymentsResult.data.length === 0) {
+    if (!orgsResult.data || orgsResult.data.length === 0) {
       return ok({
         organizations: [],
         isProduction: ENVIRONMENT === "production",
@@ -137,8 +117,49 @@ export class AdminWalletController extends Controller {
       });
     }
 
+    // Get payment data for organizations that have Stripe payments (optional)
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    let paymentsMap = new Map<string, { total: number; count: number; lastDate: string }>();
+
+    if (stripeProductSettings && stripeProductSettings.cloudGatewayTokenUsageProduct) {
+      const tokenUsageProductId = stripeProductSettings.cloudGatewayTokenUsageProduct;
+      const paymentsResult = await dbExecute<{
+        org_id: string;
+        total_amount_received: number;
+        payments_count: number;
+        last_payment_date: string;
+      }>(
+        `
+          SELECT
+            organization.id as org_id,
+            SUM(stripe.payment_intents.amount_received) as total_amount_received,
+            COUNT(stripe.payment_intents.id) as payments_count,
+            MAX(stripe.payment_intents.created) as last_payment_date
+          FROM stripe.payment_intents
+          LEFT JOIN organization ON organization.stripe_customer_id = stripe.payment_intents.customer
+          WHERE stripe.payment_intents.metadata->>'productId' = $1
+            AND stripe.payment_intents.status = 'succeeded'
+            AND organization.id IS NOT NULL
+          GROUP BY organization.id
+          `,
+        [tokenUsageProductId]
+      );
+
+      if (!paymentsResult.error && paymentsResult.data) {
+        paymentsResult.data.forEach((row) => {
+          paymentsMap.set(row.org_id, {
+            total: row.total_amount_received,
+            count: Number(row.payments_count),
+            lastDate: row.last_payment_date,
+          });
+        });
+      }
+    }
+
     // Get ClickHouse spending for these organizations
-    const orgIds = paymentsResult.data.map((org) => org.org_id);
+    const orgIds = orgsResult.data.map((org) => org.org_id);
 
     const clickhouseSpendResult = await clickhouseDb.dbQuery<{
       organization_id: string;
@@ -167,19 +188,22 @@ export class AdminWalletController extends Controller {
     }
 
     // Combine the data
-    const organizations = paymentsResult.data.map((org) => ({
-      orgId: org.org_id,
-      orgName: org.org_name || "Unknown",
-      stripeCustomerId: org.stripe_customer_id,
-      totalPayments: org.total_amount_received / 100, // Convert cents to dollars
-      paymentsCount: Number(org.payments_count),
-      clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-      lastPaymentDate: org.last_payment_date
-        ? Number(org.last_payment_date) * 1000
-        : null, // Convert seconds to milliseconds
-      tier: org.tier || "free",
-      ownerEmail: org.owner_email || "Unknown",
-    }));
+    const organizations = orgsResult.data.map((org) => {
+      const payments = paymentsMap.get(org.org_id);
+      return {
+        orgId: org.org_id,
+        orgName: org.org_name || "Unknown",
+        stripeCustomerId: org.stripe_customer_id || "",
+        totalPayments: payments ? payments.total / 100 : 0, // Convert cents to dollars
+        paymentsCount: payments ? payments.count : 0,
+        clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
+        lastPaymentDate: payments?.lastDate
+          ? Number(payments.lastDate) * 1000
+          : null, // Convert seconds to milliseconds
+        tier: org.tier || "free",
+        ownerEmail: org.owner_email || "Unknown",
+      };
+    });
 
     // Calculate summary
     const totalCreditsIssued = organizations.reduce(
@@ -222,6 +246,9 @@ export class AdminWalletController extends Controller {
 
     try {
       // Use the admin endpoint that can query any org's wallet
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
       const response = await fetch(
         `${workerApiUrl}/admin/wallet/${orgId}/state`,
         {
@@ -229,8 +256,11 @@ export class AdminWalletController extends Controller {
           headers: {
             Authorization: `Bearer ${adminAccessKey}`,
           },
+          signal: controller.signal,
         }
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -252,6 +282,21 @@ export class AdminWalletController extends Controller {
       return ok(convertedWalletState);
     } catch (error) {
       console.error("Error fetching wallet state:", error);
+
+      // Fallback for local development when Durable Objects don't work
+      if (ENVIRONMENT !== "production") {
+        console.warn("Using fallback wallet state for local development");
+        const fallbackState: WalletState = {
+          balance: 0,
+          effectiveBalance: 0,
+          totalCredits: 0,
+          totalDebits: 0,
+          totalEscrow: 0,
+          disallowList: [],
+        };
+        return ok(fallbackState);
+      }
+
       return err(`Error fetching wallet state: ${error}`);
     }
   }
@@ -300,6 +345,9 @@ export class AdminWalletController extends Controller {
       if (page !== undefined) params.set("page", page.toString());
       if (pageSize !== undefined) params.set("pageSize", pageSize.toString());
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
       // Use the admin endpoint that can query any org's table data
       const response = await fetch(
         `${workerApiUrl}/admin/wallet/${orgId}/tables/${tableName}?${params.toString()}`,
@@ -308,8 +356,11 @@ export class AdminWalletController extends Controller {
           headers: {
             Authorization: `Bearer ${adminAccessKey}`,
           },
+          signal: controller.signal,
         }
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -332,7 +383,120 @@ export class AdminWalletController extends Controller {
       return ok(transformedResponse);
     } catch (error) {
       console.error("Error fetching table data:", error);
+
+      // Fallback for local development when Durable Objects don't work
+      if (ENVIRONMENT !== "production") {
+        console.warn("Using fallback table data for local development");
+        const fallbackResponse: TableDataResponse = {
+          pageSize: validatedPageSize,
+          data: {
+            data: [],
+            total: 0,
+            page: validatedPage,
+            message: "No data available (local development mode)"
+          }
+        };
+        return ok(fallbackResponse);
+      }
+
       return err(`Error fetching table data: ${error}`);
+    }
+  }
+
+  @Post("/{orgId}/modify-balance")
+  public async modifyWalletBalance(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Query() amount: number,
+    @Query() type: "credit" | "debit",
+    @Query() reason: string
+  ): Promise<Result<WalletState, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Validate inputs
+    if (!amount || amount <= 0) {
+      return err("Amount must be a positive number");
+    }
+
+    if (!type || (type !== "credit" && type !== "debit")) {
+      return err("Type must be 'credit' or 'debit'");
+    }
+
+    if (!reason || reason.trim().length === 0) {
+      return err("Reason is required for audit trail");
+    }
+
+    // Get the wallet API URL and admin access key
+    const workerApiUrl =
+      process.env.HELICONE_WORKER_API ||
+      process.env.WORKER_API_URL ||
+      "https://api.helicone.ai";
+    const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
+
+    if (!adminAccessKey) {
+      return err("Admin access key not configured");
+    }
+
+    try {
+      // Create a unique reference ID for this manual modification
+      const referenceId = `admin-manual-${Date.now()}-${request.authParams.userId}`;
+
+      // Convert amount to cents for the API
+      const amountInCents = Math.round(amount * 100);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      // Call the worker API to modify the wallet balance
+      const response = await fetch(
+        `${workerApiUrl}/admin/wallet/${orgId}/modify-balance`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${adminAccessKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: amountInCents,
+            type,
+            reason,
+            referenceId,
+            adminUserId: request.authParams.userId,
+          }),
+          signal: controller.signal,
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return err(`Failed to modify wallet balance: ${errorText}`);
+      }
+
+      const walletState = await response.json();
+
+      // Convert values from cents to dollars
+      const convertedWalletState: WalletState = {
+        balance: (walletState.balance || 0) / 100,
+        effectiveBalance: (walletState.effectiveBalance || 0) / 100,
+        totalCredits: (walletState.totalCredits || 0) / 100,
+        totalDebits: (walletState.totalDebits || 0) / 100,
+        totalEscrow: (walletState.totalEscrow || 0) / 100,
+        disallowList: walletState.disallowList || [],
+      };
+
+      return ok(convertedWalletState);
+    } catch (error) {
+      console.error("Error modifying wallet balance:", error);
+
+      // Fallback for local development when Durable Objects don't work
+      if (ENVIRONMENT !== "production") {
+        console.warn("Wallet modification not available in local development mode");
+        return err("Wallet modification is not available in local development mode. This feature requires production Durable Objects.");
+      }
+
+      return err(`Error modifying wallet balance: ${error}`);
     }
   }
 }
