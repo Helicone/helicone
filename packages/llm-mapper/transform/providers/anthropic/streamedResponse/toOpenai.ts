@@ -339,10 +339,10 @@ export class AnthropicToOpenAIStreamConverter {
   }
 
   private finalizePendingToolCalls(chunks: OpenAIStreamEvent[]): void {
-    for (const [index, toolCall] of this.toolCallState.entries()) {
+    this.toolCallState.forEach((toolCall) => {
       if (!toolCall.hasNonEmptyDelta) {
         this.emitEmptyToolCallArguments(toolCall, chunks);
       }
-    }
+    });
   }
 }
