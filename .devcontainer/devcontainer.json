@@ -15,7 +15,15 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "bash /workspaces/helicone/.devcontainer/.build.sh"
+	"postCreateCommand": "bash /workspaces/helicone/.devcontainer/.build.sh",
+
+
+	
+	// Thank you internet https://github.com/orgs/community/discussions/48003#discussioncomment-14534217
+	"mounts": [
+		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+	]
+
 	
 
 
