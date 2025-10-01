@@ -1326,7 +1326,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1352,7 +1352,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1376,7 +1376,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -4437,6 +4437,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "kimi-k2",
     "kimi-k2-0905",
     "llama-3.1-8b-instant",
+    "llama-3.1-8b-instruct",
+    "llama-3.1-8b-instruct-turbo",
     "llama-3.3-70b-instruct",
     "llama-4-maverick",
     "llama-4-scout",
@@ -4461,7 +4463,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
   "totalArchivedConfigs": 0,
   "totalEndpoints": 124,
   "totalModelProviderConfigs": 124,
-  "totalModelsWithPtb": 46,
+  "totalModelsWithPtb": 48,
   "totalProviders": 12,
 }
 `;
