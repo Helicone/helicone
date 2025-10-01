@@ -335,4 +335,88 @@ export class AdminWalletController extends Controller {
       return err(`Error fetching table data: ${error}`);
     }
   }
+
+  @Post("/{orgId}/modify-balance")
+  public async modifyWalletBalance(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Query() amount: number,
+    @Query() type: "credit" | "debit",
+    @Query() reason: string
+  ): Promise<Result<WalletState, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Validate inputs
+    if (!amount || amount <= 0) {
+      return err("Amount must be a positive number");
+    }
+
+    if (!type || (type !== "credit" && type !== "debit")) {
+      return err("Type must be 'credit' or 'debit'");
+    }
+
+    if (!reason || reason.trim().length === 0) {
+      return err("Reason is required for audit trail");
+    }
+
+    // Get the wallet API URL and admin access key
+    const workerApiUrl =
+      process.env.HELICONE_WORKER_API ||
+      process.env.WORKER_API_URL ||
+      "https://api.helicone.ai";
+    const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
+
+    if (!adminAccessKey) {
+      return err("Admin access key not configured");
+    }
+
+    try {
+      // Create a unique reference ID for this manual modification
+      const referenceId = `admin-manual-${Date.now()}-${request.authParams.userId}`;
+
+      // Convert amount to cents for the API
+      const amountInCents = Math.round(amount * 100);
+
+      // Call the worker API to modify the wallet balance
+      const response = await fetch(
+        `${workerApiUrl}/admin/wallet/${orgId}/modify-balance`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${adminAccessKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: amountInCents,
+            type,
+            reason,
+            referenceId,
+            adminUserId: request.authParams.userId,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return err(`Failed to modify wallet balance: ${errorText}`);
+      }
+
+      const walletState = await response.json();
+
+      // Convert values from cents to dollars
+      const convertedWalletState: WalletState = {
+        balance: (walletState.balance || 0) / 100,
+        effectiveBalance: (walletState.effectiveBalance || 0) / 100,
+        totalCredits: (walletState.totalCredits || 0) / 100,
+        totalDebits: (walletState.totalDebits || 0) / 100,
+        totalEscrow: (walletState.totalEscrow || 0) / 100,
+        disallowList: walletState.disallowList || [],
+      };
+
+      return ok(convertedWalletState);
+    } catch (error) {
+      console.error("Error modifying wallet balance:", error);
+      return err(`Error modifying wallet balance: ${error}`);
+    }
+  }
 }
