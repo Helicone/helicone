@@ -16,7 +16,10 @@ import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/ope
 import OpenAI from "openai";
 import { getHeliconeDefaultTempKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { ENVIRONMENT, GET_KEY } from "../../lib/clients/constant";
-import { HeliconeChatCreateParams, HeliconeChatCreateParamsStreaming } from "@helicone-package/prompts/types";
+import {
+  HeliconeChatCreateParams,
+  HeliconeChatCreateParamsStreaming,
+} from "@helicone-package/prompts/types";
 import {
   InAppThreadsManager,
   InAppThread,
@@ -79,7 +82,7 @@ export class AgentController extends Controller {
               request.authParams.organizationId,
             "Helicone-User-Id": request.authParams.userId,
             "Helicone-Property-Is-Agent": "true",
-            "Helicone-RateLimit-Policy": "100;w=86400;s=user"
+            "Helicone-RateLimit-Policy": "100;w=86400;s=user",
           },
         });
         const abortController = new AbortController();
@@ -87,7 +90,8 @@ export class AgentController extends Controller {
         try {
           const body = {
             model: params.model as string,
-            messages: params.messages || [],
+            messages:
+              (params.messages as HeliconeChatCreateParams["messages"]) || [],
             temperature: params.temperature,
             max_tokens: params.max_tokens,
             top_p: params.top_p,
@@ -105,13 +109,13 @@ export class AgentController extends Controller {
             prompt_id: bodyParams.prompt_id ?? PROMPT_ID,
             environment: bodyParams.environment,
             inputs: bodyParams.inputs,
-          } satisfies HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming;
-          const response = await openai.chat.completions.create(
-            body,
-            {
-              signal: abortController.signal,
-            }
-          );
+          } satisfies
+            | HeliconeChatCreateParams
+            | HeliconeChatCreateParamsStreaming;
+
+          const response = await openai.chat.completions.create(body as any, {
+            signal: abortController.signal,
+          });
 
           if (params.stream) {
             // Set up streaming response
