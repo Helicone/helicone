@@ -1,4 +1,4 @@
-import { ChatCompletionChunk } from "@/llm-mapper/transform/types/openai";
+import { ChatCompletionChunk } from "../../../types/openai";
 import { OpenAILog, AnthropicLog } from "../../../types/logs";
 import { toOpenAI } from "../response/toOpenai";
 import { AnthropicToOpenAIStreamConverter } from "../streamedResponse/toOpenai";
