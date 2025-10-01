@@ -382,7 +382,6 @@ export default function RequestDrawer(props: RequestDivProps) {
         request?.heliconeMetadata.gatewayDeploymentTarget ?? undefined,
     } as Record<string, string | undefined>;
   }, [request?.heliconeMetadata.customProperties, newPromptId]);
-  console.log(specialProperties);
 
   // Get current request Properties and Scores
   const currentProperties = useMemo(() => {
