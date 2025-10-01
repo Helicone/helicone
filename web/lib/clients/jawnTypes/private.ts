@@ -531,6 +531,9 @@ export interface paths {
   "/v1/admin/wallet/{orgId}/tables/{tableName}": {
     post: operations["GetWalletTableData"];
   };
+  "/v1/admin/wallet/{orgId}/modify-balance": {
+    post: operations["ModifyWalletBalance"];
+  };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
@@ -1565,7 +1568,7 @@ Json: JsonObject;
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -16148,7 +16151,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita";
           }) | {
             error: string;
           };
@@ -19227,6 +19230,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_TableDataResponse.string_"];
+        };
+      };
+    };
+  };
+  ModifyWalletBalance: {
+    parameters: {
+      query: {
+        amount: number;
+        type: "credit" | "debit";
+        reason: string;
+      };
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_WalletState.string_"];
         };
       };
     };

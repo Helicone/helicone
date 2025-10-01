@@ -51,6 +51,12 @@ export interface CreateSavedQueryRequest {
   sql: string;
 }
 
+export interface UpdateSavedQueryRequest {
+  id: string;
+  name: string;
+  sql: string;
+}
+
 export interface BulkDeleteSavedQueriesRequest {
   ids: string[];
 }

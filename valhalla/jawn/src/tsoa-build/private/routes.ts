@@ -1108,7 +1108,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelProviderName": {
         "dataType": "refAlias",
-        "type": {"dataType":"enum","enums":["anthropic","openai","bedrock","vertex","azure","perplexity","groq","deepseek","cohere","xai","deepinfra","google-ai-studio","openrouter"],"validators":{}},
+        "type": {"dataType":"enum","enums":["anthropic","openai","bedrock","vertex","azure","perplexity","groq","deepseek","cohere","xai","deepinfra","google-ai-studio","openrouter","novita"],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Provider": {
@@ -20496,6 +20496,41 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getWalletTableData',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminWalletController_modifyWalletBalance: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
+                amount: {"in":"query","name":"amount","required":true,"dataType":"double"},
+                type: {"in":"query","name":"type","required":true,"dataType":"union","subSchemas":[{"dataType":"enum","enums":["credit"]},{"dataType":"enum","enums":["debit"]}]},
+                reason: {"in":"query","name":"reason","required":true,"dataType":"string"},
+        };
+        app.post('/v1/admin/wallet/:orgId/modify-balance',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController.prototype.modifyWalletBalance)),
+
+            async function AdminWalletController_modifyWalletBalance(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminWalletController_modifyWalletBalance, request, response });
+
+                const controller = new AdminWalletController();
+
+              await templateService.apiHandler({
+                methodName: 'modifyWalletBalance',
                 controller,
                 response,
                 next,

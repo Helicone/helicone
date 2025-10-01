@@ -486,6 +486,40 @@ export const endpoints = {
       "*": {},
     },
   },
+  "llama-3.3-70b-instruct:novita": {
+    providerModelId: "meta-llama/llama-3.3-70b-instruct",
+    provider: "novita",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000013,
+        output: 0.00000039,
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 131_072,
+    maxCompletionTokens: 120_000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "tool_choice",
+      "tools",
+    ],
+    ptbEnabled: false,
+    priority: 0,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${LlamaModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

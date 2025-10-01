@@ -278,6 +278,7 @@ export class EvaluatorManager extends BaseManager {
           cache_enabled: false,
           cache_reference_id: null,
           cost: null,
+          gateway_endpoint_version: null,
         },
       });
       if (scoreResult.error) {
