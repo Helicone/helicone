@@ -90,7 +90,7 @@ export default function AssistantToolCall({
   };
 
   const editPlaygroundToolCall = (text: string) => {
-    if (!mappedRequest || !onChatChange || !messageIndex) {
+    if (!mappedRequest || !onChatChange || messageIndex === undefined) {
       return;
     }
     onChatChange?.({
@@ -112,7 +112,7 @@ export default function AssistantToolCall({
                         ...toolCall,
                         arguments: (() => {
                           try {
-                            return text;
+                            return JSON.parse(text);
                           } catch {
                             return {};
                           }
@@ -171,7 +171,7 @@ export default function AssistantToolCall({
       ) : (
         <MarkdownEditor
           placeholder="{}"
-          language="markdown"
+          language="json"
           className="rounded-none bg-white dark:bg-slate-950"
           setText={editPlaygroundToolCall}
           text={tool.arguments}
