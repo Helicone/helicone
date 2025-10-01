@@ -52,12 +52,23 @@
       "Bash(gh pr diff:*)",
       "Bash(~/.cache/ms-playwright/chromium-1193/chrome-linux/chrome --version)",
       "Bash(~/.cache/ms-playwright/chromium-1193/chrome-linux/chrome:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "mcp__playwright__browser_fill_form",
+      "mcp__playwright__browser_select_option",
+      "mcp__playwright__browser_hover",
+      "mcp__playwright__browser_drag",
+      "mcp__playwright__browser_tabs",
+      "mcp__playwright__browser_navigate_back",
+      "mcp__playwright__browser_handle_dialog",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_install",
+      "mcp__playwright__browser_file_upload"
     ],
     "deny": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "playwright"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }
