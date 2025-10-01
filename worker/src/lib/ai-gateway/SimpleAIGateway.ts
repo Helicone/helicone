@@ -19,6 +19,10 @@ import { GatewayMetrics } from "./GatewayMetrics";
 
 export interface AuthContext {
   orgId: string;
+  orgMeta: {
+    allowNegativeBalance: boolean;
+    creditLimit: number;
+  };
   apiKey: string;
   supabaseClient: any;
 }
@@ -30,6 +34,7 @@ export class SimpleAIGateway {
   private readonly apiKey: string;
   private readonly supabaseClient: any;
   private readonly metrics: GatewayMetrics;
+  private readonly orgMeta: AuthContext["orgMeta"];
 
   constructor(
     private readonly requestWrapper: RequestWrapper,
@@ -41,6 +46,7 @@ export class SimpleAIGateway {
     this.orgId = authContext.orgId;
     this.apiKey = authContext.apiKey;
     this.supabaseClient = authContext.supabaseClient;
+    this.orgMeta = authContext.orgMeta;
     this.metrics = metrics;
 
     const providerKeysManager = new ProviderKeysManager(
@@ -92,7 +98,8 @@ export class SimpleAIGateway {
       errors.push({
         source: "No available providers",
         type: "request_failed",
-        message: "No available providers for the requested models. Check provider names and see supported models at https://helicone.ai/models",
+        message:
+          "No available providers for the requested models. Check provider names and see supported models at https://helicone.ai/models",
         statusCode: 400,
       });
       return this.createErrorResponse(errors);
@@ -136,15 +143,16 @@ export class SimpleAIGateway {
       // Set gateway attempt to request wrapper
       this.requestWrapper.setGatewayAttempt(attempt);
 
-      const result = await this.attemptExecutor.execute(
+      const result = await this.attemptExecutor.execute({
         attempt,
-        this.requestWrapper,
-        finalBody,
+        requestWrapper: this.requestWrapper,
+        parsedBody,
         requestParams,
-        this.orgId,
+        orgId: this.orgId,
         forwarder,
-        this.metrics
-      );
+        metrics: this.metrics,
+        orgMeta: this.orgMeta,
+      });
 
       if (isErr(result)) {
         errors.push({

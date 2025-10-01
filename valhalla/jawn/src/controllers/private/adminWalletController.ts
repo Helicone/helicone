@@ -63,6 +63,8 @@ export class AdminWalletController extends Controller {
           lastPaymentDate: number | null;
           tier: string;
           ownerEmail: string;
+          allowNegativeBalance: boolean;
+          creditLimit: number;
         }>;
         summary: {
           totalOrgsWithCredits: number;
@@ -84,6 +86,8 @@ export class AdminWalletController extends Controller {
       stripe_customer_id: string;
       tier: string;
       owner_email: string;
+      allow_negative_balance: boolean;
+      credit_limit: string;
     }>(
       `
         SELECT
@@ -91,12 +95,14 @@ export class AdminWalletController extends Controller {
           organization.name as org_name,
           organization.stripe_customer_id,
           organization.tier,
-          auth.users.email as owner_email
+          auth.users.email as owner_email,
+          organization.allow_negative_balance,
+          organization.credit_limit
         FROM organization
         LEFT JOIN auth.users ON organization.owner = auth.users.id
         WHERE organization.soft_delete = false
         ORDER BY organization.created_at DESC
-        LIMIT 1000
+        LIMIT 100
         `,
       []
     );
@@ -121,15 +127,24 @@ export class AdminWalletController extends Controller {
     const settingsManager = new SettingsManager();
     const stripeProductSettings =
       await settingsManager.getSetting("stripe:products");
-    let paymentsMap = new Map<string, { total: number; count: number; lastDate: string }>();
+    let paymentsMap = new Map<
+      string,
+      { total: number; count: number; lastDate: string }
+    >();
 
-    if (stripeProductSettings && stripeProductSettings.cloudGatewayTokenUsageProduct) {
-      const tokenUsageProductId = stripeProductSettings.cloudGatewayTokenUsageProduct;
+    if (
+      stripeProductSettings &&
+      stripeProductSettings.cloudGatewayTokenUsageProduct
+    ) {
+      const tokenUsageProductId =
+        stripeProductSettings.cloudGatewayTokenUsageProduct;
       const paymentsResult = await dbExecute<{
         org_id: string;
         total_amount_received: number;
         payments_count: number;
         last_payment_date: string;
+        allow_negative_balance: boolean;
+        credit_limit: string;
       }>(
         `
           SELECT
@@ -137,6 +152,7 @@ export class AdminWalletController extends Controller {
             SUM(stripe.payment_intents.amount_received) as total_amount_received,
             COUNT(stripe.payment_intents.id) as payments_count,
             MAX(stripe.payment_intents.created) as last_payment_date
+            
           FROM stripe.payment_intents
           LEFT JOIN organization ON organization.stripe_customer_id = stripe.payment_intents.customer
           WHERE stripe.payment_intents.metadata->>'productId' = $1
@@ -171,6 +187,7 @@ export class AdminWalletController extends Controller {
           SUM(cost) as total_cost
         FROM request_response_rmt
         WHERE organization_id IN (${orgIds.map((orgId) => `'${orgId}'`).join(",")})
+        and is_passthrough_billing = true
         GROUP BY organization_id
         `,
       orgIds
@@ -202,6 +219,8 @@ export class AdminWalletController extends Controller {
           : null, // Convert seconds to milliseconds
         tier: org.tier || "free",
         ownerEmail: org.owner_email || "Unknown",
+        allowNegativeBalance: org.allow_negative_balance,
+        creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0, // Convert cents to dollars
       };
     });
 
@@ -376,8 +395,8 @@ export class AdminWalletController extends Controller {
           data: rawTableData.data || [],
           total: rawTableData.total || 0,
           page: rawTableData.page || 0,
-          message: rawTableData.message
-        }
+          message: rawTableData.message,
+        },
       };
 
       return ok(transformedResponse);
@@ -393,8 +412,8 @@ export class AdminWalletController extends Controller {
             data: [],
             total: 0,
             page: validatedPage,
-            message: "No data available (local development mode)"
-          }
+            message: "No data available (local development mode)",
+          },
         };
         return ok(fallbackResponse);
       }
@@ -492,11 +511,98 @@ export class AdminWalletController extends Controller {
 
       // Fallback for local development when Durable Objects don't work
       if (ENVIRONMENT !== "production") {
-        console.warn("Wallet modification not available in local development mode");
-        return err("Wallet modification is not available in local development mode. This feature requires production Durable Objects.");
+        console.warn(
+          "Wallet modification not available in local development mode"
+        );
+        return err(
+          "Wallet modification is not available in local development mode. This feature requires production Durable Objects."
+        );
       }
 
       return err(`Error modifying wallet balance: ${error}`);
+    }
+  }
+
+  @Post("/{orgId}/update-settings")
+  public async updateWalletSettings(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Query() allowNegativeBalance?: boolean,
+    @Query() creditLimit?: number
+  ): Promise<
+    Result<
+      {
+        allowNegativeBalance: boolean;
+        creditLimit: number;
+      },
+      string
+    >
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    // Validate that at least one parameter is provided
+    if (allowNegativeBalance === undefined && creditLimit === undefined) {
+      return err("At least one setting must be provided");
+    }
+
+    // Validate credit limit if provided
+    if (creditLimit !== undefined && creditLimit < 0) {
+      return err("Credit limit must be a non-negative number");
+    }
+
+    try {
+      // Build the update query dynamically based on provided parameters
+      const updates: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+
+      if (allowNegativeBalance !== undefined) {
+        updates.push(`allow_negative_balance = $${paramIndex}`);
+        values.push(allowNegativeBalance);
+        paramIndex++;
+      }
+
+      if (creditLimit !== undefined) {
+        // Convert dollars to cents for storage
+        const creditLimitInCents = Math.round(creditLimit * 100);
+        updates.push(`credit_limit = $${paramIndex}`);
+        values.push(creditLimitInCents);
+        paramIndex++;
+      }
+
+      // Add orgId as the last parameter
+      values.push(orgId);
+
+      const updateResult = await dbExecute<{
+        allow_negative_balance: boolean;
+        credit_limit: string;
+      }>(
+        `
+        UPDATE organization
+        SET ${updates.join(", ")}
+        WHERE id = $${paramIndex}
+        RETURNING allow_negative_balance, credit_limit
+        `,
+        values
+      );
+
+      if (updateResult.error) {
+        return err(updateResult.error);
+      }
+
+      if (!updateResult.data || updateResult.data.length === 0) {
+        return err("Organization not found");
+      }
+
+      const updatedOrg = updateResult.data[0];
+
+      return ok({
+        allowNegativeBalance: updatedOrg.allow_negative_balance,
+        creditLimit: Number(updatedOrg.credit_limit) / 100, // Convert cents back to dollars
+      });
+    } catch (error) {
+      console.error("Error updating wallet settings:", error);
+      return err(`Error updating wallet settings: ${error}`);
     }
   }
 }

@@ -19,7 +19,8 @@ export function calculateStripeFee(
   amountCents: number,
   transactionCount: number = 1
 ): number {
-  const percentageFee = Math.ceil(amountCents * STRIPE_PERCENT_FEE_RATE);
+  const percentageFee =
+    amountCents - Math.ceil(amountCents / (1 + STRIPE_PERCENT_FEE_RATE));
   const fixedFee = STRIPE_FIXED_FEE_CENTS * transactionCount;
   return percentageFee + fixedFee;
 }
@@ -52,7 +53,8 @@ export function calculateGrossFromNet(
 ): number {
   // Formula: grossAmount = (netAmount + fixedFees) / (1 - percentFeeRate)
   const fixedFees = STRIPE_FIXED_FEE_CENTS * transactionCount;
-  const grossAmount = (netAmountCents + fixedFees) / (1 - STRIPE_PERCENT_FEE_RATE);
+  const grossAmount =
+    (netAmountCents + fixedFees) / (1 - STRIPE_PERCENT_FEE_RATE);
   return Math.ceil(grossAmount);
 }
 

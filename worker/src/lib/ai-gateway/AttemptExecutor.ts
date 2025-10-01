@@ -17,6 +17,23 @@ import { ProviderKey } from "../db/ProviderKeysStore";
 import { CacheProvider } from "../../../../packages/common/cache/provider";
 import { GatewayMetrics } from "./GatewayMetrics";
 
+interface ExecutorProps {
+  attempt: Attempt;
+  requestWrapper: RequestWrapper;
+  parsedBody: any;
+  requestParams: RequestParams;
+  orgId: string;
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>;
+  metrics: GatewayMetrics;
+  orgMeta: {
+    allowNegativeBalance: boolean;
+    creditLimit: number;
+  };
+}
+
 export class AttemptExecutor {
   constructor(
     private readonly env: Env,
@@ -24,41 +41,51 @@ export class AttemptExecutor {
     private readonly cacheProvider?: CacheProvider
   ) {}
 
-  async execute(
-    attempt: Attempt,
-    requestWrapper: RequestWrapper,
-    parsedBody: any,
-    requestParams: RequestParams,
-    orgId: string,
-    forwarder: (
-      targetBaseUrl: string | null,
-      escrowInfo?: EscrowInfo
-    ) => Promise<Response>,
-    metrics: GatewayMetrics
-  ): Promise<Result<Response, AttemptError>> {
-    const { endpoint, providerKey } = attempt;
+  async PTBPreCheck(props: {
+    attempt: Attempt;
+    requestWrapper: RequestWrapper;
+    orgId: string;
+    orgMeta: ExecutorProps["orgMeta"];
+  }): Promise<
+    Result<
+      {
+        reservedEscrowId: string;
+      },
+      AttemptError
+    >
+  > {
+    const escrowResult = await this.reserveEscrow(
+      props.attempt,
+      props.requestWrapper.heliconeHeaders.requestId,
+      props.orgId,
+      props.orgMeta
+    );
+
+    if (isErr(escrowResult)) {
+      return err({
+        type: "request_failed",
+        message: escrowResult.error.message,
+        statusCode: escrowResult.error.statusCode || 500,
+      });
+    }
+    return ok({ reservedEscrowId: escrowResult.data.escrowId });
+  }
+
+  async execute(props: ExecutorProps): Promise<Result<Response, AttemptError>> {
+    const { endpoint, providerKey } = props.attempt;
 
     let escrowInfo: EscrowInfo | undefined;
 
     // Reserve escrow if needed (PTB only)
-    if (attempt.authType === "ptb" && endpoint.ptbEnabled) {
-      const escrowResult = await this.reserveEscrow(
-        attempt,
-        requestWrapper.heliconeHeaders.requestId,
-        orgId
-      );
+    if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
+      const ptbCheck = await this.PTBPreCheck(props);
 
-      if (isErr(escrowResult)) {
-        return err({
-          type: "request_failed",
-          message: escrowResult.error.message,
-          statusCode: escrowResult.error.statusCode || 500,
-        });
+      if (isErr(ptbCheck)) {
+        return err(ptbCheck.error);
       }
 
-      // Build EscrowInfo once with all needed data
       escrowInfo = {
-        escrowId: escrowResult.data.escrowId,
+        escrowId: ptbCheck.data.reservedEscrowId,
         endpoint: endpoint,
       };
     }
@@ -66,19 +93,19 @@ export class AttemptExecutor {
     const result = await this.executeRequestWithProvider(
       endpoint,
       providerKey,
-      parsedBody,
-      requestParams,
-      requestWrapper,
-      orgId,
-      forwarder,
+      props.parsedBody,
+      props.requestParams,
+      props.requestWrapper,
+      props.orgId,
+      props.forwarder,
       escrowInfo,
-      metrics
+      props.metrics
     );
 
     // If error, cancel escrow and return the error
     if (isErr(result)) {
       if (escrowInfo) {
-        this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, orgId));
+        this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, props.orgId));
       }
       return result;
     }
@@ -202,7 +229,11 @@ export class AttemptExecutor {
   private async reserveEscrow(
     attempt: Attempt,
     requestId: string,
-    orgId: string
+    orgId: string,
+    orgMeta: {
+      allowNegativeBalance: boolean;
+      creditLimit: number;
+    }
   ): Promise<
     Result<{ escrowId: string }, { statusCode?: number; message: string }>
   > {
@@ -240,7 +271,11 @@ export class AttemptExecutor {
       const escrowResult = await walletStub.reserveCostInEscrow(
         orgId,
         requestId,
-        worstCaseCost
+        worstCaseCost,
+        {
+          enabled: orgMeta.allowNegativeBalance,
+          limit: orgMeta.creditLimit,
+        }
       );
 
       if (isErr(escrowResult)) {
@@ -266,6 +301,18 @@ export class AttemptExecutor {
       await walletStub.cancelEscrow(escrowId);
     } catch (error) {
       console.error(`Failed to cancel escrow ${escrowId}:`, error);
+    }
+  }
+
+  private async getTotalDebits(orgId: string): Promise<number> {
+    try {
+      const walletId = this.env.WALLET.idFromName(orgId);
+      const walletStub = this.env.WALLET.get(walletId);
+      const result = await walletStub.getTotalDebits(orgId);
+      return result.totalDebits;
+    } catch (error) {
+      console.error(`Failed to get total debits for org ${orgId}:`, error);
+      return 0;
     }
   }
 }

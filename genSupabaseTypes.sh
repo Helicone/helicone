@@ -1,7 +1,7 @@
 mkdir -p db
 
 echo "generating types"
-supabase gen types typescript --local > temp.types.ts
+npx supabase gen types typescript --local > temp.types.ts
 echo "types generated, updating local files"
 cp temp.types.ts web/db/database.types.ts
 cp temp.types.ts worker/supabase/database.types.ts
