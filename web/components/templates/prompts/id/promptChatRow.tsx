@@ -236,8 +236,8 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   const [minimize, setMinimize] = useState(false);
 
   const [role, setRole] = useState<
-    "system" | "user" | "assistant" | "function"
-  >((message.role as "system" | "user" | "assistant" | "function") || "user");
+    "system" | "user" | "assistant" | "function" | "tool"
+  >((message.role as "system" | "user" | "assistant" | "function" | "tool") || "user");
 
   // Set isEditing to true by default
   const [isEditing, setIsEditing] = useState(editMode);
@@ -533,7 +533,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
 
   const handleCallback = (
     content: string | undefined,
-    newRole: "system" | "user" | "assistant" | "function",
+    newRole: "system" | "user" | "assistant" | "function" | "tool",
     file: File | null,
   ) => {
     callback(content || "", newRole, file);
@@ -616,7 +616,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                 size="small"
                 role={role}
                 onRoleChange={(
-                  newRole: "system" | "user" | "assistant" | "function",
+                  newRole: "system" | "user" | "assistant" | "function" | "tool",
                 ) => {
                   setRole(newRole);
                   const newMessage = {
