@@ -21,3 +21,5 @@ RUN npx -y playwright@latest install chromium --with-deps
 
 # Pre-cache the Playwright MCP package for faster startup
 RUN npx -y @playwright/mcp@latest --help || true
+
+RUN claude mcp add playwright npx "@playwright/mcp@latest --isolated --headless --browser chromium"
