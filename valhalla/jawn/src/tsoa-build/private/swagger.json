@@ -932,12 +932,19 @@
 											"type": "string",
 											"nullable": true
 										},
+										"credit_limit": {
+											"type": "number",
+											"format": "double"
+										},
 										"created_at": {
 											"type": "string",
 											"nullable": true
 										},
 										"color": {
 											"type": "string"
+										},
+										"allow_negative_balance": {
+											"type": "boolean"
 										}
 									},
 									"required": [
@@ -967,8 +974,10 @@
 										"has_integrated",
 										"governance_settings",
 										"domain",
+										"credit_limit",
 										"created_at",
-										"color"
+										"color",
+										"allow_negative_balance"
 									],
 									"type": "object"
 								},
@@ -1117,12 +1126,19 @@
 								"type": "string",
 								"nullable": true
 							},
+							"credit_limit": {
+								"type": "number",
+								"format": "double"
+							},
 							"created_at": {
 								"type": "string",
 								"nullable": true
 							},
 							"color": {
 								"type": "string"
+							},
+							"allow_negative_balance": {
+								"type": "boolean"
 							}
 						},
 						"required": [
@@ -1152,8 +1168,10 @@
 							"has_integrated",
 							"governance_settings",
 							"domain",
+							"credit_limit",
 							"created_at",
-							"color"
+							"color",
+							"allow_negative_balance"
 						],
 						"type": "object"
 					},
@@ -1182,7 +1200,7 @@
 					}
 				]
 			},
-			"ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+			"ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
 				"properties": {
 					"data": {
 						"items": {
@@ -1267,11 +1285,18 @@
 								"domain": {
 									"type": "string"
 								},
+								"credit_limit": {
+									"type": "number",
+									"format": "double"
+								},
 								"created_at": {
 									"type": "string"
 								},
 								"color": {
 									"type": "string"
+								},
+								"allow_negative_balance": {
+									"type": "boolean"
 								}
 							},
 							"required": [
@@ -1301,8 +1326,10 @@
 								"has_integrated",
 								"governance_settings",
 								"domain",
+								"credit_limit",
 								"created_at",
-								"color"
+								"color",
+								"allow_negative_balance"
 							],
 							"type": "object"
 						},
@@ -1323,20 +1350,20 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": {
+			"Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+			"ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
 				"properties": {
 					"data": {
-						"$ref": "#/components/schemas/Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"
+						"$ref": "#/components/schemas/Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"
 					},
 					"error": {
 						"type": "number",
@@ -1371,10 +1398,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": {
+			"Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"
+						"$ref": "#/components/schemas/ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_unknown_"
@@ -1514,12 +1541,19 @@
 						"type": "string",
 						"nullable": true
 					},
+					"credit_limit": {
+						"type": "number",
+						"format": "double"
+					},
 					"created_at": {
 						"type": "string",
 						"nullable": true
 					},
 					"color": {
 						"type": "string"
+					},
+					"allow_negative_balance": {
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -49462,7 +49496,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
+									"$ref": "#/components/schemas/Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
 								}
 							}
 						}
