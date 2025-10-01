@@ -198,11 +198,7 @@ export const endpoints = {
     ],
     contextLength: 512,
     maxCompletionTokens: 2,
-    supportedParameters: [
-      "max_tokens",
-      "temperature",
-      "top_p",
-    ],
+    supportedParameters: ["max_tokens", "temperature", "top_p"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -225,11 +221,7 @@ export const endpoints = {
     ],
     contextLength: 512,
     maxCompletionTokens: 2,
-    supportedParameters: [
-      "max_tokens",
-      "temperature",
-      "top_p",
-    ],
+    supportedParameters: ["max_tokens", "temperature", "top_p"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -403,8 +395,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.00000002, // $0.02/1M tokens - DeepInfra pricing
-        output: 0.00000003, // $0.03/1M tokens - DeepInfra pricing
+        input: 0.00000002, // $0.02/1M tokens
+        output: 0.00000003, // $0.03/1M tokens
       },
     ],
     contextLength: 128_000,
@@ -454,11 +446,44 @@ export const endpoints = {
       "top_k",
       "min_p",
       "repetition_penalty",
-      "logit_bias"
+      "logit_bias",
     ],
     ptbEnabled: false,
     endpointConfigs: {
-      "*": {}
+      "*": {},
+    },
+  },
+  "llama-3.1-8b-instruct:deepinfra": {
+    providerModelId: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+    provider: "deepinfra",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000003, // $0.03 per 1M tokens - DeepInfra pricing from https://deepinfra.com/meta-llama/Meta-Llama-3-8B-Instruct
+        output: 0.00000005, // $0.06 per 1M tokens - DeepInfra pricing from https://deepinfra.com/meta-llama/Meta-Llama-3-8B-Instruct
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+      "tool_choice",
+      "tools",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
     },
   },
 } satisfies Partial<
