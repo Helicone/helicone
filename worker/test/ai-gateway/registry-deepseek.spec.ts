@@ -101,6 +101,22 @@ describe("DeepSeek Registry Tests", () => {
             finalStatus: 200,
           },
         }));
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "deepseek-reasoner/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-0528",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-0528"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
       it("should auto-select deepseek provider when none specified", () =>
         runGatewayTest({
@@ -550,6 +566,28 @@ describe("DeepSeek Registry Tests", () => {
         },
       }));
 
+      it("should construct correct DeepInfra URL for DeepSeek R1", () =>
+      runGatewayTest({
+        model: "deepseek-reasoner/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-0528",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-0528"),
+              expects: deepinfraAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://api.deepinfra.com/
+                // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
     it("should handle provider model ID mapping correctly for DeepInfra", () =>
       runGatewayTest({
         model: "deepseek-v3/deepinfra",
@@ -560,6 +598,23 @@ describe("DeepSeek Registry Tests", () => {
               response: "success",
               model: "deepseek-ai/DeepSeek-V3.1", // Should map to the correct provider model ID
               data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
+              expects: deepinfraAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for DeepInfra R1", () =>
+      runGatewayTest({
+        model: "deepseek-reasoner/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-0528",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-0528"),
               expects: deepinfraAuthExpectations,
             },
           ],
