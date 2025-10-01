@@ -83,6 +83,11 @@ export enum DisputeStatus {
   RESOLVED = "resolved",
 }
 
+export interface CreditLineInfo {
+  allowNegativeBalance: boolean;
+  creditLineLimitCents: number | null;
+}
+
 export interface Escrow {
   id: string;
   // amount in USD unit amounts (cents)
@@ -352,6 +357,57 @@ export class Wallet extends DurableObject<Env> {
     );
   }
 
+  async getCreditLineInfo(orgId: string, env: Env): Promise<CreditLineInfo> {
+    try {
+      // Query Supabase for the organization's credit line settings
+      const response = await fetch(
+        `${env.SUPABASE_URL}/rest/v1/organization?id=eq.${orgId}&select=allow_negative_balance,credit_line_limit_cents`,
+        {
+          headers: {
+            apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+            Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error(
+          `Failed to fetch credit line info for org ${orgId}:`,
+          response.statusText
+        );
+        // Default to not allowing negative balance on error
+        return {
+          allowNegativeBalance: false,
+          creditLineLimitCents: null,
+        };
+      }
+
+      const data: Array<{
+        allow_negative_balance: boolean;
+        credit_line_limit_cents: number | null;
+      }> = await response.json();
+      if (!data || data.length === 0) {
+        // Organization not found, default to not allowing negative balance
+        return {
+          allowNegativeBalance: false,
+          creditLineLimitCents: null,
+        };
+      }
+
+      return {
+        allowNegativeBalance: data[0].allow_negative_balance || false,
+        creditLineLimitCents: data[0].credit_line_limit_cents || null,
+      };
+    } catch (error) {
+      console.error(`Error fetching credit line info for org ${orgId}:`, error);
+      // Default to not allowing negative balance on error
+      return {
+        allowNegativeBalance: false,
+        creditLineLimitCents: null,
+      };
+    }
+  }
+
   getWalletState(orgId: string): WalletState {
     return this.ctx.storage.transactionSync(() => {
       const disallowList = this.ctx.storage.sql
@@ -438,12 +494,18 @@ export class Wallet extends DurableObject<Env> {
     });
   }
 
-  reserveCostInEscrow(
+  async reserveCostInEscrow(
     orgId: string,
     requestId: string,
     amountToReserve: number
-  ): Result<{ escrowId: string }, { statusCode: number; message: string }> {
+  ): Promise<
+    Result<{ escrowId: string }, { statusCode: number; message: string }>
+  > {
     const amountToReserveScaled = amountToReserve * SCALE_FACTOR;
+
+    // Fetch credit line info (async, outside transaction)
+    const creditLineInfo = await this.getCreditLineInfo(orgId, this.env);
+
     return this.ctx.storage.transactionSync(() => {
       // Check if wallet is suspended due to disputes
       const activeDisputesCount = this.ctx.storage.sql
@@ -485,13 +547,35 @@ export class Wallet extends DurableObject<Env> {
       const availableBalance =
         totalCreditsPurchased - totalEscrow - totalDebits;
 
-      if (availableBalance - amountToReserveScaled < MINIMUM_RESERVE) {
+      // Determine the effective minimum balance based on credit line settings
+      let effectiveMinimum = MINIMUM_RESERVE;
+      if (creditLineInfo.allowNegativeBalance) {
+        // If credit line is enabled, allow negative up to the limit
+        // creditLineLimitCents is in cents, need to scale it
+        const creditLimit = creditLineInfo.creditLineLimitCents
+          ? creditLineInfo.creditLineLimitCents * SCALE_FACTOR
+          : Infinity;
+        effectiveMinimum = -creditLimit;
+      }
+
+      if (availableBalance - amountToReserveScaled < effectiveMinimum) {
         const availableScaled = availableBalance / SCALE_FACTOR;
-        const neededScaled = amountToReserve + MINIMUM_RESERVE / SCALE_FACTOR;
-        return err({
-          statusCode: 429,
-          message: `Insufficient balance for escrow. Available: ${availableScaled} cents, needed: ${neededScaled} cents`,
-        } as { statusCode: number; message: string });
+        const neededScaled = amountToReserve + effectiveMinimum / SCALE_FACTOR;
+
+        if (creditLineInfo.allowNegativeBalance) {
+          // Custom message for credit line limit exceeded
+          const limitScaled = creditLineInfo.creditLineLimitCents || Infinity;
+          return err({
+            statusCode: 429,
+            message: `Credit line limit exceeded. Available: ${availableScaled} cents, credit limit: ${limitScaled} cents, requested: ${amountToReserve} cents`,
+          } as { statusCode: number; message: string });
+        } else {
+          // Original message for insufficient balance
+          return err({
+            statusCode: 429,
+            message: `Insufficient balance for escrow. Available: ${availableScaled} cents, needed: ${neededScaled} cents`,
+          } as { statusCode: number; message: string });
+        }
       }
 
       // we don't want to re-use the official Helicone request id (at least, not by itself),

@@ -43,6 +43,11 @@ interface TableDataResponse {
   };
 }
 
+interface CreditLineInfo {
+  allowNegativeBalance: boolean;
+  creditLineLimitCents: number | null;
+}
+
 @Route("v1/admin/wallet")
 @Tags("Admin Wallet")
 @Security("api_key")
@@ -497,6 +502,126 @@ export class AdminWalletController extends Controller {
       }
 
       return err(`Error modifying wallet balance: ${error}`);
+    }
+  }
+
+  @Post("/{orgId}/credit-line-info")
+  public async getCreditLineInfo(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<CreditLineInfo, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    try {
+      const result = await dbExecute<{
+        allow_negative_balance: boolean;
+        credit_line_limit_cents: number | null;
+      }>(
+        `
+        SELECT allow_negative_balance, credit_line_limit_cents
+        FROM organization
+        WHERE id = $1
+        `,
+        [orgId]
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err("Organization not found");
+      }
+
+      const org = result.data[0];
+      return ok({
+        allowNegativeBalance: org.allow_negative_balance,
+        creditLineLimitCents: org.credit_line_limit_cents,
+      });
+    } catch (error) {
+      console.error("Error fetching credit line info:", error);
+      return err(`Error fetching credit line info: ${error}`);
+    }
+  }
+
+  @Post("/{orgId}/enable-negative-balance")
+  public async enableNegativeBalance(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<{ success: boolean }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    try {
+      const result = await dbExecute(
+        `
+        UPDATE organization
+        SET allow_negative_balance = true
+        WHERE id = $1
+        `,
+        [orgId]
+      );
+
+      if (result.error) {
+        return err(result.error);
+      }
+
+      return ok({ success: true });
+    } catch (error) {
+      console.error("Error enabling negative balance:", error);
+      return err(`Error enabling negative balance: ${error}`);
+    }
+  }
+
+  @Post("/{orgId}/disable-negative-balance")
+  public async disableNegativeBalance(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<{ success: boolean }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    try {
+      const result = await dbExecute(
+        `
+        UPDATE organization
+        SET allow_negative_balance = false
+        WHERE id = $1
+        `,
+        [orgId]
+      );
+
+      if (result.error) {
+        return err(result.error);
+      }
+
+      return ok({ success: true });
+    } catch (error) {
+      console.error("Error disabling negative balance:", error);
+      return err(`Error disabling negative balance: ${error}`);
+    }
+  }
+
+  @Post("/{orgId}/set-credit-limit")
+  public async setCreditLimit(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Query() limitCents?: number
+  ): Promise<Result<{ success: boolean }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    try {
+      const result = await dbExecute(
+        `
+        UPDATE organization
+        SET credit_line_limit_cents = $1
+        WHERE id = $2
+        `,
+        [limitCents ?? null, orgId]
+      );
+
+      if (result.error) {
+        return err(result.error);
+      }
+
+      return ok({ success: true });
+    } catch (error) {
+      console.error("Error setting credit limit:", error);
+      return err(`Error setting credit limit: ${error}`);
     }
   }
 }

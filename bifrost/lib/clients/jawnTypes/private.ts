@@ -534,6 +534,18 @@ export interface paths {
   "/v1/admin/wallet/{orgId}/modify-balance": {
     post: operations["ModifyWalletBalance"];
   };
+  "/v1/admin/wallet/{orgId}/credit-line-info": {
+    post: operations["GetCreditLineInfo"];
+  };
+  "/v1/admin/wallet/{orgId}/enable-negative-balance": {
+    post: operations["EnableNegativeBalance"];
+  };
+  "/v1/admin/wallet/{orgId}/disable-negative-balance": {
+    post: operations["DisableNegativeBalance"];
+  };
+  "/v1/admin/wallet/{orgId}/set-credit-limit": {
+    post: operations["SetCreditLimit"];
+  };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
@@ -15941,6 +15953,25 @@ Json: JsonObject;
       error: null;
     };
     "Result_TableDataResponse.string_": components["schemas"]["ResultSuccess_TableDataResponse_"] | components["schemas"]["ResultError_string_"];
+    CreditLineInfo: {
+      allowNegativeBalance: boolean;
+      /** Format: double */
+      creditLineLimitCents: number | null;
+    };
+    ResultSuccess_CreditLineInfo_: {
+      data: components["schemas"]["CreditLineInfo"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreditLineInfo.string_": components["schemas"]["ResultSuccess_CreditLineInfo_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean__": {
+      data: {
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean_.string_": components["schemas"]["ResultSuccess__success-boolean__"] | components["schemas"]["ResultError_string_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -19250,6 +19281,69 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_WalletState.string_"];
+        };
+      };
+    };
+  };
+  GetCreditLineInfo: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreditLineInfo.string_"];
+        };
+      };
+    };
+  };
+  EnableNegativeBalance: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean_.string_"];
+        };
+      };
+    };
+  };
+  DisableNegativeBalance: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean_.string_"];
+        };
+      };
+    };
+  };
+  SetCreditLimit: {
+    parameters: {
+      query?: {
+        limitCents?: number;
+      };
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean_.string_"];
         };
       };
     };

@@ -25,6 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import {
   Loader2,
@@ -56,6 +57,15 @@ export default function AdminWallet() {
   const [modifyError, setModifyError] = useState<string | null>(null);
   const [modifySuccess, setModifySuccess] = useState<string | null>(null);
 
+  // Credit line form state
+  const [creditLineEnabled, setCreditLineEnabled] = useState(false);
+  const [creditLineLimit, setCreditLineLimit] = useState<string>("");
+  const [isSavingCreditLine, setIsSavingCreditLine] = useState(false);
+  const [creditLineError, setCreditLineError] = useState<string | null>(null);
+  const [creditLineSuccess, setCreditLineSuccess] = useState<string | null>(
+    null
+  );
+
   // Fetch dashboard data
   const { data: dashboardData, isLoading: dashboardLoading } =
     $JAWN_API.useQuery("post", "/v1/admin/wallet/gateway/dashboard_data", {});
@@ -86,6 +96,48 @@ export default function AdminWallet() {
   const modifyBalanceMutation = $JAWN_API.useMutation(
     "post",
     "/v1/admin/wallet/{orgId}/modify-balance"
+  );
+
+  // Credit line queries and mutations
+  const { data: creditLineInfo, refetch: refetchCreditLine } =
+    $JAWN_API.useQuery(
+      "post",
+      "/v1/admin/wallet/{orgId}/credit-line-info",
+      {
+        params: {
+          path: {
+            orgId: selectedOrg || "",
+          },
+        },
+      },
+      {
+        enabled: !!selectedOrg && walletDetailsOpen,
+        onSuccess: (data: any) => {
+          if (data?.data) {
+            setCreditLineEnabled(data.data.allowNegativeBalance);
+            setCreditLineLimit(
+              data.data.creditLineLimitCents
+                ? (data.data.creditLineLimitCents / 100).toString()
+                : ""
+            );
+          }
+        },
+      }
+    );
+
+  const enableCreditLineMutation = $JAWN_API.useMutation(
+    "post",
+    "/v1/admin/wallet/{orgId}/enable-negative-balance"
+  );
+
+  const disableCreditLineMutation = $JAWN_API.useMutation(
+    "post",
+    "/v1/admin/wallet/{orgId}/disable-negative-balance"
+  );
+
+  const setCreditLimitMutation = $JAWN_API.useMutation(
+    "post",
+    "/v1/admin/wallet/{orgId}/set-credit-limit"
   );
 
   // Fetch table data (lazy loaded when table is selected)
@@ -184,6 +236,58 @@ export default function AdminWallet() {
       );
     } finally {
       setIsModifying(false);
+    }
+  };
+
+  const handleSaveCreditLine = async () => {
+    if (!selectedOrg) return;
+
+    // Reset messages
+    setCreditLineError(null);
+    setCreditLineSuccess(null);
+
+    setIsSavingCreditLine(true);
+
+    try {
+      // First, enable or disable negative balance
+      if (creditLineEnabled) {
+        const enableResult = await enableCreditLineMutation.mutateAsync({
+          params: { path: { orgId: selectedOrg } },
+        });
+        if (enableResult.error) {
+          throw new Error(enableResult.error);
+        }
+
+        // Then set the credit limit
+        const limitCents = creditLineLimit
+          ? Math.round(parseFloat(creditLineLimit) * 100)
+          : null;
+        const limitResult = await setCreditLimitMutation.mutateAsync({
+          params: {
+            path: { orgId: selectedOrg },
+            query: { limitCents: limitCents ?? undefined },
+          },
+        });
+        if (limitResult.error) {
+          throw new Error(limitResult.error);
+        }
+      } else {
+        const disableResult = await disableCreditLineMutation.mutateAsync({
+          params: { path: { orgId: selectedOrg } },
+        });
+        if (disableResult.error) {
+          throw new Error(disableResult.error);
+        }
+      }
+
+      setCreditLineSuccess("Credit line settings saved successfully");
+      refetchCreditLine();
+    } catch (error) {
+      setCreditLineError(
+        error instanceof Error ? error.message : "Failed to save credit line settings"
+      );
+    } finally {
+      setIsSavingCreditLine(false);
     }
   };
 
@@ -408,6 +512,7 @@ export default function AdminWallet() {
               <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="modify">Modify Balance</TabsTrigger>
+                <TabsTrigger value="creditLine">Credit Line</TabsTrigger>
                 <TabsTrigger value="escrows">Escrows</TabsTrigger>
                 <TabsTrigger value="disallow">Disallow List</TabsTrigger>
                 <TabsTrigger value="tables">Raw Tables</TabsTrigger>
@@ -545,6 +650,112 @@ export default function AdminWallet() {
                         </>
                       ) : (
                         `${modifyType === "credit" ? "Add" : "Deduct"} Credits`
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="creditLine" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Credit Line Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Current Status Display */}
+                    <div className="rounded-md border border-border bg-muted p-4 space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium">Status:</span>
+                        <span
+                          className={`text-sm font-semibold ${creditLineInfo?.data?.allowNegativeBalance ? "text-green-600" : "text-muted-foreground"}`}
+                        >
+                          {creditLineInfo?.data?.allowNegativeBalance
+                            ? "Enabled"
+                            : "Disabled"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium">
+                          Credit Limit:
+                        </span>
+                        <span className="text-sm font-semibold">
+                          {creditLineInfo?.data?.creditLineLimitCents
+                            ? formatCurrency(
+                                creditLineInfo.data.creditLineLimitCents / 100
+                              )
+                            : "Unlimited"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Enable/Disable Toggle */}
+                    <div className="flex items-center justify-between space-x-2 rounded-md border border-border p-4">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="credit-line-toggle" className="text-sm font-medium">
+                          Allow Negative Balance
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Enable this organization to go negative up to their
+                          credit limit
+                        </p>
+                      </div>
+                      <Switch
+                        id="credit-line-toggle"
+                        checked={creditLineEnabled}
+                        onCheckedChange={setCreditLineEnabled}
+                        disabled={isSavingCreditLine}
+                      />
+                    </div>
+
+                    {/* Credit Limit Input (only shown when enabled) */}
+                    {creditLineEnabled && (
+                      <div className="space-y-2">
+                        <Label htmlFor="credit-limit">
+                          Credit Limit (USD)
+                        </Label>
+                        <Input
+                          id="credit-limit"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="10000.00 (leave empty for unlimited)"
+                          value={creditLineLimit}
+                          onChange={(e) => setCreditLineLimit(e.target.value)}
+                          disabled={isSavingCreditLine}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Maximum negative balance allowed. Leave empty for
+                          unlimited credit.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Error/Success Messages */}
+                    {creditLineError && (
+                      <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                        <AlertCircle className="mr-2 inline h-4 w-4" />
+                        {creditLineError}
+                      </div>
+                    )}
+                    {creditLineSuccess && (
+                      <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-600">
+                        {creditLineSuccess}
+                      </div>
+                    )}
+
+                    {/* Save Button */}
+                    <Button
+                      onClick={handleSaveCreditLine}
+                      disabled={isSavingCreditLine}
+                      className="w-full"
+                    >
+                      {isSavingCreditLine ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        "Save Credit Line Settings"
                       )}
                     </Button>
                   </CardContent>
