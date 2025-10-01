@@ -356,7 +356,7 @@ const response = await client.chat.completions.create({
                     provider cost for each API call.{" "}
                     <strong>No Helicone AI Gateway fees</strong> — you only pay
                     the provider&apos;s list price plus standard payment processing
-                    fees (2.9% + $0.30 per transaction). No markups, no platform
+                    fees (3% + $0.30 per transaction). No markups, no platform
                     fees, no surprises. Your credits work across all supported
                     providers from a single balance.
                   </AccordionContent>

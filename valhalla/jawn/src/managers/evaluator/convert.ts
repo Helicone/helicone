@@ -41,5 +41,8 @@ export const convertTestInputToHeliconeRequest = (
     target_url: "",
     prompt_audio_tokens: null,
     completion_audio_tokens: null,
+    cost: null,
+    prompt_version: null,
+    gateway_endpoint_version: null,
   };
 };
