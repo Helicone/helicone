@@ -5,7 +5,7 @@ import {
   buildEndpointUrl,
 } from "@helicone-package/cost/models/provider-helpers";
 import { RequestWrapper } from "../RequestWrapper";
-import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
+import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
 import { isErr, Result, ok, err } from "../util/results";
 import { Attempt, EscrowInfo, AttemptError } from "./types";
 import {
