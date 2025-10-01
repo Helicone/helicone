@@ -75,27 +75,14 @@ export class AdminWalletController extends Controller {
     >
   > {
     await authCheckThrow(request.authParams.userId);
-    const settingsManager = new SettingsManager();
-    const stripeProductSettings =
-      await settingsManager.getSetting("stripe:products");
-    if (
-      !stripeProductSettings ||
-      !stripeProductSettings.cloudGatewayTokenUsageProduct
-    ) {
-      return err("stripe:products setting is not configured");
-    }
-    const tokenUsageProductId =
-      stripeProductSettings.cloudGatewayTokenUsageProduct;
 
-    // Get organizations with payments
-    const paymentsResult = await dbExecute<{
+    // Get ALL organizations (not just those with Stripe payments)
+    // This allows admins to manage wallets even without Stripe integration
+    const orgsResult = await dbExecute<{
       org_id: string;
       org_name: string;
       stripe_customer_id: string;
       tier: string;
-      total_amount_received: number;
-      payments_count: number;
-      last_payment_date: string;
       owner_email: string;
     }>(
       `
@@ -104,28 +91,21 @@ export class AdminWalletController extends Controller {
           organization.name as org_name,
           organization.stripe_customer_id,
           organization.tier,
-          SUM(stripe.payment_intents.amount_received) as total_amount_received,
-          COUNT(stripe.payment_intents.id) as payments_count,
-          MAX(stripe.payment_intents.created) as last_payment_date,
           auth.users.email as owner_email
-        FROM stripe.payment_intents
-        LEFT JOIN organization ON organization.stripe_customer_id = stripe.payment_intents.customer
+        FROM organization
         LEFT JOIN auth.users ON organization.owner = auth.users.id
-        WHERE stripe.payment_intents.metadata->>'productId' = $1
-          AND stripe.payment_intents.status = 'succeeded'
-          AND organization.id IS NOT NULL
-        GROUP BY organization.id, organization.name, organization.stripe_customer_id, organization.tier, auth.users.email
-        ORDER BY total_amount_received DESC
+        WHERE organization.soft_delete = false
+        ORDER BY organization.created_at DESC
         LIMIT 1000
         `,
-      [tokenUsageProductId]
+      []
     );
 
-    if (paymentsResult.error) {
-      return err(paymentsResult.error);
+    if (orgsResult.error) {
+      return err(orgsResult.error);
     }
 
-    if (!paymentsResult.data || paymentsResult.data.length === 0) {
+    if (!orgsResult.data || orgsResult.data.length === 0) {
       return ok({
         organizations: [],
         isProduction: ENVIRONMENT === "production",
@@ -137,8 +117,49 @@ export class AdminWalletController extends Controller {
       });
     }
 
+    // Get payment data for organizations that have Stripe payments (optional)
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    let paymentsMap = new Map<string, { total: number; count: number; lastDate: string }>();
+
+    if (stripeProductSettings && stripeProductSettings.cloudGatewayTokenUsageProduct) {
+      const tokenUsageProductId = stripeProductSettings.cloudGatewayTokenUsageProduct;
+      const paymentsResult = await dbExecute<{
+        org_id: string;
+        total_amount_received: number;
+        payments_count: number;
+        last_payment_date: string;
+      }>(
+        `
+          SELECT
+            organization.id as org_id,
+            SUM(stripe.payment_intents.amount_received) as total_amount_received,
+            COUNT(stripe.payment_intents.id) as payments_count,
+            MAX(stripe.payment_intents.created) as last_payment_date
+          FROM stripe.payment_intents
+          LEFT JOIN organization ON organization.stripe_customer_id = stripe.payment_intents.customer
+          WHERE stripe.payment_intents.metadata->>'productId' = $1
+            AND stripe.payment_intents.status = 'succeeded'
+            AND organization.id IS NOT NULL
+          GROUP BY organization.id
+          `,
+        [tokenUsageProductId]
+      );
+
+      if (!paymentsResult.error && paymentsResult.data) {
+        paymentsResult.data.forEach((row) => {
+          paymentsMap.set(row.org_id, {
+            total: row.total_amount_received,
+            count: Number(row.payments_count),
+            lastDate: row.last_payment_date,
+          });
+        });
+      }
+    }
+
     // Get ClickHouse spending for these organizations
-    const orgIds = paymentsResult.data.map((org) => org.org_id);
+    const orgIds = orgsResult.data.map((org) => org.org_id);
 
     const clickhouseSpendResult = await clickhouseDb.dbQuery<{
       organization_id: string;
@@ -167,19 +188,22 @@ export class AdminWalletController extends Controller {
     }
 
     // Combine the data
-    const organizations = paymentsResult.data.map((org) => ({
-      orgId: org.org_id,
-      orgName: org.org_name || "Unknown",
-      stripeCustomerId: org.stripe_customer_id,
-      totalPayments: org.total_amount_received / 100, // Convert cents to dollars
-      paymentsCount: Number(org.payments_count),
-      clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-      lastPaymentDate: org.last_payment_date
-        ? Number(org.last_payment_date) * 1000
-        : null, // Convert seconds to milliseconds
-      tier: org.tier || "free",
-      ownerEmail: org.owner_email || "Unknown",
-    }));
+    const organizations = orgsResult.data.map((org) => {
+      const payments = paymentsMap.get(org.org_id);
+      return {
+        orgId: org.org_id,
+        orgName: org.org_name || "Unknown",
+        stripeCustomerId: org.stripe_customer_id || "",
+        totalPayments: payments ? payments.total / 100 : 0, // Convert cents to dollars
+        paymentsCount: payments ? payments.count : 0,
+        clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
+        lastPaymentDate: payments?.lastDate
+          ? Number(payments.lastDate) * 1000
+          : null, // Convert seconds to milliseconds
+        tier: org.tier || "free",
+        ownerEmail: org.owner_email || "Unknown",
+      };
+    });
 
     // Calculate summary
     const totalCreditsIssued = organizations.reduce(
