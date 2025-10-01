@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Copy, Check } from "lucide-react";
 import {
   Tooltip,
@@ -28,6 +26,7 @@ export function CopyButton({
   onCopy,
 }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -36,11 +35,24 @@ export function CopyButton({
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       onCopy?.();
-      setTimeout(() => setCopied(false), 2000);
+      
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      timeoutRef.current = setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <TooltipProvider delayDuration={100}>
