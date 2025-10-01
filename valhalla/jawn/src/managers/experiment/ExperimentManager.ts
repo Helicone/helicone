@@ -2,7 +2,7 @@
 import { NewExperimentParams } from "../../controllers/public/experimentController";
 import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { Result, err, ok } from "../../packages/common/result";
 import {
   Experiment,
