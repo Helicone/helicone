@@ -47,8 +47,17 @@
       "mcp__playwright__browser_network_requests",
       "mcp__playwright__browser_evaluate",
       "Bash(yarn build)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(~/.cache/ms-playwright/chromium-1193/chrome-linux/chrome --version)",
+      "Bash(~/.cache/ms-playwright/chromium-1193/chrome-linux/chrome:*)",
+      "Bash(timeout:*)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "playwright"
+  ],
+  "enableAllProjectMcpServers": true
 }

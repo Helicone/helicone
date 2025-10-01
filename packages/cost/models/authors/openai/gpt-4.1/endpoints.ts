@@ -47,8 +47,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.00000025,
-        output: 0.000001,
+        input: 0.0000004,
+        output: 0.0000016,
         cacheMultipliers: {
           cachedInput: 0.25,
         },
