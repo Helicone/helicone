@@ -124,7 +124,9 @@ export default function AdminWallet() {
       // Minimum spend filter
       const minSpendValue = parseFloat(minSpend);
       const matchesSpend =
-        !minSpend || isNaN(minSpendValue) || org.clickhouseTotalSpend >= minSpendValue;
+        !minSpend ||
+        isNaN(minSpendValue) ||
+        org.clickhouseTotalSpend >= minSpendValue;
 
       return matchesSearch && matchesSpend;
     }) || [];
