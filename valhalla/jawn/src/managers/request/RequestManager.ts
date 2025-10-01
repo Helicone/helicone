@@ -114,7 +114,7 @@ export class RequestManager extends BaseManager {
       requestIds.map((requestId) => this.getRequestById(requestId))
     );
 
-    return ok(requests.map((r) => r.data).filter((r) => r !== null));
+    return ok(requests.map((r) => r.data).filter((r) => r !== null) as HeliconeRequest[]);
   }
 
   private async uncachedGetRequestById(

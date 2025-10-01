@@ -22,9 +22,7 @@ export async function webSocketControlPlaneServer(
       clientWs.send(
         JSON.stringify({
           _type: "Error",
-          Unauthorized: {
-            message: auth.error ?? "Unauthorized",
-          },
+          message: auth.error ?? "Unauthorized",
         } as MessageTypeRX)
       );
     });

@@ -63,7 +63,7 @@ export default function AdminWallet() {
   const [isSavingCreditLine, setIsSavingCreditLine] = useState(false);
   const [creditLineError, setCreditLineError] = useState<string | null>(null);
   const [creditLineSuccess, setCreditLineSuccess] = useState<string | null>(
-    null
+    null,
   );
 
   // Fetch dashboard data
@@ -95,7 +95,7 @@ export default function AdminWallet() {
   // Mutation for modifying wallet balance
   const modifyBalanceMutation = $JAWN_API.useMutation(
     "post",
-    "/v1/admin/wallet/{orgId}/modify-balance"
+    "/v1/admin/wallet/{orgId}/modify-balance",
   );
 
   // Credit line queries and mutations
@@ -118,26 +118,26 @@ export default function AdminWallet() {
             setCreditLineLimit(
               data.data.creditLineLimitCents
                 ? (data.data.creditLineLimitCents / 100).toString()
-                : ""
+                : "",
             );
           }
         },
-      }
+      },
     );
 
   const enableCreditLineMutation = $JAWN_API.useMutation(
     "post",
-    "/v1/admin/wallet/{orgId}/enable-negative-balance"
+    "/v1/admin/wallet/{orgId}/enable-negative-balance",
   );
 
   const disableCreditLineMutation = $JAWN_API.useMutation(
     "post",
-    "/v1/admin/wallet/{orgId}/disable-negative-balance"
+    "/v1/admin/wallet/{orgId}/disable-negative-balance",
   );
 
   const setCreditLimitMutation = $JAWN_API.useMutation(
     "post",
-    "/v1/admin/wallet/{orgId}/set-credit-limit"
+    "/v1/admin/wallet/{orgId}/set-credit-limit",
   );
 
   // Fetch table data (lazy loaded when table is selected)
@@ -222,7 +222,7 @@ export default function AdminWallet() {
         setModifyError(result.error);
       } else {
         setModifySuccess(
-          `Successfully ${modifyType === "credit" ? "added" : "deducted"} ${formatCurrency(amount)}`
+          `Successfully ${modifyType === "credit" ? "added" : "deducted"} ${formatCurrency(amount)}`,
         );
         // Reset form
         setModifyAmount("");
@@ -232,7 +232,7 @@ export default function AdminWallet() {
       }
     } catch (error) {
       setModifyError(
-        error instanceof Error ? error.message : "Failed to modify balance"
+        error instanceof Error ? error.message : "Failed to modify balance",
       );
     } finally {
       setIsModifying(false);
@@ -284,7 +284,9 @@ export default function AdminWallet() {
       refetchCreditLine();
     } catch (error) {
       setCreditLineError(
-        error instanceof Error ? error.message : "Failed to save credit line settings"
+        error instanceof Error
+          ? error.message
+          : "Failed to save credit line settings",
       );
     } finally {
       setIsSavingCreditLine(false);
@@ -663,7 +665,7 @@ export default function AdminWallet() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Current Status Display */}
-                    <div className="rounded-md border border-border bg-muted p-4 space-y-2">
+                    <div className="space-y-2 rounded-md border border-border bg-muted p-4">
                       <div className="flex justify-between">
                         <span className="text-sm font-medium">Status:</span>
                         <span
@@ -681,7 +683,7 @@ export default function AdminWallet() {
                         <span className="text-sm font-semibold">
                           {creditLineInfo?.data?.creditLineLimitCents
                             ? formatCurrency(
-                                creditLineInfo.data.creditLineLimitCents / 100
+                                creditLineInfo.data.creditLineLimitCents / 100,
                               )
                             : "Unlimited"}
                         </span>
@@ -691,7 +693,10 @@ export default function AdminWallet() {
                     {/* Enable/Disable Toggle */}
                     <div className="flex items-center justify-between space-x-2 rounded-md border border-border p-4">
                       <div className="space-y-0.5">
-                        <Label htmlFor="credit-line-toggle" className="text-sm font-medium">
+                        <Label
+                          htmlFor="credit-line-toggle"
+                          className="text-sm font-medium"
+                        >
                           Allow Negative Balance
                         </Label>
                         <p className="text-sm text-muted-foreground">
@@ -710,9 +715,7 @@ export default function AdminWallet() {
                     {/* Credit Limit Input (only shown when enabled) */}
                     {creditLineEnabled && (
                       <div className="space-y-2">
-                        <Label htmlFor="credit-limit">
-                          Credit Limit (USD)
-                        </Label>
+                        <Label htmlFor="credit-limit">Credit Limit (USD)</Label>
                         <Input
                           id="credit-limit"
                           type="number"

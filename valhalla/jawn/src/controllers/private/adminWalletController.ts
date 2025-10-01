@@ -126,10 +126,17 @@ export class AdminWalletController extends Controller {
     const settingsManager = new SettingsManager();
     const stripeProductSettings =
       await settingsManager.getSetting("stripe:products");
-    let paymentsMap = new Map<string, { total: number; count: number; lastDate: string }>();
+    let paymentsMap = new Map<
+      string,
+      { total: number; count: number; lastDate: string }
+    >();
 
-    if (stripeProductSettings && stripeProductSettings.cloudGatewayTokenUsageProduct) {
-      const tokenUsageProductId = stripeProductSettings.cloudGatewayTokenUsageProduct;
+    if (
+      stripeProductSettings &&
+      stripeProductSettings.cloudGatewayTokenUsageProduct
+    ) {
+      const tokenUsageProductId =
+        stripeProductSettings.cloudGatewayTokenUsageProduct;
       const paymentsResult = await dbExecute<{
         org_id: string;
         total_amount_received: number;
@@ -381,8 +388,8 @@ export class AdminWalletController extends Controller {
           data: rawTableData.data || [],
           total: rawTableData.total || 0,
           page: rawTableData.page || 0,
-          message: rawTableData.message
-        }
+          message: rawTableData.message,
+        },
       };
 
       return ok(transformedResponse);
@@ -398,8 +405,8 @@ export class AdminWalletController extends Controller {
             data: [],
             total: 0,
             page: validatedPage,
-            message: "No data available (local development mode)"
-          }
+            message: "No data available (local development mode)",
+          },
         };
         return ok(fallbackResponse);
       }
@@ -497,8 +504,12 @@ export class AdminWalletController extends Controller {
 
       // Fallback for local development when Durable Objects don't work
       if (ENVIRONMENT !== "production") {
-        console.warn("Wallet modification not available in local development mode");
-        return err("Wallet modification is not available in local development mode. This feature requires production Durable Objects.");
+        console.warn(
+          "Wallet modification not available in local development mode"
+        );
+        return err(
+          "Wallet modification is not available in local development mode. This feature requires production Durable Objects."
+        );
       }
 
       return err(`Error modifying wallet balance: ${error}`);
