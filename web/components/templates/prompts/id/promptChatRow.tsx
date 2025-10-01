@@ -237,7 +237,10 @@ const PromptChatRow = (props: PromptChatRowProps) => {
 
   const [role, setRole] = useState<
     "system" | "user" | "assistant" | "function" | "tool"
-  >((message.role as "system" | "user" | "assistant" | "function" | "tool") || "user");
+  >(
+    (message.role as "system" | "user" | "assistant" | "function" | "tool") ||
+      "user",
+  );
 
   // Set isEditing to true by default
   const [isEditing, setIsEditing] = useState(editMode);
@@ -273,12 +276,36 @@ const PromptChatRow = (props: PromptChatRowProps) => {
 
   // Update getContentAsString function
   const getContentAsString = (rawMessage: ExtendedMessage): string => {
+    // Handle tool_calls - serialize the entire message structure
+    if (rawMessage.tool_calls && rawMessage.tool_calls.length > 0) {
+      // Create a simplified structure for editing
+      const toolCallsData = rawMessage.tool_calls.map((tool) => ({
+        name: tool.name,
+        arguments: tool.arguments,
+        ...(tool.id && { id: tool.id }),
+      }));
+      return JSON.stringify(
+        {
+          ...(rawMessage.content && { content: rawMessage.content }),
+          tool_calls: toolCallsData,
+        },
+        null,
+        2,
+      );
+    }
+
     if (Array.isArray(rawMessage.content)) {
       const textMessage = rawMessage.content.find(
         (element): element is ContentItem & { type: "text" } =>
           element.type === "text",
       );
       return textMessage?.text || "";
+    } else if (
+      typeof rawMessage.content === "object" &&
+      rawMessage.content !== null
+    ) {
+      // Handle object content (e.g., tool/function definitions) by serializing to JSON
+      return JSON.stringify(rawMessage.content, null, 2);
     } else {
       return rawMessage.content || "";
     }
@@ -540,9 +567,56 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   };
 
   const setText = (text: string): void => {
+    const newMessages = { ...currentMessage };
+
+    // Check if this message originally had tool_calls
+    if (currentMessage.tool_calls && currentMessage.tool_calls.length > 0) {
+      try {
+        // Try to parse as JSON to update tool_calls
+        const parsed = JSON.parse(text);
+        if (parsed.tool_calls && Array.isArray(parsed.tool_calls)) {
+          newMessages.tool_calls = parsed.tool_calls;
+          newMessages.content =
+            parsed.content || currentMessage.content || null;
+        } else {
+          // If no tool_calls in parsed JSON, just update content
+          newMessages.content = text;
+        }
+        setCurrentMessage(newMessages);
+        if (fileObj instanceof File) {
+          handleCallback(text, role, fileObj);
+        }
+        return;
+      } catch (e) {
+        // If parsing fails, treat as plain text and clear tool_calls
+        newMessages.content = text;
+        delete newMessages.tool_calls;
+      }
+    }
+
+    // Check if the original content was an object (e.g., tool/function definitions)
+    if (
+      typeof currentMessage.content === "object" &&
+      currentMessage.content !== null &&
+      !Array.isArray(currentMessage.content)
+    ) {
+      try {
+        // Try to parse as JSON to update the object content
+        const parsed = JSON.parse(text);
+        newMessages.content = parsed;
+        setCurrentMessage(newMessages);
+        if (fileObj instanceof File) {
+          handleCallback(text, role, fileObj);
+        }
+        return;
+      } catch (e) {
+        // If parsing fails, treat as plain text
+        newMessages.content = text;
+      }
+    }
+
     const newVariables = extractVariables(text);
     const replacedText = replaceVariablesWithTags(text, newVariables);
-    const newMessages = { ...currentMessage };
     const messageContent = newMessages.content;
 
     if (Array.isArray(messageContent)) {
@@ -616,7 +690,12 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                 size="small"
                 role={role}
                 onRoleChange={(
-                  newRole: "system" | "user" | "assistant" | "function" | "tool",
+                  newRole:
+                    | "system"
+                    | "user"
+                    | "assistant"
+                    | "function"
+                    | "tool",
                 ) => {
                   setRole(newRole);
                   const newMessage = {
@@ -701,12 +780,69 @@ const PromptChatRow = (props: PromptChatRowProps) => {
                   <MarkdownEditor
                     text={contentAsString || ""}
                     setText={function (text: string): void {
+                      const newMessages = { ...currentMessage };
+
+                      // Check if this message originally had tool_calls
+                      if (
+                        currentMessage.tool_calls &&
+                        currentMessage.tool_calls.length > 0
+                      ) {
+                        try {
+                          // Try to parse as JSON to update tool_calls
+                          const parsed = JSON.parse(text);
+                          if (
+                            parsed.tool_calls &&
+                            Array.isArray(parsed.tool_calls)
+                          ) {
+                            newMessages.tool_calls = parsed.tool_calls;
+                            newMessages.content =
+                              parsed.content || currentMessage.content || null;
+                          } else {
+                            // If no tool_calls in parsed JSON, just update content
+                            newMessages.content = text;
+                          }
+                          setCurrentMessage(newMessages);
+                          if (fileObj instanceof File) {
+                            handleCallback(text, role, fileObj);
+                          } else {
+                            handleCallback(text, role, null);
+                          }
+                          return;
+                        } catch (e) {
+                          // If parsing fails, treat as plain text and clear tool_calls
+                          newMessages.content = text;
+                          delete newMessages.tool_calls;
+                        }
+                      }
+
+                      // Check if the original content was an object (e.g., tool/function definitions)
+                      if (
+                        typeof currentMessage.content === "object" &&
+                        currentMessage.content !== null &&
+                        !Array.isArray(currentMessage.content)
+                      ) {
+                        try {
+                          // Try to parse as JSON to update the object content
+                          const parsed = JSON.parse(text);
+                          newMessages.content = parsed;
+                          setCurrentMessage(newMessages);
+                          if (fileObj instanceof File) {
+                            handleCallback(text, role, fileObj);
+                          } else {
+                            handleCallback(text, role, null);
+                          }
+                          return;
+                        } catch (e) {
+                          // If parsing fails, treat as plain text
+                          newMessages.content = text;
+                        }
+                      }
+
                       const newVariables = extractVariables(text);
                       const replacedText = replaceVariablesWithTags(
                         text,
                         newVariables,
                       );
-                      const newMessages = { ...currentMessage };
                       const messageContent = newMessages.content;
                       if (Array.isArray(messageContent)) {
                         const textMessage = messageContent.find(
