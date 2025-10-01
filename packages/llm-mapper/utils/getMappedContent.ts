@@ -116,7 +116,7 @@ const getUnsanitizedMappedContent = ({
   if (!mapper) {
     throw new Error(`Mapper not found: ${JSON.stringify(mapperType)}`);
   }
-  let result: ReturnType<MapperFn<any, any>>
+  let result: ReturnType<MapperFn<any, any>>;
 
   let requestBody = heliconeRequest.request_body;
   let responseBody = heliconeRequest.response_body;
@@ -145,17 +145,12 @@ const getUnsanitizedMappedContent = ({
         }
       }
     } else {
-      if (heliconeRequest.request_id === "4bb85264-d9a4-45d3-918e-61dcf2ba5dc3") {
-        console.log("modelProviderConfig", modelProviderConfig);
-      }
       // fallback to legacy mapper types
       const legacyMapperType = getMapperTypeFromHeliconeRequest(
         heliconeRequest,
         heliconeRequest.model,
         true
       );
-      console.log("legacyMapperType", legacyMapperType);
-      mapper = MAPPERS[legacyMapperType];
       if (!mapper) {
         throw new Error(`Mapper not found: ${JSON.stringify(legacyMapperType)}`);
       }

@@ -34,4 +34,4 @@ EXAMPLE FLOW (non AI Gateway):
 #### References
 - See the `transform/types/logs.ts` file, this outlines the type that we store in S3
 - See the `transform/types/openai.ts`, this outlines the provider OpenAI types
-- See the `mappers/types.ts`, this outline the standardized Helicone format types
+- See the `mappers/types.ts`, this outlines the standardized Helicone format types
