@@ -395,8 +395,8 @@ export class Wallet extends DurableObject<Env> {
       }
 
       return {
-        allowNegativeBalance: data[0].allow_negative_balance || false,
-        creditLineLimitCents: data[0].credit_line_limit_cents || null,
+        allowNegativeBalance: data[0].allow_negative_balance ?? false,
+        creditLineLimitCents: data[0].credit_line_limit_cents ?? null,
       };
     } catch (error) {
       console.error(`Error fetching credit line info for org ${orgId}:`, error);
