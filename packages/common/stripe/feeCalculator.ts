@@ -19,9 +19,29 @@ export function calculateStripeFee(
   amountCents: number,
   transactionCount: number = 1
 ): number {
-  const percentageFee =
-    amountCents - Math.ceil(amountCents / (1 + STRIPE_PERCENT_FEE_RATE));
+  const percentageFee = Math.ceil(amountCents * STRIPE_PERCENT_FEE_RATE);
   const fixedFee = STRIPE_FIXED_FEE_CENTS * transactionCount;
+  return percentageFee + fixedFee;
+}
+
+/**
+ * Calculate Stripe fees in reverse
+ * Given a gross amount (what was charged), calculate what the fees were
+ * Formula: fee = (gross - fixed) * rate / (1 + rate) + fixed
+ * This ensures: gross - fee = net, and fee = net * rate + fixed
+ * @param amountCents - The gross amount in cents (what was charged)
+ * @param transactionCount - Number of transactions (default: 1)
+ * @returns Total fees in cents
+ */
+export function reverseCalculateStripeFee(
+  amountCents: number,
+  transactionCount: number = 1
+): number {
+  const fixedFee = STRIPE_FIXED_FEE_CENTS * transactionCount;
+  const percentageFee = Math.ceil(
+    ((amountCents - fixedFee) * STRIPE_PERCENT_FEE_RATE) /
+      (1 + STRIPE_PERCENT_FEE_RATE)
+  );
   return percentageFee + fixedFee;
 }
 
@@ -36,7 +56,7 @@ export function calculateNetAmount(
   grossAmountCents: number,
   transactionCount: number
 ): number {
-  const fees = calculateStripeFee(grossAmountCents, transactionCount);
+  const fees = reverseCalculateStripeFee(grossAmountCents, transactionCount);
   return grossAmountCents - fees;
 }
 

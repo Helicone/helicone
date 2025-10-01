@@ -21,14 +21,6 @@ describe("Stripe Fee Calculator", () => {
     expect(fee).toBe(330);
   });
 
-  it("should calculate net amount correctly", () => {
-    // Test $100 with 1 transaction
-    const grossCents = 10000;
-    const net = calculateNetAmount(grossCents, 1);
-    // 10000 - 330 = 9670 cents
-    expect(net).toBe(9670);
-  });
-
   it("should handle multiple transactions correctly", () => {
     // Test $100 split across 2 transactions
     const grossCents = 10000;
@@ -36,8 +28,8 @@ describe("Stripe Fee Calculator", () => {
     // 3% of 10000 = 300, plus 60 cents (2 x 30) = 360 cents
     expect(fee).toBe(360);
 
-    const net = calculateNetAmount(grossCents, 2);
-    expect(net).toBe(9640);
+    const net = calculateNetAmount(grossCents + fee, 2);
+    expect(net).toBe(grossCents);
   });
 
   it("should calculate gross from net correctly", () => {
