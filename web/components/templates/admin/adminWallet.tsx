@@ -252,7 +252,7 @@ export default function AdminWallet() {
         // Update form with returned values
         if (result.data) {
           setAllowNegativeBalance(result.data.allowNegativeBalance);
-          setCreditLimit(result.data.creditLimit.toString());
+          setCreditLimit(result.data.creditLimit?.toString() ?? "0");
         }
         // Refresh dashboard data to update the table
         refetchDashboard();
