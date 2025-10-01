@@ -8386,7 +8386,8 @@
 						"type": "string",
 						"enum": [
 							"fp4",
-							"fp8"
+							"fp8",
+							"bf16"
 						]
 					},
 					"responseFormat": {

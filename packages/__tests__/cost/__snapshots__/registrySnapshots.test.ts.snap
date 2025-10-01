@@ -1305,7 +1305,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "llama-3.1-8b-instruct:deepinfra": {
+    "llama-3.1-8b-instruct-turbo:deepinfra": {
       "context": 128000,
       "crossRegion": false,
       "maxTokens": 128000,
@@ -1326,7 +1326,57 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.1-8b-instruct:deepinfra": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.1-8b-instruct:novita": {
+      "context": 16384,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "meta-llama/llama-3.1-8b-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1352,6 +1402,31 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "groq",
       "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.3-70b-instruct:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 120000,
+      "modelId": "meta-llama/llama-3.3-70b-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -2939,6 +3014,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "meta/llama": [
     "deepinfra",
+    "deepinfra",
     "groq",
     "groq",
     "groq",
@@ -2946,6 +3022,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "novita",
+    "novita",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -3612,8 +3690,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "meta/llama": {
     "deepinfra": [
       {
-        "input": 2e-8,
-        "output": 3e-8,
+        "input": 3e-8,
+        "output": 5e-8,
         "threshold": 0,
       },
     ],
@@ -3626,6 +3704,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "request": 0,
         "threshold": 0,
         "web_search": 0,
+      },
+    ],
+    "novita": [
+      {
+        "input": 1.3e-7,
+        "output": 3.9e-7,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -4149,12 +4234,20 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "llama-3.1-8b-instruct",
       "providers": [
         "deepinfra",
+        "novita",
+      ],
+    },
+    {
+      "model": "llama-3.1-8b-instruct-turbo",
+      "providers": [
+        "deepinfra",
       ],
     },
     {
       "model": "llama-3.3-70b-instruct",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
@@ -4273,7 +4366,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 10,
+      "modelCount": 11,
       "provider": "deepinfra",
     },
     {
@@ -4289,7 +4382,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 1,
+      "modelCount": 3,
       "provider": "novita",
     },
     {
@@ -4344,6 +4437,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "kimi-k2",
     "kimi-k2-0905",
     "llama-3.1-8b-instant",
+    "llama-3.1-8b-instruct",
+    "llama-3.1-8b-instruct-turbo",
     "llama-3.3-70b-instruct",
     "llama-4-maverick",
     "llama-4-scout",
@@ -4366,9 +4461,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 120,
-  "totalModelProviderConfigs": 120,
-  "totalModelsWithPtb": 46,
+  "totalEndpoints": 124,
+  "totalModelProviderConfigs": 124,
+  "totalModelsWithPtb": 48,
   "totalProviders": 12,
 }
 `;

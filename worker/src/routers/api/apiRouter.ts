@@ -716,6 +716,121 @@ function getAPIRouterV1(
     }
   );
 
+  // Admin endpoint to modify wallet balance for any org
+  router.post(
+    "/admin/wallet/:orgId/modify-balance",
+    async (
+      { params: { orgId } },
+      requestWrapper: RequestWrapper,
+      env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      const authHeader = requestWrapper.headers.get("Authorization");
+      if (!authHeader) {
+        return InternalResponse.unauthorized();
+      }
+
+      const providedToken = authHeader.replace("Bearer ", "");
+      const expectedToken = env.HELICONE_MANUAL_ACCESS_KEY;
+
+      if (!expectedToken) {
+        console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
+        return InternalResponse.newError("Server configuration error", 500);
+      }
+
+      const providedBuffer = Buffer.from(providedToken);
+      const expectedBuffer = Buffer.from(expectedToken);
+
+      // Check length first to avoid timingSafeEqual error
+      if (providedBuffer.length !== expectedBuffer.length) {
+        return InternalResponse.unauthorized();
+      }
+
+      if (!timingSafeEqual(providedBuffer, expectedBuffer)) {
+        return InternalResponse.unauthorized();
+      }
+
+      // Parse request body
+      const data = await requestWrapper.unsafeGetJson<{
+        amount: number;
+        type: "credit" | "debit";
+        reason: string;
+        referenceId: string;
+        adminUserId: string;
+      }>();
+
+      if (!data) {
+        return InternalResponse.newError("Invalid request body", 400);
+      }
+
+      // Validate inputs
+      if (!data.amount || data.amount <= 0) {
+        return InternalResponse.newError(
+          "Amount must be a positive number",
+          400
+        );
+      }
+
+      if (!data.type || (data.type !== "credit" && data.type !== "debit")) {
+        return InternalResponse.newError(
+          "Type must be 'credit' or 'debit'",
+          400
+        );
+      }
+
+      if (!data.reason || data.reason.trim().length === 0) {
+        return InternalResponse.newError("Reason is required", 400);
+      }
+
+      if (!data.referenceId) {
+        return InternalResponse.newError("Reference ID is required", 400);
+      }
+
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      try {
+        // Modify the wallet balance
+        if (data.type === "credit") {
+          // Add credits
+          await walletStub.addCredits(data.amount, data.referenceId);
+        } else {
+          // Deduct credits (similar to refund)
+          const deductResult = await walletStub.deductCredits(
+            data.amount,
+            data.referenceId,
+            orgId
+          );
+
+          if (deductResult.error) {
+            return InternalResponse.newError(deductResult.error, 400);
+          }
+        }
+
+        // Get updated wallet state
+        const walletState = await walletStub.getWalletState(orgId);
+
+        // Log the modification for audit trail
+        console.log(
+          `Admin wallet modification: orgId=${orgId}, type=${data.type}, amount=${data.amount}, reason=${data.reason}, adminUserId=${data.adminUserId}`
+        );
+
+        return InternalResponse.successJSON(walletState);
+      } catch (e) {
+        console.error(
+          `Error modifying wallet balance for org ${orgId}:`,
+          e
+        );
+        return InternalResponse.newError(
+          e instanceof Error
+            ? e.message
+            : "Failed to modify wallet balance",
+          500
+        );
+      }
+    }
+  );
+
   // Stripe Webhook Handler
   router.post(
     "/stripe/webhook",

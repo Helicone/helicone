@@ -46,6 +46,8 @@ import { AlertBannerController } from './../../controllers/private/alertBannerCo
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AdminController } from './../../controllers/private/adminController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { AdminWalletController } from './../../controllers/private/adminWalletController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AudioController } from './../../controllers/private/AudioController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { RouterControlPlaneController } from './../../controllers/private/router/controlPlaneController';
@@ -2680,7 +2682,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SettingName": {
         "dataType": "refAlias",
-        "type": {"dataType":"enum","enums":["stripe:products","kafka:dlq","kafka:log","kafka:score","kafka:dlq:score","kafka:dlq:eu","kafka:log:eu","kafka:orgs-to-dlq","azure:experiment","openai:apiKey","anthropic:apiKey","openrouter:apiKey","togetherai:apiKey","sqs:request-response-logs","sqs:helicone-scores","sqs:request-response-logs-dlq","sqs:helicone-scores-dlq"],"validators":{}},
+        "type": {"dataType":"enum","enums":["kafka:dlq","kafka:log","kafka:score","kafka:dlq:score","kafka:dlq:eu","kafka:log:eu","kafka:orgs-to-dlq","azure:experiment","openai:apiKey","anthropic:apiKey","openrouter:apiKey","togetherai:apiKey","sqs:request-response-logs","sqs:helicone-scores","sqs:request-response-logs-dlq","sqs:helicone-scores-dlq","stripe:products"],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "url.URL": {
@@ -14388,6 +14390,70 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_InAppThread_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"isProduction":{"dataType":"boolean","required":true},"summary":{"dataType":"nestedObjectLiteral","nestedProperties":{"totalCreditsSpent":{"dataType":"double","required":true},"totalCreditsIssued":{"dataType":"double","required":true},"totalOrgsWithCredits":{"dataType":"double","required":true}},"required":true},"organizations":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"ownerEmail":{"dataType":"string","required":true},"tier":{"dataType":"string","required":true},"lastPaymentDate":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},"clickhouseTotalSpend":{"dataType":"double","required":true},"paymentsCount":{"dataType":"double","required":true},"totalPayments":{"dataType":"double","required":true},"stripeCustomerId":{"dataType":"string","required":true},"orgName":{"dataType":"string","required":true},"orgId":{"dataType":"string","required":true}}},"required":true}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "WalletState": {
+        "dataType": "refObject",
+        "properties": {
+            "balance": {"dataType":"double","required":true},
+            "effectiveBalance": {"dataType":"double","required":true},
+            "totalCredits": {"dataType":"double","required":true},
+            "totalDebits": {"dataType":"double","required":true},
+            "totalEscrow": {"dataType":"double","required":true},
+            "disallowList": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"model":{"dataType":"string","required":true},"provider":{"dataType":"string","required":true},"helicone_request_id":{"dataType":"string","required":true}}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_WalletState_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"WalletState","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_WalletState.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_WalletState_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TableDataResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "pageSize": {"dataType":"double","required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string"},"page":{"dataType":"double","required":true},"total":{"dataType":"double","required":true},"data":{"dataType":"array","array":{"dataType":"any"},"required":true}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_TableDataResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"TableDataResponse","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_TableDataResponse.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_TableDataResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ConvertToWavResponse": {
         "dataType": "refObject",
         "properties": {
@@ -19610,37 +19676,6 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsAdminController_getGatewayDashboardData: Record<string, TsoaRoute.ParameterSchema> = {
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-        };
-        app.post('/v1/admin/gateway/dashboard_data',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AdminController)),
-            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getGatewayDashboardData)),
-
-            async function AdminController_getGatewayDashboardData(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_getGatewayDashboardData, request, response });
-
-                const controller = new AdminController();
-
-              await templateService.apiHandler({
-                methodName: 'getGatewayDashboardData',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAdminController_hasFeatureFlag: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"orgId":{"dataType":"string","required":true},"feature":{"dataType":"string","required":true}}},
@@ -20342,73 +20377,6 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsAdminController_getWalletDetails: Record<string, TsoaRoute.ParameterSchema> = {
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
-        };
-        app.post('/v1/admin/wallet/:orgId',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AdminController)),
-            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getWalletDetails)),
-
-            async function AdminController_getWalletDetails(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_getWalletDetails, request, response });
-
-                const controller = new AdminController();
-
-              await templateService.apiHandler({
-                methodName: 'getWalletDetails',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsAdminController_getWalletTableData: Record<string, TsoaRoute.ParameterSchema> = {
-                request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
-                tableName: {"in":"path","name":"tableName","required":true,"dataType":"string"},
-                page: {"in":"query","name":"page","dataType":"double"},
-                pageSize: {"in":"query","name":"pageSize","dataType":"double"},
-        };
-        app.post('/v1/admin/wallet/:orgId/tables/:tableName',
-            authenticateMiddleware([{"api_key":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(AdminController)),
-            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getWalletTableData)),
-
-            async function AdminController_getWalletTableData(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_getWalletTableData, request, response });
-
-                const controller = new AdminController();
-
-              await templateService.apiHandler({
-                methodName: 'getWalletTableData',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAdminController_getHelixThread: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 sessionId: {"in":"path","name":"sessionId","required":true,"dataType":"string"},
@@ -20430,6 +20398,139 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getHelixThread',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminWalletController_getGatewayDashboardData: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/admin/wallet/gateway/dashboard_data',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController.prototype.getGatewayDashboardData)),
+
+            async function AdminWalletController_getGatewayDashboardData(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminWalletController_getGatewayDashboardData, request, response });
+
+                const controller = new AdminWalletController();
+
+              await templateService.apiHandler({
+                methodName: 'getGatewayDashboardData',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminWalletController_getWalletDetails: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
+        };
+        app.post('/v1/admin/wallet/:orgId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController.prototype.getWalletDetails)),
+
+            async function AdminWalletController_getWalletDetails(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminWalletController_getWalletDetails, request, response });
+
+                const controller = new AdminWalletController();
+
+              await templateService.apiHandler({
+                methodName: 'getWalletDetails',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminWalletController_getWalletTableData: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
+                tableName: {"in":"path","name":"tableName","required":true,"dataType":"string"},
+                page: {"in":"query","name":"page","dataType":"double"},
+                pageSize: {"in":"query","name":"pageSize","dataType":"double"},
+        };
+        app.post('/v1/admin/wallet/:orgId/tables/:tableName',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController.prototype.getWalletTableData)),
+
+            async function AdminWalletController_getWalletTableData(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminWalletController_getWalletTableData, request, response });
+
+                const controller = new AdminWalletController();
+
+              await templateService.apiHandler({
+                methodName: 'getWalletTableData',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminWalletController_modifyWalletBalance: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
+                amount: {"in":"query","name":"amount","required":true,"dataType":"double"},
+                type: {"in":"query","name":"type","required":true,"dataType":"union","subSchemas":[{"dataType":"enum","enums":["credit"]},{"dataType":"enum","enums":["debit"]}]},
+                reason: {"in":"query","name":"reason","required":true,"dataType":"string"},
+        };
+        app.post('/v1/admin/wallet/:orgId/modify-balance',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController.prototype.modifyWalletBalance)),
+
+            async function AdminWalletController_modifyWalletBalance(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminWalletController_modifyWalletBalance, request, response });
+
+                const controller = new AdminWalletController();
+
+              await templateService.apiHandler({
+                methodName: 'modifyWalletBalance',
                 controller,
                 response,
                 next,
