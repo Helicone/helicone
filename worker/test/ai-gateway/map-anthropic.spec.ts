@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { toOpenAI } from '../../src/lib/clients/llmmapper/providers/anthropic/response/toOpenai';
-import { AnthropicResponseBody } from '../../src/lib/clients/llmmapper/types/anthropic';
-import { toAnthropic } from '../../src/lib/clients/llmmapper/providers/openai/request/toAnthropic';
-import { AnthropicToOpenAIStreamConverter } from '../../src/lib/clients/llmmapper/providers/anthropic/streamedResponse/toOpenai';
-import { AnthropicStreamEvent } from '../../src/lib/clients/llmmapper/types/anthropic';
+import { toOpenAI } from '@helicone-package/llm-mapper/transform/providers/anthropic/response/toOpenai';
+import { AnthropicResponseBody } from '@helicone-package/llm-mapper/transform/types/anthropic';
+import { toAnthropic } from '@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic';
+import { AnthropicToOpenAIStreamConverter } from '@helicone-package/llm-mapper/transform/providers/anthropic/streamedResponse/toOpenai';
+import { AnthropicStreamEvent } from '@helicone-package/llm-mapper/transform/types/anthropic';
 import { HeliconeChatCreateParams } from '@helicone-package/prompts/types';
 
 describe('Anthropic to OpenAI Response Mapper', () => {
