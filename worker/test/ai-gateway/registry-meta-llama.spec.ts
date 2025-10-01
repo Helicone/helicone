@@ -985,7 +985,8 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 200,
         },
-      }));
+      })
+    );
 
     it("should handle complex multi-turn conversations", () =>
       runGatewayTest({
@@ -1023,7 +1024,8 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 200,
         },
-      }));
+      })
+    );
 
     it("should handle custom headers", () =>
       runGatewayTest({
@@ -1056,7 +1058,8 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 200,
         },
-      }));
+      })
+    );
 
     it("should handle logit bias parameter", () =>
       runGatewayTest({
@@ -1086,7 +1089,8 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 200,
         },
-      }));
+      })
+    );
 
     it("should handle function calling with specific tool choice", () =>
       runGatewayTest({
@@ -1139,6 +1143,279 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 200,
         },
+      })
+    );
+  });
+
+  describe("llama-3.3-70b-instruct", () => {
+    it("should handle novita provider", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/llama-3.3-70b-instruct",
+              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              expects: novitaAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
       }));
+
+    it("should auto-select novita provider when none specified", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/llama-3.3-70b-instruct",
+              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              expects: novitaAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    // Test tool usage with Novita for llama-3.3-70b-instruct
+    it("should handle tool calls with novita provider", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/novita",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "What's the weather in Paris?" }],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "get_weather",
+                  description: "Get current weather",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      location: { type: "string" },
+                      unit: { type: "string", enum: ["celsius", "fahrenheit"] },
+                    },
+                    required: ["location"],
+                  },
+                },
+              },
+            ],
+            tool_choice: "auto",
+            temperature: 0.7,
+            max_tokens: 4000,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/llama-3.3-70b-instruct",
+              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              expects: {
+                ...novitaAuthExpectations,
+                bodyContains: [
+                  "tools",
+                  "tool_choice",
+                  "get_weather",
+                  "temperature",
+                  "max_tokens",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    // Test multilingual support - one of the key features of llama-3.3-70b-instruct
+    it("should handle multilingual conversations with novita provider", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/novita",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "¿Puedes ayudarme en español?" },
+              { role: "assistant", content: "¡Por supuesto! Puedo ayudarte en español." },
+              { role: "user", content: "Merci! Peux-tu aussi parler français?" },
+            ],
+            temperature: 0.8,
+            max_tokens: 2000,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/llama-3.3-70b-instruct",
+              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              expects: {
+                ...novitaAuthExpectations,
+                bodyContains: [
+                  "español",
+                  "français",
+                  "temperature",
+                  "max_tokens",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    // Test all supported parameters for llama-3.3-70b-instruct
+    it("should handle all supported parameters with novita provider", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/novita",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Test comprehensive parameters" },
+            ],
+            max_tokens: 8000,
+            temperature: 0.9,
+            top_p: 0.95,
+            stop: ["STOP", "END"],
+            frequency_penalty: 0.2,
+            presence_penalty: 0.1,
+            repetition_penalty: 1.05,
+            top_k: 50,
+            seed: 42,
+            min_p: 0.1,
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "test_function",
+                  description: "A test function for parameter validation",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      param: { type: "string" },
+                    },
+                  },
+                },
+              },
+            ],
+            tool_choice: "auto",
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/llama-3.3-70b-instruct",
+              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              expects: {
+                ...novitaAuthExpectations,
+                bodyContains: [
+                  "max_tokens",
+                  "temperature",
+                  "top_p",
+                  "stop",
+                  "frequency_penalty",
+                  "presence_penalty",
+                  "repetition_penalty",
+                  "top_k",
+                  "seed",
+                  "min_p",
+                  "tool_choice",
+                  "tools",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    // Test max completion tokens for llama-3.3-70b-instruct (120,000)
+    it("should handle large max completion tokens correctly", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/novita",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Generate a very long response" },
+            ],
+            max_tokens: 120000, // Max completion tokens for this model
+            temperature: 0.3,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/llama-3.3-70b-instruct",
+              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              expects: {
+                ...novitaAuthExpectations,
+                bodyContains: ["max_tokens", "120000"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    // Test error scenarios for llama-3.3-70b-instruct with Novita
+    it("should handle Novita provider failure", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Novita service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Novita", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Novita", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      })
+    );
   });
 });

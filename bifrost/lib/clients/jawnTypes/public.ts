@@ -3043,7 +3043,7 @@ Json: JsonObject;
       /** Format: double */
       priority?: number;
       /** @enum {string} */
-      quantization?: "fp4" | "fp8";
+      quantization?: "fp4" | "fp8" | "bf16";
       responseFormat?: components["schemas"]["ResponseFormat"];
     };
     UserEndpointConfig: {
