@@ -6,6 +6,7 @@ import { OpenRouterUsageProcessor } from "./openRouterUsageProcessor";
 import { DeepSeekUsageProcessor } from "./deepseekUsageProcessor";
 import { VertexUsageProcessor } from "./vertexUsageProcessor";
 import { GoogleUsageProcessor } from "./googleUsageProcessor";
+import { BedrockUsageProcessor } from "./bedrockUsageProcessor";
 import { IUsageProcessor } from "./IUsageProcessor";
 import { ModelProviderName } from "../models/providers";
 
@@ -30,6 +31,8 @@ export function getUsageProcessor(
       return new VertexUsageProcessor();
     case "google-ai-studio":
       return new GoogleUsageProcessor();
+    case "bedrock":
+      return new BedrockUsageProcessor();
     default:
       return null;
   }
