@@ -33,7 +33,7 @@ export const models = {
     created: "2025-07-23T00:00:00.000Z",
     modality: {
       inputs: ["text", "image", "audio", "video"],
-      outputs: ["text"]
+      outputs: ["text"],
     },
     tokenizer: "Qwen",
   },
@@ -47,7 +47,19 @@ export const models = {
     created: "2025-01-01T00:00:00.000Z", // Estimated release date
     modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
     tokenizer: "Qwen",
-  }
+  },
+  "qwen3-235b-a22b-instruct": {
+    name: "Qwen3-235B-A22B-Instruct",
+    author: "qwen",
+    description:
+      "Qwen3-Next uses a highly sparse MoE design: 80B total parameters, but only ~3B activated per inference step. Experiments show that, with global load balancing, increasing total expert parameters while keeping activated experts fixed steadily reduces training loss.Compared to Qwen3’s MoE (128 total experts, 8 routed), Qwen3-Next expands to 512 total experts, combining 10 routed experts + 1 shared expert — maximizing resource usage without hurting performance. The Qwen3-Next-80B-A3B-Instruct performs comparably to our flagship model Qwen3-235B-A22B-Instruct-2507, and shows clear advantages in tasks requiring ultra-long context (up to 256K tokens).",
+    contextLength: 131_072,
+    maxOutputTokens: 32_768,
+    // quantization: "bf16",
+    created: "2025-09-18T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "Qwen"
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type QwenModelName = keyof typeof models;

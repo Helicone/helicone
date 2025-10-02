@@ -149,7 +149,7 @@ export const endpoints = {
       "top_k",
       "seed",
       "min_p",
-      "response_format"
+      "response_format",
     ],
     ptbEnabled: false,
     quantization: "fp4",
@@ -169,7 +169,7 @@ export const endpoints = {
       },
     ],
     rateLimits: {
-      rpm: 12000, 
+      rpm: 12000,
       tpm: 60000000,
       tpd: 6000000000,
     },
@@ -188,7 +188,77 @@ export const endpoints = {
       "top_k",
       "seed",
       "min_p",
-      "response_format"
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3-next-80b-a3b-instruct:novita": {
+    providerModelId: "qwen/qwen3-next-80b-a3b-instruct",
+    provider: "novita",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000014, // $0.14 per million tokens
+        output: 0.0000014, // $1.40 per million tokens
+      },
+    ],
+    contextLength: 262_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3-235b-a22b-instruct:novita": {
+    providerModelId: "qwen/qwen3-next-80b-a3b-instruct",
+    provider: "novita",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000015, // $0.15 per million tokens
+        output: 0.0000015, // $1.50 per million tokens
+      },
+    ],
+    contextLength: 262_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+     "tools",
+     "tool_choice",
+     "structured_outputs",
+     "response_format",
+     "max_tokens",
+     "temperature",
+     "top_p",
+     "stop",
+     "frequency_penalty",
+     "presence_penalty",
+     "seed",
+     "top_k",
+     "min_p",
+     "repetition_penalty",
+     "logit_bias"
     ],
     ptbEnabled: false,
     endpointConfigs: {
