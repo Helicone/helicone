@@ -78,3 +78,49 @@ This allows us to build complex filters like this:
   }
 }
 ```
+
+### Filtering by Properties
+
+<Note>
+  **Important:** When filtering by custom properties, you must nest the `properties` filter inside a `request_response_rmt` object.
+</Note>
+
+```json
+{
+  "filter": {
+    "request_response_rmt": {
+      "properties": {
+        "environment": {
+          "like": "%-dev"
+        }
+      }
+    }
+  }
+}
+```
+
+You can combine property filters with other filters using the `and`/`or` operators:
+
+```json
+{
+  "filter": {
+    "operator": "and",
+    "left": {
+      "request_response_rmt": {
+        "model": {
+          "equals": "gpt-4"
+        }
+      }
+    },
+    "right": {
+      "request_response_rmt": {
+        "properties": {
+          "environment": {
+            "like": "%-dev"
+          }
+        }
+      }
+    }
+  }
+}
+```

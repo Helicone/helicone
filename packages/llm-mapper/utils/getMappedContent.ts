@@ -151,6 +151,7 @@ const getUnsanitizedMappedContent = ({
         heliconeRequest.model,
         true
       );
+      mapper = MAPPERS[legacyMapperType];
       if (!mapper) {
         throw new Error(`Mapper not found: ${JSON.stringify(legacyMapperType)}`);
       }

@@ -234,10 +234,19 @@ export class DBWrapper {
       accessDict: {
         cache: true,
       },
+      metaData: {
+        allowNegativeBalance: org.data.allow_negative_balance,
+        creditLimit: org.data.credit_limit,
+      },
     });
   }
 
   async getAuthParams(): Promise<Result<AuthParams, string>> {
+    if (this.env.ENVIRONMENT === "development") {
+      console.log("Skipping cache in development");
+      return this._getAuthParams();
+    }
+
     if (this.authParams !== undefined) {
       return ok(this.authParams);
     }

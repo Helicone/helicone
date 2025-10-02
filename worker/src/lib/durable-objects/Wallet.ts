@@ -204,6 +204,7 @@ export class Wallet extends DurableObject<Env> {
     return count > 0;
   }
 
+  // amount is in cents
   addCredits(amount: number, eventId: string): void {
     const scaledAmount = amount * SCALE_FACTOR;
     this.ctx.storage.transactionSync(() => {
@@ -222,6 +223,7 @@ export class Wallet extends DurableObject<Env> {
     });
   }
 
+  // amount is in cents
   setCredits(amount: number, eventId: string): void {
     if (this.env.ENVIRONMENT !== "development") {
       return;
@@ -244,6 +246,7 @@ export class Wallet extends DurableObject<Env> {
     });
   }
 
+  // amount is in cents
   deductCredits(
     amount: number,
     eventId: string,
@@ -441,7 +444,11 @@ export class Wallet extends DurableObject<Env> {
   reserveCostInEscrow(
     orgId: string,
     requestId: string,
-    amountToReserve: number
+    amountToReserve: number,
+    creditLine: {
+      limit: number; // in cents
+      enabled: boolean;
+    }
   ): Result<{ escrowId: string }, { statusCode: number; message: string }> {
     const amountToReserveScaled = amountToReserve * SCALE_FACTOR;
     return this.ctx.storage.transactionSync(() => {
@@ -482,8 +489,11 @@ export class Wallet extends DurableObject<Env> {
           orgId
         )
         .one().total;
-      const availableBalance =
-        totalCreditsPurchased - totalEscrow - totalDebits;
+      let availableBalance = totalCreditsPurchased - totalEscrow - totalDebits;
+
+      if (creditLine.enabled) {
+        availableBalance += creditLine.limit * SCALE_FACTOR;
+      }
 
       if (availableBalance - amountToReserveScaled < MINIMUM_RESERVE) {
         const availableScaled = availableBalance / SCALE_FACTOR;
@@ -518,6 +528,8 @@ export class Wallet extends DurableObject<Env> {
     const actualCostScaled = actualCost * SCALE_FACTOR;
     return this.ctx.storage.transactionSync(() => {
       const now = Date.now();
+
+      // This does an upsert update and += the deebits... it's confusing but I am writing a comment here so now you know, you're welcome and i love you.
       this.ctx.storage.sql.exec(
         `INSERT INTO aggregated_debits (org_id, debits, updated_at, ch_last_checked_at, ch_last_value) 
           VALUES (?, ?, ?, ?, ?) 

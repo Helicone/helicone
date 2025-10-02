@@ -48,22 +48,4 @@ export class APIKeysStore {
 
     return allData;
   }
-
-  async getAPIKeyWithFetch(apiKeyHash: string): Promise<APIKey | null> {
-    const { data, error } = await this.supabaseClient
-      .from("helicone_api_keys")
-      .select("organization_id, api_key_hash, soft_delete")
-      .eq("api_key_hash", apiKeyHash)
-      .eq("soft_delete", false);
-
-    if (error) {
-      return null;
-    }
-
-    if (data.length === 0) {
-      return null;
-    }
-
-    return data[0];
-  }
 }

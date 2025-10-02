@@ -7,6 +7,7 @@ import { APIKeysManager } from "../lib/managers/APIKeysManager";
 import { SimpleAIGateway } from "../lib/ai-gateway/SimpleAIGateway";
 import { GatewayMetrics } from "../lib/ai-gateway/GatewayMetrics";
 import { getDataDogClient } from "../lib/monitoring/DataDogClient";
+import { DBWrapper } from "../lib/db/DBWrapper";
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
   router.post(
@@ -31,11 +32,6 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
             env.SUPABASE_SERVICE_ROLE_KEY
           );
 
-      const apiKeysManager = new APIKeysManager(
-        new APIKeysStore(supabaseClient),
-        env
-      );
-
       const rawAPIKey = requestWrapper.getRawProviderAuthHeader();
       const hashedAPIKey = await requestWrapper.getProviderAuthHeader();
 
@@ -43,20 +39,34 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
         return new Response("Invalid API key", { status: 401 });
       }
 
-      const orgId = await apiKeysManager.getOrgIdWithFetch(hashedAPIKey);
-      if (!orgId || !rawAPIKey) {
+      const { data: auth, error: authError } = await requestWrapper.auth();
+
+      if (authError || !auth || !rawAPIKey) {
         return new Response("Invalid API key", { status: 401 });
+      }
+
+      const db = new DBWrapper(env, auth);
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError || !orgData) {
+        return new Response("Organization not found", { status: 401 });
       }
 
       const dataDogClient = getDataDogClient(env);
       const metrics = new GatewayMetrics(dataDogClient);
 
       // Create gateway with authenticated context
-      const gateway = new SimpleAIGateway(requestWrapper, env, ctx, {
-        orgId,
-        apiKey: rawAPIKey,
-        supabaseClient,
-      }, metrics);
+      const gateway = new SimpleAIGateway(
+        requestWrapper,
+        env,
+        ctx,
+        {
+          orgId: orgData?.organizationId,
+          apiKey: rawAPIKey,
+          supabaseClient,
+          orgMeta: orgData?.metaData,
+        },
+        metrics
+      );
 
       return gateway.handle();
     }
