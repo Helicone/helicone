@@ -45,6 +45,13 @@ export interface OpenAIUsage {
   prompt_tokens_details?: {
     cached_tokens?: number;
     audio_tokens?: number;
+
+    // AI Gateway only
+    cache_write_tokens?: number;
+    cache_write_details?: {
+      write_5m_tokens?: number;
+      write_1h_tokens?: number;
+    };
   };
   completion_tokens_details?: {
     reasoning_tokens?: number;

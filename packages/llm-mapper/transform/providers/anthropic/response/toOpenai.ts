@@ -39,7 +39,10 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
     logprobs: null,
   };
 
-  const cachedTokens = response.usage.cache_read_input_tokens ?? 0;
+  const anthropicUsage = response.usage;
+  const cachedTokens = anthropicUsage.cache_read_input_tokens ?? 0;
+  const cacheWriteTokens = anthropicUsage.cache_creation_input_tokens ?? 0;
+
   return {
     id: response.id,
     object: "chat.completion",
@@ -47,13 +50,25 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
     model: response.model,
     choices: [choice],
     usage: {
-      prompt_tokens: response.usage.input_tokens,
-      completion_tokens: response.usage.output_tokens,
-      total_tokens: response.usage.input_tokens + response.usage.output_tokens,
-      ...(cachedTokens > 0 && {
+      prompt_tokens: anthropicUsage.input_tokens,
+      completion_tokens: anthropicUsage.output_tokens,
+      total_tokens: anthropicUsage.input_tokens + anthropicUsage.output_tokens,
+      ...((cachedTokens > 0 || cacheWriteTokens > 0) && {
         prompt_tokens_details: {
           cached_tokens: cachedTokens,
           audio_tokens: 0,
+
+          ...(cacheWriteTokens > 0 && {
+            cache_write_tokens: cacheWriteTokens,
+            cache_write_details: {
+              write_5m_tokens:
+                anthropicUsage.cache_creation?.ephemeral_5m_input_tokens ??
+                cachedTokens ??
+                0,
+              write_1h_tokens:
+                anthropicUsage.cache_creation?.ephemeral_1h_input_tokens ?? 0,
+            },
+          }),
         },
       }),
       completion_tokens_details: {
