@@ -452,8 +452,10 @@ export function ModelRegistryPage() {
                           onClick={(e) => {
                             if (!(e.target as HTMLElement).closest("button")) {
                               const currentParams = searchParams.toString();
-                              router.push(
-                                `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ""}`
+                              window.open(
+                                `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ""}`,
+                                '_blank',
+                                'noopener,noreferrer'
                               );
                             }
                           }}
@@ -491,8 +493,10 @@ export function ModelRegistryPage() {
                           onClick={(e) => {
                             if (!(e.target as HTMLElement).closest("button")) {
                               const currentParams = searchParams.toString();
-                              router.push(
-                                `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ""}`
+                              window.open(
+                                `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ""}`,
+                                '_blank',
+                                'noopener,noreferrer'
                               );
                             }
                           }}
