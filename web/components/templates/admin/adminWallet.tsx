@@ -11,6 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -46,6 +53,8 @@ const formatCurrency = (amount: number | undefined) => {
 export default function AdminWallet() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<string>("created_date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const [walletDetailsOpen, setWalletDetailsOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
@@ -76,6 +85,8 @@ export default function AdminWallet() {
     params: {
       query: {
         search: searchQuery || undefined,
+        sortBy,
+        sortDirection,
       },
     },
   });
@@ -392,6 +403,39 @@ export default function AdminWallet() {
                 Clear
               </Button>
             )}
+
+            {/* Divider */}
+            <div className="h-8 w-px bg-border" />
+
+            {/* Sort Controls */}
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created_date">Created Date</SelectItem>
+                <SelectItem value="org_name">Organization Name</SelectItem>
+                <SelectItem value="total_payments">Total Payments</SelectItem>
+                <SelectItem value="payments_count">Payment Count</SelectItem>
+                <SelectItem value="last_payment_date">Last Payment</SelectItem>
+                <SelectItem value="credit_limit">Credit Limit</SelectItem>
+                <SelectItem value="tier">Tier</SelectItem>
+                <SelectItem value="owner_email">Owner Email</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={sortDirection}
+              onValueChange={(v) => setSortDirection(v as "asc" | "desc")}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="desc">Descending ↓</SelectItem>
+                <SelectItem value="asc">Ascending ↑</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Organizations Table */}
