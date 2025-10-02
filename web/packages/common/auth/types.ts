@@ -76,4 +76,6 @@ export type HeliconeOrg = {
   stripe_subscription_item_id: string | null;
   subscription_status: string | null;
   tier: string | null;
+  allow_negative_balance: boolean;
+  credit_limit: number;
 };
