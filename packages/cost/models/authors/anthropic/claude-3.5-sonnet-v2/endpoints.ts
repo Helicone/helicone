@@ -43,7 +43,7 @@ export const endpoints = {
     provider: "vertex",
     author: "anthropic",
     version: "vertex-2023-10-16",
-    crossRegion: false,
+    crossRegion: true,
     pricing: [
       {
         threshold: 0,
@@ -104,7 +104,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "us-east-1": {},

@@ -127,7 +127,7 @@ export class SupabaseConnector {
       return err("Proxy key not found in storedProxyKey");
     }
 
-    const verified = await this.client.rpc("verify_helicone_proxy_key", {
+    const verified = await (this.client.rpc as any)("verify_helicone_proxy_key", {
       api_key: proxyKey,
       stored_hashed_key: storedProxyKey.data.helicone_proxy_key,
     });

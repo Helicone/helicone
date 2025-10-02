@@ -22,12 +22,14 @@ export function getStripeLink(
 export const formatCurrency = (
   amount: number | null | undefined,
   currency = "usd",
+  maximumFractionDigits: number | undefined = undefined,
 ): string => {
   if (amount === null || amount === undefined) return "$0.00";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency.toUpperCase(),
     minimumFractionDigits: 2,
+    maximumFractionDigits: maximumFractionDigits, // Support small amounts like $0.0003049
   }).format(amount);
 };
 

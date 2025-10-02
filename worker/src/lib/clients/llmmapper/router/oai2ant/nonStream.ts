@@ -1,6 +1,6 @@
-import { toOpenAI } from "../../providers/anthropic/response/toOpenai";
-import { AnthropicResponseBody } from "../../types/anthropic";
-import { toAnthropic } from "../../providers/openai/request/toAnthropic";
+import { toOpenAI } from "@helicone-package/llm-mapper/transform/providers/anthropic/response/toOpenai";
+import { AnthropicResponseBody } from "@helicone-package/llm-mapper/transform/types/anthropic";
+import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 
 export async function oai2ant({

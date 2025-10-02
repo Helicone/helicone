@@ -35,8 +35,8 @@ export class CreditsManager extends BaseManager {
         return err(debits.error);
       }
 
-      const totalCredits = creditSum.totalCredits || 0;
-      const spendCents = debits.data?.spend_cents || 0;
+      const totalCredits = creditSum?.totalCredits || 0;
+      const spendCents = debits.data?.spend_cents ?? 0;
       const balance = totalCredits - spendCents;
 
       return ok({ balance, totalCreditsPurchased: totalCredits });
@@ -50,7 +50,7 @@ export class CreditsManager extends BaseManager {
     if (isError(debits)) {
       return err(debits.error);
     }
-    return ok(debits.data.spend_cents);
+    return ok(debits.data?.spend_cents ?? 0);
   }
 
   public async listTokenUsagePayments(params: {
@@ -103,7 +103,7 @@ export async function getAiGatewaySpend(org_id: string): Promise<
     string
   >
 > {
-  const { filter: filterString, argsAcc } = await buildFilterWithAuthClickHouse(
+  const { argsAcc } = await buildFilterWithAuthClickHouse(
     {
       org_id,
       filter: {
@@ -125,5 +125,7 @@ export async function getAiGatewaySpend(org_id: string): Promise<
 `;
 
   const res = await dbQueryClickhouse<{ spend_cents: string }>(query, argsAcc);
-  return resultMap(res, (d) => ({ spend_cents: +d[0].spend_cents }));
+  return resultMap(res, (d) => ({
+    spend_cents: +(d?.[0]?.spend_cents ?? 0),
+  }));
 }

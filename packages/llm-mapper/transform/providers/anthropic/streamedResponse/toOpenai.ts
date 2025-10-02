@@ -29,6 +29,39 @@ export class AnthropicToOpenAIStreamConverter {
     this.created = Math.floor(Date.now() / 1000);
   }
 
+  processLines(
+    raw: string,
+    onChunk: (chunk: ChatCompletionChunk) => void
+  ) {
+    const chunks: ChatCompletionChunk[] = [];
+    const lines = raw.split("\n");
+    
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        try {
+          const jsonStr = line.slice(6);
+
+          // Skip the [DONE] message from Anthropic
+          if (jsonStr.trim() === "[DONE]") {
+            continue;
+          }
+
+          const anthropicEvent = JSON.parse(jsonStr);
+          const openAIEvents = this.convert(anthropicEvent);
+
+          for (const openAIEvent of openAIEvents) {
+            onChunk(openAIEvent);
+          }
+        } catch (error) {
+          console.error("Failed to parse SSE data:", error);
+        }
+      } else if (line.startsWith("event:") || line.startsWith(":")) {
+        // Skip event type lines and comments
+        continue;
+      }
+    }
+  }
+
   convert(event: AnthropicStreamEvent): OpenAIStreamEvent[] {
     const chunks: OpenAIStreamEvent[] = [];
 
@@ -350,10 +383,10 @@ export class AnthropicToOpenAIStreamConverter {
   }
 
   private finalizePendingToolCalls(chunks: OpenAIStreamEvent[]): void {
-    for (const [index, toolCall] of this.toolCallState.entries()) {
+    this.toolCallState.forEach((toolCall) => {
       if (!toolCall.hasNonEmptyDelta) {
         this.emitEmptyToolCallArguments(toolCall, chunks);
       }
-    }
+    });
   }
 }

@@ -37,6 +37,7 @@ export type AttemptError = {
     | "request_failed"
     | "invalid_prompt"
     | "model_not_supported"
+    | "insufficient_credit_limit"
     | "disallowed";
   message: string;
   statusCode: number;

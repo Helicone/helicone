@@ -1230,7 +1230,7 @@ WHERE (${builtFilter.filter})`,
 
   public async createCloudGatewayCheckoutSession(
     origin: string,
-    amount: number,
+    amount: number
   ): Promise<Result<string, string>> {
     try {
       const customerId = await this.getOrCreateStripeCustomer();
@@ -1239,17 +1239,24 @@ WHERE (${builtFilter.filter})`,
       }
 
       const settingsManager = new SettingsManager();
-      const stripeProductSettings = await settingsManager.getSetting("stripe:products");
-      if (!stripeProductSettings || !stripeProductSettings.cloudGatewayTokenUsageProduct) {
+      const stripeProductSettings =
+        await settingsManager.getSetting("stripe:products");
+      if (
+        !stripeProductSettings ||
+        !stripeProductSettings.cloudGatewayTokenUsageProduct
+      ) {
         return err("stripe:products setting is not configured");
       }
-      const tokenUsageProductId = stripeProductSettings.cloudGatewayTokenUsageProduct;
+      const tokenUsageProductId =
+        stripeProductSettings.cloudGatewayTokenUsageProduct;
 
       try {
         const creditsAmountCents = Math.round(amount * 100);
         const PERCENT_FEE_RATE = 0.03;
         const FIXED_FEE_CENTS = 30;
-        const percentageFeeCents = Math.ceil(creditsAmountCents * PERCENT_FEE_RATE);
+        const percentageFeeCents = Math.ceil(
+          creditsAmountCents * PERCENT_FEE_RATE
+        );
         const stripeFeeCents = percentageFeeCents + FIXED_FEE_CENTS;
         const totalAmountCents = creditsAmountCents + stripeFeeCents;
 
@@ -1285,22 +1292,28 @@ WHERE (${builtFilter.filter})`,
               creditsAmountCents: creditsAmountCents.toString(),
               stripeFeeCents: stripeFeeCents.toString(),
               totalAmountCents: totalAmountCents.toString(),
-            }
-          }
-        })
+            },
+          },
+        });
 
         if (checkoutResult.lastResponse.statusCode !== 200) {
-          return err(`Got status code ${checkoutResult.lastResponse.statusCode} from Stripe`);
+          return err(
+            `Got status code ${checkoutResult.lastResponse.statusCode} from Stripe`
+          );
         } else if (!checkoutResult.url) {
           return err("Stripe did not return a session URL");
         }
 
         return ok(checkoutResult.url);
       } catch (error: any) {
-        return err(`Error creating cloud gateway checkout session: ${error.message}`);
+        return err(
+          `Error creating cloud gateway checkout session: ${error.message}`
+        );
       }
     } catch (error: any) {
-      return err(`Error creating cloud gateway checkout session: ${error.message}`);
+      return err(
+        `Error creating cloud gateway checkout session: ${error.message}`
+      );
     }
   }
 
@@ -1381,18 +1394,21 @@ WHERE (${builtFilter.filter})`,
       switch (searchKind) {
         case PaymentIntentSearchKind.CREDIT_PURCHASES:
           const settingsManager = new SettingsManager();
-          const stripeProductSettings = await settingsManager.getSetting("stripe:products");
-          const productId = stripeProductSettings?.cloudGatewayTokenUsageProduct;
+          const stripeProductSettings =
+            await settingsManager.getSetting("stripe:products");
+          const productId =
+            stripeProductSettings?.cloudGatewayTokenUsageProduct ??
+            process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT;
           if (!productId) {
             console.error(
               "[Stripe API] STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT not configured"
             );
             return err("Stripe product ID not configured");
           }
-          
+
           query = `metadata['productId']:'${productId}' AND metadata['orgId']:'${this.authParams.organizationId}'`;
           break;
-          
+
         default:
           return err(`Unsupported search kind: ${searchKind}`);
       }
@@ -1408,18 +1424,19 @@ WHERE (${builtFilter.filter})`,
         searchParams.page = page;
       }
 
-      const paymentIntents = await this.stripe.paymentIntents.search(searchParams);
+      const paymentIntents =
+        await this.stripe.paymentIntents.search(searchParams);
 
       // Map Stripe PaymentIntent to our custom PaymentIntentRecord type
       const mappedData: PaymentIntentRecord[] = [];
-      
+
       // Process each payment intent and fetch its refunds
       for (const intent of paymentIntents.data) {
         let totalRefunded = 0;
         let isFullyRefunded = false;
         let latestRefundDate = intent.created;
         let refundIds: string[] = [];
-        
+
         // Fetch refunds for this payment intent
         try {
           const refunds = await this.stripe.refunds.list({
@@ -1428,17 +1445,26 @@ WHERE (${builtFilter.filter})`,
           });
 
           if (refunds.data.length > 0) {
-            totalRefunded = refunds.data.reduce((sum, refund) => sum + refund.amount, 0);
+            totalRefunded = refunds.data.reduce(
+              (sum, refund) => sum + refund.amount,
+              0
+            );
             isFullyRefunded = totalRefunded >= intent.amount;
-            refundIds = refunds.data.map(refund => refund.id);
-            
+            refundIds = refunds.data.map((refund) => refund.id);
+
             // Use the latest refund date for sorting if fully refunded
             if (isFullyRefunded) {
-              latestRefundDate = Math.max(...refunds.data.map(r => r.created), intent.created);
+              latestRefundDate = Math.max(
+                ...refunds.data.map((r) => r.created),
+                intent.created
+              );
             }
           }
         } catch (refundError) {
-          console.error(`Error fetching refunds for payment intent ${intent.id}:`, refundError);
+          console.error(
+            `Error fetching refunds for payment intent ${intent.id}:`,
+            refundError
+          );
           // Continue processing other payment intents even if one fails
         }
 

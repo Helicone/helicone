@@ -214,6 +214,16 @@ export const providers: Provider[] = [
   //   apiKeyPlaceholder: "...",
   //   relevanceScore: 15,
   // },
+  {
+    id: "novita",
+    name: "Novita",
+    logoUrl: "/assets/home/providers/novita.webp",
+    description: "Configure your Novita API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Novita API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 10,
+  },
 ];
 
 // Mock recently used providers - in a real app, this would come from user data

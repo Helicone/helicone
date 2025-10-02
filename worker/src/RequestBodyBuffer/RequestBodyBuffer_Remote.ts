@@ -172,6 +172,17 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
       }
     );
   }
+
+  public async setBodyOverride(override: object): Promise<void> {
+    await this.requestBodyBuffer.fetch(
+      `${BASE_URL}/${this.uniqueId}/body-override`,
+      {
+        method: "POST",
+        body: JSON.stringify({ override: override }),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
     console.log(

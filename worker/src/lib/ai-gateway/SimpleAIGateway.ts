@@ -16,9 +16,14 @@ import { oai2antResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { oai2antStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { RequestParams } from "@helicone-package/cost/models/types";
 import { SecureCacheProvider } from "../util/cache/secureCache";
+import { GatewayMetrics } from "./GatewayMetrics";
 
 export interface AuthContext {
   orgId: string;
+  orgMeta: {
+    allowNegativeBalance: boolean;
+    creditLimit: number;
+  };
   apiKey: string;
   supabaseClient: any;
 }
@@ -29,16 +34,21 @@ export class SimpleAIGateway {
   private readonly orgId: string;
   private readonly apiKey: string;
   private readonly supabaseClient: any;
+  private readonly metrics: GatewayMetrics;
+  private readonly orgMeta: AuthContext["orgMeta"];
 
   constructor(
     private readonly requestWrapper: RequestWrapper,
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
-    authContext: AuthContext
+    authContext: AuthContext,
+    metrics: GatewayMetrics
   ) {
     this.orgId = authContext.orgId;
     this.apiKey = authContext.apiKey;
     this.supabaseClient = authContext.supabaseClient;
+    this.orgMeta = authContext.orgMeta;
+    this.metrics = metrics;
 
     const providerKeysManager = new ProviderKeysManager(
       new ProviderKeysStore(this.supabaseClient),
@@ -135,14 +145,16 @@ export class SimpleAIGateway {
       // Set gateway attempt to request wrapper
       this.requestWrapper.setGatewayAttempt(attempt);
 
-      const result = await this.attemptExecutor.execute(
+      const result = await this.attemptExecutor.execute({
         attempt,
-        this.requestWrapper,
-        finalBody,
+        requestWrapper: this.requestWrapper,
+        parsedBody: finalBody,
         requestParams,
-        this.orgId,
-        forwarder
-      );
+        orgId: this.orgId,
+        forwarder,
+        metrics: this.metrics,
+        orgMeta: this.orgMeta,
+      });
 
       if (isErr(result)) {
         errors.push({
@@ -162,6 +174,8 @@ export class SimpleAIGateway {
           return result.data;
         }
 
+        this.metrics.markPostRequestEnd();
+
         return mappedResponse.data;
       }
     }
@@ -174,7 +188,8 @@ export class SimpleAIGateway {
     Result<{ modelStrings: string[]; body: any; plugins?: Plugin[] }, Response>
   > {
     // Get raw text body once
-    const rawBody = await this.requestWrapper.unsafeGetText();
+    // TODO: change to use safelyGetBody
+    const rawBody = await this.requestWrapper.unsafeGetBodyText();
     const parsedBody: any = tryJSONParse(rawBody ?? "{}");
 
     if (!parsedBody || !parsedBody.model) {

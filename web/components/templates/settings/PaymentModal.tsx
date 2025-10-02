@@ -4,6 +4,10 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { clsx } from "../../shared/clsx";
 import { useCreateCheckoutSession } from "../../../services/hooks/useCredits";
 import useNotification from "../../shared/notification/useNotification";
+import {
+  STRIPE_PERCENT_FEE_RATE,
+  STRIPE_FIXED_FEE_CENTS,
+} from "@helicone-package/common/stripe/feeCalculator";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -18,13 +22,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
 
   const presetAmounts = [5, 20, 100, 500];
   const MIN_AMOUNT = 5;
-  const PERCENT_FEE_RATE = 0.03;
-  const FIXED_FEE_CENTS = 30;
 
   const creditsAmountCents = Math.round(amount * 100);
-  const percentageFeeCents = Math.ceil(creditsAmountCents * PERCENT_FEE_RATE);
-  const stripeFeeCents =
-    amount >= MIN_AMOUNT ? percentageFeeCents + FIXED_FEE_CENTS : 0;
+  const percentageFeeCents = Math.ceil(
+    creditsAmountCents * STRIPE_PERCENT_FEE_RATE,
+  );
+  const stripeFeeCents = percentageFeeCents + STRIPE_FIXED_FEE_CENTS;
   const totalDueCents = creditsAmountCents + stripeFeeCents;
 
   const formatCurrency = (cents: number) => (cents / 100).toFixed(2);

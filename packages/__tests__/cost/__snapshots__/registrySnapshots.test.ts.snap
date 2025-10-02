@@ -113,6 +113,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-next-80b-a3b-instruct:deepinfra": {
+      "context": 262000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "anthropic/claude-3.5-haiku": {
     "claude-3.5-haiku:anthropic": {
@@ -150,7 +176,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -192,7 +218,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "provider": "vertex",
       "ptbEnabled": true,
       "regions": [
-        "global",
+        "us-east5",
       ],
     },
   },
@@ -232,7 +258,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -259,7 +285,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
     "claude-3.5-sonnet-v2:vertex": {
       "context": 200000,
-      "crossRegion": false,
+      "crossRegion": true,
       "maxTokens": 8192,
       "modelId": "claude-3-5-sonnet-v2@20241022",
       "parameters": [
@@ -314,7 +340,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -352,6 +378,90 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
         "top_k",
         "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "anthropic/claude-4.5-sonnet": {
+    "claude-4.5-sonnet:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "claude-sonnet-4-5-20250929",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-sonnet:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": false,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-4.5-sonnet:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "anthropic/claude-sonnet-4.5",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-sonnet:vertex": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "claude-sonnet-4-5@20250929",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
       ],
       "provider": "vertex",
       "ptbEnabled": true,
@@ -398,7 +508,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -482,7 +592,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -566,7 +676,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -663,6 +773,56 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "deepseek/deepseek-v3": {
+    "deepseek-v3.1-terminus:deepinfra": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek-ai/DeepSeek-V3.1-Terminus",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "deepseek-v3.2:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek/deepseek-v3.2-exp",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3:deepinfra": {
       "context": 128000,
       "crossRegion": false,
@@ -822,7 +982,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -867,7 +1027,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -893,7 +1053,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -938,7 +1098,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -964,7 +1124,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1009,7 +1169,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "global",
       ],
@@ -1087,7 +1247,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1145,6 +1305,82 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-3.1-8b-instruct-turbo:deepinfra": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.1-8b-instruct:deepinfra": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.1-8b-instruct:novita": {
+      "context": 16384,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "meta-llama/llama-3.1-8b-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-3.3-70b-instruct:groq": {
       "context": 131072,
       "crossRegion": false,
@@ -1166,6 +1402,31 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "groq",
       "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.3-70b-instruct:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 120000,
+      "modelId": "meta-llama/llama-3.3-70b-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -2668,6 +2929,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "alibaba/qwen": [
     "deepinfra",
     "deepinfra",
+    "deepinfra",
     "groq",
     "openrouter",
   ],
@@ -2684,6 +2946,12 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "vertex",
   ],
   "anthropic/claude-3.7-sonnet": [
+    "anthropic",
+    "bedrock",
+    "openrouter",
+    "vertex",
+  ],
+  "anthropic/claude-4.5-sonnet": [
     "anthropic",
     "bedrock",
     "openrouter",
@@ -2713,7 +2981,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "deepseek/deepseek-v3": [
     "deepinfra",
+    "deepinfra",
     "deepseek",
+    "novita",
     "openrouter",
   ],
   "deepseek/r1-distill": [
@@ -2743,6 +3013,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
   ],
   "meta/llama": [
+    "deepinfra",
+    "deepinfra",
     "groq",
     "groq",
     "groq",
@@ -2750,6 +3022,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "novita",
+    "novita",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -2838,8 +3112,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "alibaba/qwen": {
     "deepinfra": [
       {
-        "input": 2.9e-7,
-        "output": 0.0000012,
+        "input": 1.4e-7,
+        "output": 0.0000014,
         "threshold": 0,
       },
     ],
@@ -2988,6 +3262,64 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
+      },
+    ],
+  },
+  "anthropic/claude-4.5-sonnet": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000633,
+        "output": 0.00002374,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
       },
     ],
   },
@@ -3157,6 +3489,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "deepseek/deepseek-v3": {
     "deepinfra": [
       {
+        "cacheMultipliers": {
+          "cachedInput": 0.8,
+        },
         "input": 2.7e-7,
         "output": 0.000001,
         "threshold": 0,
@@ -3169,6 +3504,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 5.6e-7,
         "output": 0.00000168,
+        "threshold": 0,
+      },
+    ],
+    "novita": [
+      {
+        "input": 2.7e-7,
+        "output": 4.1e-7,
         "threshold": 0,
       },
     ],
@@ -3346,6 +3688,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "meta/llama": {
+    "deepinfra": [
+      {
+        "input": 3e-8,
+        "output": 5e-8,
+        "threshold": 0,
+      },
+    ],
     "groq": [
       {
         "audio": 0,
@@ -3355,6 +3704,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "request": 0,
         "threshold": 0,
         "web_search": 0,
+      },
+    ],
+    "novita": [
+      {
+        "input": 1.3e-7,
+        "output": 3.9e-7,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -3598,7 +3954,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
 }
 `;
 
-exports[`Registry Snapshots registry builds correctly 1`] = `
+exports[`Registry Snapshots verify registry state 1`] = `
 {
   "modelToProviders": [
     {
@@ -3628,6 +3984,15 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     },
     {
       "model": "claude-3.7-sonnet",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "claude-4.5-sonnet",
       "providers": [
         "anthropic",
         "bedrock",
@@ -3682,6 +4047,18 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
         "deepinfra",
         "deepseek",
         "openrouter",
+      ],
+    },
+    {
+      "model": "deepseek-v3.1-terminus",
+      "providers": [
+        "deepinfra",
+      ],
+    },
+    {
+      "model": "deepseek-v3.2",
+      "providers": [
+        "novita",
       ],
     },
     {
@@ -3854,9 +4231,23 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       ],
     },
     {
+      "model": "llama-3.1-8b-instruct",
+      "providers": [
+        "deepinfra",
+        "novita",
+      ],
+    },
+    {
+      "model": "llama-3.1-8b-instruct-turbo",
+      "providers": [
+        "deepinfra",
+      ],
+    },
+    {
       "model": "llama-3.3-70b-instruct",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
@@ -3954,10 +4345,16 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
         "deepinfra",
       ],
     },
+    {
+      "model": "qwen3-next-80b-a3b-instruct",
+      "providers": [
+        "deepinfra",
+      ],
+    },
   ],
   "providerBreakdown": [
     {
-      "modelCount": 6,
+      "modelCount": 7,
       "provider": "anthropic",
     },
     {
@@ -3965,11 +4362,11 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "azure",
     },
     {
-      "modelCount": 6,
+      "modelCount": 7,
       "provider": "bedrock",
     },
     {
-      "modelCount": 7,
+      "modelCount": 11,
       "provider": "deepinfra",
     },
     {
@@ -3985,15 +4382,19 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "groq",
     },
     {
+      "modelCount": 3,
+      "provider": "novita",
+    },
+    {
       "modelCount": 14,
       "provider": "openai",
     },
     {
-      "modelCount": 41,
+      "modelCount": 42,
       "provider": "openrouter",
     },
     {
-      "modelCount": 9,
+      "modelCount": 10,
       "provider": "vertex",
     },
     {
@@ -4006,6 +4407,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku",
     "claude-3.5-sonnet-v2",
     "claude-3.7-sonnet",
+    "claude-4.5-sonnet",
     "claude-opus-4",
     "claude-opus-4-1",
     "claude-sonnet-4",
@@ -4015,6 +4417,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
+    "gemma-3-12b-it",
     "gemma2-9b-it",
     "gpt-4.1",
     "gpt-4.1-mini",
@@ -4034,6 +4437,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "kimi-k2",
     "kimi-k2-0905",
     "llama-3.1-8b-instant",
+    "llama-3.1-8b-instruct",
+    "llama-3.1-8b-instruct-turbo",
     "llama-3.3-70b-instruct",
     "llama-4-maverick",
     "llama-4-scout",
@@ -4056,9 +4461,9 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 113,
-  "totalModelProviderConfigs": 113,
-  "totalModelsWithPtb": 44,
-  "totalProviders": 11,
+  "totalEndpoints": 124,
+  "totalModelProviderConfigs": 124,
+  "totalModelsWithPtb": 48,
+  "totalProviders": 12,
 }
 `;

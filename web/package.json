@@ -37,6 +37,7 @@
     "@helicone-package/cost": "*",
     "@helicone-package/filters": "*",
     "@helicone-package/llm-mapper": "*",
+    "@helicone-package/common": "*",
     "@helicone/prompts": "1.0.15",
     "@heroicons/react": "^2.0.13",
     "@intercom/messenger-js-sdk": "^0.0.14",

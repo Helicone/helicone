@@ -36,6 +36,17 @@ export const models = {
       outputs: ["text"]
     },
     tokenizer: "Qwen",
+  },
+  "qwen3-next-80b-a3b-instruct": {
+    name: "Qwen3-Next-80B-A3B-Instruct",
+    author: "qwen",
+    description:
+      "Qwen3-Next-80B-A3B-Instruct is a causal language model that is instruction-optimized for chat and agent applications. It features a Mixture-of-Experts (MoE) architecture that achieves an extremely low activation ratio, drastically reducing FLOPs per token while preserving model capacity. The model supports ultra-long contexts and has a Multi-Token Prediction (MTP) mechanism to boost performance and accelerate inference.",
+    contextLength: 262_000,
+    maxOutputTokens: 16_384, // Standard output limit for instruction models
+    created: "2025-01-01T00:00:00.000Z", // Estimated release date
+    modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
+    tokenizer: "Qwen",
   }
 } satisfies Record<string, ModelConfig>;
 

@@ -48,6 +48,33 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
     this.cachedText = body;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private applyOverride(body: any, override: object): object {
+    for (const [key, value] of Object.entries(override)) {
+      if (typeof value !== "object" || value === null || Array.isArray(value)) {
+        body[key] = value;
+      } else {
+        if (!body[key] || typeof body[key] !== "object") {
+          body[key] = {};
+        }
+        body[key] = this.applyOverride(body[key], value);
+      }
+    }
+    return body;
+  }
+
+  public async setBodyOverride(override: object): Promise<void> {
+    try {
+      const text = await this.unsafeGetRawText();
+      const bodyJson = JSON.parse(text);
+      const modifiedBody = this.applyOverride(bodyJson, override);
+      this.cachedText = JSON.stringify(modifiedBody);
+    } catch (e) {
+      console.error("Failed to apply body override:", e);
+      throw e;
+    }
+  }
+
   // super unsafe and should only be used for cases we know will be smaller bodies
   async unsafeGetRawText(): Promise<string> {
     if (this.cachedText) {
@@ -148,6 +175,7 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   }
 
   async getReadableStreamToBody(): Promise<string> {
+    // Override is already applied in setBodyOverride, just return cached text
     return await this.unsafeGetRawText();
   }
 

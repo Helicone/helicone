@@ -96,6 +96,10 @@ export interface AuthParams {
   accessDict: {
     cache: boolean;
   };
+  metaData: {
+    allowNegativeBalance: boolean;
+    creditLimit: number;
+  };
 }
 
 export function dbLoggableRequestFromProxyRequest(
@@ -717,10 +721,10 @@ export class DBLoggable {
 
       gatewayProvider = provider as ModelProviderName;
       gatewayModel = model as string;
-      gatewayResponseFormat = endpoint.modelConfig.responseFormat;
+      gatewayResponseFormat = endpoint.modelConfig.responseFormat ?? "OPENAI";
       gatewayEndpointVersion = endpoint.modelConfig.version;
     }
-    
+
     const kafkaMessage: MessageData = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,
@@ -742,7 +746,8 @@ export class DBLoggable {
         isPassthroughBilling: this.request.escrowInfo ? true : false,
         gatewayProvider: gatewayProvider ?? undefined,
         gatewayModel: gatewayModel ?? undefined,
-        providerModelId: this.request.attempt?.endpoint.providerModelId ?? undefined,
+        providerModelId:
+          this.request.attempt?.endpoint.providerModelId ?? undefined,
         gatewayResponseFormat: gatewayResponseFormat ?? undefined,
         stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
         gatewayEndpointVersion: gatewayEndpointVersion ?? undefined,
