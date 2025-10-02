@@ -49,7 +49,8 @@ interface TableDataResponse {
 export class AdminWalletController extends Controller {
   @Post("/gateway/dashboard_data")
   public async getGatewayDashboardData(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() search?: string
   ): Promise<
     Result<
       {
@@ -78,6 +79,18 @@ export class AdminWalletController extends Controller {
   > {
     await authCheckThrow(request.authParams.userId);
 
+    // Build search filter
+    const searchFilter = search
+      ? `AND (
+          organization.name ILIKE $1 OR
+          organization.id::text ILIKE $1 OR
+          organization.stripe_customer_id ILIKE $1 OR
+          auth.users.email ILIKE $1
+        )`
+      : "";
+
+    const searchParam = search ? [`%${search}%`] : [];
+
     // Get ALL organizations (not just those with Stripe payments)
     // This allows admins to manage wallets even without Stripe integration
     const orgsResult = await dbExecute<{
@@ -101,10 +114,11 @@ export class AdminWalletController extends Controller {
         FROM organization
         LEFT JOIN auth.users ON organization.owner = auth.users.id
         WHERE organization.soft_delete = false
+        ${searchFilter}
         ORDER BY organization.created_at DESC
         LIMIT 100
         `,
-      []
+      searchParam
     );
 
     if (orgsResult.error) {
