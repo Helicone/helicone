@@ -1040,6 +1040,12 @@ describe("OpenAI Registry Tests", () => {
                 statusCode: 500,
                 errorMessage: "Azure endpoint unavailable",
               },
+              {
+                url: "https://openrouter.ai/api/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "OpenRouter endpoint unavailable",
+              },
             ],
             finalStatus: 500,
           },
