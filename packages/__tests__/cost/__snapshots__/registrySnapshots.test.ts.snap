@@ -1481,6 +1481,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-4-maverick:novita": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 1048576,
+      "modelId": "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-4-maverick:openrouter": {
       "context": 1048576,
       "crossRegion": false,
@@ -3024,6 +3048,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "novita",
     "novita",
+    "novita",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -4255,6 +4280,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "llama-4-maverick",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
@@ -4382,7 +4408,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "novita",
     },
     {
@@ -4461,8 +4487,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 124,
-  "totalModelProviderConfigs": 124,
+  "totalEndpoints": 125,
+  "totalModelProviderConfigs": 125,
   "totalModelsWithPtb": 48,
   "totalProviders": 12,
 }
