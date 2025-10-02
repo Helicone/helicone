@@ -47274,102 +47274,106 @@
 					}
 				]
 			},
-			"ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__": {
+			"DashboardData": {
 				"properties": {
-					"data": {
+					"organizations": {
+						"items": {
+							"properties": {
+								"creditLimit": {
+									"type": "number",
+									"format": "double"
+								},
+								"allowNegativeBalance": {
+									"type": "boolean"
+								},
+								"ownerEmail": {
+									"type": "string"
+								},
+								"tier": {
+									"type": "string"
+								},
+								"lastPaymentDate": {
+									"type": "number",
+									"format": "double",
+									"nullable": true
+								},
+								"clickhouseTotalSpend": {
+									"type": "number",
+									"format": "double"
+								},
+								"paymentsCount": {
+									"type": "number",
+									"format": "double"
+								},
+								"totalPayments": {
+									"type": "number",
+									"format": "double"
+								},
+								"stripeCustomerId": {
+									"type": "string"
+								},
+								"orgName": {
+									"type": "string"
+								},
+								"orgId": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"creditLimit",
+								"allowNegativeBalance",
+								"ownerEmail",
+								"tier",
+								"lastPaymentDate",
+								"clickhouseTotalSpend",
+								"paymentsCount",
+								"totalPayments",
+								"stripeCustomerId",
+								"orgName",
+								"orgId"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"summary": {
 						"properties": {
-							"isProduction": {
-								"type": "boolean"
+							"totalCreditsSpent": {
+								"type": "number",
+								"format": "double"
 							},
-							"summary": {
-								"properties": {
-									"totalCreditsSpent": {
-										"type": "number",
-										"format": "double"
-									},
-									"totalCreditsIssued": {
-										"type": "number",
-										"format": "double"
-									},
-									"totalOrgsWithCredits": {
-										"type": "number",
-										"format": "double"
-									}
-								},
-								"required": [
-									"totalCreditsSpent",
-									"totalCreditsIssued",
-									"totalOrgsWithCredits"
-								],
-								"type": "object"
+							"totalCreditsIssued": {
+								"type": "number",
+								"format": "double"
 							},
-							"organizations": {
-								"items": {
-									"properties": {
-										"creditLimit": {
-											"type": "number",
-											"format": "double"
-										},
-										"allowNegativeBalance": {
-											"type": "boolean"
-										},
-										"ownerEmail": {
-											"type": "string"
-										},
-										"tier": {
-											"type": "string"
-										},
-										"lastPaymentDate": {
-											"type": "number",
-											"format": "double",
-											"nullable": true
-										},
-										"clickhouseTotalSpend": {
-											"type": "number",
-											"format": "double"
-										},
-										"paymentsCount": {
-											"type": "number",
-											"format": "double"
-										},
-										"totalPayments": {
-											"type": "number",
-											"format": "double"
-										},
-										"stripeCustomerId": {
-											"type": "string"
-										},
-										"orgName": {
-											"type": "string"
-										},
-										"orgId": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"creditLimit",
-										"allowNegativeBalance",
-										"ownerEmail",
-										"tier",
-										"lastPaymentDate",
-										"clickhouseTotalSpend",
-										"paymentsCount",
-										"totalPayments",
-										"stripeCustomerId",
-										"orgName",
-										"orgId"
-									],
-									"type": "object"
-								},
-								"type": "array"
+							"totalOrgsWithCredits": {
+								"type": "number",
+								"format": "double"
 							}
 						},
 						"required": [
-							"isProduction",
-							"summary",
-							"organizations"
+							"totalCreditsSpent",
+							"totalCreditsIssued",
+							"totalOrgsWithCredits"
 						],
 						"type": "object"
+					},
+					"isProduction": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"organizations",
+					"summary",
+					"isProduction"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_DashboardData_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/DashboardData"
 					},
 					"error": {
 						"type": "number",
@@ -47386,10 +47390,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_": {
+			"Result_DashboardData.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__"
+						"$ref": "#/components/schemas/ResultSuccess_DashboardData_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -56279,7 +56283,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_"
+									"$ref": "#/components/schemas/Result_DashboardData.string_"
 								}
 							}
 						}
@@ -56300,6 +56304,26 @@
 						"required": false,
 						"schema": {
 							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sortBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sortOrder",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							]
 						}
 					}
 				]
