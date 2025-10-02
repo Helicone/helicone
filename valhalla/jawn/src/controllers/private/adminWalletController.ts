@@ -51,6 +51,8 @@ export class AdminWalletController extends Controller {
   public async getGatewayDashboardData(
     @Request() request: JawnAuthenticatedRequest,
     @Query() search?: string
+    // @Query() sortBy?:
+    // @Query() sortOrder?: "asc" | "desc"
   ): Promise<
     Result<
       {
@@ -79,6 +81,19 @@ export class AdminWalletController extends Controller {
   > {
     await authCheckThrow(request.authParams.userId);
 
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    if (!stripeProductSettings) {
+      return err("Stripe product settings not configured");
+    }
+
+    const tokenUsageProductId =
+      stripeProductSettings.cloudGatewayTokenUsageProduct;
+    if (!tokenUsageProductId) {
+      return err("Cloud gateway token usage product ID not configured");
+    }
+
     // Build search filter
     const searchFilter = search
       ? `AND (
@@ -89,9 +104,11 @@ export class AdminWalletController extends Controller {
         )`
       : "";
 
-    const searchParam = search ? [`%${search}%`] : [];
+    // Build query parameters
+    const queryParams = search ? [`%${search}%`] : [];
+    queryParams.push(tokenUsageProductId);
 
-    // Get ALL organizations (not just those with Stripe payments)
+    // Get ALL organizations with payment data in a single query
     // This allows admins to manage wallets even without Stripe integration
     const orgsResult = await dbExecute<{
       org_id: string;
@@ -101,6 +118,9 @@ export class AdminWalletController extends Controller {
       owner_email: string;
       allow_negative_balance: boolean;
       credit_limit: string;
+      total_amount_received: number;
+      payments_count: number;
+      last_payment_date: string | null;
     }>(
       `
         SELECT
@@ -110,15 +130,31 @@ export class AdminWalletController extends Controller {
           organization.tier,
           auth.users.email as owner_email,
           organization.allow_negative_balance,
-          organization.credit_limit
+          organization.credit_limit,
+          COALESCE(SUM(stripe.payment_intents.amount_received), 0) as total_amount_received,
+          COALESCE(COUNT(stripe.payment_intents.id), 0) as payments_count,
+          MAX(stripe.payment_intents.created) as last_payment_date
         FROM organization
         LEFT JOIN auth.users ON organization.owner = auth.users.id
+        LEFT JOIN stripe.payment_intents ON
+          organization.stripe_customer_id = stripe.payment_intents.customer
+          AND stripe.payment_intents.metadata->>'productId' = $${search ? 2 : 1}
+          AND stripe.payment_intents.status = 'succeeded'
         WHERE organization.soft_delete = false
         ${searchFilter}
+        GROUP BY
+          organization.id,
+          organization.name,
+          organization.stripe_customer_id,
+          organization.tier,
+          auth.users.email,
+          organization.allow_negative_balance,
+          organization.credit_limit,
+          organization.created_at
         ORDER BY organization.created_at DESC
         LIMIT 100
         `,
-      searchParam
+      queryParams
     );
 
     if (orgsResult.error) {
@@ -135,57 +171,6 @@ export class AdminWalletController extends Controller {
           totalCreditsSpent: 0,
         },
       });
-    }
-
-    // Get payment data for organizations that have Stripe payments (optional)
-    const settingsManager = new SettingsManager();
-    const stripeProductSettings =
-      await settingsManager.getSetting("stripe:products");
-    let paymentsMap = new Map<
-      string,
-      { total: number; count: number; lastDate: string }
-    >();
-
-    if (
-      stripeProductSettings &&
-      stripeProductSettings.cloudGatewayTokenUsageProduct
-    ) {
-      const tokenUsageProductId =
-        stripeProductSettings.cloudGatewayTokenUsageProduct;
-      const paymentsResult = await dbExecute<{
-        org_id: string;
-        total_amount_received: number;
-        payments_count: number;
-        last_payment_date: string;
-        allow_negative_balance: boolean;
-        credit_limit: string;
-      }>(
-        `
-          SELECT
-            organization.id as org_id,
-            SUM(stripe.payment_intents.amount_received) as total_amount_received,
-            COUNT(stripe.payment_intents.id) as payments_count,
-            MAX(stripe.payment_intents.created) as last_payment_date
-            
-          FROM stripe.payment_intents
-          LEFT JOIN organization ON organization.stripe_customer_id = stripe.payment_intents.customer
-          WHERE stripe.payment_intents.metadata->>'productId' = $1
-            AND stripe.payment_intents.status = 'succeeded'
-            AND organization.id IS NOT NULL
-          GROUP BY organization.id
-          `,
-        [tokenUsageProductId]
-      );
-
-      if (!paymentsResult.error && paymentsResult.data) {
-        paymentsResult.data.forEach((row) => {
-          paymentsMap.set(row.org_id, {
-            total: row.total_amount_received,
-            count: Number(row.payments_count),
-            lastDate: row.last_payment_date,
-          });
-        });
-      }
     }
 
     // Get ClickHouse spending for these organizations
@@ -220,16 +205,15 @@ export class AdminWalletController extends Controller {
 
     // Combine the data
     const organizations = orgsResult.data.map((org) => {
-      const payments = paymentsMap.get(org.org_id);
       return {
         orgId: org.org_id,
         orgName: org.org_name || "Unknown",
         stripeCustomerId: org.stripe_customer_id || "",
-        totalPayments: payments ? payments.total / 100 : 0, // Convert cents to dollars
-        paymentsCount: payments ? payments.count : 0,
+        totalPayments: org.total_amount_received / 100, // Convert cents to dollars
+        paymentsCount: org.payments_count,
         clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-        lastPaymentDate: payments?.lastDate
-          ? Number(payments.lastDate) * 1000
+        lastPaymentDate: org.last_payment_date
+          ? Number(org.last_payment_date) * 1000
           : null, // Convert seconds to milliseconds
         tier: org.tier || "free",
         ownerEmail: org.owner_email || "Unknown",
