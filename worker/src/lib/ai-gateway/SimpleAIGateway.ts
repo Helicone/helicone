@@ -249,14 +249,10 @@ export class SimpleAIGateway {
       this.env
     );
 
-    console.log("parsedBody", JSON.stringify(parsedBody, null, 2));
-
     const expandedResult = await promptManager.getMergedPromptBody(
       parsedBody,
       this.orgId
     );
-
-    console.log("expandedResult", JSON.stringify(expandedResult, null, 2));
 
     if (isErr(expandedResult)) {
       return err(
