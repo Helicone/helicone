@@ -40,7 +40,7 @@ export const endpoints = {
       "tools",
       "top_k",
       "top_logprobs",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -84,7 +84,7 @@ export const endpoints = {
       "tools",
       "top_k",
       "top_logprobs",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -128,6 +128,39 @@ export const endpoints = {
     provider: "openrouter",
     author: "moonshotai",
     providerModelId: "moonshotai/kimi-k2-0905",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000142, // $1.42/1M - worst-case: $1.35/1M (WandB) * 1.055
+        output: 0.00000528, // $5.28/1M - worst-case: $5.00/1M (Moonshot AI) * 1.055
+      },
+    ],
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144, // Same as context when not specified
+    supportedParameters: [
+      "frequency_penalty",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-instruct:novita": {
+    provider: "novita",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2-instruct",
     pricing: [
       {
         threshold: 0,
