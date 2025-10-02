@@ -18,7 +18,10 @@ import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
 import { RequestBodyBuffer_InMemory } from "../RequestBodyBuffer/RequestBodyBuffer_InMemory";
-import { IRequestBodyBuffer } from "../RequestBodyBuffer/IRequestBodyBuffer";
+import {
+  IRequestBodyBuffer,
+  ValidRequestBody,
+} from "../RequestBodyBuffer/IRequestBodyBuffer";
 import { RequestBodyBufferBuilder } from "../RequestBodyBuffer/RequestBodyBufferBuilder";
 
 export type RequestHandlerType =
@@ -299,6 +302,25 @@ export class RequestWrapper {
     return body;
   }
 
+  async applyBodyOverrides(): Promise<void> {
+    const overrides: Record<string, any> = {};
+
+    if (this.bodyKeyOverride) {
+      Object.assign(overrides, this.bodyKeyOverride);
+    }
+
+    if (this.heliconeHeaders.featureFlags.streamUsage) {
+      if (!overrides["stream_options"]) {
+        overrides["stream_options"] = {};
+      }
+      overrides["stream_options"]["include_usage"] = true;
+    }
+
+    if (Object.keys(overrides).length > 0) {
+      await this.requestBodyBuffer.setBodyOverride(overrides);
+    }
+  }
+
   // TODO deprecate this function
   async unsafeGetRawText(): Promise<string> {
     return this.requestBodyBuffer.unsafeGetRawText();
@@ -342,6 +364,30 @@ export class RequestWrapper {
 
       return JSON.stringify(objectWithoutJSXTags);
     }
+    return text;
+  }
+
+  async safelyGetBody(): Promise<ValidRequestBody> {
+    if (this.shouldFormatPrompt()) {
+      throw new Error("Cannot safely get body for request using legacy prompts");
+    }
+
+    await this.applyBodyOverrides();
+    return await this.requestBodyBuffer.getReadableStreamToBody();
+  }
+  
+  async unsafeGetBodyText(): Promise<string> {
+    await this.applyBodyOverrides();
+
+    // Unsafely load text from buffer post-overrides
+    const text = await this.unsafeGetRawText();
+
+    // Legacy prompts (todo: remove) unfortunately we load into memory here
+    if (this.shouldFormatPrompt()) {
+      const { objectWithoutJSXTags } = parseJSXObject(JSON.parse(text));
+      return JSON.stringify(objectWithoutJSXTags);
+    }
+
     return text;
   }
 

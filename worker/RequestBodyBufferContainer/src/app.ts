@@ -217,6 +217,38 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
   app.post<{
     Params: { requestId: string };
+    Body: { override: object };
+  }>("/:requestId/body-override", async (request, reply) => {
+    const { requestId } = request.params;
+    const entry = store.get(requestId);
+    if (!entry) return reply.code(404).send({ error: "not found" });
+
+    try {
+      const bodyJson = JSON.parse(entry.data.toString("utf8"));
+
+      const applyOverride = (body: any, override: object): object => {
+        for (const [key, value] of Object.entries(override)) {
+          if (key in body && typeof value !== "object") {
+            body[key] = value;
+          } else {
+            body[key] = applyOverride(body[key], value);
+          }
+        }
+        return body;
+      };
+
+      const modifiedBody = applyOverride(bodyJson, request.body.override);
+      entry.data = Buffer.from(JSON.stringify(modifiedBody));
+
+      return reply.send({ ok: true });
+    } catch (e: any) {
+      request.log.error({ err: e, requestId }, "body-override failed");
+      return reply.code(500).send({ error: "override failed" });
+    }
+  });
+
+  app.post<{
+    Params: { requestId: string };
     Body: { response: unknown };
   }>("/:requestId/s3/upload-body", async (request, reply) => {
     const awsClient = new AwsClient({

@@ -15,6 +15,8 @@ export interface IRequestBodyBuffer {
 
   tempSetBody(body: string): Promise<void>;
 
+  setBodyOverride(override: object): Promise<void>;
+
   // For forwarding to providers without reading into memory when possible.
   getReadableStreamToBody(): Promise<ValidRequestBody>;
 
