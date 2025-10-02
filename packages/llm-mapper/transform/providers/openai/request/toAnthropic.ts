@@ -222,29 +222,13 @@ function mapMessages(
       content: "n/a",
     };
 
-    if (
-      message.role === "assistant" || message.role === "user") {
-      const contentBlocks: AnthropicContentBlock[] = [];
-
-      if (message.content) {
-        const convertedContent = openAIContentToAnthropicContent(
-          message.content
-        );
-        if (typeof convertedContent === "string") {
-          contentBlocks.push({
-            type: "text",
-            text: convertedContent,
-            cache_control: message.cache_control,
-          });
-        } else {
-          contentBlocks.push(...convertedContent);
-        }
-      }
+    if (message.role === "assistant" || message.role === "user") {
+      const processedToolCallContent: AnthropicContentBlock[] = [];
 
       if (message.role === "assistant" && message.tool_calls) {
         message.tool_calls.forEach((toolCall) => {
           if (toolCall.type === "function") {
-            contentBlocks.push({
+            processedToolCallContent.push({
               type: "tool_use",
               id: toolCall.id,
               name: toolCall.function.name,
@@ -254,8 +238,36 @@ function mapMessages(
           }
         });
       }
+      
+      let processedContent: string | AnthropicContentBlock[] = [];
+      if (message.content) {
+        const convertedContent = openAIContentToAnthropicContent(
+          message.content
+        );
+        if (typeof convertedContent === "string") {
+          // if the message requires forming a content array
+          if (
+            message.cache_control ||
+            processedToolCallContent.length > 0
+          ) {
+            processedContent.push({
+              type: "text",
+              text: convertedContent,
+              cache_control: message.cache_control,
+            });
+          } else {
+            // there was no cache control breakpoint, the content was just string,
+            // and no tool calls, so we create a non-content array message.
+            antMessage.content = convertedContent;
+            return antMessage;
+          }
+        } else {
+          processedContent.push(...convertedContent);
+        }
+      }
+      processedContent.push(...processedToolCallContent);
 
-      antMessage.content = contentBlocks;
+      antMessage.content = processedContent;
       return antMessage;
     }
 
