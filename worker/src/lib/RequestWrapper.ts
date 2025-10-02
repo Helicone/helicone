@@ -290,18 +290,6 @@ export class RequestWrapper {
     this.bodyKeyOverride = bodyKeyOverride;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private overrideBody(body: any, override: object): object {
-    for (const [key, value] of Object.entries(override)) {
-      if (key in body && typeof value !== "object") {
-        body[key] = value;
-      } else {
-        body[key] = this.overrideBody(body[key], value);
-      }
-    }
-    return body;
-  }
-
   async applyBodyOverrides(): Promise<void> {
     const overrides: Record<string, any> = {};
 
@@ -345,28 +333,6 @@ export class RequestWrapper {
     return !!hostParts.includes("eu") || !!auth?.includes("helicone-eu");
   }
 
-  async unsafeGetText(): Promise<string> {
-    let text = await this.unsafeGetRawText();
-
-    if (this.bodyKeyOverride) {
-      try {
-        const bodyJson = await JSON.parse(text);
-        const bodyOverrideJson = await JSON.parse(
-          JSON.stringify(this.bodyKeyOverride)
-        );
-        const body = this.overrideBody(bodyJson, bodyOverrideJson);
-        text = JSON.stringify(body);
-      } catch (e) {
-        throw new Error("Could not stringify bodyKeyOverride");
-      }
-    } else if (this.shouldFormatPrompt()) {
-      const { objectWithoutJSXTags } = parseJSXObject(JSON.parse(text));
-
-      return JSON.stringify(objectWithoutJSXTags);
-    }
-    return text;
-  }
-
   async safelyGetBody(): Promise<ValidRequestBody> {
     if (this.shouldFormatPrompt()) {
       throw new Error("Cannot safely get body for request using legacy prompts");
@@ -391,11 +357,12 @@ export class RequestWrapper {
     return text;
   }
 
+  // TODO: change func and its references to use safelyGetBody
   async unsafeGetJson<T>(): Promise<T> {
     try {
-      return JSON.parse(await this.unsafeGetText());
+      return JSON.parse(await this.unsafeGetBodyText());
     } catch (e) {
-      console.error("RequestWrapper.getJson", e, await this.unsafeGetText());
+      console.error("RequestWrapper.getJson", e, await this.unsafeGetBodyText());
       return {} as T;
     }
   }
