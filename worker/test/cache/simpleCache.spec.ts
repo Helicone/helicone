@@ -54,7 +54,7 @@ describe("Simple Cache Test", () => {
     mockRequest = {
       url: "https://api.openai.com/v1/chat/completions",
       requestWrapper: {
-        unsafeGetText: vi.fn().mockResolvedValue(
+        unsafeGetBodyText: vi.fn().mockResolvedValue(
           JSON.stringify({
             model: "gpt-4",
             messages: [{ role: "user", content: "What is 2+2?" }],
@@ -145,7 +145,7 @@ describe("Simple Cache Test", () => {
       return {
         url: "https://api.openai.com/v1/chat/completions",
         requestWrapper: {
-          unsafeGetText: vi.fn().mockResolvedValue(body),
+          unsafeGetBodyText: vi.fn().mockResolvedValue(body),
           getHeaders: vi.fn(() => headers),
           heliconeHeaders: {
             cacheHeaders: {
@@ -225,7 +225,7 @@ describe("Simple Cache Test", () => {
       request_id: "req-123",
     });
 
-    mockRequest.requestWrapper.unsafeGetText.mockResolvedValue(request1);
+    mockRequest.requestWrapper.unsafeGetBodyText.mockResolvedValue(request1);
     mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = [
       "timestamp",
       "request_id",
@@ -251,7 +251,7 @@ describe("Simple Cache Test", () => {
       request_id: "req-456",
     });
 
-    mockRequest.requestWrapper.unsafeGetText.mockResolvedValue(request2);
+    mockRequest.requestWrapper.unsafeGetBodyText.mockResolvedValue(request2);
 
     // Should hit cache despite different timestamp and request_id
     const cachedResponse = await getCachedResponse(
@@ -272,7 +272,7 @@ describe("Simple Cache Test", () => {
       model: "gpt-4",
       messages: [{ role: "user", content: "Tell me a joke" }],
     });
-    mockRequest.requestWrapper.unsafeGetText.mockResolvedValue(requestBody);
+    mockRequest.requestWrapper.unsafeGetBodyText.mockResolvedValue(requestBody);
 
     // Save 3 different responses in different buckets
     const responses = [
