@@ -699,7 +699,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
       const responseText =
         mappedContent.preview?.fullResponseText?.() ??
-        JSON.stringify(mappedContent.raw.request);
+        JSON.stringify(mappedContent.raw.response);
 
       return {
         requestText: cleanAndTruncateString(requestText, MAX_CONTENT_LENGTH),
