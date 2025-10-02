@@ -56293,7 +56293,16 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "query",
+						"name": "search",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/admin/wallet/{orgId}": {

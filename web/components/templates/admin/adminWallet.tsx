@@ -45,6 +45,7 @@ const formatCurrency = (amount: number | undefined) => {
 
 export default function AdminWallet() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const [walletDetailsOpen, setWalletDetailsOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
@@ -71,7 +72,13 @@ export default function AdminWallet() {
     data: dashboardData,
     isLoading: dashboardLoading,
     refetch: refetchDashboard,
-  } = $JAWN_API.useQuery("post", "/v1/admin/wallet/gateway/dashboard_data", {});
+  } = $JAWN_API.useQuery("post", "/v1/admin/wallet/gateway/dashboard_data", {
+    params: {
+      query: {
+        search: searchQuery || undefined,
+      },
+    },
+  });
 
   const dashboardError = dashboardData?.error;
 
@@ -128,16 +135,16 @@ export default function AdminWallet() {
     },
   );
 
-  const filteredOrgs =
-    dashboardData?.data?.organizations?.filter(
-      (org) =>
-        org.orgName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        org.orgId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        org.stripeCustomerId
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        org.ownerEmail?.toLowerCase().includes(searchTerm.toLowerCase()),
-    ) || [];
+  const handleSearch = () => {
+    setSearchQuery(searchTerm);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setSearchQuery("");
+  };
+
+  const organizations = dashboardData?.data?.organizations || [];
 
   const handleOrgClick = (orgId: string) => {
     setSelectedOrg(orgId);
@@ -354,14 +361,37 @@ export default function AdminWallet() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex items-center space-x-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-md"
-            />
+          <div className="mb-4 flex items-center gap-2">
+            <div className="relative max-w-md flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+                className="pl-9"
+              />
+            </div>
+            <Button
+              onClick={handleSearch}
+              disabled={dashboardLoading}
+              variant="default"
+            >
+              Search
+            </Button>
+            {searchQuery && (
+              <Button
+                onClick={handleClearSearch}
+                disabled={dashboardLoading}
+                variant="outline"
+              >
+                Clear
+              </Button>
+            )}
           </div>
 
           {/* Organizations Table */}
@@ -383,7 +413,7 @@ export default function AdminWallet() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOrgs?.map((org) => {
+                {organizations?.map((org) => {
                   // Calculate net amount after removing Stripe fees
                   const totalGrossCents = dollarsToCents(org.totalPayments);
                   const totalNetCents = calculateNetAmount(

@@ -20425,6 +20425,7 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAdminWalletController_getGatewayDashboardData: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                search: {"in":"query","name":"search","dataType":"string"},
         };
         app.post('/v1/admin/wallet/gateway/dashboard_data',
             authenticateMiddleware([{"api_key":[]}]),

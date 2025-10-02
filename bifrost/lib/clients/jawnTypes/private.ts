@@ -19218,6 +19218,11 @@ export interface operations {
     };
   };
   GetGatewayDashboardData: {
+    parameters: {
+      query?: {
+        search?: string;
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
