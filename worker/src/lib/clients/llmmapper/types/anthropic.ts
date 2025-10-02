@@ -65,7 +65,7 @@ export interface ContentBlockStartEvent extends BaseStreamEvent {
   index: number;
   content_block: Pick<
     AnthropicContentBlock,
-    "type" | "text" | "id" | "name" | "input" | "thinking"
+    "type" | "text" | "id" | "name" | "input" | "thinking" | "citations"
   >;
 }
 

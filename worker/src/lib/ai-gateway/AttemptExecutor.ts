@@ -7,6 +7,7 @@ import {
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
 import { isErr, Result, ok, err } from "../util/results";
+import { Plugin } from "@helicone-package/cost/models/types";
 import { Attempt, EscrowInfo, AttemptError } from "./types";
 import {
   AuthContext,
@@ -69,7 +70,8 @@ export class AttemptExecutor {
       requestWrapper,
       orgId,
       forwarder,
-      escrowInfo
+      escrowInfo,
+      attempt.plugins
     );
 
     // If error, cancel escrow and return the error
@@ -95,13 +97,14 @@ export class AttemptExecutor {
       targetBaseUrl: string | null,
       escrowInfo?: EscrowInfo
     ) => Promise<Response>,
-    escrowInfo: EscrowInfo | undefined
+    escrowInfo: EscrowInfo | undefined,
+    plugins?: Plugin[]
   ): Promise<Result<Response, AttemptError>> {
     try {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: toAnthropic,
+        toAnthropic: (body, modelId) => toAnthropic(body, modelId, plugins),
       });
 
       if (isErr(bodyResult) || !bodyResult.data) {

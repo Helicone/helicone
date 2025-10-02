@@ -39,6 +39,7 @@ export const endpoints = {
       "tools",
       "tool_choice",
     ],
+    supportedPlugins: ["web"],
     ptbEnabled: true,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {

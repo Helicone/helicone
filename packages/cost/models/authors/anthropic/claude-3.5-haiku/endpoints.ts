@@ -31,6 +31,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
+    supportedPlugins: ["web"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},

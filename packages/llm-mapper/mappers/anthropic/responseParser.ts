@@ -25,7 +25,7 @@ const anthropicContentToMessage = (content: any, role: string): Message => {
     };
   }
   if (content.type === "text") {
-    return {
+    const message: Message = {
       id: content.id || randomId(),
       content: (content.text || JSON.stringify(content, null, 2))
         .replace(/undefined/g, "")
@@ -33,6 +33,18 @@ const anthropicContentToMessage = (content: any, role: string): Message => {
       _type: "message",
       role,
     };
+
+    // Add annotations if there are citations
+    if (content.citations && content.citations.length > 0) {
+      message.annotations = content.citations.map((citation: any) => ({
+        type: "url_citation",
+        url: citation.url,
+        title: citation.title,
+        content: citation.cited_text,
+      }));
+    }
+
+    return message;
   } else if (content.type === "tool_use") {
     return {
       id: content.id || randomId(),
@@ -112,6 +124,10 @@ export const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
     ) {
       if (Array.isArray(response.content)) {
         for (const content of response.content) {
+          // Filter out server_tool_use and web_search_tool_result blocks - they're internal to Anthropic
+          if (content.type === "server_tool_use" || content.type === "web_search_tool_result") {
+            continue;
+          }
           const message = anthropicContentToMessage(content, response.role);
           // Clean up any undefined strings in the content
           if (typeof message.content === "string") {

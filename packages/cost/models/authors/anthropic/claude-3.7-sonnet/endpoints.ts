@@ -32,6 +32,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
+    supportedPlugins: ["web"],
     ptbEnabled: true,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {

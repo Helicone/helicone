@@ -156,11 +156,34 @@ export interface RateLimits {
   tpd?: number;
 }
 
+// Plugin types
+export type PluginId = "web"; // Add more with | as we support more plugins
+
+interface BasePlugin<T extends PluginId = PluginId> {
+  id: T;
+}
+
+export interface WebSearchPlugin extends BasePlugin<"web"> {
+  max_uses?: number;
+  allowed_domains?: string[];
+  blocked_domains?: string[];
+  user_location?: {
+    type?: "approximate";
+    city?: string;
+    region?: string; // state/region
+    country?: string; // country code
+    timezone?: string; // IANA timezone ID
+  };
+}
+
+export type Plugin = WebSearchPlugin; // Add more with | as we add plugin types
+
 export interface ModelProviderConfig extends BaseConfig {
   providerModelId: string;
   provider: ModelProviderName;
   author: AuthorName;
   supportedParameters: StandardParameter[];
+  supportedPlugins?: PluginId[];
   rateLimits?: RateLimits;
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;

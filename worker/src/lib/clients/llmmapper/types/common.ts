@@ -62,7 +62,8 @@ export interface AnthropicContentBlock {
     | "tool_use"
     | "tool_result"
     | "thinking"
-    | "server_tool_use";
+    | "server_tool_use"
+    | "web_search_tool_result";
   text?: string;
   // Image fields
   source?:
@@ -81,10 +82,12 @@ export interface AnthropicContentBlock {
   input?: Record<string, any>;
   // Tool result fields
   tool_use_id?: string;
-  content?: string;
+  content?: string | WebSearchResult[] | WebSearchError;
   // Thinking fields
   thinking?: string;
   signature?: string;
+  // Text citations (for web search)
+  citations?: WebSearchCitation[];
   cache_control?: CacheControl;
 }
 
@@ -105,11 +108,35 @@ export interface AnthropicWebSearchTool {
   name: "web_search";
   max_uses?: number;
   allowed_domains?: string[];
+  blocked_domains?: string[];
   user_location?: {
-    type: "approximate";
+    type?: "approximate";
     city?: string;
+    region?: string;
     country?: string;
+    timezone?: string;
   };
+}
+
+export interface WebSearchResult {
+  type: "web_search_result";
+  url: string;
+  title: string;
+  encrypted_content: string;
+  page_age?: string;
+}
+
+export interface WebSearchError {
+  type: "web_search_tool_result_error";
+  error_code: string;
+}
+
+export interface WebSearchCitation {
+  type: "web_search_result_location";
+  url: string;
+  title: string;
+  encrypted_index: string;
+  cited_text: string;
 }
 
 // Tool choice types
