@@ -33,6 +33,28 @@ interface WalletState {
   }>;
 }
 
+interface DashboardData {
+  organizations: Array<{
+    orgId: string;
+    orgName: string;
+    stripeCustomerId: string;
+    totalPayments: number;
+    paymentsCount: number;
+    clickhouseTotalSpend: number;
+    lastPaymentDate: number | null;
+    tier: string;
+    ownerEmail: string;
+    allowNegativeBalance: boolean;
+    creditLimit: number;
+  }>;
+  summary: {
+    totalOrgsWithCredits: number;
+    totalCreditsIssued: number;
+    totalCreditsSpent: number;
+  };
+  isProduction: boolean;
+}
+
 interface TableDataResponse {
   pageSize: number;
   data: {
@@ -47,53 +69,17 @@ interface TableDataResponse {
 @Tags("Admin Wallet")
 @Security("api_key")
 export class AdminWalletController extends Controller {
-  @Post("/gateway/dashboard_data")
-  public async getGatewayDashboardData(
-    @Request() request: JawnAuthenticatedRequest,
-    @Query() search?: string
-    // @Query() sortBy?:
-    // @Query() sortOrder?: "asc" | "desc"
-  ): Promise<
-    Result<
-      {
-        organizations: Array<{
-          orgId: string;
-          orgName: string;
-          stripeCustomerId: string;
-          totalPayments: number;
-          paymentsCount: number;
-          clickhouseTotalSpend: number;
-          lastPaymentDate: number | null;
-          tier: string;
-          ownerEmail: string;
-          allowNegativeBalance: boolean;
-          creditLimit: number;
-        }>;
-        summary: {
-          totalOrgsWithCredits: number;
-          totalCreditsIssued: number;
-          totalCreditsSpent: number;
-        };
-        isProduction: boolean;
-      },
-      string
-    >
-  > {
-    await authCheckThrow(request.authParams.userId);
-
-    const settingsManager = new SettingsManager();
-    const stripeProductSettings =
-      await settingsManager.getSetting("stripe:products");
-    if (!stripeProductSettings) {
-      return err("Stripe product settings not configured");
-    }
-
-    const tokenUsageProductId =
-      stripeProductSettings.cloudGatewayTokenUsageProduct;
-    if (!tokenUsageProductId) {
-      return err("Cloud gateway token usage product ID not configured");
-    }
-
+  private async dashboardWithPostgresSort(
+    search: string,
+    tokenUsageProductId: string,
+    sortBy?:
+      | "org_created_at"
+      | "total_payments"
+      | "total_spend"
+      | "credit_limit"
+      | "amount_received",
+    sortOrder?: "asc" | "desc"
+  ): Promise<Result<DashboardData, string>> {
     // Build search filter
     const searchFilter = search
       ? `AND (
@@ -107,6 +93,38 @@ export class AdminWalletController extends Controller {
     // Build query parameters
     const queryParams = search ? [`%${search}%`] : [];
     queryParams.push(tokenUsageProductId);
+
+    function getOrderClause() {
+      if (!sortBy) {
+        return "ORDER BY organization.created_at DESC"; // Default sorting
+      }
+
+      let column: string;
+      switch (sortBy) {
+        case "org_created_at":
+          column = "organization.created_at";
+          break;
+        case "total_payments":
+          column = "total_amount_received";
+          break;
+        case "total_spend":
+          column = "clickhouse_total_spend"; // Note: This requires a subquery or join to sort correctly
+          break;
+        case "credit_limit":
+          column = "organization.credit_limit";
+          break;
+        case "amount_received":
+          column = "total_amount_received";
+          break;
+        default:
+          column = "organization.created_at";
+      }
+
+      const order = sortOrder === "asc" ? "ASC" : "DESC"; // Default to DESC if not specified
+      return `ORDER BY ${column} ${order}`;
+    }
+
+    const orderClause = getOrderClause();
 
     // Get ALL organizations with payment data in a single query
     // This allows admins to manage wallets even without Stripe integration
@@ -151,7 +169,7 @@ export class AdminWalletController extends Controller {
           organization.allow_negative_balance,
           organization.credit_limit,
           organization.created_at
-        ORDER BY organization.created_at DESC
+        ${orderClause}
         LIMIT 100
         `,
       queryParams
@@ -241,6 +259,35 @@ export class AdminWalletController extends Controller {
       },
       isProduction: ENVIRONMENT === "production",
     });
+  }
+
+  @Post("/gateway/dashboard_data")
+  public async getGatewayDashboardData(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() search?: string,
+    @Query() sortBy?: string,
+    @Query() sortOrder?: "asc" | "desc"
+  ): Promise<Result<DashboardData, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    if (!stripeProductSettings) {
+      return err("Stripe product settings not configured");
+    }
+
+    const tokenUsageProductId =
+      stripeProductSettings.cloudGatewayTokenUsageProduct;
+    if (!tokenUsageProductId) {
+      return err("Cloud gateway token usage product ID not configured");
+    }
+
+    return (
+      this.dashboardWithPostgresSort(search || "", tokenUsageProductId),
+      sortBy,
+      sortOrder
+    );
   }
 
   @Post("/{orgId}")
