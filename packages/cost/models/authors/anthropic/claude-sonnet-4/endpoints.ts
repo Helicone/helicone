@@ -119,7 +119,7 @@ export const endpoints = {
       "top_p",
       "top_k",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "us-east-1": {},
