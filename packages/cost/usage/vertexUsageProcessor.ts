@@ -1,7 +1,7 @@
 import { IUsageProcessor, ParseInput } from "./IUsageProcessor";
 import { ModelUsage } from "./types";
 import { Result } from "../../common/result";
-import { AnthropicUsageProcessor } from "./anthropicUsageProcessor";
+import { BedrockUsageProcessor } from "./bedrockUsageProcessor";
 import { OpenAIUsageProcessor } from "./openAIUsageProcessor";
 
 export class VertexOpenAIUsageProcessor extends OpenAIUsageProcessor {
@@ -57,7 +57,8 @@ export class VertexOpenAIUsageProcessor extends OpenAIUsageProcessor {
 export class VertexUsageProcessor implements IUsageProcessor {
   public async parse(parseInput: ParseInput): Promise<Result<ModelUsage, string>> {
     if (parseInput.model.includes("claude")) {
-      return new AnthropicUsageProcessor().parse(parseInput);
+      // Both bedrock and vertex don't support 1h buckets like Anthropic does.
+      return new BedrockUsageProcessor().parse(parseInput);
     } else {
       return new VertexOpenAIUsageProcessor().parse(parseInput);
     }
