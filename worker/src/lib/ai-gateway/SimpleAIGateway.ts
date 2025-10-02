@@ -146,7 +146,7 @@ export class SimpleAIGateway {
       const result = await this.attemptExecutor.execute({
         attempt,
         requestWrapper: this.requestWrapper,
-        parsedBody,
+        parsedBody: finalBody,
         requestParams,
         orgId: this.orgId,
         forwarder,
