@@ -55,6 +55,8 @@ export default function AdminWallet() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<string>("created_date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [spendersSortBy, setSpendersSortBy] = useState<string>("total_cost");
+  const [spendersSortDirection, setSpendersSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const [walletDetailsOpen, setWalletDetailsOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
