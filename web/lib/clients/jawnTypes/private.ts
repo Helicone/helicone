@@ -525,6 +525,9 @@ export interface paths {
   "/v1/admin/wallet/gateway/dashboard_data": {
     post: operations["GetGatewayDashboardData"];
   };
+  "/v1/admin/wallet/top-spenders": {
+    post: operations["GetTopSpenders"];
+  };
   "/v1/admin/wallet/{orgId}": {
     post: operations["GetWalletDetails"];
   };
@@ -15918,6 +15921,25 @@ Json: JsonObject;
       error: null;
     };
     "Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_": components["schemas"]["ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__topSpenders-Array__orgId-string--orgName-string--totalSpent-number--requestCount-number--avgCostPerRequest-number--firstRequest-string-or-null--lastRequest-string-or-null____": {
+      data: {
+        topSpenders: ({
+            lastRequest: string | null;
+            firstRequest: string | null;
+            /** Format: double */
+            avgCostPerRequest: number;
+            /** Format: double */
+            requestCount: number;
+            /** Format: double */
+            totalSpent: number;
+            orgName: string;
+            orgId: string;
+          })[];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__topSpenders-Array__orgId-string--orgName-string--totalSpent-number--requestCount-number--avgCostPerRequest-number--firstRequest-string-or-null--lastRequest-string-or-null___.string_": components["schemas"]["ResultSuccess__topSpenders-Array__orgId-string--orgName-string--totalSpent-number--requestCount-number--avgCostPerRequest-number--firstRequest-string-or-null--lastRequest-string-or-null____"] | components["schemas"]["ResultError_string_"];
     WalletState: {
       /** Format: double */
       balance: number;
@@ -19221,6 +19243,8 @@ export interface operations {
     parameters: {
       query?: {
         search?: string;
+        sortBy?: string;
+        sortDirection?: "asc" | "desc";
       };
     };
     responses: {
@@ -19228,6 +19252,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetTopSpenders: {
+    parameters: {
+      query?: {
+        limit?: number;
+        sortBy?: string;
+        sortDirection?: "asc" | "desc";
+        startDate?: string;
+        endDate?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__topSpenders-Array__orgId-string--orgName-string--totalSpent-number--requestCount-number--avgCostPerRequest-number--firstRequest-string-or-null--lastRequest-string-or-null___.string_"];
         };
       };
     };

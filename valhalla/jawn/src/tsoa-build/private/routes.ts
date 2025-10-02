@@ -14404,6 +14404,20 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__topSpenders-Array__orgId-string--orgName-string--totalSpent-number--requestCount-number--avgCostPerRequest-number--firstRequest-string-or-null--lastRequest-string-or-null____": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"topSpenders":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"lastRequest":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"firstRequest":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"avgCostPerRequest":{"dataType":"double","required":true},"requestCount":{"dataType":"double","required":true},"totalSpent":{"dataType":"double","required":true},"orgName":{"dataType":"string","required":true},"orgId":{"dataType":"string","required":true}}},"required":true}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__topSpenders-Array__orgId-string--orgName-string--totalSpent-number--requestCount-number--avgCostPerRequest-number--firstRequest-string-or-null--lastRequest-string-or-null___.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__topSpenders-Array__orgId-string--orgName-string--totalSpent-number--requestCount-number--avgCostPerRequest-number--firstRequest-string-or-null--lastRequest-string-or-null____"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "WalletState": {
         "dataType": "refObject",
         "properties": {
@@ -20426,6 +20440,8 @@ export function RegisterRoutes(app: Router) {
         const argsAdminWalletController_getGatewayDashboardData: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 search: {"in":"query","name":"search","dataType":"string"},
+                sortBy: {"in":"query","name":"sortBy","dataType":"string"},
+                sortDirection: {"in":"query","name":"sortDirection","dataType":"union","subSchemas":[{"dataType":"enum","enums":["asc"]},{"dataType":"enum","enums":["desc"]}]},
         };
         app.post('/v1/admin/wallet/gateway/dashboard_data',
             authenticateMiddleware([{"api_key":[]}]),
@@ -20444,6 +20460,42 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getGatewayDashboardData',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminWalletController_getTopSpenders: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                limit: {"in":"query","name":"limit","dataType":"double"},
+                sortBy: {"in":"query","name":"sortBy","dataType":"string"},
+                sortDirection: {"in":"query","name":"sortDirection","dataType":"union","subSchemas":[{"dataType":"enum","enums":["asc"]},{"dataType":"enum","enums":["desc"]}]},
+                startDate: {"in":"query","name":"startDate","dataType":"string"},
+                endDate: {"in":"query","name":"endDate","dataType":"string"},
+        };
+        app.post('/v1/admin/wallet/top-spenders',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController.prototype.getTopSpenders)),
+
+            async function AdminWalletController_getTopSpenders(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminWalletController_getTopSpenders, request, response });
+
+                const controller = new AdminWalletController();
+
+              await templateService.apiHandler({
+                methodName: 'getTopSpenders',
                 controller,
                 response,
                 next,
