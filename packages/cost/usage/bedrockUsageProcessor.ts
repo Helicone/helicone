@@ -26,7 +26,7 @@ export class BedrockUsageProcessor extends AnthropicUsageProcessor {
       output: outputTokens,
     };
 
-    if (cacheReadInputTokens > 0 || cacheWriteInputTokens) {
+    if (cacheReadInputTokens > 0 || cacheWriteInputTokens > 0) {
       modelUsage.cacheDetails = {
         cachedInput: cacheReadInputTokens,
         write5m: cacheWriteInputTokens,
