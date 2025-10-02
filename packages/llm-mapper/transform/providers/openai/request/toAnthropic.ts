@@ -222,7 +222,8 @@ function mapMessages(
       content: "n/a",
     };
 
-    if (message.role === "assistant" && message.tool_calls) {
+    if (
+      message.role === "assistant" || message.role === "user") {
       const contentBlocks: AnthropicContentBlock[] = [];
 
       if (message.content) {
@@ -240,17 +241,19 @@ function mapMessages(
         }
       }
 
-      message.tool_calls.forEach((toolCall) => {
-        if (toolCall.type === "function") {
-          contentBlocks.push({
-            type: "tool_use",
-            id: toolCall.id,
-            name: toolCall.function.name,
-            input: JSON.parse(toolCall.function.arguments || "{}"),
-            // TODO: add cache_control support to message.tool_calls in types
-          });
-        }
-      });
+      if (message.role === "assistant" && message.tool_calls) {
+        message.tool_calls.forEach((toolCall) => {
+          if (toolCall.type === "function") {
+            contentBlocks.push({
+              type: "tool_use",
+              id: toolCall.id,
+              name: toolCall.function.name,
+              input: JSON.parse(toolCall.function.arguments || "{}"),
+              // TODO: add cache_control support to message.tool_calls in types
+            });
+          }
+        });
+      }
 
       antMessage.content = contentBlocks;
       return antMessage;
