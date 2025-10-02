@@ -51,9 +51,12 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private applyOverride(body: any, override: object): object {
     for (const [key, value] of Object.entries(override)) {
-      if (key in body && typeof value !== "object") {
+      if (typeof value !== "object" || value === null || Array.isArray(value)) {
         body[key] = value;
       } else {
+        if (!body[key] || typeof body[key] !== "object") {
+          body[key] = {};
+        }
         body[key] = this.applyOverride(body[key], value);
       }
     }
