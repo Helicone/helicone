@@ -16,6 +16,8 @@ export function getUsageProcessor(
   switch (provider) {
     case "openai":
     case "azure":
+    case "deepinfra":
+    case "novita":
       return new OpenAIUsageProcessor();
     case "anthropic":
       return new AnthropicUsageProcessor();
