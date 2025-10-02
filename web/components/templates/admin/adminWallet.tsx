@@ -34,6 +34,9 @@ import {
   AlertCircle,
   ExternalLink,
   RefreshCw,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
 import { Small } from "@/components/ui/typography";
@@ -43,6 +46,13 @@ const formatCurrency = (amount: number | undefined) => {
   return remoteFormatCurrency(amount, "USD", 6);
 };
 
+type SortColumn =
+  | "org_created_at"
+  | "total_payments"
+  | "total_spend"
+  | "credit_limit"
+  | "amount_received";
+
 export default function AdminWallet() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,6 +60,8 @@ export default function AdminWallet() {
   const [walletDetailsOpen, setWalletDetailsOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [tablePage, setTablePage] = useState(0);
+  const [sortBy, setSortBy] = useState<SortColumn>("org_created_at");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // Wallet modification form state
   const [modifyAmount, setModifyAmount] = useState<string>("");
@@ -76,6 +88,8 @@ export default function AdminWallet() {
     params: {
       query: {
         search: searchQuery || undefined,
+        sortBy: sortBy,
+        sortOrder: sortOrder,
       },
     },
   });
@@ -142,6 +156,28 @@ export default function AdminWallet() {
   const handleClearSearch = () => {
     setSearchTerm("");
     setSearchQuery("");
+  };
+
+  const handleSort = (column: SortColumn) => {
+    if (sortBy === column) {
+      // Toggle sort order if clicking the same column
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // Set new column and default to descending
+      setSortBy(column);
+      setSortOrder("desc");
+    }
+  };
+
+  const SortIcon = ({ column }: { column: SortColumn }) => {
+    if (sortBy !== column) {
+      return <ArrowUpDown size={14} className="ml-1 opacity-50" />;
+    }
+    return sortOrder === "asc" ? (
+      <ArrowUp size={14} className="ml-1" />
+    ) : (
+      <ArrowDown size={14} className="ml-1" />
+    );
   };
 
   const organizations = dashboardData?.data?.organizations || [];
@@ -399,15 +435,55 @@ export default function AdminWallet() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Organization</TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("org_created_at")}
+                  >
+                    <div className="flex items-center">
+                      Organization
+                      <SortIcon column="org_created_at" />
+                    </div>
+                  </TableHead>
                   <TableHead>Owner</TableHead>
                   <TableHead>Tier</TableHead>
                   <TableHead># Payments</TableHead>
-                  <TableHead>Total Gross</TableHead>
-                  <TableHead>Total Net</TableHead>
-                  <TableHead>Total Spent (ClickHouse)</TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("total_payments")}
+                  >
+                    <div className="flex items-center">
+                      Total Gross
+                      <SortIcon column="total_payments" />
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("amount_received")}
+                  >
+                    <div className="flex items-center">
+                      Total Net
+                      <SortIcon column="amount_received" />
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("total_spend")}
+                  >
+                    <div className="flex items-center">
+                      Total Spent (ClickHouse)
+                      <SortIcon column="total_spend" />
+                    </div>
+                  </TableHead>
                   <TableHead>Balance</TableHead>
-                  <TableHead>Wallet Settings</TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("credit_limit")}
+                  >
+                    <div className="flex items-center">
+                      Wallet Settings
+                      <SortIcon column="credit_limit" />
+                    </div>
+                  </TableHead>
                   <TableHead>Last Payment</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
