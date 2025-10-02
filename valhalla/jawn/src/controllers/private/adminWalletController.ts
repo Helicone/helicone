@@ -233,7 +233,7 @@ export class AdminWalletController extends Controller {
           creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0,
         };
       })
-      .filter((org) => org !== null);
+      .filter((org): org is NonNullable<typeof org> => org !== null);
 
     // Calculate summary
     const totalCreditsIssued = organizations.reduce(
