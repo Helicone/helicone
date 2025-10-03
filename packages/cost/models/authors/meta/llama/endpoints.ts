@@ -100,7 +100,7 @@ export const endpoints = {
       "repetition_penalty",
       "logit_bias",
       "functions",
-      "tools",
+      "tools"
     ],
     ptbEnabled: true,
     endpointConfigs: {
