@@ -108,7 +108,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -134,7 +134,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -792,7 +792,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -818,7 +818,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -844,7 +844,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -926,7 +926,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1450,7 +1450,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1524,7 +1524,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1595,7 +1595,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1724,7 +1724,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1750,7 +1750,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -3095,6 +3095,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "novita",
     "novita",
     "novita",
     "novita",
@@ -4466,7 +4467,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 4,
+      "modelCount": 5,
       "provider": "novita",
     },
     {
@@ -4498,6 +4499,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "deepseek-r1-distill-llama-70b",
     "deepseek-reasoner",
     "deepseek-v3",
+    "deepseek-v3.1-terminus",
+    "deepseek-v3.2",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
@@ -4529,12 +4532,16 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "llama-guard-4",
     "llama-prompt-guard-2-22m",
     "llama-prompt-guard-2-86m",
+    "mistral-nemo",
+    "mistral-small",
     "o3",
     "o3-mini",
     "o3-pro",
     "o4-mini",
     "qwen3-30b-a3b",
     "qwen3-32b",
+    "qwen3-coder",
+    "qwen3-next-80b-a3b-instruct",
   ],
   "sampleArchivedKeys": [],
   "sampleEndpointIds": [
@@ -4545,9 +4552,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 125,
-  "totalModelProviderConfigs": 125,
-  "totalModelsWithPtb": 48,
+  "totalEndpoints": 127,
+  "totalModelProviderConfigs": 127,
+  "totalModelsWithPtb": 54,
   "totalProviders": 12,
 }
 `;

@@ -151,7 +151,7 @@ export const endpoints = {
       "min_p",
       "response_format"
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     quantization: "fp4",
     endpointConfigs: {
       "*": {},
@@ -169,7 +169,7 @@ export const endpoints = {
       },
     ],
     rateLimits: {
-      rpm: 12000, 
+      rpm: 12000,
       tpm: 60000000,
       tpd: 6000000000,
     },
@@ -190,7 +190,7 @@ export const endpoints = {
       "min_p",
       "response_format"
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
