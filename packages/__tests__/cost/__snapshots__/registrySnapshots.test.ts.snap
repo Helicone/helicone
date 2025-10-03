@@ -5,6 +5,30 @@ exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
   "alibaba/qwen": {
+    "qwen3-235b-a22b-thinking:deepinfra": {
+      "context": 262000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "Qwen/Qwen3-235B-A22B-Thinking-2507",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "qwen3-30b-a3b:deepinfra": {
       "context": 32768,
       "crossRegion": false,
@@ -108,7 +132,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -816,7 +840,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -842,7 +866,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -868,7 +892,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -931,6 +955,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "deepseek/r1-distill": {
+    "deepseek-r1-distill-llama-70b:deepinfra": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-r1-distill-llama-70b:groq": {
       "context": 128000,
       "crossRegion": false,
@@ -1450,7 +1498,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1505,6 +1553,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-4-maverick:novita": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 1048576,
+      "modelId": "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-4-maverick:openrouter": {
       "context": 1048576,
       "crossRegion": false,
@@ -1547,6 +1619,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "groq",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-4-scout:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1676,7 +1774,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -1702,7 +1800,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -2954,6 +3052,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "deepinfra",
     "deepinfra",
+    "deepinfra",
     "groq",
     "openrouter",
   ],
@@ -3012,6 +3111,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/r1-distill": [
+    "deepinfra",
     "groq",
     "openrouter",
   ],
@@ -3047,6 +3147,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "novita",
+    "novita",
     "novita",
     "novita",
     "openrouter",
@@ -3137,8 +3239,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "alibaba/qwen": {
     "deepinfra": [
       {
-        "input": 1.4e-7,
-        "output": 0.0000014,
+        "input": 3e-7,
+        "output": 0.0000029,
         "threshold": 0,
       },
     ],
@@ -3558,6 +3660,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/r1-distill": {
+    "deepinfra": [
+      {
+        "input": 2e-7,
+        "output": 6e-7,
+        "threshold": 0,
+      },
+    ],
     "groq": [
       {
         "audio": 0,
@@ -4065,6 +4174,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "deepseek-r1-distill-llama-70b",
       "providers": [
+        "deepinfra",
         "groq",
         "openrouter",
       ],
@@ -4291,6 +4401,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "llama-4-maverick",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
@@ -4298,6 +4409,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "llama-4-scout",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
@@ -4363,6 +4475,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "qwen3-235b-a22b-thinking",
+      "providers": [
+        "deepinfra",
+      ],
+    },
+    {
       "model": "qwen3-30b-a3b",
       "providers": [
         "deepinfra",
@@ -4402,7 +4520,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 12,
+      "modelCount": 14,
       "provider": "deepinfra",
     },
     {
@@ -4418,7 +4536,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 3,
+      "modelCount": 5,
       "provider": "novita",
     },
     {
@@ -4450,6 +4568,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "deepseek-r1-distill-llama-70b",
     "deepseek-reasoner",
     "deepseek-v3",
+    "deepseek-v3.1-terminus",
+    "deepseek-v3.2",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
@@ -4481,12 +4601,16 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "llama-guard-4",
     "llama-prompt-guard-2-22m",
     "llama-prompt-guard-2-86m",
+    "mistral-nemo",
+    "mistral-small",
     "o3",
     "o3-mini",
     "o3-pro",
     "o4-mini",
+    "qwen3-235b-a22b-thinking",
     "qwen3-30b-a3b",
     "qwen3-32b",
+    "qwen3-coder",
   ],
   "sampleArchivedKeys": [],
   "sampleEndpointIds": [
@@ -4497,9 +4621,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 125,
-  "totalModelProviderConfigs": 125,
-  "totalModelsWithPtb": 48,
+  "totalEndpoints": 129,
+  "totalModelProviderConfigs": 129,
+  "totalModelsWithPtb": 54,
   "totalProviders": 12,
 }
 `;
