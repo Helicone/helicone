@@ -29,6 +29,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-235b-a22b-thinking:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "qwen/qwen3-235b-a22b-thinking-2507",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "qwen3-30b-a3b:deepinfra": {
       "context": 32768,
       "crossRegion": false,
@@ -3057,6 +3084,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "deepinfra",
     "groq",
+    "novita",
     "openrouter",
   ],
   "anthropic/claude-3.5-haiku": [
@@ -3256,6 +3284,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "request": 0,
         "threshold": 0,
         "web_search": 0,
+      },
+    ],
+    "novita": [
+      {
+        "input": 3e-7,
+        "output": 0.000003,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -4483,6 +4518,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "qwen3-235b-a22b-thinking",
       "providers": [
         "deepinfra",
+        "novita",
       ],
     },
     {
@@ -4541,7 +4577,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 6,
+      "modelCount": 7,
       "provider": "novita",
     },
     {
@@ -4627,8 +4663,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 129,
-  "totalModelProviderConfigs": 129,
+  "totalEndpoints": 130,
+  "totalModelProviderConfigs": 130,
   "totalModelsWithPtb": 55,
   "totalProviders": 12,
 }
