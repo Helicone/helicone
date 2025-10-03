@@ -225,6 +225,23 @@ describe("DeepSeek Registry Tests", () => {
             finalStatus: 200,
           },
         }));
+
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "deepseek-r1-distill-llama-70b/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
   });
 
@@ -477,6 +494,56 @@ describe("DeepSeek Registry Tests", () => {
       }));
   });
 
+  describe("Error scenarios - DeepInfra Provider with DeepSeek R1 Distill Llama 70B", () => {
+    it("should handle DeepInfra provider failure for R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "DeepInfra service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from DeepInfra for R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from DeepInfra for R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+  });
+
   describe("Error scenarios - Novita Provider with DeepSeek V3.2", () => {
     it("should handle Novita provider failure", () =>
       runGatewayTest({
@@ -708,6 +775,68 @@ describe("DeepSeek Registry Tests", () => {
               data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
               expects: {
                 ...novitaAuthExpectations,
+                bodyContains: ["user", "Test"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should construct correct DeepInfra URL for DeepSeek R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              expects: deepinfraAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed for R1 Distill Llama 70B
+                // Base URL: https://api.deepinfra.com/
+                // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for DeepInfra R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              expects: deepinfraAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for DeepInfra R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              expects: {
+                ...deepinfraAuthExpectations,
                 bodyContains: ["user", "Test"],
               },
             },
