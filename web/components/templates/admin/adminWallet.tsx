@@ -39,9 +39,20 @@ import {
   ArrowDown,
   ChevronDown,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
 import { Small, H3, H4 } from "@/components/ui/typography";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const formatCurrency = (amount: number | undefined) => {
   if (amount === undefined) return "UNDEFINED";
@@ -66,6 +77,10 @@ export default function AdminWallet() {
 
   const drawerRef = useRef<ImperativePanelHandle>(null);
   const [drawerSize, setDrawerSize] = useState(50);
+
+  // Delete disallow entry state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<{provider: string, model: string} | null>(null);
 
   // Wallet modification form state
   const [modifyAmount, setModifyAmount] = useState<string>("");
@@ -130,6 +145,12 @@ export default function AdminWallet() {
   const updateSettingsMutation = $JAWN_API.useMutation(
     "post",
     "/v1/admin/wallet/{orgId}/update-settings",
+  );
+
+  // Mutation for deleting from disallow list
+  const deleteDisallowMutation = $JAWN_API.useMutation(
+    "delete",
+    "/v1/admin/wallet/{orgId}/disallow-list",
   );
 
   // Fetch table data (lazy loaded when table is selected)
@@ -268,6 +289,32 @@ export default function AdminWallet() {
       );
     } finally {
       setIsModifying(false);
+    }
+  };
+
+  const handleDeleteDisallowEntry = async () => {
+    if (!selectedOrg || !entryToDelete) return;
+
+    try {
+      const result = await deleteDisallowMutation.mutateAsync({
+        params: {
+          path: { orgId: selectedOrg },
+          query: {
+            provider: entryToDelete.provider,
+            model: entryToDelete.model,
+          },
+        },
+      });
+
+      if (result.data) {
+        // Refetch wallet details to update the list
+        await refetchWalletDetails();
+      }
+    } catch (error) {
+      console.error("Error deleting from disallow list:", error);
+    } finally {
+      setDeleteDialogOpen(false);
+      setEntryToDelete(null);
     }
   };
 
@@ -679,7 +726,7 @@ export default function AdminWallet() {
           }}
           collapsible={true}
         >
-          <div className="h-full overflow-y-auto bg-muted/20 border-l p-4">
+          <div className="h-full overflow-y-auto bg-background border-l p-4">
             {walletLoading ? (
               <div className="flex h-64 items-center justify-center">
                 <Loader2 size={20} className="animate-spin" />
@@ -865,30 +912,63 @@ export default function AdminWallet() {
                   </div>
                 </section>
 
-                {/* Bottom Row: Escrows, Disallow, Tables */}
-                <div className="grid grid-cols-2 gap-2">
-                  <section className="flex flex-col gap-2">
-                    <H4 className="text-sm font-semibold">Escrows</H4>
-                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
-                      <div className="text-base font-bold">
-                        {formatCurrency(walletDetails.data?.totalEscrow)}
-                      </div>
+                {/* Escrows */}
+                <section className="flex flex-col gap-2">
+                  <H4 className="text-sm font-semibold">Escrows</H4>
+                  <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
+                    <div className="text-base font-bold">
+                      {formatCurrency(walletDetails.data?.totalEscrow)}
                     </div>
-                  </section>
+                  </div>
+                </section>
 
-                  <section className="flex flex-col gap-2">
-                    <H4 className="text-sm font-semibold">Disallow List</H4>
-                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
-                      {(walletDetails?.data?.disallowList?.length ?? 0) > 0 ? (
-                        <div className="text-sm font-medium">
-                          {walletDetails?.data?.disallowList?.length} entries
-                        </div>
-                      ) : (
-                        <div className="text-sm text-muted-foreground">None</div>
-                      )}
-                    </div>
-                  </section>
-                </div>
+                {/* Disallow List */}
+                <section className="flex flex-col gap-2">
+                  <H4 className="text-sm font-semibold">Disallow List ({walletDetails?.data?.disallowList?.length ?? 0})</H4>
+                  <div className="rounded-lg bg-card border shadow-sm overflow-hidden">
+                    {(walletDetails?.data?.disallowList?.length ?? 0) > 0 ? (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-xs">Request ID</TableHead>
+                            <TableHead className="text-xs">Provider</TableHead>
+                            <TableHead className="text-xs">Model</TableHead>
+                            <TableHead className="text-xs w-[50px]"></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {walletDetails?.data?.disallowList?.map((entry, idx) => (
+                            <TableRow key={idx}>
+                              <TableCell className="text-xs font-mono">
+                                {entry.helicone_request_id.substring(0, 8)}...
+                              </TableCell>
+                              <TableCell className="text-xs">{entry.provider}</TableCell>
+                              <TableCell className="text-xs">{entry.model}</TableCell>
+                              <TableCell className="text-xs">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0"
+                                  onClick={() => {
+                                    setEntryToDelete({
+                                      provider: entry.provider,
+                                      model: entry.model,
+                                    });
+                                    setDeleteDialogOpen(true);
+                                  }}
+                                >
+                                  <Trash2 size={14} className="text-destructive" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    ) : (
+                      <div className="p-3 text-sm text-muted-foreground text-center">None</div>
+                    )}
+                  </div>
+                </section>
 
                 {/* Raw Tables */}
                 <section className="flex flex-col gap-2">
@@ -944,6 +1024,24 @@ export default function AdminWallet() {
             ) : selectedOrg ? (
               <p className="text-xs text-muted-foreground">Failed to load</p>
             ) : null}
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Disallow Entry?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to remove <strong>{entryToDelete?.provider}</strong> / <strong>{entryToDelete?.model}</strong> from the disallow list? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteDisallowEntry} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
