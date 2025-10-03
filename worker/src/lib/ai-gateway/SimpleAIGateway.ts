@@ -179,6 +179,7 @@ export class SimpleAIGateway {
     }
 
     // All attempts failed
+    this.metrics.markPostRequestEnd();
     return this.createErrorResponse(errors);
   }
 
