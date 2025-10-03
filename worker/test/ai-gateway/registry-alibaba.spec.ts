@@ -2001,19 +2001,21 @@ describe("Alibaba Registry Tests", () => {
 
       it("should auto-select novita provider when none specified", () =>
         runGatewayTest({
-          model: "qwen3-235b-a22b-thinking",
+          model: "qwen3-235b-a22b-thinking/novita",
           expected: {
             providers: [
               {
-                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
-                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
-                expects: deepinfraAuthExpectations
-              }
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse(
+                  "qwen/qwen3-235b-a22b-thinking-2507"
+                ),
+                expects: novitaAuthExpectations,
+              },
             ],
-            finalStatus: 200
-          }
+            finalStatus: 200,
+          },
         }));
 
       it("should handle multiple functions with novita provider", () =>
@@ -2447,12 +2449,6 @@ describe("Alibaba Registry Tests", () => {
     });
 
     describe("qwen3-235b-a22b-thinking with Novita Provider - Function Calling Error Scenarios", () => {
-      const novitaAuthExpectations = {
-        headers: {
-          Authorization: /^Bearer /
-        }
-      };
-
       it("should handle novita provider failure with function calls", () =>
         runGatewayTest({
           model: "qwen3-235b-a22b-thinking/novita",
