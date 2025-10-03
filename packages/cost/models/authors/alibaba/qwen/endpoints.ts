@@ -149,7 +149,7 @@ export const endpoints = {
       "top_k",
       "seed",
       "min_p",
-      "response_format"
+      "response_format",
     ],
     ptbEnabled: false,
     quantization: "fp4",
@@ -169,7 +169,7 @@ export const endpoints = {
       },
     ],
     rateLimits: {
-      rpm: 12000, 
+      rpm: 12000,
       tpm: 60000000,
       tpd: 6000000000,
     },
@@ -188,7 +188,43 @@ export const endpoints = {
       "top_k",
       "seed",
       "min_p",
-      "response_format"
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3-235b-a22b-thinking:deepinfra": {
+    providerModelId: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+    provider: "deepinfra",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003, // $0.30 per million tokens
+        output: 0.0000029, // $2.90 per million tokens
+      },
+    ],
+    rateLimits: {
+      rpm: 12000,
+      tpm: 60000000,
+      tpd: 6000000000,
+    },
+    contextLength: 262_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
     ],
     ptbEnabled: false,
     endpointConfigs: {

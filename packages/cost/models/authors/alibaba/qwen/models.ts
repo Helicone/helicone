@@ -13,7 +13,7 @@ export const models = {
     tokenizer: "GPT",
   },
   "qwen3-30b-a3b": {
-    name: "Qwen: Qwen3-30B-A3B",
+    name: "Qwen3-30B-A3B",
     author: "qwen",
     description:
       "Qwen3 is the latest generation of large language models in Qwen series, offering a comprehensive suite of dense and mixture-of-experts (MoE) models. Built upon extensive training, Qwen3 delivers groundbreaking advancements in reasoning, instruction-following, agent capabilities, and multilingual support.",
@@ -33,7 +33,7 @@ export const models = {
     created: "2025-07-23T00:00:00.000Z",
     modality: {
       inputs: ["text", "image", "audio", "video"],
-      outputs: ["text"]
+      outputs: ["text"],
     },
     tokenizer: "Qwen",
   },
@@ -43,11 +43,22 @@ export const models = {
     description:
       "Qwen3-Next-80B-A3B-Instruct is a causal language model that is instruction-optimized for chat and agent applications. It features a Mixture-of-Experts (MoE) architecture that achieves an extremely low activation ratio, drastically reducing FLOPs per token while preserving model capacity. The model supports ultra-long contexts and has a Multi-Token Prediction (MTP) mechanism to boost performance and accelerate inference.",
     contextLength: 262_000,
-    maxOutputTokens: 16_384, // Standard output limit for instruction models
-    created: "2025-01-01T00:00:00.000Z", // Estimated release date
+    maxOutputTokens: 16_384,
+    created: "2025-01-01T00:00:00.000Z",
     modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
     tokenizer: "Qwen",
-  }
+  },
+  "qwen3-235b-a22b-thinking": {
+    name: "Qwen3-235B-A22B-Thinking",
+    author: "qwen",
+    description:
+      "Qwen3-235B-A22B-Thinking-2507 is the Qwen3's new model with scaling the thinking capability of Qwen3-235B-A22B, improving both the quality and depth of reasoning.",
+    contextLength: 262_144,
+    maxOutputTokens: 81_920,
+    created: "2025-07-25T00:00:00.000Z",
+    modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
+    tokenizer: "Qwen"
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type QwenModelName = keyof typeof models;
