@@ -164,12 +164,13 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.00000142, // $1.42/1M - worst-case: $1.35/1M (WandB) * 1.055
-        output: 0.00000528, // $5.28/1M - worst-case: $5.00/1M (Moonshot AI) * 1.055
+        input: 0.00000057, // $0.57/1M
+        output: 0.0000023, // $2.3/1M
       },
     ],
-    contextLength: 262_144,
-    maxCompletionTokens: 262_144, // Same as context when not specified
+    quantization: "fp8",
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
     supportedParameters: [
       "frequency_penalty",
       "logprobs",
@@ -183,6 +184,8 @@ export const endpoints = {
       "tools",
       "top_logprobs",
       "top_p",
+      "functions",
+      "structured_outputs"
     ],
     ptbEnabled: true,
     priority: 3,
