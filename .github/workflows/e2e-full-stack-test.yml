@@ -52,19 +52,15 @@ jobs:
           timeout 120 bash -c 'until docker exec helicone-test curl -s http://localhost:8123/ping > /dev/null; do sleep 2; done'
 
           echo "Waiting for Jawn..."
-          timeout 120 bash -c 'until curl -s http://localhost:8585/api/health > /dev/null 2>&1; do sleep 2; done'
+          timeout 180 bash -c 'until curl -s http://localhost:8585/api/health > /dev/null 2>&1; do echo "Waiting for Jawn..."; sleep 5; done'
 
           echo "Waiting for Web..."
-          timeout 120 bash -c 'until curl -s http://localhost:3000 > /dev/null 2>&1; do sleep 2; done'
+          timeout 120 bash -c 'until curl -s http://localhost:3000 > /dev/null 2>&1; do echo "Waiting for Web..."; sleep 5; done'
 
-      - name: Start workers inside container
-        run: |
-          docker exec -d helicone-test bash -c "cd /app/worker && npx wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY --port 8787 > /var/log/worker-openai.log 2>&1"
-          docker exec -d helicone-test bash -c "cd /app/worker && npx wrangler dev --local --var WORKER_TYPE:HELICONE_API --port 8788 > /var/log/worker-helicone.log 2>&1"
-          docker exec -d helicone-test bash -c "cd /app/worker && npx wrangler dev --local --var WORKER_TYPE:GATEWAY_API --port 8789 > /var/log/worker-gateway.log 2>&1"
+          echo "Waiting for Workers to start..."
+          timeout 180 bash -c 'until curl -s http://localhost:8787 > /dev/null 2>&1; do echo "Waiting for Worker OpenAI..."; sleep 5; done'
 
-          echo "Waiting for workers to be ready..."
-          sleep 10
+          echo "All services are ready!"
 
       - name: Check service logs
         if: always()
@@ -83,6 +79,15 @@ jobs:
 
           echo "=== MinIO logs ==="
           docker exec helicone-test tail -50 /var/log/supervisor/minio.out.log || true
+
+          echo "=== Worker OpenAI logs ==="
+          docker exec helicone-test tail -100 /var/log/supervisor/worker-openai.out.log || true
+
+          echo "=== Worker Helicone logs ==="
+          docker exec helicone-test tail -100 /var/log/supervisor/worker-helicone.out.log || true
+
+          echo "=== Worker Gateway logs ==="
+          docker exec helicone-test tail -100 /var/log/supervisor/worker-gateway.out.log || true
 
       - name: Make test request through worker
         run: |
@@ -107,14 +112,14 @@ jobs:
           echo "Checking request data in ClickHouse..."
           docker exec helicone-test curl -s "http://localhost:8123/?query=SELECT%20request_id%2C%20request_created_at%20FROM%20request_response_rmt%20ORDER%20BY%20request_created_at%20DESC%20LIMIT%205%20FORMAT%20Pretty" || true
 
-      - name: Check worker logs
+      - name: Show Jawn error logs
         if: always()
         run: |
-          echo "=== Worker OpenAI logs ==="
-          docker exec helicone-test tail -100 /var/log/worker-openai.log || true
+          echo "=== Jawn error logs ==="
+          docker exec helicone-test tail -100 /var/log/supervisor/jawn.err.log || true
 
-          echo "=== Worker Helicone API logs ==="
-          docker exec helicone-test tail -100 /var/log/worker-helicone.log || true
+          echo "=== Worker OpenAI error logs ==="
+          docker exec helicone-test tail -100 /var/log/supervisor/worker-openai.err.log || true
 
       - name: Cleanup
         if: always()
