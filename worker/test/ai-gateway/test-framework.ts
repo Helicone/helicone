@@ -174,15 +174,17 @@ export async function runGatewayTest(
           expect(requestWrapper.getMethod()).toBe(method);
         }
 
-        if (bodyContains && requestWrapper.unsafeGetText) {
-          const body = await requestWrapper.unsafeGetText();
+        // TODO: change to use safelyGetBody
+        if (bodyContains && requestWrapper.unsafeGetBodyText) {
+          const body = await requestWrapper.unsafeGetBodyText();
           for (const text of bodyContains) {
             expect(body).toContain(text);
           }
         }
 
-        if (bodyDoesNotContain && requestWrapper.unsafeGetText) {
-          const body = await requestWrapper.unsafeGetText();
+        // TODO: change to use safelyGetBody
+        if (bodyDoesNotContain && requestWrapper.unsafeGetBodyText) {
+          const body = await requestWrapper.unsafeGetBodyText();
           for (const text of bodyDoesNotContain) {
             expect(body).not.toContain(text);
           }
@@ -190,8 +192,9 @@ export async function runGatewayTest(
       }
 
       // Automatic model validation - validate request body contains expected model
-      if (expectation?.model && requestWrapper.unsafeGetText) {
-        const body = await requestWrapper.unsafeGetText();
+      // TODO: change to use safelyGetBody
+      if (expectation?.model && requestWrapper.unsafeGetBodyText) {
+        const body = await requestWrapper.unsafeGetBodyText();
         try {
           const parsed = JSON.parse(body);
           expect(parsed.model).toBe(expectation.model);

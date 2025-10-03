@@ -100,7 +100,8 @@ export function buildIndexes(
     endpointConfigIdToEndpointConfig.set(typedConfigKey, config);
 
     // Store providerModelId -> config mapping
-    providerModelIdToConfig.set(config.providerModelId, config);
+    const providerModelIdKey = `${config.providerModelId}:${config.provider}`;
+    providerModelIdToConfig.set(providerModelIdKey, config);
 
     // Track provider to models mapping
     if (!providerToModels.has(provider)) {

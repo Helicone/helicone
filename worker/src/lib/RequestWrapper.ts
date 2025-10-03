@@ -18,7 +18,10 @@ import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
 import { RequestBodyBuffer_InMemory } from "../RequestBodyBuffer/RequestBodyBuffer_InMemory";
-import { IRequestBodyBuffer } from "../RequestBodyBuffer/IRequestBodyBuffer";
+import {
+  IRequestBodyBuffer,
+  ValidRequestBody,
+} from "../RequestBodyBuffer/IRequestBodyBuffer";
 import { RequestBodyBufferBuilder } from "../RequestBodyBuffer/RequestBodyBufferBuilder";
 
 export type RequestHandlerType =
@@ -287,16 +290,23 @@ export class RequestWrapper {
     this.bodyKeyOverride = bodyKeyOverride;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private overrideBody(body: any, override: object): object {
-    for (const [key, value] of Object.entries(override)) {
-      if (key in body && typeof value !== "object") {
-        body[key] = value;
-      } else {
-        body[key] = this.overrideBody(body[key], value);
-      }
+  async applyBodyOverrides(): Promise<void> {
+    const overrides: Record<string, any> = {};
+
+    if (this.bodyKeyOverride) {
+      Object.assign(overrides, this.bodyKeyOverride);
     }
-    return body;
+
+    if (this.heliconeHeaders.featureFlags.streamUsage) {
+      if (!overrides["stream_options"]) {
+        overrides["stream_options"] = {};
+      }
+      overrides["stream_options"]["include_usage"] = true;
+    }
+
+    if (Object.keys(overrides).length > 0) {
+      await this.requestBodyBuffer.setBodyOverride(overrides);
+    }
   }
 
   // TODO deprecate this function
@@ -323,33 +333,36 @@ export class RequestWrapper {
     return !!hostParts.includes("eu") || !!auth?.includes("helicone-eu");
   }
 
-  async unsafeGetText(): Promise<string> {
-    let text = await this.unsafeGetRawText();
+  async safelyGetBody(): Promise<ValidRequestBody> {
+    if (this.shouldFormatPrompt()) {
+      throw new Error("Cannot safely get body for request using legacy prompts");
+    }
 
-    if (this.bodyKeyOverride) {
-      try {
-        const bodyJson = await JSON.parse(text);
-        const bodyOverrideJson = await JSON.parse(
-          JSON.stringify(this.bodyKeyOverride)
-        );
-        const body = this.overrideBody(bodyJson, bodyOverrideJson);
-        text = JSON.stringify(body);
-      } catch (e) {
-        throw new Error("Could not stringify bodyKeyOverride");
-      }
-    } else if (this.shouldFormatPrompt()) {
+    await this.applyBodyOverrides();
+    return await this.requestBodyBuffer.getReadableStreamToBody();
+  }
+  
+  async unsafeGetBodyText(): Promise<string> {
+    await this.applyBodyOverrides();
+
+    // Unsafely load text from buffer post-overrides
+    const text = await this.unsafeGetRawText();
+
+    // Legacy prompts (todo: remove) unfortunately we load into memory here
+    if (this.shouldFormatPrompt()) {
       const { objectWithoutJSXTags } = parseJSXObject(JSON.parse(text));
-
       return JSON.stringify(objectWithoutJSXTags);
     }
+
     return text;
   }
 
+  // TODO: change func and its references to use safelyGetBody
   async unsafeGetJson<T>(): Promise<T> {
     try {
-      return JSON.parse(await this.unsafeGetText());
+      return JSON.parse(await this.unsafeGetBodyText());
     } catch (e) {
-      console.error("RequestWrapper.getJson", e, await this.unsafeGetText());
+      console.error("RequestWrapper.getJson", e, await this.unsafeGetBodyText());
       return {} as T;
     }
   }

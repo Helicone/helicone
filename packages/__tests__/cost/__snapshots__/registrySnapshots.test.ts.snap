@@ -176,7 +176,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -258,7 +258,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -340,7 +340,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -424,7 +424,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -508,7 +508,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -592,7 +592,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -676,7 +676,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "us-east-1",
       ],
@@ -907,6 +907,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "deepseek/r1-distill": {
+    "deepseek-r1-distill-llama-70b:deepinfra": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-r1-distill-llama-70b:groq": {
       "context": 128000,
       "crossRegion": false,
@@ -1481,6 +1505,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-4-maverick:novita": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 1048576,
+      "modelId": "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-4-maverick:openrouter": {
       "context": 1048576,
       "crossRegion": false,
@@ -1524,6 +1572,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "groq",
       "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-4-scout:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -2987,6 +3059,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/r1-distill": [
+    "deepinfra",
     "groq",
     "openrouter",
   ],
@@ -3022,6 +3095,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "novita",
     "novita",
     "novita",
     "openrouter",
@@ -3523,6 +3597,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/r1-distill": {
+    "deepinfra": [
+      {
+        "input": 2e-7,
+        "output": 6e-7,
+        "threshold": 0,
+      },
+    ],
     "groq": [
       {
         "audio": 0,
@@ -3954,7 +4035,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
 }
 `;
 
-exports[`Registry Snapshots registry builds correctly 1`] = `
+exports[`Registry Snapshots verify registry state 1`] = `
 {
   "modelToProviders": [
     {
@@ -4030,6 +4111,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     {
       "model": "deepseek-r1-distill-llama-70b",
       "providers": [
+        "deepinfra",
         "groq",
         "openrouter",
       ],
@@ -4255,6 +4337,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "llama-4-maverick",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
@@ -4262,6 +4345,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "model": "llama-4-scout",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
@@ -4366,7 +4450,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 11,
+      "modelCount": 12,
       "provider": "deepinfra",
     },
     {
@@ -4382,7 +4466,7 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "novita",
     },
     {
@@ -4461,8 +4545,8 @@ exports[`Registry Snapshots registry builds correctly 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 124,
-  "totalModelProviderConfigs": 124,
+  "totalEndpoints": 125,
+  "totalModelProviderConfigs": 125,
   "totalModelsWithPtb": 48,
   "totalProviders": 12,
 }

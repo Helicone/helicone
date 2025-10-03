@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from "@jest/globals";
 import { sync as globSync } from "glob";
 import * as path from "path";
 import { buildIndexes } from "../../cost/models/build-indexes";
+import { getUsageProcessor } from "@/cost/usage/getUsageProcessor";
 
 // Dynamically discover and import all endpoint files
 async function loadAllEndpoints() {
@@ -92,7 +93,7 @@ describe("Registry Snapshots", () => {
     expect(configs).toMatchSnapshot();
   });
 
-  it("registry builds correctly", () => {
+  it("verify registry state", () => {
     // Flatten for buildIndexes
     const flat: Record<string, any> = {};
     Object.values(allEndpoints).forEach((endpoints) => {
@@ -144,6 +145,21 @@ describe("Registry Snapshots", () => {
         .sort()
         .slice(0, 5),
     };
+
+    // Verify all PTB endpoints have usage processors
+    const modelKeys = Array.from(indexes.modelToPtbEndpoints.keys());
+    modelKeys.forEach((key) => {
+      const endpoints = indexes.modelToPtbEndpoints.get(key);
+      if (!endpoints) {
+        throw new Error(`No endpoints found for model: ${key}`);
+      }
+      endpoints.forEach((endpoint) => {
+        const usageProcessor = getUsageProcessor(endpoint.provider);
+        if (!usageProcessor) {
+          throw new Error(`Usage processor not found for provider: "${endpoint.provider}" in model: "${key}"`);
+        }
+      });
+    });
 
     expect(snapshot).toMatchSnapshot();
   });

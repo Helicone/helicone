@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { toOpenAI } from '../../src/lib/clients/llmmapper/providers/anthropic/response/toOpenai';
-import { AnthropicResponseBody } from '../../src/lib/clients/llmmapper/types/anthropic';
-import { toAnthropic } from '../../src/lib/clients/llmmapper/providers/openai/request/toAnthropic';
-import { AnthropicToOpenAIStreamConverter } from '../../src/lib/clients/llmmapper/providers/anthropic/streamedResponse/toOpenai';
-import { AnthropicStreamEvent } from '../../src/lib/clients/llmmapper/types/anthropic';
+import { toOpenAI } from '@helicone-package/llm-mapper/transform/providers/anthropic/response/toOpenai';
+import { AnthropicResponseBody } from '@helicone-package/llm-mapper/transform/types/anthropic';
+import { toAnthropic } from '@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic';
+import { AnthropicToOpenAIStreamConverter } from '@helicone-package/llm-mapper/transform/providers/anthropic/streamedResponse/toOpenai';
+import { AnthropicStreamEvent } from '@helicone-package/llm-mapper/transform/types/anthropic';
 import { HeliconeChatCreateParams } from '@helicone-package/prompts/types';
 
 describe('Anthropic to OpenAI Response Mapper', () => {
@@ -105,7 +105,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
   describe('toAnthropic', () => {
     it('should convert basic text request', () => {
       const openAIRequest: HeliconeChatCreateParams = {
-        model: 'gpt-4o',
+        model: 'claude-3.5-haiku',
         messages: [
           {
             role: 'user',
@@ -119,7 +119,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
 
       const result = toAnthropic(openAIRequest);
 
-      expect(result.model).toBe('gpt-4o');
+      expect(result.model).toBe('claude-3.5-haiku');
       expect(result.messages).toHaveLength(1);
       expect(result.messages[0]).toEqual({
         role: 'user',
@@ -132,7 +132,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
 
     it('should convert request with tool calls', () => {
       const openAIRequest: HeliconeChatCreateParams = {
-        model: 'gpt-4o',
+        model: 'claude-3.5-haiku',
         messages: [
           {
             role: 'user',
@@ -230,7 +230,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
 
     it('should handle assistant message with both text and tool calls', () => {
       const openAIRequest: HeliconeChatCreateParams = {
-        model: 'gpt-4o',
+        model: 'claude-3.5-haiku',
         messages: [
           {
             role: 'assistant',
@@ -268,7 +268,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
 
     it('should extract system message', () => {
       const openAIRequest: HeliconeChatCreateParams = {
-        model: 'gpt-4o',
+        model: 'claude-3.5-haiku',
         messages: [
           {
             role: 'system',
@@ -293,7 +293,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
 
     it('should handle cache control on system message', () => {
       const openAIRequest: HeliconeChatCreateParams = {
-        model: 'gpt-4o',
+        model: 'claude-3.5-haiku',
         messages: [
           {
             role: 'system',
@@ -319,7 +319,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
 
     it('should handle cache control on content parts', () => {
       const openAIRequest: HeliconeChatCreateParams = {
-        model: 'gpt-4o',
+        model: 'claude-3.5-haiku',
         messages: [
           {
             role: 'user',
@@ -356,7 +356,7 @@ describe('Anthropic to OpenAI Response Mapper', () => {
 
     it('should handle cache control on tool results', () => {
       const openAIRequest: HeliconeChatCreateParams = {
-        model: 'gpt-4o',
+        model: 'claude-3.5-haiku',
         messages: [
           {
             role: 'tool',
@@ -381,9 +381,30 @@ describe('Anthropic to OpenAI Response Mapper', () => {
       });
     });
 
+    it('should handle cache control on flat user message', () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: 'claude-3.5-haiku',
+        messages: [
+          {
+            role: 'user',
+            content: 'Hello',
+            cache_control: { type: 'ephemeral' }
+          }
+        ]
+      };
+
+      const result = toAnthropic(openAIRequest);
+
+      expect(result.messages[0].content).toEqual([{
+        type: 'text',
+        text: 'Hello',
+        cache_control: { type: 'ephemeral' }
+      }]);
+    });
+
     it('should handle cache control on assistant messages with text and tools', () => {
       const openAIRequest: HeliconeChatCreateParams = {
-        model: 'gpt-4o',
+        model: 'claude-3.5-haiku',
         messages: [
           {
             role: 'assistant',

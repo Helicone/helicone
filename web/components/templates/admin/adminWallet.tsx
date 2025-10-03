@@ -33,20 +33,35 @@ import {
   TrendingUp,
   AlertCircle,
   ExternalLink,
+  RefreshCw,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
+import { Small } from "@/components/ui/typography";
 
 const formatCurrency = (amount: number | undefined) => {
   if (amount === undefined) return "UNDEFINED";
   return remoteFormatCurrency(amount, "USD", 6);
 };
 
+type SortColumn =
+  | "org_created_at"
+  | "total_payments"
+  | "total_spend"
+  | "credit_limit"
+  | "amount_received";
+
 export default function AdminWallet() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const [walletDetailsOpen, setWalletDetailsOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [tablePage, setTablePage] = useState(0);
+  const [sortBy, setSortBy] = useState<SortColumn>("org_created_at");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // Wallet modification form state
   const [modifyAmount, setModifyAmount] = useState<string>("");
@@ -56,9 +71,28 @@ export default function AdminWallet() {
   const [modifyError, setModifyError] = useState<string | null>(null);
   const [modifySuccess, setModifySuccess] = useState<string | null>(null);
 
+  // Wallet settings form state
+  const [allowNegativeBalance, setAllowNegativeBalance] =
+    useState<boolean>(false);
+  const [creditLimit, setCreditLimit] = useState<string>("");
+  const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
+
   // Fetch dashboard data
-  const { data: dashboardData, isLoading: dashboardLoading } =
-    $JAWN_API.useQuery("post", "/v1/admin/wallet/gateway/dashboard_data", {});
+  const {
+    data: dashboardData,
+    isLoading: dashboardLoading,
+    refetch: refetchDashboard,
+  } = $JAWN_API.useQuery("post", "/v1/admin/wallet/gateway/dashboard_data", {
+    params: {
+      query: {
+        search: searchQuery || undefined,
+        sortBy: sortBy,
+        sortOrder: sortOrder,
+      },
+    },
+  });
 
   const dashboardError = dashboardData?.error;
 
@@ -86,7 +120,12 @@ export default function AdminWallet() {
   const modifyBalanceMutation = $JAWN_API.useMutation(
     "post",
     "/v1/admin/wallet/{orgId}/modify-balance",
-    {}
+  );
+
+  // Mutation for updating wallet settings
+  const updateSettingsMutation = $JAWN_API.useMutation(
+    "post",
+    "/v1/admin/wallet/{orgId}/update-settings",
   );
 
   // Fetch table data (lazy loaded when table is selected)
@@ -110,16 +149,38 @@ export default function AdminWallet() {
     },
   );
 
-  const filteredOrgs =
-    dashboardData?.data?.organizations?.filter(
-      (org) =>
-        org.orgName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        org.orgId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        org.stripeCustomerId
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        org.ownerEmail?.toLowerCase().includes(searchTerm.toLowerCase()),
-    ) || [];
+  const handleSearch = () => {
+    setSearchQuery(searchTerm);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setSearchQuery("");
+  };
+
+  const handleSort = (column: SortColumn) => {
+    if (sortBy === column) {
+      // Toggle sort order if clicking the same column
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // Set new column and default to descending
+      setSortBy(column);
+      setSortOrder("desc");
+    }
+  };
+
+  const SortIcon = ({ column }: { column: SortColumn }) => {
+    if (sortBy !== column) {
+      return <ArrowUpDown size={14} className="ml-1 opacity-50" />;
+    }
+    return sortOrder === "asc" ? (
+      <ArrowUp size={14} className="ml-1" />
+    ) : (
+      <ArrowDown size={14} className="ml-1" />
+    );
+  };
+
+  const organizations = dashboardData?.data?.organizations || [];
 
   const handleOrgClick = (orgId: string) => {
     setSelectedOrg(orgId);
@@ -127,6 +188,17 @@ export default function AdminWallet() {
     // Reset table selection when switching orgs
     setSelectedTable(null);
     setTablePage(0);
+    // Reset settings form
+    setSettingsError(null);
+    setSettingsSuccess(null);
+    // Load current settings from the org data
+    const org = dashboardData?.data?.organizations.find(
+      (o) => o.orgId === orgId,
+    );
+    if (org) {
+      setAllowNegativeBalance(org.allowNegativeBalance || false);
+      setCreditLimit(org.creditLimit ? org.creditLimit.toString() : "0");
+    }
   };
 
   const handleTableClick = (tableName: string) => {
@@ -171,7 +243,7 @@ export default function AdminWallet() {
         setModifyError(result.error);
       } else {
         setModifySuccess(
-          `Successfully ${modifyType === "credit" ? "added" : "deducted"} ${formatCurrency(amount)}`
+          `Successfully ${modifyType === "credit" ? "added" : "deducted"} ${formatCurrency(amount)}`,
         );
         // Reset form
         setModifyAmount("");
@@ -181,10 +253,59 @@ export default function AdminWallet() {
       }
     } catch (error) {
       setModifyError(
-        error instanceof Error ? error.message : "Failed to modify balance"
+        error instanceof Error ? error.message : "Failed to modify balance",
       );
     } finally {
       setIsModifying(false);
+    }
+  };
+
+  const handleUpdateSettings = async () => {
+    if (!selectedOrg) return;
+
+    // Reset messages
+    setSettingsError(null);
+    setSettingsSuccess(null);
+
+    // Validate that at least one field is set
+    const limitValue = creditLimit.trim() ? parseFloat(creditLimit) : undefined;
+
+    if (limitValue !== undefined && (isNaN(limitValue) || limitValue < 0)) {
+      setSettingsError("Credit limit must be a non-negative number");
+      return;
+    }
+
+    setIsUpdatingSettings(true);
+
+    try {
+      const result = await updateSettingsMutation.mutateAsync({
+        params: {
+          path: { orgId: selectedOrg },
+          query: {
+            allowNegativeBalance,
+            creditLimit: limitValue,
+          },
+        },
+      });
+
+      if (result.error) {
+        setSettingsError(result.error);
+      } else {
+        setSettingsSuccess(`Successfully updated wallet settings`);
+        // Update form with returned values
+        if (result.data) {
+          setAllowNegativeBalance(result.data.allowNegativeBalance);
+          setCreditLimit(result.data.creditLimit?.toString() ?? "0");
+        }
+        // Refresh dashboard data to update the table
+        refetchDashboard();
+      }
+    } catch (error) {
+      setSettingsError(
+        error instanceof Error ? error.message : "Failed to update settings",
+      );
+    } finally {
+      setIsUpdatingSettings(false);
     }
   };
 
@@ -260,17 +381,53 @@ export default function AdminWallet() {
       {/* Search and Filter */}
       <Card>
         <CardHeader>
-          <CardTitle>Organizations with Pass-Through Billing</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Organizations with Pass-Through Billing</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetchDashboard()}
+              disabled={dashboardLoading}
+            >
+              <RefreshCw
+                size={16}
+                className={dashboardLoading ? "animate-spin" : ""}
+              />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex items-center space-x-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-md"
-            />
+          <div className="mb-4 flex items-center gap-2">
+            <div className="relative max-w-md flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+                className="pl-9"
+              />
+            </div>
+            <Button
+              onClick={handleSearch}
+              disabled={dashboardLoading}
+              variant="default"
+            >
+              Search
+            </Button>
+            {searchQuery && (
+              <Button
+                onClick={handleClearSearch}
+                disabled={dashboardLoading}
+                variant="outline"
+              >
+                Clear
+              </Button>
+            )}
           </div>
 
           {/* Organizations Table */}
@@ -278,25 +435,66 @@ export default function AdminWallet() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Organization</TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("org_created_at")}
+                  >
+                    <div className="flex items-center">
+                      Organization
+                      <SortIcon column="org_created_at" />
+                    </div>
+                  </TableHead>
                   <TableHead>Owner</TableHead>
                   <TableHead>Tier</TableHead>
                   <TableHead># Payments</TableHead>
-                  <TableHead>Total Gross</TableHead>
-                  <TableHead>Total Net</TableHead>
-                  <TableHead>Total Spent (ClickHouse)</TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("total_payments")}
+                  >
+                    <div className="flex items-center">
+                      Total Gross
+                      <SortIcon column="total_payments" />
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("amount_received")}
+                  >
+                    <div className="flex items-center">
+                      Total Net
+                      <SortIcon column="amount_received" />
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("total_spend")}
+                  >
+                    <div className="flex items-center">
+                      Total Spent (ClickHouse)
+                      <SortIcon column="total_spend" />
+                    </div>
+                  </TableHead>
                   <TableHead>Balance</TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("credit_limit")}
+                  >
+                    <div className="flex items-center">
+                      Wallet Settings
+                      <SortIcon column="credit_limit" />
+                    </div>
+                  </TableHead>
                   <TableHead>Last Payment</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOrgs?.map((org) => {
+                {organizations?.map((org) => {
                   // Calculate net amount after removing Stripe fees
                   const totalGrossCents = dollarsToCents(org.totalPayments);
                   const totalNetCents = calculateNetAmount(
                     totalGrossCents,
-                    org.paymentsCount || 1,
+                    org.paymentsCount || 0,
                   );
                   const totalNetDollars = totalNetCents / 100;
 
@@ -304,87 +502,108 @@ export default function AdminWallet() {
                   const isNegativeBalance = balance < 0;
 
                   return (
-                    <TableRow key={org.orgId}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{org.orgName}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {org.orgId}
+                    <>
+                      <TableRow key={org.orgId}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{org.orgName}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {org.orgId}
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm text-muted-foreground">
-                          {org.ownerEmail}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                          {org.tier}
-                        </span>
-                      </TableCell>
-                      <TableCell>{org.paymentsCount || 0}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span>{formatCurrency(org.totalPayments)}</span>
-                          <span className="text-xs text-muted-foreground">
-                            (with fees)
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm text-muted-foreground">
+                            {org.ownerEmail}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                            {org.tier}
                           </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span>{formatCurrency(totalNetDollars)}</span>
-                          <span className="text-xs text-muted-foreground">
-                            (after fees)
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {formatCurrency(org.clickhouseTotalSpend)}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={
-                            isNegativeBalance ? "font-medium text-red-600" : ""
-                          }
-                        >
-                          {formatCurrency(balance)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {org.lastPaymentDate
-                          ? new Date(org.lastPaymentDate).toLocaleDateString()
-                          : "N/A"}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleOrgClick(org.orgId)}
+                        </TableCell>
+                        <TableCell>{org.paymentsCount || 0}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span>{formatCurrency(org.totalPayments)}</span>
+                            <span className="text-xs text-muted-foreground">
+                              (with fees)
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span>{formatCurrency(totalNetDollars)}</span>
+                            <span className="text-xs text-muted-foreground">
+                              (after fees)
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {formatCurrency(org.clickhouseTotalSpend)}
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            className={
+                              isNegativeBalance
+                                ? "font-medium text-red-600"
+                                : ""
+                            }
                           >
-                            View Details
-                          </Button>
-                          {org.stripeCustomerId && (
+                            {formatCurrency(balance)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <Small className="text-muted-foreground">
+                              Limit: {formatCurrency(org.creditLimit || 0)}
+                            </Small>
+                            <Small
+                              className={
+                                org.allowNegativeBalance
+                                  ? "text-green-600"
+                                  : "text-muted-foreground"
+                              }
+                            >
+                              Negative:{" "}
+                              {org.allowNegativeBalance ? "Yes" : "No"}
+                            </Small>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {org.lastPaymentDate
+                            ? new Date(org.lastPaymentDate).toLocaleDateString()
+                            : "N/A"}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => {
-                                const stripeUrl = dashboardData?.data
-                                  ?.isProduction
-                                  ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
-                                  : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
-                                window.open(stripeUrl, "_blank");
-                              }}
+                              onClick={() => handleOrgClick(org.orgId)}
                             >
-                              <ExternalLink className="mr-1 h-3 w-3" />
-                              Stripe
+                              View Details
                             </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                            {org.stripeCustomerId && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const stripeUrl = dashboardData?.data
+                                    ?.isProduction
+                                    ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
+                                    : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
+                                  window.open(stripeUrl, "_blank");
+                                }}
+                              >
+                                <ExternalLink className="mr-1 h-3 w-3" />
+                                Stripe
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    </>
                   );
                 })}
               </TableBody>
@@ -409,6 +628,7 @@ export default function AdminWallet() {
               <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="modify">Modify Balance</TabsTrigger>
+                <TabsTrigger value="settings">Credit Limit</TabsTrigger>
                 <TabsTrigger value="escrows">Escrows</TabsTrigger>
                 <TabsTrigger value="disallow">Disallow List</TabsTrigger>
                 <TabsTrigger value="tables">Raw Tables</TabsTrigger>
@@ -546,6 +766,96 @@ export default function AdminWallet() {
                         </>
                       ) : (
                         `${modifyType === "credit" ? "Add" : "Deduct"} Credits`
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="settings" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Wallet Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-6">
+                    {/* Allow Negative Balance Toggle */}
+                    <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/50 p-4">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          id="allowNegativeBalance"
+                          checked={allowNegativeBalance}
+                          onChange={(e) =>
+                            setAllowNegativeBalance(e.target.checked)
+                          }
+                          disabled={isUpdatingSettings}
+                          className="h-6 w-6 cursor-pointer rounded border-2 border-border accent-primary"
+                        />
+                        <Label
+                          htmlFor="allowNegativeBalance"
+                          className="cursor-pointer text-base font-medium"
+                        >
+                          Allow Negative Balance
+                        </Label>
+                      </div>
+                      <Small className="text-muted-foreground">
+                        When enabled, the organization can spend beyond their
+                        credit limit
+                      </Small>
+                    </div>
+
+                    {/* Credit Limit Input */}
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="creditLimit" className="text-base">
+                        Credit Limit
+                      </Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          $
+                        </span>
+                        <Input
+                          id="creditLimit"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          value={creditLimit}
+                          onChange={(e) => setCreditLimit(e.target.value)}
+                          disabled={isUpdatingSettings}
+                          className="pl-7"
+                        />
+                      </div>
+                      <Small className="text-muted-foreground">
+                        Maximum amount the organization can spend. Set to 0 for
+                        unlimited.
+                      </Small>
+                    </div>
+
+                    {/* Error/Success Messages */}
+                    {settingsError && (
+                      <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                        <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                        <span>{settingsError}</span>
+                      </div>
+                    )}
+                    {settingsSuccess && (
+                      <div className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-600">
+                        <span>{settingsSuccess}</span>
+                      </div>
+                    )}
+
+                    {/* Submit Button */}
+                    <Button
+                      onClick={handleUpdateSettings}
+                      disabled={isUpdatingSettings}
+                    >
+                      {isUpdatingSettings ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        "Update Settings"
                       )}
                     </Button>
                   </CardContent>

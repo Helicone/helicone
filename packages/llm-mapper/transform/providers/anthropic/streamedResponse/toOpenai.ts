@@ -26,6 +26,39 @@ export class AnthropicToOpenAIStreamConverter {
     this.created = Math.floor(Date.now() / 1000);
   }
 
+  processLines(
+    raw: string,
+    onChunk: (chunk: ChatCompletionChunk) => void
+  ) {
+    const chunks: ChatCompletionChunk[] = [];
+    const lines = raw.split("\n");
+    
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        try {
+          const jsonStr = line.slice(6);
+
+          // Skip the [DONE] message from Anthropic
+          if (jsonStr.trim() === "[DONE]") {
+            continue;
+          }
+
+          const anthropicEvent = JSON.parse(jsonStr);
+          const openAIEvents = this.convert(anthropicEvent);
+
+          for (const openAIEvent of openAIEvents) {
+            onChunk(openAIEvent);
+          }
+        } catch (error) {
+          console.error("Failed to parse SSE data:", error);
+        }
+      } else if (line.startsWith("event:") || line.startsWith(":")) {
+        // Skip event type lines and comments
+        continue;
+      }
+    }
+  }
+
   convert(event: AnthropicStreamEvent): OpenAIStreamEvent[] {
     const chunks: OpenAIStreamEvent[] = [];
 
@@ -159,15 +192,27 @@ export class AnthropicToOpenAIStreamConverter {
         this.finalizePendingToolCalls(chunks);
 
         const cachedTokens = event.usage.cache_read_input_tokens ?? 0;
+        const cacheWriteTokens = event.usage.cache_creation_input_tokens ?? 0;
 
         this.finalUsage = {
           prompt_tokens: event.usage.input_tokens,
           completion_tokens: event.usage.output_tokens,
           total_tokens: event.usage.input_tokens + event.usage.output_tokens,
-          ...(cachedTokens > 0 && {
+          ...((cachedTokens > 0 || cacheWriteTokens > 0) && {
             prompt_tokens_details: {
               cached_tokens: cachedTokens,
               audio_tokens: 0,
+
+              ...(cacheWriteTokens > 0 && {
+                cache_write_tokens: cacheWriteTokens,
+                cache_write_details: {
+                  write_5m_tokens:
+                    event.usage.cache_creation?.ephemeral_5m_input_tokens ??
+                    0,
+                  write_1h_tokens:
+                    event.usage.cache_creation?.ephemeral_1h_input_tokens ?? 0,
+                },
+              }),
             },
           }),
           completion_tokens_details: {
@@ -306,10 +351,10 @@ export class AnthropicToOpenAIStreamConverter {
   }
 
   private finalizePendingToolCalls(chunks: OpenAIStreamEvent[]): void {
-    for (const [index, toolCall] of this.toolCallState.entries()) {
+    this.toolCallState.forEach((toolCall) => {
       if (!toolCall.hasNonEmptyDelta) {
         this.emitEmptyToolCallArguments(toolCall, chunks);
       }
-    }
+    });
   }
 }
