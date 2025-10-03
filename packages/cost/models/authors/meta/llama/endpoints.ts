@@ -283,6 +283,7 @@ export const endpoints = {
       "min_p",
       "repetition_penalty",
       "logit_bias",
+      "functions"
     ],
     priority: 2,
     ptbEnabled: false,
