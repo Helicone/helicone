@@ -88,7 +88,7 @@ const Credits: NextPageWithLayout<void> = () => {
         rightActions={
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
-              Beta
+              Early Access
             </Badge>
             {hasAccess && (
               <Button
