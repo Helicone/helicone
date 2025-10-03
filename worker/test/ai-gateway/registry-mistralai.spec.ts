@@ -1133,4 +1133,60 @@ describe("Mistral Registry Tests", () => {
         }));
     });
   });
+
+  describe("Passthrough billing tests", () => {
+    describe("mistral-small with DeepInfra", () => {
+      it("should handle passthrough billing with deepinfra provider", () =>
+        runGatewayTest({
+          model: "mistral-small/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("mistral-nemo with DeepInfra", () => {
+      it("should handle passthrough billing with deepinfra provider", () =>
+        runGatewayTest({
+          model: "mistral-nemo/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "mistralai/Mistral-Nemo-Instruct-2407",
+                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
 });
