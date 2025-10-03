@@ -154,9 +154,11 @@ function getModelProviderConfig(
 }
 
 function getModelProviderConfigByProviderModelId(
-  providerModelId: string
+  providerModelId: string,
+  provider: ModelProviderName
 ): Result<ModelProviderConfig> {
-  const result = indexes.providerModelIdToConfig.get(providerModelId);
+  const providerModelIdKey = `${providerModelId}:${provider}`;
+  const result = indexes.providerModelIdToConfig.get(providerModelIdKey);
   return result
     ? ok(result)
     : err(`Config not found for providerModelId: ${providerModelId}`);

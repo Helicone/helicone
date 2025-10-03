@@ -41,7 +41,7 @@ export function calculateModelCostBreakdown(
 ): CostBreakdown | null {
   const { modelUsage, providerModelId, provider, requestCount = 1 } = params;
 
-  const configResult = registry.getModelProviderConfigByProviderModelId(providerModelId);
+  const configResult = registry.getModelProviderConfigByProviderModelId(providerModelId, provider);
   if (configResult.error || !configResult.data) return null;
 
   const config: ModelProviderConfig = configResult.data;

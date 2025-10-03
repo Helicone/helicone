@@ -15884,40 +15884,41 @@ Json: JsonObject;
       error: null;
     };
     "Result_InAppThread.string_": components["schemas"]["ResultSuccess_InAppThread_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__": {
-      data: {
-        isProduction: boolean;
-        summary: {
+    DashboardData: {
+      organizations: ({
           /** Format: double */
-          totalCreditsSpent: number;
+          creditLimit: number;
+          allowNegativeBalance: boolean;
+          ownerEmail: string;
+          tier: string;
           /** Format: double */
-          totalCreditsIssued: number;
+          lastPaymentDate: number | null;
           /** Format: double */
-          totalOrgsWithCredits: number;
-        };
-        organizations: ({
-            /** Format: double */
-            creditLimit: number;
-            allowNegativeBalance: boolean;
-            ownerEmail: string;
-            tier: string;
-            /** Format: double */
-            lastPaymentDate: number | null;
-            /** Format: double */
-            clickhouseTotalSpend: number;
-            /** Format: double */
-            paymentsCount: number;
-            /** Format: double */
-            totalPayments: number;
-            stripeCustomerId: string;
-            orgName: string;
-            orgId: string;
-          })[];
+          clickhouseTotalSpend: number;
+          /** Format: double */
+          paymentsCount: number;
+          /** Format: double */
+          totalPayments: number;
+          stripeCustomerId: string;
+          orgName: string;
+          orgId: string;
+        })[];
+      summary: {
+        /** Format: double */
+        totalCreditsSpent: number;
+        /** Format: double */
+        totalCreditsIssued: number;
+        /** Format: double */
+        totalOrgsWithCredits: number;
       };
+      isProduction: boolean;
+    };
+    ResultSuccess_DashboardData_: {
+      data: components["schemas"]["DashboardData"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_": components["schemas"]["ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__"] | components["schemas"]["ResultError_string_"];
+    "Result_DashboardData.string_": components["schemas"]["ResultSuccess_DashboardData_"] | components["schemas"]["ResultError_string_"];
     WalletState: {
       /** Format: double */
       balance: number;
@@ -19221,13 +19222,15 @@ export interface operations {
     parameters: {
       query?: {
         search?: string;
+        sortBy?: string;
+        sortOrder?: "asc" | "desc";
       };
     };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_"];
+          "application/json": components["schemas"]["Result_DashboardData.string_"];
         };
       };
     };

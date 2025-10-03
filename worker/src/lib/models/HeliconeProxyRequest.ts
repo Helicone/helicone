@@ -155,6 +155,13 @@ export class HeliconeProxyRequestMapper {
         isStream || targetUrl.pathname.includes("invoke-with-response-stream");
     }
 
+    let body: ValidRequestBody;
+    try {
+      body = await this.request.safelyGetBody();
+    } catch (e) {
+      body = await this.request.unsafeGetBodyText();
+    }
+
     return {
       data: {
         heliconePromptTemplate: await this.getHeliconeTemplate(),
@@ -173,8 +180,8 @@ export class HeliconeProxyRequestMapper {
         heliconeErrors: this.heliconeErrors,
         api_base,
         isStream: isStream,
-        body: await this.request.requestBodyBuffer.getReadableStreamToBody(),
-        unsafeGetBodyText: this.unsafeGetBody.bind(this),
+        body: body,
+        unsafeGetBodyText: this.request.unsafeGetBodyText.bind(this.request),
 
         startTime,
         url: this.request.url,
@@ -188,24 +195,6 @@ export class HeliconeProxyRequestMapper {
       },
       error: null,
     };
-  }
-
-  private async unsafeGetBody(): Promise<string | null> {
-    if (this.request.getMethod() === "GET") {
-      return null;
-    }
-
-    if (this.request.heliconeHeaders.featureFlags.streamUsage) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const jsonBody = (await this.request.unsafeGetJson()) as any;
-      if (!jsonBody["stream_options"]) {
-        jsonBody["stream_options"] = {};
-      }
-      jsonBody["stream_options"]["include_usage"] = true;
-      return JSON.stringify(jsonBody);
-    }
-
-    return await this.request.unsafeGetText();
   }
 
   private validateApiConfiguration(api_base: string | undefined): boolean {

@@ -146,7 +146,7 @@ export class SimpleAIGateway {
       const result = await this.attemptExecutor.execute({
         attempt,
         requestWrapper: this.requestWrapper,
-        parsedBody,
+        parsedBody: finalBody,
         requestParams,
         orgId: this.orgId,
         forwarder,
@@ -179,6 +179,7 @@ export class SimpleAIGateway {
     }
 
     // All attempts failed
+    this.metrics.markPostRequestEnd();
     return this.createErrorResponse(errors);
   }
 
@@ -186,7 +187,8 @@ export class SimpleAIGateway {
     Result<{ modelStrings: string[]; body: any }, Response>
   > {
     // Get raw text body once
-    const rawBody = await this.requestWrapper.unsafeGetText();
+    // TODO: change to use safelyGetBody
+    const rawBody = await this.requestWrapper.unsafeGetBodyText();
     const parsedBody: any = tryJSONParse(rawBody ?? "{}");
 
     if (!parsedBody || !parsedBody.model) {
