@@ -72,6 +72,7 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 COPY web/package.json ./web/package.json
 COPY valhalla/jawn/package.json ./valhalla/jawn/package.json
+COPY worker/package.json ./worker/package.json
 
 # Copy packages directory structure and package.json files
 COPY packages ./packages
