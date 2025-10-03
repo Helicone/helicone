@@ -1840,6 +1840,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "kimi-k2-instruct:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "moonshotai/kimi-k2-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2:groq": {
       "context": 131072,
       "crossRegion": false,
@@ -3143,6 +3170,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "moonshotai/kimi-k2": [
     "groq",
     "groq",
+    "novita",
     "openrouter",
     "openrouter",
   ],
@@ -3865,6 +3893,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0,
       },
     ],
+    "novita": [
+      {
+        "input": 5.7e-7,
+        "output": 0.0000023,
+        "threshold": 0,
+      },
+    ],
     "openrouter": [
       {
         "input": 0.00000142,
@@ -4336,6 +4371,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "kimi-k2-instruct",
+      "providers": [
+        "novita",
+      ],
+    },
+    {
       "model": "llama-3.1-8b-instant",
       "providers": [
         "groq",
@@ -4502,7 +4543,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 5,
+      "modelCount": 6,
       "provider": "novita",
     },
     {
@@ -4558,6 +4599,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "grok-code-fast-1",
     "kimi-k2",
     "kimi-k2-0905",
+    "kimi-k2-instruct",
     "llama-3.1-8b-instant",
     "llama-3.1-8b-instruct",
     "llama-3.1-8b-instruct-turbo",
@@ -4587,9 +4629,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 128,
-  "totalModelProviderConfigs": 128,
-  "totalModelsWithPtb": 54,
+  "totalEndpoints": 129,
+  "totalModelProviderConfigs": 129,
+  "totalModelsWithPtb": 55,
   "totalProviders": 12,
 }
 `;

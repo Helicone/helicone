@@ -40,7 +40,7 @@ export const endpoints = {
       "tools",
       "top_k",
       "top_logprobs",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -84,7 +84,7 @@ export const endpoints = {
       "tools",
       "top_k",
       "top_logprobs",
-      "top_p"
+      "top_p",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -150,6 +150,42 @@ export const endpoints = {
       "tools",
       "top_logprobs",
       "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-instruct:novita": {
+    provider: "novita",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2-instruct",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000057, // $0.57/1M
+        output: 0.0000023, // $2.3/1M
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "frequency_penalty",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+      "functions",
+      "structured_outputs",
     ],
     ptbEnabled: true,
     priority: 3,

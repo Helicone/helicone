@@ -47279,6 +47279,30 @@
 					"organizations": {
 						"items": {
 							"properties": {
+								"walletProcessedEventsCount": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletDisallowedModelCount": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletTotalDebits": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletTotalCredits": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletEffectiveBalance": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletBalance": {
+									"type": "number",
+									"format": "double"
+								},
 								"creditLimit": {
 									"type": "number",
 									"format": "double"
@@ -56536,6 +56560,57 @@
 						"schema": {
 							"format": "double",
 							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/{orgId}/disallow-list": {
+			"delete": {
+				"operationId": "RemoveFromDisallowList",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_WalletState.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "provider",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "model",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]

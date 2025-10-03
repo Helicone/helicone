@@ -23,6 +23,17 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
+  "kimi-k2-instruct": {
+    name: "Kimi K2 Instruct",
+    author: "moonshotai",
+    description:
+      "Kimi K2 is a state-of-the-art mixture-of-experts (MoE) language model with 32 billion activated parameters and 1 trillion total parameters. Trained with the Muon optimizer, Kimi K2 achieves exceptional performance across frontier knowledge, reasoning, and coding tasks while being meticulously optimized for agentic capabilities. Specifically designed for tool use, reasoning, and autonomous problem-solving.",
+    contextLength: 131_072,
+    maxOutputTokens: 131_072,
+    created: "2025-09-28T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type KimiK2ModelName = keyof typeof models;
