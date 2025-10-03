@@ -37,8 +37,10 @@ if (IS_RATE_LIMIT_ENABLED) {
       return 200;
     },
 
-    handler: (req, res, next) => {
-      next();
+    handler: (req, res) => {
+      res.status(429).json({
+        error: "Too many requests, please try again later.",
+      });
     },
     store: new RedisStore({
       // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
