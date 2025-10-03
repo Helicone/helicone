@@ -907,6 +907,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "deepseek/r1-distill": {
+    "deepseek-r1-distill-llama-70b:deepinfra": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-r1-distill-llama-70b:groq": {
       "context": 128000,
       "crossRegion": false,
@@ -3035,6 +3059,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/r1-distill": [
+    "deepinfra",
     "groq",
     "openrouter",
   ],
@@ -3572,6 +3597,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/r1-distill": {
+    "deepinfra": [
+      {
+        "input": 2e-7,
+        "output": 6e-7,
+        "threshold": 0,
+      },
+    ],
     "groq": [
       {
         "audio": 0,
@@ -4079,6 +4111,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "deepseek-r1-distill-llama-70b",
       "providers": [
+        "deepinfra",
         "groq",
         "openrouter",
       ],
@@ -4417,7 +4450,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 11,
+      "modelCount": 12,
       "provider": "deepinfra",
     },
     {
