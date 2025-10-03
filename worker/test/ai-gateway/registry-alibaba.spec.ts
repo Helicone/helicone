@@ -11,8 +11,13 @@ import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { createOpenAIMockResponse } from "../test-utils";
 
-// Define auth expectations for DeepInfra
 const deepinfraAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
+const novitaAuthExpectations = {
   headers: {
     Authorization: /^Bearer /,
   },
@@ -1944,12 +1949,6 @@ describe("Alibaba Registry Tests", () => {
     });
 
     describe("qwen3-235b-a22b-thinking with Novita Provider - Function Calling Tests", () => {
-      const novitaAuthExpectations = {
-        headers: {
-          Authorization: /^Bearer /
-        }
-      };
-
       it("should handle basic function calling with novita provider", () =>
         runGatewayTest({
           model: "qwen3-235b-a22b-thinking/novita",
