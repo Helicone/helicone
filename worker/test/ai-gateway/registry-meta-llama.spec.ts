@@ -3038,4 +3038,87 @@ describe("Meta Llama Registry Tests", () => {
         },
       }));
   });
+
+  describe("Passthrough billing tests", () => {
+    describe("llama-4-scout with Novita", () => {
+      it("should handle passthrough billing with novita provider", () =>
+        runGatewayTest({
+          model: "llama-4-scout/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                data: createOpenAIMockResponse("meta-llama/llama-4-scout-17b-16e-instruct"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("llama-3.3-70b-instruct with Novita", () => {
+      it("should handle passthrough billing with novita provider", () =>
+        runGatewayTest({
+          model: "llama-3.3-70b-instruct/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "meta-llama/llama-3.3-70b-instruct",
+                data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("llama-4-maverick with Novita", () => {
+      it("should handle passthrough billing with novita provider", () =>
+        runGatewayTest({
+          model: "llama-4-maverick/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
+                data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
 });
