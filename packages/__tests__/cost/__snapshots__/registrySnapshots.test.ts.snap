@@ -1544,6 +1544,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "seed",
         "stop",
         "temperature",
+        "tools",
         "top_k",
         "top_p",
       ],
