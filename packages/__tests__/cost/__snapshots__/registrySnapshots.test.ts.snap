@@ -3495,6 +3495,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "deepseek/deepseek-reasoner": {
     "deepinfra": [
       {
+        "cacheMultipliers": {
+          "cachedInput": 0.8,
+        },
         "input": 5e-7,
         "output": 0.00000215,
         "threshold": 0,
