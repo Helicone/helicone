@@ -845,4 +845,87 @@ describe("DeepSeek Registry Tests", () => {
         },
       }));
   });
+
+  describe("Passthrough billing tests", () => {
+    describe("deepseek-v3 with DeepInfra", () => {
+      it("should handle passthrough billing with deepinfra provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-v3.1-terminus with DeepInfra", () => {
+      it("should handle passthrough billing with deepinfra provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1-Terminus",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-v3.2 with Novita", () => {
+      it("should handle passthrough billing with novita provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3.2/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.2-exp",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
 });

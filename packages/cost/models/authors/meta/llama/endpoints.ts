@@ -100,7 +100,7 @@ export const endpoints = {
       "repetition_penalty",
       "logit_bias"
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -319,7 +319,7 @@ export const endpoints = {
       "tools"
     ],
     priority: 2,
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -580,7 +580,7 @@ export const endpoints = {
       "tool_choice",
       "tools",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

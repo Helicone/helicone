@@ -818,6 +818,33 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
+    describe("qwen3-coder Passthrough billing tests", () => {
+      it("should handle passthrough billing with deepinfra provider", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
     describe("qwen3-next-80b-a3b-instruct", () => {
       it("should handle deepinfra provider", () =>
         runGatewayTest({
@@ -1153,6 +1180,33 @@ describe("Alibaba Registry Tests", () => {
               },
             ],
             finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("qwen3-next-80b-a3b-instruct Passthrough billing tests", () => {
+      it("should handle passthrough billing with deepinfra provider", () =>
+        runGatewayTest({
+          model: "qwen3-next-80b-a3b-instruct/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
           },
         }));
     });
