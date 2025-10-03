@@ -17,6 +17,7 @@ export const endpoints = {
         },
       },
     ],
+    quantization: "fp4",
     contextLength: 128_000,
     maxCompletionTokens: 64_000,
     supportedParameters: [
