@@ -11,8 +11,13 @@ import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { createOpenAIMockResponse } from "../test-utils";
 
-// Define auth expectations for DeepInfra
 const deepinfraAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
+const novitaAuthExpectations = {
   headers: {
     Authorization: /^Bearer /,
   },
@@ -1940,6 +1945,738 @@ describe("Alibaba Registry Tests", () => {
             ],
             finalStatus: 500,
           },
+        }));
+    });
+
+    describe("qwen3-235b-a22b-thinking with Novita Provider - Function Calling Tests", () => {
+      it("should handle basic function calling with novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "What's the weather like in San Francisco?"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "get_current_weather",
+                  description: "Get the current weather in a given location",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      location: {
+                        type: "string",
+                        description: "The city and state, e.g. San Francisco, CA"
+                      },
+                      unit: {
+                        type: "string",
+                        enum: ["celsius", "fahrenheit"]
+                      }
+                    },
+                    required: ["location"]
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse("qwen/qwen3-235b-a22b-thinking-2507"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: ["get_current_weather", "San Francisco"]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should auto-select novita provider when none specified", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse(
+                  "qwen/qwen3-235b-a22b-thinking-2507"
+                ),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle multiple functions with novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Check the weather and send me an email about it"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "get_current_weather",
+                  description: "Get the current weather",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      location: { type: "string" }
+                    },
+                    required: ["location"]
+                  }
+                },
+                {
+                  name: "send_email",
+                  description: "Send an email",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      to: { type: "string" },
+                      subject: { type: "string" },
+                      body: { type: "string" }
+                    },
+                    required: ["to", "subject", "body"]
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse("qwen/qwen3-235b-a22b-thinking-2507"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: ["get_current_weather", "send_email"]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle tools parameter with novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "What's the weather and time in Tokyo?"
+              }
+            ],
+            body: {
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get weather information",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        city: { type: "string" }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse("qwen/qwen3-235b-a22b-thinking-2507"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: ["get_weather", "Tokyo"]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle function_call parameter with novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Get the weather for New York"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "get_weather",
+                  description: "Get weather",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      location: { type: "string" }
+                    }
+                  }
+                }
+              ],
+              function_call: { name: "get_weather" }
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse("qwen/qwen3-235b-a22b-thinking-2507"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: ["function_call", "get_weather"]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle tool_choice parameter with novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Calculate 15 * 23"
+              }
+            ],
+            body: {
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "calculator",
+                    description: "Perform calculations",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        expression: { type: "string" }
+                      }
+                    }
+                  }
+                }
+              ],
+              tool_choice: "auto"
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse("qwen/qwen3-235b-a22b-thinking-2507"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: ["calculator", "tool_choice"]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle structured outputs with functions and novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Extract user information from this text"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "extract_user_info",
+                  description: "Extract structured user information",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      age: { type: "number" },
+                      email: { type: "string" }
+                    },
+                    required: ["name"]
+                  }
+                }
+              ],
+              response_format: { type: "json_object" }
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse("qwen/qwen3-235b-a22b-thinking-2507"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: ["extract_user_info", "response_format"]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle streaming with functions and novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Search for information about AI"
+              }
+            ],
+            stream: true,
+            body: {
+              functions: [
+                {
+                  name: "web_search",
+                  description: "Search the web",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      query: { type: "string" }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse("qwen/qwen3-235b-a22b-thinking-2507"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: ["web_search", '"stream":true']
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle complex function parameters with novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Create a calendar event"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "create_event",
+                  description: "Create a calendar event",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      title: { type: "string" },
+                      start_time: { type: "string", format: "date-time" },
+                      end_time: { type: "string", format: "date-time" },
+                      attendees: {
+                        type: "array",
+                        items: { type: "string" }
+                      },
+                      location: { type: "string" },
+                      reminders: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            minutes_before: { type: "number" },
+                            method: { type: "string", enum: ["email", "popup"] }
+                          }
+                        }
+                      }
+                    },
+                    required: ["title", "start_time", "end_time"]
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse("qwen/qwen3-235b-a22b-thinking-2507"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: ["create_event", "attendees", "reminders"]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle reasoning parameter with functions and novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Analyze this data and provide insights"
+              }
+            ],
+            maxTokens: 2000,
+            body: {
+              functions: [
+                {
+                  name: "analyze_data",
+                  description: "Analyze data and provide insights",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      data_points: {
+                        type: "array",
+                        items: { type: "number" }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse("qwen/qwen3-235b-a22b-thinking-2507"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: ["analyze_data"]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should verify pricing configuration with novita provider ($0.30/$3.00 per million tokens)", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test pricing calculation"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "test_function",
+                  description: "Test function",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      input: { type: "string" }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-235b-a22b-thinking-2507",
+                data: createOpenAIMockResponse("qwen/qwen3-235b-a22b-thinking-2507"),
+                expects: novitaAuthExpectations,
+                customVerify: (call) => {
+                  // Verify pricing configuration for novita:
+                  // Input: $0.30 per million tokens (0.0000003)
+                  // Output: $3.00 per million tokens (0.000003)
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+    });
+
+    describe("qwen3-235b-a22b-thinking with Novita Provider - Function Calling Error Scenarios", () => {
+      it("should handle novita provider failure with function calls", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test function call"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "test_function",
+                  description: "Test",
+                  parameters: { type: "object", properties: {} }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "Novita service unavailable"
+              }
+            ],
+            finalStatus: 500
+          }
+        }));
+
+      it("should handle rate limiting from novita with function calls", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test function call"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "test_function",
+                  description: "Test",
+                  parameters: { type: "object", properties: {} }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded"
+              }
+            ],
+            finalStatus: 429
+          }
+        }));
+
+      it("should handle authentication failure with novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test function call"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "test_function",
+                  description: "Test",
+                  parameters: { type: "object", properties: {} }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key"
+              }
+            ],
+            finalStatus: 401
+          }
+        }));
+
+      it("should handle invalid function schema with novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test invalid function"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "invalid_function",
+                  description: "Invalid function schema"
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid function schema"
+              }
+            ],
+            finalStatus: 500
+          }
+        }));
+
+      it("should handle quota exceeded with novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test function call"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "test_function",
+                  description: "Test",
+                  parameters: { type: "object", properties: {} }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 403,
+                errorMessage: "Quota exceeded"
+              }
+            ],
+            finalStatus: 403
+          }
+        }));
+
+      it("should handle model not found with novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test function call"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "test_function",
+                  description: "Test",
+                  parameters: { type: "object", properties: {} }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found"
+              }
+            ],
+            finalStatus: 500
+          }
+        }));
+
+      it("should handle timeout with function calls and novita provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/novita",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test function call"
+              }
+            ],
+            body: {
+              functions: [
+                {
+                  name: "slow_function",
+                  description: "Function that might timeout",
+                  parameters: { type: "object", properties: {} }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 408,
+                errorMessage: "Request timeout"
+              }
+            ],
+            finalStatus: 500
+          }
         }));
     });
   });
