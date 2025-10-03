@@ -1528,6 +1528,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-4-scout:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-4-scout:openrouter": {
       "context": 1048576,
       "crossRegion": false,
@@ -3051,6 +3075,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "novita",
     "novita",
+    "novita",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -4303,6 +4328,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "llama-4-scout",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
@@ -4423,7 +4449,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 4,
+      "modelCount": 5,
       "provider": "novita",
     },
     {
@@ -4503,8 +4529,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 125,
-  "totalModelProviderConfigs": 125,
+  "totalEndpoints": 126,
+  "totalModelProviderConfigs": 126,
   "totalModelsWithPtb": 49,
   "totalProviders": 12,
 }
