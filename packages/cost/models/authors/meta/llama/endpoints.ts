@@ -315,6 +315,8 @@ export const endpoints = {
       "min_p",
       "repetition_penalty",
       "logit_bias",
+      "functions",
+      "tools"
     ],
     priority: 2,
     ptbEnabled: false,
