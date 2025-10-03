@@ -1481,6 +1481,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-4-maverick:novita": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 1048576,
+      "modelId": "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-4-maverick:openrouter": {
       "context": 1048576,
       "crossRegion": false,
@@ -4280,6 +4304,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "llama-4-maverick",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
