@@ -35,9 +35,14 @@ export class RateLimiterDO extends DurableObject {
   private sql: SqlStorage;
   private state: DurableObjectState;
 
-  // Bucket size in milliseconds - smaller = more precise but more rows
-  // 1000ms (1 second) is a good balance for most use cases
-  private readonly BUCKET_SIZE_MS = 1000;
+  // Target number of buckets for optimal performance
+  // More buckets = more precision but slower queries
+  // Fewer buckets = faster queries but less precision
+  // 60 buckets provides good balance for any time window
+  private readonly TARGET_BUCKET_COUNT = 60;
+
+  // Minimum bucket size (1 second) for short time windows
+  private readonly MIN_BUCKET_SIZE_MS = 1000;
 
   // Precision multiplier to avoid floating point errors
   // Store costs in units of 0.0001 cents (10,000 = 1 cent)
@@ -72,12 +77,12 @@ export class RateLimiterDO extends DurableObject {
       ).toArray();
 
       if (oldTableExists.length > 0) {
-        // Migrate existing data by bucketing it
+        // Migrate existing data by bucketing it using MIN_BUCKET_SIZE_MS (1 second)
         this.sql.exec(`
           INSERT INTO rate_limit_buckets (segment_key, bucket_timestamp, unit_count)
           SELECT
             segment_key,
-            (timestamp / ${this.BUCKET_SIZE_MS}) * ${this.BUCKET_SIZE_MS} as bucket_timestamp,
+            (timestamp / ${this.MIN_BUCKET_SIZE_MS}) * ${this.MIN_BUCKET_SIZE_MS} as bucket_timestamp,
             SUM(unit_count) * ${this.PRECISION_MULTIPLIER} as unit_count
           FROM rate_limit_entries
           GROUP BY segment_key, bucket_timestamp
@@ -118,7 +123,8 @@ export class RateLimiterDO extends DurableObject {
         // Update all existing buckets to use integer precision
         // Only update buckets that are recent (within last hour) to avoid updating stale data
         const oneHourAgo = Date.now() - 3600000;
-        const migrationBucket = this.getBucketTimestamp(oneHourAgo);
+        // Use MIN_BUCKET_SIZE_MS for migration (1 second buckets)
+        const migrationBucket = this.getBucketTimestamp(oneHourAgo, this.MIN_BUCKET_SIZE_MS);
 
         console.log(
           `[RateLimiterDO] Running precision migration for recent buckets (since ${new Date(oneHourAgo).toISOString()})`
@@ -153,19 +159,38 @@ export class RateLimiterDO extends DurableObject {
   }
 
   /**
-   * Get the bucket timestamp for a given time
+   * Calculate optimal bucket size based on time window
+   * Target: ~60 buckets maximum for any time window
+   *
+   * Examples:
+   * - 10s window: 1s buckets (10 buckets)
+   * - 60s window: 1s buckets (60 buckets)
+   * - 5min window: 5s buckets (60 buckets)
+   * - 1hr window: 60s buckets (60 buckets)
    */
-  private getBucketTimestamp(timestampMs: number): number {
-    return Math.floor(timestampMs / this.BUCKET_SIZE_MS) * this.BUCKET_SIZE_MS;
+  private getBucketSize(timeWindowSeconds: number): number {
+    const timeWindowMs = timeWindowSeconds * 1000;
+    const optimalBucketSize = Math.floor(timeWindowMs / this.TARGET_BUCKET_COUNT);
+    return Math.max(this.MIN_BUCKET_SIZE_MS, optimalBucketSize);
+  }
+
+  /**
+   * Get the bucket timestamp for a given time and bucket size
+   */
+  private getBucketTimestamp(timestampMs: number, bucketSizeMs: number): number {
+    return Math.floor(timestampMs / bucketSizeMs) * bucketSizeMs;
   }
 
   public async processRateLimit(
     req: RateLimitRequest
   ): Promise<RateLimitResponse> {
     const now = Date.now();
-    const currentBucket = this.getBucketTimestamp(now);
+
+    // Calculate optimal bucket size based on time window
+    const bucketSizeMs = this.getBucketSize(req.timeWindow);
+    const currentBucket = this.getBucketTimestamp(now, bucketSizeMs);
     const windowStartMs = now - req.timeWindow * 1000;
-    const windowStartBucket = this.getBucketTimestamp(windowStartMs);
+    const windowStartBucket = this.getBucketTimestamp(windowStartMs, bucketSizeMs);
 
     // Convert to integer units to avoid floating point errors
     // For cents-based limiting, multiply by PRECISION_MULTIPLIER
@@ -290,7 +315,8 @@ export class RateLimiterDO extends DurableObject {
   }
 
   async cleanup(olderThanMs: number): Promise<number> {
-    const threshold = this.getBucketTimestamp(Date.now() - olderThanMs);
+    // Use MIN_BUCKET_SIZE_MS for cleanup (works for all bucket sizes)
+    const threshold = this.getBucketTimestamp(Date.now() - olderThanMs, this.MIN_BUCKET_SIZE_MS);
 
     const countBefore = this.sql
       .exec(
@@ -308,8 +334,9 @@ export class RateLimiterDO extends DurableObject {
   }
 
   async getState(segmentKey: string, timeWindow: number): Promise<any> {
+    const bucketSizeMs = this.getBucketSize(timeWindow);
     const windowStartMs = Date.now() - timeWindow * 1000;
-    const windowStartBucket = this.getBucketTimestamp(windowStartMs);
+    const windowStartBucket = this.getBucketTimestamp(windowStartMs, bucketSizeMs);
 
     const buckets = this.sql
       .exec(
@@ -340,7 +367,7 @@ export class RateLimiterDO extends DurableObject {
       totalUsageInUnits: totalInUnits, // Also include raw value for debugging
       oldestBucket: buckets[buckets.length - 1]?.bucket_timestamp,
       newestBucket: buckets[0]?.bucket_timestamp,
-      bucketSizeMs: this.BUCKET_SIZE_MS,
+      bucketSizeMs, // Now dynamic based on time window
       precisionMultiplier: this.PRECISION_MULTIPLIER,
     };
   }
