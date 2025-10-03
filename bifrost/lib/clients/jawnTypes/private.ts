@@ -537,6 +537,9 @@ export interface paths {
   "/v1/admin/wallet/{orgId}/update-settings": {
     post: operations["UpdateWalletSettings"];
   };
+  "/v1/admin/wallet/{orgId}/disallow-list": {
+    delete: operations["RemoveFromDisallowList"];
+  };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
@@ -15887,6 +15890,18 @@ Json: JsonObject;
     DashboardData: {
       organizations: ({
           /** Format: double */
+          walletProcessedEventsCount?: number;
+          /** Format: double */
+          walletDisallowedModelCount?: number;
+          /** Format: double */
+          walletTotalDebits?: number;
+          /** Format: double */
+          walletTotalCredits?: number;
+          /** Format: double */
+          walletEffectiveBalance?: number;
+          /** Format: double */
+          walletBalance?: number;
+          /** Format: double */
           creditLimit: number;
           allowNegativeBalance: boolean;
           ownerEmail: string;
@@ -19305,6 +19320,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__allowNegativeBalance-boolean--creditLimit-number_.string_"];
+        };
+      };
+    };
+  };
+  RemoveFromDisallowList: {
+    parameters: {
+      query: {
+        provider: string;
+        model: string;
+      };
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_WalletState.string_"];
         };
       };
     };

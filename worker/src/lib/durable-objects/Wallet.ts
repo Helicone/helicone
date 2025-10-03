@@ -181,6 +181,14 @@ export class Wallet extends DurableObject<Env> {
     );
   }
 
+  removeFromDisallowList(provider: string, model: string): void {
+    this.ctx.storage.sql.exec(
+      "DELETE FROM disallow_list WHERE provider = ? AND model = ?",
+      provider,
+      model
+    );
+  }
+
   getDisallowList(): DisallowListEntry[] {
     const result = this.ctx.storage.sql
       .exec<{
