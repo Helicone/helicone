@@ -18,14 +18,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { $JAWN_API } from "@/lib/clients/jawn";
+import React, { useRef, useState as useReactState } from "react";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import type { ImperativePanelHandle } from "react-resizable-panels";
 import {
   Loader2,
   Search,
@@ -37,9 +37,11 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
-import { Small } from "@/components/ui/typography";
+import { Small, H3, H4 } from "@/components/ui/typography";
 
 const formatCurrency = (amount: number | undefined) => {
   if (amount === undefined) return "UNDEFINED";
@@ -57,11 +59,13 @@ export default function AdminWallet() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
-  const [walletDetailsOpen, setWalletDetailsOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [tablePage, setTablePage] = useState(0);
   const [sortBy, setSortBy] = useState<SortColumn>("org_created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const drawerRef = useRef<ImperativePanelHandle>(null);
+  const [drawerSize, setDrawerSize] = useState(50);
 
   // Wallet modification form state
   const [modifyAmount, setModifyAmount] = useState<string>("");
@@ -112,7 +116,7 @@ export default function AdminWallet() {
       },
     },
     {
-      enabled: !!selectedOrg && walletDetailsOpen,
+      enabled: !!selectedOrg,
     },
   );
 
@@ -145,7 +149,7 @@ export default function AdminWallet() {
       },
     },
     {
-      enabled: !!selectedOrg && !!selectedTable && walletDetailsOpen,
+      enabled: !!selectedOrg && !!selectedTable,
     },
   );
 
@@ -183,21 +187,28 @@ export default function AdminWallet() {
   const organizations = dashboardData?.data?.organizations || [];
 
   const handleOrgClick = (orgId: string) => {
-    setSelectedOrg(orgId);
-    setWalletDetailsOpen(true);
-    // Reset table selection when switching orgs
-    setSelectedTable(null);
-    setTablePage(0);
-    // Reset settings form
-    setSettingsError(null);
-    setSettingsSuccess(null);
-    // Load current settings from the org data
-    const org = dashboardData?.data?.organizations.find(
-      (o) => o.orgId === orgId,
-    );
-    if (org) {
-      setAllowNegativeBalance(org.allowNegativeBalance || false);
-      setCreditLimit(org.creditLimit ? org.creditLimit.toString() : "0");
+    if (selectedOrg === orgId) {
+      // Close drawer if clicking same org
+      drawerRef.current?.collapse();
+      setSelectedOrg(null);
+    } else {
+      // Open drawer for new org
+      setSelectedOrg(orgId);
+      drawerRef.current?.expand();
+      // Reset table selection when switching orgs
+      setSelectedTable(null);
+      setTablePage(0);
+      // Reset settings form
+      setSettingsError(null);
+      setSettingsSuccess(null);
+      // Load current settings from the org data
+      const org = dashboardData?.data?.organizations.find(
+        (o) => o.orgId === orgId,
+      );
+      if (org) {
+        setAllowNegativeBalance(org.allowNegativeBalance || false);
+        setCreditLimit(org.creditLimit ? org.creditLimit.toString() : "0");
+      }
     }
   };
 
@@ -330,7 +341,7 @@ export default function AdminWallet() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 h-full">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
@@ -378,7 +389,9 @@ export default function AdminWallet() {
         </Card>
       </div>
 
-      {/* Search and Filter */}
+      {/* Search and Filter with Resizable Table */}
+      <ResizablePanelGroup direction="horizontal" className="flex-1">
+        <ResizablePanel>
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -435,6 +448,7 @@ export default function AdminWallet() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Actions</TableHead>
                   <TableHead
                     className="cursor-pointer select-none hover:bg-muted/50"
                     onClick={() => handleSort("org_created_at")}
@@ -474,7 +488,8 @@ export default function AdminWallet() {
                       <SortIcon column="total_spend" />
                     </div>
                   </TableHead>
-                  <TableHead>Balance</TableHead>
+                  <TableHead>Calculated Balance</TableHead>
+                  <TableHead>Worker Balance State</TableHead>
                   <TableHead
                     className="cursor-pointer select-none hover:bg-muted/50"
                     onClick={() => handleSort("credit_limit")}
@@ -485,7 +500,6 @@ export default function AdminWallet() {
                     </div>
                   </TableHead>
                   <TableHead>Last Payment</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -502,8 +516,31 @@ export default function AdminWallet() {
                   const isNegativeBalance = balance < 0;
 
                   return (
-                    <>
-                      <TableRow key={org.orgId}>
+                      <TableRow
+                        key={org.orgId}
+                        className={`cursor-pointer hover:bg-muted/50 ${selectedOrg === org.orgId ? 'bg-muted' : ''}`}
+                        onClick={() => handleOrgClick(org.orgId)}
+                      >
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <div className="flex gap-2">
+                            {org.stripeCustomerId && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const stripeUrl = dashboardData?.data
+                                    ?.isProduction
+                                    ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
+                                    : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
+                                  window.open(stripeUrl, "_blank");
+                                }}
+                              >
+                                <ExternalLink size={14} />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <div>
                             <div className="font-medium">{org.orgName}</div>
@@ -554,6 +591,46 @@ export default function AdminWallet() {
                           </span>
                         </TableCell>
                         <TableCell>
+                          {org.walletBalance !== undefined ? (
+                            <div className="flex flex-col gap-0.5">
+                              <div className="flex items-center gap-1">
+                                <Small className="text-muted-foreground">
+                                  Balance:
+                                </Small>
+                                <span
+                                  className={
+                                    org.walletBalance < 0
+                                      ? "text-sm font-medium text-red-600"
+                                      : "text-sm"
+                                  }
+                                >
+                                  {formatCurrency(org.walletBalance)}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Small className="text-muted-foreground">
+                                  Disallowed:
+                                </Small>
+                                <span className="text-sm">
+                                  {org.walletDisallowedModelCount ?? 0}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Small className="text-muted-foreground">
+                                  Stripe Events:
+                                </Small>
+                                <span className="text-sm">
+                                  {org.walletProcessedEventsCount ?? 0}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <Small className="text-muted-foreground">
+                              N/A
+                            </Small>
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <div className="flex flex-col gap-1">
                             <Small className="text-muted-foreground">
                               Limit: {formatCurrency(org.creditLimit || 0)}
@@ -575,35 +652,7 @@ export default function AdminWallet() {
                             ? new Date(org.lastPaymentDate).toLocaleDateString()
                             : "N/A"}
                         </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleOrgClick(org.orgId)}
-                            >
-                              View Details
-                            </Button>
-                            {org.stripeCustomerId && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  const stripeUrl = dashboardData?.data
-                                    ?.isProduction
-                                    ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
-                                    : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
-                                  window.open(stripeUrl, "_blank");
-                                }}
-                              >
-                                <ExternalLink className="mr-1 h-3 w-3" />
-                                Stripe
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
                       </TableRow>
-                    </>
                   );
                 })}
               </TableBody>
@@ -611,444 +660,293 @@ export default function AdminWallet() {
           </div>
         </CardContent>
       </Card>
+        </ResizablePanel>
 
-      {/* Wallet Details Dialog */}
-      <Dialog open={walletDetailsOpen} onOpenChange={setWalletDetailsOpen}>
-        <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Wallet Details - {selectedOrg}</DialogTitle>
-          </DialogHeader>
+        <ResizableHandle />
 
-          {walletLoading ? (
-            <div className="flex h-64 items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : walletDetails ? (
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="modify">Modify Balance</TabsTrigger>
-                <TabsTrigger value="settings">Credit Limit</TabsTrigger>
-                <TabsTrigger value="escrows">Escrows</TabsTrigger>
-                <TabsTrigger value="disallow">Disallow List</TabsTrigger>
-                <TabsTrigger value="tables">Raw Tables</TabsTrigger>
-              </TabsList>
+        {/* Wallet Details Drawer */}
+        <ResizablePanel
+          ref={drawerRef}
+          defaultSize={0}
+          minSize={33}
+          onResize={(size) => {
+            if (size > 0) {
+              setDrawerSize(size);
+            }
+          }}
+          onExpand={() => {
+            drawerRef.current?.resize(drawerSize);
+          }}
+          collapsible={true}
+        >
+          <div className="h-full overflow-y-auto bg-muted/20 border-l p-4">
+            {walletLoading ? (
+              <div className="flex h-64 items-center justify-center">
+                <Loader2 size={20} className="animate-spin" />
+              </div>
+            ) : walletDetails ? (
+              <div className="flex flex-col gap-4">
+                {/* Close Button */}
+                <div className="flex items-center justify-between pb-3 border-b">
+                  <H3 className="text-foreground">Wallet Details</H3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      drawerRef.current?.collapse();
+                      setSelectedOrg(null);
+                    }}
+                    className="h-8 w-8 p-0"
+                  >
+                    ✕
+                  </Button>
+                </div>
 
-              <TabsContent value="overview" className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">Balance</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
+                {/* Overview Section */}
+                <section className="flex flex-col gap-2">
+                  <H4 className="text-sm font-semibold">Overview</H4>
+                  <div className="grid grid-cols-4 gap-2">
+                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
+                      <div className="text-xs text-muted-foreground mb-1">Balance</div>
+                      <div className="text-base font-bold">
                         {formatCurrency(walletDetails?.data?.balance)}
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">
-                        Effective Balance
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
+                    </div>
+                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
+                      <div className="text-xs text-muted-foreground mb-1">Effective Balance</div>
+                      <div className="text-base font-bold">
                         {formatCurrency(walletDetails?.data?.effectiveBalance)}
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">Total Credits</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
+                    </div>
+                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
+                      <div className="text-xs text-muted-foreground mb-1">Total Credits</div>
+                      <div className="text-base font-bold">
                         {formatCurrency(walletDetails?.data?.totalCredits)}
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">Total Debits</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
+                    </div>
+                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
+                      <div className="text-xs text-muted-foreground mb-1">Total Debits</div>
+                      <div className="text-base font-bold">
                         {formatCurrency(walletDetails.data?.totalDebits)}
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
+                    </div>
+                  </div>
+                </section>
 
-              <TabsContent value="modify" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Modify Wallet Balance</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Amount Input */}
-                    <div className="space-y-2">
-                      <Label htmlFor="amount">Amount (USD)</Label>
+                {/* Modify Balance */}
+                <section className="flex flex-col gap-2">
+                  <H4 className="text-sm font-semibold">Modify Balance</H4>
+                  <div className="rounded-lg bg-card border shadow-sm p-3 flex flex-col gap-2">
+                    <div className="flex gap-2">
                       <Input
-                        id="amount"
                         type="number"
                         step="0.01"
                         min="0"
-                        placeholder="10.00"
+                        placeholder="Amount"
                         value={modifyAmount}
                         onChange={(e) => setModifyAmount(e.target.value)}
                         disabled={isModifying}
+                        className="h-8 text-sm"
                       />
-                    </div>
-
-                    {/* Type Selection */}
-                    <div className="space-y-2">
-                      <Label>Type</Label>
                       <RadioGroup
                         value={modifyType}
                         onValueChange={(value) =>
                           setModifyType(value as "credit" | "debit")
                         }
                         disabled={isModifying}
+                        className="flex gap-2"
                       >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="credit" id="credit" />
-                          <Label htmlFor="credit" className="font-normal">
-                            Add Credits (Credit)
-                          </Label>
+                        <div className="flex items-center gap-1">
+                          <RadioGroupItem value="credit" id="credit" className="h-3 w-3" />
+                          <Label htmlFor="credit" className="text-xs">Credit</Label>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="debit" id="debit" />
-                          <Label htmlFor="debit" className="font-normal">
-                            Deduct Credits (Debit)
-                          </Label>
+                        <div className="flex items-center gap-1">
+                          <RadioGroupItem value="debit" id="debit" className="h-3 w-3" />
+                          <Label htmlFor="debit" className="text-xs">Debit</Label>
                         </div>
                       </RadioGroup>
                     </div>
-
-                    {/* Reason Input */}
-                    <div className="space-y-2">
-                      <Label htmlFor="reason">Reason (for audit trail)</Label>
-                      <Textarea
-                        id="reason"
-                        placeholder="e.g., Manual credit adjustment for promotional offer"
-                        value={modifyReason}
-                        onChange={(e) => setModifyReason(e.target.value)}
-                        disabled={isModifying}
-                        rows={3}
-                      />
-                    </div>
-
-                    {/* Error/Success Messages */}
+                    <Textarea
+                      placeholder="Reason"
+                      value={modifyReason}
+                      onChange={(e) => setModifyReason(e.target.value)}
+                      disabled={isModifying}
+                      rows={2}
+                      className="text-xs"
+                    />
                     {modifyError && (
-                      <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-                        <AlertCircle className="mr-2 inline h-4 w-4" />
+                      <div className="rounded border border-red-200 bg-red-50 p-1.5 text-xs text-red-600">
                         {modifyError}
                       </div>
                     )}
                     {modifySuccess && (
-                      <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-600">
+                      <div className="rounded border border-green-200 bg-green-50 p-1.5 text-xs text-green-600">
                         {modifySuccess}
                       </div>
                     )}
-
-                    {/* Submit Button */}
                     <Button
                       onClick={handleModifyBalance}
                       disabled={isModifying}
-                      className="w-full"
+                      size="sm"
+                      className="h-7 text-xs"
                     >
                       {isModifying ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 size={12} className="animate-spin" />
                           Processing...
                         </>
                       ) : (
-                        `${modifyType === "credit" ? "Add" : "Deduct"} Credits`
+                        `${modifyType === "credit" ? "Add" : "Deduct"}`
                       )}
                     </Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                  </div>
+                </section>
 
-              <TabsContent value="settings" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Wallet Settings</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col gap-6">
-                    {/* Allow Negative Balance Toggle */}
-                    <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/50 p-4">
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          id="allowNegativeBalance"
-                          checked={allowNegativeBalance}
-                          onChange={(e) =>
-                            setAllowNegativeBalance(e.target.checked)
-                          }
-                          disabled={isUpdatingSettings}
-                          className="h-6 w-6 cursor-pointer rounded border-2 border-border accent-primary"
-                        />
-                        <Label
-                          htmlFor="allowNegativeBalance"
-                          className="cursor-pointer text-base font-medium"
-                        >
-                          Allow Negative Balance
-                        </Label>
-                      </div>
-                      <Small className="text-muted-foreground">
-                        When enabled, the organization can spend beyond their
-                        credit limit
-                      </Small>
-                    </div>
-
-                    {/* Credit Limit Input */}
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="creditLimit" className="text-base">
-                        Credit Limit
+                {/* Wallet Settings */}
+                <section className="flex flex-col gap-2">
+                  <H4 className="text-sm font-semibold">Wallet Settings</H4>
+                  <div className="rounded-lg bg-card border shadow-sm p-3 flex flex-col gap-2">
+                    <div className="flex items-center gap-2 rounded bg-muted/50 p-1.5">
+                      <input
+                        type="checkbox"
+                        id="allowNeg"
+                        checked={allowNegativeBalance}
+                        onChange={(e) =>
+                          setAllowNegativeBalance(e.target.checked)
+                        }
+                        disabled={isUpdatingSettings}
+                        className="h-3 w-3 cursor-pointer rounded"
+                      />
+                      <Label
+                        htmlFor="allowNeg"
+                        className="cursor-pointer text-xs"
+                      >
+                        Allow Negative Balance
                       </Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          $
-                        </span>
-                        <Input
-                          id="creditLimit"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          value={creditLimit}
-                          onChange={(e) => setCreditLimit(e.target.value)}
-                          disabled={isUpdatingSettings}
-                          className="pl-7"
-                        />
-                      </div>
-                      <Small className="text-muted-foreground">
-                        Maximum amount the organization can spend. Set to 0 for
-                        unlimited.
-                      </Small>
                     </div>
-
-                    {/* Error/Success Messages */}
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-xs whitespace-nowrap">Limit:</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        value={creditLimit}
+                        onChange={(e) => setCreditLimit(e.target.value)}
+                        disabled={isUpdatingSettings}
+                        className="h-8 text-sm"
+                      />
+                    </div>
                     {settingsError && (
-                      <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-                        <AlertCircle size={16} className="mt-0.5 shrink-0" />
-                        <span>{settingsError}</span>
+                      <div className="rounded border border-red-200 bg-red-50 p-1.5 text-xs text-red-600">
+                        {settingsError}
                       </div>
                     )}
                     {settingsSuccess && (
-                      <div className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-600">
-                        <span>{settingsSuccess}</span>
+                      <div className="rounded border border-green-200 bg-green-50 p-1.5 text-xs text-green-600">
+                        {settingsSuccess}
                       </div>
                     )}
-
-                    {/* Submit Button */}
                     <Button
                       onClick={handleUpdateSettings}
                       disabled={isUpdatingSettings}
+                      size="sm"
+                      className="h-7 text-xs"
                     >
                       {isUpdatingSettings ? (
                         <>
-                          <Loader2 size={16} className="animate-spin" />
+                          <Loader2 size={12} className="animate-spin" />
                           Updating...
                         </>
                       ) : (
-                        "Update Settings"
+                        "Update"
                       )}
                     </Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                  </div>
+                </section>
 
-              <TabsContent value="escrows">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Total Escrow</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xl font-bold">
-                      {formatCurrency(walletDetails.data?.totalEscrow)}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="disallow">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Disallow List</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {(walletDetails?.data?.disallowList?.length ?? 0) > 0 ? (
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Request ID</TableHead>
-                            <TableHead>Provider</TableHead>
-                            <TableHead>Model</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {walletDetails?.data?.disallowList?.map(
-                            (entry, idx) => (
-                              <TableRow key={idx}>
-                                <TableCell className="font-mono text-sm">
-                                  {entry.helicone_request_id}
-                                </TableCell>
-                                <TableCell>{entry.provider}</TableCell>
-                                <TableCell>{entry.model}</TableCell>
-                              </TableRow>
-                            ),
-                          )}
-                        </TableBody>
-                      </Table>
-                    ) : (
-                      <p className="text-muted-foreground">
-                        No entries in disallow list
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="tables">
-                <div className="space-y-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Raw Table Inspection</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4 text-muted-foreground">
-                        Select a table to inspect raw data from the wallet
-                        durable object:
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          "credit_purchases",
-                          "aggregated_debits",
-                          "escrows",
-                          "processed_webhook_events",
-                        ].map((tableName) => (
-                          <Button
-                            key={tableName}
-                            variant={
-                              selectedTable === tableName
-                                ? "default"
-                                : "outline"
-                            }
-                            size="sm"
-                            onClick={() => handleTableClick(tableName)}
-                          >
-                            {tableName}
-                          </Button>
-                        ))}
+                {/* Bottom Row: Escrows, Disallow, Tables */}
+                <div className="grid grid-cols-2 gap-2">
+                  <section className="flex flex-col gap-2">
+                    <H4 className="text-sm font-semibold">Escrows</H4>
+                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
+                      <div className="text-base font-bold">
+                        {formatCurrency(walletDetails.data?.totalEscrow)}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </section>
 
-                  {selectedTable && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Table: {selectedTable}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {tableLoading ? (
-                          <div className="flex items-center justify-center py-8">
-                            <Loader2 className="h-6 w-6 animate-spin" />
-                            <span className="ml-2">Loading table data...</span>
-                          </div>
-                        ) : tableData ? (
-                          <div>
-                            {/* DEBUG: Show raw tableData structure */}
-                            <details className="mb-4 rounded border border-slate-200 bg-slate-50 p-3">
-                              <summary className="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-800">
-                                🔍 Debug: Raw API Response
-                              </summary>
-                              <pre className="mt-2 max-h-48 overflow-auto rounded border bg-white p-3 text-xs text-slate-700">
-                                {JSON.stringify(tableData, null, 2)}
-                              </pre>
-                            </details>
-
-                            {tableData?.data?.data?.message ? (
-                              <div className="py-8 text-center">
-                                <p className="text-muted-foreground">
-                                  {tableData?.data?.data?.message}
-                                </p>
-                              </div>
-                            ) : tableData?.data?.data ? (
-                              <div>
-                                <div className="mb-4 text-sm text-muted-foreground">
-                                  Total records: {tableData.data?.data?.total} |
-                                  Page: {tableData.data?.data?.page + 1} | Page
-                                  size: {tableData.data?.pageSize}
-                                </div>
-                                {tableData.data.data.data.length > 0 ? (
-                                  <div className="overflow-hidden rounded-lg border">
-                                    <pre className="max-h-96 overflow-auto bg-muted p-4 text-xs">
-                                      {JSON.stringify(tableData.data, null, 2)}
-                                    </pre>
-                                  </div>
-                                ) : (
-                                  <div className="py-8 text-center">
-                                    <p className="text-muted-foreground">
-                                      No data found in this table
-                                    </p>
-                                  </div>
-                                )}
-                                {tableData.data.data.total >
-                                  tableData.data.pageSize && (
-                                  <div className="mt-4 flex justify-center gap-2">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() =>
-                                        setTablePage(Math.max(0, tablePage - 1))
-                                      }
-                                      disabled={tablePage === 0}
-                                    >
-                                      Previous
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() =>
-                                        setTablePage(tablePage + 1)
-                                      }
-                                      disabled={
-                                        (tablePage + 1) *
-                                          tableData.data.pageSize >=
-                                        tableData.data.data.total
-                                      }
-                                    >
-                                      Next
-                                    </Button>
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              <div>No</div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="py-8 text-center">
-                            <p className="text-muted-foreground">
-                              Failed to load table data
-                            </p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
+                  <section className="flex flex-col gap-2">
+                    <H4 className="text-sm font-semibold">Disallow List</H4>
+                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
+                      {(walletDetails?.data?.disallowList?.length ?? 0) > 0 ? (
+                        <div className="text-sm font-medium">
+                          {walletDetails?.data?.disallowList?.length} entries
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">None</div>
+                      )}
+                    </div>
+                  </section>
                 </div>
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <p>Failed to load wallet details</p>
-          )}
-        </DialogContent>
-      </Dialog>
+
+                {/* Raw Tables */}
+                <section className="flex flex-col gap-2">
+                  <H4 className="text-sm font-semibold">Raw Tables</H4>
+                  <div className="rounded-lg bg-card border shadow-sm p-3">
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        "credit_purchases",
+                        "aggregated_debits",
+                        "escrows",
+                        "processed_webhook_events",
+                      ].map((tableName) => (
+                        <Button
+                          key={tableName}
+                          variant={
+                            selectedTable === tableName
+                              ? "default"
+                              : "outline"
+                          }
+                          size="sm"
+                          onClick={() => handleTableClick(tableName)}
+                          className="h-7 text-xs px-3"
+                        >
+                          {tableName.split("_")[0]}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+
+                {/* Table Data Display */}
+                {selectedTable && (
+                  <section className="flex flex-col gap-2">
+                    <H4 className="text-sm font-semibold">Table: {selectedTable}</H4>
+                    <div className="rounded-lg bg-card border shadow-sm p-3">
+                      {tableLoading ? (
+                        <div className="flex items-center justify-center py-4">
+                          <Loader2 size={16} className="animate-spin" />
+                        </div>
+                      ) : tableData?.data?.data ? (
+                        <div className="overflow-auto max-h-48 rounded bg-muted/30 p-2">
+                          <pre className="text-xs font-mono">
+                            {JSON.stringify(tableData.data, null, 2)}
+                          </pre>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">No data</div>
+                      )}
+                    </div>
+                  </section>
+                )}
+              </div>
+            ) : selectedOrg ? (
+              <p className="text-xs text-muted-foreground">Failed to load</p>
+            ) : null}
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }

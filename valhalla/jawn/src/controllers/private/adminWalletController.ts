@@ -1,6 +1,7 @@
 // src/users/usersController.ts
 import {
   Controller,
+  Delete,
   Path,
   Post,
   Query,
@@ -13,11 +14,10 @@ import type { JawnAuthenticatedRequest } from "../../types/request";
 
 import { err, ok, Result } from "../../packages/common/result";
 import { authCheckThrow } from "./adminController";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { ENVIRONMENT } from "../../lib/clients/constant";
 import { SettingsManager } from "../../utils/settings";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { AdminWalletManager } from "../../managers/admin/AdminWalletManager";
 
 // Wallet API response interfaces
 interface WalletState {
@@ -46,6 +46,12 @@ interface DashboardData {
     ownerEmail: string;
     allowNegativeBalance: boolean;
     creditLimit: number;
+    walletBalance?: number;
+    walletEffectiveBalance?: number;
+    walletTotalCredits?: number;
+    walletTotalDebits?: number;
+    walletDisallowedModelCount?: number;
+    walletProcessedEventsCount?: number;
   }>;
   summary: {
     totalOrgsWithCredits: number;
@@ -70,379 +76,6 @@ interface TableDataResponse {
 @Security("api_key")
 export class AdminWalletController extends Controller {
 
-      private async dashboardWithClickhouseSort(
-    search: string,
-    tokenUsageProductId: string,
-    _sortBy: "total_spend",
-    sortOrder?: "asc" | "desc"
-  ): Promise<Result<DashboardData, string>> {
-    const order = sortOrder === "asc" ? "ASC" : "DESC";
-
-    // Get top 100 organizations by spending from ClickHouse
-    const clickhouseSpendResult = await clickhouseDb.dbQuery<{
-      organization_id: string;
-      total_cost: number;
-    }>(
-      `
-        SELECT
-          organization_id,
-          SUM(cost) as total_cost
-        FROM request_response_rmt
-        WHERE is_passthrough_billing = true
-        GROUP BY organization_id
-        ORDER BY total_cost ${order}
-        LIMIT 100
-      `,
-      []
-    );
-
-    if (clickhouseSpendResult.error || !clickhouseSpendResult.data) {
-      return err(
-        clickhouseSpendResult.error || "Failed to fetch ClickHouse data"
-      );
-    }
-
-    // Get org IDs from ClickHouse results
-    const orgIds = clickhouseSpendResult.data.map((row) => row.organization_id);
-
-    if (orgIds.length === 0) {
-      return ok({
-        organizations: [],
-        isProduction: ENVIRONMENT === "production",
-        summary: {
-          totalOrgsWithCredits: 0,
-          totalCreditsIssued: 0,
-          totalCreditsSpent: 0,
-        },
-      });
-    }
-
-    // Build search filter for org details query
-    const searchFilter = search
-      ? `AND (
-          organization.name ILIKE $1 OR
-          organization.id::text ILIKE $1 OR
-          organization.stripe_customer_id ILIKE $1 OR
-          auth.users.email ILIKE $1
-        )`
-      : "";
-
-    // Build query parameters
-    const queryParams = search ? [`%${search}%`] : [];
-    queryParams.push(tokenUsageProductId);
-
-    // Build IN clause with individual placeholders for each org ID
-    const orgIdPlaceholders = orgIds
-      .map((_, index) => `$${queryParams.length + index + 1}`)
-      .join(", ");
-
-    // Get organization details for these orgs
-    const orgsResult = await dbExecute<{
-      org_id: string;
-      org_name: string;
-      stripe_customer_id: string;
-      tier: string;
-      owner_email: string;
-      allow_negative_balance: boolean;
-      credit_limit: string;
-      total_amount_received: number;
-      payments_count: number;
-      last_payment_date: string | null;
-    }>(
-      `
-        SELECT
-          organization.id as org_id,
-          organization.name as org_name,
-          organization.stripe_customer_id,
-          organization.tier,
-          auth.users.email as owner_email,
-          organization.allow_negative_balance,
-          organization.credit_limit,
-          COALESCE(SUM(stripe.payment_intents.amount_received), 0) as total_amount_received,
-          COALESCE(COUNT(stripe.payment_intents.id), 0) as payments_count,
-          MAX(stripe.payment_intents.created) as last_payment_date
-        FROM organization
-        LEFT JOIN auth.users ON organization.owner = auth.users.id
-        LEFT JOIN stripe.payment_intents ON
-          organization.stripe_customer_id = stripe.payment_intents.customer
-          AND stripe.payment_intents.metadata->>'productId' = $${search ? 2 : 1}
-          AND stripe.payment_intents.status = 'succeeded'
-        WHERE organization.soft_delete = false
-          AND organization.id IN (${orgIdPlaceholders})
-        ${searchFilter}
-        GROUP BY
-          organization.id,
-          organization.name,
-          organization.stripe_customer_id,
-          organization.tier,
-          auth.users.email,
-          organization.allow_negative_balance,
-          organization.credit_limit
-        `,
-      [...queryParams, ...orgIds]
-    );
-
-    if (orgsResult.error) {
-      return err(orgsResult.error);
-    }
-
-    if (!orgsResult.data || orgsResult.data.length === 0) {
-      return ok({
-        organizations: [],
-        isProduction: ENVIRONMENT === "production",
-        summary: {
-          totalOrgsWithCredits: 0,
-          totalCreditsIssued: 0,
-          totalCreditsSpent: 0,
-        },
-      });
-    }
-
-    // Create spend map from ClickHouse results
-    const clickhouseSpendMap = new Map<string, number>();
-    clickhouseSpendResult.data.forEach((row) => {
-      clickhouseSpendMap.set(
-        row.organization_id,
-        Number(row.total_cost) / COST_PRECISION_MULTIPLIER
-      );
-    });
-
-    // Combine the data, maintaining ClickHouse sort order
-    const orgDetailsMap = new Map(
-      orgsResult.data.map((org) => [org.org_id, org])
-    );
-
-    const organizations = orgIds
-      .map((orgId) => {
-        const org = orgDetailsMap.get(orgId);
-        if (!org) return null;
-
-        return {
-          orgId: org.org_id,
-          orgName: org.org_name || "Unknown",
-          stripeCustomerId: org.stripe_customer_id || "",
-          totalPayments: org.total_amount_received / 100,
-          paymentsCount: org.payments_count,
-          clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-          lastPaymentDate: org.last_payment_date
-            ? Number(org.last_payment_date) * 1000
-            : null,
-          tier: org.tier || "free",
-          ownerEmail: org.owner_email || "Unknown",
-          allowNegativeBalance: org.allow_negative_balance,
-          creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0,
-        };
-      })
-      .filter((org): org is NonNullable<typeof org> => org !== null);
-
-    // Calculate summary
-    const totalCreditsIssued = organizations.reduce(
-      (sum, org) => sum + org.totalPayments,
-      0
-    );
-    const totalCreditsSpent = organizations.reduce(
-      (sum, org) => sum + org.clickhouseTotalSpend,
-      0
-    );
-
-    return ok({
-      organizations,
-      summary: {
-        totalOrgsWithCredits: organizations.length,
-        totalCreditsIssued,
-        totalCreditsSpent,
-      },
-      isProduction: ENVIRONMENT === "production",
-    });
-  }
-  private async dashboardWithPostgresSort(
-    search: string,
-    tokenUsageProductId: string,
-    sortBy?:
-      | "org_created_at"
-      | "total_payments"
-      | "credit_limit"
-      | "amount_received",
-    sortOrder?: "asc" | "desc"
-  ): Promise<Result<DashboardData, string>> {
-    // Build search filter
-    const searchFilter = search
-      ? `AND (
-          organization.name ILIKE $1 OR
-          organization.id::text ILIKE $1 OR
-          organization.stripe_customer_id ILIKE $1 OR
-          auth.users.email ILIKE $1
-        )`
-      : "";
-
-    // Build query parameters
-    const queryParams = search ? [`%${search}%`] : [];
-    queryParams.push(tokenUsageProductId);
-
-    function getOrderClause() {
-      if (!sortBy) {
-        return "ORDER BY organization.created_at DESC"; // Default sorting
-      }
-
-      let column: string;
-      switch (sortBy) {
-        case "org_created_at":
-          column = "organization.created_at";
-          break;
-        case "total_payments":
-          column = "total_amount_received";
-          break;
-        case "credit_limit":
-          column = "organization.credit_limit";
-          break;
-        case "amount_received":
-          column = "total_amount_received";
-          break;
-        default:
-          column = "organization.created_at";
-      }
-
-      const order = sortOrder === "asc" ? "ASC" : "DESC"; // Default to DESC if not specified
-      return `ORDER BY ${column} ${order}`;
-    }
-
-    const orderClause = getOrderClause();
-
-    // Get ALL organizations with payment data in a single query
-    // This allows admins to manage wallets even without Stripe integration
-    const orgsResult = await dbExecute<{
-      org_id: string;
-      org_name: string;
-      stripe_customer_id: string;
-      tier: string;
-      owner_email: string;
-      allow_negative_balance: boolean;
-      credit_limit: string;
-      total_amount_received: number;
-      payments_count: number;
-      last_payment_date: string | null;
-    }>(
-      `
-        SELECT
-          organization.id as org_id,
-          organization.name as org_name,
-          organization.stripe_customer_id,
-          organization.tier,
-          auth.users.email as owner_email,
-          organization.allow_negative_balance,
-          organization.credit_limit,
-          COALESCE(SUM(stripe.payment_intents.amount_received), 0) as total_amount_received,
-          COALESCE(COUNT(stripe.payment_intents.id), 0) as payments_count,
-          MAX(stripe.payment_intents.created) as last_payment_date
-        FROM organization
-        LEFT JOIN auth.users ON organization.owner = auth.users.id
-        LEFT JOIN stripe.payment_intents ON
-          organization.stripe_customer_id = stripe.payment_intents.customer
-          AND stripe.payment_intents.metadata->>'productId' = $${search ? 2 : 1}
-          AND stripe.payment_intents.status = 'succeeded'
-        WHERE organization.soft_delete = false
-        ${searchFilter}
-        GROUP BY
-          organization.id,
-          organization.name,
-          organization.stripe_customer_id,
-          organization.tier,
-          auth.users.email,
-          organization.allow_negative_balance,
-          organization.credit_limit,
-          organization.created_at
-        ${orderClause}
-        LIMIT 100
-        `,
-      queryParams
-    );
-
-    if (orgsResult.error) {
-      return err(orgsResult.error);
-    }
-
-    if (!orgsResult.data || orgsResult.data.length === 0) {
-      return ok({
-        organizations: [],
-        isProduction: ENVIRONMENT === "production",
-        summary: {
-          totalOrgsWithCredits: 0,
-          totalCreditsIssued: 0,
-          totalCreditsSpent: 0,
-        },
-      });
-    }
-
-    // Get ClickHouse spending for these organizations
-    const orgIds = orgsResult.data.map((org) => org.org_id);
-
-    const clickhouseSpendResult = await clickhouseDb.dbQuery<{
-      organization_id: string;
-      total_cost: number;
-    }>(
-      `
-        SELECT
-          organization_id,
-          SUM(cost) as total_cost
-        FROM request_response_rmt
-        WHERE organization_id IN (${orgIds.map((orgId) => `'${orgId}'`).join(",")})
-        and is_passthrough_billing = true
-        GROUP BY organization_id
-        `,
-      orgIds
-    );
-
-    const clickhouseSpendMap = new Map<string, number>();
-    if (!clickhouseSpendResult.error && clickhouseSpendResult.data) {
-      clickhouseSpendResult.data.forEach((row) => {
-        // Divide by precision multiplier to get dollars
-        clickhouseSpendMap.set(
-          row.organization_id,
-          Number(row.total_cost) / COST_PRECISION_MULTIPLIER
-        );
-      });
-    }
-
-    // Combine the data
-    const organizations = orgsResult.data.map((org) => {
-      return {
-        orgId: org.org_id,
-        orgName: org.org_name || "Unknown",
-        stripeCustomerId: org.stripe_customer_id || "",
-        totalPayments: org.total_amount_received / 100, // Convert cents to dollars
-        paymentsCount: org.payments_count,
-        clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-        lastPaymentDate: org.last_payment_date
-          ? Number(org.last_payment_date) * 1000
-          : null, // Convert seconds to milliseconds
-        tier: org.tier || "free",
-        ownerEmail: org.owner_email || "Unknown",
-        allowNegativeBalance: org.allow_negative_balance,
-        creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0, // Convert cents to dollars
-      };
-    });
-
-    // Calculate summary
-    const totalCreditsIssued = organizations.reduce(
-      (sum, org) => sum + org.totalPayments,
-      0
-    );
-    const totalCreditsSpent = organizations.reduce(
-      (sum, org) => sum + org.clickhouseTotalSpend,
-      0
-    );
-
-    return ok({
-      organizations,
-      summary: {
-        totalOrgsWithCredits: organizations.length,
-        totalCreditsIssued,
-        totalCreditsSpent,
-      },
-      isProduction: ENVIRONMENT === "production",
-    });
-  }
-
   @Post("/gateway/dashboard_data")
   public async getGatewayDashboardData(
     @Request() request: JawnAuthenticatedRequest,
@@ -465,15 +98,17 @@ export class AdminWalletController extends Controller {
       return err("Cloud gateway token usage product ID not configured");
     }
 
+    const adminWalletManager = new AdminWalletManager(request.authParams);
+
     if (sortBy === "total_spend") {
-      return this.dashboardWithClickhouseSort(
+      return adminWalletManager.getDashboardWithClickhouseSort(
         search || "",
         tokenUsageProductId,
         sortBy as any,
         sortOrder
       );
     }
-    return this.dashboardWithPostgresSort(
+    return adminWalletManager.getDashboardWithPostgresSort(
       search || "",
       tokenUsageProductId,
       sortBy as any,
@@ -839,6 +474,73 @@ export class AdminWalletController extends Controller {
     } catch (error) {
       console.error("Error updating wallet settings:", error);
       return err(`Error updating wallet settings: ${error}`);
+    }
+  }
+
+  @Delete("/{orgId}/disallow-list")
+  public async removeFromDisallowList(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Query() provider: string,
+    @Query() model: string
+  ): Promise<Result<WalletState, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Validate inputs
+    if (!provider || !model) {
+      return err("Provider and model are required");
+    }
+
+    const workerApiUrl =
+      process.env.HELICONE_WORKER_API ||
+      process.env.WORKER_API_URL ||
+      "https://api.helicone.ai";
+    const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
+
+    if (!adminAccessKey) {
+      return err("Admin access key not configured");
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(
+        `${workerApiUrl}/admin/wallet/${orgId}/disallow-list`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${adminAccessKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ provider, model }),
+          signal: controller.signal,
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return err(`Failed to remove from disallow list: ${errorText}`);
+      }
+
+      const walletState = await response.json();
+
+      // Convert values from cents to dollars
+      const convertedWalletState: WalletState = {
+        balance: (walletState.balance || 0) / 100,
+        effectiveBalance: (walletState.effectiveBalance || 0) / 100,
+        totalCredits: (walletState.totalCredits || 0) / 100,
+        totalDebits: (walletState.totalDebits || 0) / 100,
+        totalEscrow: (walletState.totalEscrow || 0) / 100,
+        disallowList: walletState.disallowList || [],
+      };
+
+      return ok(convertedWalletState);
+    } catch (error) {
+      console.error("Error removing from disallow list:", error);
+      return err(`Error removing from disallow list: ${error}`);
     }
   }
 }
