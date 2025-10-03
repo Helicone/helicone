@@ -1536,6 +1536,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "modelId": "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
       "parameters": [
         "frequency_penalty",
+        "functions",
         "logit_bias",
         "max_tokens",
         "min_p",
@@ -1544,6 +1545,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "seed",
         "stop",
         "temperature",
+        "tools",
         "top_k",
         "top_p",
       ],
@@ -1571,6 +1573,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-4-scout:deepinfra": {
+      "context": 10000000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -3142,6 +3171,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "meta/llama": [
     "deepinfra",
     "deepinfra",
+    "deepinfra",
     "groq",
     "groq",
     "groq",
@@ -4413,6 +4443,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-4-scout",
       "providers": [
+        "deepinfra",
         "groq",
         "novita",
         "openrouter",
@@ -4525,7 +4556,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 13,
+      "modelCount": 14,
       "provider": "deepinfra",
     },
     {
@@ -4627,8 +4658,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 129,
-  "totalModelProviderConfigs": 129,
+  "totalEndpoints": 130,
+  "totalModelProviderConfigs": 130,
   "totalModelsWithPtb": 55,
   "totalProviders": 12,
 }
