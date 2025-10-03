@@ -18,6 +18,7 @@ async function concatUint8Arrays(
 export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   private cachedText: string | null = null;
   private s3Client: S3Client;
+  private originalOpenAIRequest: string | null = null;
 
   constructor(
     private request: Request | null,
@@ -204,15 +205,37 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   }
 
   async uploadS3Body(
-    responseBody: any,
+    providerResponse: string,
+    openAIResponse: string | undefined,
     url: string,
     tags?: Record<string, string>
   ): Promise<Result<string, string>> {
+    const providerRequest = await this.unsafeGetRawText();
+
+    // Build nested structure if we have both OpenAI formats
+    if (this.originalOpenAIRequest && openAIResponse) {
+      return this.s3Client.store(
+        url,
+        JSON.stringify({
+          request: {
+            openai: this.originalOpenAIRequest,
+            provider: providerRequest,
+          },
+          response: {
+            provider: providerResponse,
+            openai: openAIResponse,
+          },
+        }),
+        tags
+      );
+    }
+
+    // Default: flat structure
     return this.s3Client.store(
       url,
       JSON.stringify({
-        request: await this.unsafeGetRawText(),
-        response: responseBody,
+        request: providerRequest,
+        response: providerResponse,
       }),
       tags
     );
@@ -224,5 +247,13 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
 
   async delete(): Promise<void> {
     // no-op
+  }
+
+  setOriginalOpenAIRequest(body: string): void {
+    this.originalOpenAIRequest = body;
+  }
+
+  getOriginalOpenAIRequest(): string | null {
+    return this.originalOpenAIRequest;
   }
 }

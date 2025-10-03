@@ -272,11 +272,15 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
    * @param responseBody
    */
   async uploadS3Body(
-    responseBody: any,
+    providerResponse: string,
+    openAIResponse: string | undefined,
     url: string,
     tags?: Record<string, string>
   ): Promise<Result<string, string>> {
     await this.ingestPromise.catch(() => undefined);
+    // TODO: Implement nested format support in container
+    // For now, always use flat format (ignore openAIResponse)
+
     const res = await this.requestBodyBuffer.fetch(
       `${BASE_URL}/${this.uniqueId}/s3/upload-body`,
       {
@@ -287,7 +291,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
           "x-secret-key": this.awsCreds.secretKey,
           "x-region": this.awsCreds.region,
         },
-        body: JSON.stringify({ response: responseBody, tags, url }),
+        body: JSON.stringify({ response: providerResponse, tags, url }),
       }
     );
 
@@ -301,5 +305,14 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     await this.requestBodyBuffer.fetch(`${BASE_URL}/${this.uniqueId}`, {
       method: "DELETE",
     });
+  }
+
+  setOriginalOpenAIRequest(body: string): void {
+    // Not implemented for Remote buffer
+  }
+
+  getOriginalOpenAIRequest(): string | null {
+    // Not implemented for Remote buffer
+    return null;
   }
 }
