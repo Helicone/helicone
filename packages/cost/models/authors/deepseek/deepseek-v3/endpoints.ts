@@ -69,7 +69,7 @@ export const endpoints = {
       "min_p",
       "response_format",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     quantization: "fp4",
     endpointConfigs: {
       "*": {},
@@ -140,7 +140,7 @@ export const endpoints = {
       "min_p",
       "response_format",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -173,7 +173,7 @@ export const endpoints = {
       "repetition_penalty",
       "logit_bias",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
