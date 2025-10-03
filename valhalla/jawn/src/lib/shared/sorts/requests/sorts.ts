@@ -121,7 +121,7 @@ export function buildRequestSortClickhouse(sort: SortLeafRequest): string {
   }
   if (sort.latency) {
     assertValidSortDirection(sort.latency);
-    return `request_response_rmt.latency ${sort.latency}`;
+    return `toInt32(request_response_rmt.latency) ${sort.latency}`;
   }
   if (sort.total_tokens) {
     assertValidSortDirection(sort.total_tokens);
