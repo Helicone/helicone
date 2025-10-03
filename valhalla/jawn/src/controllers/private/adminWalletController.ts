@@ -33,6 +33,28 @@ interface WalletState {
   }>;
 }
 
+interface DashboardData {
+  organizations: Array<{
+    orgId: string;
+    orgName: string;
+    stripeCustomerId: string;
+    totalPayments: number;
+    paymentsCount: number;
+    clickhouseTotalSpend: number;
+    lastPaymentDate: number | null;
+    tier: string;
+    ownerEmail: string;
+    allowNegativeBalance: boolean;
+    creditLimit: number;
+  }>;
+  summary: {
+    totalOrgsWithCredits: number;
+    totalCreditsIssued: number;
+    totalCreditsSpent: number;
+  };
+  isProduction: boolean;
+}
+
 interface TableDataResponse {
   pageSize: number;
   data: {
@@ -47,39 +69,55 @@ interface TableDataResponse {
 @Tags("Admin Wallet")
 @Security("api_key")
 export class AdminWalletController extends Controller {
-  @Post("/gateway/dashboard_data")
-  public async getGatewayDashboardData(
-    @Request() request: JawnAuthenticatedRequest,
-    @Query() search?: string
-  ): Promise<
-    Result<
-      {
-        organizations: Array<{
-          orgId: string;
-          orgName: string;
-          stripeCustomerId: string;
-          totalPayments: number;
-          paymentsCount: number;
-          clickhouseTotalSpend: number;
-          lastPaymentDate: number | null;
-          tier: string;
-          ownerEmail: string;
-          allowNegativeBalance: boolean;
-          creditLimit: number;
-        }>;
-        summary: {
-          totalOrgsWithCredits: number;
-          totalCreditsIssued: number;
-          totalCreditsSpent: number;
-        };
-        isProduction: boolean;
-      },
-      string
-    >
-  > {
-    await authCheckThrow(request.authParams.userId);
 
-    // Build search filter
+      private async dashboardWithClickhouseSort(
+    search: string,
+    tokenUsageProductId: string,
+    _sortBy: "total_spend",
+    sortOrder?: "asc" | "desc"
+  ): Promise<Result<DashboardData, string>> {
+    const order = sortOrder === "asc" ? "ASC" : "DESC";
+
+    // Get top 100 organizations by spending from ClickHouse
+    const clickhouseSpendResult = await clickhouseDb.dbQuery<{
+      organization_id: string;
+      total_cost: number;
+    }>(
+      `
+        SELECT
+          organization_id,
+          SUM(cost) as total_cost
+        FROM request_response_rmt
+        WHERE is_passthrough_billing = true
+        GROUP BY organization_id
+        ORDER BY total_cost ${order}
+        LIMIT 100
+      `,
+      []
+    );
+
+    if (clickhouseSpendResult.error || !clickhouseSpendResult.data) {
+      return err(
+        clickhouseSpendResult.error || "Failed to fetch ClickHouse data"
+      );
+    }
+
+    // Get org IDs from ClickHouse results
+    const orgIds = clickhouseSpendResult.data.map((row) => row.organization_id);
+
+    if (orgIds.length === 0) {
+      return ok({
+        organizations: [],
+        isProduction: ENVIRONMENT === "production",
+        summary: {
+          totalOrgsWithCredits: 0,
+          totalCreditsIssued: 0,
+          totalCreditsSpent: 0,
+        },
+      });
+    }
+
+    // Build search filter for org details query
     const searchFilter = search
       ? `AND (
           organization.name ILIKE $1 OR
@@ -89,10 +127,16 @@ export class AdminWalletController extends Controller {
         )`
       : "";
 
-    const searchParam = search ? [`%${search}%`] : [];
+    // Build query parameters
+    const queryParams = search ? [`%${search}%`] : [];
+    queryParams.push(tokenUsageProductId);
 
-    // Get ALL organizations (not just those with Stripe payments)
-    // This allows admins to manage wallets even without Stripe integration
+    // Build IN clause with individual placeholders for each org ID
+    const orgIdPlaceholders = orgIds
+      .map((_, index) => `$${queryParams.length + index + 1}`)
+      .join(", ");
+
+    // Get organization details for these orgs
     const orgsResult = await dbExecute<{
       org_id: string;
       org_name: string;
@@ -101,6 +145,9 @@ export class AdminWalletController extends Controller {
       owner_email: string;
       allow_negative_balance: boolean;
       credit_limit: string;
+      total_amount_received: number;
+      payments_count: number;
+      last_payment_date: string | null;
     }>(
       `
         SELECT
@@ -110,15 +157,29 @@ export class AdminWalletController extends Controller {
           organization.tier,
           auth.users.email as owner_email,
           organization.allow_negative_balance,
-          organization.credit_limit
+          organization.credit_limit,
+          COALESCE(SUM(stripe.payment_intents.amount_received), 0) as total_amount_received,
+          COALESCE(COUNT(stripe.payment_intents.id), 0) as payments_count,
+          MAX(stripe.payment_intents.created) as last_payment_date
         FROM organization
         LEFT JOIN auth.users ON organization.owner = auth.users.id
+        LEFT JOIN stripe.payment_intents ON
+          organization.stripe_customer_id = stripe.payment_intents.customer
+          AND stripe.payment_intents.metadata->>'productId' = $${search ? 2 : 1}
+          AND stripe.payment_intents.status = 'succeeded'
         WHERE organization.soft_delete = false
+          AND organization.id IN (${orgIdPlaceholders})
         ${searchFilter}
-        ORDER BY organization.created_at DESC
-        LIMIT 100
+        GROUP BY
+          organization.id,
+          organization.name,
+          organization.stripe_customer_id,
+          organization.tier,
+          auth.users.email,
+          organization.allow_negative_balance,
+          organization.credit_limit
         `,
-      searchParam
+      [...queryParams, ...orgIds]
     );
 
     if (orgsResult.error) {
@@ -137,55 +198,179 @@ export class AdminWalletController extends Controller {
       });
     }
 
-    // Get payment data for organizations that have Stripe payments (optional)
-    const settingsManager = new SettingsManager();
-    const stripeProductSettings =
-      await settingsManager.getSetting("stripe:products");
-    let paymentsMap = new Map<
-      string,
-      { total: number; count: number; lastDate: string }
-    >();
-
-    if (
-      stripeProductSettings &&
-      stripeProductSettings.cloudGatewayTokenUsageProduct
-    ) {
-      const tokenUsageProductId =
-        stripeProductSettings.cloudGatewayTokenUsageProduct;
-      const paymentsResult = await dbExecute<{
-        org_id: string;
-        total_amount_received: number;
-        payments_count: number;
-        last_payment_date: string;
-        allow_negative_balance: boolean;
-        credit_limit: string;
-      }>(
-        `
-          SELECT
-            organization.id as org_id,
-            SUM(stripe.payment_intents.amount_received) as total_amount_received,
-            COUNT(stripe.payment_intents.id) as payments_count,
-            MAX(stripe.payment_intents.created) as last_payment_date
-            
-          FROM stripe.payment_intents
-          LEFT JOIN organization ON organization.stripe_customer_id = stripe.payment_intents.customer
-          WHERE stripe.payment_intents.metadata->>'productId' = $1
-            AND stripe.payment_intents.status = 'succeeded'
-            AND organization.id IS NOT NULL
-          GROUP BY organization.id
-          `,
-        [tokenUsageProductId]
+    // Create spend map from ClickHouse results
+    const clickhouseSpendMap = new Map<string, number>();
+    clickhouseSpendResult.data.forEach((row) => {
+      clickhouseSpendMap.set(
+        row.organization_id,
+        Number(row.total_cost) / COST_PRECISION_MULTIPLIER
       );
+    });
 
-      if (!paymentsResult.error && paymentsResult.data) {
-        paymentsResult.data.forEach((row) => {
-          paymentsMap.set(row.org_id, {
-            total: row.total_amount_received,
-            count: Number(row.payments_count),
-            lastDate: row.last_payment_date,
-          });
-        });
+    // Combine the data, maintaining ClickHouse sort order
+    const orgDetailsMap = new Map(
+      orgsResult.data.map((org) => [org.org_id, org])
+    );
+
+    const organizations = orgIds
+      .map((orgId) => {
+        const org = orgDetailsMap.get(orgId);
+        if (!org) return null;
+
+        return {
+          orgId: org.org_id,
+          orgName: org.org_name || "Unknown",
+          stripeCustomerId: org.stripe_customer_id || "",
+          totalPayments: org.total_amount_received / 100,
+          paymentsCount: org.payments_count,
+          clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
+          lastPaymentDate: org.last_payment_date
+            ? Number(org.last_payment_date) * 1000
+            : null,
+          tier: org.tier || "free",
+          ownerEmail: org.owner_email || "Unknown",
+          allowNegativeBalance: org.allow_negative_balance,
+          creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0,
+        };
+      })
+      .filter((org): org is NonNullable<typeof org> => org !== null);
+
+    // Calculate summary
+    const totalCreditsIssued = organizations.reduce(
+      (sum, org) => sum + org.totalPayments,
+      0
+    );
+    const totalCreditsSpent = organizations.reduce(
+      (sum, org) => sum + org.clickhouseTotalSpend,
+      0
+    );
+
+    return ok({
+      organizations,
+      summary: {
+        totalOrgsWithCredits: organizations.length,
+        totalCreditsIssued,
+        totalCreditsSpent,
+      },
+      isProduction: ENVIRONMENT === "production",
+    });
+  }
+  private async dashboardWithPostgresSort(
+    search: string,
+    tokenUsageProductId: string,
+    sortBy?:
+      | "org_created_at"
+      | "total_payments"
+      | "credit_limit"
+      | "amount_received",
+    sortOrder?: "asc" | "desc"
+  ): Promise<Result<DashboardData, string>> {
+    // Build search filter
+    const searchFilter = search
+      ? `AND (
+          organization.name ILIKE $1 OR
+          organization.id::text ILIKE $1 OR
+          organization.stripe_customer_id ILIKE $1 OR
+          auth.users.email ILIKE $1
+        )`
+      : "";
+
+    // Build query parameters
+    const queryParams = search ? [`%${search}%`] : [];
+    queryParams.push(tokenUsageProductId);
+
+    function getOrderClause() {
+      if (!sortBy) {
+        return "ORDER BY organization.created_at DESC"; // Default sorting
       }
+
+      let column: string;
+      switch (sortBy) {
+        case "org_created_at":
+          column = "organization.created_at";
+          break;
+        case "total_payments":
+          column = "total_amount_received";
+          break;
+        case "credit_limit":
+          column = "organization.credit_limit";
+          break;
+        case "amount_received":
+          column = "total_amount_received";
+          break;
+        default:
+          column = "organization.created_at";
+      }
+
+      const order = sortOrder === "asc" ? "ASC" : "DESC"; // Default to DESC if not specified
+      return `ORDER BY ${column} ${order}`;
+    }
+
+    const orderClause = getOrderClause();
+
+    // Get ALL organizations with payment data in a single query
+    // This allows admins to manage wallets even without Stripe integration
+    const orgsResult = await dbExecute<{
+      org_id: string;
+      org_name: string;
+      stripe_customer_id: string;
+      tier: string;
+      owner_email: string;
+      allow_negative_balance: boolean;
+      credit_limit: string;
+      total_amount_received: number;
+      payments_count: number;
+      last_payment_date: string | null;
+    }>(
+      `
+        SELECT
+          organization.id as org_id,
+          organization.name as org_name,
+          organization.stripe_customer_id,
+          organization.tier,
+          auth.users.email as owner_email,
+          organization.allow_negative_balance,
+          organization.credit_limit,
+          COALESCE(SUM(stripe.payment_intents.amount_received), 0) as total_amount_received,
+          COALESCE(COUNT(stripe.payment_intents.id), 0) as payments_count,
+          MAX(stripe.payment_intents.created) as last_payment_date
+        FROM organization
+        LEFT JOIN auth.users ON organization.owner = auth.users.id
+        LEFT JOIN stripe.payment_intents ON
+          organization.stripe_customer_id = stripe.payment_intents.customer
+          AND stripe.payment_intents.metadata->>'productId' = $${search ? 2 : 1}
+          AND stripe.payment_intents.status = 'succeeded'
+        WHERE organization.soft_delete = false
+        ${searchFilter}
+        GROUP BY
+          organization.id,
+          organization.name,
+          organization.stripe_customer_id,
+          organization.tier,
+          auth.users.email,
+          organization.allow_negative_balance,
+          organization.credit_limit,
+          organization.created_at
+        ${orderClause}
+        LIMIT 100
+        `,
+      queryParams
+    );
+
+    if (orgsResult.error) {
+      return err(orgsResult.error);
+    }
+
+    if (!orgsResult.data || orgsResult.data.length === 0) {
+      return ok({
+        organizations: [],
+        isProduction: ENVIRONMENT === "production",
+        summary: {
+          totalOrgsWithCredits: 0,
+          totalCreditsIssued: 0,
+          totalCreditsSpent: 0,
+        },
+      });
     }
 
     // Get ClickHouse spending for these organizations
@@ -220,16 +405,15 @@ export class AdminWalletController extends Controller {
 
     // Combine the data
     const organizations = orgsResult.data.map((org) => {
-      const payments = paymentsMap.get(org.org_id);
       return {
         orgId: org.org_id,
         orgName: org.org_name || "Unknown",
         stripeCustomerId: org.stripe_customer_id || "",
-        totalPayments: payments ? payments.total / 100 : 0, // Convert cents to dollars
-        paymentsCount: payments ? payments.count : 0,
+        totalPayments: org.total_amount_received / 100, // Convert cents to dollars
+        paymentsCount: org.payments_count,
         clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-        lastPaymentDate: payments?.lastDate
-          ? Number(payments.lastDate) * 1000
+        lastPaymentDate: org.last_payment_date
+          ? Number(org.last_payment_date) * 1000
           : null, // Convert seconds to milliseconds
         tier: org.tier || "free",
         ownerEmail: org.owner_email || "Unknown",
@@ -257,6 +441,44 @@ export class AdminWalletController extends Controller {
       },
       isProduction: ENVIRONMENT === "production",
     });
+  }
+
+  @Post("/gateway/dashboard_data")
+  public async getGatewayDashboardData(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() search?: string,
+    @Query() sortBy?: string,
+    @Query() sortOrder?: "asc" | "desc"
+  ): Promise<Result<DashboardData, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    if (!stripeProductSettings) {
+      return err("Stripe product settings not configured");
+    }
+
+    const tokenUsageProductId =
+      stripeProductSettings.cloudGatewayTokenUsageProduct;
+    if (!tokenUsageProductId) {
+      return err("Cloud gateway token usage product ID not configured");
+    }
+
+    if (sortBy === "total_spend") {
+      return this.dashboardWithClickhouseSort(
+        search || "",
+        tokenUsageProductId,
+        sortBy as any,
+        sortOrder
+      );
+    }
+    return this.dashboardWithPostgresSort(
+      search || "",
+      tokenUsageProductId,
+      sortBy as any,
+      sortOrder
+    );
   }
 
   @Post("/{orgId}")

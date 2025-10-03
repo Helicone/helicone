@@ -243,7 +243,6 @@ export class DBWrapper {
 
   async getAuthParams(): Promise<Result<AuthParams, string>> {
     if (this.env.ENVIRONMENT === "development") {
-      console.log("Skipping cache in development");
       return this._getAuthParams();
     }
 
