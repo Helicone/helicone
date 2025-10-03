@@ -125,6 +125,7 @@ export const endpoints = {
         },
       },
     ],
+    quantization: "fp4",
     contextLength: 128_000,
     maxCompletionTokens: 16_384,
     supportedParameters: [
@@ -156,6 +157,7 @@ export const endpoints = {
         output: 0.00000041, // $0.41 per 1M tokens
       },
     ],
+    quantization: "fp8",
     contextLength: 128_000,
     maxCompletionTokens: 16_384,
     supportedParameters: [
