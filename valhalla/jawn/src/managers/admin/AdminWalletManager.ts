@@ -4,20 +4,11 @@ import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { ENVIRONMENT } from "../../lib/clients/constant";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { WalletState } from "../../types/wallet";
 
-// Wallet API response interfaces
-interface WalletState {
-  balance: number;
-  effectiveBalance: number;
-  totalCredits: number;
-  totalDebits: number;
-  totalEscrow: number;
-  disallowList: Array<{
-    helicone_request_id: string;
-    provider: string;
-    model: string;
-  }>;
-}
+// Timeout constants for wallet API calls
+const WALLET_STATE_FETCH_TIMEOUT = 3000; // 3 seconds for batch wallet state fetching
+const WALLET_EVENTS_FETCH_TIMEOUT = 2000; // 2 seconds for webhook events count
 
 interface DashboardData {
   organizations: Array<{
@@ -71,7 +62,7 @@ export class AdminWalletManager extends BaseManager {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout for batch
+      const timeoutId = setTimeout(() => controller.abort(), WALLET_STATE_FETCH_TIMEOUT);
 
       // Fetch wallet state
       const stateResponse = await fetch(
@@ -95,7 +86,7 @@ export class AdminWalletManager extends BaseManager {
 
       // Fetch processed webhook events count
       const eventsController = new AbortController();
-      const eventsTimeoutId = setTimeout(() => eventsController.abort(), 2000);
+      const eventsTimeoutId = setTimeout(() => eventsController.abort(), WALLET_EVENTS_FETCH_TIMEOUT);
 
       let processedEventsCount = 0;
       try {
@@ -173,6 +164,12 @@ export class AdminWalletManager extends BaseManager {
     walletStates.forEach((result) => {
       if (result.status === "fulfilled") {
         walletStateMap.set(result.value.orgId, result.value.state);
+      } else {
+        // Log failed wallet state fetches for debugging
+        console.error(
+          `Failed to fetch wallet state for org:`,
+          result.reason
+        );
       }
     });
 
@@ -497,6 +494,10 @@ export class AdminWalletManager extends BaseManager {
     // Get ClickHouse spending for these organizations
     const orgIds = orgsResult.data.map((org) => org.org_id);
 
+    // SECURITY NOTE: This SQL query is safe from injection despite string interpolation.
+    // The orgIds values come from a previous PostgreSQL query (not user input) and are
+    // already validated UUIDs. This is an admin-only endpoint with proper authentication.
+    // ClickHouse client doesn't support parameterized queries in the same way as PostgreSQL.
     const clickhouseSpendResult = await clickhouseDb.dbQuery<{
       organization_id: string;
       total_cost: number;

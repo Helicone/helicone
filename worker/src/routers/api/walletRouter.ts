@@ -329,7 +329,7 @@ export function getWalletRouter(
       const walletStub = env.WALLET.get(walletId);
 
       try {
-        walletStub.removeFromDisallowList(data.provider, data.model);
+        await walletStub.removeFromDisallowList(data.provider, data.model);
 
         // Get updated wallet state to return
         const walletState = await walletStub.getWalletState(orgId);

@@ -18,20 +18,7 @@ import { ENVIRONMENT } from "../../lib/clients/constant";
 import { SettingsManager } from "../../utils/settings";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { AdminWalletManager } from "../../managers/admin/AdminWalletManager";
-
-// Wallet API response interfaces
-interface WalletState {
-  balance: number;
-  effectiveBalance: number;
-  totalCredits: number;
-  totalDebits: number;
-  totalEscrow: number;
-  disallowList: Array<{
-    helicone_request_id: string;
-    provider: string;
-    model: string;
-  }>;
-}
+import { WalletState } from "../../types/wallet";
 
 interface DashboardData {
   organizations: Array<{
