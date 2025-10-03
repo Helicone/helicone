@@ -1,0 +1,123 @@
+name: E2E Full Stack Test
+
+on:
+  push:
+    branches:
+      - github-actions-e2e-testing
+  pull_request:
+    branches:
+      - github-actions-e2e-testing
+
+jobs:
+  e2e-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t helicone-test:latest .
+
+      - name: Run Helicone container
+        run: |
+          docker run -d \
+            --name helicone-test \
+            -p 3000:3000 \
+            -p 8585:8585 \
+            -p 8123:8123 \
+            -p 9080:9080 \
+            -p 9001:9001 \
+            -p 5432:5432 \
+            -p 8787:8787 \
+            -p 8788:8788 \
+            -p 8789:8789 \
+            -p 8790:8790 \
+            -p 8791:8791 \
+            -p 8792:8792 \
+            -p 8793:8793 \
+            helicone-test:latest
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for PostgreSQL..."
+          timeout 120 bash -c 'until docker exec helicone-test pg_isready -U postgres; do sleep 2; done'
+
+          echo "Waiting for ClickHouse..."
+          timeout 120 bash -c 'until docker exec helicone-test curl -s http://localhost:8123/ping > /dev/null; do sleep 2; done'
+
+          echo "Waiting for Jawn..."
+          timeout 120 bash -c 'until curl -s http://localhost:8585/api/health > /dev/null 2>&1; do sleep 2; done'
+
+          echo "Waiting for Web..."
+          timeout 120 bash -c 'until curl -s http://localhost:3000 > /dev/null 2>&1; do sleep 2; done'
+
+      - name: Start workers inside container
+        run: |
+          docker exec -d helicone-test bash -c "cd /app/worker && npx wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY --port 8787 > /var/log/worker-openai.log 2>&1"
+          docker exec -d helicone-test bash -c "cd /app/worker && npx wrangler dev --local --var WORKER_TYPE:HELICONE_API --port 8788 > /var/log/worker-helicone.log 2>&1"
+          docker exec -d helicone-test bash -c "cd /app/worker && npx wrangler dev --local --var WORKER_TYPE:GATEWAY_API --port 8789 > /var/log/worker-gateway.log 2>&1"
+
+          echo "Waiting for workers to be ready..."
+          sleep 10
+
+      - name: Check service logs
+        if: always()
+        run: |
+          echo "=== PostgreSQL logs ==="
+          docker exec helicone-test tail -50 /var/log/supervisor/postgresql.out.log || true
+
+          echo "=== ClickHouse logs ==="
+          docker exec helicone-test tail -50 /var/log/supervisor/clickhouse.out.log || true
+
+          echo "=== Jawn logs ==="
+          docker exec helicone-test tail -100 /var/log/supervisor/jawn.out.log || true
+
+          echo "=== Web logs ==="
+          docker exec helicone-test tail -50 /var/log/supervisor/web.out.log || true
+
+          echo "=== MinIO logs ==="
+          docker exec helicone-test tail -50 /var/log/supervisor/minio.out.log || true
+
+      - name: Make test request through worker
+        run: |
+          echo "Making test request to OpenAI proxy worker..."
+          curl -v -X POST http://localhost:8787/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Helicone-Auth: Bearer test-key-123" \
+            -H "Authorization: Bearer sk-test" \
+            -d '{
+              "model": "gpt-3.5-turbo",
+              "messages": [{"role": "user", "content": "Hello"}],
+              "max_tokens": 10
+            }' || echo "Request completed (may have errored as expected)"
+
+      - name: Verify data in PostgreSQL
+        run: |
+          echo "Checking request data in PostgreSQL..."
+          docker exec helicone-test psql -U postgres -d helicone_test -c "SELECT id, created_at FROM request ORDER BY created_at DESC LIMIT 5;" || true
+
+      - name: Verify data in ClickHouse
+        run: |
+          echo "Checking request data in ClickHouse..."
+          docker exec helicone-test curl -s "http://localhost:8123/?query=SELECT%20request_id%2C%20request_created_at%20FROM%20request_response_rmt%20ORDER%20BY%20request_created_at%20DESC%20LIMIT%205%20FORMAT%20Pretty" || true
+
+      - name: Check worker logs
+        if: always()
+        run: |
+          echo "=== Worker OpenAI logs ==="
+          docker exec helicone-test tail -100 /var/log/worker-openai.log || true
+
+          echo "=== Worker Helicone API logs ==="
+          docker exec helicone-test tail -100 /var/log/worker-helicone.log || true
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop helicone-test || true
+          docker rm helicone-test || true

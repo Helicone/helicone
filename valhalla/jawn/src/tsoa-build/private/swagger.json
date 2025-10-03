@@ -3960,7 +3960,8 @@
 					"xai",
 					"deepinfra",
 					"google-ai-studio",
-					"openrouter"
+					"openrouter",
+					"novita"
 				],
 				"nullable": false
 			},
@@ -48003,7 +48004,8 @@
 														"xai",
 														"deepinfra",
 														"google-ai-studio",
-														"openrouter"
+														"openrouter",
+														"novita"
 													]
 												}
 											},

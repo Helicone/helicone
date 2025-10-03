@@ -114,7 +114,20 @@ RUN --mount=type=cache,target=/root/.yarn \
 
 # --------------------------------------------------------------------------------------------------------------------
 
-FROM web-stage AS minio-stage
+FROM web-stage AS worker-stage
+
+# Copy worker source code and install dependencies
+WORKDIR /app
+COPY worker ./worker
+
+# Install worker dependencies
+WORKDIR /app/worker
+RUN --mount=type=cache,target=/root/.yarn \
+    yarn install --frozen-lockfile
+
+# --------------------------------------------------------------------------------------------------------------------
+
+FROM worker-stage AS minio-stage
 
 # Install MinIO server and client (arch-aware)
 ARG TARGETOS
