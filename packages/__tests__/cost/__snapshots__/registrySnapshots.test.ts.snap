@@ -1560,6 +1560,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "modelId": "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
       "parameters": [
         "frequency_penalty",
+        "functions",
         "logit_bias",
         "max_tokens",
         "min_p",
@@ -1568,6 +1569,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "seed",
         "stop",
         "temperature",
+        "tools",
         "top_k",
         "top_p",
       ],
