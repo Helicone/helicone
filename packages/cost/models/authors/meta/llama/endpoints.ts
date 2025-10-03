@@ -98,7 +98,9 @@ export const endpoints = {
       "top_k",
       "min_p",
       "repetition_penalty",
-      "logit_bias"
+      "logit_bias",
+      "functions",
+      "tools"
     ],
     ptbEnabled: false,
     endpointConfigs: {

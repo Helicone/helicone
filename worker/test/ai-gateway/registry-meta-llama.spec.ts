@@ -2935,6 +2935,120 @@ describe("Meta Llama Registry Tests", () => {
         },
       }));
 
+    it("should handle legacy functions parameter with novita provider", () =>
+      runGatewayTest({
+        model: "llama-4-maverick/novita",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Calculate the sum of two numbers" },
+            ],
+            functions: [
+              {
+                name: "calculate_sum",
+                description: "Calculate the sum of two numbers",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    a: { type: "number", description: "First number" },
+                    b: { type: "number", description: "Second number" },
+                  },
+                  required: ["a", "b"],
+                },
+              },
+            ],
+            function_call: "auto",
+            temperature: 0.5,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
+              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              expects: {
+                ...novitaAuthExpectations,
+                bodyContains: [
+                  "functions",
+                  "function_call",
+                  "calculate_sum",
+                  "temperature",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle both functions and tools parameters with novita provider", () =>
+      runGatewayTest({
+        model: "llama-4-maverick/novita",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Perform calculations and get data" },
+            ],
+            functions: [
+              {
+                name: "calculate",
+                description: "Perform a calculation",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    operation: { type: "string" },
+                    value: { type: "number" },
+                  },
+                  required: ["operation", "value"],
+                },
+              },
+            ],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "get_data",
+                  description: "Retrieve data from a source",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      source: { type: "string" },
+                    },
+                    required: ["source"],
+                  },
+                },
+              },
+            ],
+            temperature: 0.7,
+            max_tokens: 1000,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
+              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              expects: {
+                ...novitaAuthExpectations,
+                bodyContains: [
+                  "functions",
+                  "tools",
+                  "calculate",
+                  "get_data",
+                  "temperature",
+                  "max_tokens",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
     it("should handle Novita provider failure", () =>
       runGatewayTest({
         model: "llama-4-maverick/novita",
