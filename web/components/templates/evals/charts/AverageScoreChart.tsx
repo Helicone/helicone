@@ -1,4 +1,5 @@
 import { AreaChart } from "@tremor/react";
+import React from "react";
 
 interface AverageScoreChartProps {
   averageOverTime: { date: string; value: number }[];

@@ -1,6 +1,7 @@
 import { Switch } from "@headlessui/react";
 import { clsx } from "../clsx";
 import { BoltIcon, BoltSlashIcon } from "@heroicons/react/24/outline";
+import React from "react";
 
 export const ThemedSwitch = ({
   checked,

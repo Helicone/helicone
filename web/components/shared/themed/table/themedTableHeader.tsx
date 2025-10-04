@@ -16,7 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Result } from "@/packages/common/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";

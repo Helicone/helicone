@@ -37,7 +37,7 @@ async function ensureUserInBetterAuth(
     if (result.error && result.error.status === 422) {
       logger.info(
         { email },
-        "Sign-up failed: user already exists in Better Auth, but no credential. Prompt for password reset."
+        "Sign-up failed: user already exists in Better Auth, but no credential. Prompt for password reset.",
       );
       return false;
     }

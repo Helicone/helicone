@@ -17,7 +17,7 @@ const Typewriter: React.FC<TypewriterProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
 
     if (delay > 0) {
       timer = setTimeout(startTyping, delay);

@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { H3, Muted } from "@/components/ui/typography";
 import { InfoIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import useNotification from "../../../shared/notification/useNotification";
 import { useEvalConfigStore } from "../store/evalConfigStore";
 import { DataEntry, LastMileConfigForm } from "./types";

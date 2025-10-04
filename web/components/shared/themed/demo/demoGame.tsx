@@ -1,6 +1,6 @@
 import StartPage from "./startPage";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Resizable } from "re-resizable";
 
 const calculateInitialPosition = () => {

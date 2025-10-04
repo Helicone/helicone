@@ -1,5 +1,6 @@
 import { CustomTooltipProps } from "@tremor/react";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 const DashboardChartTooltipContent = (props: CustomTooltipProps) => {
   return (

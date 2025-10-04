@@ -1,5 +1,6 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Row } from "../../layout/common";
+import React from "react";
 
 interface ThemedBubbleModalProps {
   open: boolean;

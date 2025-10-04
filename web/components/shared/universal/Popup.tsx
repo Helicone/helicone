@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { PiXBold } from "react-icons/pi";
 
 interface UniversalPopupProps {

@@ -32,7 +32,7 @@ export const NotificationProvider = (props: NotificationProviderProps) => {
   const { children } = props;
   const [title, setTitle] = useState("");
   const [variant, setVariant] = useState<NotificationVariants>("success");
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearNotification = useCallback(() => {
     if (timeoutRef.current) {

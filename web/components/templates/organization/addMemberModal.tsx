@@ -10,8 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Muted, Small } from "@/components/ui/typography";
 import { useAddOrgMemberMutation } from "@/services/hooks/organizations";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
-
+import React, { useState } from "react";
 interface AddMemberModalProps {
   orgId: string;
   orgOwnerId: string;

@@ -1,4 +1,6 @@
 // this component wraps page components and adds the grid background that fades out at the bottom
+import React from "react";
+
 interface GridBackgroundProps {
   children: React.ReactNode;
 }

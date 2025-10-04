@@ -11,7 +11,7 @@ import {
   WorkflowIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
+import React, {
   createContext,
   useCallback,
   useContext,
@@ -489,7 +489,7 @@ export const OnboardingProvider = ({
 
   useEffect(() => {
     if (isOnboardingVisible) {
-      let timeout: NodeJS.Timeout;
+      let timeout: ReturnType<typeof setTimeout>;
       const observer = new MutationObserver(() => {
         const element = document.querySelector(
           `[data-onboarding-step="${currentStep}"]`,

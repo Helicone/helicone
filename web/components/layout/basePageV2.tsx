@@ -1,4 +1,4 @@
-import { ReactNode, SVGProps } from "react";
+import React, { ReactNode, SVGProps } from "react";
 import { BsDiscord } from "react-icons/bs";
 import Footer from "./footer";
 import NavBarV2 from "./navbar/navBarV2";

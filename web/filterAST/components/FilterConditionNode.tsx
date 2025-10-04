@@ -1,5 +1,8 @@
 import React from "react";
-import { ConditionExpression, FilterOperator } from "@helicone-package/filters/types";
+import {
+  ConditionExpression,
+  FilterOperator,
+} from "@helicone-package/filters/types";
 import { useFilterStore } from "../store/filterStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,7 +90,7 @@ const NumberInput: React.FC<{
     }
 
     const numericValue = Number(newValue);
-    if (!isNaN(numericValue) && newValue !== "" && !newValue.endsWith('.')) {
+    if (!isNaN(numericValue) && newValue !== "" && !newValue.endsWith(".")) {
       onValueChange(numericValue);
     }
   };

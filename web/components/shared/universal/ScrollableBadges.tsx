@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { XSmall } from "@/components/ui/typography";
 import Link from "next/link";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuCheck,
   LuExternalLink,

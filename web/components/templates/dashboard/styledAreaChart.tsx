@@ -1,6 +1,7 @@
 import { Card } from "@tremor/react";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import clsx from "clsx";
+import React from "react";
 
 interface StyledAreaChartProps {
   title: string;

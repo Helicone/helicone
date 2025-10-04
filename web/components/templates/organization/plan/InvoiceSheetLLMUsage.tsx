@@ -1,5 +1,6 @@
 import { InfoIcon } from "lucide-react";
 import {
+import React from "react";
   Tooltip,
   TooltipContent,
   TooltipTrigger,

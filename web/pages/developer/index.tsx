@@ -1,6 +1,6 @@
 import { NextPageWithLayout } from "../_app";
 import AuthLayout from "../../components/layout/auth/authLayout";
-import { ReactElement } from "react";
+import React, { ReactElement } from "react";
 import DeveloperPage from "../../components/templates/developer/developerPage";
 import Link from "next/link";
 import {

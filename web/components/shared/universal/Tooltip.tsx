@@ -1,5 +1,4 @@
-import { ReactNode } from "react";
-
+import React, { ReactNode } from "react";
 interface TooltipProps {
   children: ReactNode;
   content: ReactNode;

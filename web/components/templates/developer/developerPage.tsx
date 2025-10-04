@@ -1,5 +1,6 @@
 import { IslandContainer } from "@/components/ui/islandContainer";
 import AuthHeader from "../../shared/authHeader";
+import React from "react";
 
 interface DeveloperPageProps {
   title: string;

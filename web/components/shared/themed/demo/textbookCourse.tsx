@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { marked } from "marked";
 import { highlight, languages } from "prismjs";
 import "prismjs/components/prism-markdown";

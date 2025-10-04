@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { clsx } from "../clsx";
-import { useState } from "react";
+import React, { useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 export type ColumnConfig<T> = {

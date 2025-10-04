@@ -4,7 +4,7 @@ import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { Rocket } from "lucide-react";
 import { useRouter } from "next/router";
-import { useMemo, useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";

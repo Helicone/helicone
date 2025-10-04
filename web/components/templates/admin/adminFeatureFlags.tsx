@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { XIcon } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { useOrg } from "../../layout/org/organizationContext";
 

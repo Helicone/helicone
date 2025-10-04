@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { IconType } from "react-icons";
-import { ReactElement } from "react";
-
+import React, { ReactElement } from "react";
 interface BaseProps {
   label: string;
   icon?: IconType | ReactElement;

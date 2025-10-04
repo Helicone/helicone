@@ -11,7 +11,7 @@ import {
   UserGroupIcon,
   CommandLineIcon,
 } from "@heroicons/react/20/solid";
-import { Fragment } from "react";
+import React, { Fragment } from "react";
 import Link from "next/link";
 
 const solutions: {

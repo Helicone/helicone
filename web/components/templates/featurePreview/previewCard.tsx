@@ -1,6 +1,6 @@
 import { CheckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import Link from "next/link";
 import { H2, H3, H4, P, Small } from "@/components/ui/typography";
 

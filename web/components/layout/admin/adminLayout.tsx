@@ -5,8 +5,7 @@ import { logger } from "@/lib/telemetry/logger";
 import { H4 } from "@/components/ui/typography";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./adminSidebar";
-import { useState, useEffect } from "react";
-
+import React, { useState, useEffect } from "react";
 // LocalStorage key for sidebar state
 const SIDEBAR_STATE_KEY = "admin_sidebar_open";
 

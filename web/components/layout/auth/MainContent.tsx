@@ -1,5 +1,6 @@
 import { clsx } from "../../shared/clsx";
 import { getUSDate } from "../../shared/utils/utils";
+import React from "react";
 
 interface MainContentProps {
   children: React.ReactNode;

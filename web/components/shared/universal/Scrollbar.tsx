@@ -1,11 +1,10 @@
-import {
+import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
   useRef,
   useState,
 } from "react";
-
 // CustomScrollbar: This component wraps its children and hides the native scrollbar completely.
 // It shows a custom overlay scrollbar (thumb) on hover without affecting layout.
 export interface CustomScrollbarRef {

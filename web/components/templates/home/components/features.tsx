@@ -22,7 +22,7 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import { useState } from "react";
+import React, { useState } from "react";
 import { clsx } from "../../../shared/clsx";
 import {
   Accordion,

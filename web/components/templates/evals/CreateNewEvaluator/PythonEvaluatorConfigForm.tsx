@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import useNotification from "../../../shared/notification/useNotification";
 import { useEvalPanelStore } from "../store/evalPanelStore";

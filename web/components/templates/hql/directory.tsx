@@ -2,7 +2,7 @@ import { Plus, Search, Table } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { components } from "@/lib/clients/jawnTypes/public";
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";

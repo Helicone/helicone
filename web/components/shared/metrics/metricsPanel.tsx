@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import React from "react";
 
 export interface MetricsPanelProps {
   metric: {

@@ -1,4 +1,5 @@
 import { truncString } from "../../../lib/stringHelpers";
+import React from "react";
 
 interface ThemedListItemProps {
   onClickHandler: () => void;

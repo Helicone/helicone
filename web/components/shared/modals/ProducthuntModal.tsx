@@ -1,6 +1,6 @@
 import ThemedModal from "../themed/themedModal";
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Cookies from "js-cookie";
 

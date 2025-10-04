@@ -16,7 +16,9 @@ export const ROLE_COLORS = {
 interface RoleButtonProps {
   // message: MessageInputItem;
   role: "system" | "user" | "assistant" | "function" | "tool";
-  onRoleChange: (role: "system" | "user" | "assistant" | "function" | "tool") => void;
+  onRoleChange: (
+    role: "system" | "user" | "assistant" | "function" | "tool",
+  ) => void;
   // setMessage: (message: MessageInputItem) => void;
   // deleteMessage?: (messageInputId: string) => void;
   size?: "small" | "medium";

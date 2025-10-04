@@ -1,5 +1,10 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-
+import React, {
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { StateInputs } from "@/types/prompt-state";
 import { createSelectionRange } from "@/utils/selection";
 import { toCamelCase, toSnakeCase } from "@/utils/strings";
@@ -83,7 +88,7 @@ export default function PromptBox({
   const containerRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isUndoingRef = useRef(false);
   const [toolbarPosition, setToolbarPosition] = useState({
     toolbar: { top: 0, left: 0 },

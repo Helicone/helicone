@@ -6,7 +6,7 @@ import {
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Responsive, ResponsiveProps, WidthProvider } from "react-grid-layout";
 import {
   getIncrementAsMinutes,

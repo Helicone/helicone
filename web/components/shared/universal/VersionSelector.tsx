@@ -2,7 +2,7 @@
 import { PromptVersionReference } from "@/types/prompt-state";
 import { formatDate } from "@/utils/date";
 import { toKebabCase } from "@/utils/strings";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   PiArrowCircleUpBold,
   PiCaretDownBold,

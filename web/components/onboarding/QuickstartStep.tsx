@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { MoveUpRight } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
 interface QuickstartStepProps {
   stepNumber: number;

@@ -61,8 +61,8 @@ const PlaygroundMessagesPanel = ({
   const headerRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const lastScrollTopRef = useRef<number>(0);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
-  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const resizeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const clientHeightRef = useRef<number>(0);
 
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { AreaChart } from "@tremor/react";
+import React from "react";
 
 interface TracesChartProps {
   overTime: { date: string; count: number }[];

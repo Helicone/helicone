@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SVGProps } from "react";
+import React, { SVGProps } from "react";
 import { BsDiscord } from "react-icons/bs";
 
 interface FooterProps {}

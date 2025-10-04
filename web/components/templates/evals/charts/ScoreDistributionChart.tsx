@@ -1,4 +1,5 @@
 import { BarChart } from "@tremor/react";
+import React from "react";
 
 interface ScoreDistributionChartProps {
   distribution: { lower: number; upper: number; value: number }[];

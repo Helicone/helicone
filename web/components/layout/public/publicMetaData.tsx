@@ -1,4 +1,5 @@
 import Head from "next/head";
+import React from "react";
 
 interface PublicMetaDataProps {
   description: string;
