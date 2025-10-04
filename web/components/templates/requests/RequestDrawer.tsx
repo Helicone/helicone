@@ -125,9 +125,7 @@ export default function RequestDrawer(props: RequestDivProps) {
   } = props;
 
   const { setNotification } = useNotification();
-  const router = useRouter();
   const org = useOrg();
-  const jawn = useJawnClient();
 
   const [showDetails, setShowDetails] = useLocalStorage(
     "request-drawer-details",

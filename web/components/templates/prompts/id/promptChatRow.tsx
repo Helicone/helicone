@@ -566,9 +566,8 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     callback(content || "", newRole, file);
   };
 
-  if (false) {
-    // Unused function - may be needed in the future
-    const setText = (text: string): void => {
+  /* Commented out unused function - may be needed in the future
+  const setText = (text: string): void => {
       const newMessages = { ...currentMessage };
 
     // Check if this message originally had tool_calls
@@ -645,7 +644,7 @@ const PromptChatRow = (props: PromptChatRowProps) => {
       }
       setPromptVariables(newVariables);
     };
-  }
+  */
 
   if (playgroundMode === "experiment-compact") {
     return (

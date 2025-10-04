@@ -24,11 +24,10 @@ export const ErrorMessage = ({
   className,
 }: ErrorMessageProps) => {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useLocalStorage<(typeof PROMPT_MODES)[number]>(
+  const [mode] = useLocalStorage<(typeof PROMPT_MODES)[number]>(
     "error-mode",
     "Pretty",
   );
-  const [allExpanded, setAllExpanded] = useState(false);
 
   const errorData = useMemo(() => {
     const response:

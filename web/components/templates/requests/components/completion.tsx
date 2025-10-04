@@ -12,7 +12,7 @@ interface CompletionProps {
 export const Completion = (props: CompletionProps) => {
   const { mappedRequest, defaultMode = "Pretty" } = props;
 
-  const [mode, setMode] = useState<(typeof PROMPT_MODES)[number]>(defaultMode);
+  const [mode] = useState<(typeof PROMPT_MODES)[number]>(defaultMode);
 
   const { setNotification } = useNotification();
   const renderImageRow = () => {
