@@ -18,13 +18,7 @@ interface ExperimentDatasetSelectorProps {
 }
 
 const ExperimentDatasetSelector = (props: ExperimentDatasetSelectorProps) => {
-  const {
-    open,
-    setOpen,
-    promptVersionId,
-    onSuccess,
-    handleAddRows,
-  } = props;
+  const { open, setOpen, promptVersionId, onSuccess, handleAddRows } = props;
   const jawn = useJawnClient();
   const { setNotification } = useNotification();
 

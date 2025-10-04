@@ -12,9 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Row } from "@/components/layout/common";
 import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
 
-interface FilterASTButtonProps { }
+interface FilterASTButtonProps {}
 
-export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ }) => {
+export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
   const { store } = useFilterAST();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -37,7 +37,7 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ }) => {
   const numFilters = store.getFilterNodeCount();
 
   return (
-    <Row className="space-x-2 mr-4">
+    <Row className="mr-4 space-x-2">
       <Popover onOpenChange={setIsOpen} open={isOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="gap-2" size="sm">

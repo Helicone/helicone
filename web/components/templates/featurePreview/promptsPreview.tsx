@@ -135,10 +135,7 @@ const PromptsPreview = () => {
   const org = useOrg();
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const { handleConfirmTrial } = useFeatureTrial(
-    "prompts",
-    "Prompts",
-  );
+  const { handleConfirmTrial } = useFeatureTrial("prompts", "Prompts");
   const [selectedPlan, setSelectedPlan] = useState<PromptPricingPlanName>();
 
   const isPaidPlan = useMemo(

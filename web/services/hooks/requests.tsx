@@ -149,7 +149,10 @@ export const useGetRequestsWithBodies = (
             try {
               const contentResponse = await fetch(request.signed_body_url);
               if (!contentResponse.ok) {
-                logger.error({ status: contentResponse.status }, "Error fetching request body");
+                logger.error(
+                  { status: contentResponse.status },
+                  "Error fetching request body",
+                );
                 return request;
               }
 
@@ -350,7 +353,10 @@ const getRequestBodiesBySession = async (sessions: TSessions[]) => {
         try {
           const contentResponse = await fetch(request.signed_body_url);
           if (!contentResponse.ok) {
-            logger.error({ status: contentResponse.status }, "Error fetching request body");
+            logger.error(
+              { status: contentResponse.status },
+              "Error fetching request body",
+            );
             return request;
           }
 
@@ -378,7 +384,10 @@ const getRequestBodiesBySession = async (sessions: TSessions[]) => {
       }),
     );
   } catch (error) {
-    logger.error({ error }, "Error fetching requests by session IDs with bodies");
+    logger.error(
+      { error },
+      "Error fetching requests by session IDs with bodies",
+    );
     throw error;
   }
 };

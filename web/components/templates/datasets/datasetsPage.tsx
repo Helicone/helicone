@@ -46,7 +46,6 @@ interface DatasetsPageProps {
 }
 
 const DatasetsPage = (_props: DatasetsPageProps) => {
-
   const { datasets, isLoading, refetch, isRefetching, isFetched } =
     useGetHeliconeDatasets();
 

@@ -78,7 +78,10 @@ export default function AdminWallet() {
 
   // Delete disallow entry state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [entryToDelete, setEntryToDelete] = useState<{provider: string, model: string} | null>(null);
+  const [entryToDelete, setEntryToDelete] = useState<{
+    provider: string;
+    model: string;
+  } | null>(null);
 
   // Wallet modification form state
   const [modifyAmount, setModifyAmount] = useState<string>("");
@@ -386,7 +389,7 @@ export default function AdminWallet() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full">
+    <div className="flex h-full flex-col gap-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
@@ -437,274 +440,277 @@ export default function AdminWallet() {
       {/* Search and Filter with Resizable Table */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Organizations with Pass-Through Billing</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetchDashboard()}
-              disabled={dashboardLoading}
-            >
-              <RefreshCw
-                size={16}
-                className={dashboardLoading ? "animate-spin" : ""}
-              />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 flex items-center gap-2">
-            <div className="relative max-w-md flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearch();
-                  }
-                }}
-                className="pl-9"
-              />
-            </div>
-            <Button
-              onClick={handleSearch}
-              disabled={dashboardLoading}
-              variant="default"
-            >
-              Search
-            </Button>
-            {searchQuery && (
-              <Button
-                onClick={handleClearSearch}
-                disabled={dashboardLoading}
-                variant="outline"
-              >
-                Clear
-              </Button>
-            )}
-          </div>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Organizations with Pass-Through Billing</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => refetchDashboard()}
+                  disabled={dashboardLoading}
+                >
+                  <RefreshCw
+                    size={16}
+                    className={dashboardLoading ? "animate-spin" : ""}
+                  />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4 flex items-center gap-2">
+                <div className="relative max-w-md flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleSearch();
+                      }
+                    }}
+                    className="pl-9"
+                  />
+                </div>
+                <Button
+                  onClick={handleSearch}
+                  disabled={dashboardLoading}
+                  variant="default"
+                >
+                  Search
+                </Button>
+                {searchQuery && (
+                  <Button
+                    onClick={handleClearSearch}
+                    disabled={dashboardLoading}
+                    variant="outline"
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
 
-          {/* Organizations Table */}
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Actions</TableHead>
-                  <TableHead
-                    className="cursor-pointer select-none hover:bg-muted/50"
-                    onClick={() => handleSort("org_created_at")}
-                  >
-                    <div className="flex items-center">
-                      Organization
-                      <SortIcon column="org_created_at" />
-                    </div>
-                  </TableHead>
-                  <TableHead>Owner</TableHead>
-                  <TableHead>Tier</TableHead>
-                  <TableHead># Payments</TableHead>
-                  <TableHead
-                    className="cursor-pointer select-none hover:bg-muted/50"
-                    onClick={() => handleSort("total_payments")}
-                  >
-                    <div className="flex items-center">
-                      Total Gross
-                      <SortIcon column="total_payments" />
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer select-none hover:bg-muted/50"
-                    onClick={() => handleSort("amount_received")}
-                  >
-                    <div className="flex items-center">
-                      Total Net
-                      <SortIcon column="amount_received" />
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer select-none hover:bg-muted/50"
-                    onClick={() => handleSort("total_spend")}
-                  >
-                    <div className="flex items-center">
-                      Total Spent (ClickHouse)
-                      <SortIcon column="total_spend" />
-                    </div>
-                  </TableHead>
-                  <TableHead>Calculated Balance</TableHead>
-                  <TableHead>Worker Balance State</TableHead>
-                  <TableHead
-                    className="cursor-pointer select-none hover:bg-muted/50"
-                    onClick={() => handleSort("credit_limit")}
-                  >
-                    <div className="flex items-center">
-                      Wallet Settings
-                      <SortIcon column="credit_limit" />
-                    </div>
-                  </TableHead>
-                  <TableHead>Last Payment</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {organizations?.map((org) => {
-                  // Calculate net amount after removing Stripe fees
-                  const totalGrossCents = dollarsToCents(org.totalPayments);
-                  const totalNetCents = calculateNetAmount(
-                    totalGrossCents,
-                    org.paymentsCount || 0,
-                  );
-                  const totalNetDollars = totalNetCents / 100;
-
-                  const balance = totalNetDollars - org.clickhouseTotalSpend;
-                  const isNegativeBalance = balance < 0;
-
-                  return (
-                      <TableRow
-                        key={org.orgId}
-                        className={`cursor-pointer hover:bg-muted/50 ${selectedOrg === org.orgId ? 'bg-muted' : ''}`}
-                        onClick={() => handleOrgClick(org.orgId)}
+              {/* Organizations Table */}
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Actions</TableHead>
+                      <TableHead
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("org_created_at")}
                       >
-                        <TableCell onClick={(e) => e.stopPropagation()}>
-                          <div className="flex gap-2">
-                            {org.stripeCustomerId && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const stripeUrl = dashboardData?.data
-                                    ?.isProduction
-                                    ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
-                                    : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
-                                  window.open(stripeUrl, "_blank");
-                                }}
-                              >
-                                <ExternalLink size={14} />
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{org.orgName}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {org.orgId}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm text-muted-foreground">
-                            {org.ownerEmail}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                            {org.tier}
-                          </span>
-                        </TableCell>
-                        <TableCell>{org.paymentsCount || 0}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span>{formatCurrency(org.totalPayments)}</span>
-                            <span className="text-xs text-muted-foreground">
-                              (with fees)
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span>{formatCurrency(totalNetDollars)}</span>
-                            <span className="text-xs text-muted-foreground">
-                              (after fees)
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {formatCurrency(org.clickhouseTotalSpend)}
-                        </TableCell>
-                        <TableCell>
-                          <span
-                            className={
-                              isNegativeBalance
-                                ? "font-medium text-red-600"
-                                : ""
-                            }
-                          >
-                            {formatCurrency(balance)}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          {org.walletBalance !== undefined ? (
-                            <div className="flex flex-col gap-0.5">
-                              <div className="flex items-center gap-1">
-                                <Small className="text-muted-foreground">
-                                  Balance:
-                                </Small>
-                                <span
-                                  className={
-                                    org.walletBalance < 0
-                                      ? "text-sm font-medium text-red-600"
-                                      : "text-sm"
-                                  }
+                        <div className="flex items-center">
+                          Organization
+                          <SortIcon column="org_created_at" />
+                        </div>
+                      </TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Tier</TableHead>
+                      <TableHead># Payments</TableHead>
+                      <TableHead
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("total_payments")}
+                      >
+                        <div className="flex items-center">
+                          Total Gross
+                          <SortIcon column="total_payments" />
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("amount_received")}
+                      >
+                        <div className="flex items-center">
+                          Total Net
+                          <SortIcon column="amount_received" />
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("total_spend")}
+                      >
+                        <div className="flex items-center">
+                          Total Spent (ClickHouse)
+                          <SortIcon column="total_spend" />
+                        </div>
+                      </TableHead>
+                      <TableHead>Calculated Balance</TableHead>
+                      <TableHead>Worker Balance State</TableHead>
+                      <TableHead
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("credit_limit")}
+                      >
+                        <div className="flex items-center">
+                          Wallet Settings
+                          <SortIcon column="credit_limit" />
+                        </div>
+                      </TableHead>
+                      <TableHead>Last Payment</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {organizations?.map((org) => {
+                      // Calculate net amount after removing Stripe fees
+                      const totalGrossCents = dollarsToCents(org.totalPayments);
+                      const totalNetCents = calculateNetAmount(
+                        totalGrossCents,
+                        org.paymentsCount || 0,
+                      );
+                      const totalNetDollars = totalNetCents / 100;
+
+                      const balance =
+                        totalNetDollars - org.clickhouseTotalSpend;
+                      const isNegativeBalance = balance < 0;
+
+                      return (
+                        <TableRow
+                          key={org.orgId}
+                          className={`cursor-pointer hover:bg-muted/50 ${selectedOrg === org.orgId ? "bg-muted" : ""}`}
+                          onClick={() => handleOrgClick(org.orgId)}
+                        >
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <div className="flex gap-2">
+                              {org.stripeCustomerId && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const stripeUrl = dashboardData?.data
+                                      ?.isProduction
+                                      ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
+                                      : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
+                                    window.open(stripeUrl, "_blank");
+                                  }}
                                 >
-                                  {formatCurrency(org.walletBalance)}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Small className="text-muted-foreground">
-                                  Disallowed:
-                                </Small>
-                                <span className="text-sm">
-                                  {org.walletDisallowedModelCount ?? 0}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Small className="text-muted-foreground">
-                                  Stripe Events:
-                                </Small>
-                                <span className="text-sm">
-                                  {org.walletProcessedEventsCount ?? 0}
-                                </span>
+                                  <ExternalLink size={14} />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{org.orgName}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {org.orgId}
                               </div>
                             </div>
-                          ) : (
-                            <Small className="text-muted-foreground">
-                              N/A
-                            </Small>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <Small className="text-muted-foreground">
-                              Limit: {formatCurrency(org.creditLimit || 0)}
-                            </Small>
-                            <Small
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-muted-foreground">
+                              {org.ownerEmail}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                              {org.tier}
+                            </span>
+                          </TableCell>
+                          <TableCell>{org.paymentsCount || 0}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span>{formatCurrency(org.totalPayments)}</span>
+                              <span className="text-xs text-muted-foreground">
+                                (with fees)
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span>{formatCurrency(totalNetDollars)}</span>
+                              <span className="text-xs text-muted-foreground">
+                                (after fees)
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {formatCurrency(org.clickhouseTotalSpend)}
+                          </TableCell>
+                          <TableCell>
+                            <span
                               className={
-                                org.allowNegativeBalance
-                                  ? "text-green-600"
-                                  : "text-muted-foreground"
+                                isNegativeBalance
+                                  ? "font-medium text-red-600"
+                                  : ""
                               }
                             >
-                              Negative:{" "}
-                              {org.allowNegativeBalance ? "Yes" : "No"}
-                            </Small>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {org.lastPaymentDate
-                            ? new Date(org.lastPaymentDate).toLocaleDateString()
-                            : "N/A"}
-                        </TableCell>
-                      </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                              {formatCurrency(balance)}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            {org.walletBalance !== undefined ? (
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-1">
+                                  <Small className="text-muted-foreground">
+                                    Balance:
+                                  </Small>
+                                  <span
+                                    className={
+                                      org.walletBalance < 0
+                                        ? "text-sm font-medium text-red-600"
+                                        : "text-sm"
+                                    }
+                                  >
+                                    {formatCurrency(org.walletBalance)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Small className="text-muted-foreground">
+                                    Disallowed:
+                                  </Small>
+                                  <span className="text-sm">
+                                    {org.walletDisallowedModelCount ?? 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Small className="text-muted-foreground">
+                                    Stripe Events:
+                                  </Small>
+                                  <span className="text-sm">
+                                    {org.walletProcessedEventsCount ?? 0}
+                                  </span>
+                                </div>
+                              </div>
+                            ) : (
+                              <Small className="text-muted-foreground">
+                                N/A
+                              </Small>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-1">
+                              <Small className="text-muted-foreground">
+                                Limit: {formatCurrency(org.creditLimit || 0)}
+                              </Small>
+                              <Small
+                                className={
+                                  org.allowNegativeBalance
+                                    ? "text-green-600"
+                                    : "text-muted-foreground"
+                                }
+                              >
+                                Negative:{" "}
+                                {org.allowNegativeBalance ? "Yes" : "No"}
+                              </Small>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {org.lastPaymentDate
+                              ? new Date(
+                                  org.lastPaymentDate,
+                                ).toLocaleDateString()
+                              : "N/A"}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         </ResizablePanel>
 
         <ResizableHandle />
@@ -724,7 +730,7 @@ export default function AdminWallet() {
           }}
           collapsible={true}
         >
-          <div className="h-full overflow-y-auto bg-background border-l p-4">
+          <div className="h-full overflow-y-auto border-l bg-background p-4">
             {walletLoading ? (
               <div className="flex h-64 items-center justify-center">
                 <Loader2 size={20} className="animate-spin" />
@@ -732,7 +738,7 @@ export default function AdminWallet() {
             ) : walletDetails ? (
               <div className="flex flex-col gap-4">
                 {/* Close Button */}
-                <div className="flex items-center justify-between pb-3 border-b">
+                <div className="flex items-center justify-between border-b pb-3">
                   <H3 className="text-foreground">Wallet Details</H3>
                   <Button
                     variant="ghost"
@@ -751,26 +757,34 @@ export default function AdminWallet() {
                 <section className="flex flex-col gap-2">
                   <H4 className="text-sm font-semibold">Overview</H4>
                   <div className="grid grid-cols-4 gap-2">
-                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
-                      <div className="text-xs text-muted-foreground mb-1">Balance</div>
+                    <div className="rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md">
+                      <div className="mb-1 text-xs text-muted-foreground">
+                        Balance
+                      </div>
                       <div className="text-base font-bold">
                         {formatCurrency(walletDetails?.data?.balance)}
                       </div>
                     </div>
-                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
-                      <div className="text-xs text-muted-foreground mb-1">Effective Balance</div>
+                    <div className="rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md">
+                      <div className="mb-1 text-xs text-muted-foreground">
+                        Effective Balance
+                      </div>
                       <div className="text-base font-bold">
                         {formatCurrency(walletDetails?.data?.effectiveBalance)}
                       </div>
                     </div>
-                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
-                      <div className="text-xs text-muted-foreground mb-1">Total Credits</div>
+                    <div className="rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md">
+                      <div className="mb-1 text-xs text-muted-foreground">
+                        Total Credits
+                      </div>
                       <div className="text-base font-bold">
                         {formatCurrency(walletDetails?.data?.totalCredits)}
                       </div>
                     </div>
-                    <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
-                      <div className="text-xs text-muted-foreground mb-1">Total Debits</div>
+                    <div className="rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md">
+                      <div className="mb-1 text-xs text-muted-foreground">
+                        Total Debits
+                      </div>
                       <div className="text-base font-bold">
                         {formatCurrency(walletDetails.data?.totalDebits)}
                       </div>
@@ -781,7 +795,7 @@ export default function AdminWallet() {
                 {/* Modify Balance */}
                 <section className="flex flex-col gap-2">
                   <H4 className="text-sm font-semibold">Modify Balance</H4>
-                  <div className="rounded-lg bg-card border shadow-sm p-3 flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 rounded-lg border bg-card p-3 shadow-sm">
                     <div className="flex gap-2">
                       <Input
                         type="number"
@@ -802,12 +816,24 @@ export default function AdminWallet() {
                         className="flex gap-2"
                       >
                         <div className="flex items-center gap-1">
-                          <RadioGroupItem value="credit" id="credit" className="h-3 w-3" />
-                          <Label htmlFor="credit" className="text-xs">Credit</Label>
+                          <RadioGroupItem
+                            value="credit"
+                            id="credit"
+                            className="h-3 w-3"
+                          />
+                          <Label htmlFor="credit" className="text-xs">
+                            Credit
+                          </Label>
                         </div>
                         <div className="flex items-center gap-1">
-                          <RadioGroupItem value="debit" id="debit" className="h-3 w-3" />
-                          <Label htmlFor="debit" className="text-xs">Debit</Label>
+                          <RadioGroupItem
+                            value="debit"
+                            id="debit"
+                            className="h-3 w-3"
+                          />
+                          <Label htmlFor="debit" className="text-xs">
+                            Debit
+                          </Label>
                         </div>
                       </RadioGroup>
                     </div>
@@ -850,7 +876,7 @@ export default function AdminWallet() {
                 {/* Wallet Settings */}
                 <section className="flex flex-col gap-2">
                   <H4 className="text-sm font-semibold">Wallet Settings</H4>
-                  <div className="rounded-lg bg-card border shadow-sm p-3 flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 rounded-lg border bg-card p-3 shadow-sm">
                     <div className="flex items-center gap-2 rounded bg-muted/50 p-1.5">
                       <input
                         type="checkbox"
@@ -869,8 +895,10 @@ export default function AdminWallet() {
                         Allow Negative Balance
                       </Label>
                     </div>
-                    <div className="flex gap-2 items-center">
-                      <Label className="text-xs whitespace-nowrap">Limit:</Label>
+                    <div className="flex items-center gap-2">
+                      <Label className="whitespace-nowrap text-xs">
+                        Limit:
+                      </Label>
                       <Input
                         type="number"
                         step="0.01"
@@ -913,7 +941,7 @@ export default function AdminWallet() {
                 {/* Escrows */}
                 <section className="flex flex-col gap-2">
                   <H4 className="text-sm font-semibold">Escrows</H4>
-                  <div className="rounded-lg bg-card border shadow-sm p-3 hover:shadow-md transition-shadow">
+                  <div className="rounded-lg border bg-card p-3 shadow-sm transition-shadow hover:shadow-md">
                     <div className="text-base font-bold">
                       {formatCurrency(walletDetails.data?.totalEscrow)}
                     </div>
@@ -922,48 +950,64 @@ export default function AdminWallet() {
 
                 {/* Disallow List */}
                 <section className="flex flex-col gap-2">
-                  <H4 className="text-sm font-semibold">Disallow List ({walletDetails?.data?.disallowList?.length ?? 0})</H4>
-                  <div className="rounded-lg bg-card border shadow-sm overflow-hidden">
+                  <H4 className="text-sm font-semibold">
+                    Disallow List (
+                    {walletDetails?.data?.disallowList?.length ?? 0})
+                  </H4>
+                  <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
                     {(walletDetails?.data?.disallowList?.length ?? 0) > 0 ? (
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="text-xs">Request ID</TableHead>
+                            <TableHead className="text-xs">
+                              Request ID
+                            </TableHead>
                             <TableHead className="text-xs">Provider</TableHead>
                             <TableHead className="text-xs">Model</TableHead>
-                            <TableHead className="text-xs w-[50px]"></TableHead>
+                            <TableHead className="w-[50px] text-xs"></TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {walletDetails?.data?.disallowList?.map((entry, idx) => (
-                            <TableRow key={idx}>
-                              <TableCell className="text-xs font-mono">
-                                {entry.helicone_request_id.substring(0, 8)}...
-                              </TableCell>
-                              <TableCell className="text-xs">{entry.provider}</TableCell>
-                              <TableCell className="text-xs">{entry.model}</TableCell>
-                              <TableCell className="text-xs">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-7 w-7 p-0"
-                                  onClick={() => {
-                                    setEntryToDelete({
-                                      provider: entry.provider,
-                                      model: entry.model,
-                                    });
-                                    setDeleteDialogOpen(true);
-                                  }}
-                                >
-                                  <Trash2 size={14} className="text-destructive" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                          {walletDetails?.data?.disallowList?.map(
+                            (entry, idx) => (
+                              <TableRow key={idx}>
+                                <TableCell className="font-mono text-xs">
+                                  {entry.helicone_request_id.substring(0, 8)}...
+                                </TableCell>
+                                <TableCell className="text-xs">
+                                  {entry.provider}
+                                </TableCell>
+                                <TableCell className="text-xs">
+                                  {entry.model}
+                                </TableCell>
+                                <TableCell className="text-xs">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => {
+                                      setEntryToDelete({
+                                        provider: entry.provider,
+                                        model: entry.model,
+                                      });
+                                      setDeleteDialogOpen(true);
+                                    }}
+                                  >
+                                    <Trash2
+                                      size={14}
+                                      className="text-destructive"
+                                    />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ),
+                          )}
                         </TableBody>
                       </Table>
                     ) : (
-                      <div className="p-3 text-sm text-muted-foreground text-center">None</div>
+                      <div className="p-3 text-center text-sm text-muted-foreground">
+                        None
+                      </div>
                     )}
                   </div>
                 </section>
@@ -971,7 +1015,7 @@ export default function AdminWallet() {
                 {/* Raw Tables */}
                 <section className="flex flex-col gap-2">
                   <H4 className="text-sm font-semibold">Raw Tables</H4>
-                  <div className="rounded-lg bg-card border shadow-sm p-3">
+                  <div className="rounded-lg border bg-card p-3 shadow-sm">
                     <div className="flex flex-wrap gap-2">
                       {[
                         "credit_purchases",
@@ -982,13 +1026,11 @@ export default function AdminWallet() {
                         <Button
                           key={tableName}
                           variant={
-                            selectedTable === tableName
-                              ? "default"
-                              : "outline"
+                            selectedTable === tableName ? "default" : "outline"
                           }
                           size="sm"
                           onClick={() => handleTableClick(tableName)}
-                          className="h-7 text-xs px-3"
+                          className="h-7 px-3 text-xs"
                         >
                           {tableName.split("_")[0]}
                         </Button>
@@ -1000,20 +1042,24 @@ export default function AdminWallet() {
                 {/* Table Data Display */}
                 {selectedTable && (
                   <section className="flex flex-col gap-2">
-                    <H4 className="text-sm font-semibold">Table: {selectedTable}</H4>
-                    <div className="rounded-lg bg-card border shadow-sm p-3">
+                    <H4 className="text-sm font-semibold">
+                      Table: {selectedTable}
+                    </H4>
+                    <div className="rounded-lg border bg-card p-3 shadow-sm">
                       {tableLoading ? (
                         <div className="flex items-center justify-center py-4">
                           <Loader2 size={16} className="animate-spin" />
                         </div>
                       ) : tableData?.data?.data ? (
-                        <div className="overflow-auto max-h-48 rounded bg-muted/30 p-2">
-                          <pre className="text-xs font-mono">
+                        <div className="max-h-48 overflow-auto rounded bg-muted/30 p-2">
+                          <pre className="font-mono text-xs">
                             {JSON.stringify(tableData.data, null, 2)}
                           </pre>
                         </div>
                       ) : (
-                        <div className="text-sm text-muted-foreground">No data</div>
+                        <div className="text-sm text-muted-foreground">
+                          No data
+                        </div>
                       )}
                     </div>
                   </section>
@@ -1024,17 +1070,26 @@ export default function AdminWallet() {
             ) : null}
 
             {/* Delete Confirmation Dialog */}
-            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialog
+              open={deleteDialogOpen}
+              onOpenChange={setDeleteDialogOpen}
+            >
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Disallow Entry?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to remove <strong>{entryToDelete?.provider}</strong> / <strong>{entryToDelete?.model}</strong> from the disallow list? This action cannot be undone.
+                    Are you sure you want to remove{" "}
+                    <strong>{entryToDelete?.provider}</strong> /{" "}
+                    <strong>{entryToDelete?.model}</strong> from the disallow
+                    list? This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteDisallowEntry} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  <AlertDialogAction
+                    onClick={handleDeleteDisallowEntry}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>

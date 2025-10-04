@@ -146,7 +146,8 @@ export const useOrgOnboarding = (orgId: string) => {
     },
   );
 
-  const hasCompletedQuickstart = onboardingState?.hasCompletedQuickstart ?? false;
+  const hasCompletedQuickstart =
+    onboardingState?.hasCompletedQuickstart ?? false;
 
   useEffect(() => {
     if (
@@ -166,7 +167,7 @@ export const useOrgOnboarding = (orgId: string) => {
       const keysInterval = setInterval(() => {
         refetchKeys();
       }, 5000);
-      
+
       const providerKeysInterval = setInterval(() => {
         refetchProviderKeys();
       }, 5000);
@@ -184,7 +185,7 @@ export const useOrgOnboarding = (orgId: string) => {
     }
     return (keys?.data?.data?.data?.length ?? 0) > 0;
   }, [keys]);
-  
+
   const hasProviderKeys = useMemo(() => {
     return providerKeys && providerKeys.length > 0;
   }, [providerKeys]);
@@ -198,10 +199,8 @@ export const useOrgOnboarding = (orgId: string) => {
   const { mutateAsync: saveOnboardingChangesAsync } = useMutation({
     mutationFn: async (newState: Partial<OnboardingState>) => {
       const fullState = {
-        hasOnboarded:
-          newState.hasOnboarded ?? onboardingState?.hasOnboarded,
-        hasIntegrated:
-          newState.hasIntegrated ?? onboardingState?.hasIntegrated,
+        hasOnboarded: newState.hasOnboarded ?? onboardingState?.hasOnboarded,
+        hasIntegrated: newState.hasIntegrated ?? onboardingState?.hasIntegrated,
         hasCompletedQuickstart:
           newState.hasCompletedQuickstart ??
           onboardingState?.hasCompletedQuickstart,

@@ -90,9 +90,7 @@ const AlertForm = (props: AlertFormProps) => {
 
   const orgContext = useOrg();
 
-  const { data } = useGetOrgMembers(
-    orgContext?.currentOrg?.id || "",
-  );
+  const { data } = useGetOrgMembers(orgContext?.currentOrg?.id || "");
 
   const { setNotification } = useNotification();
 
@@ -102,11 +100,13 @@ const AlertForm = (props: AlertFormProps) => {
     org_role: string;
   }[] = [...(data || [])];
 
-  const { data: slackIntegration } =
-    useGetOrgSlackIntegration(orgContext?.currentOrg?.id || "");
+  const { data: slackIntegration } = useGetOrgSlackIntegration(
+    orgContext?.currentOrg?.id || "",
+  );
 
-  const { data: slackChannelsData } =
-    useGetOrgSlackChannels(orgContext?.currentOrg?.id || "");
+  const { data: slackChannelsData } = useGetOrgSlackChannels(
+    orgContext?.currentOrg?.id || "",
+  );
 
   const slackChannels: {
     id: string;

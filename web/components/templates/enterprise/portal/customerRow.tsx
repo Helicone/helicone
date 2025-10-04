@@ -33,9 +33,7 @@ const CustomerRow = (props: CustomerRowProps) => {
   const orgContext = useOrg();
   const router = useRouter();
 
-  const { data: members } = useGetOrgMembers(
-    org.id,
-  );
+  const { data: members } = useGetOrgMembers(org.id);
 
   const startOfMonthFormatted = formatISO(
     new Date(new Date().setDate(new Date().getDate() - 30)),

@@ -123,7 +123,9 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               (message) =>
                 message.model === model.name || message.model === undefined,
             )
-            .map(({ id: _id, model: _model, latency: _latency, ...rest }) => rest); // Remove id, model, and latency fields
+            .map(
+              ({ id: _id, model: _model, latency: _latency, ...rest }) => rest,
+            ); // Remove id, model, and latency fields
         };
 
         const historyWithoutId = cleanMessages(history);

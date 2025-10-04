@@ -62,12 +62,11 @@ const CostBackfiller = () => {
     withoutCosts: null,
   });
 
-  const { backfillCostsAsync, isBackfillingCosts } =
-    useBackfillCosts(() => {
-      toast.success("Cost backfill completed successfully!");
-      setQueryPreview("");
-      setBackfillError(null); // Clear error on success
-    });
+  const { backfillCostsAsync, isBackfillingCosts } = useBackfillCosts(() => {
+    toast.success("Cost backfill completed successfully!");
+    setQueryPreview("");
+    setBackfillError(null); // Clear error on success
+  });
 
   const { backfillCostsPreviewAsync, isLoadingPreview } =
     useBackfillCostsPreview();

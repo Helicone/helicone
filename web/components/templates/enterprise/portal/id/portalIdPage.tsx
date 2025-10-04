@@ -33,9 +33,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
 
   const { data: orgData, isLoading, refetch } = useGetOrg(orgId || "");
   const org = orgData?.data;
-  const {
-    data: members,
-  } = useGetOrgMembers(orgId || "");
+  const { data: members } = useGetOrgMembers(orgId || "");
   const orgContext = useOrg();
   const router = useRouter();
   const startOfMonthFormatted = formatISO(
@@ -60,9 +58,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
     end: tomorrow,
   };
 
-  const {
-    data,
-  } = useRequestsOverTime({
+  const { data } = useRequestsOverTime({
     timeFilter,
     organizationId: orgId || undefined,
   });

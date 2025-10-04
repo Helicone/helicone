@@ -14,28 +14,24 @@ export function useStripeKey() {
     {},
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   const existingKey = vaultKeys?.data?.find(
-    (key) => key.provider_name === STRIPE_PROVIDER_NAME
+    (key) => key.provider_name === STRIPE_PROVIDER_NAME,
   );
 
-  const saveKeyMutation = $JAWN_API.useMutation(
-    "post",
-    "/v1/vault/add",
-    {
-      onSuccess: () => {
-        setNotification("Stripe API key saved successfully", "success");
-        queryClient.invalidateQueries({
-          queryKey: ["get", "/v1/vault/keys", {}],
-        });
-      },
-      onError: (error) => {
-        setNotification(`Failed to save Stripe API key: ${error}`, "error");
-      },
-    }
-  );
+  const saveKeyMutation = $JAWN_API.useMutation("post", "/v1/vault/add", {
+    onSuccess: () => {
+      setNotification("Stripe API key saved successfully", "success");
+      queryClient.invalidateQueries({
+        queryKey: ["get", "/v1/vault/keys", {}],
+      });
+    },
+    onError: (error) => {
+      setNotification(`Failed to save Stripe API key: ${error}`, "error");
+    },
+  });
 
   const updateKeyMutation = $JAWN_API.useMutation(
     "patch",
@@ -50,7 +46,7 @@ export function useStripeKey() {
       onError: (error) => {
         setNotification(`Failed to update Stripe API key: ${error}`, "error");
       },
-    }
+    },
   );
 
   const saveKey = async (newKey: string) => {

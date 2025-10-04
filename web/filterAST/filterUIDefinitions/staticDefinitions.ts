@@ -257,7 +257,7 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
   },
   {
     id: "cost",
-    label: "Cost", 
+    label: "Cost",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
     table: "request_response_rmt",
@@ -342,7 +342,6 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
       { label: "Negative", value: false },
     ],
     table: "request_response_rmt",
-
   },
 
   // Datetime fields
