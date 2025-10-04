@@ -94,7 +94,6 @@ export function ExperimentTable({
   const variantCount = promptVersionsData?.length || 0;
   const {
     canCreate: canCreateVariant,
-    hasAccess: hasAccess,
     freeLimit: MAX_VARIANTS,
   } = useFeatureLimit("experiments", variantCount, "variants");
 
@@ -113,8 +112,6 @@ export function ExperimentTable({
     autoInputs: Record<string, any>;
   } | null>(null);
   const [showScores, setShowScores] = useState(false);
-  const [showDeleteRowsConfirmation, setShowDeleteRowsConfirmation] =
-    useState(false);
 
   const cellRefs = useRef<Record<string, any>>({});
   const [
