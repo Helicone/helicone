@@ -46,7 +46,7 @@ interface DatasetsPageProps {
 }
 
 const DatasetsPage = (props: DatasetsPageProps) => {
-  const { currentPage, pageSize, sort, defaultIndex } = props;
+  const { pageSize, sort, defaultIndex } = props;
 
   const { datasets, isLoading, refetch, isRefetching, isFetched, status } =
     useGetHeliconeDatasets();

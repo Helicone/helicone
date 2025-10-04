@@ -52,7 +52,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     useGetHeliconeDatasetRows(id, page, currentPageSize);
   const {
     datasets,
-    isLoading: isLoadingDataset,
     refetch: refetchDatasets,
   } = useGetHeliconeDatasets([id]);
   const { setNotification } = useNotification();
