@@ -28,7 +28,7 @@ const ConnectionsPage: React.FC = () => {
   const [activeDrawer, setActiveDrawer] = useState<string | null>(null);
 
   const org = useOrg();
-  const { integrations, isLoadingIntegrations, refetchIntegrations } =
+  const { integrations, refetchIntegrations } =
     useIntegrations();
 
   const { data: hasStripeFeatureFlag } = useFeatureFlag(

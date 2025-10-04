@@ -53,7 +53,7 @@ interface OpenPipeFineTuneButtonProps {
 export default function OpenPipeFineTuneButton(
   props: OpenPipeFineTuneButtonProps,
 ) {
-  const { datasetId, rows, datasetName, fetchRows } = props;
+  const { rows, datasetName, fetchRows } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [fineTuneName, setFineTuneName] = useState("");
   const [baseModel, setBaseModel] = useState<(typeof SUPPORTED_MODELS)[number]>(

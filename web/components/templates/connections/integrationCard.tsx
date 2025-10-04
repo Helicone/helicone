@@ -13,7 +13,6 @@ interface IntegrationCardProps {
 
 const IntegrationCard: React.FC<IntegrationCardProps> = ({
   title,
-  description,
   enabled,
   onClick,
 }) => {
