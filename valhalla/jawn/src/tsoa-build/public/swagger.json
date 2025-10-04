@@ -11840,45 +11840,6 @@
 					}
 				]
 			},
-			"ResultSuccess__totalSpend-number__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"totalSpend": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"totalSpend"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__totalSpend-number_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__totalSpend-number__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
 				"properties": {
 					"data": {
@@ -21707,32 +21668,6 @@
 						}
 					}
 				]
-			}
-		},
-		"/v1/credits/totalSpend": {
-			"get": {
-				"operationId": "GetTotalSpend",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__totalSpend-number_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Credits"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
 			}
 		},
 		"/v1/public/alert-banner": {

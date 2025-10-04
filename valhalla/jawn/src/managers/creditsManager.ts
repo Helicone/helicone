@@ -1,14 +1,12 @@
-import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
 import { err, ok, Result } from "../../../../packages/common/result";
-import { AuthParams } from "../packages/common/auth/types";
-import { BaseManager } from "./BaseManager";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
-import { dbQueryClickhouse } from "../lib/shared/db/dbExecute";
-import { isError, resultMap } from "../packages/common/result";
 import {
   CreditBalanceResponse,
   PaginatedPurchasedCredits,
 } from "../controllers/public/creditsController";
+import { AuthParams } from "../packages/common/auth/types";
+import { isError } from "../packages/common/result";
+import { BaseManager } from "./BaseManager";
+import { WalletManager } from "./wallet/WalletManager";
 
 export class CreditsManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -18,39 +16,17 @@ export class CreditsManager extends BaseManager {
   public async getCreditsBalance(): Promise<
     Result<CreditBalanceResponse, string>
   > {
-    try {
-      const creditSumResponse = await fetch(
-        `${process.env.HELICONE_WORKER_API}/wallet/credits/total?orgId=${this.authParams.organizationId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.HELICONE_MANUAL_ACCESS_KEY}`,
-          },
-        }
-      );
-      const creditSum = await creditSumResponse.json();
-      const debits = await getAiGatewaySpend(this.authParams.organizationId);
-      if (isError(debits)) {
-        return err(debits.error);
-      }
-
-      const totalCredits = creditSum?.totalCredits || 0;
-      const spendCents = debits.data?.spend_cents ?? 0;
-      const balance = totalCredits - spendCents;
-
-      return ok({ balance, totalCreditsPurchased: totalCredits });
-    } catch (error: any) {
-      return err(`Error retrieving credit balance: ${error.message}`);
+    const adminWalletManager = new WalletManager(
+      this.authParams.organizationId
+    );
+    const walletState = await adminWalletManager.getWalletState();
+    if (isError(walletState)) {
+      return err(walletState.error);
     }
-  }
-
-  public async getTotalSpend(): Promise<Result<number, string>> {
-    const debits = await getAiGatewaySpend(this.authParams.organizationId);
-    if (isError(debits)) {
-      return err(debits.error);
-    }
-    return ok(debits.data?.spend_cents ?? 0);
+    return ok({
+      totalCreditsPurchased: walletState.data.totalCredits,
+      balance: walletState.data.effectiveBalance,
+    });
   }
 
   public async listTokenUsagePayments(params: {
@@ -92,40 +68,4 @@ export class CreditsManager extends BaseManager {
       );
     }
   }
-}
-
-/// returns the total spend in unitary amounts of fiat in USD (aka freedom cents)
-export async function getAiGatewaySpend(org_id: string): Promise<
-  Result<
-    {
-      spend_cents: number;
-    },
-    string
-  >
-> {
-  const { argsAcc } = await buildFilterWithAuthClickHouse(
-    {
-      org_id,
-      filter: {
-        request_response_rmt: {
-          is_passthrough_billing: {
-            equals: true,
-          },
-        },
-      },
-      argsAcc: [],
-    }
-  );
-
-  const query = `
-  SELECT
-    spend / ${COST_PRECISION_MULTIPLIER / 100} as spend_cents
-  FROM organization_ptb_spend
-  WHERE organization_id = {val_0 : String}
-`;
-
-  const res = await dbQueryClickhouse<{ spend_cents: string }>(query, argsAcc);
-  return resultMap(res, (d) => ({
-    spend_cents: +(d?.[0]?.spend_cents ?? 0),
-  }));
 }

@@ -19,6 +19,7 @@ import { SettingsManager } from "../../utils/settings";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { AdminWalletManager } from "../../managers/admin/AdminWalletManager";
 import { WalletState } from "../../types/wallet";
+import { WalletManager } from "../../managers/wallet/WalletManager";
 
 interface DashboardData {
   organizations: Array<{
@@ -62,7 +63,6 @@ interface TableDataResponse {
 @Tags("Admin Wallet")
 @Security("api_key")
 export class AdminWalletController extends Controller {
-
   @Post("/gateway/dashboard_data")
   public async getGatewayDashboardData(
     @Request() request: JawnAuthenticatedRequest,
@@ -110,72 +110,8 @@ export class AdminWalletController extends Controller {
   ): Promise<Result<WalletState, string>> {
     await authCheckThrow(request.authParams.userId);
 
-    // Get the wallet state from the worker API using admin credentials
-    const workerApiUrl =
-      process.env.HELICONE_WORKER_API ||
-      process.env.WORKER_API_URL ||
-      "https://api.helicone.ai";
-    const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
-
-    if (!adminAccessKey) {
-      return err("Admin access key not configured");
-    }
-
-    try {
-      // Use the admin endpoint that can query any org's wallet
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-
-      const response = await fetch(
-        `${workerApiUrl}/admin/wallet/${orgId}/state`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${adminAccessKey}`,
-          },
-          signal: controller.signal,
-        }
-      );
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        return err(`Failed to fetch wallet state: ${errorText}`);
-      }
-
-      const walletState = await response.json();
-
-      // Convert values from cents to dollars
-      const convertedWalletState: WalletState = {
-        balance: (walletState.balance || 0) / 100,
-        effectiveBalance: (walletState.effectiveBalance || 0) / 100,
-        totalCredits: (walletState.totalCredits || 0) / 100,
-        totalDebits: (walletState.totalDebits || 0) / 100,
-        totalEscrow: (walletState.totalEscrow || 0) / 100,
-        disallowList: walletState.disallowList || [],
-      };
-
-      return ok(convertedWalletState);
-    } catch (error) {
-      console.error("Error fetching wallet state:", error);
-
-      // Fallback for local development when Durable Objects don't work
-      if (ENVIRONMENT !== "production") {
-        console.warn("Using fallback wallet state for local development");
-        const fallbackState: WalletState = {
-          balance: 0,
-          effectiveBalance: 0,
-          totalCredits: 0,
-          totalDebits: 0,
-          totalEscrow: 0,
-          disallowList: [],
-        };
-        return ok(fallbackState);
-      }
-
-      return err(`Error fetching wallet state: ${error}`);
-    }
+    const adminWalletManager = new WalletManager(orgId);
+    return adminWalletManager.getWalletState();
   }
 
   @Post("/{orgId}/tables/{tableName}")
