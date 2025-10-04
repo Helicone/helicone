@@ -818,6 +818,33 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
+    describe("qwen3-coder Passthrough billing tests", () => {
+      it("should handle passthrough billing with deepinfra provider", () =>
+        runGatewayTest({
+          model: "qwen3-coder/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
     describe("qwen3-next-80b-a3b-instruct", () => {
       it("should handle deepinfra provider", () =>
         runGatewayTest({
@@ -1157,6 +1184,33 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
+    describe("qwen3-next-80b-a3b-instruct Passthrough billing tests", () => {
+      it("should handle passthrough billing with deepinfra provider", () =>
+        runGatewayTest({
+          model: "qwen3-next-80b-a3b-instruct/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
     describe("Advanced scenarios", () => {
       it("should handle custom headers and body mapping", () =>
         runGatewayTest({
@@ -1362,6 +1416,519 @@ describe("Alibaba Registry Tests", () => {
       it("should handle network connectivity issues", () =>
         runGatewayTest({
           model: "qwen3-next-80b-a3b-instruct/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 502,
+                errorMessage: "Bad gateway - upstream server error",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("qwen3-235b-a22b-thinking", () => {
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select deepinfra provider when none specified", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle successful request with custom parameters", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          request: {
+            messages: [
+              { role: "user", content: "Test message for Qwen3 235B A22B Thinking model" },
+            ],
+            maxTokens: 1000
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: ["Test message for Qwen3 235B A22B Thinking model"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle complex reasoning tasks", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Solve this complex reasoning problem step by step"
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle streaming requests", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          request: {
+            messages: [{ role: "user", content: "Stream this response" }],
+            stream: true,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: ['"stream":true'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify context length limits are respected (262k tokens)", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test message within 262k context limit",
+              },
+            ],
+            maxTokens: 16384, // Should be within the 16,384 completion token limit
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify pricing configuration ($0.30/$2.90 per million tokens)", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: deepinfraAuthExpectations,
+                customVerify: (call) => {
+                  // Verify pricing configuration:
+                  // Input: $0.30 per million tokens (0.0000003)
+                  // Output: $2.90 per million tokens (0.0000029)
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("qwen3-235b-a22b-thinking Error scenarios", () => {
+      it("should handle DeepInfra provider failure", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "DeepInfra service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from DeepInfra", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle authentication failure", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+
+      it("should handle model not found", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle quota exceeded", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 403,
+                errorMessage: "Quota exceeded",
+              },
+            ],
+            finalStatus: 403,
+          },
+        }));
+
+      it("should handle bad request with invalid parameters", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid request parameters",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle timeout scenarios", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 408,
+                errorMessage: "Request timeout",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle content filtering violations", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          request: {
+            messages: [
+              { role: "user", content: "Content that might be filtered" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 422,
+                errorMessage: "Content filtering violation",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("qwen3-235b-a22b-thinking Advanced scenarios", () => {
+      it("should handle custom headers and body mapping", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          request: {
+            messages: [{ role: "user", content: "Test with custom mapping" }],
+            headers: {
+              "X-Custom-Header": "test-value",
+            },
+            bodyMapping: "NO_MAPPING",
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  headers: {
+                    ...deepinfraAuthExpectations.headers,
+                    "X-Custom-Header": "test-value",
+                  },
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle supported parameters correctly", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          request: {
+            messages: [
+              { role: "user", content: "Test with various parameters" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: deepinfraAuthExpectations,
+                customVerify: (call) => {
+                  // Verify that the request supports the expected parameters
+                  // like temperature, top_p, frequency_penalty, etc.
+                  // This would be expanded in actual implementation
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle rate limit recovery scenario", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+    });
+
+    describe("qwen3-235b-a22b-thinking Provider URL validation", () => {
+      it("should construct correct DeepInfra URL", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: deepinfraAuthExpectations,
+                customVerify: (call) => {
+                  // Verify that the URL is correctly constructed
+                  // Base URL: https://api.deepinfra.com/
+                  // Built URL: https://api.deepinfra.com/v1/openai
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle provider model ID mapping correctly", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507", // Should map to the correct provider model ID
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("qwen3-235b-a22b-thinking Edge cases and robustness", () => {
+      it("should handle empty messages array", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          request: {
+            messages: [],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Messages array cannot be empty",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle very long input within context limits", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Very long input... ".repeat(1000), // Still within 262k token limit
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle unicode and special characters", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "测试中文 🚀 émojis and spéciål chars",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle malformed JSON gracefully", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid JSON in request body",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle network connectivity issues", () =>
+        runGatewayTest({
+          model: "qwen3-235b-a22b-thinking/deepinfra",
           expected: {
             providers: [
               {

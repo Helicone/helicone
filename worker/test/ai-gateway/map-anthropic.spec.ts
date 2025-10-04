@@ -6,6 +6,7 @@ import {
   AnthropicStreamEvent,
 } from "@helicone-package/llm-mapper/transform/types/anthropic";
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
+import { WebSearchPlugin } from "@helicone-package/cost/models/types";
 import { describe, expect, it } from "vitest";
 
 describe("Anthropic to OpenAI Response Mapper", () => {
@@ -522,6 +523,29 @@ describe("Anthropic to OpenAI Response Mapper", () => {
         model: "claude-3.5-haiku",
         messages: [
           {
+            role: "user",
+            content: "Hello",
+            cache_control: { type: "ephemeral" },
+          },
+        ],
+      };
+
+      const result = toAnthropic(openAIRequest);
+
+      expect(result.messages[0].content).toEqual([
+        {
+          type: "text",
+          text: "Hello",
+          cache_control: { type: "ephemeral" },
+        },
+      ]);
+    });
+
+    it("should handle cache control on assistant messages with text and tools", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "claude-3.5-haiku",
+        messages: [
+          {
             role: "assistant",
             content: "I'll help you calculate that.",
             cache_control: { type: "ephemeral", ttl: "1h" },
@@ -938,7 +962,7 @@ describe("Anthropic to OpenAI Response Mapper", () => {
         ],
       };
 
-      const plugins = [{ id: "web" }];
+      const plugins: WebSearchPlugin[] = [{ id: "web" }];
 
       const result = toAnthropic(openAIRequest, undefined, plugins);
 
@@ -961,7 +985,7 @@ describe("Anthropic to OpenAI Response Mapper", () => {
         ],
       };
 
-      const plugins = [
+      const plugins: WebSearchPlugin[] = [
         {
           id: "web",
           max_uses: 3,
@@ -1000,7 +1024,7 @@ describe("Anthropic to OpenAI Response Mapper", () => {
         ],
       };
 
-      const plugins = [{ id: "other-plugin" }];
+      const plugins = [{ id: "other-plugin" as any }];
 
       const result = toAnthropic(openAIRequest, undefined, plugins);
 
@@ -1028,7 +1052,7 @@ describe("Anthropic to OpenAI Response Mapper", () => {
         ],
       };
 
-      const plugins = [
+      const plugins: WebSearchPlugin[] = [
         {
           id: "web",
           max_uses: 5,
@@ -1075,7 +1099,7 @@ describe("Anthropic to OpenAI Response Mapper", () => {
         ],
       };
 
-      const plugins = [{ id: "web" }];
+      const plugins: WebSearchPlugin[] = [{ id: "web" }];
 
       const result = toAnthropic(openAIRequest, undefined, plugins);
 

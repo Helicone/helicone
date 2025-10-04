@@ -47303,102 +47303,130 @@
 					}
 				]
 			},
-			"ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__": {
+			"DashboardData": {
 				"properties": {
-					"data": {
+					"organizations": {
+						"items": {
+							"properties": {
+								"walletProcessedEventsCount": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletDisallowedModelCount": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletTotalDebits": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletTotalCredits": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletEffectiveBalance": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletBalance": {
+									"type": "number",
+									"format": "double"
+								},
+								"creditLimit": {
+									"type": "number",
+									"format": "double"
+								},
+								"allowNegativeBalance": {
+									"type": "boolean"
+								},
+								"ownerEmail": {
+									"type": "string"
+								},
+								"tier": {
+									"type": "string"
+								},
+								"lastPaymentDate": {
+									"type": "number",
+									"format": "double",
+									"nullable": true
+								},
+								"clickhouseTotalSpend": {
+									"type": "number",
+									"format": "double"
+								},
+								"paymentsCount": {
+									"type": "number",
+									"format": "double"
+								},
+								"totalPayments": {
+									"type": "number",
+									"format": "double"
+								},
+								"stripeCustomerId": {
+									"type": "string"
+								},
+								"orgName": {
+									"type": "string"
+								},
+								"orgId": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"creditLimit",
+								"allowNegativeBalance",
+								"ownerEmail",
+								"tier",
+								"lastPaymentDate",
+								"clickhouseTotalSpend",
+								"paymentsCount",
+								"totalPayments",
+								"stripeCustomerId",
+								"orgName",
+								"orgId"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"summary": {
 						"properties": {
-							"isProduction": {
-								"type": "boolean"
+							"totalCreditsSpent": {
+								"type": "number",
+								"format": "double"
 							},
-							"summary": {
-								"properties": {
-									"totalCreditsSpent": {
-										"type": "number",
-										"format": "double"
-									},
-									"totalCreditsIssued": {
-										"type": "number",
-										"format": "double"
-									},
-									"totalOrgsWithCredits": {
-										"type": "number",
-										"format": "double"
-									}
-								},
-								"required": [
-									"totalCreditsSpent",
-									"totalCreditsIssued",
-									"totalOrgsWithCredits"
-								],
-								"type": "object"
+							"totalCreditsIssued": {
+								"type": "number",
+								"format": "double"
 							},
-							"organizations": {
-								"items": {
-									"properties": {
-										"creditLimit": {
-											"type": "number",
-											"format": "double"
-										},
-										"allowNegativeBalance": {
-											"type": "boolean"
-										},
-										"ownerEmail": {
-											"type": "string"
-										},
-										"tier": {
-											"type": "string"
-										},
-										"lastPaymentDate": {
-											"type": "number",
-											"format": "double",
-											"nullable": true
-										},
-										"clickhouseTotalSpend": {
-											"type": "number",
-											"format": "double"
-										},
-										"paymentsCount": {
-											"type": "number",
-											"format": "double"
-										},
-										"totalPayments": {
-											"type": "number",
-											"format": "double"
-										},
-										"stripeCustomerId": {
-											"type": "string"
-										},
-										"orgName": {
-											"type": "string"
-										},
-										"orgId": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"creditLimit",
-										"allowNegativeBalance",
-										"ownerEmail",
-										"tier",
-										"lastPaymentDate",
-										"clickhouseTotalSpend",
-										"paymentsCount",
-										"totalPayments",
-										"stripeCustomerId",
-										"orgName",
-										"orgId"
-									],
-									"type": "object"
-								},
-								"type": "array"
+							"totalOrgsWithCredits": {
+								"type": "number",
+								"format": "double"
 							}
 						},
 						"required": [
-							"isProduction",
-							"summary",
-							"organizations"
+							"totalCreditsSpent",
+							"totalCreditsIssued",
+							"totalOrgsWithCredits"
 						],
 						"type": "object"
+					},
+					"isProduction": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"organizations",
+					"summary",
+					"isProduction"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_DashboardData_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/DashboardData"
 					},
 					"error": {
 						"type": "number",
@@ -47415,10 +47443,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_": {
+			"Result_DashboardData.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean__"
+						"$ref": "#/components/schemas/ResultSuccess_DashboardData_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -56308,7 +56336,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__organizations-Array__orgId-string--orgName-string--stripeCustomerId-string--totalPayments-number--paymentsCount-number--clickhouseTotalSpend-number--lastPaymentDate-number-or-null--tier-string--ownerEmail-string--allowNegativeBalance-boolean--creditLimit-number__--summary_58__totalOrgsWithCredits-number--totalCreditsIssued-number--totalCreditsSpent-number_--isProduction-boolean_.string_"
+									"$ref": "#/components/schemas/Result_DashboardData.string_"
 								}
 							}
 						}
@@ -56329,6 +56357,26 @@
 						"required": false,
 						"schema": {
 							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sortBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sortOrder",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							]
 						}
 					}
 				]
@@ -56541,6 +56589,57 @@
 						"schema": {
 							"format": "double",
 							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/{orgId}/disallow-list": {
+			"delete": {
+				"operationId": "RemoveFromDisallowList",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_WalletState.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "provider",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "model",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]

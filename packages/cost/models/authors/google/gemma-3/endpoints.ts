@@ -19,6 +19,7 @@ export const endpoints = {
       tpm: 60000000,
       tpd: 6000000000,
     },
+    quantization: "bf16",
     contextLength: 131_072,
     maxCompletionTokens: 8_192,
     supportedParameters: [

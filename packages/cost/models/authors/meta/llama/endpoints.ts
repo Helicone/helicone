@@ -73,6 +73,40 @@ export const endpoints = {
       "*": {},
     },
   },
+  "llama-4-maverick:novita": {
+    providerModelId: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
+    provider: "novita",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000017,
+        output: 0.00000085,
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 1_048_576,
+    maxCompletionTokens: 1_048_576,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+      "functions",
+      "tools"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "llama-guard-4:groq": {
     providerModelId: "meta-llama/Llama-Guard-4-12B",
     provider: "groq",
@@ -258,6 +292,41 @@ export const endpoints = {
       "*": {},
     },
   },
+  "llama-4-scout:novita": {
+    provider: "novita",
+    author: "meta-llama",
+    providerModelId: "meta-llama/llama-4-scout-17b-16e-instruct",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000001, // $0.1/1M tokens
+        output: 0.0000005, // $0.5/1M tokens
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+      "functions",
+      "tools"
+    ],
+    priority: 2,
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "llama-4-maverick:openrouter": {
     provider: "openrouter",
     author: "meta-llama",
@@ -399,6 +468,7 @@ export const endpoints = {
         output: 0.00000003, // $0.03/1M tokens
       },
     ],
+    quantization: "fp8",
     contextLength: 128_000,
     maxCompletionTokens: 128_000,
     supportedParameters: [
@@ -464,6 +534,7 @@ export const endpoints = {
         output: 0.00000005, // $0.06 per 1M tokens - DeepInfra pricing from https://deepinfra.com/meta-llama/Meta-Llama-3-8B-Instruct
       },
     ],
+    quantization: "bf16",
     contextLength: 131_072,
     maxCompletionTokens: 131_072,
     supportedParameters: [
@@ -514,8 +585,7 @@ export const endpoints = {
       "tool_choice",
       "tools",
     ],
-    ptbEnabled: false,
-    priority: 0,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

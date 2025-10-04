@@ -69,7 +69,7 @@ export const endpoints = {
       "min_p",
       "response_format",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     quantization: "fp4",
     endpointConfigs: {
       "*": {},
@@ -125,6 +125,7 @@ export const endpoints = {
         },
       },
     ],
+    quantization: "fp4",
     contextLength: 128_000,
     maxCompletionTokens: 16_384,
     supportedParameters: [
@@ -140,7 +141,7 @@ export const endpoints = {
       "min_p",
       "response_format",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -156,6 +157,7 @@ export const endpoints = {
         output: 0.00000041, // $0.41 per 1M tokens
       },
     ],
+    quantization: "fp8",
     contextLength: 128_000,
     maxCompletionTokens: 16_384,
     supportedParameters: [
@@ -173,7 +175,7 @@ export const endpoints = {
       "repetition_penalty",
       "logit_bias",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

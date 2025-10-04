@@ -92,7 +92,7 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
     return { usage: finalUsage };
   }
 
-  private extractUsageFromResponse(parsedResponse: any): ModelUsage {
+  protected extractUsageFromResponse(parsedResponse: any): ModelUsage {
     if (!parsedResponse || typeof parsedResponse !== "object") {
       return {
         input: 0,

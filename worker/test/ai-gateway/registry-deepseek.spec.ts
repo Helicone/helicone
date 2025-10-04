@@ -101,6 +101,22 @@ describe("DeepSeek Registry Tests", () => {
             finalStatus: 200,
           },
         }));
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "deepseek-reasoner/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-0528",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-0528"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
       it("should auto-select deepseek provider when none specified", () =>
         runGatewayTest({
@@ -220,6 +236,23 @@ describe("DeepSeek Registry Tests", () => {
                 response: "success",
                 model: "deepseek-r1-distill-llama-70b",
                 expects: groqAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "deepseek-r1-distill-llama-70b/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+                expects: deepinfraAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -477,6 +510,56 @@ describe("DeepSeek Registry Tests", () => {
       }));
   });
 
+  describe("Error scenarios - DeepInfra Provider with DeepSeek R1 Distill Llama 70B", () => {
+    it("should handle DeepInfra provider failure for R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "DeepInfra service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from DeepInfra for R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from DeepInfra for R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+  });
+
   describe("Error scenarios - Novita Provider with DeepSeek V3.2", () => {
     it("should handle Novita provider failure", () =>
       runGatewayTest({
@@ -550,6 +633,28 @@ describe("DeepSeek Registry Tests", () => {
         },
       }));
 
+      it("should construct correct DeepInfra URL for DeepSeek R1", () =>
+      runGatewayTest({
+        model: "deepseek-reasoner/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-0528",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-0528"),
+              expects: deepinfraAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://api.deepinfra.com/
+                // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
     it("should handle provider model ID mapping correctly for DeepInfra", () =>
       runGatewayTest({
         model: "deepseek-v3/deepinfra",
@@ -560,6 +665,23 @@ describe("DeepSeek Registry Tests", () => {
               response: "success",
               model: "deepseek-ai/DeepSeek-V3.1", // Should map to the correct provider model ID
               data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
+              expects: deepinfraAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for DeepInfra R1", () =>
+      runGatewayTest({
+        model: "deepseek-reasoner/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-0528",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-0528"),
               expects: deepinfraAuthExpectations,
             },
           ],
@@ -715,5 +837,150 @@ describe("DeepSeek Registry Tests", () => {
           finalStatus: 200,
         },
       }));
+
+    it("should construct correct DeepInfra URL for DeepSeek R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              expects: deepinfraAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed for R1 Distill Llama 70B
+                // Base URL: https://api.deepinfra.com/
+                // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for DeepInfra R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              expects: deepinfraAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for DeepInfra R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/deepinfra",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              expects: {
+                ...deepinfraAuthExpectations,
+                bodyContains: ["user", "Test"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+  describe("Passthrough billing tests", () => {
+    describe("deepseek-v3 with DeepInfra", () => {
+      it("should handle passthrough billing with deepinfra provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-v3.1-terminus with DeepInfra", () => {
+      it("should handle passthrough billing with deepinfra provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1-Terminus",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-v3.2 with Novita", () => {
+      it("should handle passthrough billing with novita provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3.2/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.2-exp",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
   });
 });

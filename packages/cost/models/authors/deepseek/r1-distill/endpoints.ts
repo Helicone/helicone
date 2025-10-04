@@ -76,6 +76,38 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-r1-distill-llama-70b:deepinfra": {
+    provider: "deepinfra",
+    author: "deepseek",
+    providerModelId: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000002, // $0.20 per 1M tokens
+        output: 0.0000006, // $0.60 per 1M tokens
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 128_000,
+    quantization: "fp8",
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${DeepSeekR1ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

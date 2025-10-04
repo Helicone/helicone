@@ -23,7 +23,7 @@
           },
           {
             "group": "AI Gateway",
-            "tag": "BETA",
+            "tag": "EARLY ACCESS",
             "pages": [
               "gateway/overview",
               "gateway/provider-routing",

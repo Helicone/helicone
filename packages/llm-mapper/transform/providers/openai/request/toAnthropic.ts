@@ -242,37 +242,52 @@ function mapMessages(
       content: "n/a",
     };
 
-    if (message.role === "assistant" && message.tool_calls) {
-      const contentBlocks: AnthropicContentBlock[] = [];
+    if (message.role === "assistant" || message.role === "user") {
+      const processedToolCallContent: AnthropicContentBlock[] = [];
 
+      if (message.role === "assistant" && message.tool_calls) {
+        message.tool_calls.forEach((toolCall) => {
+          if (toolCall.type === "function") {
+            processedToolCallContent.push({
+              type: "tool_use",
+              id: toolCall.id,
+              name: toolCall.function.name,
+              input: JSON.parse(toolCall.function.arguments || "{}"),
+              // TODO: add cache_control support to message.tool_calls in types
+            });
+          }
+        });
+      }
+      
+      let processedContent: string | AnthropicContentBlock[] = [];
       if (message.content) {
         const convertedContent = openAIContentToAnthropicContent(
           message.content
         );
         if (typeof convertedContent === "string") {
-          contentBlocks.push({
-            type: "text",
-            text: convertedContent,
-            cache_control: message.cache_control,
-          });
+          // if the message requires forming a content array
+          if (
+            message.cache_control ||
+            processedToolCallContent.length > 0
+          ) {
+            processedContent.push({
+              type: "text",
+              text: convertedContent,
+              cache_control: message.cache_control,
+            });
+          } else {
+            // there was no cache control breakpoint, the content was just string,
+            // and no tool calls, so we create a non-content array message.
+            antMessage.content = convertedContent;
+            return antMessage;
+          }
         } else {
-          contentBlocks.push(...convertedContent);
+          processedContent.push(...convertedContent);
         }
       }
+      processedContent.push(...processedToolCallContent);
 
-      message.tool_calls.forEach((toolCall) => {
-        if (toolCall.type === "function") {
-          contentBlocks.push({
-            type: "tool_use",
-            id: toolCall.id,
-            name: toolCall.function.name,
-            input: JSON.parse(toolCall.function.arguments || "{}"),
-            // TODO: add cache_control support to message.tool_calls in types
-          });
-        }
-      });
-
-      antMessage.content = contentBlocks;
+      antMessage.content = processedContent;
       return antMessage;
     }
 

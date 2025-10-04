@@ -28,6 +28,7 @@ import { parseVercelStream } from "./streamParsers/vercelStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "@helicone-package/cost";
+import { toOpenAI } from "@helicone-package/llm-mapper/transform/providers/anthropic/response/toOpenai";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
@@ -679,12 +680,30 @@ export class DBLoggable {
 
     if (S3_ENABLED === "true") {
       try {
+        const providerResponse = rawResponseBody.join("");
+        let openAIResponse: string | undefined;
+
+        // For AI Gateway non-OpenAI: map response to OpenAI format
+        const isAIGatewayNonOpenAI =
+          this.request.attempt?.endpoint.modelConfig.responseFormat &&
+          this.request.attempt.endpoint.modelConfig.responseFormat !== "OPENAI";
+
+        if (isAIGatewayNonOpenAI) {
+          try {
+            const anthropicBody = JSON.parse(providerResponse);
+            openAIResponse = JSON.stringify(toOpenAI(anthropicBody));
+          } catch (e) {
+            console.error("Failed to map response to OpenAI:", e);
+          }
+        }
+
         const s3Result =
           await db.requestResponseManager.storeRequestResponseRaw({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
             requestBodyBuffer: this.request.requestBodyBuffer,
-            responseBody: rawResponseBody.join(""),
+            providerResponse,
+            openAIResponse,
           });
 
         if (s3Result.error) {

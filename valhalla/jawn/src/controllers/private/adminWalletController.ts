@@ -1,6 +1,7 @@
 // src/users/usersController.ts
 import {
   Controller,
+  Delete,
   Path,
   Post,
   Query,
@@ -13,24 +14,38 @@ import type { JawnAuthenticatedRequest } from "../../types/request";
 
 import { err, ok, Result } from "../../packages/common/result";
 import { authCheckThrow } from "./adminController";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { ENVIRONMENT } from "../../lib/clients/constant";
 import { SettingsManager } from "../../utils/settings";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { AdminWalletManager } from "../../managers/admin/AdminWalletManager";
+import { WalletState } from "../../types/wallet";
 
-// Wallet API response interfaces
-interface WalletState {
-  balance: number;
-  effectiveBalance: number;
-  totalCredits: number;
-  totalDebits: number;
-  totalEscrow: number;
-  disallowList: Array<{
-    helicone_request_id: string;
-    provider: string;
-    model: string;
+interface DashboardData {
+  organizations: Array<{
+    orgId: string;
+    orgName: string;
+    stripeCustomerId: string;
+    totalPayments: number;
+    paymentsCount: number;
+    clickhouseTotalSpend: number;
+    lastPaymentDate: number | null;
+    tier: string;
+    ownerEmail: string;
+    allowNegativeBalance: boolean;
+    creditLimit: number;
+    walletBalance?: number;
+    walletEffectiveBalance?: number;
+    walletTotalCredits?: number;
+    walletTotalDebits?: number;
+    walletDisallowedModelCount?: number;
+    walletProcessedEventsCount?: number;
   }>;
+  summary: {
+    totalOrgsWithCredits: number;
+    totalCreditsIssued: number;
+    totalCreditsSpent: number;
+  };
+  isProduction: boolean;
 }
 
 interface TableDataResponse {
@@ -47,216 +62,45 @@ interface TableDataResponse {
 @Tags("Admin Wallet")
 @Security("api_key")
 export class AdminWalletController extends Controller {
+
   @Post("/gateway/dashboard_data")
   public async getGatewayDashboardData(
     @Request() request: JawnAuthenticatedRequest,
-    @Query() search?: string
-  ): Promise<
-    Result<
-      {
-        organizations: Array<{
-          orgId: string;
-          orgName: string;
-          stripeCustomerId: string;
-          totalPayments: number;
-          paymentsCount: number;
-          clickhouseTotalSpend: number;
-          lastPaymentDate: number | null;
-          tier: string;
-          ownerEmail: string;
-          allowNegativeBalance: boolean;
-          creditLimit: number;
-        }>;
-        summary: {
-          totalOrgsWithCredits: number;
-          totalCreditsIssued: number;
-          totalCreditsSpent: number;
-        };
-        isProduction: boolean;
-      },
-      string
-    >
-  > {
+    @Query() search?: string,
+    @Query() sortBy?: string,
+    @Query() sortOrder?: "asc" | "desc"
+  ): Promise<Result<DashboardData, string>> {
     await authCheckThrow(request.authParams.userId);
 
-    // Build search filter
-    const searchFilter = search
-      ? `AND (
-          organization.name ILIKE $1 OR
-          organization.id::text ILIKE $1 OR
-          organization.stripe_customer_id ILIKE $1 OR
-          auth.users.email ILIKE $1
-        )`
-      : "";
-
-    const searchParam = search ? [`%${search}%`] : [];
-
-    // Get ALL organizations (not just those with Stripe payments)
-    // This allows admins to manage wallets even without Stripe integration
-    const orgsResult = await dbExecute<{
-      org_id: string;
-      org_name: string;
-      stripe_customer_id: string;
-      tier: string;
-      owner_email: string;
-      allow_negative_balance: boolean;
-      credit_limit: string;
-    }>(
-      `
-        SELECT
-          organization.id as org_id,
-          organization.name as org_name,
-          organization.stripe_customer_id,
-          organization.tier,
-          auth.users.email as owner_email,
-          organization.allow_negative_balance,
-          organization.credit_limit
-        FROM organization
-        LEFT JOIN auth.users ON organization.owner = auth.users.id
-        WHERE organization.soft_delete = false
-        ${searchFilter}
-        ORDER BY organization.created_at DESC
-        LIMIT 100
-        `,
-      searchParam
-    );
-
-    if (orgsResult.error) {
-      return err(orgsResult.error);
-    }
-
-    if (!orgsResult.data || orgsResult.data.length === 0) {
-      return ok({
-        organizations: [],
-        isProduction: ENVIRONMENT === "production",
-        summary: {
-          totalOrgsWithCredits: 0,
-          totalCreditsIssued: 0,
-          totalCreditsSpent: 0,
-        },
-      });
-    }
-
-    // Get payment data for organizations that have Stripe payments (optional)
     const settingsManager = new SettingsManager();
     const stripeProductSettings =
       await settingsManager.getSetting("stripe:products");
-    let paymentsMap = new Map<
-      string,
-      { total: number; count: number; lastDate: string }
-    >();
+    if (!stripeProductSettings) {
+      return err("Stripe product settings not configured");
+    }
 
-    if (
-      stripeProductSettings &&
-      stripeProductSettings.cloudGatewayTokenUsageProduct
-    ) {
-      const tokenUsageProductId =
-        stripeProductSettings.cloudGatewayTokenUsageProduct;
-      const paymentsResult = await dbExecute<{
-        org_id: string;
-        total_amount_received: number;
-        payments_count: number;
-        last_payment_date: string;
-        allow_negative_balance: boolean;
-        credit_limit: string;
-      }>(
-        `
-          SELECT
-            organization.id as org_id,
-            SUM(stripe.payment_intents.amount_received) as total_amount_received,
-            COUNT(stripe.payment_intents.id) as payments_count,
-            MAX(stripe.payment_intents.created) as last_payment_date
-            
-          FROM stripe.payment_intents
-          LEFT JOIN organization ON organization.stripe_customer_id = stripe.payment_intents.customer
-          WHERE stripe.payment_intents.metadata->>'productId' = $1
-            AND stripe.payment_intents.status = 'succeeded'
-            AND organization.id IS NOT NULL
-          GROUP BY organization.id
-          `,
-        [tokenUsageProductId]
+    const tokenUsageProductId =
+      stripeProductSettings.cloudGatewayTokenUsageProduct;
+    if (!tokenUsageProductId) {
+      return err("Cloud gateway token usage product ID not configured");
+    }
+
+    const adminWalletManager = new AdminWalletManager(request.authParams);
+
+    if (sortBy === "total_spend") {
+      return adminWalletManager.getDashboardWithClickhouseSort(
+        search || "",
+        tokenUsageProductId,
+        sortBy as any,
+        sortOrder
       );
-
-      if (!paymentsResult.error && paymentsResult.data) {
-        paymentsResult.data.forEach((row) => {
-          paymentsMap.set(row.org_id, {
-            total: row.total_amount_received,
-            count: Number(row.payments_count),
-            lastDate: row.last_payment_date,
-          });
-        });
-      }
     }
-
-    // Get ClickHouse spending for these organizations
-    const orgIds = orgsResult.data.map((org) => org.org_id);
-
-    const clickhouseSpendResult = await clickhouseDb.dbQuery<{
-      organization_id: string;
-      total_cost: number;
-    }>(
-      `
-        SELECT
-          organization_id,
-          SUM(cost) as total_cost
-        FROM request_response_rmt
-        WHERE organization_id IN (${orgIds.map((orgId) => `'${orgId}'`).join(",")})
-        and is_passthrough_billing = true
-        GROUP BY organization_id
-        `,
-      orgIds
+    return adminWalletManager.getDashboardWithPostgresSort(
+      search || "",
+      tokenUsageProductId,
+      sortBy as any,
+      sortOrder
     );
-
-    const clickhouseSpendMap = new Map<string, number>();
-    if (!clickhouseSpendResult.error && clickhouseSpendResult.data) {
-      clickhouseSpendResult.data.forEach((row) => {
-        // Divide by precision multiplier to get dollars
-        clickhouseSpendMap.set(
-          row.organization_id,
-          Number(row.total_cost) / COST_PRECISION_MULTIPLIER
-        );
-      });
-    }
-
-    // Combine the data
-    const organizations = orgsResult.data.map((org) => {
-      const payments = paymentsMap.get(org.org_id);
-      return {
-        orgId: org.org_id,
-        orgName: org.org_name || "Unknown",
-        stripeCustomerId: org.stripe_customer_id || "",
-        totalPayments: payments ? payments.total / 100 : 0, // Convert cents to dollars
-        paymentsCount: payments ? payments.count : 0,
-        clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-        lastPaymentDate: payments?.lastDate
-          ? Number(payments.lastDate) * 1000
-          : null, // Convert seconds to milliseconds
-        tier: org.tier || "free",
-        ownerEmail: org.owner_email || "Unknown",
-        allowNegativeBalance: org.allow_negative_balance,
-        creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0, // Convert cents to dollars
-      };
-    });
-
-    // Calculate summary
-    const totalCreditsIssued = organizations.reduce(
-      (sum, org) => sum + org.totalPayments,
-      0
-    );
-    const totalCreditsSpent = organizations.reduce(
-      (sum, org) => sum + org.clickhouseTotalSpend,
-      0
-    );
-
-    return ok({
-      organizations,
-      summary: {
-        totalOrgsWithCredits: organizations.length,
-        totalCreditsIssued,
-        totalCreditsSpent,
-      },
-      isProduction: ENVIRONMENT === "production",
-    });
   }
 
   @Post("/{orgId}")
@@ -617,6 +461,73 @@ export class AdminWalletController extends Controller {
     } catch (error) {
       console.error("Error updating wallet settings:", error);
       return err(`Error updating wallet settings: ${error}`);
+    }
+  }
+
+  @Delete("/{orgId}/disallow-list")
+  public async removeFromDisallowList(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Query() provider: string,
+    @Query() model: string
+  ): Promise<Result<WalletState, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Validate inputs
+    if (!provider || !model) {
+      return err("Provider and model are required");
+    }
+
+    const workerApiUrl =
+      process.env.HELICONE_WORKER_API ||
+      process.env.WORKER_API_URL ||
+      "https://api.helicone.ai";
+    const adminAccessKey = process.env.HELICONE_MANUAL_ACCESS_KEY;
+
+    if (!adminAccessKey) {
+      return err("Admin access key not configured");
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(
+        `${workerApiUrl}/admin/wallet/${orgId}/disallow-list`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${adminAccessKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ provider, model }),
+          signal: controller.signal,
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return err(`Failed to remove from disallow list: ${errorText}`);
+      }
+
+      const walletState = await response.json();
+
+      // Convert values from cents to dollars
+      const convertedWalletState: WalletState = {
+        balance: (walletState.balance || 0) / 100,
+        effectiveBalance: (walletState.effectiveBalance || 0) / 100,
+        totalCredits: (walletState.totalCredits || 0) / 100,
+        totalDebits: (walletState.totalDebits || 0) / 100,
+        totalEscrow: (walletState.totalEscrow || 0) / 100,
+        disallowList: walletState.disallowList || [],
+      };
+
+      return ok(convertedWalletState);
+    } catch (error) {
+      console.error("Error removing from disallow list:", error);
+      return err(`Error removing from disallow list: ${error}`);
     }
   }
 }

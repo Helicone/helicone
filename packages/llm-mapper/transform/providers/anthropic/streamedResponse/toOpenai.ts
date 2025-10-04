@@ -230,15 +230,27 @@ export class AnthropicToOpenAIStreamConverter {
         this.finalizePendingToolCalls(chunks);
 
         const cachedTokens = event.usage.cache_read_input_tokens ?? 0;
+        const cacheWriteTokens = event.usage.cache_creation_input_tokens ?? 0;
 
         this.finalUsage = {
           prompt_tokens: event.usage.input_tokens,
           completion_tokens: event.usage.output_tokens,
           total_tokens: event.usage.input_tokens + event.usage.output_tokens,
-          ...(cachedTokens > 0 && {
+          ...((cachedTokens > 0 || cacheWriteTokens > 0) && {
             prompt_tokens_details: {
               cached_tokens: cachedTokens,
               audio_tokens: 0,
+
+              ...(cacheWriteTokens > 0 && {
+                cache_write_tokens: cacheWriteTokens,
+                cache_write_details: {
+                  write_5m_tokens:
+                    event.usage.cache_creation?.ephemeral_5m_input_tokens ??
+                    0,
+                  write_1h_tokens:
+                    event.usage.cache_creation?.ephemeral_1h_input_tokens ?? 0,
+                },
+              }),
             },
           }),
           completion_tokens_details: {
