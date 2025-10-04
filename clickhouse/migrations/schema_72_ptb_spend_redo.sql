@@ -1,7 +1,5 @@
 -- see docs: https://clickhouse.com/docs/materialized-view/incremental-materialized-view
 
-
-DROP MATERIALIZED VIEW IF EXISTS organization_ptb_spend_mv ON organization_ptb_spend;
 DROP TABLE IF EXISTS organization_ptb_spend;
 
 
