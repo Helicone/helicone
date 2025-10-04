@@ -184,6 +184,15 @@ export class AttemptExecutor {
       );
       requestWrapper.resetObject();
       requestWrapper.setUrl(urlResult.data);
+
+      // For AI Gateway: store original OpenAI format before converting to provider format
+      // This allows the frontend to use OpenAI format without conversion
+      if (endpoint.modelConfig.responseFormat !== "OPENAI") {
+        requestWrapper.requestBodyBuffer.setOriginalOpenAIRequest(
+          JSON.stringify(parsedBody)
+        );
+      }
+
       await requestWrapper.setBody(bodyResult.data);
 
       for (const [key, value] of Object.entries(

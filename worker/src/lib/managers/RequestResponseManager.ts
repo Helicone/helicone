@@ -19,9 +19,9 @@ export class RequestResponseManager {
   async storeRequestResponseRaw(content: {
     organizationId: string;
     requestId: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     requestBodyBuffer: IRequestBodyBuffer;
-    responseBody: any;
+    providerResponse: string;
+    openAIResponse?: string;
   }): Promise<Result<string, string>> {
     const url = this.s3Client.getRequestResponseRawUrl(
       content.requestId,
@@ -29,7 +29,8 @@ export class RequestResponseManager {
     );
 
     const result = await content.requestBodyBuffer.uploadS3Body(
-      content.responseBody,
+      content.providerResponse,
+      content.openAIResponse,
       url
     );
 
