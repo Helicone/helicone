@@ -12,7 +12,7 @@ export const AssistantContent: React.FC<AssistantContentProps> = ({
   mode,
   mappedRequest,
 }) => {
-  const { schema, raw } = mappedRequest;
+  const { raw } = mappedRequest;
   const isError = mappedRequest.heliconeMetadata.status.code >= 400;
   const response = raw.response;
   const { setNotification } = useNotification();

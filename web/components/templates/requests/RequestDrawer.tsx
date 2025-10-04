@@ -305,8 +305,8 @@ export default function RequestDrawer(props: RequestDivProps) {
     return { requestInfo, tokenInfo, parameterInfo };
   }, [request, requestParameters]);
 
-  // Create experiment handler
-  const handleCreateExperiment = useCallback(() => {
+  // Create experiment handler - commented out as unused
+  /*const handleCreateExperiment = useCallback(() => {
     if (!request) return;
 
     jawn
@@ -324,7 +324,7 @@ export default function RequestDrawer(props: RequestDivProps) {
         }
         router.push(`/experiments/${res.data.data?.experimentId}`);
       });
-  }, [jawn, request, router, setNotification]);
+  }, [jawn, request, router, setNotification]);*/
 
   // TODO: Delete legacy prompts code
   const hasNewPromptData = useMemo(

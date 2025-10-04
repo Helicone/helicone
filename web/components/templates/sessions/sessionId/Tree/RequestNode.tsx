@@ -43,7 +43,6 @@ export function RequestNode(props: {
   label?: string;
 }) {
   const {
-    isOnboardingRequest,
     node,
     isRequestSingleChild,
     selectedRequestId,

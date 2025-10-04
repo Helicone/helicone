@@ -72,7 +72,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
   onRequestSelect,
 }) => {
   const messageToScrollToRef = useRef<HTMLDivElement>(null);
-  const [shouldScroll, setShouldScroll] = useState(true);
+  const [shouldScroll] = useState(true);
 
   // Derive messageIndexFilter from metadata if not provided
   const derivedMessageIndexFilter = useMemo(() => {

@@ -109,11 +109,11 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     "pageSize",
     pageSizeProp.toString(),
   );
-  const [sortDirection, setSortDirection] = useQueryParam(
+  const [sortDirection] = useQueryParam(
     "sortDirection",
     sortProp.sortDirection ?? "desc",
   );
-  const [sortKey, setSortKey] = useQueryParam("sortKey", "last_active");
+  const [sortKey] = useQueryParam("sortKey", "last_active");
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [currentTab, setCurrentTab] = useLocalStorage<
     (typeof TABS)[number]["id"]
