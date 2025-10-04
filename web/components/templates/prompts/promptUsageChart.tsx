@@ -23,7 +23,7 @@ const PromptUsageChart = (props: PromptUsageChartProps) => {
     };
   };
 
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
+  const [timeFilter] = useState<TimeFilter>(getTimeFilter());
 
   const timeIncrement = getTimeInterval(timeFilter);
 
@@ -48,12 +48,8 @@ const PromptUsageChart = (props: PromptUsageChartProps) => {
     timeZoneDifference: new Date().getTimezoneOffset(),
   };
 
-  const {
-    data,
-    isLoading: isPromptRequestsLoading,
-    refetch,
-    total,
-  } = usePromptRequestsOverTime(params, "promptRequests" + promptId);
+  const { data, isLoading: isPromptRequestsLoading } =
+    usePromptRequestsOverTime(params, "promptRequests" + promptId);
 
   return (
     <>

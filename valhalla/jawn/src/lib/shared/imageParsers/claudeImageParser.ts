@@ -18,7 +18,7 @@ export class ClaudeImageParser extends ImageModelRequestBodyParser {
               if (item.type === "image") {
                 const assetId = this.generateAssetId(
                   this.requestId,
-                  this.assetIndex++
+                  this.assetIndex++,
                 );
                 const base64Image = `data:${item.source.media_type};${item.source.type},${item.source.data}`;
                 requestAssets.set(assetId, base64Image);
@@ -30,7 +30,7 @@ export class ClaudeImageParser extends ImageModelRequestBodyParser {
       }
     } catch (error) {
       console.error(
-        `Error processing request body for model: ${this.modelName}, error: ${error}`
+        `Error processing request body for model: ${this.modelName}, error: ${error}`,
       );
     }
 

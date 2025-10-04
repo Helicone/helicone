@@ -29,7 +29,7 @@ export class OnlineEvalHandler extends AbstractLogHandler {
     const hasOnlineEvals = await cacheResultCustom(
       "has-online-evals-" + orgId,
       async () => await onlineEvalStore.hasOnlineEvals(orgId),
-      kvCache
+      kvCache,
     );
 
     if (hasOnlineEvals.data === false) {
@@ -44,11 +44,11 @@ export class OnlineEvalHandler extends AbstractLogHandler {
 
     for (const onlineEval of onlineEvals.data ?? []) {
       const sampleRate = Number(
-        (onlineEval.config as any)?.["sampleRate"] ?? 100
+        (onlineEval.config as any)?.["sampleRate"] ?? 100,
       );
 
       const properties = Object.keys(
-        context.processedLog.request.properties ?? {}
+        context.processedLog.request.properties ?? {},
       ).map((property) => property.toLowerCase());
       if (
         isNaN(sampleRate) ||
@@ -71,7 +71,7 @@ export class OnlineEvalHandler extends AbstractLogHandler {
       const shouldOnlineEvalProperties = propertyFilters.every(
         (propertyFilter) =>
           context.processedLog.request.properties?.[propertyFilter.key] ===
-          propertyFilter.value
+          propertyFilter.value,
       );
 
       if (!shouldOnlineEvalProperties) {

@@ -19,7 +19,7 @@ export class AuthenticationHandler extends AbstractLogHandler {
       const orgResult = await getAndStoreInCache(
         `auth-handler-org-${stableStringify(authResult.data)}-${authResult.data.organizationId}`,
         () => this.getOrganization(authResult.data),
-        60 * 5 // 5 minutes
+        60 * 5, // 5 minutes
       );
       if (orgResult.error || !orgResult.data) {
         return err(`Organization not found: ${orgResult.error}`);
@@ -31,13 +31,13 @@ export class AuthenticationHandler extends AbstractLogHandler {
       return await super.handle(context);
     } catch (error) {
       return err(
-        `Error processing authentication: ${error}, Context: ${this.constructor.name}`
+        `Error processing authentication: ${error}, Context: ${this.constructor.name}`,
       );
     }
   }
 
   private async authenticateEntry(
-    context: HandlerContext
+    context: HandlerContext,
   ): PromiseGenericResult<AuthParams> {
     const start = performance.now();
     context.timingMetrics.push({
@@ -66,14 +66,14 @@ export class AuthenticationHandler extends AbstractLogHandler {
     const authResult = await getAndStoreInCache(
       `auth-authenticateEntry-${stableStringify(heliconeAuth)}-${heliconeAuth.token}`,
       async () => authClient.authenticate(heliconeAuth),
-      60 * 5 // 5 minutes
+      60 * 5, // 5 minutes
     );
 
     if (authResult.error || !authResult.data?.organizationId) {
       return err(
         `Authentication failed: ${
           authResult.error || "Missing organization ID"
-        }`
+        }`,
       );
     }
 
@@ -81,7 +81,7 @@ export class AuthenticationHandler extends AbstractLogHandler {
   }
 
   private async getOrganization(
-    authParams: AuthParams
+    authParams: AuthParams,
   ): PromiseGenericResult<OrgParams> {
     const authClient = getHeliconeAuthClient();
     const orgResult = await authClient.getOrganization(authParams);

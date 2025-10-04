@@ -53,7 +53,7 @@ export class PlaygroundController extends Controller {
       useAIGateway?: boolean;
       logRequest?: boolean;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       | OpenAI.Chat.Completions.ChatCompletion
@@ -75,7 +75,7 @@ export class PlaygroundController extends Controller {
           id: string;
         }>(
           `SELECT id from feature_flags where org_id = $1 and feature = 'ai_gateway'`,
-          [request.authParams.organizationId]
+          [request.authParams.organizationId],
         );
         if (featureFlags.error) {
           return err(`Failed to get feature flags: ${featureFlags.error}`);
@@ -86,7 +86,7 @@ export class PlaygroundController extends Controller {
         if (!hasAccessToAIGateway) {
           this.setStatus(403);
           return err(
-            "You do not have access to the AI Gateway. Please contact support to enable this feature."
+            "You do not have access to the AI Gateway. Please contact support to enable this feature.",
           );
         }
       }
@@ -104,7 +104,7 @@ export class PlaygroundController extends Controller {
 
       if (tempKey.error || !tempKey.data) {
         throw new Error(
-          tempKey.error || "Failed to generate temporary API key"
+          tempKey.error || "Failed to generate temporary API key",
         );
       }
 
@@ -121,7 +121,7 @@ export class PlaygroundController extends Controller {
          AND soft_delete = false
          AND provider_name = 'openrouter'
          LIMIT 1`,
-        [request.authParams.organizationId]
+        [request.authParams.organizationId],
       );
 
       let openRouterKey = await GET_KEY("key:openrouter");
@@ -173,7 +173,7 @@ export class PlaygroundController extends Controller {
             } as any,
             {
               signal: abortController.signal,
-            }
+            },
           );
 
           if (params.stream) {
@@ -235,7 +235,7 @@ export class PlaygroundController extends Controller {
 
           if (!content && !calls) {
             console.warn(
-              "[API] LLM call resulted in empty content and no tool calls."
+              "[API] LLM call resulted in empty content and no tool calls.",
             );
           }
 
@@ -261,7 +261,7 @@ export class PlaygroundController extends Controller {
               ) {
                 this.setStatus(429);
                 return err(
-                  "You have reached your free playground limit. Please add your own OpenRouter key to continue using the Playground."
+                  "You have reached your free playground limit. Please add your own OpenRouter key to continue using the Playground.",
                 );
               }
 
@@ -294,22 +294,22 @@ export class PlaygroundController extends Controller {
   @Post("/requests-through-helicone")
   public async requestsThroughHelicone(
     @Body() params: { requestsThroughHelicone: boolean },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     const playgroundManager = new PlaygroundManager(request.authParams);
     return playgroundManager.setPlaygroundRequestsThroughHelicone(
       request.authParams.organizationId,
-      params.requestsThroughHelicone
+      params.requestsThroughHelicone,
     );
   }
 
   @Get("/requests-through-helicone")
   public async getRequestsThroughHelicone(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<boolean, string>> {
     const playgroundManager = new PlaygroundManager(request.authParams);
     return playgroundManager.getRequestsThroughHelicone(
-      request.authParams.organizationId
+      request.authParams.organizationId,
     );
   }
 }

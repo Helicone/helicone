@@ -20,7 +20,7 @@ export async function authenticateBearer(bearer: string): Promise<AuthResult> {
         organization.tier as tier,
         helicone_api_keys.key_permissions
     FROM helicone_api_keys INNER JOIN organization ON helicone_api_keys.organization_id = organization.id WHERE helicone_api_keys.api_key_hash = $1 AND helicone_api_keys.soft_delete = false`,
-    [hashedBearer]
+    [hashedBearer],
   );
 
   if (apiKey.error) {
@@ -44,7 +44,7 @@ export async function authenticateBearer(bearer: string): Promise<AuthResult> {
         organization.tier as tier,
         helicone_api_keys.key_permissions
       FROM helicone_api_keys INNER JOIN organization ON helicone_api_keys.organization_id = organization.id WHERE helicone_api_keys.api_key_hash = $1 AND helicone_api_keys.soft_delete = false`,
-      [hashedBearer2]
+      [hashedBearer2],
     );
   }
 

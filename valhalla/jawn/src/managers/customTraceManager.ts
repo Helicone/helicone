@@ -52,12 +52,14 @@ const getTime = (
         seconds: number;
         milliseconds: number;
       }
-    | string
+    | string,
 ) => {
   if (typeof time === "string") {
     if (/^\d+$/.test(time)) {
       const timestamp = parseInt(time);
-      return timestamp < 4102444800 ? new Date(timestamp * 1000) : new Date(timestamp);
+      return timestamp < 4102444800
+        ? new Date(timestamp * 1000)
+        : new Date(timestamp);
     }
     return new Date(time);
   }
@@ -99,14 +101,14 @@ export class CustomTraceManager {
   }) {
     const key = this.s3Client.getRawRequestResponseKey(
       requestId,
-      organizationId
+      organizationId,
     );
     const s3Result = await this.s3Client.store(
       key,
       JSON.stringify({
         request: requestBody,
         response: responseBody,
-      })
+      }),
     );
     if (s3Result.error) {
       console.error(`Error storing request response in S3: ${s3Result.error}`);
@@ -117,7 +119,7 @@ export class CustomTraceManager {
     const kafkaProducer = new HeliconeQueueProducer();
     await kafkaProducer.sendMessages(
       [kafkaMessage],
-      "request-response-logs-prod"
+      "request-response-logs-prod",
     );
   }
 
@@ -125,11 +127,11 @@ export class CustomTraceManager {
     asyncLog: AsyncLogModel,
     requestWrapperHeaders: Headers,
     authorization: string,
-    authParams: AuthParams
+    authParams: AuthParams,
   ) {
     const requestHeaders = new Headers(asyncLog.providerRequest.meta);
     const heliconeHeaders = new HeliconeHeaders(
-      mergeHeaders(requestHeaders, requestWrapperHeaders)
+      mergeHeaders(requestHeaders, requestWrapperHeaders),
     );
 
     const requestBodyString = JSON.stringify(asyncLog.providerRequest.json);

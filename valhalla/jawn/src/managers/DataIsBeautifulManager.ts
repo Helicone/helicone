@@ -41,17 +41,17 @@ function bigNumberRound(num: number): number {
 
 export class DataIsBeautifulManager {
   async getTotalRequests(
-    filters: DataIsBeautifulRequestBody
+    filters: DataIsBeautifulRequestBody,
   ): Promise<Result<number, string>> {
     const timeCondition = this.getTimeCondition(filters.timespan);
     const filteredModels = this.filterModelNames(
       filters.models,
-      filters.provider
+      filters.provider,
     );
     const { caseStatements, whereCondition } =
       this.buildCaseStatementsAndWhereCondition(filteredModels);
     const providerCondition = this.getProviderCondition(
-      filters.provider ? [filters.provider] : undefined
+      filters.provider ? [filters.provider] : undefined,
     );
 
     const query = `
@@ -68,7 +68,7 @@ export class DataIsBeautifulManager {
   }
 
   async getProviderPercentage(
-    filters: DataIsBeautifulRequestBody
+    filters: DataIsBeautifulRequestBody,
   ): Promise<Result<ProviderBreakdown[], string>> {
     const timeCondition = this.getTimeCondition(filters.timespan);
 
@@ -87,7 +87,7 @@ export class DataIsBeautifulManager {
       AND ${timeCondition}
       AND provider IN (${(
         Array.from(
-          new Set(modelNames.map((model) => model.provider))
+          new Set(modelNames.map((model) => model.provider)),
         ) as OpenStatsProviderName[]
       )
         .map((provider) => `'${provider}'`)
@@ -106,17 +106,17 @@ export class DataIsBeautifulManager {
   }
 
   async getModelCost(
-    filters: DataIsBeautifulRequestBody
+    filters: DataIsBeautifulRequestBody,
   ): Promise<Result<ModelCost[], string>> {
     const timeCondition = this.getTimeCondition(filters.timespan);
     const filteredModels = this.filterModelNames(
       filters.models,
-      filters.provider
+      filters.provider,
     );
     const { caseStatements, whereCondition } =
       this.buildCaseStatementsAndWhereCondition(filteredModels);
     const providerCondition = this.getProviderCondition(
-      filters.provider ? [filters.provider] : undefined
+      filters.provider ? [filters.provider] : undefined,
     );
 
     const query = `
@@ -140,7 +140,7 @@ export class DataIsBeautifulManager {
           "status = '200'",
           timeCondition,
           providerCondition,
-          whereCondition
+          whereCondition,
         )}
       GROUP BY model
     )
@@ -163,7 +163,7 @@ export class DataIsBeautifulManager {
     }
 
     const filteredResults = result.data?.filter(
-      (modelCost) => modelCost.cost && modelCost.cost > 0
+      (modelCost) => modelCost.cost && modelCost.cost > 0,
     );
 
     const totalCost =
@@ -179,17 +179,17 @@ export class DataIsBeautifulManager {
   }
 
   async getModelPercentageOverTime(
-    filters: DataIsBeautifulRequestBody
+    filters: DataIsBeautifulRequestBody,
   ): Promise<Result<ModelBreakdownOverTime[], string>> {
     const timeCondition = this.getTimeCondition(filters.timespan);
     const filteredModels = this.filterModelNames(
       filters.models,
-      filters.provider
+      filters.provider,
     );
     const { whereCondition, caseStatements } =
       this.buildCaseStatementsAndWhereCondition(filteredModels);
     const providerCondition = this.getProviderCondition(
-      filters.provider ? [filters.provider] : undefined
+      filters.provider ? [filters.provider] : undefined,
     );
 
     const query = `
@@ -211,7 +211,7 @@ export class DataIsBeautifulManager {
       "status = '200'",
       timeCondition,
       providerCondition,
-      whereCondition
+      whereCondition,
     )}
   GROUP BY day, matched_model
   ORDER BY day, matched_model
@@ -253,7 +253,7 @@ export class DataIsBeautifulManager {
       .reduce((acc, model) => {
         const existing = acc.find(
           (m) =>
-            m.date === model.date && m.matched_model === model.matched_model
+            m.date === model.date && m.matched_model === model.matched_model,
         );
         if (existing) {
           existing.percent += model.percent;
@@ -267,17 +267,17 @@ export class DataIsBeautifulManager {
   }
 
   async getTTFTvsPromptInputLength(
-    filters: DataIsBeautifulRequestBody
+    filters: DataIsBeautifulRequestBody,
   ): Promise<Result<TTFTvsPromptLength[], string>> {
     const timeCondition = this.getTimeCondition(filters.timespan);
     const filteredModels = this.filterModelNames(
       filters.models,
-      filters.provider
+      filters.provider,
     );
     const { caseStatements, whereCondition } =
       this.buildCaseStatementsAndWhereCondition(filteredModels);
     const providerCondition = this.getProviderCondition(
-      filters.provider ? [filters.provider] : undefined
+      filters.provider ? [filters.provider] : undefined,
     );
 
     const query = `
@@ -300,7 +300,7 @@ export class DataIsBeautifulManager {
           timeCondition,
           providerCondition,
           whereCondition,
-          "true"
+          "true",
         )}
     GROUP BY
         prompt_length
@@ -317,17 +317,17 @@ export class DataIsBeautifulManager {
   }
 
   async getModelPercentage(
-    filters: DataIsBeautifulRequestBody
+    filters: DataIsBeautifulRequestBody,
   ): Promise<Result<ModelBreakdown[], string>> {
     const timeCondition = this.getTimeCondition(filters.timespan);
     const filteredModels = this.filterModelNames(
       filters.models,
-      filters.provider
+      filters.provider,
     );
     const { caseStatements, whereCondition } =
       this.buildCaseStatementsAndWhereCondition(filteredModels);
     const providerCondition = this.getProviderCondition(
-      filters.provider ? [filters.provider] : undefined
+      filters.provider ? [filters.provider] : undefined,
     );
 
     const query = `
@@ -354,7 +354,7 @@ export class DataIsBeautifulManager {
         "status = '200'",
         timeCondition,
         providerCondition,
-        whereCondition
+        whereCondition,
       )}
     GROUP BY ${caseStatements ? "matched_model" : "model"}, total_count.total
     ORDER BY percent DESC;
@@ -378,7 +378,7 @@ export class DataIsBeautifulManager {
         ${allProviders
           .map(
             (provider) =>
-              `WHEN provider LIKE '%${provider}%' THEN '${provider}'`
+              `WHEN provider LIKE '%${provider}%' THEN '${provider}'`,
           )
           .join(" ")}
         ELSE 'Other'
@@ -450,7 +450,7 @@ export class DataIsBeautifulManager {
 
     const result = await clickhouseDb.dbQuery<{ total_cost: number }>(
       query,
-      []
+      [],
     );
     if (!result.data?.[0]?.total_cost) {
       return 5_700_000;
@@ -498,12 +498,12 @@ export class DataIsBeautifulManager {
 
   filterModelNames(
     models: ModelName[] | undefined,
-    provider: OpenStatsProviderName | undefined
+    provider: OpenStatsProviderName | undefined,
   ): ModelElement[] {
     return modelNames.filter(
       (model) =>
         (!models || models.includes(model.model)) &&
-        (!provider || model.provider === provider)
+        (!provider || model.provider === provider),
     );
   }
 
@@ -513,15 +513,15 @@ export class DataIsBeautifulManager {
         model.variations
           .map(
             (variation) =>
-              `WHEN model LIKE '%${variation}%' THEN '${model.model}'`
+              `WHEN model LIKE '%${variation}%' THEN '${model.model}'`,
           )
-          .join(" ")
+          .join(" "),
       )
       .join(" ");
 
     const whereCondition = filteredModels
       .flatMap((model) =>
-        model.variations.map((variation) => `model LIKE '%${variation}%'`)
+        model.variations.map((variation) => `model LIKE '%${variation}%'`),
       )
       .join(" OR ");
 

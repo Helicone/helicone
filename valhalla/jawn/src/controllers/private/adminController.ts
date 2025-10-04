@@ -39,7 +39,7 @@ export const authCheckThrow = async (userId: string | undefined) => {
 
   const result = await dbExecute<{ user_id: string }>(
     "SELECT user_id FROM admins WHERE user_id = $1",
-    [userId]
+    [userId],
   );
 
   if (result.error) {
@@ -62,7 +62,7 @@ export class AdminController extends Controller {
   @Post("/has-feature-flag")
   public async hasFeatureFlag(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: { feature: string; orgId: string }
+    @Body() body: { feature: string; orgId: string },
   ): Promise<Result<boolean, string>> {
     try {
       const { data } = await dbExecute<{
@@ -82,7 +82,7 @@ export class AdminController extends Controller {
   @Post("/feature-flags")
   public async updateFeatureFlags(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: { flag: string; orgId: string }
+    @Body() body: { flag: string; orgId: string },
   ) {
     await authCheckThrow(request.authParams.userId);
 
@@ -90,20 +90,20 @@ export class AdminController extends Controller {
 
     await dbExecute(
       `INSERT INTO feature_flags (org_id, feature) VALUES ($1, $2)`,
-      [orgId, flag]
+      [orgId, flag],
     );
   }
 
   @Delete("/feature-flags")
   public async deleteFeatureFlag(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: { flag: string; orgId: string }
+    @Body() body: { flag: string; orgId: string },
   ) {
     await authCheckThrow(request.authParams.userId);
 
     await dbExecute(
       `DELETE FROM feature_flags WHERE org_id = $1 AND feature = $2`,
-      [body.orgId, body.flag]
+      [body.orgId, body.flag],
     );
   }
 
@@ -125,7 +125,7 @@ export class AdminController extends Controller {
         LEFT JOIN organization ON feature_flags.org_id = organization.id
       GROUP BY organization.id, organization.name
       `,
-      []
+      [],
     );
   }
 
@@ -136,7 +136,7 @@ export class AdminController extends Controller {
     body: {
       limit: number;
       minRequests: number;
-    }
+    },
   ): Promise<{
     organizations: Array<{
       organization: {
@@ -325,7 +325,7 @@ export class AdminController extends Controller {
         };
       })
       .sort(
-        (a, b) => b.usage.requests_last_30_days - a.usage.requests_last_30_days
+        (a, b) => b.usage.requests_last_30_days - a.usage.requests_last_30_days,
       );
 
     return { organizations: organizations ?? [] };
@@ -342,7 +342,7 @@ export class AdminController extends Controller {
       orgsId?: string[];
       orgsNameContains?: string[];
       emailContains?: string[];
-    }
+    },
   ) {
     console.log("getTopOrgs");
     await authCheckThrow(request.authParams.userId);
@@ -388,7 +388,7 @@ export class AdminController extends Controller {
       users_view.email,
       users_view.last_sign_in_at;
     `,
-      []
+      [],
     );
 
     if (!orgData.data) {
@@ -419,7 +419,7 @@ export class AdminController extends Controller {
     GROUP BY organization_id
     ORDER BY ct DESC
     `,
-      []
+      [],
     );
 
     if (!orgs.data) {
@@ -428,7 +428,7 @@ export class AdminController extends Controller {
 
     if (body.orgsId) {
       orgs.data = orgs.data.filter((org) =>
-        body.orgsId?.includes(org.organization_id)
+        body.orgsId?.includes(org.organization_id),
       );
     }
     if (!orgs.data) {
@@ -437,7 +437,7 @@ export class AdminController extends Controller {
     // Step 2: Fetch organization details including members
 
     orgs.data = orgs.data?.filter((org) =>
-      orgData.data?.find((od) => od.id === org.organization_id)
+      orgData.data?.find((od) => od.id === org.organization_id),
     );
 
     if (body.orgsNameContains) {
@@ -446,8 +446,8 @@ export class AdminController extends Controller {
           orgData.data
             ?.find((od) => od.id === org.organization_id)
             ?.name.toLowerCase()
-            .includes(name.toLowerCase())
-        )
+            .includes(name.toLowerCase()),
+        ),
       );
     }
 
@@ -457,8 +457,8 @@ export class AdminController extends Controller {
           orgData.data
             ?.find((od) => od.id === org.organization_id)
             ?.owner_email.toLowerCase()
-            .includes(email.toLowerCase())
-        )
+            .includes(email.toLowerCase()),
+        ),
       );
     }
 
@@ -509,16 +509,16 @@ export class AdminController extends Controller {
         body.endDate
       }') STEP INTERVAL 1 ${timeGrain}
     `,
-      []
+      [],
     );
 
     // Step 4: Merge all data into one massive object
     const mergedData = orgs.data!.map((org) => {
       const orgDetail = orgData.data!.find(
-        (od) => od?.id! === org.organization_id
+        (od) => od?.id! === org.organization_id,
       );
       const orgOverTime = orgsOverTime.data!.filter(
-        (ot) => ot!.organization_id! === org.organization_id
+        (ot) => ot!.organization_id! === org.organization_id,
       );
 
       return {
@@ -552,7 +552,7 @@ export class AdminController extends Controller {
       SELECT user_email, id, created_at, user_id FROM
       admins
       `,
-      []
+      [],
     );
 
     return data ?? [];
@@ -566,7 +566,7 @@ export class AdminController extends Controller {
       organizationId?: string;
       userId?: string;
       email?: string;
-    }
+    },
   ): Promise<{
     organizations: Array<{
       organization: {
@@ -603,7 +603,7 @@ export class AdminController extends Controller {
 
     if (!organizationId && !userId && !email) {
       throw new Error(
-        "At least one of organizationId, userId, or email must be provided"
+        "At least one of organizationId, userId, or email must be provided",
       );
     }
 
@@ -750,7 +750,7 @@ export class AdminController extends Controller {
             all_time_count: Number(allTimeCount),
           },
         };
-      })
+      }),
     );
 
     return { organizations };
@@ -759,7 +759,7 @@ export class AdminController extends Controller {
   @Get("/settings/{name}")
   public async getSetting(
     @Path() name: SettingName,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Setting> {
     await authCheckThrow(request.authParams.userId);
 
@@ -769,7 +769,7 @@ export class AdminController extends Controller {
       `
       SELECT settings FROM helicone_settings WHERE name = $1
       `,
-      [name]
+      [name],
     );
 
     if (error || !data) {
@@ -782,7 +782,7 @@ export class AdminController extends Controller {
 
   @Get("/settings")
   public async getSettings(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     {
       name: string;
@@ -798,7 +798,7 @@ export class AdminController extends Controller {
       `
       SELECT name, settings FROM helicone_settings
       `,
-      []
+      [],
     );
 
     return (
@@ -816,7 +816,7 @@ export class AdminController extends Controller {
     body: {
       name: string;
       settings: any;
-    }
+    },
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
@@ -825,7 +825,7 @@ export class AdminController extends Controller {
       INSERT INTO helicone_settings (name, settings) VALUES ($1, $2)
       ON CONFLICT (name) DO UPDATE SET settings = $2
       `,
-      [body.name, JSON.stringify(body.settings)]
+      [body.name, JSON.stringify(body.settings)],
     );
 
     if (error) {
@@ -839,7 +839,7 @@ export class AdminController extends Controller {
     @Body()
     body: {
       requestBody: any;
-    }
+    },
   ) {
     await authCheckThrow(request.authParams.userId);
 
@@ -868,7 +868,7 @@ export class AdminController extends Controller {
     @Body()
     body: {
       orgName: string;
-    }
+    },
   ): Promise<{
     orgs: {
       name: string;
@@ -884,7 +884,7 @@ export class AdminController extends Controller {
       `
       SELECT name, id FROM organization WHERE name ILIKE $1
       `,
-      [body.orgName]
+      [body.orgName],
     );
     return {
       orgs:
@@ -909,7 +909,7 @@ export class AdminController extends Controller {
         | "12 months"
         | "24 months";
       groupBy: "hour" | "day" | "week" | "month";
-    }
+    },
   ): Promise<{
     newOrgsOvertime: {
       count: string;
@@ -944,7 +944,7 @@ export class AdminController extends Controller {
       ORDER BY day ASC
 
     `,
-      []
+      [],
     );
 
     const userData = await dbExecute<{
@@ -962,7 +962,7 @@ export class AdminController extends Controller {
       GROUP BY day
       ORDER BY day ASC
     `,
-      []
+      [],
     );
 
     const countBeforeTimeFilter = await dbExecute<{
@@ -972,7 +972,7 @@ export class AdminController extends Controller {
       SELECT count(*) as count FROM auth.users
       WHERE created_at < now() - INTERVAL '${body.timeFilter}'
       `,
-      []
+      [],
     );
 
     const userOverTime = await dbExecute<{
@@ -994,7 +994,7 @@ export class AdminController extends Controller {
       FROM user_counts
       ORDER BY day ASC
     `,
-      []
+      [],
     );
 
     return {
@@ -1017,7 +1017,7 @@ export class AdminController extends Controller {
     body: {
       orgId: string;
       adminIds: string[];
-    }
+    },
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
     const { orgId, adminIds } = body;
@@ -1027,7 +1027,7 @@ export class AdminController extends Controller {
         `
       INSERT INTO organization_member (organization, member, org_role) VALUES ($1, $2, $3)
       `,
-        [orgId, adminId, "admin"]
+        [orgId, adminId, "admin"],
       );
 
       if (error) {
@@ -1043,7 +1043,7 @@ export class AdminController extends Controller {
     body: {
       title: string;
       message: string;
-    }
+    },
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
@@ -1051,7 +1051,7 @@ export class AdminController extends Controller {
       `
       INSERT INTO alert_banners (title, message, active) VALUES ($1, $2, $3)
       `,
-      [body.title, body.message, false]
+      [body.title, body.message, false],
     );
 
     if (error) {
@@ -1066,7 +1066,7 @@ export class AdminController extends Controller {
     body: {
       id: number;
       active: boolean;
-    }
+    },
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
@@ -1078,14 +1078,14 @@ export class AdminController extends Controller {
       `
       SELECT * FROM alert_banners ORDER BY created_at DESC
       `,
-      []
+      [],
     );
 
     if (body.active) {
       const activeBanner = data?.find((banner) => banner.active);
       if (activeBanner) {
         throw new Error(
-          "There is already an active banner. Please deactivate it first"
+          "There is already an active banner. Please deactivate it first",
         );
       }
     }
@@ -1094,7 +1094,7 @@ export class AdminController extends Controller {
       `
       UPDATE alert_banners SET active = $1, updated_at = $2 WHERE id = $3
       `,
-      [body.active, new Date().toISOString(), body.id]
+      [body.active, new Date().toISOString(), body.id],
     );
 
     if (error) {
@@ -1110,7 +1110,7 @@ export class AdminController extends Controller {
       timeRange: string;
       limit: number;
       groupBy?: string;
-    }
+    },
   ): Promise<{
     organizations: Array<{
       organization_id: string;
@@ -1326,7 +1326,7 @@ export class AdminController extends Controller {
   @Get("/subscription-data")
   public async getSubscriptionData(
     @Request() request: JawnAuthenticatedRequest,
-    @Query() forceRefresh?: boolean
+    @Query() forceRefresh?: boolean,
   ): Promise<{
     subscriptions: Stripe.Subscription[];
     invoices: Stripe.Invoice[];
@@ -1356,7 +1356,7 @@ export class AdminController extends Controller {
       hasCosts: boolean;
       fromDate?: string;
       toDate?: string;
-    }
+    },
   ): Promise<{
     query: string;
     results: Array<{
@@ -1391,7 +1391,7 @@ export class AdminController extends Controller {
     const results = result.data || [];
     const totalCount = results.reduce(
       (sum, row) => sum + parseInt(row.count),
-      0
+      0,
     );
 
     return {
@@ -1405,7 +1405,7 @@ export class AdminController extends Controller {
   public async deduplicateRequestResponseRmt(
     @Request() request: JawnAuthenticatedRequest,
     @Body()
-    body: {}
+    body: {},
   ): Promise<{
     query: string;
     message: string;
@@ -1437,7 +1437,7 @@ export class AdminController extends Controller {
       confirmed: boolean;
       fromDate?: string;
       toDate?: string;
-    }
+    },
   ): Promise<{
     query: string;
   }> {
@@ -1501,12 +1501,12 @@ export class AdminController extends Controller {
   @Get("/helix-thread/{sessionId}")
   public async getHelixThread(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() sessionId: string
+    @Path() sessionId: string,
   ): Promise<Result<InAppThread, string>> {
     await authCheckThrow(request.authParams.userId);
     const thread = await dbExecute<InAppThread>(
       `SELECT * FROM in_app_threads WHERE id = $1`,
-      [sessionId]
+      [sessionId],
     );
     if (thread.error) {
       return err(thread.error);

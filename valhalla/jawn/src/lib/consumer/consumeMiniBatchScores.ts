@@ -10,10 +10,10 @@ export async function consumeMiniBatchScores(
   lastOffset: string,
   miniBatchId: string,
   batchPartition: number,
-  topic: QueueTopics
+  topic: QueueTopics,
 ): PromiseGenericResult<string> {
   console.log(
-    `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`
+    `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`,
   );
 
   const scoresManager = new ScoreManager({
@@ -28,7 +28,7 @@ export async function consumeMiniBatchScores(
         lastOffset: lastOffset,
         messageCount: messages.length,
       },
-      messages
+      messages,
     );
     return ok(miniBatchId);
   } catch (error) {

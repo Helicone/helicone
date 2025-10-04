@@ -26,12 +26,12 @@ export default async function ModelCostPage({
   const modelExists = initialCostData.some(
     (d: CostData) =>
       d.provider.toLowerCase() === decodedProvider.toLowerCase() &&
-      d.model.toLowerCase() === decodedModel.toLowerCase()
+      d.model.toLowerCase() === decodedModel.toLowerCase(),
   );
   if (!modelExists) {
     const providerExists = providerWithModels.some(
       (p: ProviderWithModels) =>
-        p.provider.toLowerCase() === decodedProvider.toLowerCase()
+        p.provider.toLowerCase() === decodedProvider.toLowerCase(),
     );
     if (!providerExists) {
       notFound();

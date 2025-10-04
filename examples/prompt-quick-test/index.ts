@@ -54,7 +54,7 @@ async function main() {
         "Helicone-Prompt-Id": "tino-test2",
         "Helicone-Session-Name": "QA Wolf",
       },
-    }
+    },
   );
 
   try {

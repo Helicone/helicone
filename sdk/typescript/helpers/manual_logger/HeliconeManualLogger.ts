@@ -25,11 +25,11 @@ export class HeliconeManualLogger {
     let endpoint = this.LOGGING_ENDPOINT;
     const key = provider ? String(provider).toUpperCase() : undefined;
     const providerRoutes = new Map([
-      ['OPENAI', 'oai'],
-      ['ANTHROPIC', 'anthropic'],
-      ['GOOGLE', 'googleapis']
+      ["OPENAI", "oai"],
+      ["ANTHROPIC", "anthropic"],
+      ["GOOGLE", "googleapis"],
     ]);
-    const route = key ? (providerRoutes.get(key) || 'custom') : 'custom';
+    const route = key ? providerRoutes.get(key) || "custom" : "custom";
     const knownRouteRegex = /(\/(custom|oai|anthropic|googleapis)\/v1\/log)$/;
     return knownRouteRegex.test(endpoint)
       ? endpoint.replace(knownRouteRegex, `/${route}/v1/log`)
@@ -44,7 +44,7 @@ export class HeliconeManualLogger {
    */
   public logBuilder(
     request: HeliconeLogRequest,
-    additionalHeaders?: Record<string, string>
+    additionalHeaders?: Record<string, string>,
   ): HeliconeLogBuilder {
     return new HeliconeLogBuilder(this, request, additionalHeaders);
   }
@@ -60,7 +60,7 @@ export class HeliconeManualLogger {
     request: HeliconeLogRequest,
     operation: (resultRecorder: HeliconeResultRecorder) => Promise<T>,
     additionalHeaders?: Record<string, string>,
-    provider?: string
+    provider?: string,
   ): Promise<T> {
     const startTime = Date.now();
     const resultRecorder = new HeliconeResultRecorder();
@@ -94,7 +94,7 @@ export class HeliconeManualLogger {
   public async logSingleStream(
     request: HeliconeLogRequest,
     stream: ReadableStream,
-    additionalHeaders?: Record<string, string>
+    additionalHeaders?: Record<string, string>,
   ): Promise<void> {
     const startTime = Date.now();
     const resultRecorder = new HeliconeStreamResultRecorder();
@@ -140,7 +140,7 @@ export class HeliconeManualLogger {
     options: {
       additionalHeaders?: Record<string, string>;
       latencyMs?: number;
-    }
+    },
   ): Promise<void> {
     const startTime = Date.now();
     const endTime = options.latencyMs
@@ -180,7 +180,7 @@ export class HeliconeManualLogger {
   public async logStream<T>(
     request: HeliconeLogRequest,
     operation: (resultRecorder: HeliconeStreamResultRecorder) => Promise<T>,
-    additionalHeaders?: Record<string, string>
+    additionalHeaders?: Record<string, string>,
   ): Promise<T> {
     const startTime = Date.now();
     const resultRecorder = new HeliconeStreamResultRecorder();
@@ -215,7 +215,7 @@ export class HeliconeManualLogger {
       timeToFirstToken?: number;
       status?: number;
       provider?: string;
-    }
+    },
   ): Promise<void> {
     const { startTime, endTime, additionalHeaders, status = 200 } = options;
 
@@ -271,18 +271,21 @@ export class HeliconeManualLogger {
     };
 
     try {
-      const response = await fetch(this.getLoggingEndpoint(options.provider), fetchOptions);
+      const response = await fetch(
+        this.getLoggingEndpoint(options.provider),
+        fetchOptions,
+      );
       if (!response.ok) {
         console.error(
           "Error making request to Helicone log endpoint:",
-          response.statusText
+          response.statusText,
         );
       }
     } catch (error: any) {
       console.error(
         "Error making request to Helicone log endpoint:",
         error?.message,
-        error
+        error,
       );
     }
   }
@@ -322,7 +325,7 @@ class HeliconeStreamResultRecorder {
           streamedData.push(decoder.decode(chunk));
         }
         return streamedData.join("");
-      })
+      }),
     );
   }
 }

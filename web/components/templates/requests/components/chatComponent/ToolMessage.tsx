@@ -83,7 +83,11 @@ export default function ToolMessage({
             className="w-full rounded-none bg-white dark:bg-slate-950"
             language="json"
             setText={(text) => {
-              if (!mappedRequest || !onChatChange || messageIndex === undefined) {
+              if (
+                !mappedRequest ||
+                !onChatChange ||
+                messageIndex === undefined
+              ) {
                 return;
               }
               onChatChange?.({

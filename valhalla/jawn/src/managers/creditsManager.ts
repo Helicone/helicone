@@ -19,7 +19,7 @@ export class CreditsManager extends BaseManager {
     Result<CreditBalanceResponse, string>
   > {
     const adminWalletManager = new WalletManager(
-      this.authParams.organizationId
+      this.authParams.organizationId,
     );
     const walletState = await adminWalletManager.getWalletState();
     if (isError(walletState)) {
@@ -48,11 +48,11 @@ export class CreditsManager extends BaseManager {
             "Content-Type": "application/json",
             Authorization: `Bearer ${process.env.HELICONE_MANUAL_ACCESS_KEY}`,
           },
-        }
+        },
       );
       if (!paymentsResponse.ok) {
         return err(
-          `Error retrieving credit balance transactions: ${paymentsResponse.statusText}`
+          `Error retrieving credit balance transactions: ${paymentsResponse.statusText}`,
         );
       }
 
@@ -66,7 +66,7 @@ export class CreditsManager extends BaseManager {
       });
     } catch (error: any) {
       return err(
-        `Error retrieving credit balance transactions: ${error.message}`
+        `Error retrieving credit balance transactions: ${error.message}`,
       );
     }
   }

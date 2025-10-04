@@ -31,7 +31,7 @@ const getRequestText = (requestBody: any): string => {
 
     if (lastMessage.function_call || lastMessage.tool_calls) {
       return formatStreamingToolCalls(
-        lastMessage.tool_calls || [lastMessage.function_call]
+        lastMessage.tool_calls || [lastMessage.function_call],
       );
     }
 
@@ -63,7 +63,7 @@ const getRequestText = (requestBody: any): string => {
 export const getResponseText = (
   responseBody: any,
   statusCode: number = 200,
-  model: string
+  model: string,
 ): string => {
   if (statusCode === 0 || statusCode === null) {
     return "";
@@ -117,7 +117,7 @@ export const getResponseText = (
 
         if (message?.tool_calls || message?.function_call) {
           return formatStreamingToolCalls(
-            message.tool_calls || [message.function_call]
+            message.tool_calls || [message.function_call],
           );
         }
       }
@@ -296,7 +296,7 @@ export const mapOpenAIRequest: MapperFn<any, any> = ({
       response: getResponseText(response, statusCode, model),
       concatenatedMessages:
         llmSchema.request.messages?.concat(
-          llmSchema.response?.messages ?? []
+          llmSchema.response?.messages ?? [],
         ) ?? [],
     },
   };

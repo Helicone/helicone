@@ -14,7 +14,7 @@ export class LogController extends Controller {
   public async logRequests(
     @Body()
     logMessage: KafkaMessageContents,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<void> {
     const logManager = new LogManager();
     if (

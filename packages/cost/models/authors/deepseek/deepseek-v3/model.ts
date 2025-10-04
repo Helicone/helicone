@@ -32,7 +32,7 @@ export const models = {
     maxOutputTokens: 65_536,
     created: "2025-09-22T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "DeepSeek"
+    tokenizer: "DeepSeek",
   },
 } satisfies Record<string, ModelConfig>;
 

@@ -53,7 +53,7 @@ async function analyzePageStructure(example: (typeof examples)[0]) {
         "Helicone-Session-Id": sessionId,
         "Helicone-Session-Path": `/${example.page}/structure-analysis`,
       },
-    }
+    },
   );
 
   try {
@@ -107,7 +107,7 @@ async function identifyInteractiveElements(example: (typeof examples)[0]) {
         "Helicone-Session-Id": sessionId,
         "Helicone-Session-Path": `/${example.page}/interactive-elements`,
       },
-    }
+    },
   );
 
   try {
@@ -121,7 +121,7 @@ async function identifyInteractiveElements(example: (typeof examples)[0]) {
 async function generateTestCases(
   pageStructure: any,
   interactiveElements: any,
-  example: (typeof examples)[0]
+  example: (typeof examples)[0],
 ) {
   const prompt = hpf`
   As a QA engineer, generate test cases for the following page structure and interactive elements:
@@ -165,7 +165,7 @@ async function generateTestCases(
         "Helicone-Session-Id": sessionId,
         "Helicone-Session-Path": `/${example.page}/generate-test-cases`,
       },
-    }
+    },
   );
 
   try {
@@ -178,7 +178,7 @@ async function generateTestCases(
 
 async function simulateTestExecution(
   testCases: any,
-  example: (typeof examples)[0]
+  example: (typeof examples)[0],
 ) {
   const prompt = hpf`
   As a QA engineer, simulate the execution of the following test cases:
@@ -217,7 +217,7 @@ async function simulateTestExecution(
         "Helicone-Session-Id": sessionId,
         "Helicone-Session-Path": `/${example.page}/simulate-test-execution`,
       },
-    }
+    },
   );
 
   try {
@@ -242,7 +242,7 @@ async function processExample(example: (typeof examples)[0]) {
   const testCases = await generateTestCases(
     pageStructure,
     interactiveElements,
-    example
+    example,
   );
   console.log("Generated Test Cases:", testCases);
 
@@ -267,7 +267,7 @@ async function main() {
       headers: {
         "Helicone-LLM-Security-Enabled": "true",
       },
-    }
+    },
   );
   console.log(response);
 }

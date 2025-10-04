@@ -32,7 +32,7 @@ export class RateLimitHandler extends AbstractLogHandler {
     try {
       const { data: isRateLimited, error: rateLimitErr } = this.rateLimitEntry(
         context.orgParams.id,
-        context.orgParams.percentLog
+        context.orgParams.percentLog,
       );
 
       if (rateLimitErr || isRateLimited === null) {
@@ -53,14 +53,14 @@ export class RateLimitHandler extends AbstractLogHandler {
       }
     } catch (error: any) {
       return err(
-        `Error processing rate limit: ${error}, Context: ${this.constructor.name}`
+        `Error processing rate limit: ${error}, Context: ${this.constructor.name}`,
       );
     }
   }
 
   public rateLimitEntry(
     orgId: string,
-    percentLog: number
+    percentLog: number,
   ): GenericResult<boolean> {
     if (orgId && percentLog !== 100_000) {
       const random = Math.random() * 100_000;
@@ -78,7 +78,7 @@ export class RateLimitHandler extends AbstractLogHandler {
     }
 
     const result = await this.rateLimitStore.batchInsertRateLimits(
-      this.rateLimitLogs
+      this.rateLimitLogs,
     );
 
     if (result.error) {

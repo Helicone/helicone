@@ -15,7 +15,7 @@ const getRequestText = (requestBody: any) => {
       ? lastMessage.parts
       : [lastMessage.parts].filter(Boolean);
     const textParts = parts.filter(
-      (part: any) => part && typeof part.text === "string"
+      (part: any) => part && typeof part.text === "string",
     );
 
     return textParts.map((part: any) => part.text).join("\n");
@@ -60,7 +60,7 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
                   .map((part: any) => {
                     if (part?.functionCall) {
                       return `Function Call: ${JSON.stringify(
-                        part.functionCall
+                        part.functionCall,
                       )}`;
                     }
                     return part && typeof part.text === "string"
@@ -193,7 +193,7 @@ export const mapGeminiPro: MapperFn<any, any> = ({
 
               return parts
                 .map((part: any) =>
-                  part && typeof part.text === "string" ? part.text : ""
+                  part && typeof part.text === "string" ? part.text : "",
                 )
                 .filter(Boolean)
                 .join("");

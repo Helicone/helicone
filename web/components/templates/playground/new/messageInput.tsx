@@ -2,7 +2,6 @@ import { PlusIcon } from "@heroicons/react/20/solid";
 import { ChangeEvent, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 
-import useNotification from "../../../shared/notification/useNotification";
 import ResizeTextArea from "../resizeTextArea";
 
 type ImageUrlItem =
@@ -40,15 +39,13 @@ const MessageInput = (props: MessageInputProps) => {
   const {
     onMessageChange,
     initialValues,
-    deleteMessage,
+    deleteMessage: _deleteMessage,
     editable = true,
   } = props;
 
   const [message, setMessage] = useState<MessageInputItem>(
     initialValues || EMPTY_MESSAGE,
   );
-
-  const { setNotification } = useNotification();
 
   const getContent = (content: string | ContentItem[]) => {
     if (typeof content === "string") {

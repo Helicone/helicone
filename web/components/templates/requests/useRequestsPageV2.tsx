@@ -41,7 +41,7 @@ const useRequestsPageV2 = (
     searchPropertyFilters,
   } = useGetPropertiesV2(getPropertyFiltersV2);
 
-  const { models, isLoading: isModelsLoading } = useModels(timeFilter, 50);
+  const { models } = useModels(timeFilter, 50);
 
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
     Array.isArray(propertyFilters) ? propertyFilters : [],

@@ -66,13 +66,13 @@ const AiGateway = () => {
           <div
             className={cn(
               "bg-slate-50 border border-slate-200 px-6 py-3 cursor-pointer max-w-[550px] transition-all duration-300 ease-in-out",
-              isQuestionOpen ? "rounded-2xl" : "rounded-[24px]"
+              isQuestionOpen ? "rounded-2xl" : "rounded-[24px]",
             )}
             onClick={() => setIsQuestionOpen(!isQuestionOpen)}
           >
             <div
               className={cn(
-                "flex justify-between items-center transition-all duration-300"
+                "flex justify-between items-center transition-all duration-300",
               )}
             >
               <p className="text-lg">What is LLM routing?</p>
@@ -89,7 +89,7 @@ const AiGateway = () => {
                 "grid transition-all duration-300",
                 isQuestionOpen
                   ? "grid-rows-[1fr] opacity-100 mt-4"
-                  : "grid-rows-[0fr] opacity-0 mt-0"
+                  : "grid-rows-[0fr] opacity-0 mt-0",
               )}
             >
               <div className="overflow-hidden">

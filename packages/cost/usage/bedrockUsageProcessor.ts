@@ -11,7 +11,7 @@ export class BedrockUsageProcessor extends AnthropicUsageProcessor {
     }
 
     const usage = parsedResponse.usage || {};
-    
+
     const inputTokens = usage.input_tokens ?? 0;
     const outputTokens = usage.output_tokens ?? 0;
     const cacheReadInputTokens = usage.cache_read_input_tokens ?? 0;
@@ -20,7 +20,7 @@ export class BedrockUsageProcessor extends AnthropicUsageProcessor {
     // and cache creation details are not available.
 
     const cacheWriteInputTokens = usage.cache_creation_input_tokens ?? 0;
-    
+
     const modelUsage: ModelUsage = {
       input: inputTokens,
       output: outputTokens,

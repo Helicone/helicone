@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/tooltip";
 import { P, XSmall } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { useJawnClient } from "@/lib/clients/jawnHook";
 import { logger } from "@/lib/telemetry/logger";
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { useGetPromptInputs } from "@/services/hooks/prompts";
@@ -24,7 +23,6 @@ import {
 } from "lucide-react";
 
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuChevronDown,
@@ -125,9 +123,7 @@ export default function RequestDrawer(props: RequestDivProps) {
   } = props;
 
   const { setNotification } = useNotification();
-  const router = useRouter();
   const org = useOrg();
-  const jawn = useJawnClient();
 
   const [showDetails, setShowDetails] = useLocalStorage(
     "request-drawer-details",
@@ -305,8 +301,8 @@ export default function RequestDrawer(props: RequestDivProps) {
     return { requestInfo, tokenInfo, parameterInfo };
   }, [request, requestParameters]);
 
-  // Create experiment handler
-  const handleCreateExperiment = useCallback(() => {
+  // Create experiment handler - commented out as unused
+  /*const handleCreateExperiment = useCallback(() => {
     if (!request) return;
 
     jawn
@@ -324,7 +320,7 @@ export default function RequestDrawer(props: RequestDivProps) {
         }
         router.push(`/experiments/${res.data.data?.experimentId}`);
       });
-  }, [jawn, request, router, setNotification]);
+  }, [jawn, request, router, setNotification]);*/
 
   // TODO: Delete legacy prompts code
   const hasNewPromptData = useMemo(

@@ -1,13 +1,13 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ['index.ts'],
-  format: ['cjs', 'esm'],
+  entry: ["index.ts"],
+  format: ["cjs", "esm"],
   dts: {
     resolve: true,
   },
   clean: true,
-  external: ['openai'],
+  external: ["openai"],
   bundle: true,
   noExternal: [/@helicone-package/],
-}) 
+});

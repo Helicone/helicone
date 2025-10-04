@@ -15,7 +15,7 @@ type StableStringifyOptions = {
  */
 export function stableStringify(
   value: unknown,
-  opts: StableStringifyOptions = {}
+  opts: StableStringifyOptions = {},
 ): string {
   const {
     space,
@@ -42,7 +42,7 @@ export function stableStringify(
     if (t === "bigint") {
       if (bigintAsString) return v.toString();
       throw new TypeError(
-        "BigInt cannot be serialized to JSON. Set bigintAsString: true."
+        "BigInt cannot be serialized to JSON. Set bigintAsString: true.",
       );
     }
 

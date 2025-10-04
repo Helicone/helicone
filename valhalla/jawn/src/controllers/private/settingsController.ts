@@ -9,7 +9,7 @@ import { IS_ON_PREM } from "../../constants/IS_ON_PREM";
 export class SettingController extends Controller {
   @Get("/query")
   public async getSettings(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<{
     useAzureForExperiment: boolean;
   }> {

@@ -77,11 +77,10 @@ const PromptsPage = (props: PromptsPageProps) => {
     }
   }, [prompts, selectedPrompt?.prompt.id]);
 
-  const { data: filteredVersions, isLoading: isLoadingFilteredVersions } =
-    useGetPromptVersions(
-      selectedPrompt?.prompt.id || "",
-      filteredMajorVersion !== null ? filteredMajorVersion : undefined,
-    );
+  const { data: filteredVersions } = useGetPromptVersions(
+    selectedPrompt?.prompt.id || "",
+    filteredMajorVersion !== null ? filteredMajorVersion : undefined,
+  );
 
   const displayPrompt =
     selectedPrompt && filteredMajorVersion !== null && filteredVersions

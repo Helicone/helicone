@@ -61,10 +61,10 @@ export interface Prompt2025Input {
 
 /**
  * Cache control configuration for Anthropic's prompt caching feature.
- * 
+ *
  * When using Anthropic models through the Helicone AI Gateway, you can enable
  * prompt caching to reduce costs and latency for repeated prompts.
- * 
+ *
  * @example
  * ```typescript
  * const message = {
@@ -78,7 +78,7 @@ export interface CacheControl {
   /** Cache type - currently only ephemeral caching is supported */
   type: "ephemeral";
   /** Time-to-live for the cached content */
-  ttl?: "5m" | "1h"
+  ttl?: "5m" | "1h";
 }
 
 /**
@@ -92,31 +92,37 @@ export type HeliconeChatCompletionContentPart = ChatCompletionContentPart & {
 /**
  * OpenAI message with optional cache control support
  */
-type HeliconeMessageParam<T> = Omit<T, 'content'> & {
+type HeliconeMessageParam<T> = Omit<T, "content"> & {
   content: string | HeliconeChatCompletionContentPart[] | null;
   cache_control?: CacheControl;
 };
 
-export type HeliconeChatCompletionMessageParam = 
+export type HeliconeChatCompletionMessageParam =
   | HeliconeMessageParam<ChatCompletionDeveloperMessageParam>
   | HeliconeMessageParam<ChatCompletionSystemMessageParam>
   | HeliconeMessageParam<ChatCompletionUserMessageParam>
   | HeliconeMessageParam<ChatCompletionAssistantMessageParam>
   | HeliconeMessageParam<ChatCompletionToolMessageParam>
-  | HeliconeMessageParam<ChatCompletionFunctionMessageParam>
+  | HeliconeMessageParam<ChatCompletionFunctionMessageParam>;
 
 /**
  * Non-streaming completion params with optional messages
  */
-type ChatCompletionCreateParamsNonStreamingPartialMessages = Omit<ChatCompletionCreateParamsNonStreaming, 'messages'> & { 
-  messages?: HeliconeChatCompletionMessageParam[] 
+type ChatCompletionCreateParamsNonStreamingPartialMessages = Omit<
+  ChatCompletionCreateParamsNonStreaming,
+  "messages"
+> & {
+  messages?: HeliconeChatCompletionMessageParam[];
 };
 
 /**
  * Streaming completion params with optional messages
  */
-type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCreateParamsStreaming, 'messages'> & { 
-  messages?: HeliconeChatCompletionMessageParam[] 
+type ChatCompletionCreateParamsStreamingPartialMessages = Omit<
+  ChatCompletionCreateParamsStreaming,
+  "messages"
+> & {
+  messages?: HeliconeChatCompletionMessageParam[];
 };
 
 /**
@@ -188,8 +194,8 @@ export type HeliconePromptParams = {
  * } as HeliconeChatCreateParams);
  * ```
  */
-export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreamingPartialMessages &
-  HeliconePromptParams;
+export type HeliconeChatCreateParams =
+  ChatCompletionCreateParamsNonStreamingPartialMessages & HeliconePromptParams;
 
 /**
  * OpenAI ChatCompletion parameters extended with Helicone prompt template support for streaming responses.

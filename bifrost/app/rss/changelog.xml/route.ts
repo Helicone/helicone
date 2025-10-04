@@ -10,7 +10,7 @@ export async function GET() {
     process.cwd(),
     "app",
     "changelog",
-    "changes"
+    "changes",
   );
   const changes = fs.readdirSync(changelogFolder);
 
@@ -32,7 +32,7 @@ export async function GET() {
       const dateObject = new Date(
         Number(date.slice(0, 4)),
         Number(date.slice(4, 6)) - 1,
-        Number(date.slice(6, 8))
+        Number(date.slice(6, 8)),
       );
       const fullPath = path.join(changelogFolder, folder, "src.mdx");
       const source = fs.readFileSync(fullPath, "utf8");
@@ -42,16 +42,16 @@ export async function GET() {
         "static",
         "changelog",
         "images",
-        `${folder}.webp`
+        `${folder}.webp`,
       );
       let imageExists = fs.existsSync(
-        path.join(process.cwd(), "public", imagePath)
+        path.join(process.cwd(), "public", imagePath),
       );
 
       if (!imageExists) {
         imagePath = path.join("static", "changelog", "images", `${folder}.gif`);
         imageExists = fs.existsSync(
-          path.join(process.cwd(), "public", imagePath)
+          path.join(process.cwd(), "public", imagePath),
         );
       }
       const metadata = await getMetadata(folder, "changelog", "changes");
@@ -68,7 +68,7 @@ export async function GET() {
         imagePath: path.join("/", imagePath),
         source,
       };
-    })
+    }),
   );
 
   mdxs.forEach((mdx) => {

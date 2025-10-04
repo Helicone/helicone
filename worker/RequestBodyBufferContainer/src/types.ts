@@ -16,4 +16,3 @@ export type SignAwsOutput = {
   newHeaders: Record<string, string>;
   model: string;
 };
-

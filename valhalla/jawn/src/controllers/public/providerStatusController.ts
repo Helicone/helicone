@@ -24,7 +24,7 @@ export type TimeFrame = "24h" | "7d" | "30d";
 export class StatusController extends Controller {
   @Get("")
   public async getAllProviderStatus(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ProviderMetrics[], string>> {
     const providerStatusManager = new ProviderStatusManager();
     const result = await providerStatusManager.getAllProviderStatus();
@@ -36,12 +36,12 @@ export class StatusController extends Controller {
   public async getProviderStatus(
     @Request() request: JawnAuthenticatedRequest,
     @Path() provider: string,
-    @Query() timeFrame: TimeFrame
+    @Query() timeFrame: TimeFrame,
   ): Promise<Result<ProviderMetrics, string>> {
     const providerStatusManager = new ProviderStatusManager();
     const result = await providerStatusManager.getProviderStatus(
       provider,
-      timeFrame
+      timeFrame,
     );
 
     return result;

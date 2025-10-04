@@ -22,8 +22,7 @@ export const OriginalOutputCellRenderer = ({
   prompt?: any;
   wrapText: boolean;
 }) => {
-  const { requestsData, isRequestsLoading } =
-    useExperimentRequestData(requestId);
+  const { requestsData } = useExperimentRequestData(requestId);
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
 
   // const content = requestsData?.responseBody;
@@ -125,7 +124,7 @@ export const OriginalOutputCellRenderer = ({
           <PromptPlayground
             prompt={formatPromptForPlayground() || ""}
             selectedInput={undefined}
-            onSubmit={(history, model) => {
+            onSubmit={() => {
               setShowPromptPlayground(false);
             }}
             submitText="Save"

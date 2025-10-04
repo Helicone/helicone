@@ -63,7 +63,7 @@ export class ExperimentController extends Controller {
       metadata: Record<string, string>;
       datasetId: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -83,7 +83,7 @@ export class ExperimentController extends Controller {
         requestBody.datasetId,
         request.authParams.organizationId,
         requestBody.metadata,
-      ]
+      ],
     );
 
     if (result.error || !result.data || result.data.length === 0) {
@@ -102,7 +102,7 @@ export class ExperimentController extends Controller {
           "Experiment Table",
           request.authParams.organizationId,
           { datasetId: requestBody.datasetId },
-        ]
+        ],
       );
 
       this.setStatus(200);
@@ -116,7 +116,7 @@ export class ExperimentController extends Controller {
   public async createNewExperimentTable(
     @Body()
     requestBody: CreateExperimentTableParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -127,9 +127,8 @@ export class ExperimentController extends Controller {
     >
   > {
     const experimentManager = new ExperimentManager(request.authParams);
-    const result = await experimentManager.createNewExperimentTable(
-      requestBody
-    );
+    const result =
+      await experimentManager.createNewExperimentTable(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
       console.error(result.error);
@@ -138,7 +137,7 @@ export class ExperimentController extends Controller {
     const inputManager = new InputsManager(request.authParams);
     const inputRecordResult = await inputManager.createInputRecord(
       requestBody.promptVersionId,
-      {}
+      {},
     );
 
     if (inputRecordResult.error || !inputRecordResult.data) {
@@ -150,7 +149,7 @@ export class ExperimentController extends Controller {
     const datasetManager = new DatasetManager(request.authParams);
     const datasetRowResult = await datasetManager.addDatasetRow(
       (requestBody.experimentTableMetadata as any)?.datasetId,
-      inputRecordResult.data
+      inputRecordResult.data,
     );
 
     if (datasetRowResult.error || !datasetRowResult.data) {
@@ -160,7 +159,7 @@ export class ExperimentController extends Controller {
       this.setStatus(200);
     }
     const inputs = Object.fromEntries(
-      result.data.inputKeys.map((key) => [key, ""])
+      result.data.inputKeys.map((key) => [key, ""]),
     );
     const experimentTableRowResult =
       await experimentManager.createExperimentTableRow({
@@ -179,7 +178,7 @@ export class ExperimentController extends Controller {
     }
 
     const inputCellId = experimentTableRowResult.data.find(
-      (cell) => cell.cellType === "input"
+      (cell) => cell.cellType === "input",
     )?.id;
 
     if (!inputCellId) {
@@ -219,7 +218,7 @@ export class ExperimentController extends Controller {
   @Post("/table/{experimentTableId}/query")
   public async getExperimentTableById(
     @Path() experimentTableId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ExperimentTable, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     return experimentManager.getExperimentTableById(experimentTableId);
@@ -227,16 +226,16 @@ export class ExperimentController extends Controller {
   @Post("/table/{experimentTableId}/metadata/query")
   public async getExperimentTableMetadata(
     @Path() experimentTableId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ExperimentTableSimplified, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     return experimentManager.getExperimentTableSimplifiedById(
-      experimentTableId
+      experimentTableId,
     );
   }
   @Post("/tables/query")
   public async getExperimentTables(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ExperimentTableSimplified[], string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     return experimentManager.getExperimentTables();
@@ -251,12 +250,12 @@ export class ExperimentController extends Controller {
       rowIndex: number;
       value: string | null;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     const experimentTable =
       await experimentManager.getExperimentTableSimplifiedById(
-        experimentTableId
+        experimentTableId,
       );
     if (experimentTable.error || !experimentTable.data) {
       this.setStatus(500);
@@ -286,12 +285,12 @@ export class ExperimentController extends Controller {
       metadata?: string;
       updateInputs?: boolean;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     const experimentTable =
       await experimentManager.getExperimentTableSimplifiedById(
-        experimentTableId
+        experimentTableId,
       );
     if (experimentTable.error || !experimentTable.data) {
       this.setStatus(500);
@@ -327,16 +326,16 @@ export class ExperimentController extends Controller {
                 (input: { key: string; value: string }) => [
                   input.key,
                   input.value ?? "",
-                ]
-              )
+                ],
+              ),
             );
 
             return inputManager.updateInputRecord(
               cell.metadata.inputId,
-              inputData
+              inputData,
             );
           }
-        })
+        }),
       );
     }
 
@@ -355,12 +354,12 @@ export class ExperimentController extends Controller {
       promptVersionId?: string;
       inputKeys?: string[];
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     const experimentTable =
       await experimentManager.getExperimentTableSimplifiedById(
-        experimentTableId
+        experimentTableId,
       );
     if (experimentTable.error || !experimentTable.data) {
       this.setStatus(500);
@@ -419,12 +418,12 @@ export class ExperimentController extends Controller {
       sourceRequest?: string;
       inputs?: Record<string, string>;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     const experimentTable =
       await experimentManager.getExperimentTableSimplifiedById(
-        experimentTableId
+        experimentTableId,
       );
 
     if (experimentTable.error || !experimentTable.data) {
@@ -437,7 +436,7 @@ export class ExperimentController extends Controller {
     const inputRecordResult = await inputManager.createInputRecord(
       requestBody.promptVersionId,
       {},
-      requestBody.sourceRequest
+      requestBody.sourceRequest,
     );
     if (inputRecordResult.error || !inputRecordResult.data) {
       this.setStatus(500);
@@ -448,7 +447,7 @@ export class ExperimentController extends Controller {
     const datasetManager = new DatasetManager(request.authParams);
     const datasetRowResult = await datasetManager.addDatasetRow(
       (experimentTable.data?.metadata as any)?.datasetId,
-      inputRecordResult.data
+      inputRecordResult.data,
     );
 
     if (datasetRowResult.error || !datasetRowResult.data) {
@@ -485,7 +484,7 @@ export class ExperimentController extends Controller {
                 ([key, value]) => ({
                   key,
                   value: "",
-                })
+                }),
               ),
             },
           },
@@ -500,12 +499,12 @@ export class ExperimentController extends Controller {
   public async deleteExperimentTableRow(
     @Path() experimentTableId: string,
     @Path() rowIndex: number,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     const experimentTable =
       await experimentManager.getExperimentTableSimplifiedById(
-        experimentTableId
+        experimentTableId,
       );
     if (experimentTable.error || !experimentTable.data) {
       this.setStatus(500);
@@ -536,12 +535,12 @@ export class ExperimentController extends Controller {
         sourceRequest?: string;
       }[];
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
     const experimentTable =
       await experimentManager.getExperimentTableSimplifiedById(
-        experimentTableId
+        experimentTableId,
       );
 
     if (experimentTable.error || !experimentTable.data) {
@@ -554,7 +553,7 @@ export class ExperimentController extends Controller {
 
     // Process dataset rows in parallel
     const datasetRowPromises = requestBody.rows.map((row) =>
-      datasetManager.addDatasetRow(row.datasetId, row.inputRecordId)
+      datasetManager.addDatasetRow(row.datasetId, row.inputRecordId),
     );
 
     const datasetRowResults = await Promise.all(datasetRowPromises);
@@ -602,7 +601,7 @@ export class ExperimentController extends Controller {
       experimentId: string;
       meta: Record<string, string>;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ) {
     const result = await dbExecute(
       `UPDATE experiment_v2 
@@ -613,7 +612,7 @@ export class ExperimentController extends Controller {
         requestBody.meta,
         requestBody.experimentId,
         request.authParams.organizationId,
-      ]
+      ],
     );
 
     if (result.error || !result.data || result.data.length === 0) {
@@ -630,7 +629,7 @@ export class ExperimentController extends Controller {
   public async createNewExperimentOld(
     @Body()
     requestBody: NewExperimentParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -663,13 +662,12 @@ export class ExperimentController extends Controller {
       providerKeyId: string;
       status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ hypothesisId: string }, string>> {
     const experimentManager = new ExperimentManager(request.authParams);
 
-    const result = await experimentManager.createNewExperimentHypothesis(
-      requestBody
-    );
+    const result =
+      await experimentManager.createNewExperimentHypothesis(requestBody);
 
     if (result.error) {
       this.setStatus(500);
@@ -684,7 +682,7 @@ export class ExperimentController extends Controller {
   @Post("/hypothesis/{hypothesisId}/scores/query")
   public async getExperimentHypothesisScores(
     @Path() hypothesisId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<{ runsCount: number; scores: Record<string, Score> }, string>
   > {
@@ -698,19 +696,18 @@ export class ExperimentController extends Controller {
   @Get("/{experimentId}/evaluators")
   public async getExperimentEvaluators(
     @Path() experimentId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<EvaluatorResult[], string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
-    const result = await evaluatorManager.getEvaluatorsForExperiment(
-      experimentId
-    );
+    const result =
+      await evaluatorManager.getEvaluatorsForExperiment(experimentId);
     return result;
   }
 
   @Post("/{experimentId}/evaluators/run")
   public async runExperimentEvaluatorsOld(
     @Path() experimentId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.runExperimentEvaluators(experimentId);
@@ -724,12 +721,12 @@ export class ExperimentController extends Controller {
     requestBody: {
       evaluatorId: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.createExperimentEvaluator(
       experimentId,
-      requestBody.evaluatorId
+      requestBody.evaluatorId,
     );
     return result;
   }
@@ -738,12 +735,12 @@ export class ExperimentController extends Controller {
   public async deleteExperimentEvaluatorOld(
     @Path() experimentId: string,
     @Path() evaluatorId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.deleteExperimentEvaluator(
       experimentId,
-      evaluatorId
+      evaluatorId,
     );
     return result;
   }
@@ -755,13 +752,13 @@ export class ExperimentController extends Controller {
       filter: ExperimentFilterNode;
       include?: IncludeExperimentKeys;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Experiment[], string>> {
     const experimentManager = new ExperimentManager(request.authParams);
 
     const result = await experimentManager.getExperiments(
       requestBody.filter,
-      requestBody.include ?? {}
+      requestBody.include ?? {},
     );
     // const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {

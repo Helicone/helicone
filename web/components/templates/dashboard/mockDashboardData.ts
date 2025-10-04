@@ -301,7 +301,7 @@ export const getMockModels = () => ({
 });
 
 // Generate mock data for various over time metrics
-export const getMockOverTimeData = (timeIncrement: TimeIncrement) => {
+export const getMockOverTimeData = (_timeIncrement: TimeIncrement) => {
   return {
     requests: {
       data: getMockRequestsOverTime(),

@@ -59,7 +59,7 @@ export class OrganizationController extends Controller {
 
     const authParams = await getHeliconeAuthClient().getUser(
       authHeader.data,
-      req.headers
+      req.headers,
     );
     if (authParams.error || !authParams.data) {
       return err(authParams.error ?? "User not found");
@@ -76,7 +76,7 @@ export class OrganizationController extends Controller {
       WHERE soft_delete = false
       and (organization_member.member = $1 or organization.owner = $1)
       `,
-      [authParams.data.id]
+      [authParams.data.id],
     );
     if (result.error) {
       this.setStatus(500);
@@ -89,7 +89,7 @@ export class OrganizationController extends Controller {
   @Get("/{organizationId}")
   public async getOrganization(
     @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<Database["public"]["Tables"]["organization"]["Row"], string>
   > {
@@ -101,7 +101,7 @@ export class OrganizationController extends Controller {
       WHERE soft_delete = false
       and (organization_member.member = $1 or organization.owner = $1)
       and organization.id = $2`,
-      [request.authParams.userId, organizationId]
+      [request.authParams.userId, organizationId],
     );
 
     if (result.error) {
@@ -120,13 +120,13 @@ export class OrganizationController extends Controller {
   @Get("/reseller/{resellerId}")
   public async getReseller(
     @Path() resellerId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ) {
     const result = await dbExecute<
       Database["public"]["Tables"]["organization"]["Row"]
     >(
       `SELECT * FROM organization WHERE reseller_id = $1 and soft_delete = false`,
-      [resellerId]
+      [resellerId],
     );
 
     return ok(result);
@@ -134,7 +134,7 @@ export class OrganizationController extends Controller {
 
   @Post("/user/accept_terms")
   public async acceptTerms(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     if (!request.authParams.userId) {
       return err("User not found");
@@ -148,7 +148,7 @@ export class OrganizationController extends Controller {
          $1::jsonb
        )
        WHERE id = $2`,
-      [JSON.stringify(new Date().toISOString()), request.authParams.userId]
+      [JSON.stringify(new Date().toISOString()), request.authParams.userId],
     );
 
     if (result.error) {
@@ -162,7 +162,7 @@ export class OrganizationController extends Controller {
   public async createNewOrganization(
     @Body()
     requestBody: NewOrganizationParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
@@ -181,13 +181,13 @@ export class OrganizationController extends Controller {
     @Body()
     requestBody: UpdateOrganizationParams,
     @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.updateOrganization(
       requestBody,
-      organizationId
+      organizationId,
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -202,13 +202,13 @@ export class OrganizationController extends Controller {
   public async onboardOrganization(
     @Body()
     requestBody: {},
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const { error } = await dbExecute(
       `UPDATE organization
        SET has_onboarded = true
        WHERE id = $1`,
-      [request.authParams.organizationId]
+      [request.authParams.organizationId],
     );
 
     if (error) {
@@ -223,7 +223,7 @@ export class OrganizationController extends Controller {
     @Body()
     requestBody: { email: string },
     @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ temporaryPassword?: string } | null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
     const org = await organizationManager.getOrg();
@@ -240,7 +240,7 @@ export class OrganizationController extends Controller {
 
     const isExistingMember = members.data?.some(
       (member) =>
-        member.email?.toLowerCase() === requestBody.email.toLowerCase()
+        member.email?.toLowerCase() === requestBody.email.toLowerCase(),
     );
 
     if (isExistingMember) {
@@ -273,7 +273,7 @@ export class OrganizationController extends Controller {
       // Automatically purchase more seats if needed
       if (memberCount.data + 1 > purchasedSeats.data) {
         const updateResult = await stripeManager.updateProUserCount(
-          memberCount.data + 1
+          memberCount.data + 1,
         );
         if (updateResult.error) {
           return err("Failed to purchase additional seats");
@@ -282,7 +282,7 @@ export class OrganizationController extends Controller {
 
       // Update Stripe user count
       const userCount = await stripeManager.updateProUserCount(
-        memberCount.data + 1
+        memberCount.data + 1,
       );
 
       if (userCount.error) {
@@ -292,7 +292,7 @@ export class OrganizationController extends Controller {
 
     const result = await organizationManager.addMember(
       organizationId,
-      requestBody.email
+      requestBody.email,
     );
 
     if (result.error || !result.data) {
@@ -312,14 +312,14 @@ export class OrganizationController extends Controller {
       filterType: "dashboard" | "requests";
     },
     @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.createFilter(
       organizationId,
       requestBody.filters,
-      requestBody.filterType
+      requestBody.filterType,
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -338,14 +338,14 @@ export class OrganizationController extends Controller {
       filterType: "dashboard" | "requests";
     },
     @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.updateFilter(
       organizationId,
       requestBody.filterType,
-      requestBody.filters
+      requestBody.filters,
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -358,7 +358,7 @@ export class OrganizationController extends Controller {
 
   @Delete("/delete")
   public async deleteOrganization(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
@@ -376,13 +376,13 @@ export class OrganizationController extends Controller {
   public async getOrganizationLayout(
     @Path() organizationId: string,
     @Query() filterType: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<OrganizationLayout, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.getOrganizationLayout(
       organizationId,
-      filterType
+      filterType,
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -396,7 +396,7 @@ export class OrganizationController extends Controller {
   @Get("/{organizationId}/members")
   public async getOrganizationMembers(
     @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<OrganizationMember[], string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
@@ -416,14 +416,14 @@ export class OrganizationController extends Controller {
     @Body()
     requestBody: { role: string; memberId: string },
     @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.updateMember(
       organizationId,
       requestBody.role,
-      requestBody.memberId
+      requestBody.memberId,
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -439,13 +439,13 @@ export class OrganizationController extends Controller {
     @Body()
     requestBody: { memberId: string },
     @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.updateOwner(
       organizationId,
-      requestBody.memberId
+      requestBody.memberId,
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -459,7 +459,7 @@ export class OrganizationController extends Controller {
   @Get("/{organizationId}/owner")
   public async getOrganizationOwner(
     @Path() organizationId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<OrganizationOwner[], string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
@@ -478,7 +478,7 @@ export class OrganizationController extends Controller {
   public async removeMemberFromOrganization(
     @Path() organizationId: string,
     @Query() memberId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const stripeManager = new StripeManager(request.authParams);
     const organizationManager = new OrganizationManager(request.authParams);
@@ -500,7 +500,7 @@ export class OrganizationController extends Controller {
       org.data.tier != "enterprise"
     ) {
       const userCount = await stripeManager.updateProUserCount(
-        memberCount.data - 1
+        memberCount.data - 1,
       );
 
       if (userCount.error) {
@@ -510,7 +510,7 @@ export class OrganizationController extends Controller {
 
     const result = await organizationManager.removeOrganizationMember(
       organizationId,
-      memberId
+      memberId,
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -523,7 +523,7 @@ export class OrganizationController extends Controller {
 
   @Post("/setup-demo")
   public async setupDemo(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
@@ -538,7 +538,7 @@ export class OrganizationController extends Controller {
       and (organization_member.member = $1 or organization.owner = $1)
       limit 1
       `,
-      [request.authParams.userId]
+      [request.authParams.userId],
     );
 
     if (demoOrg.error || !demoOrg.data) {
@@ -567,14 +567,14 @@ export class OrganizationController extends Controller {
       onboarding_status: OnboardingStatus;
       name: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
     const result = await organizationManager.updateOnboardingStatus(
       request.authParams.organizationId ?? "",
       requestBody.onboarding_status,
-      requestBody.name
+      requestBody.name,
     );
 
     if (result.error) {

@@ -48,7 +48,7 @@ const getRequestText = (messages: AnthropicChatRequest["messages"]): string => {
   } else if (Array.isArray(lastMessage.content)) {
     return lastMessage.content
       .map((c: any) =>
-        typeof c === "string" ? c : c.type === "text" ? c.text : ""
+        typeof c === "string" ? c : c.type === "text" ? c.text : "",
       )
       .join(" ");
   }
@@ -77,7 +77,7 @@ const getResponseText = (responseBody: any): string => {
  */
 const processMessages = (
   messages: AnthropicChatRequest["messages"] = [],
-  system?: string
+  system?: string,
 ): AnthropicChatRequest["messages"] => {
   const result: AnthropicChatRequest["messages"] = [];
 
@@ -103,7 +103,7 @@ const processMessages = (
  * Convert request messages to internal Message format
  */
 const convertRequestMessages = (
-  messages?: AnthropicChatRequest["messages"]
+  messages?: AnthropicChatRequest["messages"],
 ): Message[] => {
   if (!Array.isArray(messages) || messages.length === 0) return [];
 
@@ -115,12 +115,12 @@ const convertRequestMessages = (
         typeof msg.content === "string"
           ? msg.content
           : Array.isArray(msg.content)
-          ? msg.content
-              .map((c: any) =>
-                typeof c === "string" ? c : c.type === "text" ? c.text : ""
-              )
-              .join(" ")
-          : "",
+            ? msg.content
+                .map((c: any) =>
+                  typeof c === "string" ? c : c.type === "text" ? c.text : "",
+                )
+                .join(" ")
+            : "",
       id: `req-msg-${idx}`,
     };
   });
@@ -151,7 +151,7 @@ const convertResponseMessages = (responseBody: any): Message[] => {
  * Convert internal messages back to Anthropic message format
  */
 const toExternalMessages = (
-  messages: Message[]
+  messages: Message[],
 ): AnthropicChatRequest["messages"] => {
   if (!messages) return [];
 
@@ -168,7 +168,7 @@ const toExternalMessages = (
  * Convert Anthropic tools to internal Tool format
  */
 const convertTools = (
-  tools?: AnthropicChatRequest["tools"]
+  tools?: AnthropicChatRequest["tools"],
 ): LlmSchema["request"]["tools"] => {
   if (!tools || !Array.isArray(tools)) return undefined;
 
@@ -183,7 +183,7 @@ const convertTools = (
  * Convert internal Tool format back to Anthropic tools
  */
 const toExternalTools = (
-  tools?: LlmSchema["request"]["tools"]
+  tools?: LlmSchema["request"]["tools"],
 ): AnthropicChatRequest["tools"] => {
   if (!tools || !Array.isArray(tools)) return undefined;
 
@@ -198,7 +198,7 @@ const toExternalTools = (
  * Convert Anthropic tool_choice to internal format
  */
 const convertToolChoice = (
-  toolChoice?: AnthropicChatRequest["tool_choice"]
+  toolChoice?: AnthropicChatRequest["tool_choice"],
 ): LlmSchema["request"]["tool_choice"] => {
   if (!toolChoice) return undefined;
 
@@ -235,7 +235,7 @@ const convertToolChoice = (
  * Convert internal tool_choice back to Anthropic format
  */
 const toExternalToolChoice = (
-  toolChoice?: LlmSchema["request"]["tool_choice"]
+  toolChoice?: LlmSchema["request"]["tool_choice"],
 ): AnthropicChatRequest["tool_choice"] => {
   if (!toolChoice) return undefined;
 
@@ -271,7 +271,7 @@ const toExternalToolChoice = (
  * Build the simplified Anthropic Chat mapper with proper type safety
  */
 export const anthropicChatMapper = new MapperBuilder<AnthropicChatRequest>(
-  "anthropic-chat-v2"
+  "anthropic-chat-v2",
 )
   // Map basic request parameters
   .map("model", "model")
@@ -287,14 +287,14 @@ export const anthropicChatMapper = new MapperBuilder<AnthropicChatRequest>(
     "tools",
     (tools?: AnthropicChatRequest["tools"], internal?: any) =>
       convertTools(tools),
-    (tools?: any, external?: any) => toExternalTools(tools)
+    (tools?: any, external?: any) => toExternalTools(tools),
   )
   .mapWithTransform(
     "tool_choice",
     "tool_choice",
     (toolChoice?: AnthropicChatRequest["tool_choice"], internal?: any) =>
       convertToolChoice(toolChoice),
-    (toolChoice?: any, external?: any) => toExternalToolChoice(toolChoice)
+    (toolChoice?: any, external?: any) => toExternalToolChoice(toolChoice),
   )
   .mapWithTransform(
     "tool_choice",
@@ -303,7 +303,7 @@ export const anthropicChatMapper = new MapperBuilder<AnthropicChatRequest>(
       if (!toolChoice || typeof toolChoice === "string") return undefined;
       return toolChoice.disable_parallel_tool_use === true ? false : undefined;
     },
-    (_: boolean | null | undefined, external?: any) => undefined
+    (_: boolean | null | undefined, external?: any) => undefined,
   )
 
   // Map system message
@@ -318,7 +318,7 @@ export const anthropicChatMapper = new MapperBuilder<AnthropicChatRequest>(
       if (!messages) return undefined;
       const systemMessage = messages.find((m) => m.role === "system");
       return systemMessage?.content as string;
-    }
+    },
   )
 
   // Map messages with transformation
@@ -336,7 +336,7 @@ export const anthropicChatMapper = new MapperBuilder<AnthropicChatRequest>(
         // If there's already a system message from the system parameter,
         // filter out any system messages from the messages array to avoid duplicates
         const nonSystemMessages = convertedMessages.filter(
-          (msg) => msg.role !== "system"
+          (msg) => msg.role !== "system",
         );
         return [...existingMessages, ...nonSystemMessages];
       }
@@ -347,14 +347,14 @@ export const anthropicChatMapper = new MapperBuilder<AnthropicChatRequest>(
       if (!messages) return undefined;
       // Don't filter out system messages, include all messages
       return toExternalMessages(messages);
-    }
+    },
   )
   .build();
 
 // Create a separate mapper for preview data
 const previewMapper = (
   messages: AnthropicChatRequest["messages"] = [],
-  system?: string
+  system?: string,
 ) => {
   if (!messages && !system) return "";
   return getRequestText(processMessages(messages, system));

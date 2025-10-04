@@ -23,7 +23,7 @@ const wss = new WebSocketServer({ noServer: true });
 async function logCurrentSession(
   loggedRequestId: string | null,
   messages: SocketMessage[],
-  requestWrapper: RequestWrapper
+  requestWrapper: RequestWrapper,
 ): Promise<{
   requestId: string | null;
 }> {
@@ -33,7 +33,7 @@ async function logCurrentSession(
     const { loggable } = await handleSocketSession(
       messages,
       requestWrapper,
-      loggedRequestId ?? undefined
+      loggedRequestId ?? undefined,
     );
     const requestId = await loggable.getRequestId();
 
@@ -69,14 +69,14 @@ async function logCurrentSession(
             process.env.S3_SECRET_KEY || undefined,
             process.env.S3_ENDPOINT ?? "",
             process.env.S3_BUCKET_NAME ?? "",
-            (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
-          )
+            (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
+          ),
         ),
         kafkaProducer: new HeliconeQueueProducer(),
       },
       authParams,
       orgParams,
-      requestWrapper.heliconeHeaders
+      requestWrapper.heliconeHeaders,
     );
 
     if (result.error) {
@@ -93,7 +93,7 @@ async function logCurrentSession(
 export function webSocketProxyForwarder(
   requestWrapper: RequestWrapper,
   socket: internal.Duplex,
-  head: Buffer
+  head: Buffer,
 ) {
   const req = requestWrapper.getRequest();
 
@@ -161,7 +161,7 @@ export function webSocketProxyForwarder(
           "OpenAI-Beta": "realtime=v1",
         })} | Request path: ${
           requestWrapper.url.pathname
-        } | Azure params: resource=${azureResource}, deployment=${azureDeployment} | Timestamp: ${new Date().toISOString()}`
+        } | Azure params: resource=${azureResource}, deployment=${azureDeployment} | Timestamp: ${new Date().toISOString()}`,
       );
     });
 
@@ -176,7 +176,7 @@ export function webSocketProxyForwarder(
         const { requestId: newRequestId } = await logCurrentSession(
           requestId,
           [...messages],
-          requestWrapper
+          requestWrapper,
         );
         requestId = newRequestId;
       }, REALTIME_LOGGING_INTERVAL);
@@ -198,16 +198,16 @@ export function webSocketProxyForwarder(
               from,
             });
           } else if (messageType === "close") {
-          /* -------------------------------------------------------------------------- */
-          /*                            Handle Closing Event                            */
-          /* -------------------------------------------------------------------------- */
+            /* -------------------------------------------------------------------------- */
+            /*                            Handle Closing Event                            */
+            /* -------------------------------------------------------------------------- */
             if (loggingInterval) {
               clearInterval(loggingInterval);
             }
             const { requestId: newRequestId } = await logCurrentSession(
               requestId,
               [...messages],
-              requestWrapper
+              requestWrapper,
             );
             requestId = newRequestId;
           }
@@ -238,7 +238,7 @@ async function linkWebSocket({
       | "pong"
       | "unexpected-response",
     from: "client" | "target",
-    data: string | Error
+    data: string | Error,
   ) => Promise<void>;
 }) {
   // MESSAGE EVENTS

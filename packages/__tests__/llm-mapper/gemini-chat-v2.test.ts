@@ -182,7 +182,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Verify response text was extracted correctly
       expect(result.response?.messages?.[0].content).toBe(
-        "I'm doing well, thank you for asking!"
+        "I'm doing well, thank you for asking!",
       );
     });
 
@@ -415,7 +415,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Find temperature transformation via the property name
       const temperatureMapping = googleChatMapper["mappings"].find(
-        (m) => m.internal === "temperature"
+        (m) => m.internal === "temperature",
       );
 
       // Extract and test each transformation individually
@@ -427,7 +427,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Test topP transformation
       const topPMapping = googleChatMapper["mappings"].find(
-        (m) => m.internal === "top_p"
+        (m) => m.internal === "top_p",
       );
       expect(topPMapping?.transform).toBeDefined();
       if (topPMapping?.transform) {
@@ -437,7 +437,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Test maxTokens transformation
       const maxTokensMapping = googleChatMapper["mappings"].find(
-        (m) => m.internal === "max_tokens"
+        (m) => m.internal === "max_tokens",
       );
       expect(maxTokensMapping?.transform).toBeDefined();
       if (maxTokensMapping?.transform) {
@@ -447,7 +447,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Test candidateCount transformation
       const candidateCountMapping = googleChatMapper["mappings"].find(
-        (m) => m.internal === "n"
+        (m) => m.internal === "n",
       );
       expect(candidateCountMapping?.transform).toBeDefined();
       if (candidateCountMapping?.transform) {
@@ -458,7 +458,7 @@ describe("Gemini Chat V2 Mapper Core Tests", () => {
 
       // Test stopSequences transformation
       const stopSequencesMapping = googleChatMapper["mappings"].find(
-        (m) => m.internal === "stop"
+        (m) => m.internal === "stop",
       );
       expect(stopSequencesMapping?.transform).toBeDefined();
       if (stopSequencesMapping?.transform) {

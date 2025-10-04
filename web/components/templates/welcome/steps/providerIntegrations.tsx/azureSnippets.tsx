@@ -133,18 +133,6 @@ const DIFF_LINES: {
   curl: [0, 2, 3],
 };
 
-const NAMES: {
-  [key in SupportedLanguages]: string;
-} = {
-  typescript: "Node.js",
-  python: "Python",
-  langchain_python: "LangChain",
-  langchain_typescript: "LangChainJS",
-  asyncLogging: "OpenLLMetry",
-  manualLogging: "Custom",
-  curl: "cURL",
-};
-
 interface AzureSnippetsProps {
   apiKey?: string;
 }

@@ -48,7 +48,7 @@ const CTA = () => {
             <div
               className={cn(
                 "bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-2 xl:py-4 px-7 text-brand transition-transform duration-1000",
-                "rotate-[-3deg]"
+                "rotate-[-3deg]",
               )}
             >
               <h1>Reliable</h1>
@@ -77,7 +77,7 @@ const CTA = () => {
       <div
         className={cn(
           ISLAND_WIDTH,
-          "z-[10] flex flex-col md:flex-row justify-between items-start md:items-center gap-y-6 md:gap-y-0 mt-11 md:mt-0 mb-11"
+          "z-[10] flex flex-col md:flex-row justify-between items-start md:items-center gap-y-6 md:gap-y-0 mt-11 md:mt-0 mb-11",
         )}
       >
         <p className="font-medium text-sm md:text-xl">We protect your data.</p>
@@ -107,7 +107,7 @@ const CTA = () => {
         className={cn(
           "w-[178px] h-[178px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-28 left-4 rotate-[-27deg] transition-all duration-1000",
           isHovered &&
-            "w-[160px] h-[160px] 2xl:w-[200px] 2xl:h-[200px] left-1/2 translate-x-[-380px] 2xl:translate-x-[-600px] bottom-16 rotate-[-27deg]"
+            "w-[160px] h-[160px] 2xl:w-[200px] 2xl:h-[200px] left-1/2 translate-x-[-380px] 2xl:translate-x-[-600px] bottom-16 rotate-[-27deg]",
         )}
         innerClassName=""
       />
@@ -117,7 +117,7 @@ const CTA = () => {
         className={cn(
           "w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-1/3 left-44 2xl:left-56 transition-all duration-1000",
           isHovered &&
-            "!left-1/2 translate-x-[-450px] 2xl:translate-x-[-550px] translate-y-[50px] rotate-[17deg]"
+            "!left-1/2 translate-x-[-450px] 2xl:translate-x-[-550px] translate-y-[50px] rotate-[17deg]",
         )}
       />
 
@@ -126,7 +126,7 @@ const CTA = () => {
         className={cn(
           "w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute left-0 top-1/4 -rotate-[25deg] transition-all duration-1000",
           isHovered &&
-            "left-1/2 translate-x-[-620px] 2xl:translate-x-[-720px] translate-y-[10px] rotate-[20deg]"
+            "left-1/2 translate-x-[-620px] 2xl:translate-x-[-720px] translate-y-[10px] rotate-[20deg]",
         )}
         innerClassName="p-2"
       />
@@ -135,7 +135,7 @@ const CTA = () => {
         imgSrc="/static/home/logos/openai.webp"
         className={cn(
           "w-[194px] h-[194px] 2xl:w-[240px] 2xl:h-[240px] absolute top-0 left-36 2xl:left-48 transition-all duration-1000",
-          isHovered && "!left-1/2 translate-x-[-470px] top-10 rotate-[-45deg]"
+          isHovered && "!left-1/2 translate-x-[-470px] top-10 rotate-[-45deg]",
         )}
         innerClassName="rounded-3xl"
       />
@@ -144,7 +144,7 @@ const CTA = () => {
         imgSrc="/static/home/logos/togetherai.webp"
         className={cn(
           "w-[142px] h-[142px] 2xl:w-[180px] 2xl:h-[180px] absolute top-0 right-4 rotate-[40deg] transition-all duration-1000",
-          isHovered && "right-1/2 translate-x-[400px] rotate-[-3deg]"
+          isHovered && "right-1/2 translate-x-[400px] rotate-[-3deg]",
         )}
         innerClassName="rounded-3xl"
       />
@@ -154,7 +154,7 @@ const CTA = () => {
         className={cn(
           "w-[176px] h-[176px] 2xl:w-[220px] 2xl:h-[220px] absolute bottom-40 right-20 2xl:translate-x-[50px] translate-x-[50px] rotate-[15deg] transition-all duration-1000",
           isHovered &&
-            "bottom-20 right-1/2 translate-x-[400px] 2xl:translate-x-[560px] rotate-[28deg]"
+            "bottom-20 right-1/2 translate-x-[400px] 2xl:translate-x-[560px] rotate-[28deg]",
         )}
         innerClassName="p-4"
       />
@@ -164,7 +164,7 @@ const CTA = () => {
         className={cn(
           "w-[135px] h-[135px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/3 right-56 rotate-[43deg] transition-all duration-1000",
           isHovered &&
-            "right-1/2 translate-x-[400px] 2xl:translate-x-[500px] translate-y-[-30px] rotate-[15deg]"
+            "right-1/2 translate-x-[400px] 2xl:translate-x-[500px] translate-y-[-30px] rotate-[15deg]",
         )}
         innerClassName="p-2"
       />
@@ -173,7 +173,7 @@ const CTA = () => {
         imgSrc="/static/home/logos/openrouter.webp"
         className={cn(
           "w-28 h-28 2xl:w-32 2xl:h-32 absolute top-10 right-56 rotate-[-16deg] transition-all duration-1000",
-          isHovered && "top-6 right-1/2 translate-x-[200px] rotate-[-76deg]"
+          isHovered && "top-6 right-1/2 translate-x-[200px] rotate-[-76deg]",
         )}
         innerClassName="p-2"
       />
@@ -182,7 +182,7 @@ const CTA = () => {
         imgSrc="/static/home/logo4.webp"
         className={cn(
           "w-28 h-28 2xl:w-32 2xl:h-32 absolute top-1/4 right-10 transition-all duration-1000",
-          isHovered && "right-1/2 translate-x-[550px] top-1/2 rotate-[-45deg]"
+          isHovered && "right-1/2 translate-x-[550px] top-1/2 rotate-[-45deg]",
         )}
       />
     </div>

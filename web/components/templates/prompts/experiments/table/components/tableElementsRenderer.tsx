@@ -72,7 +72,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
     isOriginal,
     onForkPromptVersion,
     experimentId,
-    originalPromptVersionId,
+    originalPromptVersionId: _originalPromptVersionId,
   } = props;
 
   const org = useOrg();
@@ -81,45 +81,40 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
   const [showViewPrompt, setShowViewPrompt] = useState(false);
   const jawnClient = useJawnClient();
 
-  const { data: promptTemplate, isLoading: isPromptTemplateLoading } = useQuery(
-    {
-      queryKey: ["promptTemplate", promptVersionId],
-      queryFn: async () => {
-        if (!promptVersionId) return null;
+  const { data: promptTemplate } = useQuery({
+    queryKey: ["promptTemplate", promptVersionId],
+    queryFn: async () => {
+      if (!promptVersionId) return null;
 
-        const res = await jawnClient.GET(
-          "/v1/prompt/version/{promptVersionId}",
-          {
-            params: {
-              path: {
-                promptVersionId: promptVersionId,
-              },
+      const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
+        params: {
+          path: {
+            promptVersionId: promptVersionId,
+          },
+        },
+      });
+
+      const parentPromptVersion = await jawnClient.GET(
+        "/v1/prompt/version/{promptVersionId}",
+        {
+          params: {
+            path: {
+              promptVersionId: res.data?.data?.parent_prompt_version ?? "",
             },
           },
-        );
+        },
+      );
 
-        const parentPromptVersion = await jawnClient.GET(
-          "/v1/prompt/version/{promptVersionId}",
-          {
-            params: {
-              path: {
-                promptVersionId: res.data?.data?.parent_prompt_version ?? "",
-              },
-            },
-          },
-        );
-
-        return {
-          ...res.data?.data,
-          parent_prompt_version: parentPromptVersion?.data?.data,
-        };
-      },
-      staleTime: Infinity,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
+      return {
+        ...res.data?.data,
+        parent_prompt_version: parentPromptVersion?.data?.data,
+      };
     },
-  );
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
 
   const queryClient = useQueryClient();
 
@@ -260,7 +255,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           <PromptPlayground
             prompt={promptTemplate?.helicone_template ?? ""}
             selectedInput={undefined}
-            onSubmit={(history, model) => {
+            onSubmit={() => {
               setShowViewPrompt(false);
             }}
             submitText="Save"
@@ -638,8 +633,6 @@ const InputCell = ({
     queryKey: ["inputs", rowRecordId],
     queryFn: () => rowInputs,
   });
-
-  const ref = useRef<HTMLInputElement>(null);
 
   return (
     <div

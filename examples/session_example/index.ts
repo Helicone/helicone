@@ -11,19 +11,19 @@ async function manualLoggerTest() {
   const heliconeLogger = new HeliconeManualLogger({
     apiKey: process.env.HELICONE_API_KEY ?? "", // Can be set as env variable
     headers: {},
-    loggingEndpoint: `${process.env.HELICONE_BASE_LOGGING_URL}`
+    loggingEndpoint: `${process.env.HELICONE_BASE_LOGGING_URL}`,
   });
 
   const reqBody = {
-    "messages": [
+    messages: [
       {
-        "role": "user",
-        "content": "What is the meaning of life, the universe, and everything?"
-      }
+        role: "user",
+        content: "What is the meaning of life, the universe, and everything?",
+      },
     ],
-    "model": "grok-3",
-    "stream": false,
-    "temperature": 0.7
+    model: "grok-3",
+    stream: false,
+    temperature: 0.7,
   };
 
   const res = await heliconeLogger.logRequest(
@@ -33,9 +33,9 @@ async function manualLoggerTest() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.XAI_API_KEY}`
+          Authorization: `Bearer ${process.env.XAI_API_KEY}`,
         },
-        body: JSON.stringify(reqBody)
+        body: JSON.stringify(reqBody),
       });
       const resBody = await r.json();
       resultRecorder.appendResults(resBody as any);
@@ -44,7 +44,7 @@ async function manualLoggerTest() {
     {
       "Helicone-Session-Id": "123",
       "Helicone-Session-Name": "test",
-    }
+    },
   );
 
   console.log(res);
@@ -80,7 +80,7 @@ async function main() {
         "Helicone-Cache-Enabled": "true",
         "Helicone-Cache-Max-Bucket-Size": "3",
       },
-    }
+    },
   );
 
   await openai.chat.completions.create(
@@ -99,7 +99,7 @@ async function main() {
         "Helicone-Session-Name": sessionName,
         "Helicone-Session-Path": "/abstract",
       },
-    }
+    },
   );
 
   await openai.chat.completions.create(
@@ -118,7 +118,7 @@ async function main() {
         "Helicone-Session-Name": sessionName,
         "Helicone-Session-Path": "/outline",
       },
-    }
+    },
   );
 
   const chapterNames = [
@@ -148,7 +148,7 @@ async function main() {
             "Helicone-Session-Name": sessionName,
             "Helicone-Session-Path": `/outline/${chapterName}`,
           },
-        }
+        },
       );
       const sectionNames = [
         "Overview",
@@ -175,11 +175,11 @@ async function main() {
                 "Helicone-Session-Name": sessionName,
                 "Helicone-Session-Path": `/outline/${chapterName}/${sectionName}`,
               },
-            }
+            },
           );
-        })
+        }),
       );
-    })
+    }),
   );
 }
 

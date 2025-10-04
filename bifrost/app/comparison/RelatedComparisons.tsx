@@ -16,10 +16,10 @@ export default function RelatedComparisons({
   providerB,
 }: RelatedComparisonsProps) {
   const providerInfoA = providers.find(
-    (p) => p.provider.toUpperCase() === providerA.toUpperCase()
+    (p) => p.provider.toUpperCase() === providerA.toUpperCase(),
   );
   const providerInfoB = providers.find(
-    (p) => p.provider.toUpperCase() === providerB.toUpperCase()
+    (p) => p.provider.toUpperCase() === providerB.toUpperCase(),
   );
 
   const findModelFamily = (providerInfo: any, modelName: string) => {
@@ -28,18 +28,18 @@ export default function RelatedComparisons({
       return {
         parent: modelName,
         siblings: Array.from(
-          new Set(providerInfo.modelDetails[modelName].matches)
+          new Set(providerInfo.modelDetails[modelName].matches),
         ).filter((m) => m !== modelName) as string[],
       };
     }
 
     // Check if it's a variant
     for (const [parentModel, details] of Object.entries<{ matches: string[] }>(
-      providerInfo?.modelDetails || {}
+      providerInfo?.modelDetails || {},
     )) {
       if (details.matches.includes(modelName)) {
         const siblings = Array.from(new Set(details.matches)).filter(
-          (m) => m !== modelName
+          (m) => m !== modelName,
         ) as string[];
 
         siblings.unshift(parentModel);
@@ -57,10 +57,10 @@ export default function RelatedComparisons({
     model1: string,
     provider1: string,
     model2: string,
-    provider2: string
+    provider2: string,
   ) => {
     return `/comparison/${encodeURIComponent(model1)}-on-${encodeURIComponent(
-      provider1
+      provider1,
     )}-vs-${encodeURIComponent(model2)}-on-${encodeURIComponent(provider2)}`;
   };
 
@@ -82,7 +82,7 @@ export default function RelatedComparisons({
                     modelAFamily.parent,
                     providerA,
                     modelB,
-                    providerB
+                    providerB,
                   )}
                   className="block text-blue-500 hover:underline"
                 >
@@ -99,7 +99,7 @@ export default function RelatedComparisons({
                       sibling,
                       providerA,
                       modelB,
-                      providerB
+                      providerB,
                     )}
                     className="block text-blue-500 hover:underline"
                   >
@@ -124,7 +124,7 @@ export default function RelatedComparisons({
                     modelA,
                     providerA,
                     modelBFamily.parent,
-                    providerB
+                    providerB,
                   )}
                   className="block text-blue-500 hover:underline"
                 >
@@ -141,7 +141,7 @@ export default function RelatedComparisons({
                       modelA,
                       providerA,
                       sibling,
-                      providerB
+                      providerB,
                     )}
                     className="block text-blue-500 hover:underline"
                   >

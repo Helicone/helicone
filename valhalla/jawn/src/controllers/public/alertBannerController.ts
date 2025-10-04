@@ -13,7 +13,7 @@ export class AlertBannerController extends Controller {
     body: {
       id: number;
       active: boolean;
-    }
+    },
   ): Promise<Result<void, string>> {
     if (
       request.headers.authorization !== process.env.HELICONE_MANUAL_ACCESS_KEY
@@ -26,7 +26,7 @@ export class AlertBannerController extends Controller {
       `
     UPDATE alert_banners SET active = $1 WHERE id = $2
     `,
-      [body.active, body.id]
+      [body.active, body.id],
     );
 
     if (error) {
@@ -40,7 +40,7 @@ export class AlertBannerController extends Controller {
 
   @Get("/")
   public async getAlertBanners(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -62,7 +62,7 @@ export class AlertBannerController extends Controller {
     }
     const { error, data } = await dbExecute(
       `SELECT * FROM alert_banners ORDER BY created_at ASC`,
-      []
+      [],
     );
 
     if (error) {
@@ -78,7 +78,7 @@ export class AlertBannerController extends Controller {
         message: string;
         created_at: string;
         updated_at: string;
-      }[]
+      }[],
     );
   }
 }

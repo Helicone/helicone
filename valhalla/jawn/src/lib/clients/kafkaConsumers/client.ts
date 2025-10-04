@@ -1,8 +1,6 @@
 import * as Sentry from "@sentry/node";
 import { Kafka, logLevel } from "kafkajs";
 
-
-
 export function getKafka() {
   try {
     const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
@@ -29,7 +27,9 @@ export function getKafka() {
       });
     } else {
       if (!KAFKA_ENABLED) {
-        Sentry.captureMessage("Kafka is disabled. Check environment variables.");
+        Sentry.captureMessage(
+          "Kafka is disabled. Check environment variables.",
+        );
         console.log("Kafka is disabled.");
       } else {
         // Check which environment variables are missing
@@ -66,7 +66,7 @@ export function generateKafkaConsumer(
     | "jawn-consumer"
     | "jawn-consumer-backfill"
     | "jawn-consumer-scores"
-    | "jawn-consumer-scores-dlq"
+    | "jawn-consumer-scores-dlq",
 ) {
   const kafka = getKafka();
   const consumer = kafka?.consumer({

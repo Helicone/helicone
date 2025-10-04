@@ -62,7 +62,7 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
             metadataText = `\nMetadata: ${JSON.stringify(
               match.metadata,
               null,
-              2
+              2,
             )}`;
           }
 

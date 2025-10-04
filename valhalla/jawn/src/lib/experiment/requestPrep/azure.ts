@@ -6,7 +6,7 @@ const settingsManager = new SettingsManager();
 export async function prepareRequestAzure(
   apiKey?: string,
   requestId?: string,
-  experimentId?: string
+  experimentId?: string,
 ): Promise<{
   url: URL;
   headers: { [key: string]: string };
@@ -71,7 +71,7 @@ export async function prepareRequestAzureFull({
   const { url: fetchUrl, headers } = await prepareRequestAzure(
     apiKey,
     requestId,
-    experimentId
+    experimentId,
   );
   return {
     url: fetchUrl,

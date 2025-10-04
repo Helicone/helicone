@@ -16,7 +16,7 @@ import { EvaluatorType } from "@/components/templates/evals/testing/types";
 
 export const EvaluatorTypeDropdown: React.FC<{
   selectedOption: string;
-  onOptionSelect: (option: EvaluatorType) => void;
+  onOptionSelect: (_option: EvaluatorType) => void;
 }> = ({ selectedOption, onOptionSelect }) => {
   return (
     <>

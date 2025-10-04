@@ -13,7 +13,7 @@ export class S3Manager {
   }): Promise<Result<string, string>> {
     const url = this.s3Client.getRequestResponseRawUrl(
       content.requestId,
-      content.organizationId
+      content.organizationId,
     );
 
     const tags: Record<string, string> = {
@@ -26,7 +26,7 @@ export class S3Manager {
         request: content.requestBody,
         response: content.responseBody,
       }),
-      tags
+      tags,
     );
   }
 }

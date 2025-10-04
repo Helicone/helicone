@@ -114,18 +114,6 @@ const DIFF_LINES: {
   manualLogging: [],
 };
 
-const NAMES: {
-  [key in SupportedLanguages]: string;
-} = {
-  curl: "cURL",
-  typescript: "Node.js",
-  python: "Python",
-  langchain_python: "LangChain",
-  langchain_typescript: "LangChainJS",
-  asyncLogging: "OpenLLMetry",
-  manualLogging: "Custom",
-};
-
 interface OpenAISnippetsProps {
   apiKey?: string;
 }

@@ -84,14 +84,14 @@ async function signJWT(content: string, privateKey: string): Promise<string> {
       hash: { name: "SHA-256" },
     },
     false,
-    ["sign"]
+    ["sign"],
   );
 
   // Sign the content
   const binarySignature = await crypto.subtle.sign(
     { name: "RSASSA-PKCS1-V1_5" },
     signer,
-    buf
+    buf,
   );
 
   return arrayBufferToBase64Url(binarySignature);
@@ -103,7 +103,7 @@ async function signJWT(content: string, privateKey: string): Promise<string> {
 async function hashString(str: string): Promise<string> {
   const hashBuffer = await crypto.subtle.digest(
     "SHA-256",
-    new TextEncoder().encode(str)
+    new TextEncoder().encode(str),
   );
   return Array.from(new Uint8Array(hashBuffer))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -122,14 +122,14 @@ export async function getGoogleAccessToken(
   serviceAccountJson: string,
   orgId?: string,
   scopes: string[] = ["https://www.googleapis.com/auth/cloud-platform"],
-  cacheProvider?: CacheProvider
+  cacheProvider?: CacheProvider,
 ): Promise<string> {
   let serviceAccount: ServiceAccount;
   try {
     serviceAccount = JSON.parse(serviceAccountJson);
   } catch (error) {
     throw new Error(
-      `Invalid service account JSON: ${error instanceof Error ? error.message : "Parse error"}`
+      `Invalid service account JSON: ${error instanceof Error ? error.message : "Parse error"}`,
     );
   }
   const serviceAccountHash = await hashString(serviceAccountJson);
@@ -179,7 +179,7 @@ export async function getGoogleAccessToken(
  */
 async function generateGoogleAccessToken(
   serviceAccount: ServiceAccount,
-  scopes: string[]
+  scopes: string[],
 ): Promise<GoogleTokenResponse> {
   // Create JWT header
   const header = objectToBase64url({
@@ -219,7 +219,7 @@ async function generateGoogleAccessToken(
   if (!tokenResponse.ok) {
     const errorText = await tokenResponse.text();
     throw new Error(
-      `Failed to get Google access token: ${tokenResponse.status} - ${errorText}`
+      `Failed to get Google access token: ${tokenResponse.status} - ${errorText}`,
     );
   }
 

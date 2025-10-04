@@ -1,4 +1,3 @@
-import MarkdownEditor from "@/components/shared/markdownEditor";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { logger } from "@/lib/telemetry/logger";
@@ -402,7 +401,6 @@ export default function ChatMessage({
 }: ChatMessageProps) {
   const { mode } = useRequestRenderModeStore();
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFileAction, setPendingFileAction] = useState<
     "add" | "change" | null

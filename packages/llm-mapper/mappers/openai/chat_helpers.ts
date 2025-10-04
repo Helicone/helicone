@@ -19,7 +19,7 @@ export const isImageContent = (content: any): boolean => {
 };
 
 export const parseFunctionArguments = (
-  args: string | undefined
+  args: string | undefined,
 ): Record<string, any> => {
   try {
     return JSON.parse(args ?? "{}");
@@ -36,7 +36,7 @@ export const mapToolCallToFunction = (tool: ToolCall): FunctionCall => ({
 
 export const handleArrayContent = (content: any[]): string => {
   const textContent = content.find(
-    (item: any) => typeof item === "string" || item?.type === "text"
+    (item: any) => typeof item === "string" || item?.type === "text",
   );
 
   if (textContent) {
@@ -69,7 +69,7 @@ export const handleToolCalls = (message: any): Message => {
             arguments: parseFunctionArguments(message.function_call.arguments),
           },
         ]
-      : message.tool_calls?.map(mapToolCallToFunction) ?? [],
+      : (message.tool_calls?.map(mapToolCallToFunction) ?? []),
     _type: "functionCall",
   };
 };
@@ -129,7 +129,7 @@ export const formatStreamingToolCalls = (toolCalls: ToolCall[]): string => {
 export const handleClaudeResponse = (responseBody: any): string | undefined => {
   if (responseBody?.content?.[0].type === "tool_use") {
     const toolUse = responseBody.content.find(
-      (item: any) => item.type === "tool_use"
+      (item: any) => item.type === "tool_use",
     );
     if (toolUse) {
       return `${toolUse.name}(${JSON.stringify(toolUse.input)})`;

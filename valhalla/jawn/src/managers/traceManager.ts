@@ -11,7 +11,7 @@ export class TraceManager {
       process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT ?? "",
       process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
     );
   }
 
@@ -30,7 +30,7 @@ export class TraceManager {
       index: i,
       logprobs: null,
       finish_reason: span.attributes.get(
-        `gen_ai.completion.${i}.finish_reason`
+        `gen_ai.completion.${i}.finish_reason`,
       ) as string,
       message: this.extractAttributes(span, `gen_ai.completion`, i),
     };
@@ -47,12 +47,15 @@ export class TraceManager {
         seenKeys.add(i);
         return true;
       })
-      .reduce((acc, i) => {
-        if (span.attributes.has(`${prefix}.${i}.role`)) {
-          acc.push(this.extractAttributes(span, prefix, i));
-        }
-        return acc;
-      }, [] as { role: "system" | "user" | "assistant"; content: string }[]);
+      .reduce(
+        (acc, i) => {
+          if (span.attributes.has(`${prefix}.${i}.role`)) {
+            acc.push(this.extractAttributes(span, prefix, i));
+          }
+          return acc;
+        },
+        [] as { role: "system" | "user" | "assistant"; content: string }[],
+      );
   }
 
   private extractCompletions(span: TModifiedSpan) {
@@ -81,7 +84,7 @@ export class TraceManager {
             role: "system" | "user" | "assistant";
             content: string;
           };
-        }[]
+        }[],
       );
   }
 
@@ -89,18 +92,18 @@ export class TraceManager {
     span: TModifiedSpan,
     requestBody: TRequestBody,
     responseBody: TResponseBody,
-    authParams: AuthParams
+    authParams: AuthParams,
   ) {
     const key = this.s3Client.getRawRequestResponseKey(
       span.traceId,
-      authParams.organizationId
+      authParams.organizationId,
     );
     const s3Result = await this.s3Client.store(
       key,
       JSON.stringify({
         request: JSON.stringify(requestBody),
         response: JSON.stringify(responseBody),
-      })
+      }),
     );
     if (s3Result.error) {
       console.error(`Error storing request response in S3: ${s3Result.error}`);
@@ -116,7 +119,7 @@ export class TraceManager {
     completionChoices: TCompletionChoices,
     heliconeProperties: Record<string, string>,
     authParams: AuthParams,
-    userId?: string
+    userId?: string,
   ): Log {
     return {
       request: {
@@ -149,7 +152,7 @@ export class TraceManager {
             ? Math.trunc(
                 (parseInt(span.endTimeUnixNano) -
                   parseInt(span.startTimeUnixNano)) /
-                  1000000
+                  1000000,
               )
             : -1,
       },
@@ -160,7 +163,7 @@ export class TraceManager {
     const kafkaProducer = new HeliconeQueueProducer();
     await kafkaProducer.sendMessages(
       [kafkaMessage],
-      "request-response-logs-prod"
+      "request-response-logs-prod",
     );
   }
 
@@ -179,15 +182,15 @@ export class TraceManager {
             traceId: uuid,
             attributes: attributes,
           };
-        })
-      )
+        }),
+      ),
     );
   }
 
   public async consumeTraces(
     trace: OTELTrace,
     heliconeAuthorization: string,
-    authParams: AuthParams
+    authParams: AuthParams,
   ) {
     const spans = this.processOtelSpans(trace);
 
@@ -197,7 +200,7 @@ export class TraceManager {
 
       const userId =
         span.attributes.get(
-          "traceloop.association.properties.Helicone-User-Id"
+          "traceloop.association.properties.Helicone-User-Id",
         ) ??
         span.attributes.get("llm.user") ??
         "";
@@ -206,20 +209,23 @@ export class TraceManager {
         .filter(
           ([key]) =>
             key.startsWith("traceloop.association.properties.Helicone-") &&
-            key !== "traceloop.association.properties.Helicone-User-Id"
+            key !== "traceloop.association.properties.Helicone-User-Id",
         )
-        .reduce((acc, [key, value]) => {
-          const propertyName = key.replace(
-            key.startsWith(
-              "traceloop.association.properties.Helicone-Property-"
-            )
-              ? "traceloop.association.properties.Helicone-Property-"
-              : "traceloop.association.properties.",
-            ""
-          );
-          acc[propertyName] = value;
-          return acc;
-        }, {} as Record<string, string>);
+        .reduce(
+          (acc, [key, value]) => {
+            const propertyName = key.replace(
+              key.startsWith(
+                "traceloop.association.properties.Helicone-Property-",
+              )
+                ? "traceloop.association.properties.Helicone-Property-"
+                : "traceloop.association.properties.",
+              "",
+            );
+            acc[propertyName] = value;
+            return acc;
+          },
+          {} as Record<string, string>,
+        );
 
       const requestBody = {
         model: span.attributes.get("gen_ai.response.model"),
@@ -239,7 +245,7 @@ export class TraceManager {
         usage: {
           prompt_tokens: span.attributes.get("gen_ai.usage.prompt_tokens"),
           completion_tokens: span.attributes.get(
-            "gen_ai.usage.completion_tokens"
+            "gen_ai.usage.completion_tokens",
           ),
           total_tokens: span.attributes.get("llm.usage.total_tokens"),
         },
@@ -254,7 +260,7 @@ export class TraceManager {
         completionChoices,
         heliconeProperties,
         authParams,
-        userId
+        userId,
       );
 
       const kafkaMessage: KafkaMessageContents = {

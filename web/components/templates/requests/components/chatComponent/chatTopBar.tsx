@@ -8,7 +8,6 @@ import {
 import { useRouter } from "next/router";
 import React from "react";
 import { PiPlayBold } from "react-icons/pi";
-import { useCreatePrompt } from "../../../../../services/hooks/prompts/prompts";
 
 export const PROMPT_MODES = ["Pretty", "JSON", "Markdown", "Debug"] as const;
 
@@ -47,7 +46,6 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   promptData,
 }) => {
   const router = useRouter();
-  const createPrompt = useCreatePrompt();
 
   return (
     <div className="flex h-10 w-full flex-row items-center justify-between rounded-md bg-slate-50 px-2 text-slate-900 dark:bg-black dark:text-slate-100">

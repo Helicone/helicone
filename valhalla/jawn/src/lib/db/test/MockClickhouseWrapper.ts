@@ -1,6 +1,9 @@
 import { Result } from "../../../packages/common/result";
 import { ClickhouseDB, RequestResponseRMT } from "../ClickhouseWrapper";
-import { CLICKHOUSE_ERRORS, mockRequestResponseData } from "./clickhouseMockData";
+import {
+  CLICKHOUSE_ERRORS,
+  mockRequestResponseData,
+} from "./clickhouseMockData";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
@@ -41,14 +44,16 @@ export class MockClickhouseClientWrapper {
       },
       // Block multi-statement queries
       {
-        pattern: /;\s*(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|RENAME|GRANT|REVOKE)/i,
+        pattern:
+          /;\s*(?:SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|RENAME|GRANT|REVOKE)/i,
         errorCode: CLICKHOUSE_ERRORS.SYNTAX_ERROR.code,
         errorType: CLICKHOUSE_ERRORS.SYNTAX_ERROR.type,
         errorMessage: "Multi-statement queries are not allowed",
       },
       // Block DDL operations
       {
-        pattern: /^\s*(?:CREATE|DROP|ALTER|TRUNCATE|RENAME)\s+(?:TABLE|DATABASE|VIEW)/i,
+        pattern:
+          /^\s*(?:CREATE|DROP|ALTER|TRUNCATE|RENAME)\s+(?:TABLE|DATABASE|VIEW)/i,
         errorCode: CLICKHOUSE_ERRORS.READONLY.code,
         errorType: CLICKHOUSE_ERRORS.READONLY.type,
         errorMessage: "DDL operations are not allowed in readonly mode",
@@ -147,7 +152,7 @@ export class MockClickhouseClientWrapper {
 
   async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
     table: T,
-    values: ClickhouseDB["Tables"][T][]
+    values: ClickhouseDB["Tables"][T][],
   ): Promise<Result<string, string>> {
     // In readonly mode, all inserts should fail
     if (this.readonlyMode) {
@@ -164,16 +169,16 @@ export class MockClickhouseClientWrapper {
     // Mock successful insert
     const existingData = this.mockData.get(table) || [];
     this.mockData.set(table, [...existingData, ...values]);
-    
-    return { 
-      data: `mock-query-id-${Date.now()}`, 
-      error: null 
+
+    return {
+      data: `mock-query-id-${Date.now()}`,
+      error: null,
     };
   }
 
   async dbQuery<RowType>(
     query: string,
-    parameters: (number | string | boolean | Date)[]
+    parameters: (number | string | boolean | Date)[],
   ): Promise<Result<RowType[], string>> {
     // Apply security checks
     const securityCheck = this.checkSecurity(query);
@@ -184,13 +189,13 @@ export class MockClickhouseClientWrapper {
     // Mock query execution - return mock data
     const tableName = this.extractTableName(query);
     const data = this.mockData.get(tableName) || [];
-    
+
     return { data: data as RowType[], error: null };
   }
 
   async dbQueryHql<RowType>(
     query: string,
-    parameters: (number | string | boolean | Date)[]
+    parameters: (number | string | boolean | Date)[],
   ): Promise<Result<RowType[], string>> {
     // HQL queries should go through the same security checks
     return this.dbQuery<RowType>(query, parameters);
@@ -211,7 +216,8 @@ export class MockClickhouseClientWrapper {
         error: JSON.stringify({
           code: CLICKHOUSE_ERRORS.SYNTAX_ERROR.code,
           type: CLICKHOUSE_ERRORS.SYNTAX_ERROR.type,
-          message: "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
+          message:
+            "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
         }),
       };
     }
@@ -224,13 +230,16 @@ export class MockClickhouseClientWrapper {
           type: rule.errorType,
           message: rule.errorMessage,
         };
-        
+
         // Special handling for DDL commands that would return syntax errors
-        const isDDL = /^\s*(grant|revoke|create\s+(user|role)|alter\s+(user|role)|drop\s+(user|role))/i.test(query);
+        const isDDL =
+          /^\s*(grant|revoke|create\s+(user|role)|alter\s+(user|role)|drop\s+(user|role))/i.test(
+            query,
+          );
         if (isDDL) {
           error.message = `Syntax error: failed at position ${query.indexOf(query.match(rule.pattern)?.[0] || "")} ('FORMAT') (line 2, col 1): FORMAT JSON. Expected one of: VALID UNTIL, HOST, SETTINGS, DEFAULT ROLE, ON, GRANTEES, DEFAULT DATABASE, IN, end of query.`;
         }
-        
+
         return {
           data: null,
           error: JSON.stringify(error),
@@ -249,7 +258,11 @@ export class MockClickhouseClientWrapper {
 
     // Apply WHERE clause filtering after RLS
     // This simulates how ClickHouse would apply WHERE conditions after row-level security
-    if (query.includes(`WHERE organization_id = '${organizationId.replace(/'/g, "")}'`)) {
+    if (
+      query.includes(
+        `WHERE organization_id = '${organizationId.replace(/'/g, "")}'`,
+      )
+    ) {
       // Already filtered by RLS, this WHERE is redundant but valid
     } else if (query.includes("WHERE organization_id = '")) {
       // Looking for a different org than what RLS allows - should return empty
@@ -306,7 +319,7 @@ export class MockClickhouseClientWrapper {
 
   private applyRowLevelSecurity(data: any[], organizationId: string): any[] {
     // Simulate ClickHouse row-level security
-    return data.filter(row => row.organization_id === organizationId);
+    return data.filter((row) => row.organization_id === organizationId);
   }
 
   private extractTableName(query: string): string {

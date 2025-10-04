@@ -5,7 +5,7 @@ import { calculateModel } from "../../../utils/modelMapper";
 
 export class VercelStreamProcessor implements IBodyProcessor {
   public async parse(
-    parseInput: ParseInput
+    parseInput: ParseInput,
   ): PromiseGenericResult<ParseOutput> {
     // Check if the response looks like a Vercel stream (contains "data: {")
     if (!parseInput.responseBody.includes("data: {")) {

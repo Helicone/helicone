@@ -46,7 +46,7 @@ export class RateLimitController extends Controller {
 
   @Get("/")
   public async getRateLimits(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<RateLimitRuleView[], string>> {
     const rateLimitManager = new RateLimitManager(request.authParams);
     const result = await rateLimitManager.getOrgRateLimits();
@@ -54,7 +54,7 @@ export class RateLimitController extends Controller {
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(
-        result.error || "Failed to fetch rate limits or no data found"
+        result.error || "Failed to fetch rate limits or no data found",
       );
     }
     return ok(result.data);
@@ -63,7 +63,7 @@ export class RateLimitController extends Controller {
   @Post("/")
   public async createRateLimit(
     @Body() params: CreateRateLimitRuleParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<RateLimitRuleView, string>> {
     const rateLimitManager = new RateLimitManager(request.authParams);
     const result = await rateLimitManager.createRateLimit(params);
@@ -80,7 +80,7 @@ export class RateLimitController extends Controller {
   public async updateRateLimit(
     @Path() ruleId: string,
     @Body() params: UpdateRateLimitRuleParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<RateLimitRuleView, string>> {
     const rateLimitManager = new RateLimitManager(request.authParams);
     const result = await rateLimitManager.updateRateLimit(ruleId, params);
@@ -90,8 +90,8 @@ export class RateLimitController extends Controller {
         result.error?.includes("Minimum time window")
           ? 400
           : result.error === "Rate limit rule not found"
-          ? 404
-          : 500
+            ? 404
+            : 500,
       );
       return err(result.error || "Failed to update rate limit rule");
     }
@@ -101,7 +101,7 @@ export class RateLimitController extends Controller {
   @Delete("/{ruleId}")
   public async deleteRateLimit(
     @Path() ruleId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const rateLimitManager = new RateLimitManager(request.authParams);
     const result = await rateLimitManager.deleteRateLimit(ruleId);

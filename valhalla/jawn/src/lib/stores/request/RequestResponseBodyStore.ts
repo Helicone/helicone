@@ -9,7 +9,7 @@ export class RequestResponseBodyStore {
       process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT ?? "",
       process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
     );
   }
 
@@ -24,7 +24,7 @@ export class RequestResponseBodyStore {
   > {
     const signedUrl = await this.s3Client.getRequestResponseBodySignedUrl(
       this.orgId,
-      requestId
+      requestId,
     );
 
     if (signedUrl.error) {

@@ -39,7 +39,10 @@ class FakeAlertStore {
     return { data: null, error: null };
   }
   async getErrorRate() {
-    return { data: { totalCount: 100, errorCount: 10, requestCount: 100 }, error: null };
+    return {
+      data: { totalCount: 100, errorCount: 10, requestCount: 100 },
+      error: null,
+    };
   }
   async getCost() {
     return { data: { totalCount: 200, requestCount: 50 }, error: null };
@@ -57,7 +60,16 @@ const baseAlert = {
   org_id: "org",
   emails: ["x@example.com"],
   slack_channels: ["C123"],
-  organization: { integrations: [{ id: "i1", integration_name: "slack", settings: { access_token: "x" }, active: true }] },
+  organization: {
+    integrations: [
+      {
+        id: "i1",
+        integration_name: "slack",
+        settings: { access_token: "x" },
+        active: true,
+      },
+    ],
+  },
 };
 
 describe("AlertManager", () => {
@@ -79,7 +91,9 @@ describe("AlertManager", () => {
   });
 
   it("triggers alerts when threshold breached and updates history", async () => {
-    const alertStore = new FakeAlertStore([{ ...baseAlert, status: "resolved" }]);
+    const alertStore = new FakeAlertStore([
+      { ...baseAlert, status: "resolved" },
+    ]);
     const manager = new AlertManager(alertStore as any, env);
 
     // getErrorRate returns totalCount=100, errorCount=10 => 10%
@@ -107,5 +121,3 @@ describe("AlertManager", () => {
     expect(res.error).toBeNull();
   });
 });
-
-

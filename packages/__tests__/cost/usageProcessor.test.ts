@@ -4,7 +4,10 @@ import { AnthropicUsageProcessor } from "@helicone-package/cost/usage/anthropicU
 import { GroqUsageProcessor } from "@helicone-package/cost/usage/groqUsageProcessor";
 import { XAIUsageProcessor } from "@helicone-package/cost/usage/xaiUsageProcessor";
 import { DeepSeekUsageProcessor } from "@helicone-package/cost/usage/deepseekUsageProcessor";
-import { VertexUsageProcessor, VertexOpenAIUsageProcessor } from "@helicone-package/cost/usage/vertexUsageProcessor";
+import {
+  VertexUsageProcessor,
+  VertexOpenAIUsageProcessor,
+} from "@helicone-package/cost/usage/vertexUsageProcessor";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import * as fs from "fs";
 import * as path from "path";
@@ -52,7 +55,7 @@ describe("OpenAIUsageProcessor", () => {
   it("should parse real GPT-4o response with cached tokens", async () => {
     const responseData = fs.readFileSync(
       path.join(__dirname, "testData", "gpt4o-response-cached.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await processor.parse({
@@ -74,7 +77,7 @@ describe("OpenAIUsageProcessor", () => {
   it("should parse real GPT-4o stream response", async () => {
     const streamData = fs.readFileSync(
       path.join(__dirname, "testData", "gpt4o-stream-response.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await processor.parse({
@@ -96,7 +99,7 @@ describe("OpenAIUsageProcessor", () => {
         name: "cached-response",
         data: fs.readFileSync(
           path.join(__dirname, "testData", "gpt4o-response-cached.snapshot"),
-          "utf-8"
+          "utf-8",
         ),
         isStream: false,
       },
@@ -104,7 +107,7 @@ describe("OpenAIUsageProcessor", () => {
         name: "stream-response",
         data: fs.readFileSync(
           path.join(__dirname, "testData", "gpt4o-stream-response.snapshot"),
-          "utf-8"
+          "utf-8",
         ),
         isStream: true,
       },
@@ -131,7 +134,7 @@ describe("Azure Usage Processing", () => {
   it("should parse Azure regular response", async () => {
     const responseData = fs.readFileSync(
       path.join(__dirname, "testData", "azure-response.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await processor.parse({
@@ -150,7 +153,7 @@ describe("Azure Usage Processing", () => {
   it("should parse Azure stream response", async () => {
     const streamData = fs.readFileSync(
       path.join(__dirname, "testData", "azure-stream-response.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await processor.parse({
@@ -173,7 +176,7 @@ describe("Azure Usage Processing", () => {
         name: "azure-response",
         data: fs.readFileSync(
           path.join(__dirname, "testData", "azure-response.snapshot"),
-          "utf-8"
+          "utf-8",
         ),
         isStream: false,
       },
@@ -181,7 +184,7 @@ describe("Azure Usage Processing", () => {
         name: "azure-stream-response",
         data: fs.readFileSync(
           path.join(__dirname, "testData", "azure-stream-response.snapshot"),
-          "utf-8"
+          "utf-8",
         ),
         isStream: true,
       },
@@ -208,7 +211,7 @@ describe("AnthropicUsageProcessor", () => {
   it("should parse Anthropic response with cache details", async () => {
     const responseData = fs.readFileSync(
       path.join(__dirname, "testData", "anthropic-response.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await processor.parse({
@@ -231,7 +234,7 @@ describe("AnthropicUsageProcessor", () => {
   it("should parse Anthropic stream response", async () => {
     const streamData = fs.readFileSync(
       path.join(__dirname, "testData", "anthropic-stream-response.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await processor.parse({
@@ -257,7 +260,7 @@ describe("AnthropicUsageProcessor", () => {
         name: "anthropic-response",
         data: fs.readFileSync(
           path.join(__dirname, "testData", "anthropic-response.snapshot"),
-          "utf-8"
+          "utf-8",
         ),
         isStream: false,
       },
@@ -267,9 +270,9 @@ describe("AnthropicUsageProcessor", () => {
           path.join(
             __dirname,
             "testData",
-            "anthropic-stream-response.snapshot"
+            "anthropic-stream-response.snapshot",
           ),
-          "utf-8"
+          "utf-8",
         ),
         isStream: true,
       },
@@ -296,7 +299,7 @@ describe("XAI/Grok specific features", () => {
   it("should parse XAI response with web search", async () => {
     const xaiResponse = fs.readFileSync(
       path.join(__dirname, "testData", "xai-response-websearch.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await xaiProcessor.parse({
@@ -319,7 +322,7 @@ describe("XAI/Grok specific features", () => {
   it("should parse XAI response with reasoning tokens", async () => {
     const xaiResponse = fs.readFileSync(
       path.join(__dirname, "testData", "xai-response-reasoning.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await xaiProcessor.parse({
@@ -344,7 +347,7 @@ describe("XAI/Grok specific features", () => {
   it("should parse XAI stream response with web search", async () => {
     const streamData = fs.readFileSync(
       path.join(__dirname, "testData", "xai-stream-response.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await xaiProcessor.parse({
@@ -371,7 +374,7 @@ describe("Groq specific features", () => {
   it("should parse Groq non-streaming response", async () => {
     const groqResponse = fs.readFileSync(
       path.join(__dirname, "testData", "groq-response.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await groqProcessor.parse({
@@ -390,7 +393,7 @@ describe("Groq specific features", () => {
   it("should parse Groq streaming response with usage in x_groq", async () => {
     const streamData = fs.readFileSync(
       path.join(__dirname, "testData", "groq-stream-response.snapshot"),
-      "utf-8"
+      "utf-8",
     );
 
     const result = await groqProcessor.parse({
@@ -412,7 +415,7 @@ describe("Groq specific features", () => {
     it("should parse real DeepSeek non-streaming response", async () => {
       const responseData = fs.readFileSync(
         path.join(__dirname, "testData", "deepseek-non-stream.snapshot"),
-        "utf-8"
+        "utf-8",
       );
 
       const result = await deepseekProcessor.parse({
@@ -431,7 +434,7 @@ describe("Groq specific features", () => {
     it("should parse DeepSeek response with cache hits", async () => {
       const responseData = fs.readFileSync(
         path.join(__dirname, "testData", "deepseek-cached.snapshot"),
-        "utf-8"
+        "utf-8",
       );
 
       const result = await deepseekProcessor.parse({
@@ -453,7 +456,7 @@ describe("Groq specific features", () => {
     it("should parse DeepSeek reasoner response with thinking tokens", async () => {
       const responseData = fs.readFileSync(
         path.join(__dirname, "testData", "deepseek-reasoner.snapshot"),
-        "utf-8"
+        "utf-8",
       );
 
       const result = await deepseekProcessor.parse({
@@ -476,7 +479,7 @@ describe("Groq specific features", () => {
     it("should parse DeepSeek streaming response", async () => {
       const streamData = fs.readFileSync(
         path.join(__dirname, "testData", "deepseek-stream.snapshot"),
-        "utf-8"
+        "utf-8",
       );
 
       const result = await deepseekProcessor.parse({

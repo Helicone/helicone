@@ -31,7 +31,7 @@ async function checkLLMGuard(text: string): Promise<{
         method: "POST",
         headers,
         body: JSON.stringify(data),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -70,7 +70,7 @@ export class LLMSecurityController extends Controller {
       advanced: boolean;
       text: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ unsafe: boolean }, string>> {
     if (
       request.headers.authorization !== process.env.HELICONE_MANUAL_ACCESS_KEY

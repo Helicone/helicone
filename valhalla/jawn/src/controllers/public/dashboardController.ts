@@ -33,7 +33,7 @@ export class DashboardController extends Controller {
   public async getScoresOverTime(
     @Body()
     requestBody: DataOverTimeRequest,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {

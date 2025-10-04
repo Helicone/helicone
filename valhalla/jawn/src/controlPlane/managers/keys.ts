@@ -9,7 +9,7 @@ export async function getKeys(organizationId: string) {
     api_key_hash: string;
   }>(
     "SELECT user_id, api_key_hash FROM helicone_api_keys WHERE organization_id = $1 and soft_delete = false",
-    [organizationId]
+    [organizationId],
   );
 }
 

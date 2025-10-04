@@ -42,13 +42,13 @@ export interface LogMetaData {
 
 async function withTimeout<T>(
   fn: PromiseGenericResult<T>,
-  timeout: number
+  timeout: number,
 ): Promise<PromiseGenericResult<T>> {
   try {
     return await Promise.race([
       fn,
       new Promise<Result<T, string>>((_, reject) =>
-        setTimeout(() => reject(err("Timeout")), timeout)
+        setTimeout(() => reject(err("Timeout")), timeout),
       ),
     ]);
   } catch (error) {
@@ -58,7 +58,7 @@ async function withTimeout<T>(
 
 export class LogManager {
   public async processLogEntry(
-    logMessage: KafkaMessageContents
+    logMessage: KafkaMessageContents,
   ): Promise<void> {
     await this.processLogEntries([logMessage], {
       batchId: "",
@@ -70,14 +70,14 @@ export class LogManager {
 
   public async processLogEntries(
     logMessages: KafkaMessageContents[],
-    logMetaData: LogMetaData
+    logMetaData: LogMetaData,
   ): Promise<void> {
     const s3Client = new S3Client(
       process.env.S3_ACCESS_KEY || undefined,
       process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT ?? "",
       process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
     );
 
     const authHandler = new AuthenticationHandler();
@@ -90,7 +90,7 @@ export class LogManager {
     const loggingHandler = new LoggingHandler(
       new LogStore(),
       new VersionedRequestStore(""),
-      s3Client
+      s3Client,
     );
     // Store in S3 after logging to DB
     const posthogHandler = new PostHogHandler();
@@ -123,7 +123,7 @@ export class LogManager {
         const handlerContext = new HandlerContext(logMessage);
         const result = await withTimeout(
           authHandler.handle(handlerContext),
-          60_000 * 15 // 15 minutes
+          60_000 * 15, // 15 minutes
         );
         const end = performance.now();
 
@@ -161,12 +161,12 @@ export class LogManager {
             "Authentication failed: Authentication failed: No API key found"
           ) {
             console.log(
-              `Authentication failed: not reproducing for request ${logMessage.log.request.id} for batch ${logMetaData.batchId}`
+              `Authentication failed: not reproducing for request ${logMessage.log.request.id} for batch ${logMetaData.batchId}`,
             );
             return;
           } else {
             console.error(
-              `Reproducing error for request ${logMessage.log.request.id} for batch ${logMetaData.batchId}: ${result.error}`
+              `Reproducing error for request ${logMessage.log.request.id} for batch ${logMetaData.batchId}: ${result.error}`,
             );
           }
 
@@ -177,7 +177,7 @@ export class LogManager {
 
             const res = await kafkaProducer.sendMessages(
               [logMessage],
-              "request-response-logs-prod-dlq"
+              "request-response-logs-prod-dlq",
             );
 
             if (res.error) {
@@ -198,12 +198,12 @@ export class LogManager {
               });
 
               console.error(
-                `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${logMetaData.batchId}`
+                `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${logMetaData.batchId}`,
               );
             }
           }
         }
-      })
+      }),
     );
 
     for (const [constructor, averageTime] of globalTimingMetrics) {
@@ -211,8 +211,8 @@ export class LogManager {
         dataDogClient.logDistributionMetric(
           Date.now(),
           averageTime,
-          constructor
-        )
+          constructor,
+        ),
       ).catch();
     }
 
@@ -230,7 +230,7 @@ export class LogManager {
 
   private async logStripeMeter(
     stripeLogHandler: StripeLogHandler,
-    logMetaData: LogMetaData
+    logMetaData: LogMetaData,
   ): Promise<void> {
     if (!SecretManager.getSecret("STRIPE_SECRET_KEY")) {
       return;
@@ -251,7 +251,7 @@ export class LogManager {
 
   private async logStripeIntegration(
     stripeIntegrationHandler: StripeIntegrationHandler,
-    logMetaData: LogMetaData
+    logMetaData: LogMetaData,
   ): Promise<void> {
     const start = performance.now();
     await stripeIntegrationHandler.handleResults();
@@ -270,7 +270,7 @@ export class LogManager {
   private async logHandlerResults(
     handler: LoggingHandler,
     logMetaData: LogMetaData,
-    logMessages: KafkaMessageContents[]
+    logMessages: KafkaMessageContents[],
   ): Promise<void> {
     const start = performance.now();
     const result = await handler.handleResults();
@@ -302,7 +302,7 @@ export class LogManager {
       console.error(
         `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
           logMetaData.batchId
-        }`
+        }`,
       );
 
       const pushToDLQ: boolean =
@@ -312,7 +312,7 @@ export class LogManager {
         const kafkaProducer = new HeliconeQueueProducer();
         const kafkaResult = await kafkaProducer.sendMessages(
           logMessages,
-          "request-response-logs-prod-dlq"
+          "request-response-logs-prod-dlq",
         );
 
         if (kafkaResult.error) {
@@ -335,7 +335,7 @@ export class LogManager {
 
   private async logRateLimits(
     handler: RateLimitHandler,
-    logMetaData: LogMetaData
+    logMetaData: LogMetaData,
   ): Promise<void> {
     const start = performance.now();
     const { data: rateLimitInsId, error: rateLimitErr } =
@@ -366,14 +366,14 @@ export class LogManager {
       });
 
       console.error(
-        `Error inserting rate limits: ${rateLimitErr} for batch ${logMetaData.batchId}`
+        `Error inserting rate limits: ${rateLimitErr} for batch ${logMetaData.batchId}`,
       );
     }
   }
 
   private async logLytixEvents(
     handler: LytixHandler,
-    logMetaData: LogMetaData
+    logMetaData: LogMetaData,
   ): Promise<void> {
     const start = performance.now();
     await handler.handleResults();
@@ -391,7 +391,7 @@ export class LogManager {
 
   private async logSegmentEvents(
     handler: SegmentLogHandler,
-    logMetaData: LogMetaData
+    logMetaData: LogMetaData,
   ): Promise<void> {
     const start = performance.now();
     await handler.handleResults();
@@ -409,7 +409,7 @@ export class LogManager {
 
   private async logPosthogEvents(
     handler: PostHogHandler,
-    logMetaData: LogMetaData
+    logMetaData: LogMetaData,
   ): Promise<void> {
     const start = performance.now();
     await handler.handleResults();
@@ -427,7 +427,7 @@ export class LogManager {
 
   private async logWebhooks(
     handler: WebhookHandler,
-    logMetaData: LogMetaData
+    logMetaData: LogMetaData,
   ): Promise<void> {
     const start = performance.now();
     await handler.handleResults();

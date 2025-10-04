@@ -62,11 +62,7 @@ describe("AlertStore", () => {
     (fromMock as any).mockReturnValue(updateChain);
 
     const now = new Date().toISOString();
-    const res = await store.updateAlertHistoryStatuses(
-      "resolved",
-      ["a1"],
-      now
-    );
+    const res = await store.updateAlertHistoryStatuses("resolved", ["a1"], now);
     expect(res.error).toBeNull();
     expect(updateChain.update).toHaveBeenCalled();
     expect(updateChain.in).toHaveBeenCalledWith("alert_id", ["a1"]);
@@ -95,30 +91,26 @@ describe("AlertStore", () => {
   });
 
   it("getErrorRate queries clickhouse and maps data", async () => {
-    const mock = vi
-      .spyOn(clickhouse, "dbQuery")
-      .mockResolvedValue({
-        data: [
-          { totalCount: 100, errorCount: 10, requestCount: 100 },
-        ],
-        error: null,
-      });
+    const mock = vi.spyOn(clickhouse, "dbQuery").mockResolvedValue({
+      data: [{ totalCount: 100, errorCount: 10, requestCount: 100 }],
+      error: null,
+    });
 
     const res = await store.getErrorRate("org", 60000);
     expect(res.error).toBeNull();
-    expect(res.data).toEqual({ totalCount: 100, errorCount: 10, requestCount: 100 });
+    expect(res.data).toEqual({
+      totalCount: 100,
+      errorCount: 10,
+      requestCount: 100,
+    });
     expect(mock).toHaveBeenCalled();
   });
 
   it("getCost queries clickhouse and maps data", async () => {
-    const mock = vi
-      .spyOn(clickhouse, "dbQuery")
-      .mockResolvedValue({
-        data: [
-          { totalCount: 5.5, requestCount: 42 },
-        ],
-        error: null,
-      });
+    const mock = vi.spyOn(clickhouse, "dbQuery").mockResolvedValue({
+      data: [{ totalCount: 5.5, requestCount: 42 }],
+      error: null,
+    });
 
     const res = await store.getCost("org", 60000);
     expect(res.error).toBeNull();
@@ -126,5 +118,3 @@ describe("AlertStore", () => {
     expect(mock).toHaveBeenCalled();
   });
 });
-
-

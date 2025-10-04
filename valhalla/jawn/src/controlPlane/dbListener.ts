@@ -20,7 +20,7 @@ export const startDBListener = async () => {
 
       if (payload.event === "api_key_updated") {
         const listeners = websocketListeners.getListeners(
-          payload.organization_id
+          payload.organization_id,
         );
 
         const keys = await getKeys(payload.organization_id);

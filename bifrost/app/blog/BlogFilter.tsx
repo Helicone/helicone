@@ -64,7 +64,7 @@ export default function BlogFilter({ badges }: BlogFilterProps) {
                 "px-3 py-1 rounded-md text-sm font-medium transition-colors",
                 activeFilter === filter
                   ? "bg-sky-200 text-sky-700"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200",
               )}
             >
               {filter === "all"

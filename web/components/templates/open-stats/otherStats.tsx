@@ -543,7 +543,7 @@ export function OtherStats({
               category="value"
               index="name"
               colors={colors}
-              onValueChange={(v) => {}}
+              onValueChange={() => {}}
               className="min-h-[10em] min-w-[10em]"
               valueFormatter={(v) => `${v === 0 ? "0" : v.toFixed(2)}%`}
             />

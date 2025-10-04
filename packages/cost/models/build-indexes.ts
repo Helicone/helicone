@@ -10,7 +10,7 @@ import type {
 function mergeConfigs(
   modelProviderConfig: ModelProviderConfig,
   endpointConfig: EndpointConfig,
-  deploymentId: string
+  deploymentId: string,
 ): Endpoint {
   const userConfig: UserEndpointConfig = {
     region: deploymentId,
@@ -67,7 +67,7 @@ export interface ModelIndexes {
 
 export function buildIndexes(
   modelProviderConfigs: Record<string, ModelProviderConfig>,
-  archivedModelProviderConfigs: Record<string, ModelProviderConfig> = {}
+  archivedModelProviderConfigs: Record<string, ModelProviderConfig> = {},
 ): ModelIndexes {
   const endpointIdToEndpoint: Map<EndpointId, Endpoint> = new Map();
   const endpointConfigIdToEndpointConfig: Map<
@@ -139,7 +139,7 @@ export function buildIndexes(
 
     // Create an endpoint for each deployment
     for (const [deploymentId, deploymentConfig] of Object.entries(
-      config.endpointConfigs
+      config.endpointConfigs,
     )) {
       const endpointKey = `${configKey}:${deploymentId}` as EndpointId;
       const endpoint = mergeConfigs(config, deploymentConfig, deploymentId);
@@ -171,7 +171,7 @@ export function buildIndexes(
   }
 
   for (const [versionKey, archivedConfig] of Object.entries(
-    archivedModelProviderConfigs
+    archivedModelProviderConfigs,
   )) {
     modelToArchivedEndpointConfigs.set(versionKey, archivedConfig);
   }
@@ -186,11 +186,11 @@ export function buildIndexes(
   modelToEndpoints.forEach((endpoints) => endpoints.sort(sortByCost));
   modelToPtbEndpoints.forEach((endpoints) => endpoints.sort(sortByCost));
   endpointConfigIdToPtbEndpoints.forEach((endpoints) =>
-    endpoints.sort(sortByCost)
+    endpoints.sort(sortByCost),
   );
 
   modelToProviderData.forEach((providerDataList) =>
-    providerDataList.forEach((pd) => pd.ptbEndpoints.sort(sortByCost))
+    providerDataList.forEach((pd) => pd.ptbEndpoints.sort(sortByCost)),
   );
 
   return {

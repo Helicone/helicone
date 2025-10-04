@@ -60,9 +60,8 @@ async function withMessages({
     | "sqs:request-response-logs-dlq"
     | "sqs:helicone-scores-dlq";
 }): Promise<void> {
-  const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-    sizeSetting
-  );
+  const messagesPerMiniBatchSetting =
+    await settingsManager.getSetting(sizeSetting);
   const count =
     messagesPerMiniBatchSetting?.messagesPerMiniBatch ?? MAX_NUMBER_OF_MESSAGES;
 
@@ -116,7 +115,7 @@ export async function consumeRequestResponseLogs() {
       sizeSetting: "sqs:request-response-logs",
       process: async (messages) => {
         const mappedMessages = messages.map((message) =>
-          mapMessageDates(JSON.parse(message.Body ?? "{}"))
+          mapMessageDates(JSON.parse(message.Body ?? "{}")),
         );
 
         const logManager = new LogManager();
@@ -133,7 +132,7 @@ export async function consumeRequestResponseLogsLowPriority() {
       sizeSetting: "sqs:request-response-logs", // TODO: Add a new setting for this
       process: async (messages) => {
         const mappedMessages = messages.map((message) =>
-          mapMessageDates(JSON.parse(message.Body ?? "{}"))
+          mapMessageDates(JSON.parse(message.Body ?? "{}")),
         );
 
         const logManager = new LogManager();
@@ -150,7 +149,7 @@ export async function consumeRequestResponseLogsDlq() {
       sizeSetting: "sqs:request-response-logs-dlq",
       process: async (messages) => {
         const mappedMessages = messages.map((message) =>
-          mapMessageDates(JSON.parse(message.Body ?? "{}"))
+          mapMessageDates(JSON.parse(message.Body ?? "{}")),
         );
 
         const logManager = new LogManager();
@@ -167,7 +166,7 @@ export async function consumeHeliconeScores() {
       sizeSetting: "sqs:helicone-scores",
       process: async (messages) => {
         const mappedMessages = messages.map((message) =>
-          JSON.parse(message.Body ?? "{}")
+          JSON.parse(message.Body ?? "{}"),
         );
 
         const scoresManager = new ScoreManager({
@@ -181,7 +180,7 @@ export async function consumeHeliconeScores() {
             lastOffset: "",
             messageCount: messages.length,
           },
-          mappedMessages
+          mappedMessages,
         );
       },
     });
@@ -195,7 +194,7 @@ export async function consumeHeliconeScoresDlq() {
       sizeSetting: "sqs:helicone-scores-dlq",
       process: async (messages) => {
         const mappedMessages = messages.map((message) =>
-          JSON.parse(message.Body ?? "{}")
+          JSON.parse(message.Body ?? "{}"),
         );
 
         const scoresManager = new ScoreManager({
@@ -208,7 +207,7 @@ export async function consumeHeliconeScoresDlq() {
             lastOffset: "",
             messageCount: messages.length,
           },
-          mappedMessages
+          mappedMessages,
         );
       },
     });

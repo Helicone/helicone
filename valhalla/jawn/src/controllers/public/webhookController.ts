@@ -30,7 +30,7 @@ export class WebhookController extends Controller {
   public async newWebhook(
     @Body()
     webhookData: WebhookData,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ) {
     const newHMACKEY = crypto.randomBytes(32).toString("hex");
 
@@ -56,7 +56,7 @@ export class WebhookController extends Controller {
       ) {
         this.setStatus(400);
         return err(
-          "Property filters must be an array of objects with key and value properties"
+          "Property filters must be an array of objects with key and value properties",
         );
       }
     }
@@ -82,7 +82,7 @@ export class WebhookController extends Controller {
           includeData,
         }),
         newHMACKEY,
-      ]
+      ],
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -111,7 +111,7 @@ export class WebhookController extends Controller {
         config,
         hmac_key
       FROM webhooks WHERE org_id = $1`,
-      [request.authParams.organizationId]
+      [request.authParams.organizationId],
     );
 
     if (result.error || !result.data) {
@@ -126,11 +126,11 @@ export class WebhookController extends Controller {
   @Delete("/{webhookId}")
   public async deleteWebhook(
     @Path() webhookId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const result = await dbExecute(
       `DELETE FROM webhooks WHERE id = $1 AND org_id = $2`,
-      [webhookId, request.authParams.organizationId]
+      [webhookId, request.authParams.organizationId],
     );
 
     if (result.error) {
@@ -145,7 +145,7 @@ export class WebhookController extends Controller {
   @Post("/{webhookId}/test")
   public async testWebhook(
     @Path() webhookId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ success: boolean; message: string }, string>> {
     // Fetch the webhook configuration
     const webhookResult = await dbExecute<{
@@ -157,28 +157,32 @@ export class WebhookController extends Controller {
       `SELECT id, destination, config, hmac_key 
        FROM webhooks 
        WHERE id = $1 AND org_id = $2`,
-      [webhookId, request.authParams.organizationId]
+      [webhookId, request.authParams.organizationId],
     );
 
-    if (webhookResult.error || !webhookResult.data || webhookResult.data.length === 0) {
+    if (
+      webhookResult.error ||
+      !webhookResult.data ||
+      webhookResult.data.length === 0
+    ) {
       this.setStatus(404);
       return err("Webhook not found");
     }
 
     const webhook = webhookResult.data[0];
-    
+
     // Send test webhook with mock data
     const testResult = await sendTestWebhook(webhook);
-    
+
     if (testResult.error) {
       this.setStatus(500);
       return err(testResult.error);
     }
 
     this.setStatus(200);
-    return ok({ 
-      success: true, 
-      message: testResult.data || "Test webhook sent successfully" 
+    return ok({
+      success: true,
+      message: testResult.data || "Test webhook sent successfully",
     });
   }
 }

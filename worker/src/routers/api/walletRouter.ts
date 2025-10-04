@@ -342,7 +342,9 @@ export function getWalletRouter(
       } catch (e) {
         console.error(`Error removing from disallow list for org ${orgId}:`, e);
         return InternalResponse.newError(
-          e instanceof Error ? e.message : "Failed to remove from disallow list",
+          e instanceof Error
+            ? e.message
+            : "Failed to remove from disallow list",
           500
         );
       }

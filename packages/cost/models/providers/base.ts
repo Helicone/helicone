@@ -30,7 +30,7 @@ export abstract class BaseProvider {
 
   buildModelId(
     modelProviderConfig: ModelProviderConfig,
-    userEndpointConfig: UserEndpointConfig
+    userEndpointConfig: UserEndpointConfig,
   ): string {
     return modelProviderConfig.providerModelId;
   }
@@ -38,7 +38,7 @@ export abstract class BaseProvider {
   authenticate(
     authContext: AuthContext,
     endpoint: Endpoint,
-    cacheProvider?: CacheProvider
+    cacheProvider?: CacheProvider,
   ): AuthResult | Promise<AuthResult> {
     return {
       headers: {
@@ -49,7 +49,7 @@ export abstract class BaseProvider {
 
   buildRequestBody(
     endpoint: Endpoint,
-    context: RequestBodyContext
+    context: RequestBodyContext,
   ): string | Promise<string> {
     return JSON.stringify({
       ...context.parsedBody,
@@ -68,5 +68,4 @@ export abstract class BaseProvider {
       return `Request failed with status ${response.status}`;
     }
   }
-
 }

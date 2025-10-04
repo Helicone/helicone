@@ -11,12 +11,13 @@ const EnterpriseCard: React.FC = () => {
     <Card className="w-full h-full p-6 bg-background rounded-xl border-spacing-1.5 border-border md:border-transparent md:shadow-none mx-auto">
       <Col className="h-full justify-between gap-4">
         <Col className="gap-6">
-
           <Col className="h-full gap-2">
             <div className="text-accent-foreground text-md font-semibold leading-tight">
               Enterprise
             </div>
-            <div className="text-accent-foreground text-3xl font-bold">Contact us</div>
+            <div className="text-accent-foreground text-3xl font-bold">
+              Contact us
+            </div>
             <div className="text-sidebar-foreground text-sm font-normal">
               Custom-built packages.
             </div>

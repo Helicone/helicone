@@ -13,37 +13,37 @@ export class ControlPlaneManager extends BaseManager {
       process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT ?? "",
       process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
     );
   }
 
   async signS3Url(
     requestId: string,
     payloadSize: number,
-    authParams: AuthParams
+    authParams: AuthParams,
   ): Promise<Result<string, string>> {
     const key = this.s3Client.getRawRequestResponseKey(
       requestId,
-      authParams.organizationId
+      authParams.organizationId,
     );
     // 10 minutes
     const expiresIn = 60 * 10;
     return await this.s3Client.putObjectSignedUrlWithExpiration(
       key,
       payloadSize,
-      expiresIn
+      expiresIn,
     );
   }
 
   async signS3GetUrlForPrompt(
     promptId: string,
     versionId: string,
-    authParams: AuthParams
+    authParams: AuthParams,
   ): Promise<Result<string, string>> {
     const key = this.s3Client.getPromptKey(
       promptId,
       versionId,
-      authParams.organizationId
+      authParams.organizationId,
     );
     return await this.s3Client.getSignedUrl(key);
   }

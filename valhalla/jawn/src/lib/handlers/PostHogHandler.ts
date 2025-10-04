@@ -54,7 +54,7 @@ export class PostHogHandler extends AbstractLogHandler {
           "helicone_request_response",
           event.properties,
           event.createdAt,
-          distinctId
+          distinctId,
         );
       } catch (error: any) {
         Sentry.captureException(new Error(JSON.stringify(error)), {
@@ -110,7 +110,7 @@ export class PostHogHandler extends AbstractLogHandler {
 
           return acc;
         },
-        {} as Record<string, string>
+        {} as Record<string, string>,
       ),
     };
 

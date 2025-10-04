@@ -141,7 +141,9 @@ describe("Registry Snapshots", () => {
       totalArchivedConfigs: indexes.modelToArchivedEndpointConfigs.size,
 
       // Sample archived endpoint keys to ensure format is correct
-      sampleArchivedKeys: Array.from(indexes.modelToArchivedEndpointConfigs.keys())
+      sampleArchivedKeys: Array.from(
+        indexes.modelToArchivedEndpointConfigs.keys(),
+      )
         .sort()
         .slice(0, 5),
     };
@@ -156,7 +158,9 @@ describe("Registry Snapshots", () => {
       endpoints.forEach((endpoint) => {
         const usageProcessor = getUsageProcessor(endpoint.provider);
         if (!usageProcessor) {
-          throw new Error(`Usage processor not found for provider: "${endpoint.provider}" in model: "${key}"`);
+          throw new Error(
+            `Usage processor not found for provider: "${endpoint.provider}" in model: "${key}"`,
+          );
         }
       });
     });
@@ -167,19 +171,23 @@ describe("Registry Snapshots", () => {
   it("archived endpoints snapshot", () => {
     const archivedSnapshot: Record<string, any> = {};
 
-    Object.entries(allArchivedEndpoints).forEach(([model, archivedEndpoints]) => {
-      if (Object.keys(archivedEndpoints).length > 0) {
-        archivedSnapshot[model] = {};
-        Object.entries(archivedEndpoints).forEach(([key, config]: [string, any]) => {
-          archivedSnapshot[model][key] = {
-            provider: config.provider,
-            version: config.version,
-            modelId: config.providerModelId,
-            pricing: config.pricing,
-          };
-        });
-      }
-    });
+    Object.entries(allArchivedEndpoints).forEach(
+      ([model, archivedEndpoints]) => {
+        if (Object.keys(archivedEndpoints).length > 0) {
+          archivedSnapshot[model] = {};
+          Object.entries(archivedEndpoints).forEach(
+            ([key, config]: [string, any]) => {
+              archivedSnapshot[model][key] = {
+                provider: config.provider,
+                version: config.version,
+                modelId: config.providerModelId,
+                pricing: config.pricing,
+              };
+            },
+          );
+        }
+      },
+    );
 
     expect(archivedSnapshot).toMatchSnapshot();
   });

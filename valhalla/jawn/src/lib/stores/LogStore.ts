@@ -25,13 +25,13 @@ export class LogStore {
                 SET has_integrated = true,
                 has_onboarded = true
                 WHERE id = $1 AND has_integrated = false`,
-                [orgId]
+                [orgId],
               );
             }
           } catch (error) {
             console.error(
               "Error updating organization onboarding status:",
-              error
+              error,
             );
             // Don't fail the transaction if onboarding update fails
           }
@@ -40,12 +40,12 @@ export class LogStore {
         if (payload.promptInputs && payload.promptInputs.length > 0) {
           const result = await this.processPromptInputsBatch(
             payload.promptInputs,
-            t
+            t,
           );
           if (result.error) {
             console.error(
               "Error processing prompt inputs batch:",
-              result.error
+              result.error,
             );
           }
         }
@@ -59,7 +59,7 @@ export class LogStore {
 
   async processPromptInputsBatch(
     promptInputs: Prompt2025Input[],
-    t: pgPromise.ITask<{}>
+    t: pgPromise.ITask<{}>,
   ): PromiseGenericResult<string> {
     if (promptInputs.length === 0) {
       return ok("No prompt inputs to process");
@@ -71,15 +71,15 @@ export class LogStore {
 
     const existingVersions = await t.manyOrNone<{ id: string }>(
       `SELECT id FROM prompts_2025_versions WHERE id = ANY($1::uuid[])`,
-      [versionIds]
+      [versionIds],
     );
 
     const existingVersionIds = new Set(existingVersions.map((v) => v.id));
     const validInputs = promptInputs.filter((input) =>
-      existingVersionIds.has(input.version_id)
+      existingVersionIds.has(input.version_id),
     );
     const invalidInputs = promptInputs.filter(
-      (input) => !existingVersionIds.has(input.version_id)
+      (input) => !existingVersionIds.has(input.version_id),
     );
 
     if (validInputs.length === 0) {
@@ -89,7 +89,7 @@ export class LogStore {
     try {
       const cs = new pgp.helpers.ColumnSet(
         ["request_id", "version_id", "inputs", "environment"],
-        { table: "prompts_2025_inputs" }
+        { table: "prompts_2025_inputs" },
       );
 
       const query = pgp.helpers.insert(validInputs, cs);
@@ -98,7 +98,7 @@ export class LogStore {
       if (invalidInputs.length > 0) {
         console.warn(
           `Skipped ${invalidInputs.length} prompt inputs due to invalid version IDs:`,
-          invalidInputs.map((input) => input.version_id)
+          invalidInputs.map((input) => input.version_id),
         );
       }
 

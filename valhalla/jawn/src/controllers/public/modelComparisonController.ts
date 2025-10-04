@@ -83,7 +83,7 @@ export class ModelComparisonController extends Controller {
   public async getModelComparison(
     @Request() request: JawnAuthenticatedRequest,
     @Body()
-    modelsToCompare: ModelsToCompare[]
+    modelsToCompare: ModelsToCompare[],
   ): Promise<Result<Model[], string>> {
     const modelComparisonManager = new ModelComparisonManager();
 
@@ -91,7 +91,7 @@ export class ModelComparisonController extends Controller {
       "v1/public/compare/models" + JSON.stringify(modelsToCompare),
       async () =>
         await modelComparisonManager.getModelComparison(modelsToCompare),
-      kvCache
+      kvCache,
     );
 
     if (result.error || !result.data) {

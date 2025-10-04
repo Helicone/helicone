@@ -24,7 +24,7 @@ const allModels = {
   ...mistralModels,
   ...deepseekModels,
   ...alibabaModels,
-  ...metaModels
+  ...metaModels,
 };
 
 export type ModelName = keyof typeof allModels;
@@ -38,7 +38,7 @@ const modelProviderConfigs = {
   ...mistralEndpointConfig,
   ...deepseekEndpointConfig,
   ...alibabaEndpointConfig,
-  ...metaEndpointConfig
+  ...metaEndpointConfig,
 };
 
 export type ModelProviderConfigId = keyof typeof modelProviderConfigs;

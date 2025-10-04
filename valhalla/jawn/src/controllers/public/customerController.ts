@@ -37,7 +37,7 @@ export class CustomerController extends Controller {
     @Body()
     requestBody: {},
     @Request() request: JawnAuthenticatedRequest,
-    @Path() customerId: string
+    @Path() customerId: string,
   ): Promise<CustomerUsage | null> {
     const customerResult = await dbExecute<{
       id: string;
@@ -48,7 +48,7 @@ export class CustomerController extends Controller {
        AND id = $2
        AND organization_type = 'customer'
        AND soft_delete = false`,
-      [request.authParams.organizationId, customerId]
+      [request.authParams.organizationId, customerId],
     );
 
     if (
@@ -80,7 +80,7 @@ export class CustomerController extends Controller {
         request_response_rmt.organization_id = {val_0 : String}
       )
     `,
-      [customerId]
+      [customerId],
     );
 
     if (error || !data) {
@@ -104,7 +104,7 @@ export class CustomerController extends Controller {
   public async getCustomers(
     @Body()
     requestBody: {},
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Customer[]> {
     const customersResult = await dbExecute<{
       id: string;
@@ -114,7 +114,7 @@ export class CustomerController extends Controller {
        WHERE reseller_id = $1
        AND organization_type = 'customer'
        AND soft_delete = false`,
-      [request.authParams.organizationId]
+      [request.authParams.organizationId],
     );
 
     if (customersResult.error || !customersResult.data) {

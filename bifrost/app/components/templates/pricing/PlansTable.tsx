@@ -25,7 +25,7 @@ const FeatureRow: React.FC<FeatureRowProps> = ({
         title === "SOC-2 Type II Compliance" ||
           title === "Alerts (Slack + Email)"
           ? "rounded-bl-lg"
-          : ""
+          : "",
       )}
     >
       <Col className="gap-[4px]">

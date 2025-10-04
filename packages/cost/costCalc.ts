@@ -1,7 +1,10 @@
 import { costOfPrompt } from "./index";
 import type { ModelUsage } from "./usage/types";
 import type { ModelProviderName } from "./models/providers";
-import { calculateModelCostBreakdown, CostBreakdown } from "./models/calculate-cost";
+import {
+  calculateModelCostBreakdown,
+  CostBreakdown,
+} from "./models/calculate-cost";
 
 // since costs in clickhouse are multiplied by the multiplier
 // divide to get real cost in USD in dollars
@@ -12,23 +15,21 @@ export const COST_PRECISION_MULTIPLIER = 1_000_000_000;
  * This function uses the legacy cost registry in /providers/mappings
  * @deprecated Use modelCostFromRegistry for new implementations
  */
-export function modelCost(
-  params: {
-    provider: string;
-    model: string;
-    sum_prompt_tokens: number;
-    prompt_cache_write_tokens: number;
-    prompt_cache_read_tokens: number;
-    prompt_audio_tokens: number;
-    sum_completion_tokens: number;
-    completion_audio_tokens: number;
-    prompt_cache_write_5m: number;
-    prompt_cache_write_1h: number;
-    per_call?: number;
-    per_image?: number;
-    multiple?: number;
-  },
-): number {
+export function modelCost(params: {
+  provider: string;
+  model: string;
+  sum_prompt_tokens: number;
+  prompt_cache_write_tokens: number;
+  prompt_cache_read_tokens: number;
+  prompt_audio_tokens: number;
+  sum_completion_tokens: number;
+  completion_audio_tokens: number;
+  prompt_cache_write_5m: number;
+  prompt_cache_write_1h: number;
+  per_call?: number;
+  per_image?: number;
+  multiple?: number;
+}): number {
   return (
     costOfPrompt({
       provider: params.provider,
@@ -60,6 +61,6 @@ export function modelCostBreakdownFromRegistry(params: {
     provider: params.provider,
     requestCount: params.requestCount,
   });
-  
+
   return breakdown;
 }

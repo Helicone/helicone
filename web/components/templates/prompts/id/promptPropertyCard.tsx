@@ -43,7 +43,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
     requestId,
     createdAt,
     properties,
-    view = "list",
+    view: _view = "list",
     index,
     autoInputs,
     size = "large",
@@ -207,7 +207,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
               {getUSDateFromString(createdAt)}
             </p>
             <ul className="flex flex-wrap gap-2 pt-2">
-              {Object.entries(properties).map(([key, value]) => (
+              {Object.entries(properties).map(([key]) => (
                 <li key={key}>
                   <button
                     onClick={() => {

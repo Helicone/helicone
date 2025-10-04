@@ -21,7 +21,7 @@ export class DBQueryTimer {
   async logDistributionMetric(
     timestamp: number,
     executionTimeMs: number,
-    queryName: string
+    queryName: string,
   ): Promise<Response> {
     try {
       const distribution = {
@@ -48,7 +48,7 @@ export class DBQueryTimer {
 
       const response = await fetch(
         `${this.dataDogConfig.endpoint}/v1/distribution_points`,
-        requestInit
+        requestInit,
       );
 
       return response;

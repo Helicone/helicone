@@ -100,7 +100,7 @@ export const endpoints = {
       "repetition_penalty",
       "logit_bias",
       "functions",
-      "tools"
+      "tools",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -319,7 +319,7 @@ export const endpoints = {
       "repetition_penalty",
       "logit_bias",
       "functions",
-      "tools"
+      "tools",
     ],
     priority: 2,
     ptbEnabled: true,

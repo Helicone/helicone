@@ -11,7 +11,7 @@ export default function OpenSource() {
     <div
       className={cn(
         ISLAND_WIDTH,
-        "flex flex-col md:space-y-4 pb-2 md:items-center items-start md:text-center text-start w-full "
+        "flex flex-col md:space-y-4 pb-2 md:items-center items-start md:text-center text-start w-full ",
       )}
     >
       <div className="flex flex-col items-start gap-[12px]">

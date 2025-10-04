@@ -15,7 +15,7 @@ export class IntegrationManager extends BaseManager {
   }
 
   public async createIntegration(
-    params: IntegrationCreateParams
+    params: IntegrationCreateParams,
   ): Promise<Result<{ id: string }, string>> {
     try {
       const result = await dbExecute<{ id: string }>(
@@ -27,7 +27,7 @@ export class IntegrationManager extends BaseManager {
           params.integration_name,
           params.settings,
           params.active ?? false,
-        ]
+        ],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -47,7 +47,7 @@ export class IntegrationManager extends BaseManager {
         `SELECT id, integration_name, active, settings
          FROM integrations
          WHERE organization_id = $1`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (result.error) {
@@ -63,7 +63,7 @@ export class IntegrationManager extends BaseManager {
 
   public async updateIntegration(
     integrationId: string,
-    params: IntegrationUpdateParams
+    params: IntegrationUpdateParams,
   ): Promise<Result<null, string>> {
     try {
       // Build the SET part of the query dynamically based on provided params
@@ -98,7 +98,7 @@ export class IntegrationManager extends BaseManager {
          SET ${updates.join(", ")}
          WHERE id = $${paramIndex++}
          AND organization_id = $${paramIndex}`,
-        values
+        values,
       );
 
       if (result.error) {
@@ -135,7 +135,7 @@ export class IntegrationManager extends BaseManager {
          WHERE id = $1
          AND organization_id = $2
          LIMIT 1`,
-        [integrationId, this.authParams.organizationId]
+        [integrationId, this.authParams.organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -172,7 +172,7 @@ export class IntegrationManager extends BaseManager {
          WHERE organization_id = $1
          AND integration_name = $2
          LIMIT 1`,
-        [this.authParams.organizationId, integrationType]
+        [this.authParams.organizationId, integrationType],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -201,7 +201,7 @@ export class IntegrationManager extends BaseManager {
          WHERE integration_name = 'slack'
          AND organization_id = $1
          LIMIT 1`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -220,7 +220,7 @@ export class IntegrationManager extends BaseManager {
             Authorization: `Bearer ${slackSettings.access_token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -252,7 +252,7 @@ export class IntegrationManager extends BaseManager {
               Authorization: `Bearer ${slackSettings.access_token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (!nextResponse.ok) {
@@ -272,7 +272,7 @@ export class IntegrationManager extends BaseManager {
           ...nextJson.channels.map((channel: { id: string; name: string }) => ({
             id: channel.id,
             name: channel.name,
-          }))
+          })),
         );
         nextCursor = nextJson.response_metadata?.next_cursor ?? null;
         iterations++;

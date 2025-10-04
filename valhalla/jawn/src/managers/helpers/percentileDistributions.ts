@@ -83,7 +83,7 @@ export async function getHistogramRowOnKeys({
       range_start: row.hist[0].toString(),
       range_end: row.hist[1].toString(),
       value: row.hist[2],
-    }))
+    })),
   );
 }
 

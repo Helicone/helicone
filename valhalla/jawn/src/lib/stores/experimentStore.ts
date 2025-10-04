@@ -141,7 +141,7 @@ export interface ExperimentTableSimplified {
 function getExperimentsQuery(
   filter?: string,
   limit?: number,
-  include?: IncludeExperimentKeys
+  include?: IncludeExperimentKeys,
 ) {
   const responseObjectString = (filter: string) => {
     return `(
@@ -190,10 +190,10 @@ function getExperimentsQuery(
                           include?.responseBodies
                             ? `
                         'response', ${responseObjectString(
-                          "response.request = pir.source_request"
+                          "response.request = pir.source_request",
                         )},
                         'request', ${requestObjectString(
-                          "re.id = pir.source_request"
+                          "re.id = pir.source_request",
                         )},
                         `
                             : ""
@@ -276,10 +276,10 @@ function getExperimentsQuery(
                                     include?.responseBodies
                                       ? `
                                   'response', ${responseObjectString(
-                                    "response.request = hr.result_request_id"
+                                    "response.request = hr.result_request_id",
                                   )},
                                   'request', ${requestObjectString(
-                                    "request.id = hr.result_request_id"
+                                    "request.id = hr.result_request_id",
                                   )},
                                   `
                                       : ""
@@ -330,7 +330,7 @@ function getExperimentsQuery(
 
 async function enrichExperiment(
   experiment: Experiment,
-  include: IncludeExperimentKeys
+  include: IncludeExperimentKeys,
 ) {
   const bodyStore = new RequestResponseBodyStore(experiment.organization);
 
@@ -340,7 +340,7 @@ async function enrichExperiment(
         row.inputRecord.inputs = await getAllSignedURLsFromInputs(
           row.inputRecord.inputs,
           experiment.organization,
-          row.inputRecord.requestId
+          row.inputRecord.requestId,
         );
         if (include.responseBodies) {
           row.inputRecord.response.body = await (
@@ -375,7 +375,7 @@ async function enrichExperiment(
 export class ExperimentStore extends BaseStore {
   async getExperiments(
     filter: FilterNode,
-    include: IncludeExperimentKeys
+    include: IncludeExperimentKeys,
   ): Promise<Result<Experiment[], string>> {
     const builtFilter = buildFilterPostgres({
       filter,
@@ -385,14 +385,14 @@ export class ExperimentStore extends BaseStore {
     const experimentQuery = getExperimentsQuery(
       `e.organization = $1 AND ${builtFilter.filter}`,
       30,
-      include
+      include,
     );
 
     const experiments = resultMap(
       await dbExecute<{
         jsonb_build_object: Experiment;
       }>(experimentQuery, builtFilter.argsAcc),
-      (d) => d.map((d) => d.jsonb_build_object)
+      (d) => d.map((d) => d.jsonb_build_object),
     );
 
     if (experiments.error) {
@@ -400,7 +400,7 @@ export class ExperimentStore extends BaseStore {
     }
 
     const experimentResults = await Promise.all(
-      experiments.data!.map((d) => enrichExperiment(d, include))
+      experiments.data!.map((d) => enrichExperiment(d, include)),
     );
     return ok(experimentResults);
   }
@@ -409,7 +409,7 @@ export class ExperimentStore extends BaseStore {
     datasetId: string,
     name: string,
     experimentMetadata: Record<string, string>,
-    experimentTableMetadata?: Record<string, any>
+    experimentTableMetadata?: Record<string, any>,
   ): Promise<
     Result<{ experimentTableId: string; experimentId: string }, string>
   > {
@@ -419,7 +419,7 @@ export class ExperimentStore extends BaseStore {
         `INSERT INTO experiment_v2 (dataset, organization, meta)
          VALUES ($1, $2, $3)
          RETURNING id`,
-        [datasetId, this.organizationId, experimentMetadata]
+        [datasetId, this.organizationId, experimentMetadata],
       );
 
       if (
@@ -442,7 +442,7 @@ export class ExperimentStore extends BaseStore {
           name,
           this.organizationId,
           experimentTableMetadata ?? null,
-        ]
+        ],
       );
 
       if (
@@ -464,7 +464,7 @@ export class ExperimentStore extends BaseStore {
   }
 
   async getMaxRowIndex(
-    experimentTableId: string
+    experimentTableId: string,
   ): Promise<Result<number, string>> {
     const query = `
       SELECT COALESCE(MAX(ecv.row_index), -1) as max_row_index
@@ -486,14 +486,14 @@ export class ExperimentStore extends BaseStore {
   }
 
   async getExperimentTableColumns(
-    experimentTableId: string
+    experimentTableId: string,
   ): Promise<Result<Array<{ id: string; name: string }>, string>> {
     try {
       const result = await dbExecute<{ id: string; column_name: string }>(
         `SELECT id, column_name
          FROM experiment_column
          WHERE table_id = $1`,
-        [experimentTableId]
+        [experimentTableId],
       );
 
       if (result.error || !result.data) {
@@ -518,7 +518,7 @@ export class ExperimentStore extends BaseStore {
   }): Promise<Result<null, string>> {
     try {
       const existingMetadata = await this.getExperimentTable(
-        params.experimentTableId
+        params.experimentTableId,
       );
 
       if (existingMetadata.error || !existingMetadata.data) {
@@ -537,7 +537,7 @@ export class ExperimentStore extends BaseStore {
           },
           params.experimentTableId,
           this.organizationId,
-        ]
+        ],
       );
 
       if (result.error) {
@@ -556,7 +556,7 @@ export class ExperimentStore extends BaseStore {
     columnType: "input" | "output" | "experiment",
     hypothesisId?: string,
     promptVersionId?: string,
-    inputKeys?: string[]
+    inputKeys?: string[],
   ): Promise<Result<{ id: string }, string>> {
     try {
       const metadata: Record<string, any> = {};
@@ -572,7 +572,7 @@ export class ExperimentStore extends BaseStore {
         `INSERT INTO experiment_column (table_id, column_name, column_type, metadata)
          VALUES ($1, $2, $3, $4)
          RETURNING id, table_id, column_name, column_type, metadata`,
-        [experimentTableId, columnName, columnType, metadata]
+        [experimentTableId, columnName, columnType, metadata],
       );
 
       if (
@@ -588,7 +588,7 @@ export class ExperimentStore extends BaseStore {
         `SELECT id FROM experiment_column
          WHERE table_id = $1
          LIMIT 1`,
-        [experimentTableId]
+        [experimentTableId],
       );
 
       if (
@@ -610,12 +610,12 @@ export class ExperimentStore extends BaseStore {
         `SELECT row_index, metadata
          FROM experiment_cell
          WHERE column_id = $1`,
-        [existingColumnId]
+        [existingColumnId],
       );
 
       if (existingCellsResult.error || !existingCellsResult.data) {
         return err(
-          existingCellsResult.error ?? "Failed to fetch existing cells"
+          existingCellsResult.error ?? "Failed to fetch existing cells",
         );
       }
 
@@ -632,7 +632,7 @@ export class ExperimentStore extends BaseStore {
         if (inputId) {
           // Build the inputs object you wish to add
           const inputs = Object.fromEntries(
-            (inputKeys ?? []).map((key) => [key, ""])
+            (inputKeys ?? []).map((key) => [key, ""]),
           );
 
           // Collect data for bulk input record update
@@ -670,7 +670,7 @@ export class ExperimentStore extends BaseStore {
         const cellsInsertResult = await dbExecute(
           `INSERT INTO experiment_cell (column_id, row_index, status, metadata)
            VALUES ${insertValues}`,
-          params
+          params,
         );
 
         if (cellsInsertResult.error) {
@@ -719,7 +719,7 @@ export class ExperimentStore extends BaseStore {
       type: "input" | "output" | "experiment";
       hypothesisId?: string;
       promptVersionId?: string;
-    }[]
+    }[],
   ): Promise<Result<{ ids: string[] }, string>> {
     const results = await Promise.all(
       columns.map((column) =>
@@ -728,9 +728,9 @@ export class ExperimentStore extends BaseStore {
           column.name,
           column.type,
           column.hypothesisId,
-          column.promptVersionId
-        )
-      )
+          column.promptVersionId,
+        ),
+      ),
     );
     if (results.some((result) => result.error)) {
       return err("Failed to create experiment table columns");
@@ -742,7 +742,7 @@ export class ExperimentStore extends BaseStore {
     columnId: string,
     rowIndex: number,
     value: string | null,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): Promise<Result<{ id: string; cellType: string }, string>> {
     try {
       const result = await dbExecute<{
@@ -753,7 +753,7 @@ export class ExperimentStore extends BaseStore {
          (column_id, row_index, value, status, metadata)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING id, metadata`,
-        [columnId, rowIndex, value ?? null, "initialized", metadata ?? null]
+        [columnId, rowIndex, value ?? null, "initialized", metadata ?? null],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -814,7 +814,7 @@ export class ExperimentStore extends BaseStore {
         metadata: cell.metadata,
         rowIndex: cell.row_index,
         columnId: cell.column_id,
-      }))
+      })),
     );
   }
 
@@ -855,7 +855,7 @@ export class ExperimentStore extends BaseStore {
     if (metadata) {
       // Use jsonb concatenation operator to merge existing and new metadata
       updates.push(
-        `metadata = COALESCE(ec.metadata, '{}'::jsonb) || $${index++}::jsonb`
+        `metadata = COALESCE(ec.metadata, '{}'::jsonb) || $${index++}::jsonb`,
       );
       values.push(JSON.stringify(metadata));
     }
@@ -916,7 +916,7 @@ export class ExperimentStore extends BaseStore {
     >
   > {
     const results = await Promise.all(
-      params.cells.map((cell) => this.updateExperimentCell(cell))
+      params.cells.map((cell) => this.updateExperimentCell(cell)),
     );
     if (results.some((result) => result.error)) {
       return err("Failed to update experiment cell statuses");
@@ -940,7 +940,7 @@ export class ExperimentStore extends BaseStore {
         `SELECT id, column_name, column_type
          FROM experiment_column
          WHERE table_id = $1`,
-        [params.experimentTableId]
+        [params.experimentTableId],
       );
 
       if (columnsResult.error || !columnsResult.data) {
@@ -961,15 +961,15 @@ export class ExperimentStore extends BaseStore {
             {
               ...params.metadata,
               cellType: column.column_type,
-            }
-          )
+            },
+          ),
         );
       } else {
         cellPromises = columnsResult.data.map((column) =>
           this.createExperimentCell(column.id, params.rowIndex, null, {
             ...params.metadata,
             cellType: column.column_type,
-          })
+          }),
         );
       }
 
@@ -987,7 +987,7 @@ export class ExperimentStore extends BaseStore {
         results.map((result) => ({
           id: result.data!.id,
           cellType: result.data!.cellType,
-        }))
+        })),
       );
     } catch (error) {
       console.error("Error creating experiment table row:", error);
@@ -1030,7 +1030,7 @@ export class ExperimentStore extends BaseStore {
       rowIndex: number;
       value: string | null;
       metadata?: Record<string, any>;
-    }[]
+    }[],
   ): Promise<Result<{ ids: string[] }, string>> {
     const results = await Promise.all(
       cells.map((cell) =>
@@ -1038,9 +1038,9 @@ export class ExperimentStore extends BaseStore {
           cell.columnId,
           cell.rowIndex,
           cell.value === null || cell.value === "" ? null : cell.value,
-          cell.metadata
-        )
-      )
+          cell.metadata,
+        ),
+      ),
     );
     if (results.some((result) => result.error)) {
       return err("Failed to create experiment cells");
@@ -1175,7 +1175,7 @@ export class ExperimentStore extends BaseStore {
   }
 
   async getExperimentTable(
-    experimentTableId: string
+    experimentTableId: string,
   ): Promise<Result<ExperimentTable, string>> {
     const query = `
       SELECT 
@@ -1267,7 +1267,7 @@ export class ExperimentStore extends BaseStore {
   }
 
   async getExperimentTableById(
-    experimentTableId: string
+    experimentTableId: string,
   ): Promise<Result<ExperimentTableSimplified, string>> {
     try {
       // First get the experiment table
@@ -1281,7 +1281,7 @@ export class ExperimentStore extends BaseStore {
         `SELECT id, name, experiment_id, metadata, created_at
          FROM experiment_table
          WHERE id = $1 AND organization_id = $2`,
-        [experimentTableId, this.organizationId]
+        [experimentTableId, this.organizationId],
       );
 
       if (
@@ -1302,7 +1302,7 @@ export class ExperimentStore extends BaseStore {
         `SELECT id, column_name, column_type, metadata
          FROM experiment_column
          WHERE table_id = $1`,
-        [experimentTableId]
+        [experimentTableId],
       );
 
       if (columnsResult.error) {
@@ -1346,7 +1346,7 @@ export class ExperimentStore extends BaseStore {
          FROM experiment_table
          WHERE organization_id = $1
          ORDER BY created_at DESC`,
-        [this.organizationId]
+        [this.organizationId],
       );
 
       if (result.error) {
@@ -1371,7 +1371,7 @@ export class ExperimentStore extends BaseStore {
 
   async getExperimentById(
     experimentId: string,
-    include: IncludeExperimentKeys
+    include: IncludeExperimentKeys,
   ): Promise<Result<Experiment, string>> {
     return await ServerExperimentStore.getExperiment(experimentId, include);
   }
@@ -1478,7 +1478,7 @@ export class ExperimentStore extends BaseStore {
               ? `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`
               : row.inputRecord.requestPath;
           return row;
-        })
+        }),
       );
     } catch (e) {
       console.error("Exception:", e);
@@ -1502,7 +1502,7 @@ export class ExperimentStore extends BaseStore {
         `SELECT id
          FROM experiment_column
          WHERE table_id = $1`,
-        [params.experimentTableId]
+        [params.experimentTableId],
       );
 
       if (columnsResult.error || !columnsResult.data) {
@@ -1517,14 +1517,14 @@ export class ExperimentStore extends BaseStore {
           cell.columnId,
           params.rowIndex,
           cell.value,
-          cell.metadata ?? params.metadata
-        )
+          cell.metadata ?? params.metadata,
+        ),
       );
 
       // Create empty cells for other columns
       const specifiedColumnIds = params.cells.map((cell) => cell.columnId);
       const otherColumnIds = allColumnIds.filter(
-        (id) => !specifiedColumnIds.includes(id)
+        (id) => !specifiedColumnIds.includes(id),
       );
 
       for (const columnId of otherColumnIds) {
@@ -1533,8 +1533,8 @@ export class ExperimentStore extends BaseStore {
             columnId,
             params.rowIndex,
             null,
-            params.metadata
-          )
+            params.metadata,
+          ),
         );
       }
 
@@ -1575,7 +1575,7 @@ export class ExperimentStore extends BaseStore {
         `SELECT id, column_type
          FROM experiment_column
          WHERE table_id = $1`,
-        [params.experimentTableId]
+        [params.experimentTableId],
       );
 
       if (columnsResult.error || !columnsResult.data) {
@@ -1586,7 +1586,7 @@ export class ExperimentStore extends BaseStore {
 
       // Get the current max row index
       const maxRowIndexResult = await this.getMaxRowIndex(
-        params.experimentTableId
+        params.experimentTableId,
       );
       if (maxRowIndexResult.error || maxRowIndexResult.data === null) {
         return err(maxRowIndexResult.error ?? "Failed to get max row index");
@@ -1607,7 +1607,7 @@ export class ExperimentStore extends BaseStore {
         // Create cells for specified columns
         const specifiedColumnIds = row.cells.map((cell) => cell.columnId);
         const otherColumnIds = allColumns.filter(
-          (col) => !specifiedColumnIds.includes(col.id)
+          (col) => !specifiedColumnIds.includes(col.id),
         );
 
         // Cells for specified columns
@@ -1627,7 +1627,7 @@ export class ExperimentStore extends BaseStore {
             rowIndex: currentRowIndex,
             value:
               column.column_type === "output"
-                ? row.sourceRequest ?? null
+                ? (row.sourceRequest ?? null)
                 : null,
             metadata: {
               ...row.metadata,
@@ -1658,11 +1658,11 @@ export class ExperimentStore extends BaseStore {
 
 export const ServerExperimentStore: {
   experimentPop: (
-    include?: IncludeExperimentKeys
+    include?: IncludeExperimentKeys,
   ) => Promise<Result<Experiment, string>>;
   getExperiment: (
     id: string,
-    include?: IncludeExperimentKeys
+    include?: IncludeExperimentKeys,
   ) => Promise<Result<Experiment, string>>;
   popLatestExperiment: () => Promise<
     Result<
@@ -1687,7 +1687,7 @@ export const ServerExperimentStore: {
 
     return await ServerExperimentStore.getExperiment(
       experimentId.experimentId,
-      include
+      include,
     );
   },
   getExperiment: async (id: string, include?: IncludeExperimentKeys) => {
@@ -1695,7 +1695,7 @@ export const ServerExperimentStore: {
       await dbExecute<{
         jsonb_build_object: Experiment;
       }>(getExperimentsQuery("e.id = $1", 1, include), [id]),
-      async (d) => enrichExperiment(d[0].jsonb_build_object, include ?? {})
+      async (d) => enrichExperiment(d[0].jsonb_build_object, include ?? {}),
     );
   },
 
@@ -1721,23 +1721,23 @@ export const ServerExperimentStore: {
       FROM updated_experiment_hypothesis
       LIMIT 1;
     `,
-        []
+        [],
       ),
       (d) => {
         return {
           experimentId: d?.[0]?.experiment_id,
         };
-      }
+      },
     );
   },
 };
 
 function getExperimentScores(
-  experiment: Experiment
+  experiment: Experiment,
 ): Result<ExperimentScores, string> {
   const datasetScores = getExperimentDatasetScores(experiment.dataset);
   const hypothesisScores = getExperimentHypothesisScores(
-    experiment.hypotheses[0]
+    experiment.hypotheses[0],
   );
 
   if (datasetScores.error || !datasetScores.data) {
@@ -1755,7 +1755,7 @@ function getExperimentScores(
 }
 
 function getExperimentHypothesisScores(
-  hypothesis: Experiment["hypotheses"][0]
+  hypothesis: Experiment["hypotheses"][0],
 ): Result<ExperimentScores["hypothesis"], string> {
   try {
     const validRuns =
@@ -1781,7 +1781,7 @@ function getExperimentHypothesisScores(
           totalLatency: acc.totalLatency + run.response!.delayMs,
         };
       },
-      { totalCost: 0, totalLatency: 0 }
+      { totalCost: 0, totalLatency: 0 },
     );
 
     return ok({
@@ -1808,7 +1808,7 @@ function getExperimentHypothesisScores(
   }
 }
 function getExperimentDatasetScores(
-  dataset: Experiment["dataset"]
+  dataset: Experiment["dataset"],
 ): Result<ExperimentScores["dataset"], string> {
   try {
     const validRows = dataset.rows.filter((row) => row?.inputRecord?.response);
@@ -1851,7 +1851,7 @@ function getExperimentDatasetScores(
           createdAt: new Date(0).toISOString(),
           model: "",
         },
-      }
+      },
     );
 
     return ok({
@@ -1876,26 +1876,32 @@ function getExperimentDatasetScores(
 }
 
 function getCustomScores(
-  scores: Record<string, Score>[]
+  scores: Record<string, Score>[],
 ): Record<string, Score> {
-  const scoresValues = scores.reduce((acc, record) => {
-    for (const key in record) {
-      if (record.hasOwnProperty(key) && typeof record[key].value === "number") {
-        if (!acc[key]) {
-          acc[key] = { sum: 0, count: 0, valueType: record[key].valueType };
+  const scoresValues = scores.reduce(
+    (acc, record) => {
+      for (const key in record) {
+        if (
+          record.hasOwnProperty(key) &&
+          typeof record[key].value === "number"
+        ) {
+          if (!acc[key]) {
+            acc[key] = { sum: 0, count: 0, valueType: record[key].valueType };
+          }
+          acc[key].sum += record[key].value as number;
+          acc[key].count += 1;
         }
-        acc[key].sum += record[key].value as number;
-        acc[key].count += 1;
       }
-    }
-    return acc;
-  }, {} as Record<string, { sum: number; count: number; valueType: string }>);
+      return acc;
+    },
+    {} as Record<string, { sum: number; count: number; valueType: string }>,
+  );
 
   return Object.fromEntries(
     Object.entries(scoresValues).map(([key, { sum, count, valueType }]) => [
       key,
       { value: sum / count, valueType },
-    ])
+    ]),
   );
 }
 

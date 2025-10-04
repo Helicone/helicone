@@ -3,7 +3,9 @@ import { ModelUsage } from "./types";
 import { Result } from "../../common/result";
 
 export class AnthropicUsageProcessor implements IUsageProcessor {
-  public async parse(parseInput: ParseInput): Promise<Result<ModelUsage, string>> {
+  public async parse(
+    parseInput: ParseInput,
+  ): Promise<Result<ModelUsage, string>> {
     try {
       if (parseInput.isStream) {
         return this.parseStreamResponse(parseInput.responseBody);
@@ -18,11 +20,13 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
     }
   }
 
-  private parseNonStreamResponse(responseBody: string): Result<ModelUsage, string> {
+  private parseNonStreamResponse(
+    responseBody: string,
+  ): Result<ModelUsage, string> {
     try {
       const parsedResponse = JSON.parse(responseBody);
       const usage = this.extractUsageFromResponse(parsedResponse);
-      
+
       return {
         data: usage,
         error: null,
@@ -35,7 +39,9 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
     }
   }
 
-  private parseStreamResponse(responseBody: string): Result<ModelUsage, string> {
+  private parseStreamResponse(
+    responseBody: string,
+  ): Result<ModelUsage, string> {
     try {
       const lines = responseBody
         .split("\n")
@@ -72,14 +78,14 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
   private consolidateStreamUsage(streamData: any[]): any {
     // message_start and message_delta events that contain usage
     let finalUsage = null;
-    
+
     for (const chunk of streamData) {
       if (chunk?.type === "message_start" && chunk?.message?.usage) {
         finalUsage = chunk.message.usage;
       }
       if (chunk?.type === "message_delta" && chunk?.usage) {
         // message_delta contains the final usage, merge with any existing usage
-        finalUsage = { ...finalUsage || {}, ...chunk.usage };
+        finalUsage = { ...(finalUsage || {}), ...chunk.usage };
       }
     }
 
@@ -95,29 +101,33 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
     }
 
     const usage = parsedResponse.usage || {};
-    
+
     const inputTokens = usage.input_tokens ?? 0;
     const outputTokens = usage.output_tokens ?? 0;
     const cacheReadInputTokens = usage.cache_read_input_tokens ?? 0;
-    
+
     const cacheCreation = usage.cache_creation || {};
     const ephemeral5mTokens = cacheCreation.ephemeral_5m_input_tokens ?? 0;
     const ephemeral1hTokens = cacheCreation.ephemeral_1h_input_tokens ?? 0;
-    
+
     const modelUsage: ModelUsage = {
       input: inputTokens,
       output: outputTokens,
     };
 
-    if (cacheReadInputTokens > 0 || ephemeral5mTokens > 0 || ephemeral1hTokens > 0) {
+    if (
+      cacheReadInputTokens > 0 ||
+      ephemeral5mTokens > 0 ||
+      ephemeral1hTokens > 0
+    ) {
       modelUsage.cacheDetails = {
         cachedInput: cacheReadInputTokens,
       };
-      
+
       if (ephemeral5mTokens > 0) {
         modelUsage.cacheDetails.write5m = ephemeral5mTokens;
       }
-      
+
       if (ephemeral1hTokens > 0) {
         modelUsage.cacheDetails.write1h = ephemeral1hTokens;
       }

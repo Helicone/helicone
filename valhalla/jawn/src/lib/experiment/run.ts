@@ -32,7 +32,7 @@ type Provider = "OPENAI" | "OPENROUTER";
 
 async function prepareRequest(
   args: PreparedRequestArgs,
-  provider: Provider
+  provider: Provider,
 ): Promise<PreparedRequest> {
   if (await isOnPrem()) {
     return await prepareRequestAzureOnPremFull(args);
@@ -67,10 +67,10 @@ interface PromptInputRecord {
 
 export async function runOriginalExperiment(
   experiment: Experiment,
-  datasetRows: ExperimentDatasetRow[]
+  datasetRows: ExperimentDatasetRow[],
 ): Promise<Result<string, string>> {
   const tempKey: Result<BaseTempKey, string> = await generateTempHeliconeAPIKey(
-    experiment.organization
+    experiment.organization,
   );
 
   if (tempKey.error || !tempKey.data) {
@@ -84,7 +84,7 @@ export async function runOriginalExperiment(
           data.inputRecord.inputs,
           experiment.organization,
           data.inputRecord.requestId,
-          true
+          true,
         );
       }
 
@@ -95,7 +95,7 @@ export async function runOriginalExperiment(
          FROM prompts_versions 
          WHERE id = $1 
          LIMIT 1`,
-        [promptVersionId]
+        [promptVersionId],
       );
 
       if (
@@ -115,11 +115,10 @@ export async function run(
   promptVersionId: string,
   inputRecordId: string,
   organizationId: string,
-  isOriginalRequest?: boolean
+  isOriginalRequest?: boolean,
 ): Promise<Result<string, string>> {
-  const tempKey: Result<BaseTempKey, string> = await generateTempHeliconeAPIKey(
-    organizationId
-  );
+  const tempKey: Result<BaseTempKey, string> =
+    await generateTempHeliconeAPIKey(organizationId);
 
   if (tempKey.error || !tempKey.data) {
     return err(tempKey.error);
@@ -130,7 +129,7 @@ export async function run(
      FROM prompts_versions 
      WHERE id = $1 
      LIMIT 1`,
-    [promptVersionId]
+    [promptVersionId],
   );
 
   if (
@@ -147,7 +146,7 @@ export async function run(
      FROM prompt_input_record 
      WHERE id = $1 
      LIMIT 1`,
-    [inputRecordId]
+    [inputRecordId],
   );
 
   if (
@@ -156,7 +155,7 @@ export async function run(
     promptInputRecordResult.data.length === 0
   ) {
     return err(
-      promptInputRecordResult.error || "Prompt input record not found"
+      promptInputRecordResult.error || "Prompt input record not found",
     );
   }
   const promptInputRecord = promptInputRecordResult.data[0];
@@ -170,7 +169,7 @@ export async function run(
         promptInputRecord.inputs,
         organizationId,
         requestId,
-        true
+        true,
       );
     }
 
@@ -188,7 +187,7 @@ export async function run(
         experimentId,
         model: promptVersion.model ?? "",
       },
-      providerByModelName(promptVersion.model ?? "")
+      providerByModelName(promptVersion.model ?? ""),
     );
 
     await runHypothesis({

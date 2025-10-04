@@ -7,7 +7,7 @@ function withTimeout<T>(promise: Promise<T>, timeout: number): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error("Timeout")), timeout)
+      setTimeout(() => reject(new Error("Timeout")), timeout),
     ),
   ]);
 }
@@ -57,7 +57,7 @@ export async function pythonEvaluator({
           {
             create: true,
             overwrite: true,
-          }
+          },
         ),
 
         await sandbox.fs.writeFile(
@@ -66,15 +66,15 @@ export async function pythonEvaluator({
           {
             create: true,
             overwrite: true,
-          }
+          },
         ),
       ]),
-      10000
+      10000,
     );
 
     const result = await withTimeout(
       sandbox.shells.python.run(`HELICONE_EXECUTION_ID="${uniqueId}"\n${code}`),
-      10000
+      10000,
     );
     traces.push(result.output);
 
@@ -82,7 +82,7 @@ export async function pythonEvaluator({
     try {
       output = await withTimeout(
         sandbox.fs.readFile(`/tmp/${uniqueId}/output.txt`),
-        10000
+        10000,
       ).then((r) => r.toString());
     } catch (e) {
       console.error(e);

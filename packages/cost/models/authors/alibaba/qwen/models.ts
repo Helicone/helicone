@@ -57,7 +57,7 @@ export const models = {
     maxOutputTokens: 81_920,
     created: "2025-07-25T00:00:00.000Z",
     modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
-    tokenizer: "Qwen"
+    tokenizer: "Qwen",
   },
 } satisfies Record<string, ModelConfig>;
 

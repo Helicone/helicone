@@ -15,7 +15,7 @@ export class PiPublicController extends Controller {
     body: {
       sessionUUID: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ apiKey: string }, string>> {
     let one_hour_ago = new Date(new Date().getTime() - 1 * 60 * 60 * 1000);
 
@@ -26,7 +26,7 @@ export class PiPublicController extends Controller {
        WHERE session_id = $1
        AND created_at > $2
        LIMIT 1`,
-      [body.sessionUUID, one_hour_ago.toISOString()]
+      [body.sessionUUID, one_hour_ago.toISOString()],
     );
 
     if (sessionResult.error) {
@@ -43,13 +43,13 @@ export class PiPublicController extends Controller {
     const apiKey = await generateHeliconeAPIKey(
       sessionResult.data[0].organization_id,
       "Auto Generated PI Key",
-      "rw"
+      "rw",
     );
 
     const { error: deleteError } = await dbExecute(
       `DELETE FROM pi_session
        WHERE session_id = $1`,
-      [body.sessionUUID]
+      [body.sessionUUID],
     );
 
     if (deleteError) {

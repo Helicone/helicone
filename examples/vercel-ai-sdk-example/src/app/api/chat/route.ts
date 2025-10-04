@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     console.error("Error in chat API route:", error);
     return NextResponse.json(
       { error: "Failed to generate response" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

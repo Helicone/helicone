@@ -49,13 +49,15 @@ const formatCost = (value: number) => {
   return `$${value.toFixed(2)}`;
 };
 
-export function ModelDetailPage({ initialModel, modelName }: ModelDetailPageProps) {
-
+export function ModelDetailPage({
+  initialModel,
+  modelName,
+}: ModelDetailPageProps) {
   const [model, setModel] = useState<ModelRegistryItem | null>(initialModel);
   const [loading, setLoading] = useState(!initialModel);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [expandedProviders, setExpandedProviders] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [currentLanguage, setCurrentLanguage] = useState<
     "typescript" | "python"
@@ -81,12 +83,12 @@ export function ModelDetailPage({ initialModel, modelName }: ModelDetailPageProp
         try {
           const jawnClient = getJawnClient();
           const response = await jawnClient.GET(
-            "/v1/public/model-registry/models"
+            "/v1/public/model-registry/models",
           );
 
           if (response.data?.data?.models) {
             const foundModel = response.data.data.models.find(
-              (m: ModelRegistryItem) => m.id === modelName
+              (m: ModelRegistryItem) => m.id === modelName,
             );
             setModel(foundModel || null);
           }
@@ -203,7 +205,7 @@ completion = client.chat.completions.create(
 
   const cleanModelName = model.name.replace(
     new RegExp(`^${model.author}:\s*`, "i"),
-    ""
+    "",
   );
 
   const firstEndpoint = model.endpoints[0];
@@ -242,10 +244,14 @@ completion = client.chat.completions.create(
               {(model as ModelRegistryItem & { created?: string }).created && (
                 <span className="text-gray-500 dark:text-gray-400">
                   Released{" "}
-                  {new Date((model as ModelRegistryItem & { created?: string }).created!).toLocaleDateString(
-                    "en-US",
-                    { month: "short", year: "numeric" }
-                  )}
+                  {new Date(
+                    (
+                      model as ModelRegistryItem & { created?: string }
+                    ).created!,
+                  ).toLocaleDateString("en-US", {
+                    month: "short",
+                    year: "numeric",
+                  })}
                 </span>
               )}
             </div>
@@ -347,7 +353,6 @@ completion = client.chat.completions.create(
                 const pricing =
                   hasTiers && pricingArray ? pricingArray[0] : endpoint.pricing;
                 const isExpanded = expandedProviders.has(endpoint.provider);
-
 
                 return (
                   <div key={endpoint.provider}>
@@ -516,8 +521,8 @@ completion = client.chat.completions.create(
                                     OpenRouter routes to multiple providers with
                                     different costs. Prices shown are the
                                     maximum (worst-case) for credit escrow.
-                                    You&apos;ll be charged actual costs, which are
-                                    typically lower.
+                                    You&apos;ll be charged actual costs, which
+                                    are typically lower.
                                   </p>
                                 </div>
                               </div>
@@ -562,56 +567,56 @@ completion = client.chat.completions.create(
                                 </p>
                                 <div className="flex flex-wrap gap-1">
                                   {model.supportedParameters.includes(
-                                    "tools" as StandardParameter
+                                    "tools" as StandardParameter,
                                   ) && (
                                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                       Tools
                                     </span>
                                   )}
                                   {model.supportedParameters.includes(
-                                    "response_format" as StandardParameter
+                                    "response_format" as StandardParameter,
                                   ) && (
                                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                       JSON Mode
                                     </span>
                                   )}
                                   {model.supportedParameters.includes(
-                                    "structured_outputs" as StandardParameter
+                                    "structured_outputs" as StandardParameter,
                                   ) && (
                                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                       Structured Output
                                     </span>
                                   )}
                                   {model.supportedParameters.includes(
-                                    "stream" as StandardParameter
+                                    "stream" as StandardParameter,
                                   ) && (
                                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                       Streaming
                                     </span>
                                   )}
                                   {model.supportedParameters.includes(
-                                    "max_tokens" as StandardParameter
+                                    "max_tokens" as StandardParameter,
                                   ) && (
                                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                       Max Tokens
                                     </span>
                                   )}
                                   {model.supportedParameters.includes(
-                                    "temperature" as StandardParameter
+                                    "temperature" as StandardParameter,
                                   ) && (
                                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                       Temperature
                                     </span>
                                   )}
                                   {model.supportedParameters.includes(
-                                    "top_p" as StandardParameter
+                                    "top_p" as StandardParameter,
                                   ) && (
                                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                       Top P
                                     </span>
                                   )}
                                   {model.supportedParameters.includes(
-                                    "logprobs" as StandardParameter
+                                    "logprobs" as StandardParameter,
                                   ) && (
                                     <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                       Log Probs

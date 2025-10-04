@@ -28,7 +28,7 @@ type StoreFilterType = {
 export class FilterController extends Controller {
   @Get("/")
   public async getFilters(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<StoreFilterType[], string>> {
     const { data, error } = await dbExecute<{
       id: string;
@@ -43,7 +43,7 @@ export class FilterController extends Controller {
       AND type = 'filter_ast'
       ORDER BY created_at DESC
       `,
-      [request.authParams.organizationId]
+      [request.authParams.organizationId],
     );
 
     if (error) {
@@ -57,14 +57,14 @@ export class FilterController extends Controller {
         name: d.name,
         filter: JSON.parse(d.filter),
         createdAt: d.created_at,
-      })) ?? []
+      })) ?? [],
     );
   }
 
   @Get("/{id}")
   public async getFilter(
     @Path() id: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<StoreFilterType, string>> {
     const { data, error } = await dbExecute<{
       filters: any;
@@ -74,7 +74,7 @@ export class FilterController extends Controller {
       WHERE id = $1
       AND organization_id = $2
       `,
-      [id, request.authParams.organizationId]
+      [id, request.authParams.organizationId],
     );
 
     if (error || !data || data.length === 0) {
@@ -89,7 +89,7 @@ export class FilterController extends Controller {
   public async createFilter(
     @Body()
     requestBody: StoreFilterType,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ id: string }, string>> {
     const { data, error } = await dbExecute<{ id: string }>(
       `
@@ -98,7 +98,7 @@ export class FilterController extends Controller {
       VALUES ($1, $2, 'filter_ast')
       RETURNING id
       `,
-      [request.authParams.organizationId, requestBody]
+      [request.authParams.organizationId, requestBody],
     );
 
     if (error || !data || data.length === 0) {
@@ -113,7 +113,7 @@ export class FilterController extends Controller {
   @Delete("/{id}")
   public async deleteFilter(
     @Path() id: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const { error } = await dbExecute(
       `
@@ -121,7 +121,7 @@ export class FilterController extends Controller {
       WHERE id = $1
       AND organization_id = $2
       `,
-      [id, request.authParams.organizationId]
+      [id, request.authParams.organizationId],
     );
 
     if (error) {
@@ -140,7 +140,7 @@ export class FilterController extends Controller {
       filters: any;
     },
     @Path() id: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const { error } = await dbExecute(
       `
@@ -149,7 +149,7 @@ export class FilterController extends Controller {
       WHERE id = $2
       AND organization_id = $3
       `,
-      [requestBody.filters, id, request.authParams.organizationId]
+      [requestBody.filters, id, request.authParams.organizationId],
     );
 
     if (error) {

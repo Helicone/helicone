@@ -4,9 +4,9 @@ export class GroqUsageProcessor extends OpenAIUsageProcessor {
   // Groq puts usage in x_groq.usage in streaming responses
   protected consolidateStreamData(streamData: any[]): any {
     // Look for usage in x_groq.usage first (Groq's location)
-    const lastChunkWithUsage = [...streamData].reverse().find(
-      chunk => chunk?.usage || chunk?.x_groq?.usage
-    );
+    const lastChunkWithUsage = [...streamData]
+      .reverse()
+      .find((chunk) => chunk?.usage || chunk?.x_groq?.usage);
 
     if (lastChunkWithUsage?.usage) {
       return lastChunkWithUsage;
@@ -16,7 +16,7 @@ export class GroqUsageProcessor extends OpenAIUsageProcessor {
     if (lastChunkWithUsage?.x_groq?.usage) {
       return {
         ...lastChunkWithUsage,
-        usage: lastChunkWithUsage.x_groq.usage
+        usage: lastChunkWithUsage.x_groq.usage,
       };
     }
 

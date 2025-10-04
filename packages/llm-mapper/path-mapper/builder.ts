@@ -10,8 +10,8 @@ export type PathsOf<T> = T extends object
         ? T[K] extends Array<any>
           ? K | `${K}[${number}]` | `${K}[${number}].${PathsOf<T[K][number]>}`
           : T[K] extends object
-          ? K | `${K}.${PathsOf<T[K]>}`
-          : K
+            ? K | `${K}.${PathsOf<T[K]>}`
+            : K
         : never;
     }[keyof T]
   : never;
@@ -22,16 +22,16 @@ export type PathsOf<T> = T extends object
 export type TypeAtPath<T, P extends string> = P extends keyof T
   ? T[P]
   : P extends `${infer K}.${infer R}`
-  ? K extends keyof T
-    ? TypeAtPath<T[K], R>
-    : never
-  : P extends `${infer K}[${infer I}]`
-  ? K extends keyof T
-    ? T[K] extends Array<infer V>
-      ? V
+    ? K extends keyof T
+      ? TypeAtPath<T[K], R>
       : never
-    : never
-  : never;
+    : P extends `${infer K}[${infer I}]`
+      ? K extends keyof T
+        ? T[K] extends Array<infer V>
+          ? V
+          : never
+        : never
+      : never;
 
 /**
  * Helper to get full recursive path strings for all properties in an object type
@@ -55,7 +55,7 @@ export interface PathMapping<
   T = any,
   E = any,
   InternalType = any,
-  ExternalType = any
+  ExternalType = any,
 > {
   external: string;
   internal: string;
@@ -86,7 +86,7 @@ export class MapperBuilder<ExternalType = any, InternalType = LLMRequestBody> {
    */
   map<
     ExternalPath extends string & PathsOf<ExternalType>,
-    InternalPath extends string & ValidInternalPaths
+    InternalPath extends string & ValidInternalPaths,
   >(externalPath: ExternalPath, internalPath: InternalPath): this {
     this.mappings.push({
       external: externalPath,
@@ -102,13 +102,13 @@ export class MapperBuilder<ExternalType = any, InternalType = LLMRequestBody> {
     ExternalPath extends string & PathsOf<ExternalType>,
     InternalPath extends string & ValidInternalPaths,
     T = any,
-    E = TypeAtPath<ExternalType, ExternalPath>
+    E = TypeAtPath<ExternalType, ExternalPath>,
   >(
     externalPath: ExternalPath,
     internalPath: InternalPath,
     toInternal: (value: E, internal?: InternalType) => T,
     toExternal: (value: T, external?: ExternalType) => E,
-    description?: string
+    description?: string,
   ): this {
     this.mappings.push({
       external: externalPath,
@@ -128,7 +128,7 @@ export class MapperBuilder<ExternalType = any, InternalType = LLMRequestBody> {
   build(): PathMapper<ExternalType, InternalType> {
     return new PathMapper<ExternalType, InternalType>(
       this.mapperName,
-      this.mappings
+      this.mappings,
     );
   }
 }

@@ -11,7 +11,7 @@ async function findAndBookFlight(
   openai: OpenAI,
   travelPlan: any,
   sessionId: string,
-  userId: string
+  userId: string,
 ) {
   const flightSearch = await heliconeLogger.logRequest(
     {
@@ -44,7 +44,7 @@ async function findAndBookFlight(
       "Helicone-Session-Id": sessionId,
       "Helicone-Session-Path": `/booking/flight/search`,
       "Helicone-User-Id": userId,
-    }
+    },
   );
 
   // Use LLM to select the best flight (for show)
@@ -80,7 +80,7 @@ async function findAndBookFlight(
         "Helicone-Session-Path": `/booking/flight/selection`,
         "Helicone-User-Id": userId,
       },
-    }
+    },
   );
 
   // Ignore LLM's choice and use our predetermined selection
@@ -183,7 +183,7 @@ async function findAndBookFlight(
       "Helicone-Session-Id": sessionId,
       "Helicone-Session-Path": `/booking/flight/confirm`,
       "Helicone-User-Id": userId,
-    }
+    },
   );
 
   return booking;
@@ -194,7 +194,7 @@ async function findAndBookHotel(
   openai: OpenAI,
   travelPlan: any,
   sessionId: string,
-  userId: string
+  userId: string,
 ) {
   const hotelSearch = await heliconeLogger.logRequest(
     {
@@ -225,7 +225,7 @@ async function findAndBookHotel(
       "Helicone-Session-Id": sessionId,
       "Helicone-Session-Path": `/booking/hotel/search`,
       "Helicone-User-Id": userId,
-    }
+    },
   );
 
   // Use LLM to select the best hotel (for show)
@@ -261,7 +261,7 @@ async function findAndBookHotel(
         "Helicone-Session-Path": `/booking/hotel/selection`,
         "Helicone-User-Id": userId,
       },
-    }
+    },
   );
 
   // Ignore LLM's choice and use our predetermined selection
@@ -344,7 +344,7 @@ async function findAndBookHotel(
       "Helicone-Session-Id": sessionId,
       "Helicone-Session-Path": `/booking/hotel/confirm`,
       "Helicone-User-Id": userId,
-    }
+    },
   );
 
   return booking;
@@ -353,7 +353,7 @@ async function findAndBookHotel(
 async function getUsersTravelPlan(
   openai: OpenAI,
   example: (typeof examples)[0],
-  sessionId: string
+  sessionId: string,
 ) {
   const prompt = hpf`As a travel planner, extract the user's travel plans from their request.
 
@@ -386,12 +386,12 @@ async function getUsersTravelPlan(
         "Helicone-Session-Path": `/planning/extract-travel-plan`,
         "Helicone-User-Id": example.userId,
       },
-    }
+    },
   );
 
   try {
     const result = JSON.parse(
-      chatCompletion.choices[0].message.content || "{}"
+      chatCompletion.choices[0].message.content || "{}",
     );
     return result;
   } catch (e) {
@@ -405,7 +405,7 @@ async function getTravelTips(
   heliconeLogger: HeliconeManualLogger,
   example: (typeof examples)[0],
   sessionId: string,
-  travelPlan: any
+  travelPlan: any,
 ) {
   const destination = travelPlan?.destination || "unknown";
 
@@ -442,7 +442,7 @@ async function getTravelTips(
       "Helicone-Session-Id": sessionId,
       "Helicone-Session-Path": `/planning/tips/vector-db`,
       "Helicone-User-Id": example.userId,
-    }
+    },
   );
 
   const res2 = await heliconeLogger.logRequest(
@@ -485,7 +485,7 @@ async function getTravelTips(
       "Helicone-Session-Id": sessionId,
       "Helicone-Session-Path": `/planning/tips/api-call`,
       "Helicone-User-Id": example.userId,
-    }
+    },
   );
 
   const prompt = hpf`As a travel planner, generate travel tips based on the user's travel plans.
@@ -516,12 +516,12 @@ async function getTravelTips(
         "Helicone-Session-Path": `/planning/tips/generation`,
         "Helicone-User-Id": example.userId,
       },
-    }
+    },
   );
 
   try {
     const result = JSON.parse(
-      chatCompletion.choices[0].message.content || "{}"
+      chatCompletion.choices[0].message.content || "{}",
     );
     return result;
   } catch (e) {
@@ -536,7 +536,7 @@ async function getDestinationWeather(
   startDate: string,
   endDate: string,
   sessionId: string,
-  userId: string
+  userId: string,
 ) {
   const res = await heliconeLogger.logRequest(
     {
@@ -575,7 +575,7 @@ async function getDestinationWeather(
       "Helicone-Session-Id": sessionId,
       "Helicone-Session-Path": `/planning/packing/weather`,
       "Helicone-User-Id": userId,
-    }
+    },
   );
 
   return res;
@@ -587,7 +587,7 @@ async function generatePackingList(
   example: (typeof examples)[0],
   sessionId: string,
   travelPlan: any,
-  weatherData: any
+  weatherData: any,
 ) {
   const prompt = hpf`As a travel expert, generate a comprehensive packing list based on the destination, planned activities, and weather conditions.
 
@@ -623,12 +623,12 @@ async function generatePackingList(
         "Helicone-Session-Path": `/planning/packing/list`,
         "Helicone-User-Id": example.userId,
       },
-    }
+    },
   );
 
   try {
     const result = JSON.parse(
-      chatCompletion.choices[0].message.content || "{}"
+      chatCompletion.choices[0].message.content || "{}",
     );
     return result;
   } catch (e) {
@@ -641,7 +641,7 @@ async function processExample(
   openai: OpenAI,
   heliconeLogger: HeliconeManualLogger,
   example: (typeof examples)[0],
-  sessionId: string
+  sessionId: string,
 ) {
   const travelPlan = await getUsersTravelPlan(openai, example, sessionId);
 
@@ -652,7 +652,7 @@ async function processExample(
     travelPlan.startDate || "unknown",
     travelPlan.endDate || "unknown",
     sessionId,
-    example.userId
+    example.userId,
   );
 
   // Run these in parallel
@@ -664,21 +664,21 @@ async function processExample(
       example,
       sessionId,
       travelPlan,
-      weatherData
+      weatherData,
     ),
     findAndBookFlight(
       heliconeLogger,
       openai,
       travelPlan,
       sessionId,
-      example.userId
+      example.userId,
     ),
     findAndBookHotel(
       heliconeLogger,
       openai,
       travelPlan,
       sessionId,
-      example.userId
+      example.userId,
     ),
   ]);
 
@@ -712,7 +712,7 @@ export async function setupDemoOrganizationRequests({
   });
 
   const heliconeOnHeliconeApiKey = await GET_KEY(
-    "key:helicone_on_helicone_key"
+    "key:helicone_on_helicone_key",
   );
   const heliconeLogger = new HeliconeManualLogger({
     apiKey: heliconeOnHeliconeApiKey,
@@ -727,7 +727,7 @@ export async function setupDemoOrganizationRequests({
       openai,
       heliconeLogger,
       example,
-      sessionId
+      sessionId,
     );
   }
 }

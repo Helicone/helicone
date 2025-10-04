@@ -24,7 +24,7 @@ import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 
 export function placeAssetIdValues(
   inputValues: Record<string, string>,
-  heliconeTemplate: any
+  heliconeTemplate: any,
 ): any {
   function traverseAndTransform(obj: any): any {
     if (typeof obj === "string") {
@@ -73,7 +73,7 @@ export class EvaluatorManager extends BaseManager {
     return runLastMileEvaluator(
       convertTestInputToHeliconeRequest(testInput),
       config,
-      testInput.inputs
+      testInput.inputs,
     );
   }
   testPythonEvaluator({
@@ -108,7 +108,7 @@ export class EvaluatorManager extends BaseManager {
       WHERE evaluator = $1
       AND experiment.organization = $2
       `,
-      [evaluatorId, this.authParams.organizationId]
+      [evaluatorId, this.authParams.organizationId],
     );
     return result;
   }
@@ -207,7 +207,7 @@ export class EvaluatorManager extends BaseManager {
     ) {
       request.data.request_body = placeAssetIdValues(
         request.data.asset_urls,
-        request.data.request_body
+        request.data.request_body,
       );
     }
     return ok({
@@ -300,7 +300,7 @@ export class EvaluatorManager extends BaseManager {
           [scoreName]: scoreResult.data?.score,
         },
         0,
-        evaluator.id
+        evaluator.id,
       );
 
       return ok(null);
@@ -316,7 +316,7 @@ export class EvaluatorManager extends BaseManager {
       inputs: Record<string, string>;
       autoInputs?: Record<string, string>;
     },
-    run: ExperimentOutputForScores
+    run: ExperimentOutputForScores,
   ) {
     const content = await this.getContent(run.request_id);
     if (content.error) {
@@ -332,21 +332,19 @@ export class EvaluatorManager extends BaseManager {
   }
 
   async runExperimentEvaluators(
-    experimentId: string
+    experimentId: string,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(this.authParams);
-    const experiment = await experimentManager.hasAccessToExperiment(
-      experimentId
-    );
+    const experiment =
+      await experimentManager.hasAccessToExperiment(experimentId);
     if (!experiment) {
       return err("Unauthorized");
     }
 
     const evaluators = await this.getEvaluatorsForExperiment(experimentId);
 
-    const experimentData = await experimentManager.getExperimentOutputForScores(
-      experimentId
-    );
+    const experimentData =
+      await experimentManager.getExperimentOutputForScores(experimentId);
 
     if (experimentData.error) {
       return err(experimentData.error);
@@ -369,33 +367,31 @@ export class EvaluatorManager extends BaseManager {
                 run: request,
                 requestBody: content.data?.requestBody ?? "",
                 responseBody: content.data?.responseBody ?? "",
-              })
+              }),
             );
           }
         }
         return Promise.all(evaluationPromises);
-      }) ?? []
+      }) ?? [],
     );
 
     return ok(null);
   }
 
   async shouldRunEvaluators(
-    experimentId: string
+    experimentId: string,
   ): Promise<Result<boolean, string>> {
     const experimentManager = new ExperimentV2Manager(this.authParams);
-    const experiment = await experimentManager.hasAccessToExperiment(
-      experimentId
-    );
+    const experiment =
+      await experimentManager.hasAccessToExperiment(experimentId);
     if (!experiment) {
       return err("Unauthorized");
     }
 
     const evaluators = await this.getEvaluatorsForExperiment(experimentId);
 
-    const experimentData = await experimentManager.getExperimentOutputForScores(
-      experimentId
-    );
+    const experimentData =
+      await experimentManager.getExperimentOutputForScores(experimentId);
 
     if (experimentData.error) {
       return err(experimentData.error);
@@ -419,18 +415,17 @@ export class EvaluatorManager extends BaseManager {
 
   async deleteExperimentEvaluator(
     experimentId: string,
-    evaluatorId: string
+    evaluatorId: string,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(this.authParams);
-    const experiment = await experimentManager.hasAccessToExperiment(
-      experimentId
-    );
+    const experiment =
+      await experimentManager.hasAccessToExperiment(experimentId);
     if (!experiment) {
       return err("Unauthorized");
     }
     const result = await dbExecute(
       `DELETE FROM evaluator_experiments_v3 WHERE experiment = $1 AND evaluator = $2`,
-      [experimentId, evaluatorId]
+      [experimentId, evaluatorId],
     );
     if (result.error) {
       return err(`Failed to delete evaluator experiment: ${result.error}`);
@@ -438,12 +433,11 @@ export class EvaluatorManager extends BaseManager {
     return ok(null);
   }
   async getEvaluatorsForExperiment(
-    experimentId: string
+    experimentId: string,
   ): Promise<Result<EvaluatorResult[], string>> {
     const experimentManager = new ExperimentV2Manager(this.authParams);
-    const experiment = await experimentManager.hasAccessToExperiment(
-      experimentId
-    );
+    const experiment =
+      await experimentManager.hasAccessToExperiment(experimentId);
     if (!experiment) {
       return err("Unauthorized");
     }
@@ -464,7 +458,7 @@ export class EvaluatorManager extends BaseManager {
       left join evaluator on evaluator_experiments_v3.evaluator = evaluator.id
       WHERE evaluator_experiments_v3.experiment = $1
       `,
-      [experimentId]
+      [experimentId],
     );
 
     return result;
@@ -472,12 +466,11 @@ export class EvaluatorManager extends BaseManager {
 
   async createExperimentEvaluator(
     experimentId: string,
-    evaluatorId: string
+    evaluatorId: string,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(this.authParams);
-    const experiment = await experimentManager.hasAccessToExperiment(
-      experimentId
-    );
+    const experiment =
+      await experimentManager.hasAccessToExperiment(experimentId);
     if (!experiment) {
       return err("Unauthorized");
     }
@@ -486,7 +479,7 @@ export class EvaluatorManager extends BaseManager {
       INSERT INTO evaluator_experiments_v3 (experiment, evaluator)
       VALUES ($1, $2)
       `,
-      [experimentId, evaluatorId]
+      [experimentId, evaluatorId],
     );
 
     if (result.error) {
@@ -496,7 +489,7 @@ export class EvaluatorManager extends BaseManager {
   }
 
   async createEvaluator(
-    params: CreateEvaluatorParams
+    params: CreateEvaluatorParams,
   ): Promise<Result<EvaluatorResult, string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
@@ -511,14 +504,14 @@ export class EvaluatorManager extends BaseManager {
         params.name,
         params.code_template,
         params.last_mile_config,
-      ]
+      ],
     );
 
     return resultMap(result, (data) => data[0]);
   }
 
   async getEvaluator(
-    evaluatorId: string
+    evaluatorId: string,
   ): Promise<Result<EvaluatorResult, string>> {
     const result = await dbExecute<EvaluatorResult>(
       `
@@ -526,7 +519,7 @@ export class EvaluatorManager extends BaseManager {
       FROM evaluator
       WHERE id = $1 AND organization_id = $2
       `,
-      [evaluatorId, this.authParams.organizationId]
+      [evaluatorId, this.authParams.organizationId],
     );
 
     return resultMap(result, (data) => data[0]);
@@ -540,7 +533,7 @@ export class EvaluatorManager extends BaseManager {
       WHERE organization_id = $1
       ORDER BY created_at DESC
       `,
-      [this.authParams.organizationId]
+      [this.authParams.organizationId],
     );
 
     return result;
@@ -548,7 +541,7 @@ export class EvaluatorManager extends BaseManager {
 
   async updateEvaluator(
     evaluatorId: string,
-    params: UpdateEvaluatorParams
+    params: UpdateEvaluatorParams,
   ): Promise<Result<EvaluatorResult, string>> {
     const updateFields: string[] = [];
     const updateValues: any[] = [];
@@ -585,7 +578,7 @@ export class EvaluatorManager extends BaseManager {
       WHERE id = $${paramIndex++} AND organization_id = $${paramIndex++}
       RETURNING id, created_at, scoring_type, llm_template, organization_id, updated_at, last_mile_config
       `,
-      [...updateValues, evaluatorId, this.authParams.organizationId]
+      [...updateValues, evaluatorId, this.authParams.organizationId],
     );
 
     return resultMap(result, (data) => data[0]);
@@ -597,11 +590,11 @@ export class EvaluatorManager extends BaseManager {
       DELETE FROM evaluator_experiments_v3
       WHERE evaluator = $1
       `,
-      [evaluatorId]
+      [evaluatorId],
     );
     if (deleteExperimentEvaluator.error) {
       return err(
-        `Failed to delete evaluator experiments: ${deleteExperimentEvaluator.error}`
+        `Failed to delete evaluator experiments: ${deleteExperimentEvaluator.error}`,
       );
     }
 
@@ -610,11 +603,11 @@ export class EvaluatorManager extends BaseManager {
       DELETE FROM evaluator_experiments
       WHERE evaluator = $1
       `,
-      [evaluatorId]
+      [evaluatorId],
     );
     if (deleteOldExperimentEvaluators.error) {
       return err(
-        `Failed to delete old experiment evaluators: ${deleteOldExperimentEvaluators.error}`
+        `Failed to delete old experiment evaluators: ${deleteOldExperimentEvaluators.error}`,
       );
     }
 
@@ -623,11 +616,11 @@ export class EvaluatorManager extends BaseManager {
       DELETE FROM online_evaluators
       WHERE evaluator = $1 and organization = $2
       `,
-      [evaluatorId, this.authParams.organizationId]
+      [evaluatorId, this.authParams.organizationId],
     );
     if (deleteOnlineEvaluators.error) {
       return err(
-        `Failed to delete online evaluators: ${deleteOnlineEvaluators.error}`
+        `Failed to delete online evaluators: ${deleteOnlineEvaluators.error}`,
       );
     }
 
@@ -637,11 +630,11 @@ export class EvaluatorManager extends BaseManager {
       SET evaluator_id = NULL
       WHERE evaluator_id = $1 and organization = $2
       `,
-      [evaluatorId, this.authParams.organizationId]
+      [evaluatorId, this.authParams.organizationId],
     );
     if (setNullScoreAttributes.error) {
       return err(
-        `Failed to set null score attributes: ${setNullScoreAttributes.error}`
+        `Failed to set null score attributes: ${setNullScoreAttributes.error}`,
       );
     }
 
@@ -650,7 +643,7 @@ export class EvaluatorManager extends BaseManager {
       DELETE FROM evaluator
       WHERE id = $1 AND organization_id = $2
       `,
-      [evaluatorId, this.authParams.organizationId]
+      [evaluatorId, this.authParams.organizationId],
     );
 
     if (result.error) {
@@ -661,7 +654,7 @@ export class EvaluatorManager extends BaseManager {
   }
 
   public async getEvaluatorStats(
-    evaluatorId: string
+    evaluatorId: string,
   ): Promise<Result<EvaluatorStats, string>> {
     try {
       // First, get the evaluator to verify it exists and get the name for scoring
@@ -673,7 +666,7 @@ export class EvaluatorManager extends BaseManager {
       // If name or scoring_type is missing, return default stats instead of error
       if (!evaluator.data.name || !evaluator.data.scoring_type) {
         console.warn(
-          `Evaluator ${evaluatorId} has missing name or scoring_type, returning default stats`
+          `Evaluator ${evaluatorId} has missing name or scoring_type, returning default stats`,
         );
         return ok({
           averageScore: 0,

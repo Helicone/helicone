@@ -143,8 +143,13 @@ export async function runGatewayTest(
 
       // Automatic verifications from 'expects'
       if (expectation?.expects) {
-        const { escrowInfo, headers, method, bodyContains, bodyDoesNotContain } =
-          expectation.expects;
+        const {
+          escrowInfo,
+          headers,
+          method,
+          bodyContains,
+          bodyDoesNotContain,
+        } = expectation.expects;
 
         // Check escrow info
         if (escrowInfo !== undefined) {

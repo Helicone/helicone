@@ -11,7 +11,7 @@ const Hero = () => {
     <div
       className={cn(
         "flex flex-col justify-top h-auto lg:h-[500px] 2xl:h-[550px] relative lg:w-[1300px] 2xl:w-[1500px]",
-        ISLAND_WIDTH
+        ISLAND_WIDTH,
       )}
     >
       <div className="flex flex-wrap gap-x-12 gap-y-4 items-center mt-12 lg:mt-0 mb-12">

@@ -205,7 +205,14 @@ const ChatRow = (props: ChatRowProps) => {
 
   const [role, setRole] = useState<
     "system" | "user" | "assistant" | "function" | "tool"
-  >(currentMessage.role as "system" | "user" | "assistant" | "function" | "tool");
+  >(
+    currentMessage.role as
+      | "system"
+      | "user"
+      | "assistant"
+      | "function"
+      | "tool",
+  );
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -523,13 +530,20 @@ const ChatRow = (props: ChatRowProps) => {
                     };
 
                     // Check if this message originally had tool_calls
-                    if (currentMessage.tool_calls && currentMessage.tool_calls.length > 0) {
+                    if (
+                      currentMessage.tool_calls &&
+                      currentMessage.tool_calls.length > 0
+                    ) {
                       try {
                         // Try to parse as JSON to update tool_calls
                         const parsed = JSON.parse(text);
-                        if (parsed.tool_calls && Array.isArray(parsed.tool_calls)) {
+                        if (
+                          parsed.tool_calls &&
+                          Array.isArray(parsed.tool_calls)
+                        ) {
                           newMessages.tool_calls = parsed.tool_calls;
-                          newMessages.content = parsed.content || currentMessage.content || null;
+                          newMessages.content =
+                            parsed.content || currentMessage.content || null;
                         } else {
                           // If no tool_calls in parsed JSON, just update content
                           newMessages.content = text;

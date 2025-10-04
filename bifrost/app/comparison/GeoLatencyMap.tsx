@@ -44,7 +44,7 @@ const formatValue = (value: number, metric: MetricType) => {
 
 const getGeographicData = (
   model: components["schemas"]["Model"],
-  metric: MetricType
+  metric: MetricType,
 ) => {
   const geoData =
     metric === "latency" ? model.geographicLatency : model.geographicTtft;
@@ -177,7 +177,7 @@ export const GeoMetricMap = ({
                             setTooltipOpen(true);
                             const tooltipText = `${country.name}\n${formatValue(
                               country.value,
-                              metric
+                              metric,
                             )}`;
                             setLocalTooltipContent(tooltipText);
                           }

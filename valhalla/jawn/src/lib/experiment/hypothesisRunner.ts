@@ -21,7 +21,7 @@ interface DatabaseOperation {
 
 async function runWithRetry(
   props: RunnerProps,
-  dbOp: DatabaseOperation
+  dbOp: DatabaseOperation,
 ): Promise<Result<string, string>> {
   const {
     url,
@@ -34,7 +34,7 @@ async function runWithRetry(
     isOriginalRequest,
   } = props;
   const heliconeOnHeliconeApiKey = await GET_KEY(
-    "key:helicone_on_helicone_key"
+    "key:helicone_on_helicone_key",
   );
   const heliconeClient = new HeliconeManualLogger({
     apiKey: heliconeOnHeliconeApiKey,
@@ -94,7 +94,7 @@ async function runWithRetry(
 }
 
 export async function runHypothesis(
-  props: RunnerProps
+  props: RunnerProps,
 ): Promise<Result<string, string>> {
   const {
     experimentId,
@@ -120,7 +120,7 @@ export async function runHypothesis(
           requestId,
           promptVersionId,
           isOriginalRequest ?? false,
-        ]
+        ],
       );
     },
     errorMessage: "Failed to insert hypothesis run after multiple attempts",
@@ -129,7 +129,7 @@ export async function runHypothesis(
 }
 
 export async function runOriginalRequest(
-  props: RunnerProps & { inputRecordId: string }
+  props: RunnerProps & { inputRecordId: string },
 ): Promise<Result<string, string>> {
   const { requestId, inputRecordId } = props;
   const dbOp: DatabaseOperation = {
@@ -139,7 +139,7 @@ export async function runOriginalRequest(
          SET source_request = $1
          WHERE id = $2
          RETURNING id`,
-        [requestId, inputRecordId]
+        [requestId, inputRecordId],
       );
     },
     errorMessage:

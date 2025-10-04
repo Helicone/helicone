@@ -17,7 +17,7 @@ const ALLOWED_LINES = [
 
 export class AnthropicStreamBodyProcessor implements IBodyProcessor {
   public async parse(
-    parseInput: ParseInput
+    parseInput: ParseInput,
   ): PromiseGenericResult<ParseOutput> {
     if (isParseInputJson(parseInput)) {
       return ok({
@@ -97,7 +97,7 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
         } catch (e) {
           console.error(
             `Error parsing consolidated JSON for index ${index}:`,
-            e
+            e,
           );
           // Add unparsed string for debugging
           processedLines.push({
@@ -159,10 +159,10 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
           completion: processedLines.map((d) => d.completion).join(""),
         };
         const completionTokens = await getTokenCountAnthropic(
-          claudeData.completion
+          claudeData.completion,
         );
         const promptTokens = await getTokenCountAnthropic(
-          JSON.parse(requestBody ?? "{}")?.prompt ?? ""
+          JSON.parse(requestBody ?? "{}")?.prompt ?? "",
         );
         return ok({
           processedBody: {

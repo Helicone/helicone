@@ -154,19 +154,23 @@ const ENTERPRISE_TABS: {
 ];
 
 const Enterprise = (props: EnterpriseProps) => {
-
   return (
     <div className="flex flex-col gap-8 px-2 w-full md:items-center items-start md:text-center text-start">
-
       <div>
         <p className="text-blue-600 text-sm font-bold mb-4">Enterprise</p>
         <h2 className="text-3xl md:text-4xl font-bold text-black md:text-center text-start tracking-tight leading-tight">
           Get to production-quality{" "}
-          <span className="text-blue-600 md:text-center text-start">faster</span>
+          <span className="text-blue-600 md:text-center text-start">
+            faster
+          </span>
         </h2>
       </div>
 
-      <a href="/contact" target="_blank" className="hover:bg-blue-100 ease-in-out duration-500 text-blue-600 border-2 border-blue-600 rounded-lg px-4 py-2 font-bold flex w-fit items-center gap-1">
+      <a
+        href="/contact"
+        target="_blank"
+        className="hover:bg-blue-100 ease-in-out duration-500 text-blue-600 border-2 border-blue-600 rounded-lg px-4 py-2 font-bold flex w-fit items-center gap-1"
+      >
         Get a Demo
       </a>
 
@@ -175,50 +179,96 @@ const Enterprise = (props: EnterpriseProps) => {
           <h3 className="font-bold text-black tracking-tight leading-tight">
             Scalability and Reliability
           </h3>
-          <p>Helicone is 100x more scalable than competitors, offering read and write abilities for millions of logs.</p>
+          <p>
+            Helicone is 100x more scalable than competitors, offering read and
+            write abilities for millions of logs.
+          </p>
         </div>
 
         <div className="space-y-2">
           <h3 className="font-bold text-black tracking-tight leading-tight">
             Sub-millisecond latency
           </h3>
-          <p>As a Gateway, we deploy using Cloudflare Workers to minimize response time while bringing smart analytics and convenience to you.</p>
+          <p>
+            As a Gateway, we deploy using Cloudflare Workers to minimize
+            response time while bringing smart analytics and convenience to you.
+          </p>
         </div>
 
         <div className="space-y-2">
           <h3 className="font-bold text-black tracking-tight leading-tight">
             Risk free experimentation
           </h3>
-          <p>Evaluate the outputs of your new prompt without impacting production data (and have stats to back you up).</p>
+          <p>
+            Evaluate the outputs of your new prompt without impacting production
+            data (and have stats to back you up).
+          </p>
         </div>
-
       </div>
 
       <div className="self-center md:flex hidden flex flex-col w-full">
-        <a href="https://docs.helicone.ai/features/prompts#prompts-and-experiments" target="_blank" className="w-fit">
-          <Image src={enterpriseTileExperiments} alt="enterprise experiments graphic" className="w-11/12 pr-5" />
+        <a
+          href="https://docs.helicone.ai/features/prompts#prompts-and-experiments"
+          target="_blank"
+          className="w-fit"
+        >
+          <Image
+            src={enterpriseTileExperiments}
+            alt="enterprise experiments graphic"
+            className="w-11/12 pr-5"
+          />
         </a>
         <div className="flex flex-row w-full">
-          <a href="https://docs.helicone.ai/features/customer-portal#customer-portal" target="_blank" className="pl-2">
-            <Image src={enterpriseTileAnalytics} alt="enterprise analytics graphic" className="w-full" />
+          <a
+            href="https://docs.helicone.ai/features/customer-portal#customer-portal"
+            target="_blank"
+            className="pl-2"
+          >
+            <Image
+              src={enterpriseTileAnalytics}
+              alt="enterprise analytics graphic"
+              className="w-full"
+            />
           </a>
 
-          <a href="https://docs.helicone.ai/use-cases/etl#etl-data-extraction" target="_blank">
-            <Image src={enterpriseTileEtl} alt="enterprise etl graphic" className="w-full" />
+          <a
+            href="https://docs.helicone.ai/use-cases/etl#etl-data-extraction"
+            target="_blank"
+          >
+            <Image
+              src={enterpriseTileEtl}
+              alt="enterprise etl graphic"
+              className="w-full"
+            />
           </a>
         </div>
       </div>
-      
+
       <div className="md:hidden flex flex-col gap-4">
-        <a href="https://docs.helicone.ai/features/prompts#prompts-and-experiments" target="_blank">
-          <Image src={enterpriseExpMobile} alt="enterprise experiments graphic" />
+        <a
+          href="https://docs.helicone.ai/features/prompts#prompts-and-experiments"
+          target="_blank"
+        >
+          <Image
+            src={enterpriseExpMobile}
+            alt="enterprise experiments graphic"
+          />
         </a>
 
-        <a href="https://docs.helicone.ai/features/customer-portal#customer-portal" target="_blank">
-          <Image src={enterpriseAnalyticsMobile} alt="enterprise analytics graphic" />
+        <a
+          href="https://docs.helicone.ai/features/customer-portal#customer-portal"
+          target="_blank"
+        >
+          <Image
+            src={enterpriseAnalyticsMobile}
+            alt="enterprise analytics graphic"
+          />
         </a>
 
-        <a href="https://docs.helicone.ai/use-cases/etl#etl-data-extraction" target="_blank">
+        <a
+          href="https://docs.helicone.ai/use-cases/etl#etl-data-extraction"
+          target="_blank"
+        >
           <Image src={enterpriseEtlMobile} alt="enterprise etl graphic" />
         </a>
       </div>

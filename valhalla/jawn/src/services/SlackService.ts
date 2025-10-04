@@ -81,7 +81,7 @@ export class SlackService {
       "message",
       async ({ event, client }: { event: any; client: any }) => {
         await this.handleSlackMessage(event, client);
-      }
+      },
     );
 
     // Start the app
@@ -92,7 +92,7 @@ export class SlackService {
       () => {
         this.processedEvents.clear();
       },
-      60 * 60 * 1000
+      60 * 60 * 1000,
     );
 
     // Handle shutdown
@@ -102,7 +102,7 @@ export class SlackService {
 
   private async handleSlackMessage(
     event: any,
-    client: WebClient
+    client: WebClient,
   ): Promise<void> {
     // Check for thread_ts
     if (!event.thread_ts) {
@@ -164,7 +164,7 @@ export class SlackService {
                           url: imageURL,
                         },
                       };
-                    })
+                    }),
                 )),
               ],
             }
@@ -178,7 +178,7 @@ export class SlackService {
       // Look up thread
       const thread = await dbExecute<InAppThread>(
         `SELECT * FROM in_app_threads WHERE metadata->>'slack_thread_ts' = $1`,
-        [event.thread_ts]
+        [event.thread_ts],
       );
 
       if (thread.error || !thread.data?.[0]) {
@@ -194,7 +194,7 @@ export class SlackService {
 
       // Check if message already exists
       const messageExists = messages.find(
-        (m: MessageWithEventTs) => m.event_ts === event.event_ts
+        (m: MessageWithEventTs) => m.event_ts === event.event_ts,
       );
 
       if (!messageExists) {
@@ -204,7 +204,7 @@ export class SlackService {
 
         const updateResult = await dbExecute(
           `UPDATE in_app_threads SET chat = $1 WHERE id = $2`,
-          [JSON.stringify(newChat), thread.data[0].id]
+          [JSON.stringify(newChat), thread.data[0].id],
         );
 
         if (updateResult.error) {
@@ -219,7 +219,7 @@ export class SlackService {
   public async uploadFile(
     file: Buffer,
     filename: string,
-    threadTs: string
+    threadTs: string,
   ): Promise<boolean> {
     if (!this.client || !this.config.channel) {
       console.error("Slack not configured, cannot upload file");
@@ -245,7 +245,7 @@ export class SlackService {
 
   public async postMessage(
     text: string,
-    blocks?: any[]
+    blocks?: any[],
   ): Promise<string | null> {
     if (!this.client || !this.config.channel) {
       console.error("Slack not configured, cannot post message");
@@ -271,7 +271,7 @@ export class SlackService {
   public async postThreadMessage(
     threadTs: string,
     text: string,
-    attachments?: MessageAttachment[]
+    attachments?: MessageAttachment[],
   ): Promise<void> {
     if (!this.client || !this.config.channel) {
       console.error("Slack not configured, cannot post thread message");
@@ -297,7 +297,7 @@ export class SlackService {
 
   private async retryWithBackoff<T>(
     fn: () => Promise<T>,
-    maxRetries: number = 1
+    maxRetries: number = 1,
   ): Promise<T> {
     let lastError: any;
 

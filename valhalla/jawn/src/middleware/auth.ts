@@ -16,7 +16,7 @@ export const logHttpRequestInClickhouse = (
   resParams: {
     status: number;
   },
-  authParams?: AuthParams
+  authParams?: AuthParams,
 ): (() => void) => {
   const start = Date.now();
 
@@ -48,7 +48,7 @@ export const logHttpRequestInClickhouse = (
 };
 
 export const authFromRequest = async (
-  req: Request
+  req: Request,
 ): Promise<Result<AuthParams, string>> => {
   const request = new RequestWrapper(req);
   const authorization = request.authHeader();
@@ -59,14 +59,14 @@ export const authFromRequest = async (
 
   return await getHeliconeAuthClient().authenticate(
     authorization.data!,
-    req.headers
+    req.headers,
   );
 };
 
 export const authMiddleware = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (req.path.startsWith("/v1/public")) {
     next();
@@ -108,7 +108,7 @@ export const authMiddleware = async (
       {
         status: res.statusCode,
       },
-      authParams.data
+      authParams.data,
     );
 
     res.on("finish", onFinish);

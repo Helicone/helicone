@@ -15,7 +15,7 @@ export function configureBodyParser(app: Express) {
       extended: true,
       limit: "50mb",
       parameterLimit: 50000,
-    })
+    }),
   );
   app.use(bodyParser.raw({ verify: rawBodySaver, type: "*/*", limit: "50mb" }));
-} 
+}

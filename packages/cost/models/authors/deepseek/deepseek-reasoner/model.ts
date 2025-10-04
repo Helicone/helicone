@@ -11,7 +11,7 @@ export const models = {
     created: "2025-01-20T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
-  }
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type DeepSeekReasonerModelName = keyof typeof models;

@@ -18,11 +18,11 @@ type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 const cache = new KVCache(60 * 1000); // 1 hour
 
 const getStripeCustomerId = async (
-  organizationId: string
+  organizationId: string,
 ): Promise<Result<string, string>> => {
   const result = await dbExecute<{ stripe_customer_id: string }>(
     `SELECT stripe_customer_id FROM organization where id = $1 limit 1`,
-    [organizationId]
+    [organizationId],
   );
 
   if (result.error) {
@@ -53,14 +53,18 @@ export class StripeLogHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    if (context.message.log.request.cacheReferenceId && (context.message.log.request.cacheReferenceId !== DEFAULT_CACHE_REFERENCE_ID)) {
+    if (
+      context.message.log.request.cacheReferenceId &&
+      context.message.log.request.cacheReferenceId !==
+        DEFAULT_CACHE_REFERENCE_ID
+    ) {
       return await super.handle(context);
     }
 
     const stripe_customer_id = await cacheResultCustom(
       "stripe_customer_id_" + organizationId,
       async () => getStripeCustomerId(organizationId),
-      cache
+      cache,
     );
 
     if (stripe_customer_id.error || !stripe_customer_id.data) {

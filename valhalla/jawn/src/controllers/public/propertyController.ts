@@ -10,7 +10,10 @@ import {
 } from "tsoa";
 import { KVCache } from "../../lib/cache/kvCache";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { buildFilterWithAuthClickHouse, buildFilterWithAuthClickHouseOrganizationProperties } from "@helicone-package/filters/filters";
+import {
+  buildFilterWithAuthClickHouse,
+  buildFilterWithAuthClickHouseOrganizationProperties,
+} from "@helicone-package/filters/filters";
 import { resultMap } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { quickCacheResultCustom } from "../../utils/cacheResult";
@@ -37,13 +40,14 @@ export class PropertyController extends Controller {
   public async getProperties(
     @Body()
     requestBody: {},
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ) {
-    const builtFilter = await buildFilterWithAuthClickHouseOrganizationProperties({
-      org_id: request.authParams.organizationId,
-      argsAcc: [],
-      filter: {},
-    });
+    const builtFilter =
+      await buildFilterWithAuthClickHouseOrganizationProperties({
+        org_id: request.authParams.organizationId,
+        argsAcc: [],
+        filter: {},
+      });
 
     const query = `
     SELECT DISTINCT property_key AS property
@@ -56,7 +60,7 @@ export class PropertyController extends Controller {
     return await quickCacheResultCustom(
       "v1/property/query" + request.authParams.organizationId,
       async () => await dbQueryClickhouse<Property>(query, builtFilter.argsAcc),
-      longCache
+      longCache,
     );
   }
 
@@ -68,7 +72,7 @@ export class PropertyController extends Controller {
     @Body()
     requestBody: {
       searchTerm: string;
-    }
+    },
   ) {
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: request.authParams.organizationId,
@@ -96,7 +100,7 @@ export class PropertyController extends Controller {
 
     const res = await dbQueryClickhouse<{ property: string }>(
       query,
-      builtFilter.argsAcc
+      builtFilter.argsAcc,
     );
 
     return resultMap(res, (data) => data.map((r) => r.property));
@@ -106,7 +110,7 @@ export class PropertyController extends Controller {
   public async getTopCosts(
     @Request() request: JawnAuthenticatedRequest,
     @Path() propertyKey: string,
-    @Body() requestBody: TimeFilterRequest
+    @Body() requestBody: TimeFilterRequest,
   ) {
     if (!propertyKey) {
       throw new Error("Property key is required");

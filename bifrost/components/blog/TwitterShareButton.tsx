@@ -11,13 +11,13 @@ interface TwitterShareButtonProps {
 export function TwitterShareButton({ title, path }: TwitterShareButtonProps) {
   const handleTwitterShare = () => {
     const url = `https://www.helicone.ai/blog/${path}`;
-    
+
     const tweetText = `Just read "${title}" by @helicone_ai.`;
 
     const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-      tweetText
+      tweetText,
     )}&url=${encodeURIComponent(url)}`;
-    
+
     window.open(tweetUrl, "_blank");
   };
 
@@ -31,4 +31,4 @@ export function TwitterShareButton({ title, path }: TwitterShareButtonProps) {
       <Twitter className="ml-2 h-4 w-4" />
     </Button>
   );
-} 
+}

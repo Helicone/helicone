@@ -39,7 +39,7 @@ async function main() {
           "Helicone-Property-Environment": "development",
           "Helicone-Prompt-Id": "say-hello-to",
         },
-      }
+      },
     );
     console.log(chatCompletion);
   }

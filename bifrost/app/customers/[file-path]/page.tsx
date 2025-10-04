@@ -1,4 +1,7 @@
-import { getMetadata, CaseStudyStructureMetaData } from "@/components/templates/customers/getMetaData";
+import {
+  getMetadata,
+  CaseStudyStructureMetaData,
+} from "@/components/templates/customers/getMetaData";
 import { promises as fs } from "fs";
 import { serialize } from "next-mdx-remote/serialize";
 import Link from "next/link";
@@ -13,7 +16,10 @@ import rehypeSlug from "rehype-slug";
 import "highlight.js/styles/atom-one-dark.css";
 import { ChevronLeft } from "lucide-react";
 import { OtherCaseStudies } from "@/components/customers/OtherCaseStudies";
-import { formatCustomerSince, formatLastUpdated } from "@/components/customers/CaseStudies";
+import {
+  formatCustomerSince,
+  formatLastUpdated,
+} from "@/components/customers/CaseStudies";
 
 export default async function Home({
   params,
@@ -28,7 +34,7 @@ export default async function Home({
     "customers",
     "case-studies",
     params["file-path"],
-    "src.mdx"
+    "src.mdx",
   );
 
   const source = await fs.readFile(changelogFolder, "utf8");
@@ -39,10 +45,7 @@ export default async function Home({
         remarkGfm,
         [remarkToc, { heading: "Table of Contents", tight: true, maxDepth: 2 }],
       ],
-      rehypePlugins: [
-        rehypeSlug,
-        rehypeHighlight,
-      ],
+      rehypePlugins: [rehypeSlug, rehypeHighlight],
     },
   });
 
@@ -56,19 +59,18 @@ export default async function Home({
   let relatedStudiesData: CaseStudyStructureMetaData[] = [];
   if (metadata && Array.isArray(metadata.relatedStudies)) {
     const results = await Promise.all(
-      metadata.relatedStudies
-        .map(slug => getMetadata(slug)) // Fetch metadata for each slug
+      metadata.relatedStudies.map((slug) => getMetadata(slug)), // Fetch metadata for each slug
     );
-    relatedStudiesData = results.filter((study): study is CaseStudyStructureMetaData => study !== null); // Filter out nulls and type guard
+    relatedStudiesData = results.filter(
+      (study): study is CaseStudyStructureMetaData => study !== null,
+    ); // Filter out nulls and type guard
   }
 
   return (
     <div className="w-full bg-white h-full antialiased relative">
       <div className="flex flex-col sm:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative gap-8">
-
         {/* Left Column */}
         <div className="hidden sm:flex flex-col sm:sticky w-56 h-full gap-6 top-24 md-top-32">
-
           {/* Back to all stories */}
           <Link
             href="/customers"
@@ -81,13 +83,17 @@ export default async function Home({
           {/* Customer info */}
           <section className="flex flex-col gap-6 overflow-hidden">
             <div className="flex flex-col gap-1 px-2">
-              <p className="text-muted-foreground text-sm font-medium">Customer since</p>
+              <p className="text-muted-foreground text-sm font-medium">
+                Customer since
+              </p>
               <span className="text-accent-foreground text-sm font-medium">
                 {formatCustomerSince(metadata.customerSince)}
               </span>
             </div>
             <div className="flex flex-col gap-1 px-2">
-              <p className="text-muted-foreground text-sm font-medium">Website</p>
+              <p className="text-muted-foreground text-sm font-medium">
+                Website
+              </p>
               <a
                 href={`https://${String(metadata.url)}`}
                 target="_blank"
@@ -98,7 +104,9 @@ export default async function Home({
               </a>
             </div>
             <div className="flex flex-col gap-1 px-2">
-              <p className="text-muted-foreground text-sm font-medium">Written on</p>
+              <p className="text-muted-foreground text-sm font-medium">
+                Written on
+              </p>
               <span className="text-accent-foreground text-sm font-medium">
                 {formatLastUpdated(metadata.date ? metadata.date : "") || ""}
               </span>
@@ -130,7 +138,8 @@ export default async function Home({
               {/* Customer info */}
               <div className="flex items-center gap-2">
                 <p className="text-muted-foreground text-sm font-medium">
-                  Customer since</p>
+                  Customer since
+                </p>
                 <span className="text-accent-foreground text-sm font-medium">
                   {formatCustomerSince(metadata.customerSince)}
                 </span>
@@ -157,8 +166,11 @@ export default async function Home({
               />
             </div>
             {/* Pass related studies data to the MDX renderer */}
-            <RemoteMdxPage mdxSource={mdxSource} relatedStudiesData={relatedStudiesData} />
-          </article >
+            <RemoteMdxPage
+              mdxSource={mdxSource}
+              relatedStudiesData={relatedStudiesData}
+            />
+          </article>
 
           {/* Related Stories (Outside Prose) */}
           <OtherCaseStudies caseStudies={relatedStudiesData} />

@@ -28,6 +28,6 @@ export interface CacheProvider {
    */
   getAndStoreToken<T, K>(
     key: string,
-    fn: () => Promise<Result<TokenWithTTL<T>, K>>
+    fn: () => Promise<Result<TokenWithTTL<T>, K>>,
   ): Promise<Result<T, K>>;
 }

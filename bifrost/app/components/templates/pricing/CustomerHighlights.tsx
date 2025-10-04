@@ -60,9 +60,10 @@ export default function CustomerHighlights() {
           <div
             key={index}
             className={`flex-1 flex flex-col justify-between items-start
-              ${index !== highlights.length - 1
-                ? "border-b md:border-b-0 md:border-r border-border"
-                : ""
+              ${
+                index !== highlights.length - 1
+                  ? "border-b md:border-b-0 md:border-r border-border"
+                  : ""
               }
             `}
           >

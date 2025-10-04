@@ -3,7 +3,7 @@ import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class GoogleBodyProcessor implements IBodyProcessor {
   public async parse(
-    parseInput: ParseInput
+    parseInput: ParseInput,
   ): PromiseGenericResult<ParseOutput> {
     const { responseBody } = parseInput;
     const parsedResponseBody = JSON.parse(responseBody);

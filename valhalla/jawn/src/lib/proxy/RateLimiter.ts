@@ -23,7 +23,7 @@ type KVObject = {
 async function getSegmentKeyValue(
   properties: HeliconeProperties,
   userId: string | undefined,
-  segment: string | undefined
+  segment: string | undefined,
 ): Promise<string> {
   if (segment === undefined) {
     return "global";
@@ -44,7 +44,7 @@ async function getSegmentKeyValue(
 function binarySearchFirstRelevantIndex(
   timestamps: number[],
   now: number,
-  timeWindowMillis: number
+  timeWindowMillis: number,
 ): number {
   let left = 0;
   let right = timestamps.length - 1;
@@ -72,7 +72,7 @@ interface RateLimitProps {
 }
 
 export async function checkRateLimit(
-  props: RateLimitProps
+  props: RateLimitProps,
 ): Promise<RateLimitResponse> {
   const { heliconeProperties, userId, rateLimitOptions, providerAuthHash } =
     props;
@@ -81,7 +81,7 @@ export async function checkRateLimit(
   const segmentKeyValue = await getSegmentKeyValue(
     heliconeProperties,
     userId,
-    segment
+    segment,
   );
   const kvKey = `rl_${segmentKeyValue}_${providerAuthHash}_3`;
   const kv = await redisClient?.get(kvKey);
@@ -93,7 +93,7 @@ export async function checkRateLimit(
   const firstRelevantIndex = binarySearchFirstRelevantIndex(
     timestamps.map((x) => x.timestamp),
     now,
-    timeWindowMillis
+    timeWindowMillis,
   );
 
   const relevantTimestamps = timestamps.slice(firstRelevantIndex);
@@ -106,7 +106,7 @@ export async function checkRateLimit(
   const remaining = Math.max(0, quota - currentQuota);
 
   const reset = Math.ceil(
-    (timestamps[firstRelevantIndex].timestamp + timeWindowMillis - now) / 1000
+    (timestamps[firstRelevantIndex].timestamp + timeWindowMillis - now) / 1000,
   );
 
   if (currentQuota >= quota) {
@@ -117,7 +117,7 @@ export async function checkRateLimit(
 }
 
 export async function updateRateLimitCounter(
-  props: RateLimitProps
+  props: RateLimitProps,
 ): Promise<void> {
   const {
     heliconeProperties,
@@ -130,7 +130,7 @@ export async function updateRateLimitCounter(
   const segmentKeyValue = await getSegmentKeyValue(
     heliconeProperties,
     userId,
-    segment
+    segment,
   );
 
   const kvKey = `rl_${segmentKeyValue}_${heliconeAuthHash}_3`;
@@ -159,6 +159,6 @@ export async function updateRateLimitCounter(
     kvKey,
     JSON.stringify(prunedTimestamps),
     "EX",
-    Math.ceil(timeWindowMillis / 1000)
+    Math.ceil(timeWindowMillis / 1000),
   );
 }

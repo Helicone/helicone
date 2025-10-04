@@ -105,11 +105,20 @@ export function costOfPrompt({
       promptCacheWriteTokens -
       (promptCacheWrite5m ?? 0) -
       (promptCacheWrite1h ?? 0);
-    totalCost += effectivePromptCacheWriteTokens * cost.prompt_cache_write_token;
-    if (cost.prompt_cache_creation_5m && promptCacheWrite5m && promptCacheWrite5m > 0) {
+    totalCost +=
+      effectivePromptCacheWriteTokens * cost.prompt_cache_write_token;
+    if (
+      cost.prompt_cache_creation_5m &&
+      promptCacheWrite5m &&
+      promptCacheWrite5m > 0
+    ) {
       totalCost += promptCacheWrite5m * cost.prompt_cache_creation_5m;
     }
-    if (cost.prompt_cache_creation_1h && promptCacheWrite1h && promptCacheWrite1h > 0) {
+    if (
+      cost.prompt_cache_creation_1h &&
+      promptCacheWrite1h &&
+      promptCacheWrite1h > 0
+    ) {
       totalCost += promptCacheWrite1h * cost.prompt_cache_creation_1h;
     }
   } else if (promptCacheWriteTokens > 0) {
@@ -157,25 +166,26 @@ function caseForCost(
   table: string,
   multiple: number,
   useDefaultCost: boolean = false,
-  optimized: boolean = false
+  optimized: boolean = false,
 ) {
   const validCases = costs.map((cost) => {
     const costPerMultiple = {
       prompt: Math.round(cost.cost.prompt_token * multiple),
       completion: Math.round(cost.cost.completion_token * multiple),
       prompt_audio: Math.round(
-        (cost.cost.prompt_audio_token ?? cost.cost.prompt_token) * multiple
+        (cost.cost.prompt_audio_token ?? cost.cost.prompt_token) * multiple,
       ),
       completion_audio: Math.round(
         (cost.cost.completion_audio_token ?? cost.cost.completion_token) *
-          multiple
+          multiple,
       ),
       prompt_cache_write: Math.round(
         (cost.cost.prompt_cache_write_token ?? cost.cost.prompt_token) *
-          multiple
+          multiple,
       ),
       prompt_cache_read: Math.round(
-        (cost.cost.prompt_cache_read_token ?? cost.cost.prompt_token) * multiple
+        (cost.cost.prompt_cache_read_token ?? cost.cost.prompt_token) *
+          multiple,
       ),
       image: Math.round((cost.cost.per_image ?? 0) * multiple),
       per_call: Math.round((cost.cost.per_call ?? 0) * multiple),
@@ -187,27 +197,27 @@ function caseForCost(
     }
     if (costPerMultiple.completion > 0) {
       costParts.push(
-        `${costPerMultiple.completion} * ${table}.completion_tokens`
+        `${costPerMultiple.completion} * ${table}.completion_tokens`,
       );
     }
     if (costPerMultiple.prompt_audio > 0) {
       costParts.push(
-        `${costPerMultiple.prompt_audio} * ${table}.prompt_audio_tokens`
+        `${costPerMultiple.prompt_audio} * ${table}.prompt_audio_tokens`,
       );
     }
     if (costPerMultiple.completion_audio > 0) {
       costParts.push(
-        `${costPerMultiple.completion_audio} * ${table}.completion_audio_tokens`
+        `${costPerMultiple.completion_audio} * ${table}.completion_audio_tokens`,
       );
     }
     if (costPerMultiple.prompt_cache_write > 0) {
       costParts.push(
-        `${costPerMultiple.prompt_cache_write} * ${table}.prompt_cache_write_tokens`
+        `${costPerMultiple.prompt_cache_write} * ${table}.prompt_cache_write_tokens`,
       );
     }
     if (costPerMultiple.prompt_cache_read > 0) {
       costParts.push(
-        `${costPerMultiple.prompt_cache_read} * ${table}.prompt_cache_read_tokens`
+        `${costPerMultiple.prompt_cache_read} * ${table}.prompt_cache_read_tokens`,
       );
     }
     if (costPerMultiple.image > 0) {
@@ -242,7 +252,7 @@ END
 // Current only used for backfilling costs via admin.
 export function clickhouseModelFilter(
   rows: ModelWithProvider[],
-  table = "request_response_rmt"
+  table = "request_response_rmt",
 ) {
   const uniqueProviders = Array.from(new Set(rows.map((row) => row.provider)));
 
@@ -271,7 +281,7 @@ export function clickhouseModelFilter(
 // If not chunked, the query will be too large for Clickhouse.
 export function clickhousePriceCalcNonAggregated(
   models: ModelWithProvider[],
-  table = "request_response_rmt"
+  table = "request_response_rmt",
 ) {
   const modelsByProvider = models.reduce(
     (acc, model) => {
@@ -281,7 +291,7 @@ export function clickhousePriceCalcNonAggregated(
       acc[model.provider].push(model.modelRow);
       return acc;
     },
-    {} as Record<string, ModelRow[]>
+    {} as Record<string, ModelRow[]>,
   );
 
   return `
@@ -301,7 +311,7 @@ export function clickhousePriceCalcNonAggregated(
 
 export function clickhousePriceCalc(table: string, inDollars: boolean = true) {
   const providersWithCosts = providers.filter(
-    (p) => p.costs && defaultProvider.provider !== p.provider
+    (p) => p.costs && defaultProvider.provider !== p.provider,
   );
   if (!defaultProvider.costs) {
     throw new Error("Default provider does not have costs");

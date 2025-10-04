@@ -11,7 +11,7 @@ const USER_ID = process.env.USER_ID || "default_user";
 
 async function makeGeminiRequest(
   prompt: string,
-  analyticsPermission: boolean = true
+  analyticsPermission: boolean = true,
 ) {
   // Set up the request configuration
   const requestConfig = {
@@ -48,7 +48,7 @@ async function makeGeminiRequest(
       throw new Error(
         `HTTP error! status: ${
           response.status
-        }, message: ${await response.text()}`
+        }, message: ${await response.text()}`,
       );
     }
 

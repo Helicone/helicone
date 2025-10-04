@@ -18,7 +18,7 @@ export class KafkaProducer implements MessageProducer {
   constructor() {
     if (!KAFKA_ENABLED || !KAFKA_URL || !KAFKA_USERNAME || !KAFKA_PASSWORD) {
       console.log(
-        "Required Kafka environment variables are not set, KafkaProducer will not be initialized."
+        "Required Kafka environment variables are not set, KafkaProducer will not be initialized.",
       );
       return;
     }

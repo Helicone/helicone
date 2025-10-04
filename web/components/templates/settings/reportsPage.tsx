@@ -49,7 +49,7 @@ const ReportsPage = () => {
   const orgContext = useOrg();
   const { setNotification } = useNotification();
 
-  const { data, isLoading, refetch } = useGetOrgMembers(
+  const { data, isLoading } = useGetOrgMembers(
     orgContext?.currentOrg?.id || "",
   );
 
@@ -59,8 +59,9 @@ const ReportsPage = () => {
     org_role: string;
   }[] = [...(data || [])];
 
-  const { data: slackIntegration, isLoading: isLoadingSlackIntegration } =
-    useGetOrgSlackIntegration(orgContext?.currentOrg?.id || "");
+  const { data: slackIntegration } = useGetOrgSlackIntegration(
+    orgContext?.currentOrg?.id || "",
+  );
 
   const { data: slackChannelsData, isLoading: isLoadingSlackChannels } =
     useGetOrgSlackChannels(orgContext?.currentOrg?.id || "");

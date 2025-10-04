@@ -41,7 +41,7 @@ export class ApiKeyController extends Controller {
   @Delete("/provider-key/{providerKeyId}")
   public async deleteProviderKey(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() providerKeyId: string
+    @Path() providerKeyId: string,
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.deleteProviderKey(providerKeyId);
@@ -67,7 +67,7 @@ export class ApiKeyController extends Controller {
   public async createProviderKey(
     @Request() request: JawnAuthenticatedRequest,
     @Body()
-    body: CreateProviderKeyRequest
+    body: CreateProviderKeyRequest,
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.createProviderKey(body);
@@ -91,7 +91,7 @@ export class ApiKeyController extends Controller {
   @Get("/provider-key/{providerKeyId}")
   public async getProviderKey(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() providerKeyId: string
+    @Path() providerKeyId: string,
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.getDecryptedProviderKeyById(providerKeyId);
@@ -118,13 +118,12 @@ export class ApiKeyController extends Controller {
     return result.data;
   }
 
-
   @Patch("/provider-key/{providerKeyId}")
   public async updateProviderKey(
     @Request() request: JawnAuthenticatedRequest,
     @Path() providerKeyId: string,
     @Body()
-    body: UpdateProviderKeyRequest
+    body: UpdateProviderKeyRequest,
   ): Promise<Result<{ id: string; providerName: string }, string>> {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.updateProviderKey({
@@ -162,12 +161,12 @@ export class ApiKeyController extends Controller {
   @Post("/")
   public async createAPIKey(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: { api_key_name: string; key_permissions?: "rw" | "r" | "w" }
+    @Body() body: { api_key_name: string; key_permissions?: "rw" | "r" | "w" },
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.createNormalKey(
       body.api_key_name,
-      body.key_permissions ?? "rw"
+      body.key_permissions ?? "rw",
     );
 
     if (result.error || !result.data) {
@@ -178,7 +177,7 @@ export class ApiKeyController extends Controller {
     await setAPIKey(
       result.data.hashedKey,
       request.authParams.organizationId,
-      false
+      false,
     );
 
     return result.data;
@@ -191,7 +190,7 @@ export class ApiKeyController extends Controller {
     body: {
       providerKeyId: string;
       proxyKeyName: string;
-    }
+    },
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.createProxyKey({
@@ -210,7 +209,7 @@ export class ApiKeyController extends Controller {
   @Delete("/{apiKeyId}")
   public async deleteAPIKey(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() apiKeyId: number
+    @Path() apiKeyId: number,
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.deleteAPIKey(apiKeyId);
@@ -223,7 +222,7 @@ export class ApiKeyController extends Controller {
     await setAPIKey(
       result.data.hashedKey,
       request.authParams.organizationId,
-      true
+      true,
     );
 
     return result.data;
@@ -233,7 +232,7 @@ export class ApiKeyController extends Controller {
   public async updateAPIKey(
     @Request() request: JawnAuthenticatedRequest,
     @Path() apiKeyId: number,
-    @Body() body: { api_key_name: string }
+    @Body() body: { api_key_name: string },
   ) {
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.updateAPIKey(apiKeyId, {
@@ -248,7 +247,7 @@ export class ApiKeyController extends Controller {
     await setAPIKey(
       result.data.hashedKey,
       request.authParams.organizationId,
-      false
+      false,
     );
 
     return result.data;

@@ -39,7 +39,7 @@ export class AzureOpenAIProvider extends BaseProvider {
 
     if (!deployment) {
       throw new Error(
-        "Azure OpenAI requires a deployment name, provider model ID, or model name"
+        "Azure OpenAI requires a deployment name, provider model ID, or model name",
       );
     }
 

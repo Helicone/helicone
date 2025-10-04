@@ -572,7 +572,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -589,7 +591,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -602,9 +606,13 @@ describe("Alibaba Registry Tests", () => {
           model: "qwen3-coder/deepinfra",
           request: {
             messages: [
-              { role: "user", content: "Write a Python function to calculate fibonacci numbers" },
+              {
+                role: "user",
+                content:
+                  "Write a Python function to calculate fibonacci numbers",
+              },
             ],
-            maxTokens: 1000
+            maxTokens: 1000,
           },
           expected: {
             providers: [
@@ -612,10 +620,14 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
-                  bodyContains: ["Write a Python function to calculate fibonacci numbers"],
+                  bodyContains: [
+                    "Write a Python function to calculate fibonacci numbers",
+                  ],
                 },
               },
             ],
@@ -630,7 +642,8 @@ describe("Alibaba Registry Tests", () => {
             messages: [
               {
                 role: "user",
-                content: "Create a web scraper that can extract data from a website"
+                content:
+                  "Create a web scraper that can extract data from a website",
               },
             ],
           },
@@ -640,7 +653,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -655,7 +670,7 @@ describe("Alibaba Registry Tests", () => {
             messages: [
               {
                 role: "user",
-                content: "Generate a React component for a todo list"
+                content: "Generate a React component for a todo list",
               },
             ],
             stream: true,
@@ -666,7 +681,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ['"stream":true'],
@@ -684,7 +701,8 @@ describe("Alibaba Registry Tests", () => {
             messages: [
               {
                 role: "user",
-                content: "Analyze this code screenshot and explain what it does"
+                content:
+                  "Analyze this code screenshot and explain what it does",
               },
             ],
           },
@@ -694,7 +712,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -717,7 +737,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -743,7 +765,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -824,9 +848,7 @@ describe("Alibaba Registry Tests", () => {
           model: "qwen3-coder/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -836,7 +858,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -855,7 +879,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -872,7 +898,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -885,9 +913,12 @@ describe("Alibaba Registry Tests", () => {
           model: "qwen3-next-80b-a3b-instruct/deepinfra",
           request: {
             messages: [
-              { role: "user", content: "Test message for Qwen3 Next 80B A3B model" },
+              {
+                role: "user",
+                content: "Test message for Qwen3 Next 80B A3B model",
+              },
             ],
-            maxTokens: 1000
+            maxTokens: 1000,
           },
           expected: {
             providers: [
@@ -895,7 +926,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ["Test message for Qwen3 Next 80B A3B model"],
@@ -910,7 +943,9 @@ describe("Alibaba Registry Tests", () => {
         runGatewayTest({
           model: "qwen3-next-80b-a3b-instruct/deepinfra",
           request: {
-            messages: [{ role: "user", content: "What's the weather like today?" }],
+            messages: [
+              { role: "user", content: "What's the weather like today?" },
+            ],
           },
           expected: {
             providers: [
@@ -918,7 +953,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -939,7 +976,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ['"stream":true'],
@@ -967,7 +1006,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -993,7 +1034,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1018,7 +1061,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1035,7 +1080,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify pricing configuration:
@@ -1190,9 +1237,7 @@ describe("Alibaba Registry Tests", () => {
           model: "qwen3-next-80b-a3b-instruct/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -1202,7 +1247,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1228,7 +1275,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   headers: {
@@ -1256,7 +1305,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the request supports the expected parameters
@@ -1296,7 +1347,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the URL is correctly constructed
@@ -1318,7 +1371,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct", // Should map to the correct provider model ID
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1364,7 +1419,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1389,7 +1446,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
-                data: createOpenAIMockResponse("Qwen/Qwen3-Next-80B-A3B-Instruct"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-Next-80B-A3B-Instruct"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1440,7 +1499,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1457,7 +1518,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1470,9 +1533,12 @@ describe("Alibaba Registry Tests", () => {
           model: "qwen3-235b-a22b-thinking/deepinfra",
           request: {
             messages: [
-              { role: "user", content: "Test message for Qwen3 235B A22B Thinking model" },
+              {
+                role: "user",
+                content: "Test message for Qwen3 235B A22B Thinking model",
+              },
             ],
-            maxTokens: 1000
+            maxTokens: 1000,
           },
           expected: {
             providers: [
@@ -1480,10 +1546,14 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
-                  bodyContains: ["Test message for Qwen3 235B A22B Thinking model"],
+                  bodyContains: [
+                    "Test message for Qwen3 235B A22B Thinking model",
+                  ],
                 },
               },
             ],
@@ -1498,7 +1568,7 @@ describe("Alibaba Registry Tests", () => {
             messages: [
               {
                 role: "user",
-                content: "Solve this complex reasoning problem step by step"
+                content: "Solve this complex reasoning problem step by step",
               },
             ],
           },
@@ -1508,7 +1578,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1529,7 +1601,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ['"stream":true'],
@@ -1558,7 +1632,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1575,7 +1651,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify pricing configuration:
@@ -1741,7 +1819,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   headers: {
@@ -1769,7 +1849,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the request supports the expected parameters
@@ -1809,7 +1891,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the URL is correctly constructed
@@ -1831,7 +1915,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507", // Should map to the correct provider model ID
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1877,7 +1963,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1902,7 +1990,9 @@ describe("Alibaba Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-235B-A22B-Thinking-2507",
-                data: createOpenAIMockResponse("Qwen/Qwen3-235B-A22B-Thinking-2507"),
+                data: createOpenAIMockResponse(
+                  "Qwen/Qwen3-235B-A22B-Thinking-2507"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],

@@ -1,5 +1,5 @@
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,6 @@ import {
 } from "../../ui/dialog";
 import { Label } from "../../ui/label";
 import { Switch } from "../../ui/switch";
-import { MODEL_LIST } from "../playground/new/modelList";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { Button } from "@/components/ui/button";
 
@@ -20,20 +19,9 @@ interface CreatePromptDialogProps {
 
 const CreatePromptDialog: React.FC<CreatePromptDialogProps> = ({
   hasAccess,
-  onCreatePrompt,
+  onCreatePrompt: _onCreatePrompt,
 }) => {
   const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
-  const [newPromptName, setNewPromptName] = useState<string>("");
-  const [newPromptModel, setNewPromptModel] = useState(MODEL_LIST[0].value);
-  const [newPromptContent, setNewPromptContent] = useState("");
-  const [promptVariables, setPromptVariables] = useState<string[]>([]);
-  const newPromptInputRef = useRef<HTMLInputElement>(null);
-
-  const extractVariables = useCallback((content: string) => {
-    const regex = /\{\{([^}]+)\}\}/g;
-    const matches = content.match(regex);
-    return matches ? matches.map((match) => match.slice(2, -2).trim()) : [];
-  }, []);
 
   return (
     <Dialog>

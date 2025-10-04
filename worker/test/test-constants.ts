@@ -7,7 +7,8 @@ export const TEST_API_KEY = "sk-helicone-aaaaaa1-bbbbbbb-ccccccc-ddddddd";
 
 // SHA256 hash of the TEST_API_KEY
 // This hash should match what's expected in setup.ts for the mocked database
-export const TEST_API_KEY_HASH = "4ff435549f7ff2c4a644185152e079d2bec8f533996b41f471de44b99f2e3254";
+export const TEST_API_KEY_HASH =
+  "4ff435549f7ff2c4a644185152e079d2bec8f533996b41f471de44b99f2e3254";
 
 // Common test headers
 export const TEST_HEADERS = {

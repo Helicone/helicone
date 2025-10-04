@@ -15,7 +15,6 @@ export type ColumnType =
   | "number-with-suggestions"
   | "bool";
 
-
 export type InputParam = {
   key: string;
   param: string;
@@ -136,7 +135,7 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
 };
 
 export function textWithSuggestions(
-  inputParams: InputParam[]
+  inputParams: InputParam[],
 ): Operator<string>[] {
   return textOperators.map((o) => ({
     ...o,
@@ -146,7 +145,7 @@ export function textWithSuggestions(
 }
 
 export function numberWithSuggestions(
-  inputParams: InputParam[]
+  inputParams: InputParam[],
 ): Operator<string>[] {
   return numberOperators.map((o) => ({
     ...o,
@@ -157,7 +156,7 @@ export function numberWithSuggestions(
 
 export function getPropertyFilters(
   properties: string[],
-  inputParams: InputParam[]
+  inputParams: InputParam[],
 ): SingleFilterDef<"properties">[] {
   return properties.map((p) => ({
     label: p,
@@ -170,7 +169,7 @@ export function getPropertyFilters(
 
 export function getPropertyFiltersV2(
   properties: string[],
-  inputParams: InputParam[]
+  inputParams: InputParam[],
 ): SingleFilterDef<"request_response_rmt">[] {
   return properties.map((p) => ({
     label: p,
@@ -184,7 +183,7 @@ export function getPropertyFiltersV2(
 
 export function getValueFilters(
   properties: string[],
-  inputParams: InputParam[]
+  inputParams: InputParam[],
 ): SingleFilterDef<"values">[] {
   return properties.map((p) => ({
     label: p,
@@ -194,7 +193,6 @@ export function getValueFilters(
     category: "prompt variables",
   }));
 }
-
 
 const STATUS_OPS = numberWithSuggestions([
   {
@@ -247,7 +245,7 @@ export const DASHBOARD_PAGE_TABLE_FILTERS: [
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
-  SingleFilterDef<"request_response_rmt">
+  SingleFilterDef<"request_response_rmt">,
 ] = [
   {
     label: "Model",
@@ -290,7 +288,7 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
-  SingleFilterDef<"request_response_rmt">
+  SingleFilterDef<"request_response_rmt">,
 ] = [
   {
     label: "Request",

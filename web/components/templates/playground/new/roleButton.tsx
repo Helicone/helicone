@@ -2,7 +2,6 @@ import { Menu, Transition } from "@headlessui/react";
 import { clsx } from "../../../shared/clsx";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { Fragment } from "react";
-import useNotification from "../../../shared/notification/useNotification";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 export const ROLE_COLORS = {
@@ -16,7 +15,9 @@ export const ROLE_COLORS = {
 interface RoleButtonProps {
   // message: MessageInputItem;
   role: "system" | "user" | "assistant" | "function" | "tool";
-  onRoleChange: (role: "system" | "user" | "assistant" | "function" | "tool") => void;
+  onRoleChange: (
+    role: "system" | "user" | "assistant" | "function" | "tool",
+  ) => void;
   // setMessage: (message: MessageInputItem) => void;
   // deleteMessage?: (messageInputId: string) => void;
   size?: "small" | "medium";
@@ -28,12 +29,10 @@ const RoleButton = (props: RoleButtonProps) => {
   const {
     role,
     onRoleChange,
-    onDelete,
+    onDelete: _onDelete,
     size = "medium",
     disabled = false,
   } = props;
-
-  const { setNotification } = useNotification();
 
   return (
     <Menu as="div" className="relative inline-block w-full text-left">

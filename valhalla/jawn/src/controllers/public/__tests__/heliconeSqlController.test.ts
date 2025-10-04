@@ -44,7 +44,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       // Check that organization_id is filtered out
       const requestTable = result.data?.find(
-        (table: any) => table.table_name === "request_response_rmt"
+        (table: any) => table.table_name === "request_response_rmt",
       );
       expect(requestTable).toBeDefined();
       if (requestTable) {

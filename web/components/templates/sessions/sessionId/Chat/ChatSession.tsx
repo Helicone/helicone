@@ -37,7 +37,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({
 
   const properties = useGetPropertiesV2(() => []);
 
-  const { isRealtime, effectiveRequests, originalRequest } = realtimeData;
+  const { isRealtime, originalRequest } = realtimeData;
 
   const sortedRequests = useMemo(() => {
     // Use the original requests array when not in realtime mode

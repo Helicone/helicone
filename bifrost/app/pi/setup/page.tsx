@@ -15,7 +15,7 @@ const PiPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { apiKey, sessionUUID, countDown } = useHeliconeLogin(
-    searchParams.get("invalid_api_key") === "true"
+    searchParams.get("invalid_api_key") === "true",
   );
   const { data, isLoading } = useTestAPIKey(apiKey.data ?? "");
 

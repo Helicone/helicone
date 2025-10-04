@@ -92,9 +92,9 @@ export class ModelRegistryController extends Controller {
    * - Input/output modalities (text, image, audio, video)
    * - Supported parameters (temperature, max_tokens, etc.)
    * - Available capabilities (audio, video, image, thinking, web_search, caching)
-   * 
+   *
    * No authentication required - this is a public endpoint.
-   * 
+   *
    * @returns {ModelRegistryResponse} Complete model registry with models and filter options
    */
   @Get("/models")
@@ -158,7 +158,7 @@ export class ModelRegistryController extends Controller {
       const models: ModelRegistryItem[] = [];
 
       for (const [modelId, modelConfig] of Object.entries(
-        allModelsResult.data!
+        allModelsResult.data!,
       )) {
         const providerConfigsResult = registry.getModelProviderConfigs(modelId);
         if (providerConfigsResult.error || !providerConfigsResult.data) {
@@ -236,7 +236,7 @@ export class ModelRegistryController extends Controller {
         const allSupportedParameters = new Set<StandardParameter>();
         for (const config of providerConfigsResult.data) {
           config.supportedParameters.forEach((param) =>
-            allSupportedParameters.add(param)
+            allSupportedParameters.add(param),
           );
         }
 

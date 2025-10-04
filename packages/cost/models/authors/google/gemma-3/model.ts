@@ -10,7 +10,7 @@ export const model = {
     maxOutputTokens: 8_192,
     created: "2024-12-01T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
-    tokenizer: "Gemini"
+    tokenizer: "Gemini",
   },
 } satisfies Record<string, ModelConfig>;
 

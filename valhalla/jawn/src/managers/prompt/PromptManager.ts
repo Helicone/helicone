@@ -31,10 +31,9 @@ import { AuthParams } from "../../packages/common/auth/types";
 import { StringChain } from "lodash";
 import { Prompt2025Input } from "../../lib/db/ClickhouseWrapper";
 
-
 const PROMPT_ID_LENGTH = 6;
 const MAX_PROMPT_ID_GENERATION_ATTEMPTS = 3;
-const PRODUCTION_ENVIRONMENT = 'production';
+const PRODUCTION_ENVIRONMENT = "production";
 
 export class Prompt2025Manager extends BaseManager {
   private s3Client: S3Client;
@@ -46,13 +45,14 @@ export class Prompt2025Manager extends BaseManager {
       process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
       process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
     );
   }
 
-  private generateRandomPromptId() : string {
-    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let result = '';
+  private generateRandomPromptId(): string {
+    const chars =
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let result = "";
     for (let i = 0; i < PROMPT_ID_LENGTH; i++) {
       result += chars[Math.floor(Math.random() * chars.length)];
     }
@@ -62,7 +62,7 @@ export class Prompt2025Manager extends BaseManager {
   async totalPrompts(): Promise<Result<number, string>> {
     const result = await dbExecute<{ count: number }>(
       `SELECT COUNT(*) as count FROM prompts_2025 WHERE organization = $1 AND soft_delete is false`,
-      [this.authParams.organizationId]
+      [this.authParams.organizationId],
     );
     if (result.error) {
       return err(result.error);
@@ -76,22 +76,21 @@ export class Prompt2025Manager extends BaseManager {
        FROM prompts_2025_versions 
        WHERE organization = $1 AND soft_delete = false AND environment IS NOT NULL
        ORDER BY environment`,
-      [this.authParams.organizationId]
+      [this.authParams.organizationId],
     );
 
     if (result.error) {
       return err(result.error);
     }
 
-    const environments = result.data?.map(row => row.environment) || [];
+    const environments = result.data?.map((row) => row.environment) || [];
     return ok(environments);
   }
-
 
   async getPromptTags(): Promise<Result<string[], string>> {
     const result = await dbExecute<{ tags: string }>(
       `SELECT DISTINCT UNNEST(tags) as tags FROM prompts_2025 WHERE organization = $1 AND soft_delete is false`,
-      [this.authParams.organizationId]
+      [this.authParams.organizationId],
     );
     if (result.error) {
       return err(result.error);
@@ -110,7 +109,7 @@ export class Prompt2025Manager extends BaseManager {
       WHERE id = $1 AND organization = $2 AND soft_delete is false
       LIMIT 1
       `,
-      [promptId, this.authParams.organizationId]
+      [promptId, this.authParams.organizationId],
     );
     if (result.error) {
       return err(result.error);
@@ -127,7 +126,7 @@ export class Prompt2025Manager extends BaseManager {
   }): Promise<Result<null, string>> {
     const result = await dbExecute<null>(
       `UPDATE prompts_2025 SET name = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
-      [params.name, params.promptId, this.authParams.organizationId]
+      [params.name, params.promptId, this.authParams.organizationId],
     );
 
     if (result.error) {
@@ -143,9 +142,10 @@ export class Prompt2025Manager extends BaseManager {
     page: number;
     pageSize: number;
   }): Promise<Result<Prompt2025[], string>> {
-    const tagsFilterClause = params.tagsFilter.length > 0 ? `AND tags && $3::text[]` : "";
+    const tagsFilterClause =
+      params.tagsFilter.length > 0 ? `AND tags && $3::text[]` : "";
     const result = await dbExecute<Prompt2025>(
-    `
+      `
       SELECT
         id,
         name,
@@ -162,8 +162,8 @@ export class Prompt2025Manager extends BaseManager {
         this.authParams.organizationId,
         params.tagsFilter,
         params.pageSize,
-        params.page * params.pageSize
-      ]
+        params.page * params.pageSize,
+      ],
     );
 
     if (result.error) {
@@ -178,12 +178,12 @@ export class Prompt2025Manager extends BaseManager {
     versionId: string;
     requestId: string;
   }): Promise<Result<Prompt2025Input | null, string>> {
-    const existsResult = await dbExecute<{exists: boolean}>(
+    const existsResult = await dbExecute<{ exists: boolean }>(
       `SELECT EXISTS (
         SELECT 1 FROM prompts_2025_versions 
         WHERE prompt_id = $1 AND id = $2 AND organization = $3 AND soft_delete is false
       )`,
-      [params.promptId, params.versionId, this.authParams.organizationId]
+      [params.promptId, params.versionId, this.authParams.organizationId],
     );
 
     if (existsResult.error) {
@@ -204,7 +204,7 @@ export class Prompt2025Manager extends BaseManager {
       WHERE version_id = $1 AND request_id = $2
       LIMIT 1
       `,
-      [params.versionId, params.requestId]
+      [params.versionId, params.requestId],
     );
 
     if (result.error) {
@@ -214,18 +214,20 @@ export class Prompt2025Manager extends BaseManager {
     return ok(result.data?.[0] ?? null);
   }
 
-
   async getPromptVersionCounts(params: {
     promptId: string;
   }): Promise<Result<PromptVersionCounts, string>> {
-    const result = await dbExecute<{ total_versions: number, major_versions: number }>(
+    const result = await dbExecute<{
+      total_versions: number;
+      major_versions: number;
+    }>(
       `SELECT
         COUNT(*)::integer as total_versions,
         MAX(major_version) as major_versions
       FROM prompts_2025_versions
       WHERE prompt_id = $1 AND organization = $2 AND soft_delete is false
       `,
-      [params.promptId, this.authParams.organizationId]
+      [params.promptId, this.authParams.organizationId],
     );
 
     if (result.error) {
@@ -256,7 +258,7 @@ export class Prompt2025Manager extends BaseManager {
       ON prompts.production_version = versions.id
       WHERE prompts.id = $1 AND prompts.organization = $2 AND prompts.soft_delete is false AND versions.soft_delete is false
       `,
-      [params.promptId, this.authParams.organizationId]
+      [params.promptId, this.authParams.organizationId],
     );
 
     if (result.error) {
@@ -269,7 +271,10 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersion = result.data[0];
 
-    const s3UrlResult = await this.getPromptVersionS3Url(promptVersion.prompt_id, promptVersion.id);
+    const s3UrlResult = await this.getPromptVersionS3Url(
+      promptVersion.prompt_id,
+      promptVersion.id,
+    );
     if (s3UrlResult.error) {
       return err(s3UrlResult.error);
     }
@@ -296,11 +301,11 @@ export class Prompt2025Manager extends BaseManager {
       FROM prompts_2025_versions
       WHERE prompt_id = $1
       AND organization = $2 AND soft_delete is false
-      ${params.majorVersion !== undefined ? `AND major_version = $3` : ''}
+      ${params.majorVersion !== undefined ? `AND major_version = $3` : ""}
       ORDER BY created_at DESC
       LIMIT 50
       `,
-      [params.promptId, this.authParams.organizationId, params.majorVersion]
+      [params.promptId, this.authParams.organizationId, params.majorVersion],
     );
 
     if (result.error) {
@@ -328,7 +333,7 @@ export class Prompt2025Manager extends BaseManager {
       FROM prompts_2025_versions
       WHERE prompt_id = $1 AND environment = $2 AND organization = $3 AND soft_delete is false
       `,
-      [params.promptId, params.environment, this.authParams.organizationId]
+      [params.promptId, params.environment, this.authParams.organizationId],
     );
 
     if (result.error) {
@@ -341,7 +346,10 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersion = result.data[0];
 
-    const s3UrlResult = await this.getPromptVersionS3Url(promptVersion.prompt_id, promptVersion.id);
+    const s3UrlResult = await this.getPromptVersionS3Url(
+      promptVersion.prompt_id,
+      promptVersion.id,
+    );
     if (s3UrlResult.error) {
       return err(s3UrlResult.error);
     }
@@ -369,7 +377,7 @@ export class Prompt2025Manager extends BaseManager {
       AND organization = $2 AND soft_delete is false
       LIMIT 1
       `,
-      [params.promptVersionId, this.authParams.organizationId]
+      [params.promptVersionId, this.authParams.organizationId],
     );
 
     if (result.error) {
@@ -382,7 +390,10 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersion = result.data[0];
 
-    const s3UrlResult = await this.getPromptVersionS3Url(promptVersion.prompt_id, promptVersion.id);
+    const s3UrlResult = await this.getPromptVersionS3Url(
+      promptVersion.prompt_id,
+      promptVersion.id,
+    );
     if (s3UrlResult.error) {
       return err(s3UrlResult.error);
     }
@@ -392,9 +403,9 @@ export class Prompt2025Manager extends BaseManager {
   }
 
   async createPrompt(params: {
-    name: string,
-    tags: string[],
-    promptBody: OpenAIChatRequest,
+    name: string;
+    tags: string[];
+    promptBody: OpenAIChatRequest;
   }): Promise<Result<PromptCreateResponse, string>> {
     // Create prompt
     let attempts = 0;
@@ -408,30 +419,25 @@ export class Prompt2025Manager extends BaseManager {
         INSERT INTO prompts_2025 (id, name, tags, created_at, organization)
         VALUES ($1, $2, $3, NOW(), $4)
         RETURNING id
-          `, [
-            promptId,
-            params.name,
-            params.tags,
-            this.authParams.organizationId,
-          ]
+          `,
+          [promptId, params.name, params.tags, this.authParams.organizationId],
         );
         break;
       } catch (error: any) {
-        if (error.code === '23505') {
+        if (error.code === "23505") {
           attempts++;
           continue;
         }
         return err(error);
       }
     }
-    
+
     if (insertPromptResult?.error) {
       return err(insertPromptResult.error);
     }
-    
-    const promptId = insertPromptResult?.data?.[0]?.id ?? '';
-    
-    
+
+    const promptId = insertPromptResult?.data?.[0]?.id ?? "";
+
     const insertPromptVersionResult = await dbExecute<{ id: string }>(
       `
       INSERT INTO prompts_2025_versions (
@@ -446,30 +452,36 @@ export class Prompt2025Manager extends BaseManager {
       )
       VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3, $4)
       RETURNING id
-      `, [
+      `,
+      [
         promptId,
         this.authParams.userId,
         this.authParams.organizationId,
         params.promptBody.model,
-      ]
-    )
-    
+      ],
+    );
+
     if (insertPromptVersionResult?.error) {
       return err(insertPromptVersionResult.error);
     }
 
-    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
+    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? "";
 
-    const updateProductionVersionResult = await this.setPromptVersionEnvironment({
-      promptId,
-      promptVersionId,
-      environment: PRODUCTION_ENVIRONMENT,
-    });
+    const updateProductionVersionResult =
+      await this.setPromptVersionEnvironment({
+        promptId,
+        promptVersionId,
+        environment: PRODUCTION_ENVIRONMENT,
+      });
     if (updateProductionVersionResult?.error) {
       return err(updateProductionVersionResult.error);
     }
 
-    const s3Result = await this.storePromptBody(promptId, promptVersionId, params.promptBody);
+    const s3Result = await this.storePromptBody(
+      promptId,
+      promptVersionId,
+      params.promptBody,
+    );
     if (s3Result.error) {
       return err(s3Result.error);
     }
@@ -493,7 +505,7 @@ export class Prompt2025Manager extends BaseManager {
       `SELECT major_version, minor_version, prompt_id 
       FROM prompts_2025_versions 
       WHERE id = $1 AND organization = $2 AND soft_delete is false`,
-      [params.promptVersionId, this.authParams.organizationId]
+      [params.promptVersionId, this.authParams.organizationId],
     );
 
     if (currentVersionInfo.error || !currentVersionInfo.data?.[0]) {
@@ -509,11 +521,13 @@ export class Prompt2025Manager extends BaseManager {
         `SELECT COALESCE(MAX(major_version), 0) + 1 as next_major 
         FROM prompts_2025_versions 
         WHERE prompt_id = $1 AND organization = $2 AND soft_delete is false`,
-        [params.promptId, this.authParams.organizationId]
+        [params.promptId, this.authParams.organizationId],
       );
 
       if (maxMajorResult.error || !maxMajorResult.data?.[0]) {
-        return err(maxMajorResult.error || "Failed to calculate next major version");
+        return err(
+          maxMajorResult.error || "Failed to calculate next major version",
+        );
       }
 
       nextMajor = maxMajorResult.data[0].next_major;
@@ -523,11 +537,17 @@ export class Prompt2025Manager extends BaseManager {
         `SELECT COALESCE(MAX(minor_version), 0) + 1 as next_minor 
         FROM prompts_2025_versions 
         WHERE prompt_id = $1 AND major_version = $2 AND organization = $3 AND soft_delete is false`,
-        [params.promptId, current.major_version, this.authParams.organizationId]
+        [
+          params.promptId,
+          current.major_version,
+          this.authParams.organizationId,
+        ],
       );
 
       if (maxMinorResult.error || !maxMinorResult.data?.[0]) {
-        return err(maxMinorResult.error || "Failed to calculate next minor version");
+        return err(
+          maxMinorResult.error || "Failed to calculate next minor version",
+        );
       }
 
       nextMajor = current.major_version;
@@ -548,7 +568,8 @@ export class Prompt2025Manager extends BaseManager {
       )
       VALUES (NOW(), $1, $2, $3, $4, $5, $6, $7)
       RETURNING id
-      `, [
+      `,
+      [
         params.promptId,
         nextMajor,
         nextMinor,
@@ -556,27 +577,32 @@ export class Prompt2025Manager extends BaseManager {
         this.authParams.userId,
         this.authParams.organizationId,
         params.promptBody.model,
-      ]
-    )
+      ],
+    );
 
     if (insertPromptVersionResult?.error) {
       return err(insertPromptVersionResult.error);
     }
 
-    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
+    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? "";
 
     if (params.environment) {
-      const updateEnvironmentVersionResult = await this.setPromptVersionEnvironment({
-        promptId: params.promptId,
-        promptVersionId,
-        environment: params.environment,
-      });
+      const updateEnvironmentVersionResult =
+        await this.setPromptVersionEnvironment({
+          promptId: params.promptId,
+          promptVersionId,
+          environment: params.environment,
+        });
       if (updateEnvironmentVersionResult?.error) {
         return err(updateEnvironmentVersionResult.error);
       }
     }
 
-    const s3Result = await this.storePromptBody(params.promptId, promptVersionId, params.promptBody);
+    const s3Result = await this.storePromptBody(
+      params.promptId,
+      promptVersionId,
+      params.promptBody,
+    );
     if (s3Result.error) {
       return err(s3Result.error);
     }
@@ -592,7 +618,7 @@ export class Prompt2025Manager extends BaseManager {
     const versionCheck = await dbExecute<{ id: string }>(
       `SELECT id FROM prompts_2025_versions 
       WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete is false`,
-      [params.promptVersionId, params.promptId, this.authParams.organizationId]
+      [params.promptVersionId, params.promptId, this.authParams.organizationId],
     );
 
     if (versionCheck.error) {
@@ -600,14 +626,20 @@ export class Prompt2025Manager extends BaseManager {
     }
 
     if (!versionCheck.data?.[0]) {
-      return err("Prompt version not found or does not belong to the specified prompt");
+      return err(
+        "Prompt version not found or does not belong to the specified prompt",
+      );
     }
 
     // Update production version ref
     if (params.environment === PRODUCTION_ENVIRONMENT) {
       const result = await dbExecute<null>(
         `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
-        [params.promptVersionId, params.promptId, this.authParams.organizationId]
+        [
+          params.promptVersionId,
+          params.promptId,
+          this.authParams.organizationId,
+        ],
       );
 
       if (result.error) {
@@ -629,7 +661,12 @@ export class Prompt2025Manager extends BaseManager {
       
       COMMIT;
       `,
-      [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
+      [
+        params.promptId,
+        this.authParams.organizationId,
+        params.environment,
+        params.promptVersionId,
+      ],
     );
 
     if (updateEnvResult.error) {
@@ -643,7 +680,7 @@ export class Prompt2025Manager extends BaseManager {
   }): Promise<Result<null, string>> {
     const versionsResult = await dbExecute<{ id: string }>(
       `SELECT id FROM prompts_2025_versions WHERE prompt_id = $1 AND organization = $2 AND soft_delete is false`,
-      [params.promptId, this.authParams.organizationId]
+      [params.promptId, this.authParams.organizationId],
     );
 
     if (versionsResult.error) {
@@ -654,7 +691,10 @@ export class Prompt2025Manager extends BaseManager {
     for (const version of versionIds) {
       const s3Result = await this.deletePromptBody(params.promptId, version.id);
       if (s3Result.error) {
-        console.error(`Failed to delete S3 object for version ${version.id}:`, s3Result.error);
+        console.error(
+          `Failed to delete S3 object for version ${version.id}:`,
+          s3Result.error,
+        );
         // continue with other deletions even if one fails
       }
     }
@@ -662,7 +702,7 @@ export class Prompt2025Manager extends BaseManager {
     // this will happen on cascade anyways when we delete the source prompt.
     const versionResult = await dbExecute<null>(
       `UPDATE prompts_2025_versions SET soft_delete = true WHERE prompt_id = $1 AND organization = $2`,
-      [params.promptId, this.authParams.organizationId]
+      [params.promptId, this.authParams.organizationId],
     );
 
     if (versionResult.error) {
@@ -671,7 +711,7 @@ export class Prompt2025Manager extends BaseManager {
 
     const result = await dbExecute<null>(
       `UPDATE prompts_2025 SET soft_delete = true WHERE id = $1 AND organization = $2`,
-      [params.promptId, this.authParams.organizationId]
+      [params.promptId, this.authParams.organizationId],
     );
 
     if (result.error) {
@@ -687,14 +727,17 @@ export class Prompt2025Manager extends BaseManager {
   }): Promise<Result<null, string>> {
     const result = await dbExecute<null>(
       `UPDATE prompts_2025_versions SET soft_delete = true WHERE id = $1 AND organization = $2`,
-      [params.promptVersionId, this.authParams.organizationId]
+      [params.promptVersionId, this.authParams.organizationId],
     );
 
     if (result.error) {
       return err(result.error);
     }
 
-    const s3Result = await this.deletePromptBody(params.promptId, params.promptVersionId);
+    const s3Result = await this.deletePromptBody(
+      params.promptId,
+      params.promptVersionId,
+    );
     if (s3Result.error) {
       return err(s3Result.error);
     }
@@ -707,33 +750,48 @@ export class Prompt2025Manager extends BaseManager {
   private async storePromptBody(
     promptId: string,
     promptVersionId: string,
-    promptBody: OpenAIChatRequest
+    promptBody: OpenAIChatRequest,
   ): Promise<Result<null, string>> {
     if (!promptId) return err("Prompt ID is required");
-    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
-    
-    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody)); 
+    const key = this.s3Client.getPromptKey(
+      promptId,
+      promptVersionId,
+      this.authParams.organizationId,
+    );
+
+    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody));
     if (s3result.error) return err(s3result.error);
-    
+
     return ok(null);
   }
 
   private async deletePromptBody(
     promptId: string,
-    promptVersionId: string
+    promptVersionId: string,
   ): Promise<Result<null, string>> {
-    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
-    
+    const key = this.s3Client.getPromptKey(
+      promptId,
+      promptVersionId,
+      this.authParams.organizationId,
+    );
+
     const s3Result = await this.s3Client.remove(key);
     if (s3Result.error) return err(s3Result.error);
     return ok(null);
   }
 
-  private async getPromptVersionS3Url(promptId: string, promptVersionId: string): Promise<Result<string, string>> {
-    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
+  private async getPromptVersionS3Url(
+    promptId: string,
+    promptVersionId: string,
+  ): Promise<Result<string, string>> {
+    const key = this.s3Client.getPromptKey(
+      promptId,
+      promptVersionId,
+      this.authParams.organizationId,
+    );
     const s3Result = await this.s3Client.getSignedUrl(key);
     if (s3Result.error) return err(s3Result.error);
-    return ok(s3Result.data ?? '');
+    return ok(s3Result.data ?? "");
   }
 
   // TODO: add other methods for deletion, etc.
@@ -744,19 +802,17 @@ export class Prompt2025Manager extends BaseManager {
 // TODO: Remove this once Prompt2025Manager and new prompt system is live
 export class PromptManager extends BaseManager {
   async getOrCreatePromptVersionFromRequest(
-    requestId: string
+    requestId: string,
   ): Promise<Result<string, string>> {
     const requestManager = new RequestManager(this.authParams);
-    const requestResult = await requestManager.uncachedGetRequestByIdWithBody(
-      requestId
-    );
+    const requestResult =
+      await requestManager.uncachedGetRequestByIdWithBody(requestId);
     if (requestResult.error || !requestResult.data) {
       return err(requestResult.error);
     }
 
-    const promptVersionResult = await this.getPromptVersionFromRequest(
-      requestId
-    );
+    const promptVersionResult =
+      await this.getPromptVersionFromRequest(requestId);
     if (promptVersionResult.data) {
       return ok(promptVersionResult.data);
     }
@@ -777,7 +833,7 @@ export class PromptManager extends BaseManager {
   }
 
   private async getPromptVersionFromRequest(
-    requestId: string
+    requestId: string,
   ): Promise<Result<string, string>> {
     try {
       const result = await dbExecute<{ prompt_version: string }>(
@@ -785,7 +841,7 @@ export class PromptManager extends BaseManager {
          FROM prompt_input_record
          WHERE source_request = $1
          LIMIT 1`,
-        [requestId]
+        [requestId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -799,7 +855,7 @@ export class PromptManager extends BaseManager {
   }
   async createNewPromptVersion(
     parentPromptVersionId: string,
-    params: PromptCreateSubversionParams
+    params: PromptCreateSubversionParams,
   ): Promise<Result<PromptVersionResult, string>> {
     if (JSON.stringify(params.newHeliconeTemplate).length > 1_000_000_000) {
       return err("Helicone template too large");
@@ -910,7 +966,7 @@ export class PromptManager extends BaseManager {
         metadata,
         params.experimentId || null,
         params.bumpForMajorPromptVersionId || null,
-      ]
+      ],
     );
 
     return resultMap(result, (data) => data[0]);
@@ -918,7 +974,7 @@ export class PromptManager extends BaseManager {
 
   async editPromptVersionTemplate(
     promptVersionId: string,
-    params: PromptEditSubversionTemplateParams
+    params: PromptEditSubversionTemplateParams,
   ): Promise<Result<null, string>> {
     if (
       params.heliconeTemplate &&
@@ -934,7 +990,11 @@ export class PromptManager extends BaseManager {
     updated_at = now()
     WHERE id = $2 AND organization = $3
     `,
-      [params.heliconeTemplate, promptVersionId, this.authParams.organizationId]
+      [
+        params.heliconeTemplate,
+        promptVersionId,
+        this.authParams.organizationId,
+      ],
     );
 
     if (result.error) {
@@ -946,7 +1006,7 @@ export class PromptManager extends BaseManager {
         (typeof params.heliconeTemplate === "string"
           ? params.heliconeTemplate
           : JSON.stringify(params.heliconeTemplate)
-        ).matchAll(/<helicone-prompt-input key=\\"(\w+)\\" \/>/g)
+        ).matchAll(/<helicone-prompt-input key=\\"(\w+)\\" \/>/g),
       ).map((match) => match[1]);
 
       // Get existing input keys for experiment
@@ -955,7 +1015,7 @@ export class PromptManager extends BaseManager {
          FROM experiment_v3
          WHERE id = $1
          LIMIT 1`,
-        [params.experimentId]
+        [params.experimentId],
       );
 
       const existingInputKeys = existingKeysResult.data?.[0]?.input_keys ?? [];
@@ -971,13 +1031,13 @@ export class PromptManager extends BaseManager {
             [...new Set([...existingInputKeys, ...newPromptVersionInputKeys])],
             this.authParams.organizationId,
             params.experimentId,
-          ]
+          ],
         ),
         dbExecute(
           `INSERT INTO prompt_input_keys (key, prompt_version)
            SELECT unnest($1::text[]), $2
            ON CONFLICT (key, prompt_version) DO NOTHING`,
-          [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId]
+          [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId],
         ),
       ]);
 
@@ -993,7 +1053,7 @@ export class PromptManager extends BaseManager {
 
   async editPromptVersionLabel(
     promptVersionId: string,
-    params: PromptEditSubversionLabelParams
+    params: PromptEditSubversionLabelParams,
   ): Promise<Result<{ metadata: Record<string, any> }, string>> {
     if (params.label.length > 100) {
       return err("Label too long");
@@ -1017,7 +1077,7 @@ export class PromptManager extends BaseManager {
     RETURNING 
       metadata
     `,
-      [params.label, promptVersionId, this.authParams.organizationId]
+      [params.label, promptVersionId, this.authParams.organizationId],
     );
 
     return resultMap(result, (data) => data[0]);
@@ -1025,7 +1085,7 @@ export class PromptManager extends BaseManager {
 
   async promotePromptVersionToProduction(
     promptVersionId: string,
-    previousProductionVersionId: string
+    previousProductionVersionId: string,
   ): Promise<Result<PromptVersionResult, string>> {
     const removeProductionFlagFromPreviousVersion = await dbExecute(
       `
@@ -1033,12 +1093,12 @@ export class PromptManager extends BaseManager {
     SET metadata = COALESCE(metadata, '{}'::jsonb) - 'isProduction'
     WHERE id = $1 AND organization = $2
     `,
-      [previousProductionVersionId, this.authParams.organizationId]
+      [previousProductionVersionId, this.authParams.organizationId],
     );
 
     if (removeProductionFlagFromPreviousVersion.error) {
       return err(
-        `Failed to remove production flag from previous version: ${removeProductionFlagFromPreviousVersion.error}`
+        `Failed to remove production flag from previous version: ${removeProductionFlagFromPreviousVersion.error}`,
       );
     }
 
@@ -1057,7 +1117,7 @@ export class PromptManager extends BaseManager {
       created_at,
       metadata
     `,
-      [promptVersionId, this.authParams.organizationId]
+      [promptVersionId, this.authParams.organizationId],
     );
 
     if (result.error || !result.data || result.data.length === 0) {
@@ -1068,7 +1128,7 @@ export class PromptManager extends BaseManager {
   }
 
   async deletePromptVersion(
-    promptVersionId: string
+    promptVersionId: string,
   ): Promise<Result<null, string>> {
     const promptVersion = await this.getPromptVersion({
       promptVersionId,
@@ -1095,7 +1155,7 @@ export class PromptManager extends BaseManager {
     SET soft_delete = true
     WHERE id = $1 AND organization = $2
     `,
-      [promptVersionId, this.authParams.organizationId]
+      [promptVersionId, this.authParams.organizationId],
     );
 
     if (result.error) {
@@ -1107,7 +1167,7 @@ export class PromptManager extends BaseManager {
 
   async removePromptVersionFromExperiment(
     promptVersionId: string,
-    experimentId: string
+    experimentId: string,
   ): Promise<Result<null, string>> {
     const promptVersion = await this.getPromptVersion({
       promptVersionId,
@@ -1127,7 +1187,7 @@ export class PromptManager extends BaseManager {
     SET experiment_id = null
     WHERE id = $1 AND organization = $2 AND experiment_id = $3
     `,
-      [promptVersionId, this.authParams.organizationId, experimentId]
+      [promptVersionId, this.authParams.organizationId, experimentId],
     );
 
     if (result.error) {
@@ -1139,7 +1199,7 @@ export class PromptManager extends BaseManager {
 
   async getPromptVersions(
     filter: FilterNode,
-    includeExperimentVersions: boolean = false
+    includeExperimentVersions: boolean = false,
   ): Promise<Result<PromptVersionResult[], string>> {
     const filterWithAuth = buildFilterPostgres({
       filter,
@@ -1187,7 +1247,7 @@ export class PromptManager extends BaseManager {
             )`
     }
     `,
-      filterWithAuth.argsAcc
+      filterWithAuth.argsAcc,
     );
 
     return result;
@@ -1195,7 +1255,7 @@ export class PromptManager extends BaseManager {
 
   async getCompiledPromptVersions(
     filter: FilterNode,
-    inputs: Record<string, string>
+    inputs: Record<string, string>,
   ): Promise<Result<PromptVersionResultCompiled, string>> {
     const filterWithAuth = buildFilterPostgres({
       filter,
@@ -1228,7 +1288,7 @@ export class PromptManager extends BaseManager {
     AND (prompts_versions.metadata->>'isProduction')::boolean = true
     AND (${filterWithAuth.filter})
     `,
-      filterWithAuth.argsAcc
+      filterWithAuth.argsAcc,
     );
 
     if (result.error || !result.data || result.data.length === 0) {
@@ -1253,7 +1313,7 @@ export class PromptManager extends BaseManager {
 
   async getPormptVersionsTemplates(
     filter: FilterNode,
-    inputs: Record<string, string>
+    inputs: Record<string, string>,
   ): Promise<Result<PromptVersionResultFilled, string>> {
     const filterWithAuth = buildFilterPostgres({
       filter,
@@ -1287,7 +1347,7 @@ export class PromptManager extends BaseManager {
     AND (prompts_versions.metadata->>'isProduction')::boolean = true
     AND (${filterWithAuth.filter})
     `,
-      filterWithAuth.argsAcc
+      filterWithAuth.argsAcc,
     );
 
     if (result.error || !result.data || result.data.length === 0) {
@@ -1312,7 +1372,7 @@ export class PromptManager extends BaseManager {
   }
 
   async getPrompts(
-    params: PromptsQueryParams
+    params: PromptsQueryParams,
   ): Promise<Result<PromptsResult[], string>> {
     const filterWithAuth = buildFilterPostgres({
       filter: params.filter,
@@ -1346,14 +1406,14 @@ export class PromptManager extends BaseManager {
     AND (prompt_v2.metadata->>'emptyPrompt' != 'true' OR prompt_v2.metadata->>'emptyPrompt' IS NULL)
     ORDER BY created_at DESC
     `,
-      filterWithAuth.argsAcc
+      filterWithAuth.argsAcc,
     );
     return result;
   }
 
   async getPrompt(
     params: PromptQueryParams,
-    promptId: string
+    promptId: string,
   ): Promise<Result<PromptResult, string>> {
     const result = await dbExecute<{
       id: string;
@@ -1398,7 +1458,7 @@ export class PromptManager extends BaseManager {
     AND prompt_v2.id = $2
     ORDER BY prompts_versions.major_version DESC, prompts_versions.minor_version DESC
     `,
-      [this.authParams.organizationId, promptId]
+      [this.authParams.organizationId, promptId],
     );
 
     return resultMap(result, (data) => data[0]);
@@ -1431,7 +1491,7 @@ export class PromptManager extends BaseManager {
     WHERE prompts_versions.organization = $1
     AND prompts_versions.id = $2
     `,
-      [this.authParams.organizationId, params.promptVersionId]
+      [this.authParams.organizationId, params.promptVersionId],
     );
     return result;
   }
@@ -1451,7 +1511,7 @@ export class PromptManager extends BaseManager {
       `
     SELECT id FROM prompt_v2 WHERE user_defined_id = $1 AND organization = $2
     `,
-      [params.userDefinedId, this.authParams.organizationId]
+      [params.userDefinedId, this.authParams.organizationId],
     );
 
     if (existingPrompt.data && existingPrompt.data.length > 0) {
@@ -1471,7 +1531,7 @@ export class PromptManager extends BaseManager {
     VALUES ($1, $2, $3) 
     RETURNING id
     `,
-      [this.authParams.organizationId, params.userDefinedId, metadata]
+      [this.authParams.organizationId, params.userDefinedId, metadata],
     );
 
     if (result.error || !result.data) {
@@ -1496,23 +1556,23 @@ export class PromptManager extends BaseManager {
         JSON.stringify(params.prompt),
         params.prompt.model,
         params.createdAt,
-      ]
+      ],
     );
 
     if (insertVersionResult.error || !insertVersionResult.data) {
       return err(
-        `Failed to create prompt version: ${insertVersionResult.error}`
+        `Failed to create prompt version: ${insertVersionResult.error}`,
       );
     }
 
     const createPromptInputKeysResult = await this.createPromptInputKeys(
       insertVersionResult.data[0].id,
-      JSON.stringify(params.prompt)
+      JSON.stringify(params.prompt),
     );
 
     if (createPromptInputKeysResult.error) {
       return err(
-        `Failed to create prompt input keys: ${createPromptInputKeysResult.error}`
+        `Failed to create prompt input keys: ${createPromptInputKeysResult.error}`,
       );
     }
 
@@ -1534,7 +1594,7 @@ export class PromptManager extends BaseManager {
     WHERE id = $1
     AND organization = $2
     `,
-      [params.promptId, this.authParams.organizationId]
+      [params.promptId, this.authParams.organizationId],
     );
 
     if (result.error) {
@@ -1546,7 +1606,7 @@ export class PromptManager extends BaseManager {
 
   async updatePromptUserDefinedId(
     promptId: string,
-    newUserDefinedId: string
+    newUserDefinedId: string,
   ): Promise<Result<null, string>> {
     // First check if the new ID already exists
     const existingPrompt = await dbExecute<{
@@ -1558,7 +1618,7 @@ export class PromptManager extends BaseManager {
     AND organization = $2
     AND soft_delete = false
     `,
-      [newUserDefinedId, this.authParams.organizationId]
+      [newUserDefinedId, this.authParams.organizationId],
     );
 
     if (existingPrompt.data && existingPrompt.data.length > 0) {
@@ -1574,7 +1634,7 @@ export class PromptManager extends BaseManager {
     AND organization = $3
     AND soft_delete = false
     `,
-      [newUserDefinedId, promptId, this.authParams.organizationId]
+      [newUserDefinedId, promptId, this.authParams.organizationId],
     );
 
     if (result.error) {
@@ -1601,9 +1661,9 @@ export class PromptManager extends BaseManager {
               match
                 .replace(
                   /<helicone-prompt-input key=\\?"(.*?)\\?"\s*\/>/g,
-                  "$1"
+                  "$1",
                 )
-                .replace(/\\/g, "")
+                .replace(/\\/g, ""),
             )
           : [];
       };
@@ -1643,7 +1703,7 @@ export class PromptManager extends BaseManager {
 
   async createPromptInputKeys(
     promptVersionId: string,
-    heliconeTemplate: string
+    heliconeTemplate: string,
   ): Promise<Result<null, string>> {
     const newPromptVersionInputKeys =
       this.getHeliconeTemplateKeys(heliconeTemplate);
@@ -1653,7 +1713,7 @@ export class PromptManager extends BaseManager {
         `INSERT INTO prompt_input_keys (key, prompt_version)
        SELECT unnest($1::text[]), $2
        ON CONFLICT (key, prompt_version) DO NOTHING`,
-        [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId]
+        [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId],
       );
 
       return ok(null);

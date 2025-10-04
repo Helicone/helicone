@@ -23,7 +23,10 @@ export interface EnhancedPathPair extends PathPair {
  * Core PathMapper class that handles transforming between external and internal formats
  */
 export class PathMapper<ExternalType, InternalType = LLMRequestBody> {
-  constructor(private name: string, private mappings: PathMapping[]) {}
+  constructor(
+    private name: string,
+    private mappings: PathMapping[],
+  ) {}
 
   /**
    * Maps an external request to the provider's format

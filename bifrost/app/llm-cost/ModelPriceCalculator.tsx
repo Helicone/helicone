@@ -75,13 +75,16 @@ const FilterSection = ({
   const availableModels = providers
     .filter(
       (p) =>
-        selectedProviders.length === 0 || selectedProviders.includes(p.provider)
+        selectedProviders.length === 0 ||
+        selectedProviders.includes(p.provider),
     )
     .flatMap((p) => p.models)
     .filter((model) => !selectedModels.includes(model));
 
   const hasSelections =
-    selectedProviders.length > 0 || selectedModels.length > 0 || searchQuery.length > 0;
+    selectedProviders.length > 0 ||
+    selectedModels.length > 0 ||
+    searchQuery.length > 0;
 
   return (
     <div className="mb-4">
@@ -126,7 +129,7 @@ const FilterSection = ({
             size="sm"
             onClick={() => {
               onClearAll();
-              onSearchChange('');
+              onSearchChange("");
             }}
             className="text-xs text-slate-500 hover:text-slate-700"
           >
@@ -184,14 +187,14 @@ export default function ModelPriceCalculator({
 }: ModelPriceCalculatorProps) {
   // Initialize state with props from the server
   const [inputTokens, setInputTokens] = useState<string>(
-    String(defaultInputTokens || "100")
+    String(defaultInputTokens || "100"),
   );
   const [outputTokens, setOutputTokens] = useState<string>(
-    String(defaultOutputTokens || "100")
+    String(defaultOutputTokens || "100"),
   );
   const [costData, setCostData] = useState<CostData[]>(initialCostData || []);
   const [selectedModelData, setSelectedModelData] = useState<CostData | null>(
-    null
+    null,
   );
   const pathname = usePathname();
 
@@ -206,7 +209,7 @@ export default function ModelPriceCalculator({
   const [searchQuery, setSearchQuery] = useState<string>("");
   // Start loading as false if initial data is provided
   const [isLoading, setIsLoading] = useState<boolean>(
-    !initialCostData || initialCostData.length === 0
+    !initialCostData || initialCostData.length === 0,
   );
 
   function formatCost(cost: number): string {
@@ -266,7 +269,7 @@ export default function ModelPriceCalculator({
           } else {
             // Client-side warning
             console.warn(
-              `[Client Cost Calc] Cost details not found for model: ${modelCost.model.value} by provider: ${prov.provider}`
+              `[Client Cost Calc] Cost details not found for model: ${modelCost.model.value} by provider: ${prov.provider}`,
             );
           }
         });
@@ -295,17 +298,17 @@ export default function ModelPriceCalculator({
       let selectedModel = costData.find(
         (data) =>
           data.model.toLowerCase() === decodedModel.toLowerCase() &&
-          data.provider.toLowerCase() === decodedProvider.toLowerCase()
+          data.provider.toLowerCase() === decodedProvider.toLowerCase(),
       );
 
       // Fallback logic remains the same...
       if (!selectedModel) {
         const providerData = providers.find(
-          (p) => p.provider.toLowerCase() === decodedProvider.toLowerCase()
+          (p) => p.provider.toLowerCase() === decodedProvider.toLowerCase(),
         );
         if (providerData?.modelDetails) {
           for (const [_, details] of Object.entries(
-            providerData.modelDetails
+            providerData.modelDetails,
           )) {
             if (
               details.searchTerms[0].toLowerCase() ===
@@ -315,7 +318,7 @@ export default function ModelPriceCalculator({
               selectedModel = costData.find(
                 (data) =>
                   data.model === firstMatchModel &&
-                  data.provider.toLowerCase() === decodedProvider.toLowerCase()
+                  data.provider.toLowerCase() === decodedProvider.toLowerCase(),
               );
               break;
             }
@@ -333,20 +336,23 @@ export default function ModelPriceCalculator({
   const visibleCostData = useMemo(() => {
     let filteredData = costData.filter((data) => {
       // Provider and model filter logic
-      const providerMatch = selectedProviders.length === 0 || selectedProviders.includes(data.provider);
-      const modelMatch = selectedModels.length === 0 || selectedModels.includes(data.model);
-      
+      const providerMatch =
+        selectedProviders.length === 0 ||
+        selectedProviders.includes(data.provider);
+      const modelMatch =
+        selectedModels.length === 0 || selectedModels.includes(data.model);
+
       // Fuzzy search logic
       let searchMatch = true;
       if (searchQuery.trim().length > 0) {
         const query = searchQuery.toLowerCase();
         const providerName = data.provider.toLowerCase();
         const modelName = data.model.toLowerCase();
-        
+
         // Check if search query matches provider or model (fuzzy matching)
         searchMatch = providerName.includes(query) || modelName.includes(query);
       }
-      
+
       return providerMatch && modelMatch && searchMatch;
     });
 
@@ -392,7 +398,7 @@ export default function ModelPriceCalculator({
     const outputCostPer1k = formatCost(selectedModelData.outputCostPer1k);
 
     const tweetText = `I just used Helicone's API pricing calculator for ${formatProviderName(
-      selectedModelData.provider
+      selectedModelData.provider,
     )} ${selectedModelData.model}.
 
 ${inputTokenCount} input tokens + ${outputTokenCount} output tokens cost $${totalCost}
@@ -403,7 +409,7 @@ Output: $${outputCostPer1k}/1k tokens
 Optimize your AI API costs:`;
 
     const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-      tweetText
+      tweetText,
     )}&url=${encodeURIComponent(window.location.href)}`;
     window.open(tweetUrl, "_blank");
   };
@@ -714,7 +720,7 @@ Optimize your AI API costs:`;
                         <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
-                              data.provider.toLowerCase()
+                              data.provider.toLowerCase(),
                             )}/model/${encodeURIComponent(data.model)}`}
                             className="block w-full h-full px-6 py-2"
                           >
@@ -724,7 +730,7 @@ Optimize your AI API costs:`;
                         <td className="text-sm text-slate-900 font-medium border border-slate-200 p-0">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
-                              data.provider.toLowerCase()
+                              data.provider.toLowerCase(),
                             )}/model/${encodeURIComponent(data.model)}`}
                             className="block w-full h-full px-6 py-2"
                           >
@@ -734,7 +740,7 @@ Optimize your AI API costs:`;
                         <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
-                              data.provider.toLowerCase()
+                              data.provider.toLowerCase(),
                             )}/model/${encodeURIComponent(data.model)}`}
                             className="block w-full h-full px-6 py-2"
                           >
@@ -744,7 +750,7 @@ Optimize your AI API costs:`;
                         <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
-                              data.provider.toLowerCase()
+                              data.provider.toLowerCase(),
                             )}/model/${encodeURIComponent(data.model)}`}
                             className="block w-full h-full px-6 py-2"
                           >
@@ -754,7 +760,7 @@ Optimize your AI API costs:`;
                         <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
-                              data.provider.toLowerCase()
+                              data.provider.toLowerCase(),
                             )}/model/${encodeURIComponent(data.model)}`}
                             className="block w-full h-full px-6 py-2"
                           >
@@ -764,7 +770,7 @@ Optimize your AI API costs:`;
                         <td className="whitespace-nowrap text-sm text-slate-500 border border-slate-200 p-0">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
-                              data.provider.toLowerCase()
+                              data.provider.toLowerCase(),
                             )}/model/${encodeURIComponent(data.model)}`}
                             className="block w-full h-full px-6 py-2"
                           >
@@ -774,7 +780,7 @@ Optimize your AI API costs:`;
                         <td className="whitespace-nowrap text-sm font-medium text-sky-500 border border-slate-200 p-0">
                           <Link
                             href={`/llm-cost/provider/${encodeURIComponent(
-                              data.provider.toLowerCase()
+                              data.provider.toLowerCase(),
                             )}/model/${encodeURIComponent(data.model)}`}
                             className="block w-full h-full px-6 py-2"
                           >

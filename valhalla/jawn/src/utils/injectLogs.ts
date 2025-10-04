@@ -29,6 +29,6 @@ export function initLogs(router: express.Router) {
         tokens["response-time"](req, res),
         "ms",
       ].join(" ");
-    })
+    }),
   );
 }

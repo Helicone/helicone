@@ -24,7 +24,7 @@ const DialogOverlay = React.forwardRef<
 >(
   (
     { className, showOverlay = true, backgroundOpacity = 0.8, ...props },
-    ref
+    ref,
   ) => (
     <DialogPrimitive.Overlay
       ref={ref}
@@ -32,11 +32,11 @@ const DialogOverlay = React.forwardRef<
         "fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out " +
           "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         showOverlay ? `bg-black/${backgroundOpacity * 100}` : "bg-transparent",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  ),
 );
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
@@ -58,7 +58,7 @@ const DialogContent = React.forwardRef<
       backgroundOpacity = 0.8,
       ...props
     },
-    ref
+    ref,
   ) => (
     <DialogPortal>
       {showOverlay && (
@@ -77,7 +77,7 @@ const DialogContent = React.forwardRef<
             "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] " +
             "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] " +
             "sm:rounded-lg dark:border-slate-800 dark:bg-slate-950",
-          className
+          className,
         )}
         {...props}
       >
@@ -88,7 +88,7 @@ const DialogContent = React.forwardRef<
             "hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2",
             "disabled:pointer-events-none data-[state=open]:bg-slate-100 data-[state=open]:text-slate-500",
             "dark:ring-offset-slate-950 dark:focus:ring-slate-300",
-            "dark:data-[state=open]:bg-slate-800 dark:data-[state=open]:text-slate-400"
+            "dark:data-[state=open]:bg-slate-800 dark:data-[state=open]:text-slate-400",
           )}
         >
           <X className="h-4 w-4" />
@@ -96,7 +96,7 @@ const DialogContent = React.forwardRef<
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPortal>
-  )
+  ),
 );
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
@@ -107,7 +107,7 @@ const DialogHeader = ({
   <div
     className={cn(
       "flex flex-col space-y-1.5 text-center sm:text-left",
-      className
+      className,
     )}
     {...props}
   />
@@ -121,7 +121,7 @@ const DialogFooter = ({
   <div
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className
+      className,
     )}
     {...props}
   />
@@ -136,7 +136,7 @@ const DialogTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-lg font-semibold leading-none tracking-tight",
-      className
+      className,
     )}
     {...props}
   />

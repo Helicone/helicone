@@ -53,7 +53,7 @@ export class HeliconeQueueProducer {
 
   async sendMessages(
     msgs: KafkaMessageContents[],
-    topic: RequestResponseTopics
+    topic: RequestResponseTopics,
   ): PromiseGenericResult<string> {
     if (!this.producer) {
       for (const msg of msgs) {
@@ -70,7 +70,7 @@ export class HeliconeQueueProducer {
 
   async sendScoresMessage(
     scoresMessages: HeliconeScoresMessage[],
-    topic: ScoreTopics
+    topic: ScoreTopics,
   ): PromiseGenericResult<string> {
     if (!this.producer) {
       return ok("Kafka is not initialized");

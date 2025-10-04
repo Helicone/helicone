@@ -50,28 +50,28 @@ describe("Vector DB Mapper", () => {
     expect(result.schema.request.vectorDBDetails?._type).toBe("vector_db");
     expect(result.schema.request.vectorDBDetails?.operation).toBe("search");
     expect(result.schema.request.vectorDBDetails?.text).toBe(
-      "Generate travel tips for Bali"
+      "Generate travel tips for Bali",
     );
     expect(result.schema.request.vectorDBDetails?.databaseName).toBe(
-      "travel-tips"
+      "travel-tips",
     );
 
     expect(result.schema.response?.vectorDBDetailsResponse).toBeDefined();
     expect(result.schema.response?.vectorDBDetailsResponse?.status).toBe(
-      "failed"
+      "failed",
     );
     expect(result.schema.response?.vectorDBDetailsResponse?.message).toBe(
-      "No travel tips found with sufficient similarity for Bali"
+      "No travel tips found with sufficient similarity for Bali",
     );
     expect(
-      result.schema.response?.vectorDBDetailsResponse?.similarityThreshold
+      result.schema.response?.vectorDBDetailsResponse?.similarityThreshold,
     ).toBe(0.8);
     expect(
-      result.schema.response?.vectorDBDetailsResponse?.actualSimilarity
+      result.schema.response?.vectorDBDetailsResponse?.actualSimilarity,
     ).toBe(0.5);
 
     expect(result.preview.request).toContain(
-      "Text: Generate travel tips for Bali"
+      "Text: Generate travel tips for Bali",
     );
     expect(result.preview.response).toBe(response.message);
   });
@@ -106,7 +106,7 @@ describe("Vector DB Mapper", () => {
 
     expect(result.schema.request.vectorDBDetails?.operation).toBe("insert");
     expect(result.schema.response?.vectorDBDetailsResponse?.status).toBe(
-      "success"
+      "success",
     );
     expect(result.preview.request).toContain("Operation: insert");
     expect(result.preview.response).toBe(response.message);
@@ -139,10 +139,10 @@ describe("Vector DB Mapper", () => {
 
     expect(result.preview.response).toBe("Database connection failed");
     expect(result.schema.response?.vectorDBDetailsResponse?.status).toBe(
-      "error"
+      "error",
     );
     expect(result.schema.response?.vectorDBDetailsResponse?.message).toBe(
-      "Database connection failed"
+      "Database connection failed",
     );
   });
 
@@ -173,14 +173,14 @@ describe("Vector DB Mapper", () => {
 
     expect(result.schema.request.vectorDBDetails?.operation).toBe("delete");
     expect(result.schema.response?.vectorDBDetailsResponse?.status).toBe(
-      "success"
+      "success",
     );
     expect(result.preview.request).toContain("Operation: delete");
     expect(result.preview.request).toContain(
       `Filter: {
   "category": "outdated",
   "older_than": "2023-01-01"
-}`
+}`,
     );
     expect(result.preview.response).toBe(response.message);
   });

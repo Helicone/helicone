@@ -82,7 +82,7 @@ export class LoggingHandler extends AbstractLogHandler {
   constructor(
     logStore: LogStore,
     requestStore: VersionedRequestStore,
-    s3Client: S3Client
+    s3Client: S3Client,
   ) {
     super();
     this.logStore = logStore;
@@ -150,7 +150,7 @@ export class LoggingHandler extends AbstractLogHandler {
         sanitizedRequestResponseVersionedCHMapped.request_body =
           sanitizedRequestResponseVersionedCHMapped.request_body.replace(
             /[\uD800-\uDFFF]/g,
-            "\uFFFD"
+            "\uFFFD",
           );
       }
 
@@ -163,7 +163,7 @@ export class LoggingHandler extends AbstractLogHandler {
         context.message.log.request.cacheReferenceId != DEFAULT_UUID;
       if (loggingCacheHit) {
         const sanitizedCacheMetricCHMapped = this.sanitizeJsonEscapeSequences(
-          this.mapCacheMetricCH(context)
+          this.mapCacheMetricCH(context),
         );
         this.batchPayload.cacheMetricCH.push(sanitizedCacheMetricCHMapped);
       }
@@ -197,13 +197,13 @@ export class LoggingHandler extends AbstractLogHandler {
       }
 
       this.batchPayload.requestResponseVersionedCH.push(
-        sanitizedRequestResponseVersionedCHMapped
+        sanitizedRequestResponseVersionedCHMapped,
       );
 
       return await super.handle(context);
     } catch (error: any) {
       return err(
-        `Failed to map data: ${error.message}, Context: ${this.constructor.name}`
+        `Failed to map data: ${error.message}, Context: ${this.constructor.name}`,
       );
     }
   }
@@ -249,7 +249,7 @@ export class LoggingHandler extends AbstractLogHandler {
     const uploadPromises = this.batchPayload.s3Records.map(async (s3Record) => {
       const key = this.s3Client.getRequestResponseKey(
         s3Record.requestId,
-        s3Record.organizationId
+        s3Record.organizationId,
       );
 
       // Upload request and response body
@@ -258,12 +258,12 @@ export class LoggingHandler extends AbstractLogHandler {
         JSON.stringify({
           request: s3Record.requestBody,
           response: s3Record.responseBody,
-        })
+        }),
       );
 
       if (uploadRes.error) {
         return err(
-          `Failed to store request body for request ID ${s3Record.requestId}: ${uploadRes.error}`
+          `Failed to store request body for request ID ${s3Record.requestId}: ${uploadRes.error}`,
         );
       }
 
@@ -272,12 +272,12 @@ export class LoggingHandler extends AbstractLogHandler {
         const imageUploadRes = await this.storeRequestResponseImage(
           s3Record.organizationId,
           s3Record.requestId,
-          s3Record.assets
+          s3Record.assets,
         );
 
         if (imageUploadRes.error) {
           return err(
-            `Failed to store request response images: ${imageUploadRes.error}`
+            `Failed to store request response images: ${imageUploadRes.error}`,
           );
         }
       }
@@ -295,11 +295,11 @@ export class LoggingHandler extends AbstractLogHandler {
   private async storeRequestResponseImage(
     organizationId: string,
     requestId: string,
-    assets: Map<string, string>
+    assets: Map<string, string>,
   ): PromiseGenericResult<string> {
     const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
       ([assetId, imageUrl]) =>
-        this.handleImageUpload(assetId, imageUrl, requestId, organizationId)
+        this.handleImageUpload(assetId, imageUrl, requestId, organizationId),
     );
 
     await Promise.allSettled(uploadPromises);
@@ -325,7 +325,7 @@ export class LoggingHandler extends AbstractLogHandler {
     assetId: string,
     imageUrl: string,
     requestId: string,
-    organizationId: string
+    organizationId: string,
   ): Promise<void> {
     try {
       if (this.isBase64Image(imageUrl)) {
@@ -336,7 +336,7 @@ export class LoggingHandler extends AbstractLogHandler {
           assetType,
           requestId,
           organizationId,
-          assetId
+          assetId,
         );
       } else {
         const response = await fetch(imageUrl, {
@@ -352,7 +352,7 @@ export class LoggingHandler extends AbstractLogHandler {
           blob,
           requestId,
           organizationId,
-          assetId
+          assetId,
         );
       }
     } catch (error) {
@@ -387,7 +387,7 @@ export class LoggingHandler extends AbstractLogHandler {
         this.batchPayload.requestResponseVersionedCH.length > 0
       ) {
         const result = await this.requestStore.insertRequestResponseVersioned(
-          this.batchPayload.requestResponseVersionedCH
+          this.batchPayload.requestResponseVersionedCH,
         );
         if (result.error) {
           return err(`Error inserting request response logs: ${result.error}`);
@@ -396,7 +396,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
       if (this.batchPayload.cacheMetricCH.length > 0) {
         const cacheResult = await this.requestStore.insertCacheMetricVersioned(
-          this.batchPayload.cacheMetricCH
+          this.batchPayload.cacheMetricCH,
         );
 
         if (cacheResult.error) {
@@ -409,7 +409,7 @@ export class LoggingHandler extends AbstractLogHandler {
       return err(
         `Unexpected error during logging to Clickhouse: ${
           error.message ?? "No error message provided"
-        }`
+        }`,
       );
     }
   }
@@ -435,7 +435,7 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   mapAssets(
-    context: HandlerContext
+    context: HandlerContext,
   ): Database["public"]["Tables"]["asset"]["Insert"][] {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
@@ -528,22 +528,22 @@ export class LoggingHandler extends AbstractLogHandler {
     const legacyUsage = context.legacyUsage;
     const modelUsage = context.usage;
     const promptTokens = atLeastZero(
-      getPromptTokens(modelUsage, legacyUsage) ?? 0
+      getPromptTokens(modelUsage, legacyUsage) ?? 0,
     );
     const completionTokens = atLeastZero(
-      getCompletionTokens(modelUsage, legacyUsage) ?? 0
+      getCompletionTokens(modelUsage, legacyUsage) ?? 0,
     );
     const promptCacheWriteTokens = atLeastZero(
-      getPromptCacheWriteTokens(modelUsage, legacyUsage) ?? 0
+      getPromptCacheWriteTokens(modelUsage, legacyUsage) ?? 0,
     );
     const promptCacheReadTokens = atLeastZero(
-      getPromptCacheReadTokens(modelUsage, legacyUsage) ?? 0
+      getPromptCacheReadTokens(modelUsage, legacyUsage) ?? 0,
     );
     const promptAudioTokens = atLeastZero(
-      getPromptAudioTokens(modelUsage, legacyUsage) ?? 0
+      getPromptAudioTokens(modelUsage, legacyUsage) ?? 0,
     );
     const completionAudioTokens = atLeastZero(
-      legacyUsage.completionAudioTokens ?? 0
+      legacyUsage.completionAudioTokens ?? 0,
     );
     const orgParams = context.orgParams;
     const { requestText, responseText } =
@@ -559,7 +559,7 @@ export class LoggingHandler extends AbstractLogHandler {
     // rather than falling back to legacy usage cost
     if (context.message.heliconeMeta.providerModelId) {
       rawCost = atLeastZero(
-        context.costBreakdown?.totalCost ?? context.legacyUsage.cost ?? 0
+        context.costBreakdown?.totalCost ?? context.legacyUsage.cost ?? 0,
       );
     } else {
       rawCost = atLeastZero(context.legacyUsage.cost ?? 0);
@@ -580,18 +580,18 @@ export class LoggingHandler extends AbstractLogHandler {
       completion_tokens: atLeastZero(isCacheHit ? 0 : completionTokens),
       prompt_tokens: atLeastZero(isCacheHit ? 0 : promptTokens),
       prompt_cache_write_tokens: atLeastZero(
-        isCacheHit ? 0 : promptCacheWriteTokens
+        isCacheHit ? 0 : promptCacheWriteTokens,
       ),
       prompt_cache_read_tokens: atLeastZero(
-        isCacheHit ? 0 : promptCacheReadTokens
+        isCacheHit ? 0 : promptCacheReadTokens,
       ),
       prompt_audio_tokens: atLeastZero(isCacheHit ? 0 : promptAudioTokens),
       completion_audio_tokens: atLeastZero(
-        isCacheHit ? 0 : completionAudioTokens
+        isCacheHit ? 0 : completionAudioTokens,
       ),
       cost: cost,
       request_created_at: formatTimeString(
-        request.requestCreatedAt.toISOString()
+        request.requestCreatedAt.toISOString(),
       ),
       response_created_at: response.responseCreatedAt
         ? formatTimeString(response.responseCreatedAt.toISOString())
@@ -613,8 +613,8 @@ export class LoggingHandler extends AbstractLogHandler {
         : [],
       scores: Object.fromEntries(
         Object.entries(context.processedLog.request.scores ?? {}).map(
-          ([key, value]) => [key, +(value ?? 0)]
-        )
+          ([key, value]) => [key, +(value ?? 0)],
+        ),
       ),
       request_body: requestText,
       response_body: responseText,
@@ -642,22 +642,22 @@ export class LoggingHandler extends AbstractLogHandler {
     const legacyUsage = context.legacyUsage;
     const modelUsage = context.usage;
     const promptTokens = atLeastZero(
-      getPromptTokens(modelUsage, legacyUsage) ?? 0
+      getPromptTokens(modelUsage, legacyUsage) ?? 0,
     );
     const completionTokens = atLeastZero(
-      getCompletionTokens(modelUsage, legacyUsage) ?? 0
+      getCompletionTokens(modelUsage, legacyUsage) ?? 0,
     );
     const promptCacheWriteTokens = atLeastZero(
-      getPromptCacheWriteTokens(modelUsage, legacyUsage) ?? 0
+      getPromptCacheWriteTokens(modelUsage, legacyUsage) ?? 0,
     );
     const promptCacheReadTokens = atLeastZero(
-      getPromptCacheReadTokens(modelUsage, legacyUsage) ?? 0
+      getPromptCacheReadTokens(modelUsage, legacyUsage) ?? 0,
     );
     const promptAudioTokens = atLeastZero(
-      getPromptAudioTokens(modelUsage, legacyUsage) ?? 0
+      getPromptAudioTokens(modelUsage, legacyUsage) ?? 0,
     );
     const completionAudioTokens = atLeastZero(
-      legacyUsage.completionAudioTokens ?? 0
+      legacyUsage.completionAudioTokens ?? 0,
     );
     const orgParams = context.orgParams;
 
@@ -691,7 +691,7 @@ export class LoggingHandler extends AbstractLogHandler {
   } {
     try {
       const mappedContent = heliconeRequestToMappedContent(
-        toHeliconeRequest(context)
+        toHeliconeRequest(context),
       );
       const requestText =
         mappedContent.preview?.fullRequestText?.() ??
@@ -718,7 +718,7 @@ export class LoggingHandler extends AbstractLogHandler {
    * @returns A sanitized delay value that won't cause integer overflow
    */
   private sanitizeDelayMs(
-    delay_ms: number | null | undefined
+    delay_ms: number | null | undefined,
   ): number | null | undefined {
     if (delay_ms === null || delay_ms === undefined) {
       return delay_ms;
@@ -733,14 +733,14 @@ export class LoggingHandler extends AbstractLogHandler {
 
     if (delay_ms > MAX_SAFE_INT) {
       console.warn(
-        `Capping delay_ms value from ${delay_ms} to ${MAX_SAFE_INT} to prevent integer overflow`
+        `Capping delay_ms value from ${delay_ms} to ${MAX_SAFE_INT} to prevent integer overflow`,
       );
       return MAX_SAFE_INT;
     }
 
     if (delay_ms < -MAX_SAFE_INT) {
       console.warn(
-        `Capping negative delay_ms value from ${delay_ms} to ${-MAX_SAFE_INT} to prevent integer overflow`
+        `Capping negative delay_ms value from ${delay_ms} to ${-MAX_SAFE_INT} to prevent integer overflow`,
       );
       return -MAX_SAFE_INT;
     }
@@ -774,7 +774,7 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   mapResponse(
-    context: HandlerContext
+    context: HandlerContext,
   ): Database["public"]["Tables"]["response"]["Insert"] {
     const response = context.message.log.response;
     const processedResponse = context.processedLog.response;
@@ -785,11 +785,11 @@ export class LoggingHandler extends AbstractLogHandler {
 
     const promptCacheWriteTokens = getPromptCacheWriteTokens(
       context.usage,
-      context.legacyUsage
+      context.legacyUsage,
     );
     const promptCacheReadTokens = getPromptCacheReadTokens(
       context.usage,
-      context.legacyUsage
+      context.legacyUsage,
     );
     const responseInsert: Database["public"]["Tables"]["response"]["Insert"] = {
       id: response.id,
@@ -811,7 +811,7 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   mapRequest(
-    context: HandlerContext
+    context: HandlerContext,
   ): Database["public"]["Tables"]["request"]["Insert"] {
     const request = context.message.log.request;
     const orgParams = context.orgParams;

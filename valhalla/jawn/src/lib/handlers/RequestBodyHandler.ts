@@ -13,7 +13,7 @@ export const MAX_ASSETS = 100;
 
 function truncMap(
   map: Map<string, string>,
-  maxSize: number
+  maxSize: number,
 ): Map<string, string> {
   return new Map(Array.from(map.entries()).slice(0, maxSize));
 }
@@ -33,7 +33,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
         this.processRequestBodyImages(
           context.message.log.request.id,
           processedBody,
-          requestModel
+          requestModel,
         );
 
       context.processedLog.request.assets = requestBodyAssets;
@@ -55,11 +55,14 @@ export class RequestBodyHandler extends AbstractLogHandler {
 
       try {
         context.processedLog.request.properties = Object.entries(
-          context.message.log.request.properties
-        ).reduce((acc, [key, value]) => {
-          acc[key] = this.cleanRequestBody(value);
-          return acc;
-        }, {} as Record<string, string>);
+          context.message.log.request.properties,
+        ).reduce(
+          (acc, [key, value]) => {
+            acc[key] = this.cleanRequestBody(value);
+            return acc;
+          },
+          {} as Record<string, string>,
+        );
       } catch (error: any) {
         context.processedLog.request.properties =
           context.message.log.request.properties;
@@ -68,7 +71,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
       return await super.handle(context);
     } catch (error: any) {
       return err(
-        `Error processing request body: ${error}, Context: ${this.constructor.name}`
+        `Error processing request body: ${error}, Context: ${this.constructor.name}`,
       );
     }
   }
@@ -116,7 +119,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
         model: getModelFromRequest(
           "{}",
           log.request.path,
-          log.request.targetUrl
+          log.request.targetUrl,
         ),
       };
     }
@@ -126,7 +129,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
     const requestModel = getModelFromRequest(
       parsedRequestBody,
       log.request.path,
-      log.request.targetUrl
+      log.request.targetUrl,
     );
 
     parsedRequestBody = context.message.heliconeMeta.omitRequestLog
@@ -144,7 +147,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
   private processRequestBodyImages(
     requestId: string,
     requestBody: any,
-    model?: string
+    model?: string,
   ): ImageModelParsingResponse {
     let imageModelParsingResponse: ImageModelParsingResponse = {
       body: requestBody,
@@ -161,7 +164,7 @@ export class RequestBodyHandler extends AbstractLogHandler {
     if (imageModelParsingResponse.assets.size > MAX_ASSETS) {
       imageModelParsingResponse.assets = truncMap(
         imageModelParsingResponse.assets,
-        MAX_ASSETS
+        MAX_ASSETS,
       );
     }
 

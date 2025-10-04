@@ -69,7 +69,7 @@ export const useLLMConfigStore = create<{
               ),
             }));
           } else {
-            set((state) => ({
+            set((_state) => ({
               LLMEvaluatorConfigFormPreset: by,
             }));
           }
@@ -134,7 +134,7 @@ const FormField = ({
 const BasicInformationSection = ({
   configFormParams,
   updateConfigFormParams,
-  notification,
+  notification: _notification,
   existingEvaluator = false,
 }: {
   configFormParams: LLMEvaluatorConfigFormPreset;
@@ -550,9 +550,9 @@ const VariablesSection = ({
 const ModelTestingSection = ({
   configFormParams,
   updateConfigFormParams,
-  openTestPanel,
-  evalPanelStore,
-  existingEvaluatorId,
+  openTestPanel: _openTestPanel,
+  evalPanelStore: _evalPanelStore,
+  existingEvaluatorId: _existingEvaluatorId,
 }: {
   configFormParams: LLMEvaluatorConfigFormPreset;
   updateConfigFormParams: (
@@ -609,7 +609,7 @@ export const LLMEvaluatorConfigForm: React.FC<{
 }> = ({ existingEvaluatorId, onSubmit, openTestPanel }) => {
   const notification = useNotification();
   const evalPanelStore = useEvalPanelStore();
-  const { isSubmitting, hideFormButtons } = useEvalFormStore();
+  useEvalFormStore();
 
   // Use the evalConfigStore directly
   const { llmConfig, setLLMConfig, setLLMTemplate } = useEvalConfigStore();

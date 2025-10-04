@@ -19,16 +19,16 @@ export interface IValhallaDB {
   query(query: string, values: any[]): PromiseGenericResult<QueryResult<any>>;
   now(): PromiseGenericResult<QueryResult<any>>;
   insertRequest(
-    request: ValhallaRequest
+    request: ValhallaRequest,
   ): PromiseGenericResult<QueryResult<any>>;
   insertResponse(
-    response: ValhallaResponse
+    response: ValhallaResponse,
   ): PromiseGenericResult<QueryResult<any>>;
   updateResponse(
-    response: ValhallaResponse
+    response: ValhallaResponse,
   ): PromiseGenericResult<QueryResult<any>>;
   upsertFeedback(
-    feedback: ValhallaFeedback
+    feedback: ValhallaFeedback,
   ): PromiseGenericResult<QueryResult<any>>;
   close(): Promise<void>;
 }
@@ -88,7 +88,7 @@ class ValhallaDB implements IValhallaDB {
           "Error occurred on client",
           client,
           "err",
-          JSON.stringify(err)
+          JSON.stringify(err),
         );
         client.release();
       } catch (e) {
@@ -103,7 +103,7 @@ class ValhallaDB implements IValhallaDB {
 
   async query(
     query: string,
-    values: any[] = []
+    values: any[] = [],
   ): PromiseGenericResult<QueryResult<any>> {
     let client: PoolClient | null = null;
     try {
@@ -129,7 +129,7 @@ class ValhallaDB implements IValhallaDB {
   }
 
   async upsertFeedback(
-    feedback: ValhallaFeedback
+    feedback: ValhallaFeedback,
   ): PromiseGenericResult<QueryResult<any>> {
     const query = `
       INSERT INTO feedback (
@@ -152,7 +152,7 @@ class ValhallaDB implements IValhallaDB {
   }
 
   async updateResponse(
-    response: ValhallaResponse
+    response: ValhallaResponse,
   ): PromiseGenericResult<QueryResult<any>> {
     const query = `
       UPDATE response
@@ -183,7 +183,7 @@ class ValhallaDB implements IValhallaDB {
   }
 
   async insertRequest(
-    request: ValhallaRequest
+    request: ValhallaRequest,
   ): PromiseGenericResult<QueryResult<any>> {
     const query = `
       INSERT INTO request (
@@ -218,7 +218,7 @@ class ValhallaDB implements IValhallaDB {
   }
 
   async insertResponse(
-    response: ValhallaResponse
+    response: ValhallaResponse,
   ): PromiseGenericResult<QueryResult<any>> {
     const query = `
     INSERT INTO response (

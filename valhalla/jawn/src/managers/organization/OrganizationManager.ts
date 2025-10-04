@@ -94,7 +94,7 @@ export class OrganizationManager extends BaseManager {
          FROM organization
          WHERE id = $1
          LIMIT 1`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -108,7 +108,7 @@ export class OrganizationManager extends BaseManager {
   }
 
   async createOrganization(
-    createOrgParams: NewOrganizationParams
+    createOrgParams: NewOrganizationParams,
   ): Promise<Result<NewOrganizationParams, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     if (createOrgParams.owner !== this.authParams.userId) {
@@ -135,19 +135,19 @@ export class OrganizationManager extends BaseManager {
 
   async updateOrganization(
     updateOrgParams: UpdateOrganizationParams,
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkAccessToMutateOrg(
       organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
     if (!hasAccess) {
       return err("User does not have access to update organization");
     }
     const orgMember = await this.organizationStore.getOrganizationMember(
       this.authParams.userId,
-      organizationId
+      organizationId,
     );
 
     if (!orgMember.data) {
@@ -163,7 +163,7 @@ export class OrganizationManager extends BaseManager {
 
     const { data, error } = await this.organizationStore.updateOrganization(
       updateOrgParams,
-      organizationId
+      organizationId,
     );
 
     if (error || !data || data.length === 0) {
@@ -175,7 +175,7 @@ export class OrganizationManager extends BaseManager {
 
   async addMember(
     organizationId: string,
-    email: string
+    email: string,
   ): Promise<Result<{ userId: string; temporaryPassword?: string }, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     let { data: userId, error: userIdError } =
@@ -219,7 +219,7 @@ export class OrganizationManager extends BaseManager {
     if (
       (await this.organizationStore.checkAccessToMutateOrg(
         organizationId,
-        this.authParams.userId
+        this.authParams.userId,
       )) === false
     ) {
       return err("User does not have access to add member to organization");
@@ -228,7 +228,7 @@ export class OrganizationManager extends BaseManager {
     const { error: insertError } =
       await this.organizationStore.addMemberToOrganization(
         userId!,
-        organizationId
+        organizationId,
       );
 
     if (insertError && insertError !== null) {
@@ -241,12 +241,12 @@ export class OrganizationManager extends BaseManager {
   async updateMember(
     organizationId: string,
     orgRole: string,
-    memberId: string
+    memberId: string,
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkAccessToMutateOrg(
       organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
     if (!hasAccess) {
       return err("User does not have access to update member");
@@ -259,7 +259,7 @@ export class OrganizationManager extends BaseManager {
         organizationId,
         this.authParams.userId,
         orgRole,
-        memberId
+        memberId,
       );
 
     if (updateError) {
@@ -270,12 +270,12 @@ export class OrganizationManager extends BaseManager {
 
   async updateOwner(
     organizationId: string,
-    memberId: string
+    memberId: string,
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const isUserOwner = await this.organizationStore.isUserOwner(
       organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
     if (!isUserOwner) {
       return err("User does not have access to update member");
@@ -286,7 +286,7 @@ export class OrganizationManager extends BaseManager {
       await this.organizationStore.updateOrganizationOwner(
         organizationId,
         this.authParams.userId,
-        memberId
+        memberId,
       );
 
     if (updateError) {
@@ -296,14 +296,14 @@ export class OrganizationManager extends BaseManager {
   }
 
   async getOrganizationOwner(
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<OrganizationOwner[], string>> {
     if (!this.authParams.userId) return err("Unauthorized");
 
     const { data: owner, error: ownerError } =
       await this.organizationStore.getOrganizationOwner(
         organizationId,
-        this.authParams.userId
+        this.authParams.userId,
       );
 
     if (ownerError || !owner) {
@@ -314,23 +314,23 @@ export class OrganizationManager extends BaseManager {
 
   async removeOrganizationMember(
     organizationId: string,
-    memberId: string
+    memberId: string,
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkAccessToMutateOrg(
       organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
     if (!hasAccess) {
       return err(
-        "User does not have access to remove member from organization"
+        "User does not have access to remove member from organization",
       );
     }
 
     const { error: deleteError } =
       await this.organizationStore.removeMemberFromOrganization(
         organizationId,
-        memberId
+        memberId,
       );
 
     if (deleteError) {
@@ -342,12 +342,12 @@ export class OrganizationManager extends BaseManager {
   async createFilter(
     organizationId: string,
     filters: OrganizationFilter[],
-    filterType: "dashboard" | "requests"
+    filterType: "dashboard" | "requests",
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
       organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
     if (!hasAccess) {
       return err("User does not have access to create organization filter");
@@ -372,12 +372,12 @@ export class OrganizationManager extends BaseManager {
   async updateFilter(
     organizationId: string,
     type: string,
-    filters: OrganizationFilter[]
+    filters: OrganizationFilter[],
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
       organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
     if (!hasAccess) {
       return err("User does not have access to update organization filter");
@@ -386,7 +386,7 @@ export class OrganizationManager extends BaseManager {
       await this.organizationStore.updateOrganizationFilter(
         organizationId,
         type,
-        filters
+        filters,
       );
 
     if (updateError) {
@@ -399,7 +399,7 @@ export class OrganizationManager extends BaseManager {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkAccessToMutateOrg(
       this.authParams.organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
 
     if (!hasAccess) {
@@ -416,12 +416,12 @@ export class OrganizationManager extends BaseManager {
 
   async getOrganizationLayout(
     organizationId: string,
-    filterType: string
+    filterType: string,
   ): Promise<Result<OrganizationLayout, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
       organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
 
     if (!hasAccess) {
@@ -430,7 +430,7 @@ export class OrganizationManager extends BaseManager {
     const { data: layout, error: organizationLayoutError } =
       await this.organizationStore.getOrganizationLayout(
         organizationId,
-        filterType
+        filterType,
       );
 
     if (organizationLayoutError !== null) {
@@ -440,11 +440,11 @@ export class OrganizationManager extends BaseManager {
   }
 
   async getMemberCount(
-    filterHeliconeEmails: boolean = false
+    filterHeliconeEmails: boolean = false,
   ): Promise<Result<number, string>> {
     const { data: members, error: membersError } =
       await this.organizationStore.getOrganizationMembers(
-        this.authParams.organizationId
+        this.authParams.organizationId,
       );
 
     if (membersError !== null) {
@@ -453,7 +453,7 @@ export class OrganizationManager extends BaseManager {
     if (filterHeliconeEmails && ENVIRONMENT === "production") {
       return ok(
         members.filter((member) => !member.email.endsWith("@helicone.ai"))
-          .length
+          .length,
       );
     } else {
       return ok(members.length);
@@ -461,12 +461,12 @@ export class OrganizationManager extends BaseManager {
   }
 
   async getOrganizationMembers(
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<OrganizationMember[], string>> {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
       organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
 
     if (!hasAccess) {
@@ -476,7 +476,7 @@ export class OrganizationManager extends BaseManager {
     const superUsersResult = await dbExecute<{ user_id: string }>(
       `SELECT *
        FROM admins`,
-      []
+      [],
     );
 
     const superUsers = superUsersResult.data || [];
@@ -489,7 +489,7 @@ export class OrganizationManager extends BaseManager {
     if (
       this.authParams.userId &&
       superUsers?.some(
-        (superUser) => superUser.user_id === this.authParams.userId
+        (superUser) => superUser.user_id === this.authParams.userId,
       )
     ) {
       return ok(members);
@@ -498,8 +498,8 @@ export class OrganizationManager extends BaseManager {
     return ok(
       members.filter(
         (member) =>
-          !superUsers?.some((superUser) => superUser.user_id === member.member)
-      )
+          !superUsers?.some((superUser) => superUser.user_id === member.member),
+      ),
     );
   }
 
@@ -507,7 +507,7 @@ export class OrganizationManager extends BaseManager {
     if (!this.authParams.userId) return err("Unauthorized");
     const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
       organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
 
     if (!hasAccess) {
@@ -517,7 +517,7 @@ export class OrganizationManager extends BaseManager {
     const { data: org, error: orgError } =
       await this.organizationStore.setupDemo(
         this.authParams.userId,
-        organizationId
+        organizationId,
       );
 
     if (orgError) {
@@ -529,24 +529,24 @@ export class OrganizationManager extends BaseManager {
   async updateOnboardingStatus(
     organizationId: string,
     onboardingStatus: OnboardingStatus,
-    name: string
+    name: string,
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
 
     const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
       organizationId,
-      this.authParams.userId
+      this.authParams.userId,
     );
 
     if (!hasAccess) {
       return err(
-        "User does not have access to update organization onboarding status"
+        "User does not have access to update organization onboarding status",
       );
     }
 
     const { data, error } = await this.organizationStore.updateOnboardingStatus(
       onboardingStatus,
-      name
+      name,
     );
 
     if (error || !data) {

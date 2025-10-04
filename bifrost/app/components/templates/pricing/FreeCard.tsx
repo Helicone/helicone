@@ -9,12 +9,13 @@ const FreeCard: React.FC = () => {
     <Card className="w-full h-full p-6 bg-background rounded-xl border-spacing-1.5 border-border md:border-transparent md:shadow-none mx-auto">
       <Col className="h-full justify-between gap-4">
         <Col className="gap-6">
-
           <Col className="h-full gap-2">
             <div className="text-accent-foreground text-md font-semibold leading-tight">
               Hobby
             </div>
-            <div className="text-accent-foreground text-3xl font-bold">Free</div>
+            <div className="text-accent-foreground text-3xl font-bold">
+              Free
+            </div>
             <div className="text-sidebar-foreground text-sm font-normal">
               Kickstart your AI project.
             </div>
@@ -39,8 +40,7 @@ const FreeCard: React.FC = () => {
         </Col>
 
         <Link href="/signup">
-          <Button
-            variant="secondary" className="w-full text-base py-5">
+          <Button variant="secondary" className="w-full text-base py-5">
             Get started for free
           </Button>
         </Link>

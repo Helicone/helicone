@@ -22,11 +22,11 @@ describe("VertexProvider", () => {
             modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
-          { isStreaming: false }
+          { isStreaming: false },
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions"
+          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
         );
       });
 
@@ -38,7 +38,7 @@ describe("VertexProvider", () => {
             modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "eu-west1" },
           } as any,
-          { isStreaming: false }
+          { isStreaming: false },
         );
 
         const streamingUrl = provider.buildUrl(
@@ -48,12 +48,12 @@ describe("VertexProvider", () => {
             modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "eu-west1" },
           } as any,
-          { isStreaming: true }
+          { isStreaming: true },
         );
 
         expect(nonStreamingUrl).toBe(streamingUrl);
         expect(nonStreamingUrl).toBe(
-          "https://eu-west1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/eu-west1/endpoints/openapi/chat/completions"
+          "https://eu-west1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/eu-west1/endpoints/openapi/chat/completions",
         );
       });
 
@@ -66,8 +66,8 @@ describe("VertexProvider", () => {
               modelConfig: { crossRegion: false } as any,
               userConfig: { region: "us-central1" },
             } as any,
-            { isStreaming: false }
-          )
+            { isStreaming: false },
+          ),
         ).toThrow("Vertex AI requires projectId in config for Gemini models");
       });
 
@@ -79,11 +79,11 @@ describe("VertexProvider", () => {
             modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
-          { isStreaming: false }
+          { isStreaming: false },
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions"
+          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
         );
       });
     });
@@ -97,11 +97,11 @@ describe("VertexProvider", () => {
             modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
-          { isStreaming: false }
+          { isStreaming: false },
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:rawPredict"
+          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-haiku@20241022:rawPredict",
         );
       });
 
@@ -113,11 +113,11 @@ describe("VertexProvider", () => {
             modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
-          { isStreaming: true }
+          { isStreaming: true },
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-sonnet@20241022:streamRawPredict"
+          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-5-sonnet@20241022:streamRawPredict",
         );
       });
 
@@ -129,11 +129,11 @@ describe("VertexProvider", () => {
             modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "my-project", region: "europe-west1" },
           } as any,
-          { isStreaming: false }
+          { isStreaming: false },
         );
 
         expect(url).toBe(
-          "https://europe-west1-aiplatform.googleapis.com/v1/projects/my-project/locations/europe-west1/publishers/anthropic/models/claude-3-opus@20240229:rawPredict"
+          "https://europe-west1-aiplatform.googleapis.com/v1/projects/my-project/locations/europe-west1/publishers/anthropic/models/claude-3-opus@20240229:rawPredict",
         );
       });
 
@@ -146,9 +146,11 @@ describe("VertexProvider", () => {
               modelConfig: { crossRegion: false } as any,
               userConfig: { region: "us-central1" },
             } as any,
-            { isStreaming: false }
-          )
-        ).toThrow("Vertex AI requires projectId and region in config for non-Gemini models");
+            { isStreaming: false },
+          ),
+        ).toThrow(
+          "Vertex AI requires projectId and region in config for non-Gemini models",
+        );
       });
 
       it("should default author to anthropic if not provided", () => {
@@ -158,11 +160,11 @@ describe("VertexProvider", () => {
             modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project", region: "us-central1" },
           } as any,
-          { isStreaming: false }
+          { isStreaming: false },
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-haiku:rawPredict"
+          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3-haiku:rawPredict",
         );
       });
     });
@@ -176,11 +178,11 @@ describe("VertexProvider", () => {
             modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project" },
           } as any,
-          { isStreaming: false }
+          { isStreaming: false },
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions"
+          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
         );
       });
 
@@ -192,11 +194,11 @@ describe("VertexProvider", () => {
             modelConfig: { crossRegion: false } as any,
             userConfig: { projectId: "test-project" },
           } as any,
-          { isStreaming: false }
+          { isStreaming: false },
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3:rawPredict"
+          "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/claude-3:rawPredict",
         );
       });
     });
@@ -210,9 +212,9 @@ describe("VertexProvider", () => {
           {
             parsedBody: {
               model: "gemini-1.5-pro",
-              messages: [{ role: "user", content: "Hello" }]
-            }
-          } as any
+              messages: [{ role: "user", content: "Hello" }],
+            },
+          } as any,
         );
 
         const parsed = JSON.parse(body);
@@ -226,9 +228,9 @@ describe("VertexProvider", () => {
           {
             parsedBody: {
               model: "GEMINI-1.5-FLASH",
-              temperature: 0.7
-            }
-          } as any
+              temperature: 0.7,
+            },
+          } as any,
         );
 
         const parsed = JSON.parse(body);
@@ -246,9 +248,9 @@ describe("VertexProvider", () => {
             toAnthropic: (body: any) => ({ ...body, anthropic_content: true }),
             parsedBody: {
               model: "claude-3-haiku",
-              messages: [{ role: "user", content: "Test" }]
-            }
-          } as any
+              messages: [{ role: "user", content: "Test" }],
+            },
+          } as any,
         );
 
         const parsed = JSON.parse(body);
@@ -264,9 +266,9 @@ describe("VertexProvider", () => {
             toAnthropic: (body: any) => ({ ...body, should_not_appear: true }),
             parsedBody: {
               model: "claude-3-sonnet",
-              messages: [{ role: "user", content: "Test" }]
-            }
-          } as any
+              messages: [{ role: "user", content: "Test" }],
+            },
+          } as any,
         );
 
         const parsed = JSON.parse(body);
@@ -282,9 +284,9 @@ describe("VertexProvider", () => {
           {
             parsedBody: {
               model: "some-other-model",
-              custom_field: "custom_value"
-            }
-          } as any
+              custom_field: "custom_value",
+            },
+          } as any,
         );
 
         const parsed = JSON.parse(body);
@@ -299,26 +301,24 @@ describe("VertexProvider", () => {
       const result = await provider.authenticate(
         { apiKey: '{"type":"service_account"}', orgId: "test-org" },
         {} as any,
-        undefined
+        undefined,
       );
 
       expect(getGoogleAccessToken).toHaveBeenCalledWith(
         '{"type":"service_account"}',
         "test-org",
         ["https://www.googleapis.com/auth/cloud-platform"],
-        undefined
+        undefined,
       );
       expect(result.headers.Authorization).toBe("Bearer test-access-token");
     });
 
     it("should throw error when service account JSON is missing", async () => {
       await expect(
-        provider.authenticate(
-          { orgId: "test-org" },
-          {} as any,
-          undefined
-        )
-      ).rejects.toThrow("Service account JSON is required for Vertex AI authentication");
+        provider.authenticate({ orgId: "test-org" }, {} as any, undefined),
+      ).rejects.toThrow(
+        "Service account JSON is required for Vertex AI authentication",
+      );
     });
 
     it("should pass cache provider to getGoogleAccessToken", async () => {
@@ -327,14 +327,14 @@ describe("VertexProvider", () => {
       await provider.authenticate(
         { apiKey: '{"type":"service_account"}', orgId: "test-org" },
         {} as any,
-        mockCacheProvider as any
+        mockCacheProvider as any,
       );
 
       expect(getGoogleAccessToken).toHaveBeenCalledWith(
         '{"type":"service_account"}',
         "test-org",
         ["https://www.googleapis.com/auth/cloud-platform"],
-        mockCacheProvider
+        mockCacheProvider,
       );
     });
   });
@@ -348,11 +348,11 @@ describe("VertexProvider", () => {
           modelConfig: { crossRegion: false } as any,
           userConfig: { projectId: "test-project", region: "us-central1" },
         } as any,
-        { isStreaming: false }
+        { isStreaming: false },
       );
 
       expect(url).toBe(
-        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:rawPredict"
+        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:rawPredict",
       );
     });
 
@@ -363,11 +363,11 @@ describe("VertexProvider", () => {
           modelConfig: { crossRegion: false } as any,
           userConfig: { projectId: "test-project", region: "us-central1" },
         } as any,
-        { isStreaming: false }
+        { isStreaming: false },
       );
 
       expect(url).toBe(
-        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:rawPredict"
+        "https://us-central1-aiplatform.googleapis.com/v1/projects/test-project/locations/us-central1/publishers/anthropic/models/:rawPredict",
       );
     });
 
@@ -379,11 +379,11 @@ describe("VertexProvider", () => {
           modelConfig: { crossRegion: false } as any,
           userConfig: { projectId: "my-project-123", region: "us-central1" },
         } as any,
-        { isStreaming: false }
+        { isStreaming: false },
       );
 
       expect(url).toBe(
-        "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/my-project-123/locations/us-central1/endpoints/openapi/chat/completions"
+        "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/my-project-123/locations/us-central1/endpoints/openapi/chat/completions",
       );
     });
   });

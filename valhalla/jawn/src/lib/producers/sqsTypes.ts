@@ -1,6 +1,10 @@
 export const QUEUE_NAMES = {
-  requestResponseLogs: process.env.REQUEST_RESPONSE_LOGS_QUEUE_NAME ?? "request-response-logs-queue",
-  requestResponseLogsLowPriority: process.env.REQUEST_RESPONSE_LOGS_LOW_PRIORITY_QUEUE_NAME ?? "request-response-logs-low",
+  requestResponseLogs:
+    process.env.REQUEST_RESPONSE_LOGS_QUEUE_NAME ??
+    "request-response-logs-queue",
+  requestResponseLogsLowPriority:
+    process.env.REQUEST_RESPONSE_LOGS_LOW_PRIORITY_QUEUE_NAME ??
+    "request-response-logs-low",
   heliconeScores: "helicone-scores-queue",
   requestResponseLogsDlq: "request-response-logs-dlq",
   heliconeScoresDlq: "helicone-scores-dlq",

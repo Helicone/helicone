@@ -27,9 +27,15 @@ export class VertexOpenAIUsageProcessor extends OpenAIUsageProcessor {
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
 
-    const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
+    const effectivePromptTokens = Math.max(
+      0,
+      promptTokens - cachedTokens - promptAudioTokens,
+    );
     // For Vertex, completion_tokens is already the effective tokens (no reasoning/audio included)
-    const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens);
+    const effectiveCompletionTokens = Math.max(
+      0,
+      completionTokens - completionAudioTokens,
+    );
 
     const modelUsage: ModelUsage = {
       input: effectivePromptTokens,
@@ -55,7 +61,9 @@ export class VertexOpenAIUsageProcessor extends OpenAIUsageProcessor {
 }
 
 export class VertexUsageProcessor implements IUsageProcessor {
-  public async parse(parseInput: ParseInput): Promise<Result<ModelUsage, string>> {
+  public async parse(
+    parseInput: ParseInput,
+  ): Promise<Result<ModelUsage, string>> {
     if (parseInput.model.includes("claude")) {
       // Both bedrock and vertex don't support 1h buckets like Anthropic does.
       return new BedrockUsageProcessor().parse(parseInput);

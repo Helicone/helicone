@@ -1831,8 +1831,7 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 200,
         },
-      })
-    );
+      }));
 
     it("should handle complex multi-turn conversations", () =>
       runGatewayTest({
@@ -1872,8 +1871,7 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 200,
         },
-      })
-    );
+      }));
 
     it("should handle custom headers", () =>
       runGatewayTest({
@@ -1908,8 +1906,7 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 200,
         },
-      })
-    );
+      }));
 
     it("should handle logit bias parameter", () =>
       runGatewayTest({
@@ -1941,8 +1938,7 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 200,
         },
-      })
-    );
+      }));
 
     it("should handle function calling with specific tool choice", () =>
       runGatewayTest({
@@ -1999,8 +1995,7 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 200,
         },
-      })
-    );
+      }));
   });
 
   describe("llama-4-scout", () => {
@@ -2028,7 +2023,9 @@ describe("Meta Llama Registry Tests", () => {
         model: "llama-4-scout/novita",
         request: {
           body: {
-            messages: [{ role: "user", content: "What's the weather in Tokyo?" }],
+            messages: [
+              { role: "user", content: "What's the weather in Tokyo?" },
+            ],
             tools: [
               {
                 type: "function",
@@ -2455,7 +2452,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.3-70b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.3-70b-instruct"
+              ),
               expects: novitaAuthExpectations,
             },
           ],
@@ -2469,7 +2468,9 @@ describe("Meta Llama Registry Tests", () => {
         model: "llama-3.3-70b-instruct/novita",
         request: {
           body: {
-            messages: [{ role: "user", content: "What's the weather in Paris?" }],
+            messages: [
+              { role: "user", content: "What's the weather in Paris?" },
+            ],
             tools: [
               {
                 type: "function",
@@ -2498,7 +2499,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.3-70b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.3-70b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -2522,8 +2525,14 @@ describe("Meta Llama Registry Tests", () => {
           body: {
             messages: [
               { role: "user", content: "¿Puedes ayudarme en español?" },
-              { role: "assistant", content: "¡Por supuesto! Puedo ayudarte en español." },
-              { role: "user", content: "Merci! Peux-tu aussi parler français?" },
+              {
+                role: "assistant",
+                content: "¡Por supuesto! Puedo ayudarte en español.",
+              },
+              {
+                role: "user",
+                content: "Merci! Peux-tu aussi parler français?",
+              },
             ],
             temperature: 0.8,
             max_tokens: 2000,
@@ -2535,7 +2544,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.3-70b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.3-70b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -2594,7 +2605,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.3-70b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.3-70b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -2637,7 +2650,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-3.3-70b-instruct",
-              data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-3.3-70b-instruct"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["max_tokens", "120000"],
@@ -2695,8 +2710,7 @@ describe("Meta Llama Registry Tests", () => {
           ],
           finalStatus: 401,
         },
-      })
-    );
+      }));
   });
 
   describe("llama-4-maverick", () => {
@@ -2709,7 +2723,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: novitaAuthExpectations,
             },
           ],
@@ -2722,7 +2738,9 @@ describe("Meta Llama Registry Tests", () => {
         model: "llama-4-maverick/novita",
         request: {
           body: {
-            messages: [{ role: "user", content: "What's the weather in Paris?" }],
+            messages: [
+              { role: "user", content: "What's the weather in Paris?" },
+            ],
             tools: [
               {
                 type: "function",
@@ -2751,7 +2769,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -2787,7 +2807,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -2847,7 +2869,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -2877,7 +2901,10 @@ describe("Meta Llama Registry Tests", () => {
         request: {
           body: {
             messages: [
-              { role: "user", content: "Generate a response with large context" },
+              {
+                role: "user",
+                content: "Generate a response with large context",
+              },
             ],
             max_tokens: 100000,
             temperature: 0.3,
@@ -2889,7 +2916,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["max_tokens", "100000"],
@@ -2916,7 +2945,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["stream", "true"],
@@ -2948,7 +2979,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -2983,7 +3016,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 headers: {
@@ -3036,7 +3071,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -3085,7 +3122,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -3149,7 +3188,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: [
@@ -3259,7 +3300,9 @@ describe("Meta Llama Registry Tests", () => {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
               model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-              data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+              data: createOpenAIMockResponse(
+                "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+              ),
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["user", "Test"],
@@ -3278,9 +3321,7 @@ describe("Meta Llama Registry Tests", () => {
           model: "llama-4-scout/novita",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -3290,7 +3331,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "meta-llama/llama-4-scout-17b-16e-instruct",
-                data: createOpenAIMockResponse("meta-llama/llama-4-scout-17b-16e-instruct"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/llama-4-scout-17b-16e-instruct"
+                ),
                 expects: novitaAuthExpectations,
               },
             ],
@@ -3305,9 +3348,7 @@ describe("Meta Llama Registry Tests", () => {
           model: "llama-3.3-70b-instruct/novita",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -3317,7 +3358,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "meta-llama/llama-3.3-70b-instruct",
-                data: createOpenAIMockResponse("meta-llama/llama-3.3-70b-instruct"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/llama-3.3-70b-instruct"
+                ),
                 expects: novitaAuthExpectations,
               },
             ],
@@ -3332,9 +3375,7 @@ describe("Meta Llama Registry Tests", () => {
           model: "llama-4-maverick/novita",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -3344,7 +3385,9 @@ describe("Meta Llama Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-                data: createOpenAIMockResponse("meta-llama/llama-4-maverick-17b-128e-instruct-fp8"),
+                data: createOpenAIMockResponse(
+                  "meta-llama/llama-4-maverick-17b-128e-instruct-fp8"
+                ),
                 expects: novitaAuthExpectations,
               },
             ],

@@ -25,7 +25,7 @@ export class BedrockProvider extends BaseProvider {
 
   private getModelId(
     modelProviderConfig: ModelProviderConfig,
-    userEndpointConfig: UserEndpointConfig
+    userEndpointConfig: UserEndpointConfig,
   ): string {
     if (userEndpointConfig.crossRegion && userEndpointConfig.region) {
       const regionPrefix = userEndpointConfig.region.split("-")[0];
@@ -42,7 +42,7 @@ export class BedrockProvider extends BaseProvider {
 
   buildModelId(
     modelProviderConfig: ModelProviderConfig,
-    userEndpointConfig: UserEndpointConfig
+    userEndpointConfig: UserEndpointConfig,
   ): string {
     if (modelProviderConfig.author === "passthrough") {
       return modelProviderConfig.providerModelId;
@@ -52,7 +52,7 @@ export class BedrockProvider extends BaseProvider {
 
   async authenticate(
     authContext: AuthContext,
-    endpoint: Endpoint
+    endpoint: Endpoint,
   ): Promise<AuthResult> {
     if (!authContext.apiKey || !authContext.secretKey) {
       throw new Error("Bedrock requires both apiKey and secretKey");
@@ -64,7 +64,7 @@ export class BedrockProvider extends BaseProvider {
       !authContext.requestBody
     ) {
       throw new Error(
-        "Bedrock authentication requires requestMethod, requestUrl, and requestBody"
+        "Bedrock authentication requires requestMethod, requestUrl, and requestBody",
       );
     }
 
@@ -111,7 +111,7 @@ export class BedrockProvider extends BaseProvider {
         context.bodyMapping === "OPENAI"
           ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
           : context.parsedBody;
-      
+
       const updatedBody = {
         ...anthropicBody,
         anthropic_version: "bedrock-2023-05-31",

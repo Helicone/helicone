@@ -36,11 +36,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
   const org = useOrg();
   const { user } = useHeliconeAuthClient();
 
-  const {
-    data,
-    isLoading: isMembersLoading,
-    refetch,
-  } = useGetOrgMembers(org?.currentOrg?.id || "");
+  const { data, refetch } = useGetOrgMembers(org?.currentOrg?.id || "");
 
   const currentUserRole = data?.find((d) => d.email === user?.email)?.org_role;
 

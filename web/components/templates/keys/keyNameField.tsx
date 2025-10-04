@@ -6,9 +6,8 @@ interface KeyNameFieldProps {
   key: Database["public"]["Tables"]["user_api_keys"]["Row"];
 }
 
-const KeyNameField = (props: KeyNameFieldProps) => {
-  const { key } = props;
-  const [mode, setMode] = useState<"view" | "edit">("view");
+const KeyNameField = (_props: KeyNameFieldProps) => {
+  const [mode] = useState<"view" | "edit">("view");
 
   return (
     <>

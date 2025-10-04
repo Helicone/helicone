@@ -62,12 +62,11 @@ const CostBackfiller = () => {
     withoutCosts: null,
   });
 
-  const { backfillCosts, backfillCostsAsync, isBackfillingCosts } =
-    useBackfillCosts(() => {
-      toast.success("Cost backfill completed successfully!");
-      setQueryPreview("");
-      setBackfillError(null); // Clear error on success
-    });
+  const { backfillCostsAsync, isBackfillingCosts } = useBackfillCosts(() => {
+    toast.success("Cost backfill completed successfully!");
+    setQueryPreview("");
+    setBackfillError(null); // Clear error on success
+  });
 
   const { backfillCostsPreviewAsync, isLoadingPreview } =
     useBackfillCostsPreview();
@@ -381,7 +380,7 @@ const CostBackfiller = () => {
 
                   {isExpanded && (
                     <div className="pb-2 pl-6">
-                      {models.map((model, localIndex) => {
+                      {models.map((model) => {
                         const globalIndex = allModels.findIndex(
                           (m) =>
                             m.provider === model.provider &&

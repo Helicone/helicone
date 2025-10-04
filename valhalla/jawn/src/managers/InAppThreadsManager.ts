@@ -51,7 +51,7 @@ export class InAppThreadsManager extends BaseManager {
   }
 
   async upsertThreadMessage(
-    params: UpsertThreadMessageParams
+    params: UpsertThreadMessageParams,
   ): Promise<Result<InAppThread, string>> {
     const { sessionId, messages, metadata } = params;
 
@@ -60,12 +60,12 @@ export class InAppThreadsManager extends BaseManager {
       const existingThreadResult = await dbExecute<InAppThread>(
         `SELECT * FROM in_app_threads 
          WHERE id = $1 AND org_id = $2`,
-        [sessionId, this.authParams.organizationId]
+        [sessionId, this.authParams.organizationId],
       );
 
       if (existingThreadResult.error) {
         return err(
-          `Failed to check existing thread: ${existingThreadResult.error}`
+          `Failed to check existing thread: ${existingThreadResult.error}`,
         );
       }
 
@@ -85,7 +85,7 @@ export class InAppThreadsManager extends BaseManager {
             JSON.stringify(metadata),
             sessionId,
             this.authParams.organizationId,
-          ]
+          ],
         );
 
         if (updateResult.error) {
@@ -120,7 +120,7 @@ export class InAppThreadsManager extends BaseManager {
             this.authParams.userId ?? "",
             this.authParams.organizationId,
             JSON.stringify(metadata),
-          ]
+          ],
         );
 
         if (insertResult.error) {
@@ -146,7 +146,7 @@ export class InAppThreadsManager extends BaseManager {
              updated_at = NOW()
          WHERE id = $1 AND org_id = $2
          RETURNING *`,
-        [sessionId, this.authParams.organizationId]
+        [sessionId, this.authParams.organizationId],
       );
 
       if (deleteResult.error) {
@@ -160,12 +160,12 @@ export class InAppThreadsManager extends BaseManager {
   }
 
   async escalateThread(
-    sessionId: string
+    sessionId: string,
   ): Promise<Result<InAppThread, string>> {
     const slackService = SlackService.getInstance();
     const userEmailResult = await dbExecute<{ email: string }>(
       `SELECT email FROM auth.users WHERE id = $1`,
-      [this.authParams.userId]
+      [this.authParams.userId],
     );
     if (userEmailResult.error) {
       return err(`Failed to get user email: ${userEmailResult.error}`);
@@ -283,7 +283,7 @@ export class InAppThreadsManager extends BaseManager {
          WHERE id = $1 AND org_id = $2 AND escalated = false
          RETURNING *`,
         // If no row is updated, it means it was already escalated
-        [sessionId, this.authParams.organizationId, threadTs]
+        [sessionId, this.authParams.organizationId, threadTs],
       );
 
       if (updateResult.data?.[0]) {
@@ -318,7 +318,7 @@ export class InAppThreadsManager extends BaseManager {
          FROM in_app_threads 
          WHERE org_id = $1 AND user_id = $2 AND soft_delete = false
          ORDER BY updated_at DESC`,
-        [this.authParams.organizationId, this.authParams.userId]
+        [this.authParams.organizationId, this.authParams.userId],
       );
 
       if (threadsResult.error) {
@@ -336,7 +336,7 @@ export class InAppThreadsManager extends BaseManager {
       const threadResult = await dbExecute<InAppThread>(
         `SELECT * FROM in_app_threads 
          WHERE id = $1 AND org_id = $2 AND soft_delete = false`,
-        [sessionId, this.authParams.organizationId]
+        [sessionId, this.authParams.organizationId],
       );
 
       if (threadResult.error) {
@@ -399,7 +399,7 @@ export class InAppThreadsManager extends BaseManager {
 
   private async forwardUserMessageToSlack(
     thread: InAppThread,
-    _allMessages: OpenAI.Chat.ChatCompletionMessageParam[]
+    _allMessages: OpenAI.Chat.ChatCompletionMessageParam[],
   ): Promise<void> {
     const slackService = SlackService.getInstance();
 
@@ -431,7 +431,7 @@ export class InAppThreadsManager extends BaseManager {
           messageText = textParts.join("\n");
 
           const imageParts = message.content.filter(
-            (part: any) => part.type === "image_url"
+            (part: any) => part.type === "image_url",
           );
           if (imageParts.length > 0) {
             messageText += `\n\n📎 *[Message contains ${imageParts.length} image(s)]*`;
@@ -444,7 +444,7 @@ export class InAppThreadsManager extends BaseManager {
                 if (isBase64) {
                   const data = imagePart.image_url.url.replace(
                     /^data:image\/\w+;base64,/,
-                    ""
+                    "",
                   );
                   const buffer = Buffer.from(data, "base64");
                   const extension = imagePart.image_url.url
@@ -454,7 +454,7 @@ export class InAppThreadsManager extends BaseManager {
                   const uploaded = await slackService.uploadFile(
                     buffer,
                     `${fileID}.${extension}`,
-                    slackThreadTs
+                    slackThreadTs,
                   );
                   if (!uploaded) {
                     continue;
@@ -471,7 +471,7 @@ export class InAppThreadsManager extends BaseManager {
           await slackService.postThreadMessage(
             slackThreadTs,
             formattedMessage,
-            attachments
+            attachments,
           );
         }
       }

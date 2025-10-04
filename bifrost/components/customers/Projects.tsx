@@ -1,6 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { clsx } from "@/utils/clsx";
-import { ArrowUpRight, Brush, Building2, Code, GraduationCap, MessageSquareHeart, Sparkles, HeartPulse, Car } from "lucide-react";
+import {
+  ArrowUpRight,
+  Brush,
+  Building2,
+  Code,
+  GraduationCap,
+  MessageSquareHeart,
+  Sparkles,
+  HeartPulse,
+  Car,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 interface ProjectTag {
@@ -13,37 +23,37 @@ const TAGS: Record<string, ProjectTag> = {
   tech: {
     name: "Tech",
     href: "",
-    icon: <Code className="size-5 mr-2" />
+    icon: <Code className="size-5 mr-2" />,
   },
   marketing: {
     name: "Digital Marketing",
     href: "",
-    icon: <Brush className="size-5 mr-2" />
+    icon: <Brush className="size-5 mr-2" />,
   },
   education: {
     name: "Education",
     href: "",
-    icon: <GraduationCap className="size-5 mr-2" />
+    icon: <GraduationCap className="size-5 mr-2" />,
   },
   healthcare: {
     name: "Healthcare",
     href: "",
-    icon: <HeartPulse className="size-5 mr-2" />
+    icon: <HeartPulse className="size-5 mr-2" />,
   },
   civictech: {
     name: "Civic Technology",
     href: "",
-    icon: <Building2 className="size-5 mr-2" />
+    icon: <Building2 className="size-5 mr-2" />,
   },
   automotive: {
     name: "Automotive",
     href: "",
-    icon: <Car className="size-5 mr-2" />
+    icon: <Car className="size-5 mr-2" />,
   },
   customersupport: {
     name: "Customer Support",
     href: "",
-    icon: <MessageSquareHeart className="size-5 mr-2" />
+    icon: <MessageSquareHeart className="size-5 mr-2" />,
   },
 };
 
@@ -204,10 +214,7 @@ export function Projects() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {projects.map((project, i) => {
           return (
-            <div
-              className="flex flex-col h-full gap-4 items-left"
-              key={i}
-            >
+            <div className="flex flex-col h-full gap-4 items-left" key={i}>
               <Link
                 id="featured"
                 className="flex flex-col gap-4 w-full h-full bg-gray-50 hover:bg-brand/10 transition-all duration-200 rounded-xl py-6 px-5 group"
@@ -220,7 +227,6 @@ export function Projects() {
                   {/* Image and usage */}
                   <div className="flex flex-col gap-6">
                     <div className="flex items-start justify-between">
-
                       <Image
                         src={project.imageHref}
                         alt={project.title}
@@ -239,13 +245,12 @@ export function Projects() {
                   </div>
                   {/* Tags */}
                   <div className="flex items-center justify-between gap-2 overflow-hidden ">
-
                     {/* Industry tag */}
                     {project.tags.map((tag, index) => (
                       <span
                         key={index}
                         className={clsx(
-                          "text-xs font-medium flex flex-row text-accent-foreground items-center gap"
+                          "text-xs font-medium flex flex-row text-accent-foreground items-center gap",
                         )}
                       >
                         {tag.icon}
@@ -260,7 +265,6 @@ export function Projects() {
                       </span>
                     )}
                   </div>
-
                 </div>
               </Link>
             </div>

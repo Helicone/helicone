@@ -12,10 +12,10 @@ import {
   Security,
 } from "tsoa";
 import { err, ok, Result, isError } from "../../packages/common/result";
-import { 
-  HqlError, 
-  HqlErrorCode, 
-  createHqlError
+import {
+  HqlError,
+  HqlErrorCode,
+  createHqlError,
 } from "../../lib/errors/HqlErrors";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
 import { type JawnAuthenticatedRequest } from "../../types/request";
@@ -80,8 +80,10 @@ export type ExecuteSqlResponse = {
 // Helper function to convert HqlError to string for API responses
 function formatHqlError(error: HqlError): string {
   // Include error code in the response for frontend parsing
-  const codePrefix = error.code ? `[${error.code}] ` : '';
-  const message = error.details ? `${error.message}: ${error.details}` : error.message;
+  const codePrefix = error.code ? `[${error.code}] ` : "";
+  const message = error.details
+    ? `${error.message}: ${error.details}`
+    : error.message;
   return `${codePrefix}${message}`;
 }
 
@@ -109,7 +111,7 @@ export class HeliconeSqlController extends Controller {
     successStatus: 200,
   })
   public async getClickHouseSchema(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ClickHouseTableSchema[], string>> {
     const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
     const result = await heliconeSqlManager.getClickhouseSchema();
@@ -129,7 +131,10 @@ export class HeliconeSqlController extends Controller {
   @Post("execute")
   @TracedController("hql.controller.executeSql", {
     baseTags: ({ args }) => {
-      const [requestBody, request] = args as [ExecuteSqlRequest, JawnAuthenticatedRequest];
+      const [requestBody, request] = args as [
+        ExecuteSqlRequest,
+        JawnAuthenticatedRequest,
+      ];
       return {
         organizationId: request.authParams.organizationId,
         service: "helicone-sql",
@@ -142,12 +147,12 @@ export class HeliconeSqlController extends Controller {
   })
   public async executeSql(
     @Body() requestBody: ExecuteSqlRequest,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ExecuteSqlResponse, string>> {
     // Feature flag
     const featureFlagResult = await checkFeatureFlag(
       request.authParams.organizationId,
-      HQL_FEATURE_FLAG
+      HQL_FEATURE_FLAG,
     );
     if (isError(featureFlagResult)) {
       const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
@@ -178,7 +183,10 @@ export class HeliconeSqlController extends Controller {
   @Post("download")
   @TracedController("hql.controller.downloadCsv", {
     baseTags: ({ args }) => {
-      const [requestBody, request] = args as [ExecuteSqlRequest, JawnAuthenticatedRequest];
+      const [requestBody, request] = args as [
+        ExecuteSqlRequest,
+        JawnAuthenticatedRequest,
+      ];
       return {
         organizationId: request.authParams.organizationId,
         service: "helicone-sql",
@@ -191,12 +199,12 @@ export class HeliconeSqlController extends Controller {
   })
   public async downloadCsv(
     @Body() requestBody: ExecuteSqlRequest,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     // Feature flag
     const featureFlagResult = await checkFeatureFlag(
       request.authParams.organizationId,
-      HQL_FEATURE_FLAG
+      HQL_FEATURE_FLAG,
     );
     if (isError(featureFlagResult)) {
       const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
@@ -205,7 +213,10 @@ export class HeliconeSqlController extends Controller {
 
     // Validate request
     if (!requestBody.sql?.trim()) {
-      const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL, "CSV download requires a SQL query");
+      const error = createHqlError(
+        HqlErrorCode.MISSING_QUERY_SQL,
+        "CSV download requires a SQL query",
+      );
       return err(formatHqlError(error));
     }
 
@@ -225,16 +236,16 @@ export class HeliconeSqlController extends Controller {
   @Security("api_key")
   @Get("saved-queries")
   public async getSavedQueries(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Array<HqlSavedQuery>, string>> {
     const hqlQueryManager = new HqlQueryManager(request.authParams);
     const res = await hqlQueryManager.getSavedQueries();
-    
+
     if (isError(res)) {
       this.setStatus(res.error.statusCode || 500);
       return err(formatHqlError(res.error));
     }
-    
+
     this.setStatus(200);
     return ok(res.data || []);
   }
@@ -249,11 +260,11 @@ export class HeliconeSqlController extends Controller {
   @Get("saved-query/{queryId}")
   public async getSavedQuery(
     @Path() queryId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<HqlSavedQuery | null, string>> {
     const hqlQueryManager = new HqlQueryManager(request.authParams);
     const result = await hqlQueryManager.getSavedQuery(queryId);
-    
+
     if (isError(result)) {
       this.setStatus(result.error.statusCode || 500);
       return err(formatHqlError(result.error));
@@ -272,16 +283,16 @@ export class HeliconeSqlController extends Controller {
   @Delete("saved-query/{queryId}")
   public async deleteSavedQuery(
     @Path() queryId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<void, string>> {
     const hqlQueryManager = new HqlQueryManager(request.authParams);
     const result = await hqlQueryManager.deleteSavedQuery(queryId);
-    
+
     if (isError(result)) {
       this.setStatus(result.error.statusCode || 500);
       return err(formatHqlError(result.error));
     }
-    
+
     this.setStatus(204);
     return ok(undefined);
   }
@@ -295,10 +306,12 @@ export class HeliconeSqlController extends Controller {
   @Post("saved-queries/bulk-delete")
   public async bulkDeleteSavedQueries(
     @Body() requestBody: BulkDeleteSavedQueriesRequest,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<void, string>> {
     const hqlQueryManager = new HqlQueryManager(request.authParams);
-    const result = await hqlQueryManager.bulkDeleteSavedQueries(requestBody.ids);
+    const result = await hqlQueryManager.bulkDeleteSavedQueries(
+      requestBody.ids,
+    );
     if (isError(result)) {
       this.setStatus(result.error.statusCode || 500);
       return err(formatHqlError(result.error));
@@ -317,16 +330,16 @@ export class HeliconeSqlController extends Controller {
   @Post("saved-query")
   public async createSavedQuery(
     @Body() requestBody: CreateSavedQueryRequest,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<HqlSavedQuery[], string>> {
     const hqlQueryManager = new HqlQueryManager(request.authParams);
     const result = await hqlQueryManager.createSavedQuery(requestBody);
-    
+
     if (isError(result)) {
       this.setStatus(result.error.statusCode || 500);
       return err(formatHqlError(result.error));
     }
-    
+
     this.setStatus(201);
     return ok(result.data);
   }
@@ -343,19 +356,19 @@ export class HeliconeSqlController extends Controller {
   public async updateSavedQuery(
     @Path() queryId: string,
     @Body() requestBody: CreateSavedQueryRequest,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<HqlSavedQuery, string>> {
     const hqlQueryManager = new HqlQueryManager(request.authParams);
     const result = await hqlQueryManager.updateSavedQuery({
       id: queryId,
-      ...requestBody
+      ...requestBody,
     });
-    
+
     if (isError(result)) {
       this.setStatus(result.error.statusCode || 500);
       return err(formatHqlError(result.error));
     }
-    
+
     this.setStatus(200);
     return ok(result.data);
   }

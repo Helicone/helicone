@@ -104,7 +104,7 @@ export function buildProviderUrl(
     location?: string;
     endpoint?: string;
     deployment?: string;
-  }
+  },
 ): string {
   const config = providerConfigs[provider];
   const finalEndpoint = providerSettings?.endpoint || config.defaultEndpoint;
@@ -114,7 +114,7 @@ export function buildProviderUrl(
   if (modelString) {
     processedEndpoint = processedEndpoint.replace(
       /{modelString}/g,
-      modelString
+      modelString,
     );
   }
 
@@ -130,51 +130,51 @@ export function buildProviderUrl(
   if (providerSettings?.region) {
     processedBaseUrl = processedBaseUrl.replace(
       /{REGION}/g,
-      providerSettings.region
+      providerSettings.region,
     );
     processedEndpoint = processedEndpoint.replace(
       /{REGION}/g,
-      providerSettings.region
+      providerSettings.region,
     );
   }
 
   if (providerSettings?.project) {
     processedBaseUrl = processedBaseUrl.replace(
       /{PROJECT}/g,
-      providerSettings.project
+      providerSettings.project,
     );
     processedEndpoint = processedEndpoint.replace(
       /{PROJECT}/g,
-      providerSettings.project
+      providerSettings.project,
     );
   }
 
   if (providerSettings?.location) {
     processedBaseUrl = processedBaseUrl.replace(
       /{LOCATION}/g,
-      providerSettings.location
+      providerSettings.location,
     );
     processedEndpoint = processedEndpoint.replace(
       /{LOCATION}/g,
-      providerSettings.location
+      providerSettings.location,
     );
   }
 
   if (providerSettings?.endpoint) {
     processedBaseUrl = processedBaseUrl.replace(
       /{ENDPOINT}/g,
-      providerSettings.endpoint
+      providerSettings.endpoint,
     );
   }
 
   if (providerSettings?.deployment) {
     processedBaseUrl = processedBaseUrl.replace(
       /{DEPLOYMENT}/g,
-      providerSettings.deployment
+      providerSettings.deployment,
     );
     processedEndpoint = processedEndpoint.replace(
       /{DEPLOYMENT}/g,
-      providerSettings.deployment
+      providerSettings.deployment,
     );
   }
 

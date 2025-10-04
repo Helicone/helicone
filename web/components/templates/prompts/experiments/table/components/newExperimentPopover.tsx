@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { BeakerIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
-import { Input as PromptInput } from "../../../id/MessageInput";
 import useNotification from "../../../../../shared/notification/useNotification";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
 
@@ -26,38 +25,7 @@ export const NewExperimentPopover = () => {
 
   const router = useRouter();
 
-  const [selectedInput, setSelectedInput] = useState<PromptInput>({
-    id: "",
-    inputs: {},
-    source_request: "",
-    prompt_version: "",
-    created_at: "",
-    auto_prompt_inputs: [],
-    response_body: "",
-  });
-
   const [promptName, setPromptName] = useState<string>("");
-  const [promptVariables, setPromptVariables] = useState<
-    Array<{ original: string; heliconeTag: string; value: string }>
-  >([]);
-
-  const [inputs, setInputs] = useState<{ variable: string; value: string }[]>([
-    { variable: "sectionTitle", value: "The universe" },
-  ]);
-
-  const handleInputChange = (
-    index: number,
-    field: "variable" | "value",
-    newValue: string,
-  ) => {
-    const newInputs = [...inputs];
-    newInputs[index][field] = newValue;
-    setInputs(newInputs);
-  };
-
-  const addNewInput = () => {
-    setInputs([...inputs, { variable: "", value: "" }]);
-  };
 
   const handlePromptChange = (newPrompt: string | PromptObject) => {
     setBasePrompt(newPrompt as PromptObject);

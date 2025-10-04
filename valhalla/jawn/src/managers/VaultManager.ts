@@ -28,7 +28,7 @@ export class VaultManager extends BaseManager {
            WHERE org_id = $1 
            AND provider_name = $2
            LIMIT 1`,
-          [this.authParams.organizationId, params.provider]
+          [this.authParams.organizationId, params.provider],
         );
 
         if (result.data && result.data.length > 0) {
@@ -45,7 +45,7 @@ export class VaultManager extends BaseManager {
           params.provider,
           params.key,
           params.name ?? "Untitled",
-        ]
+        ],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -77,7 +77,7 @@ export class VaultManager extends BaseManager {
          WHERE org_id = $1
          AND soft_delete = false
          ORDER BY created_at DESC`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (result.error) {
@@ -93,7 +93,7 @@ export class VaultManager extends BaseManager {
           provider_name: key.provider_name,
           provider_key_name: key.provider_key_name,
           provider_secret_key: key.provider_secret_key,
-        })
+        }),
       );
 
       return { data: providerKeys, error: null };
@@ -104,7 +104,7 @@ export class VaultManager extends BaseManager {
   }
 
   public async getDecryptedProviderKeyById(
-    providerKeyId: string
+    providerKeyId: string,
   ): Promise<Result<DecryptedProviderKey, string>> {
     try {
       const result = await dbExecute<{
@@ -120,7 +120,7 @@ export class VaultManager extends BaseManager {
          WHERE id = $1
          AND soft_delete = false
          LIMIT 1`,
-        [providerKeyId]
+        [providerKeyId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -182,7 +182,7 @@ export class VaultManager extends BaseManager {
          SET ${updates.join(", ")}
          WHERE id = $${paramIndex++}
          AND org_id = $${paramIndex}`,
-        values
+        values,
       );
 
       if (result.error) {

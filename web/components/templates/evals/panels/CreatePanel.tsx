@@ -23,7 +23,7 @@ import { useTestDataStore } from "../testing/testingStore";
 
 export const useCreatePanelTabs = create<{
   selectedTab: string;
-  setSelectedTab: (tab: string) => void;
+  setSelectedTab: (_tab: string) => void;
 }>()(
   devtools(
     persist(

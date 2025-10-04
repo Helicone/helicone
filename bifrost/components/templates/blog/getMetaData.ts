@@ -18,14 +18,14 @@ export interface BlogStructureMetaData {
 export async function getMetadata(
   filePath: string,
   blogFolder: string = "blog",
-  blogSubFolder: string = "blogs"
+  blogSubFolder: string = "blogs",
 ): Promise<BlogStructureMetaData | null> {
   const basePath = path.join(
     process.cwd(),
     "app",
     blogFolder,
     blogSubFolder,
-    filePath
+    filePath,
   );
   const jsonPath = path.join(basePath, "metadata.json");
 
@@ -48,7 +48,7 @@ export async function getMetadata(
     console.error(`[Blog] Error loading metadata for ${filePath}:`, error);
     if (error instanceof Error) {
       console.error(
-        `[Blog] Error name: ${error.name}, message: ${error.message}`
+        `[Blog] Error name: ${error.name}, message: ${error.message}`,
       );
       console.error(`[Blog] Error stack: ${error.stack}`);
     }

@@ -56,7 +56,7 @@ export class HeliconeDatasetController extends Controller {
   public async addHeliconeDataset(
     @Body()
     requestBody: NewHeliconeDatasetParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -90,7 +90,7 @@ export class HeliconeDatasetController extends Controller {
     datasetId: string,
     @Body()
     requestBody: MutateParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const datasetManager = new DatasetManager(request.authParams);
     const result = await datasetManager.helicone.mutate(datasetId, requestBody);
@@ -112,7 +112,7 @@ export class HeliconeDatasetController extends Controller {
       offset: number;
       limit: number;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<HeliconeDatasetRow[], string>> {
     const datasetManager = new DatasetManager(request.authParams);
     const result = await datasetManager.helicone.query(datasetId, requestBody);
@@ -129,7 +129,7 @@ export class HeliconeDatasetController extends Controller {
   public async countHeliconeDatasetRows(
     @Path()
     datasetId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const datasetManager = new DatasetManager(request.authParams);
     const result = await datasetManager.helicone.count(datasetId);
@@ -148,7 +148,7 @@ export class HeliconeDatasetController extends Controller {
     requestBody: {
       datasetIds?: string[];
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<HeliconeDataset[], string>> {
     const datasetManager = new DatasetManager(request.authParams);
 
@@ -169,13 +169,13 @@ export class HeliconeDatasetController extends Controller {
     @Path()
     requestId: string,
     @Body() requestBody: { requestBody: Json; responseBody: Json },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ) {
     const datasetManager = new DatasetManager(request.authParams);
     const result = await datasetManager.helicone.updateDatasetRequest(
       datasetId,
       requestId,
-      requestBody
+      requestBody,
     );
     if (result.error) {
       this.setStatus(500);
@@ -189,7 +189,7 @@ export class HeliconeDatasetController extends Controller {
   public async deleteHeliconeDataset(
     @Path()
     datasetId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const datasetManager = new DatasetManager(request.authParams);
     const result = await datasetManager.helicone.deleteDataset(datasetId);

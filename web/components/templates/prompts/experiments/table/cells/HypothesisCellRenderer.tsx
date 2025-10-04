@@ -145,10 +145,6 @@ export const HypothesisCellRenderer = forwardRef<
       refetchOnReconnect: false,
     });
 
-    const handleCellClick = (e: React.MouseEvent) => {
-      e.stopPropagation();
-    };
-
     useEffect(() => {
       if (
         requestsData?.responseBody?.response?.choices?.[0]?.message?.content

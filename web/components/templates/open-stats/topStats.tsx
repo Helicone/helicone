@@ -41,7 +41,7 @@ const transformAllModelData = (
   return { transformedData: result, models: Array.from(models) };
 };
 export function TopStats() {
-  const { isLoading: isLoadingModels, data: modelData } = useQuery({
+  const { data: modelData } = useQuery({
     queryKey: ["modelUsageOverTime"],
     queryFn: async () => {
       const jawn = getJawnClient("none");
@@ -52,7 +52,7 @@ export function TopStats() {
     },
   });
 
-  const { isLoading: isLoadingProviders, data: providerData } = useQuery({
+  const { data: providerData } = useQuery({
     queryKey: ["providerUsageOverTime"],
     queryFn: async () => {
       const jawn = getJawnClient("none");

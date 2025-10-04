@@ -32,7 +32,7 @@ class DataDogClient {
         this.logDistributionMetric(
           Date.now(),
           metrics.executionTimeMs,
-          `${metrics.handlerName}.handleResults`
+          `${metrics.handlerName}.handleResults`,
         ),
         this.logExecutionTime(
           Date.now(),
@@ -40,7 +40,7 @@ class DataDogClient {
           metrics.handlerName,
           metrics.methodName,
           metrics.executionTimeMs,
-          metrics.messageCount
+          metrics.messageCount,
         ),
       ];
 
@@ -61,7 +61,7 @@ class DataDogClient {
   public async logDistributionMetric(
     timestamp: number,
     executionTimeMs: number,
-    handlerName: string
+    handlerName: string,
   ): PromiseGenericResult<Response> {
     if (!this.config.enabled) {
       return err(`DataDog logging is disabled`);
@@ -91,7 +91,7 @@ class DataDogClient {
 
       const response = await fetch(
         `${this.config.endpoint}/v1/distribution_points`,
-        requestInit
+        requestInit,
       );
 
       return ok(response);
@@ -106,7 +106,7 @@ class DataDogClient {
     handlerName: string,
     methodName: string,
     executionTimeMs: number,
-    batchSize: number
+    batchSize: number,
   ): PromiseGenericResult<Response> {
     if (!this.config.enabled) {
       return err(`DataDog logging is disabled`);
@@ -139,7 +139,7 @@ class DataDogClient {
 
       const response = await fetch(
         `https://http-intake.logs.us5.datadoghq.com/api/v2/logs`,
-        requestInit as RequestInit
+        requestInit as RequestInit,
       );
 
       return ok(response);

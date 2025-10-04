@@ -4,7 +4,7 @@ import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
 export class GenericBodyProcessor implements IBodyProcessor {
   public async parse(
-    parseInput: ParseInput
+    parseInput: ParseInput,
   ): PromiseGenericResult<ParseOutput> {
     const parsedResponseBody = JSON.parse(parseInput.responseBody);
 
@@ -67,11 +67,22 @@ export class GenericBodyProcessor implements IBodyProcessor {
 
     // OpenAI charges for input, input cache read, output, output audio, input audio.
     const usage = response.usage;
-    const effectivePromptTokens = usage?.prompt_tokens !== undefined
-        ? Math.max(0, (usage.prompt_tokens ?? 0) - (usage.prompt_tokens_details?.cached_tokens ?? 0) - (usage.prompt_tokens_details?.audio_tokens ?? 0))
+    const effectivePromptTokens =
+      usage?.prompt_tokens !== undefined
+        ? Math.max(
+            0,
+            (usage.prompt_tokens ?? 0) -
+              (usage.prompt_tokens_details?.cached_tokens ?? 0) -
+              (usage.prompt_tokens_details?.audio_tokens ?? 0),
+          )
         : usage?.input_tokens;
-    const effectiveCompletionTokens = usage?.completion_tokens !== undefined
-        ? Math.max(0, (usage.completion_tokens ?? 0) - (usage.completion_tokens_details?.audio_tokens ?? 0))
+    const effectiveCompletionTokens =
+      usage?.completion_tokens !== undefined
+        ? Math.max(
+            0,
+            (usage.completion_tokens ?? 0) -
+              (usage.completion_tokens_details?.audio_tokens ?? 0),
+          )
         : usage?.output_tokens;
 
     return {

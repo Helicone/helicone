@@ -148,8 +148,11 @@ export const mapRealtimeRequest: MapperFn<any, any> = ({
   };
 };
 
-
-const combineAudioBuffers = (audioBuffer: SocketMessage[], audio_key: "audio" | "delta", type: RealtimeMessage["type"]) => {
+const combineAudioBuffers = (
+  audioBuffer: SocketMessage[],
+  audio_key: "audio" | "delta",
+  type: RealtimeMessage["type"],
+) => {
   // When we hit a commit, we create a combined message from all appends in the current group
   const firstMsg = audioBuffer[0];
   const lastMsg = audioBuffer[audioBuffer.length - 1];
@@ -174,11 +177,11 @@ const combineAudioBuffers = (audioBuffer: SocketMessage[], audio_key: "audio" | 
   };
 
   return combinedMsg;
-}
+};
 
 // Helper function to group audio buffer append messages
 const groupAudioBufferMessages = (
-  messages: SocketMessage[]
+  messages: SocketMessage[],
 ): SocketMessage[] => {
   const result: SocketMessage[] = [];
   let currentAudioGroup: SocketMessage[] = [];
@@ -190,10 +193,17 @@ const groupAudioBufferMessages = (
 
     if (msg.content.type === "response.audio.delta") {
       targetAudioGroup.push(msg);
-    } else if (msg.content.type === "response.audio.done" &&
+    } else if (
+      msg.content.type === "response.audio.done" &&
       targetAudioGroup.length > 0
     ) {
-      result.push(combineAudioBuffers(targetAudioGroup, "delta", "response.audio.combined"));
+      result.push(
+        combineAudioBuffers(
+          targetAudioGroup,
+          "delta",
+          "response.audio.combined",
+        ),
+      );
       targetAudioGroup = [];
     } else if (msg.content.type === "input_audio_buffer.append") {
       currentAudioGroup.push(msg);
@@ -201,7 +211,13 @@ const groupAudioBufferMessages = (
       msg.content.type === "input_audio_buffer.commit" &&
       currentAudioGroup.length > 0
     ) {
-      result.push(combineAudioBuffers(currentAudioGroup, "audio", "input_audio_buffer.combined"));
+      result.push(
+        combineAudioBuffers(
+          currentAudioGroup,
+          "audio",
+          "input_audio_buffer.combined",
+        ),
+      );
       currentAudioGroup = []; // Reset the group
     }
     result.push(msg);
@@ -254,10 +270,10 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
     }
   });
 
-  let userTentativeMessage : Message | null = null;
-  let targetTentativeMessage : Message | null = null;
-  let userAudioTentativeMessage : Message | null = null;
-  let targetAudioTentativeMessage : Message | null = null;
+  let userTentativeMessage: Message | null = null;
+  let targetTentativeMessage: Message | null = null;
+  let userAudioTentativeMessage: Message | null = null;
+  let targetAudioTentativeMessage: Message | null = null;
   let message: Message | null = null;
 
   return groupedMessages
@@ -341,7 +357,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               _type: "audio",
               start_timestamp: msg.timestamp,
               trigger_event_id: msg.content.type,
-            }
+            };
           }
           break;
         case "conversation.item.input_audio_transcription.completed":
@@ -488,7 +504,11 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
     .sort(
       // Sort by timestamp
       (a, b) =>
-        new Date(((a as Message)?.start_timestamp ?? a?.timestamp) || 0).getTime() -
-        new Date(((b as Message)?.start_timestamp ?? b?.timestamp) || 0).getTime()
+        new Date(
+          ((a as Message)?.start_timestamp ?? a?.timestamp) || 0,
+        ).getTime() -
+        new Date(
+          ((b as Message)?.start_timestamp ?? b?.timestamp) || 0,
+        ).getTime(),
     ) as Message[];
 };

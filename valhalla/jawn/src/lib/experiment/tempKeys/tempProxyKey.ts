@@ -10,7 +10,7 @@ type HashedPasswordRow = {
 async function createProxyKey(
   providerKeyId: string,
   heliconeProxyKeyName: string,
-  organizationId: string
+  organizationId: string,
 ) {
   if (!providerKeyId || !heliconeProxyKeyName) {
     return {
@@ -59,7 +59,7 @@ class TempProxyKey implements BaseTempKey {
   private keyUsed = false;
   constructor(
     private proxyKey: string,
-    private proxyKeyId: string
+    private proxyKeyId: string,
   ) {}
 
   async cleanup() {
@@ -73,7 +73,7 @@ class TempProxyKey implements BaseTempKey {
         `DELETE FROM helicone_proxy_keys
          WHERE id = $1
          AND experiment_use = true`,
-        [this.proxyKeyId]
+        [this.proxyKeyId],
       );
     } catch (error) {
       console.error("Error cleaning up proxy key:", error);
@@ -101,7 +101,7 @@ class TempProxyKey implements BaseTempKey {
 export async function generateProxyKey(
   providerKeyId: string,
   heliconeProxyKeyName: string,
-  organizationId?: string
+  organizationId?: string,
 ): Promise<Result<TempProxyKey, string>> {
   // Get provider key details to determine organization ID if not provided
   if (!organizationId) {
@@ -113,7 +113,7 @@ export async function generateProxyKey(
          WHERE id = $1 
          AND soft_delete = false
          LIMIT 1`,
-        [providerKeyId]
+        [providerKeyId],
       );
 
       if (keyResult.error || !keyResult.data || keyResult.data.length === 0) {
@@ -131,14 +131,14 @@ export async function generateProxyKey(
   const proxyKey = await createProxyKey(
     providerKeyId,
     heliconeProxyKeyName,
-    organizationId
+    organizationId,
   );
 
   if (!proxyKey?.data) {
     return err(proxyKey?.error || "Failed to create proxy key");
   } else {
     return ok(
-      new TempProxyKey(proxyKey.data.proxyKey, proxyKey.data.proxyKeyId)
+      new TempProxyKey(proxyKey.data.proxyKey, proxyKey.data.proxyKeyId),
     );
   }
 }

@@ -16,7 +16,7 @@ async function fetchAnthropic(url: any, init?: any): Promise<Response> {
       console.log(`Rate limit exceeded. Retrying after ${retryAfter} seconds.`);
 
       await new Promise((resolve) =>
-        setTimeout(resolve, (Number(retryAfter) + 1) * 1000)
+        setTimeout(resolve, (Number(retryAfter) + 1) * 1000),
       );
 
       return fetch(url, init);

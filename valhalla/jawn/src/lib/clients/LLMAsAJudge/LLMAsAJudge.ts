@@ -33,13 +33,13 @@ export class LLMAsAJudge {
       promptTemplate: string;
       evaluatorName: string;
       organizationId: string;
-    }
+    },
   ) {}
 
   private async evaluateChoice(result: any): Promise<EvaluatorScoreResult> {
     const evaluatorName = this.params.evaluatorName;
     const score = JSON.parse(
-      result?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments
+      result?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments,
     );
 
     if (Object.keys(score).length === 0) {
@@ -53,7 +53,7 @@ export class LLMAsAJudge {
 
   private async evaluateBoolean(result: any): Promise<EvaluatorScoreResult> {
     const score = JSON.parse(
-      result.choices[0].message.tool_calls[0].function.arguments
+      result.choices[0].message.tool_calls[0].function.arguments,
     );
     if (Object.keys(score).length === 0) {
       return err("No score found");
@@ -66,7 +66,7 @@ export class LLMAsAJudge {
 
   private async evaluateRange(result: any): Promise<EvaluatorScoreResult> {
     const score = JSON.parse(
-      result.choices[0].message.tool_calls[0].function.arguments
+      result.choices[0].message.tool_calls[0].function.arguments,
     );
     if (Object.keys(score).length === 0) {
       return err("No score found");
@@ -95,12 +95,12 @@ export class LLMAsAJudge {
 
     const heliconeApiKey = await generateTempHeliconeAPIKey(
       this.params.organizationId,
-      "LLMAsAJudge"
+      "LLMAsAJudge",
     );
 
     const openrouterKey = await GET_KEY("key:openrouter");
     const heliconeOnHeliconeApiKey = await GET_KEY(
-      "key:helicone_on_helicone_key"
+      "key:helicone_on_helicone_key",
     );
     const heliconeClient = new HeliconeManualLogger({
       apiKey: heliconeOnHeliconeApiKey,

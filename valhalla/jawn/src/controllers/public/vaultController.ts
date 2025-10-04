@@ -30,7 +30,7 @@ export class VaultController extends Controller {
   @Post("add")
   public async addKey(
     @Body() requestBody: AddVaultKeyParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ id: string }, string>> {
     if (
       !(
@@ -54,7 +54,7 @@ export class VaultController extends Controller {
 
   @Get("keys")
   public async getKeys(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<DecryptedProviderKey[], string>> {
     if (
       !(
@@ -79,7 +79,7 @@ export class VaultController extends Controller {
   @Get("key/{providerKeyId}")
   public async getKeyById(
     @Path() providerKeyId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<DecryptedProviderKey, string>> {
     if (
       !(
@@ -93,9 +93,8 @@ export class VaultController extends Controller {
 
     const vaultManager = new VaultManager(request.authParams);
 
-    const result = await vaultManager.getDecryptedProviderKeyById(
-      providerKeyId
-    );
+    const result =
+      await vaultManager.getDecryptedProviderKeyById(providerKeyId);
     if (result.error || !result.data) {
       this.setStatus(500);
       return { data: null, error: result.error || "Failed to retrieve key" };
@@ -109,7 +108,7 @@ export class VaultController extends Controller {
   public async updateKey(
     @Path() id: string,
     @Body() requestBody: { key?: string; name?: string; active?: boolean },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     if (
       !(

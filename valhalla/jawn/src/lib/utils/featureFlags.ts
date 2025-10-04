@@ -10,7 +10,7 @@ export const AI_GATEWAY_FEATURE_FLAG = "ai_gateway";
  */
 export async function checkFeatureFlag(
   organizationId: string,
-  feature: string
+  feature: string,
 ): Promise<Result<boolean, string>> {
   try {
     const { data } = await dbExecute<{

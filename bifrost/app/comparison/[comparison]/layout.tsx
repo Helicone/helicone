@@ -19,13 +19,13 @@ export async function generateMetadata({
     decodedModelA,
     decodedModelB,
     decodedProviderA,
-    decodedProviderB
+    decodedProviderB,
   );
   const description = getComparisonDescription(
     decodedModelA,
     decodedModelB,
     decodedProviderA,
-    decodedProviderB
+    decodedProviderB,
   );
   const imageUrl = "/static/status/status-page-open-graph.webp";
 
@@ -61,7 +61,7 @@ export default function RootLayout({
 
 const getDisplayName = (model: string, provider: string): string => {
   const providerInfo = providers.find(
-    (p) => p.provider.toUpperCase() === provider.toUpperCase()
+    (p) => p.provider.toUpperCase() === provider.toUpperCase(),
   );
   const modelDetails = providerInfo?.modelDetails;
 
@@ -78,7 +78,7 @@ const getComparisonTitle = (
   modelA: string,
   modelB: string,
   providerA: string,
-  providerB: string
+  providerB: string,
 ) => {
   const modelADisplay = getDisplayName(modelA, providerA);
   const modelBDisplay = getDisplayName(modelB, providerB);
@@ -89,7 +89,7 @@ const getComparisonDescription = (
   modelA: string,
   modelB: string,
   providerA: string,
-  providerB: string
+  providerB: string,
 ) => {
   const modelADisplay = `${providerA}'s ${getDisplayName(modelA, providerA)}`;
   const modelBDisplay = `${providerB}'s ${getDisplayName(modelB, providerB)}`;

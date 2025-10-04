@@ -40,7 +40,7 @@ export class AgentController extends Controller {
       environment?: string;
       inputs?: any;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       | OpenAI.Chat.Completions.ChatCompletion
@@ -54,12 +54,12 @@ export class AgentController extends Controller {
       const { useAIGateway, logRequest, ...params } = bodyParams;
 
       const tempKey = await getHeliconeDefaultTempKey(
-        request.authParams.organizationId
+        request.authParams.organizationId,
       );
 
       if (tempKey.error || !tempKey.data) {
         throw new Error(
-          tempKey.error || "Failed to generate temporary API key"
+          tempKey.error || "Failed to generate temporary API key",
         );
       }
 
@@ -176,7 +176,7 @@ export class AgentController extends Controller {
 
           if (!content && !calls) {
             console.warn(
-              "[Agent API] LLM call resulted in empty content and no tool calls."
+              "[Agent API] LLM call resulted in empty content and no tool calls.",
             );
           }
 
@@ -222,7 +222,7 @@ export class AgentController extends Controller {
         [key: string]: any;
       };
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<InAppThread, string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
 
@@ -243,7 +243,7 @@ export class AgentController extends Controller {
   @Delete("/thread/{sessionId}")
   public async deleteThread(
     @Path() sessionId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ success: boolean }, string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
 
@@ -260,7 +260,7 @@ export class AgentController extends Controller {
   @Post("/thread/{sessionId}/escalate")
   public async escalateThread(
     @Path() sessionId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<InAppThread, string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
 
@@ -276,7 +276,7 @@ export class AgentController extends Controller {
 
   @Post("/thread/create-and-escalate")
   public async createAndEscalateThread(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<InAppThread, string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
 
@@ -292,7 +292,7 @@ export class AgentController extends Controller {
 
   @Get("/threads")
   public async getAllThreads(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ThreadSummary[], string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
 
@@ -309,7 +309,7 @@ export class AgentController extends Controller {
   @Get("/thread/{sessionId}")
   public async getThread(
     @Path() sessionId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<InAppThread, string>> {
     const threadsManager = new InAppThreadsManager(request.authParams);
 
@@ -326,7 +326,7 @@ export class AgentController extends Controller {
   @Post("/mcp/search")
   public async searchDocs(
     @Body() bodyParams: { query: string },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     const { query } = bodyParams;
     const mcpTool =

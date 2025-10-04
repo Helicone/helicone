@@ -30,12 +30,12 @@ export function formatProviderName(provider: string): string {
 
 const getParentModelInfo = (provider: string, model: string) => {
   const providerData = providers.find(
-    (p) => p.provider.toLowerCase() === provider.toLowerCase()
+    (p) => p.provider.toLowerCase() === provider.toLowerCase(),
   );
   if (!providerData?.modelDetails) return null;
 
   for (const [parentModel, details] of Object.entries(
-    providerData.modelDetails
+    providerData.modelDetails,
   )) {
     if (details.matches.includes(model)) {
       return {
@@ -386,7 +386,7 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
                 <div className="mx-auto w-full">
                   <Link
                     href={`/llm-cost/provider/${encodeURIComponent(
-                      provider.toLowerCase()
+                      provider.toLowerCase(),
                     )}/model/${encodeURIComponent(parentInfo.name)}`}
                     className="inline-flex items-center gap-2 text-sm text-sky-600 hover:text-sky-700"
                   >
@@ -824,12 +824,17 @@ const CalculatorInfo: React.FC<CalculatorInfoProps> = ({ model, provider }) => {
               API Access - Get LLM Cost Data Programmatically
             </h3>
             <p className="text-slate-500 mb-4">
-              Access the same pricing data used in this calculator programmatically through our API endpoint. Perfect for integrating cost calculations into your applications, scripts, or automated workflows.
+              Access the same pricing data used in this calculator
+              programmatically through our API endpoint. Perfect for integrating
+              cost calculations into your applications, scripts, or automated
+              workflows.
             </p>
 
             <div className="space-y-6">
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Basic Usage</h4>
+                <h4 className="font-semibold text-slate-700 mb-3">
+                  Basic Usage
+                </h4>
                 <div className="bg-slate-900 p-4 rounded-md">
                   <pre className="text-green-400 text-sm overflow-x-auto">
                     <code>{`# Get all models with costs per 1 million tokens
@@ -848,7 +853,9 @@ curl "https://www.helicone.ai/api/llm-costs?provider=anthropic&model=claude"`}</
               </div>
 
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Output Formats</h4>
+                <h4 className="font-semibold text-slate-700 mb-3">
+                  Output Formats
+                </h4>
                 <div className="bg-slate-900 p-4 rounded-md">
                   <pre className="text-green-400 text-sm overflow-x-auto">
                     <code>{`# Get data as JSON (default)
@@ -862,8 +869,13 @@ curl "https://www.helicone.ai/api/llm-costs?provider=openai&format=csv" \\
               </div>
 
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Response Format</h4>
-                <p className="text-slate-500 mb-2">The API returns structured data with metadata and cost information:</p>
+                <h4 className="font-semibold text-slate-700 mb-3">
+                  Response Format
+                </h4>
+                <p className="text-slate-500 mb-2">
+                  The API returns structured data with metadata and cost
+                  information:
+                </p>
                 <div className="bg-slate-900 p-4 rounded-md">
                   <pre className="text-green-400 text-sm overflow-x-auto">
                     <code>{`{
@@ -892,35 +904,67 @@ curl "https://www.helicone.ai/api/llm-costs?provider=openai&format=csv" \\
               </div>
 
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Parameters</h4>
+                <h4 className="font-semibold text-slate-700 mb-3">
+                  Parameters
+                </h4>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-slate-200">
                     <thead className="bg-slate-50">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Parameter</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Default</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Parameter
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Default
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Description
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-200">
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">provider</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">string</td>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">
+                          provider
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          string
+                        </td>
                         <td className="px-4 py-2 text-sm text-slate-500">-</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Filter by exact provider name (e.g., &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Filter by exact provider name (e.g.,
+                          &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">model</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">string</td>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">
+                          model
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          string
+                        </td>
                         <td className="px-4 py-2 text-sm text-slate-500">-</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Search models containing this text (e.g., &quot;gpt&quot;, &quot;claude&quot;)</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Search models containing this text (e.g.,
+                          &quot;gpt&quot;, &quot;claude&quot;)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">format</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">string</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">json</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Output format: &quot;json&quot; or &quot;csv&quot;</td>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">
+                          format
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          string
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          json
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Output format: &quot;json&quot; or &quot;csv&quot;
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -928,43 +972,79 @@ curl "https://www.helicone.ai/api/llm-costs?provider=openai&format=csv" \\
               </div>
 
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Response Fields</h4>
+                <h4 className="font-semibold text-slate-700 mb-3">
+                  Response Fields
+                </h4>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-slate-200">
                     <thead className="bg-slate-50">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Field</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Field
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Description
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-200">
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">provider</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Provider name (e.g., &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)</td>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">
+                          provider
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Provider name (e.g., &quot;OPENAI&quot;,
+                          &quot;ANTHROPIC&quot;)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">model</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Model identifier</td>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">
+                          model
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Model identifier
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">operator</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">How the model name matching works (&quot;equals&quot;, &quot;startsWith&quot;, &quot;includes&quot;)</td>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">
+                          operator
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          How the model name matching works (&quot;equals&quot;,
+                          &quot;startsWith&quot;, &quot;includes&quot;)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">input_cost_per_1m</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Cost per 1 million input tokens (USD)</td>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">
+                          input_cost_per_1m
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Cost per 1 million input tokens (USD)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">output_cost_per_1m</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Cost per 1 million output tokens (USD)</td>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">
+                          output_cost_per_1m
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Cost per 1 million output tokens (USD)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">per_image</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Cost per image (USD) - if applicable</td>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">
+                          per_image
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Cost per image (USD) - if applicable
+                        </td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">per_call</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Cost per API call (USD) - if applicable</td>
+                        <td className="px-4 py-2 text-sm text-slate-700 font-mono">
+                          per_call
+                        </td>
+                        <td className="px-4 py-2 text-sm text-slate-500">
+                          Cost per API call (USD) - if applicable
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -972,12 +1052,22 @@ curl "https://www.helicone.ai/api/llm-costs?provider=openai&format=csv" \\
               </div>
 
               <div className="bg-blue-50 p-4 rounded-md">
-                <h4 className="font-semibold text-blue-700 mb-2">💡 Pro Tips</h4>
+                <h4 className="font-semibold text-blue-700 mb-2">
+                  💡 Pro Tips
+                </h4>
                 <ul className="list-disc pl-5 text-blue-700 text-sm space-y-1">
-                  <li>All costs are per 1 million tokens, making it easy to calculate expenses</li>
-                  <li>Model operators help understand how model matching works</li>
+                  <li>
+                    All costs are per 1 million tokens, making it easy to
+                    calculate expenses
+                  </li>
+                  <li>
+                    Model operators help understand how model matching works
+                  </li>
                   <li>Results are sorted by provider, then by model name</li>
-                  <li>Data comes directly from Helicone&apos;s production cost database</li>
+                  <li>
+                    Data comes directly from Helicone&apos;s production cost
+                    database
+                  </li>
                   <li>API supports CORS for browser-based applications</li>
                   <li>Use CSV format for easy import into spreadsheets</li>
                 </ul>

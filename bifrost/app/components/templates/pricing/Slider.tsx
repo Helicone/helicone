@@ -64,7 +64,7 @@ const Slider: React.FC<SliderProps> = ({
                 toExponentialValue(sliderValue) >= Number(key)
                   ? "font-bold text-black"
                   : "text-gray-500",
-                "absolute text-xs"
+                "absolute text-xs",
               )}
               onClick={() => {
                 setSliderValue(toLinearValue(Number(key)));

@@ -8,7 +8,7 @@ function prepareRequestAzure(
   requestId: string,
   columnId?: string,
   rowIndex?: number,
-  experimentId?: string
+  experimentId?: string,
 ): {
   url: URL;
   headers: { [key: string]: string };
@@ -46,7 +46,7 @@ function prepareRequestAnthropic(
   requestPath: string,
   apiKey: string,
   requestId: string,
-  experimentId?: string
+  experimentId?: string,
 ): {
   url: URL;
   headers: { [key: string]: string };
@@ -96,7 +96,7 @@ export function prepareRequestOpenAIOnPremFull({
 
   const requestBodyRemoved = removeKeysWithValue(
     newRequestBody,
-    "helicone-to-remove"
+    "helicone-to-remove",
   );
 
   const { url: fetchUrl, headers } = prepareRequestAzure(
@@ -106,7 +106,7 @@ export function prepareRequestOpenAIOnPremFull({
     requestId,
     columnId,
     rowIndex,
-    experimentId
+    experimentId,
   );
 
   return {
@@ -133,14 +133,14 @@ export function prepareRequestAnthropicFull({
 
   const requestBodyRemoved = removeKeysWithValue(
     newRequestBody,
-    "helicone-to-remove"
+    "helicone-to-remove",
   );
 
   const { url: fetchUrl, headers } = prepareRequestAnthropic(
     `${process.env.HELICONE_LLMMAPPER_URL}/oai2ant/v1/chat/completions`,
     proxyKey,
     requestId,
-    experimentId
+    experimentId,
   );
   return {
     url: fetchUrl,

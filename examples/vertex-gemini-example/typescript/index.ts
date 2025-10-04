@@ -49,7 +49,7 @@ async function vercel() {
   console.log("✅ Vercel AI SDK Response received:");
   console.log(text);
   console.log(
-    "\n📊 Check your Helicone dashboard at https://helicone.ai/requests"
+    "\n📊 Check your Helicone dashboard at https://helicone.ai/requests",
   );
 }
 
@@ -83,7 +83,7 @@ async function notVercel() {
     console.log(response.choices[0].message.content);
 
     console.log(
-      "\n📊 Check your Helicone dashboard at https://helicone.ai/requests"
+      "\n📊 Check your Helicone dashboard at https://helicone.ai/requests",
     );
   } catch (error) {
     console.error("❌ Error:", error);
@@ -109,7 +109,7 @@ async function geminiTest() {
 
     if (fs.existsSync(imagePath)) {
       console.log(
-        "📸 Found test.png - reading image for multimodal request..."
+        "📸 Found test.png - reading image for multimodal request...",
       );
       const imageBuffer = fs.readFileSync(imagePath);
       imageData = imageBuffer.toString("base64");
@@ -176,10 +176,10 @@ async function geminiTest() {
       if (response.status === 401 || response.status === 403) {
         console.log("💡 This might be an authentication issue.");
         console.log(
-          "   Make sure to set GOOGLE_API_KEY or VERTEX_AI_TOKEN in your .env file"
+          "   Make sure to set GOOGLE_API_KEY or VERTEX_AI_TOKEN in your .env file",
         );
         console.log(
-          "   and ensure your Google Cloud project has Vertex AI API enabled."
+          "   and ensure your Google Cloud project has Vertex AI API enabled.",
         );
       }
       return;
@@ -195,19 +195,19 @@ async function geminiTest() {
     }
 
     console.log(
-      "\n📊 Check your Helicone dashboard at https://helicone.ai/requests"
+      "\n📊 Check your Helicone dashboard at https://helicone.ai/requests",
     );
   } catch (error) {
     console.error("❌ Gemini Error:", error);
     console.log("\n💡 To use Gemini with Helicone, you need:");
     console.log("   1. Set GOOGLE_CLOUD_PROJECT in your .env file");
     console.log(
-      "   2. Set GOOGLE_API_KEY or VERTEX_AI_TOKEN in your .env file"
+      "   2. Set GOOGLE_API_KEY or VERTEX_AI_TOKEN in your .env file",
     );
     console.log("   3. Enable Vertex AI API in your Google Cloud project");
     console.log("   4. Ensure proper authentication is configured");
     console.log(
-      "   5. Add a test.png file in the same directory for image testing"
+      "   5. Add a test.png file in the same directory for image testing",
     );
   }
 }

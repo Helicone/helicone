@@ -48,7 +48,7 @@ const anthropicMessageToMessage = (message: any, role?: string): Message => {
       role: messageRole,
       _type: "contentArray",
       contentArray: message.content.map((c: any) =>
-        anthropicMessageToMessage(c, messageRole)
+        anthropicMessageToMessage(c, messageRole),
       ),
       id: randomId(),
     };
@@ -111,8 +111,8 @@ export const getRequestMessages = (request: any) => {
             .map((item: any) => item.text || JSON.stringify(item))
             .join(" ")
         : typeof request.system === "string"
-        ? request.system
-        : JSON.stringify(request.system),
+          ? request.system
+          : JSON.stringify(request.system),
       _type: "message",
     });
   }
@@ -120,7 +120,7 @@ export const getRequestMessages = (request: any) => {
   requestMessages.push(
     ...(request.messages?.map((message: any) => {
       return anthropicMessageToMessage(message);
-    }) || [])
+    }) || []),
   );
 
   return requestMessages;

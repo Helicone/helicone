@@ -126,7 +126,7 @@ describe("mapGeminiPro", () => {
     // Test preview
     expect(result.preview.request).toBe("What's in this image?");
     expect(result.preview.response).toContain(
-      "That's a screenshot of a file explorer"
+      "That's a screenshot of a file explorer",
     );
   });
 

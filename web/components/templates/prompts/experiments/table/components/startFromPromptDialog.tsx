@@ -31,40 +31,9 @@ export const NewExperimentDialog = () => {
   const router = useRouter();
   const jawn = useJawnClient();
 
-  const [selectedInput, setSelectedInput] = useState<any>({
-    id: "",
-    inputs: {},
-    source_request: "",
-    prompt_version: "",
-    created_at: "",
-    auto_prompt_inputs: [],
-    response_body: "",
-  });
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [promptName, setPromptName] = useState<string>("");
-  const [promptVariables, setPromptVariables] = useState<
-    Array<{ original: string; heliconeTag: string; value: string }>
-  >([]);
-
-  const [inputs, setInputs] = useState<{ variable: string; value: string }[]>([
-    { variable: "sectionTitle", value: "The universe" },
-  ]);
-
-  const handleInputChange = (
-    index: number,
-    field: "variable" | "value",
-    newValue: string,
-  ) => {
-    const newInputs = [...inputs];
-    newInputs[index][field] = newValue;
-    setInputs(newInputs);
-  };
-
-  const addNewInput = () => {
-    setInputs([...inputs, { variable: "", value: "" }]);
-  };
 
   const handlePromptChange = (newPrompt: string | PromptObject) => {
     setBasePrompt(newPrompt as PromptObject);

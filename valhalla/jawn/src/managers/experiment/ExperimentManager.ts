@@ -41,7 +41,7 @@ export class ExperimentManager extends BaseManager {
          WHERE id = $1
          AND organization = $2
          LIMIT 1`,
-        [experimentId, this.authParams.organizationId]
+        [experimentId, this.authParams.organizationId],
       );
 
       return !!(result.data && result.data.length > 0);
@@ -53,7 +53,7 @@ export class ExperimentManager extends BaseManager {
 
   async getExperimentById(
     experimentId: string,
-    include: IncludeExperimentKeys
+    include: IncludeExperimentKeys,
   ): Promise<Result<Experiment, string>> {
     if (!(await this.hasAccessToExperiment(experimentId))) {
       return err("Unauthorized");
@@ -69,7 +69,7 @@ export class ExperimentManager extends BaseManager {
 
   async getExperiments(
     filter: FilterNode,
-    include: IncludeExperimentKeys
+    include: IncludeExperimentKeys,
   ): Promise<Result<Experiment[], string>> {
     return this.ExperimentStore.getExperiments(filter, include);
   }
@@ -88,7 +88,7 @@ export class ExperimentManager extends BaseManager {
          FROM experiment_v2
          WHERE id = $1
          AND organization = $2`,
-        [params.experimentId, this.authParams.organizationId]
+        [params.experimentId, this.authParams.organizationId],
       );
 
       if (hasAccess.error || !hasAccess.data || hasAccess.data[0].count === 0) {
@@ -113,7 +113,7 @@ export class ExperimentManager extends BaseManager {
           params.status,
           params.experimentId,
           params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
-        ]
+        ],
       );
 
       if (result.error || !result.data) {
@@ -128,7 +128,7 @@ export class ExperimentManager extends BaseManager {
   }
 
   async addNewExperiment(
-    params: NewExperimentParams
+    params: NewExperimentParams,
   ): Promise<Result<{ experimentId: string }, string>> {
     try {
       // Create the experiment
@@ -136,7 +136,7 @@ export class ExperimentManager extends BaseManager {
         `INSERT INTO experiment_v2 (dataset, organization, meta)
          VALUES ($1, $2, $3)
          RETURNING id`,
-        [params.datasetId, this.authParams.organizationId, params.meta || null]
+        [params.datasetId, this.authParams.organizationId, params.meta || null],
       );
 
       if (
@@ -167,7 +167,7 @@ export class ExperimentManager extends BaseManager {
           "PENDING",
           experimentId,
           params.providerKeyId === "NOKEY" ? null : params.providerKeyId,
-        ]
+        ],
       );
 
       if (result.error) {
@@ -182,7 +182,7 @@ export class ExperimentManager extends BaseManager {
   }
 
   async createNewExperimentTable(
-    params: CreateExperimentTableParams
+    params: CreateExperimentTableParams,
   ): Promise<
     Result<
       { tableId: string; experimentId: string; inputKeys: string[] },
@@ -194,7 +194,7 @@ export class ExperimentManager extends BaseManager {
         params.datasetId,
         params.experimentMetadata.experiment_name || "Experiment",
         params.experimentMetadata,
-        params.experimentTableMetadata
+        params.experimentTableMetadata,
       );
 
     if (experimentTableResult.error || !experimentTableResult.data) {
@@ -208,7 +208,7 @@ export class ExperimentManager extends BaseManager {
         newHeliconeTemplate: params.newHeliconeTemplate,
         isMajorVersion: params.isMajorVersion,
         metadata: params.promptSubversionMetadata,
-      }
+      },
     );
 
     if (newPromptVersionResult.error || !newPromptVersionResult.data) {
@@ -216,7 +216,7 @@ export class ExperimentManager extends BaseManager {
     }
 
     const heliconeInputKeys = promptManager.getHeliconeTemplateKeys(
-      newPromptVersionResult.data.helicone_template
+      newPromptVersionResult.data.helicone_template,
     );
 
     const experimentTableColumnsResult =
@@ -232,7 +232,7 @@ export class ExperimentManager extends BaseManager {
             type: "output",
             promptVersionId: params.promptVersionId,
           },
-        ] as { name: string; type: "input" | "output" }[]
+        ] as { name: string; type: "input" | "output" }[],
       );
 
     if (
@@ -240,7 +240,7 @@ export class ExperimentManager extends BaseManager {
       !experimentTableColumnsResult.data
     ) {
       return err(
-        "Failed to create experiment table columns. Make sure the prompt has any inputs."
+        "Failed to create experiment table columns. Make sure the prompt has any inputs.",
       );
     }
 
@@ -306,7 +306,7 @@ export class ExperimentManager extends BaseManager {
     inputs?: Record<string, string>;
   }): Promise<Result<{ id: string; cellType: string }[], string>> {
     const maxRowIndex = await this.ExperimentStore.getMaxRowIndex(
-      params.experimentTableId
+      params.experimentTableId,
     );
     if (maxRowIndex.error || maxRowIndex.data === null) {
       return err(maxRowIndex.error ?? "Failed to get max row index");
@@ -321,19 +321,19 @@ export class ExperimentManager extends BaseManager {
   }
 
   async getExperimentTableById(
-    experimentTableId: string
+    experimentTableId: string,
   ): Promise<Result<ExperimentTable, string>> {
     return this.ExperimentStore.getExperimentTable(experimentTableId);
   }
 
   async getExperimentTableColumns(
-    experimentTableId: string
+    experimentTableId: string,
   ): Promise<Result<{ id: string; name: string }[], string>> {
     return this.ExperimentStore.getExperimentTableColumns(experimentTableId);
   }
 
   async getExperimentTableSimplifiedById(
-    experimentTableId: string
+    experimentTableId: string,
   ): Promise<Result<ExperimentTableSimplified, string>> {
     return this.ExperimentStore.getExperimentTableById(experimentTableId);
   }
@@ -367,7 +367,7 @@ export class ExperimentManager extends BaseManager {
     >
   > {
     const experimentTableResult = await this.getExperimentTableSimplifiedById(
-      params.experimentTableId
+      params.experimentTableId,
     );
     if (experimentTableResult.error || !experimentTableResult.data) {
       return err(experimentTableResult.error);
@@ -379,7 +379,7 @@ export class ExperimentManager extends BaseManager {
         params.columnType as "experiment" | "input" | "output",
         params.hypothesisId,
         params.promptVersionId,
-        params.inputKeys
+        params.inputKeys,
       );
 
     if (experimentColumnResult.error || !experimentColumnResult.data) {
@@ -393,7 +393,7 @@ export class ExperimentManager extends BaseManager {
           columnId: experimentColumnResult.data.id,
           rowIndex: index,
           value: null,
-        })
+        }),
       ),
     });
 

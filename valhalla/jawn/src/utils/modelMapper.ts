@@ -1,7 +1,7 @@
 export function getModelFromRequest(
   requestBody: string,
   path: string,
-  targetUrl: string | null = null
+  targetUrl: string | null = null,
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (requestBody && (requestBody as any).model) {
@@ -66,7 +66,7 @@ export function calculateModel(
   requestModel?: string,
   responseModel?: string,
   modelOverride?: string,
-  modelFromPath?: string
+  modelFromPath?: string,
 ): string | null {
   return (
     (modelOverride || null) ??

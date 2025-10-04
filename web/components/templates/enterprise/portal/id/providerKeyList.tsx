@@ -125,7 +125,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                         setDecryptedKey(key.provider_key || "");
                       }
                     }}
-                    className={({ active, checked }) =>
+                    className={({ active: _active, checked }) =>
                       clsx(
                         checked
                           ? "bg-sky-100 ring-sky-300 dark:bg-sky-900 dark:ring-sky-700"
@@ -134,7 +134,7 @@ const ProviderKeyList = (props: ProviderKeyListProps) => {
                       )
                     }
                   >
-                    {({ active, checked }) => (
+                    {({ active: _active, checked }) => (
                       <>
                         <div className="flex w-full items-center justify-between">
                           <div className="flex items-center">

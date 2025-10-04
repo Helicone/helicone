@@ -14,12 +14,13 @@ export const Layout = async ({
   noNavbarMargin?: boolean;
 }) => {
   const githubResponse = await fetch(
-    "https://api.github.com/repos/helicone/helicone"
+    "https://api.github.com/repos/helicone/helicone",
   );
   const githubData = await githubResponse.json();
   const stars = githubData.stargazers_count;
 
-  const featuredBlogFolderName = (BLOG_CONTENT[0] as any)?.dynmaicEntry?.folderName;
+  const featuredBlogFolderName = (BLOG_CONTENT[0] as any)?.dynmaicEntry
+    ?.folderName;
   const featuredBlogMetadata = await getMetadata(featuredBlogFolderName);
 
   return (
@@ -28,10 +29,13 @@ export const Layout = async ({
 
       <NavBar
         stars={stars}
-        featuredBlogMetadata={featuredBlogMetadata || {
-          title: "Check out our latest blog",
-          description: "Open-source LLM observability and monitoring platform for developers",
-        }}
+        featuredBlogMetadata={
+          featuredBlogMetadata || {
+            title: "Check out our latest blog",
+            description:
+              "Open-source LLM observability and monitoring platform for developers",
+          }
+        }
         featuredBlogFolderName={featuredBlogFolderName}
         noMargin={noNavbarMargin}
       />

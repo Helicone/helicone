@@ -30,7 +30,7 @@ export class DeepSeekUsageProcessor extends OpenAIUsageProcessor {
     const effectivePromptTokens = promptCacheMissTokens;
     const effectiveCompletionTokens = Math.max(
       0,
-      completionTokens - reasoningTokens
+      completionTokens - reasoningTokens,
     );
 
     const modelUsage: ModelUsage = {

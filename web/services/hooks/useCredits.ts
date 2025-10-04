@@ -91,17 +91,19 @@ export const useCreditTransactions = (params?: {
   const transformedData = result.data
     ? (() => {
         const data = result.data as StripePaymentIntentsResponse;
-        
+
         // Transform Stripe payment intents to our format
-        const purchases: PurchasedCredits[] = (data.data || []).map((intent) => ({
-          id: intent.id, // Always the payment intent ID
-          createdAt: intent.created * 1000, // Convert from seconds to milliseconds
-          credits: intent.amount || 0, // Amount is in cents
-          status: intent.status,
-          isRefunded: intent.isRefunded,
-          refundedAmount: intent.refundedAmount,
-          refundIds: intent.refundIds,
-        }));
+        const purchases: PurchasedCredits[] = (data.data || []).map(
+          (intent) => ({
+            id: intent.id, // Always the payment intent ID
+            createdAt: intent.created * 1000, // Convert from seconds to milliseconds
+            credits: intent.amount || 0, // Amount is in cents
+            status: intent.status,
+            isRefunded: intent.isRefunded,
+            refundedAmount: intent.refundedAmount,
+            refundIds: intent.refundIds,
+          }),
+        );
 
         return {
           purchases,

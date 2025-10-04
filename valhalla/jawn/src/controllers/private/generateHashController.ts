@@ -21,7 +21,7 @@ export class GenerateHashController extends Controller {
   public async generateHash(
     @Body()
     requestBody: GenerateHashQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<{
     success?: boolean;
     error?: {
@@ -32,7 +32,7 @@ export class GenerateHashController extends Controller {
     const { apiKey, keyName, governance } = requestBody;
     const { data, error } = await dbExecute<{ count: number }>(
       `select count(*) from helicone_api_keys where soft_delete = false and organization_id = $1 and temp_key = false`,
-      [request.authParams.organizationId]
+      [request.authParams.organizationId],
     );
     if (error) {
       this.setStatus(500);
@@ -75,7 +75,7 @@ export class GenerateHashController extends Controller {
           request.authParams.organizationId,
           requestBody.permissions,
           governance,
-        ]
+        ],
       );
 
       if (error) {
@@ -90,7 +90,7 @@ export class GenerateHashController extends Controller {
       setAPIKey(hashedKey, request.authParams.organizationId, false).catch(
         (error) => {
           console.error("error setting api key in gateway", error);
-        }
+        },
       );
 
       this.setStatus(201);

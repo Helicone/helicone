@@ -12,7 +12,10 @@ const kvCache = new KVCache(CACHE_TTL);
 
 class TempHeliconeAPIKey implements BaseTempKey {
   private keyUsed = false;
-  constructor(private apiKey: string, private heliconeApiKeyId: string) {}
+  constructor(
+    private apiKey: string,
+    private heliconeApiKeyId: string,
+  ) {}
 
   async cleanup() {
     if (this.keyUsed) {
@@ -24,7 +27,7 @@ class TempHeliconeAPIKey implements BaseTempKey {
        SET soft_delete = true
        WHERE temp_key = true
        AND created_at < $1`,
-      [new Date(Date.now() - CACHE_TTL).toISOString()]
+      [new Date(Date.now() - CACHE_TTL).toISOString()],
     );
   }
 
@@ -48,7 +51,7 @@ class TempHeliconeAPIKey implements BaseTempKey {
 export async function generateHeliconeAPIKey(
   organizationId: string,
   keyName?: string,
-  keyPermissions?: "rw" | "r" | "w"
+  keyPermissions?: "rw" | "r" | "w",
 ): Promise<
   Result<
     {
@@ -68,7 +71,7 @@ export async function generateHeliconeAPIKey(
     // Use the KeyManager to create a temporary key
     const result = await keyManager.createTempKey(
       keyName ?? "auto-generated-experiment-key",
-      keyPermissions ?? "w"
+      keyPermissions ?? "w",
     );
 
     if (result.error || !result.data) {
@@ -86,19 +89,22 @@ export async function generateHeliconeAPIKey(
 
 export async function generateTempHeliconeAPIKey(
   organizationId: string,
-  keyName?: string
+  keyName?: string,
 ): Promise<Result<TempHeliconeAPIKey, string>> {
   const apiKey = await cacheResultCustom(
     "generateTempHeliconeAPIKey-" + organizationId + (keyName ?? ""),
     async () => await generateHeliconeAPIKey(organizationId, keyName),
-    kvCache
+    kvCache,
   );
 
   if (apiKey.error) {
     return err(apiKey.error);
   } else {
     return ok(
-      new TempHeliconeAPIKey(apiKey.data!.apiKey, apiKey.data!.heliconeApiKeyId)
+      new TempHeliconeAPIKey(
+        apiKey.data!.apiKey,
+        apiKey.data!.heliconeApiKeyId,
+      ),
     );
   }
 }
@@ -112,7 +118,7 @@ class HeliconeDefaultTempKey {
 }
 
 export async function getHeliconeDefaultTempKey(
-  orgId: string
+  orgId: string,
 ): Promise<Result<HeliconeDefaultTempKey, string>> {
   const apiKey = await GET_KEY("key:helicone_on_helicone_key");
   if (apiKey.error) {

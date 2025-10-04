@@ -84,19 +84,19 @@ const ModelComparisonTable = ({
                 : {
                     median: calculatePercentDiff(
                       models[medianWinner][metric].median,
-                      model[metric].median
+                      model[metric].median,
                     ),
                     p90: calculatePercentDiff(
                       models[medianWinner][metric].p90,
-                      model[metric].p90
+                      model[metric].p90,
                     ),
                     p95: calculatePercentDiff(
                       models[medianWinner][metric].p95,
-                      model[metric].p95
+                      model[metric].p95,
                     ),
                     p99: calculatePercentDiff(
                       models[medianWinner][metric].p99,
-                      model[metric].p99
+                      model[metric].p99,
                     ),
                   };
 
@@ -107,8 +107,8 @@ const ModelComparisonTable = ({
                     isWinner
                       ? "bg-blue-50"
                       : index % 2 === 0
-                      ? "bg-white"
-                      : "bg-gray-50"
+                        ? "bg-white"
+                        : "bg-gray-50"
                   }
                 >
                   <td

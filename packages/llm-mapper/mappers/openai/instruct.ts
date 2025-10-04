@@ -22,7 +22,7 @@ const getRequestText = (requestBody: any) => {
 const getResponseText = (
   responseBody: any,
   statusCode: number = 200,
-  model: string
+  model: string,
 ) => {
   if (statusCode === 0 || statusCode === null) {
     return "";
@@ -128,7 +128,7 @@ export const mapOpenAIInstructRequest: MapperFn<any, any> = ({
       response: getResponseText(response, statusCode, model),
       concatenatedMessages:
         llmSchema.request.messages?.concat(
-          llmSchema.response?.messages ?? []
+          llmSchema.response?.messages ?? [],
         ) ?? [],
     },
   };

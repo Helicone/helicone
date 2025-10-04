@@ -83,16 +83,16 @@ export class RequestWrapper {
 
     if (headers.has("helicone-auth")) {
       throw new Error(
-        "Cannot have both helicone-auth and Helicone Authorization headers"
+        "Cannot have both helicone-auth and Helicone Authorization headers",
       );
     }
 
     const authorizationKeys = authorization.split(",").map((x) => x.trim());
     const heliconeAuth = authorizationKeys.find((x) =>
-      x.includes(HELICONE_KEY_ID)
+      x.includes(HELICONE_KEY_ID),
     );
     const providerAuth = authorizationKeys.find(
-      (x) => !x.includes(HELICONE_KEY_ID)
+      (x) => !x.includes(HELICONE_KEY_ID),
     );
 
     if (providerAuth) {
@@ -126,7 +126,7 @@ export class RequestWrapper {
 
   private getPromptMode(
     promptId?: string,
-    promptMode?: string
+    promptMode?: string,
   ): PromptSettings["promptMode"] {
     const validPromptModes = ["production", "testing", "deactivated"];
 
@@ -149,7 +149,7 @@ export class RequestWrapper {
     const promptId = this.heliconeHeaders.promptHeaders.promptId ?? undefined;
     const promptMode = this.getPromptMode(
       promptId,
-      this.heliconeHeaders.promptHeaders.promptMode ?? undefined
+      this.heliconeHeaders.promptHeaders.promptMode ?? undefined,
     );
 
     return {
@@ -159,7 +159,7 @@ export class RequestWrapper {
   }
 
   static async create(
-    request: Request
+    request: Request,
   ): Promise<Result<RequestWrapper, string>> {
     const requestWrapper = new RequestWrapper(request);
     const authorization = await requestWrapper.setAuthorization();
@@ -199,7 +199,7 @@ export class RequestWrapper {
       });
     } else if (tokenType === "bearer") {
       const res = await this.validateHeliconeAuthHeader(
-        this.heliconeHeaders.heliconeAuthV2.token ?? this.authorization
+        this.heliconeHeaders.heliconeAuthV2.token ?? this.authorization,
       );
       if (res.error) {
         return err(res.error);
@@ -247,7 +247,7 @@ export class RequestWrapper {
       try {
         const bodyJson = await JSON.parse(text);
         const bodyOverrideJson = await JSON.parse(
-          JSON.stringify(this.bodyKeyOverride)
+          JSON.stringify(this.bodyKeyOverride),
         );
         const body = this.overrideBody(bodyJson, bodyOverrideJson);
         text = JSON.stringify(body);
@@ -312,7 +312,7 @@ export class RequestWrapper {
   }
 
   private async validateHeliconeAuthHeader(
-    heliconeAuth: string
+    heliconeAuth: string,
   ): Promise<Result<null, string>> {
     if (!heliconeAuth) {
       return { data: null, error: null };
@@ -366,7 +366,7 @@ export class RequestWrapper {
 
       if (error || !data || !data.providerKey) {
         return err(
-          `Provider key not found using Customer Portal Key. Error: ${error}`
+          `Provider key not found using Customer Portal Key. Error: ${error}`,
         );
       }
       this.authorization = data.providerKey;
@@ -403,18 +403,18 @@ export class RequestWrapper {
   }
 
   private async getProviderKeyFromProxy(
-    authKey: string
+    authKey: string,
   ): Promise<Result<ProxyKeyRow, string>> {
     return getProviderKeyFromProxyCache(authKey);
   }
 
   private async getProviderKeyFromCustomerPortalKey(
-    authKey: string
+    authKey: string,
   ): Promise<Result<CustomerPortalValues, string>> {
     return await getAndStoreInCache(
       `getProxy-CP-${authKey}`,
 
-      async () => await getProviderKeyFromPortalKey(authKey)
+      async () => await getProviderKeyFromPortalKey(authKey),
     );
   }
 
@@ -434,11 +434,11 @@ export interface ProxyKeyRow {
 }
 
 export async function getProviderKeyFromProxyCache(
-  authKey: string
+  authKey: string,
 ): Promise<Result<ProxyKeyRow, string>> {
   return await getAndStoreInCache(
     `getProxyKey-${authKey}`,
-    async () => await getProviderKeyFromProxy(authKey)
+    async () => await getProviderKeyFromProxy(authKey),
   );
 }
 
@@ -449,11 +449,11 @@ export interface ProxyKeyRow {
 }
 
 export async function getProviderKeyFromPortalKey(
-  authKey: string
+  authKey: string,
 ): Promise<Result<CustomerPortalValues, string>> {
   const apiKey = await dbExecute<{ organization_id: string }>(
     `SELECT organization_id FROM helicone_api_keys WHERE api_key_hash = $1 LIMIT 1`,
-    [await hashAuth(authKey)]
+    [await hashAuth(authKey)],
   );
 
   if (apiKey.error) {
@@ -465,7 +465,7 @@ export async function getProviderKeyFromPortalKey(
     limits: any;
   }>(
     `SELECT org_provider_key, limits FROM organization WHERE id = $1 LIMIT 1`,
-    [apiKey.data?.[0]?.organization_id ?? ""]
+    [apiKey.data?.[0]?.organization_id ?? ""],
   );
 
   if (organization.error) {
@@ -488,7 +488,7 @@ export async function getProviderKeyFromPortalKey(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (organization.data?.[0]?.limits as any)["requests"],
     "month",
-    apiKey.data?.[0]?.organization_id ?? ""
+    apiKey.data?.[0]?.organization_id ?? "",
   );
 
   if (check.error) {
@@ -501,7 +501,7 @@ export async function getProviderKeyFromPortalKey(
     decrypted_provider_key: string;
   }>(
     `SELECT decrypted_provider_key FROM decrypted_provider_keys_v2 WHERE id = $1 LIMIT 1`,
-    [providerKeyId.data?.[0]?.id ?? ""]
+    [providerKeyId.data?.[0]?.id ?? ""],
   );
 
   if (providerKey.error) {
@@ -513,7 +513,7 @@ export async function getProviderKeyFromPortalKey(
 }
 
 export async function getProviderKeyFromProxy(
-  authKey: string
+  authKey: string,
 ): Promise<Result<ProxyKeyRow, string>> {
   const proxyKey = authKey?.replace("Bearer ", "").trim();
   const regex =
@@ -534,11 +534,11 @@ export async function getProviderKeyFromProxy(
   const [storedProxyKey, limits] = await Promise.all([
     dbExecute<Database["public"]["Tables"]["helicone_proxy_keys"]["Row"]>(
       `SELECT * FROM helicone_proxy_keys WHERE id = $1 AND soft_delete = false LIMIT 1`,
-      [proxyKeyId]
+      [proxyKeyId],
     ),
     dbExecute<Database["public"]["Tables"]["helicone_proxy_key_limits"]["Row"]>(
       `SELECT * FROM helicone_proxy_key_limits WHERE helicone_proxy_key = $1`,
-      [proxyKeyId]
+      [proxyKeyId],
     ),
   ]);
 
@@ -555,7 +555,7 @@ export async function getProviderKeyFromProxy(
 
   const verified = await dbExecute<{ result: boolean }>(
     `SELECT verify_helicone_proxy_key($1, $2) as result`,
-    [proxyKey, storedProxyKey.data?.[0]?.helicone_proxy_key ?? ""]
+    [proxyKey, storedProxyKey.data?.[0]?.helicone_proxy_key ?? ""],
   );
 
   if (verified.error || !verified.data) {
@@ -566,7 +566,7 @@ export async function getProviderKeyFromProxy(
     decrypted_provider_key: string;
   }>(
     `SELECT decrypted_provider_key FROM decrypted_provider_keys_v2 WHERE id = $1 AND soft_delete = false LIMIT 1`,
-    [storedProxyKey.data?.[0]?.provider_key_id ?? ""]
+    [storedProxyKey.data?.[0]?.provider_key_id ?? ""],
   );
 
   if (providerKey.error || !providerKey.data?.[0]?.decrypted_provider_key) {

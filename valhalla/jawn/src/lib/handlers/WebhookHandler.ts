@@ -24,7 +24,7 @@ export class WebhookHandler extends AbstractLogHandler {
       process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT ?? "",
       process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
     );
   }
 
@@ -116,18 +116,18 @@ export class WebhookHandler extends AbstractLogHandler {
 
   private async getSignedUrl(
     requestId: string,
-    orgId: string
+    orgId: string,
   ): Promise<string | undefined> {
     try {
       const result = await this.s3Client.getRequestResponseBodySignedUrl(
         orgId,
-        requestId
+        requestId,
       );
       return result.data || undefined;
     } catch (error) {
       console.error(
         `Error getting signed URL for request ${requestId}:`,
-        error
+        error,
       );
       return undefined;
     }
@@ -144,7 +144,7 @@ export class WebhookHandler extends AbstractLogHandler {
           // Ensure we're sending the most up-to-date data
           const result = await sendToWebhook(
             webhookPayload.payload,
-            webhookPayload.webhook
+            webhookPayload.webhook,
           );
 
           if (result.error) {
@@ -162,7 +162,7 @@ export class WebhookHandler extends AbstractLogHandler {
             },
           });
         }
-      })
+      }),
     );
 
     return ok(`Successfully sent to webhooks`);

@@ -29,7 +29,9 @@ parentPort?.once("message", (message) => {
       console.log("Sqs scores DLQ consumer thread started!");
       consumeHeliconeScoresDlq();
     } else {
-      console.log("Scores DLQ consumer disabled via DISABLE_NON_REQUEST_CONSUMERS");
+      console.log(
+        "Scores DLQ consumer disabled via DISABLE_NON_REQUEST_CONSUMERS",
+      );
     }
   } else if (message === "start-backfill") {
     throw new Error("Not implemented");

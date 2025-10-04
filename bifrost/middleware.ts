@@ -5,8 +5,11 @@ import { NextResponse, NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 
-    (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://us.helicone.ai");
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : "https://us.helicone.ai");
 
   // Handle existing redirects first
   switch (pathname) {
@@ -16,14 +19,14 @@ export async function middleware(request: NextRequest) {
     case "/career":
       return NextResponse.redirect(
         "https://helicone.notion.site/Helicone-Job-Board-a0a37e35da6e41cc9ace3030f0d04a10?pvs=4",
-        301
+        301,
       );
     case "/developer":
       return NextResponse.redirect(`${appUrl}/developer`, 301);
     case "/features/customer-portal":
       return NextResponse.redirect(
         "https://docs.helicone.ai/features/customer-portal",
-        301
+        301,
       );
     case "/prompts":
       return NextResponse.redirect(`${appUrl}/prompts`, 301);

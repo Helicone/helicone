@@ -11,7 +11,7 @@ export class UsageLimitManager {
     costUSD: number,
     requestCount: number,
     timeGrain: "minute" | "hour" | "day" | "week" | "month",
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<string, string>> {
     if (!organizationId) {
       console.log("No organization ID provided");
@@ -32,7 +32,7 @@ export class UsageLimitManager {
       request_response_rmt.organization_id = {val_0 : String}
     )
   `,
-      [organizationId]
+      [organizationId],
     );
     if (error || !data) {
       console.error("Error checking limits:", error);
@@ -49,7 +49,7 @@ export class UsageLimitManager {
     }
 
     return ok(
-      `OK, within limits {cost: ${cost}/${costUSD}, count: ${count}/${requestCount}}}`
+      `OK, within limits {cost: ${cost}/${costUSD}, count: ${count}/${requestCount}}}`,
     );
   }
 
@@ -73,7 +73,7 @@ export class UsageLimitManager {
 
   // TODO: add cache
   async checkLimits(
-    limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Row"][]
+    limits: Database["public"]["Tables"]["helicone_proxy_key_limits"]["Row"][],
   ): Promise<boolean> {
     const cacheKey = (await hashAuth(JSON.stringify(limits))).substring(0, 32);
     const cached = await redisClient?.get(cacheKey);
@@ -92,7 +92,7 @@ export class UsageLimitManager {
       limits.flatMap((limit) => [
         limit.timewindow_seconds ?? 0,
         limit.helicone_proxy_key,
-      ])
+      ]),
     );
     if (error) {
       console.error("Error checking limits:", error);
@@ -102,7 +102,7 @@ export class UsageLimitManager {
     }
     const limitResults = (Object.values(keyMappings?.[0])?.[0] ?? []) as [
       number,
-      number
+      number,
     ][];
 
     const remappedResults = limitResults.map(([count, cost], index) => {
@@ -112,7 +112,7 @@ export class UsageLimitManager {
 
     const result = limits.every((limit) => {
       const limitResult = remappedResults.find(
-        (result) => result.limitId === limit.id
+        (result) => result.limitId === limit.id,
       );
       if (!limitResult) {
         return false;

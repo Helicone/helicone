@@ -186,7 +186,7 @@ export default function ModelCapabilitiesCard({
                   </div>
                   {renderBenchmarkBar(
                     infoA.benchmarks?.hellaswag,
-                    "bg-red-400"
+                    "bg-red-400",
                   )}
                 </div>
 
@@ -198,7 +198,7 @@ export default function ModelCapabilitiesCard({
                   </div>
                   {renderBenchmarkBar(
                     infoB.benchmarks?.hellaswag,
-                    "bg-blue-400"
+                    "bg-blue-400",
                   )}
                 </div>
               </div>
@@ -373,11 +373,11 @@ export default function ModelCapabilitiesCard({
                     <Link
                       key={i}
                       href={`/comparison?modelA=${encodeURIComponent(
-                        modelA
+                        modelA,
                       )}&providerA=${encodeURIComponent(
-                        providerA
+                        providerA,
                       )}&modelB=${encodeURIComponent(
-                        relatedModel
+                        relatedModel,
                       )}&providerB=auto`}
                       className="text-sm text-sky-600 hover:text-sky-800 hover:underline py-1"
                     >
@@ -419,11 +419,11 @@ export default function ModelCapabilitiesCard({
                     <Link
                       key={i}
                       href={`/comparison?modelA=${encodeURIComponent(
-                        modelB
+                        modelB,
                       )}&providerA=${encodeURIComponent(
-                        providerB
+                        providerB,
                       )}&modelB=${encodeURIComponent(
-                        relatedModel
+                        relatedModel,
                       )}&providerB=auto`}
                       className="text-sm text-sky-600 hover:text-sky-800 hover:underline py-1"
                     >

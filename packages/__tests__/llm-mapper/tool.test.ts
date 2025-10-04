@@ -64,7 +64,7 @@ describe("Tool Mapper", () => {
     expect(result.schema.response?.toolDetailsResponse?.status).toBe("success");
     expect(result.schema.response?.toolDetailsResponse?._type).toBe("tool");
     expect(result.schema.response?.toolDetailsResponse?.toolName).toBe(
-      "HotelAPI"
+      "HotelAPI",
     );
   });
 
@@ -98,7 +98,7 @@ describe("Tool Mapper", () => {
     expect(result.preview.response).toBe("Invalid destination provided");
     expect(result.schema.response?.toolDetailsResponse?.status).toBe("error");
     expect(result.schema.response?.toolDetailsResponse?.message).toBe(
-      "Invalid destination provided"
+      "Invalid destination provided",
     );
   });
 

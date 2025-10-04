@@ -21,7 +21,7 @@ export default function QueryProvider({
               Math.min(1000 * 2 ** attemptIndex, 30000),
           },
         },
-      })
+      }),
   );
 
   return (

@@ -63,7 +63,10 @@ const archivedModelProviderConfigs = {
   // TODO: if any archived endpoints are added, make sure they are included here
 } satisfies Record<string, ModelProviderConfig>;
 
-const indexes: ModelIndexes = buildIndexes(modelProviderConfigs, archivedModelProviderConfigs);
+const indexes: ModelIndexes = buildIndexes(
+  modelProviderConfigs,
+  archivedModelProviderConfigs,
+);
 
 function getAllModelIds(): Result<ModelName[]> {
   return ok(Object.keys(allModels) as ModelName[]);
@@ -81,7 +84,7 @@ function getEndpointsByModel(model: string): Result<Endpoint[]> {
 function createPassthroughEndpoint(
   modelName: string,
   provider: ModelProviderName,
-  userEndpointConfig: UserEndpointConfig
+  userEndpointConfig: UserEndpointConfig,
 ): Result<Endpoint> {
   const endpointConfig: ModelProviderConfig = {
     providerModelId: modelName,
@@ -106,7 +109,7 @@ function createPassthroughEndpoint(
 
 function getPtbEndpointsByProvider(
   model: string,
-  provider: string
+  provider: string,
 ): Result<Endpoint[]> {
   const configId = `${model}:${provider}` as ModelProviderConfigId;
   const endpoints = indexes.modelProviderIdToPtbEndpoints.get(configId) || [];
@@ -121,7 +124,7 @@ function getProviderModels(provider: string): Result<Set<ModelName>> {
 
 function buildEndpoint(
   endpointConfig: ModelProviderConfig,
-  userEndpointConfig: UserEndpointConfig
+  userEndpointConfig: UserEndpointConfig,
 ): Result<Endpoint> {
   const modelIdResult = buildModelId(endpointConfig, userEndpointConfig);
   if (modelIdResult.error) {
@@ -146,7 +149,7 @@ function buildEndpoint(
 
 function getModelProviderConfig(
   model: string,
-  provider: string
+  provider: string,
 ): Result<ModelProviderConfig> {
   const configId = `${model}:${provider}` as ModelProviderConfigId;
   const config = indexes.endpointConfigIdToEndpointConfig.get(configId);
@@ -155,7 +158,7 @@ function getModelProviderConfig(
 
 function getModelProviderConfigByProviderModelId(
   providerModelId: string,
-  provider: ModelProviderName
+  provider: ModelProviderName,
 ): Result<ModelProviderConfig> {
   const providerModelIdKey = `${providerModelId}:${provider}`;
   const result = indexes.providerModelIdToConfig.get(providerModelIdKey);
@@ -176,7 +179,7 @@ function getModelProviders(model: string): Result<Set<ModelProviderName>> {
 }
 
 function getModelProviderEntriesByModel(
-  model: string
+  model: string,
 ): Result<ModelProviderEntry[]> {
   const providerData =
     indexes.modelToProviderData.get(model as ModelName) || [];
@@ -185,7 +188,7 @@ function getModelProviderEntriesByModel(
 
 function getModelProviderEntry(
   model: string,
-  provider: ModelProviderName
+  provider: ModelProviderName,
 ): Result<ModelProviderEntry | null> {
   const configId = `${model}:${provider}` as ModelProviderConfigId;
   const providerData = indexes.modelProviderToData.get(configId) || null;
@@ -198,7 +201,7 @@ export const getPtbEndpoints = (model: string): Result<Endpoint[]> => {
 };
 
 function getPtbEndpointsForProvider(
-  provider: string
+  provider: string,
 ): Result<{ endpoint: Endpoint; model: ModelName }[]> {
   const topLevelEndpoints: { endpoint: Endpoint; model: ModelName }[] = [];
   indexes.modelToPtbEndpoints.forEach((endpoints, model) => {
@@ -217,14 +220,14 @@ function getPtbEndpointsForProvider(
 function getModelProviderConfigByVersion(
   model: string,
   provider: ModelProviderName,
-  version: string
+  version: string,
 ): Result<ModelProviderConfig | null> {
   const currentEntry = getModelProviderEntry(model, provider);
   // if the given version matches the active config version (or both are undefined/empty)
   if (
     (!currentEntry.data?.config.version && !version) ||
-    (currentEntry.data?.config.version === version)
-  ) { 
+    currentEntry.data?.config.version === version
+  ) {
     return ok(currentEntry.data?.config ?? null);
   }
 

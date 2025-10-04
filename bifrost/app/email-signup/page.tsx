@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 const bullets: string[] = [
   "Exclusive access to our LLM observability playbooks",
   "Benchmark data from production LLM deployments",
-  "Early access to our launch features and updates"
+  "Early access to our launch features and updates",
 ];
 
 const EmailSignup = () => {

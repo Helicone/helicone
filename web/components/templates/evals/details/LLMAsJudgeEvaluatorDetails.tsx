@@ -46,8 +46,8 @@ interface LLMAsJudgeEvaluatorDetailsProps {
 
 const LLMAsJudgeEvaluatorDetails: React.FC<LLMAsJudgeEvaluatorDetailsProps> = ({
   evaluator,
-  deleteEvaluator,
-  setSelectedEvaluator,
+  deleteEvaluator: _deleteEvaluator,
+  setSelectedEvaluator: _setSelectedEvaluator,
 }) => {
   const { setLLMConfig } = useEvalConfigStore();
 

@@ -17,7 +17,11 @@ import { Result } from "../../packages/common/result";
 import { Prompt2025Manager } from "../../managers/prompt/PromptManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-import { Prompt2025Version, Prompt2025, Prompt2025Input } from "@helicone-package/prompts/types";
+import {
+  Prompt2025Version,
+  Prompt2025,
+  Prompt2025Input,
+} from "@helicone-package/prompts/types";
 
 export interface PromptCreateResponse {
   id: string;
@@ -28,7 +32,6 @@ export interface PromptVersionCounts {
   totalVersions: number;
   majorVersions: number;
 }
-
 
 // TODO: Delete old promptController and rename this to promptController
 @Route("v1/prompt-2025")
@@ -54,13 +57,17 @@ export class Prompt2025Controller extends Controller {
   @Post("id/{promptId}/rename")
   public async renamePrompt2025(
     @Path() promptId: string,
-    @Body() requestBody: {
+    @Body()
+    requestBody: {
       name: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
-    const result = await promptManager.renamePrompt({ promptId, name: requestBody.name });
+    const result = await promptManager.renamePrompt({
+      promptId,
+      name: requestBody.name,
+    });
     if (result.error) {
       this.setStatus(500);
     } else {
@@ -72,7 +79,7 @@ export class Prompt2025Controller extends Controller {
   @Delete("{promptId}")
   public async deletePrompt2025(
     @Path() promptId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.deletePrompt({ promptId });
@@ -88,10 +95,13 @@ export class Prompt2025Controller extends Controller {
   public async deletePrompt2025Version(
     @Path() promptId: string,
     @Path() versionId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
-    const result = await promptManager.deletePromptVersion({ promptId, promptVersionId: versionId });
+    const result = await promptManager.deletePromptVersion({
+      promptId,
+      promptVersionId: versionId,
+    });
     if (result.error) {
       this.setStatus(500);
     } else {
@@ -108,7 +118,11 @@ export class Prompt2025Controller extends Controller {
     @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Prompt2025Input, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
-    const result = await promptManager.getPromptInputs({ promptId, versionId, requestId });
+    const result = await promptManager.getPromptInputs({
+      promptId,
+      versionId,
+      requestId,
+    });
     if (result.error) {
       this.setStatus(500);
       return result;
@@ -123,7 +137,7 @@ export class Prompt2025Controller extends Controller {
 
   @Get("tags")
   public async getPrompt2025Tags(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string[], string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptTags();
@@ -137,7 +151,7 @@ export class Prompt2025Controller extends Controller {
 
   @Get("environments")
   public async getPrompt2025Environments(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string[], string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptEnvironments();
@@ -157,7 +171,7 @@ export class Prompt2025Controller extends Controller {
       tags: string[];
       promptBody: OpenAIChatRequest;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<PromptCreateResponse, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
 
@@ -181,7 +195,7 @@ export class Prompt2025Controller extends Controller {
       commitMessage: string;
       promptBody: OpenAIChatRequest;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ id: string }, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
 
@@ -202,7 +216,7 @@ export class Prompt2025Controller extends Controller {
       promptVersionId: string;
       environment: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.setPromptVersionEnvironment({
@@ -217,10 +231,10 @@ export class Prompt2025Controller extends Controller {
     }
     return result;
   }
-  
+
   @Get("count")
   public async getPrompt2025Count(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.totalPrompts();
@@ -241,7 +255,7 @@ export class Prompt2025Controller extends Controller {
       page: number;
       pageSize: number;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Prompt2025[], string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPrompts(requestBody);
@@ -259,7 +273,7 @@ export class Prompt2025Controller extends Controller {
     requestBody: {
       promptVersionId: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Prompt2025Version, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptVersionWithBody(requestBody);
@@ -278,10 +292,11 @@ export class Prompt2025Controller extends Controller {
       promptId: string;
       environment: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Prompt2025Version, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
-    const result = await promptManager.getPromptVersionWithBodyByEnvironment(requestBody);
+    const result =
+      await promptManager.getPromptVersionWithBodyByEnvironment(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {
@@ -297,7 +312,7 @@ export class Prompt2025Controller extends Controller {
       promptId: string;
       majorVersion?: number;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Prompt2025Version[], string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
 
@@ -316,7 +331,7 @@ export class Prompt2025Controller extends Controller {
     requestBody: {
       promptId: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Prompt2025Version, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptProductionVersion(requestBody);
@@ -334,9 +349,8 @@ export class Prompt2025Controller extends Controller {
     requestBody: {
       promptId: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<PromptVersionCounts, string>> {
-
     const promptManager = new Prompt2025Manager(request.authParams);
 
     const result = await promptManager.getPromptVersionCounts(requestBody);

@@ -50,13 +50,13 @@ export function consolidateTextFields(responseBody: any[]): any {
                   function_call: c.delta.function_call
                     ? recursivelyConsolidate(
                         c.delta.function_call,
-                        cur.choices[i].delta.function_call ?? {}
+                        cur.choices[i].delta.function_call ?? {},
                       )
                     : cur.choices[i].delta.function_call,
                   tool_calls: c.delta.tool_calls
                     ? recursivelyConsolidateToolCalls(
                         c.delta.tool_calls,
-                        cur.choices[i].delta.tool_calls ?? []
+                        cur.choices[i].delta.tool_calls ?? [],
                       )
                     : cur.choices[i].delta.tool_calls,
                 },
@@ -124,7 +124,7 @@ export function recursivelyConsolidate(body: any, delta: any): any {
 
 export function recursivelyConsolidateToolCalls(
   existingToolCalls: any[],
-  newToolCalls: any[]
+  newToolCalls: any[],
 ): any[] {
   if (!existingToolCalls || existingToolCalls.length === 0) {
     return newToolCalls || [];
@@ -216,15 +216,15 @@ export function consolidateGoogleTextFields(responseBody: any[]): any {
         if (cur.usageMetadata && acc.usageMetadata) {
           acc.usageMetadata.promptTokenCount = Math.max(
             acc.usageMetadata.promptTokenCount,
-            cur.usageMetadata.promptTokenCount
+            cur.usageMetadata.promptTokenCount,
           );
           acc.usageMetadata.candidatesTokenCount = Math.max(
             acc.usageMetadata.candidatesTokenCount,
-            cur.usageMetadata.candidatesTokenCount
+            cur.usageMetadata.candidatesTokenCount,
           );
           acc.usageMetadata.totalTokenCount = Math.max(
             acc.usageMetadata.totalTokenCount,
-            cur.usageMetadata.totalTokenCount
+            cur.usageMetadata.totalTokenCount,
           );
         } else if (cur.usageMetadata) {
           // Handle the case where acc has no usageMetadata but cur has

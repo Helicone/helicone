@@ -1,10 +1,6 @@
 // For legacy adapters for now lets just convert to the old filter node
 
-import {
-  FilterNode,
-  FilterBranch,
-  FilterLeaf,
-} from "./filterDefs";
+import { FilterNode, FilterBranch, FilterLeaf } from "./filterDefs";
 import {
   FilterExpression,
   ConditionExpression,

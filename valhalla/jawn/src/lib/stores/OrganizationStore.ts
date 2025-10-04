@@ -16,7 +16,7 @@ import { BaseStore } from "./baseStore";
 
 export class OrganizationStore extends BaseStore {
   async createNewOrganization(
-    createOrgParams: NewOrganizationParams
+    createOrgParams: NewOrganizationParams,
   ): Promise<Result<NewOrganizationParams, string>> {
     try {
       // Insert the organization and return the inserted record
@@ -38,7 +38,7 @@ export class OrganizationStore extends BaseStore {
           createOrgParams.icon,
           createOrgParams.stripe_customer_id,
           createOrgParams.org_provider_key,
-        ]
+        ],
       );
 
       if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
@@ -53,12 +53,12 @@ export class OrganizationStore extends BaseStore {
          (created_at, member, organization, org_role)
          VALUES ($1, $2, $3, $4)
          RETURNING *`,
-        [new Date().toISOString(), createOrgParams.owner, insert.id, "owner"]
+        [new Date().toISOString(), createOrgParams.owner, insert.id, "owner"],
       );
 
       if (memberResult.error) {
         return err(
-          memberResult.error || "Failed to create organization member"
+          memberResult.error || "Failed to create organization member",
         );
       }
 
@@ -80,7 +80,7 @@ export class OrganizationStore extends BaseStore {
          AND name = 'My Organization'
        )
        RETURNING id;`,
-      [userId]
+      [userId],
     );
 
     if (result.error || !result.data || result.data.length === 0) {
@@ -91,7 +91,7 @@ export class OrganizationStore extends BaseStore {
          AND tier = 'free' 
          AND name = 'My Organization'
          LIMIT 1`,
-        [userId]
+        [userId],
       );
 
       if (existing.error || !existing.data || existing.data.length === 0) {
@@ -106,11 +106,11 @@ export class OrganizationStore extends BaseStore {
 
   async getOrganizationMember(
     userId: string,
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<{ org_role: string }, string>> {
     const orgMember = await dbExecute<{ org_role: string }>(
       "SELECT org_role FROM organization_member WHERE organization = $1 AND member = $2",
-      [organizationId, userId]
+      [organizationId, userId],
     );
 
     if (!orgMember.data || orgMember.data.length === 0) {
@@ -121,7 +121,7 @@ export class OrganizationStore extends BaseStore {
 
   async updateOrganization(
     updateOrgParams: UpdateOrganizationParams,
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<string, string>> {
     try {
       // Build dynamic SQL based on provided parameters - only allow name, color, and icon
@@ -180,7 +180,7 @@ export class OrganizationStore extends BaseStore {
     `;
     let { data: userId, error: userIdError } = await dbExecute<{ id: string }>(
       getUserIdQuery,
-      [email]
+      [email],
     );
 
     if (userIdError) {
@@ -196,14 +196,14 @@ export class OrganizationStore extends BaseStore {
 
   async addMemberToOrganization(
     userId: string,
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<string, string>> {
     try {
       const result = await dbExecute<{ member: string }>(
         `INSERT INTO organization_member (organization, member)
          VALUES ($1, $2)
          RETURNING member`,
-        [organizationId, userId]
+        [organizationId, userId],
       );
 
       if (result.error) {
@@ -239,7 +239,7 @@ export class OrganizationStore extends BaseStore {
           insertRequest.organization_id,
           insertRequest.type,
           JSON.stringify(insertRequest.filters),
-        ]
+        ],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -261,7 +261,7 @@ export class OrganizationStore extends BaseStore {
          SET soft_delete = true
          WHERE id = $1
          RETURNING id`,
-        [this.organizationId]
+        [this.organizationId],
       );
 
       if (result.error) {
@@ -275,7 +275,7 @@ export class OrganizationStore extends BaseStore {
 
   async getOrganizationLayout(
     organizationId: string,
-    filterType: string
+    filterType: string,
   ): Promise<Result<OrganizationLayout, string>> {
     try {
       const result = await dbExecute<OrganizationLayout>(
@@ -284,7 +284,7 @@ export class OrganizationStore extends BaseStore {
          WHERE organization_id = $1
          AND type = $2
          LIMIT 1`,
-        [organizationId, filterType]
+        [organizationId, filterType],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -306,7 +306,7 @@ export class OrganizationStore extends BaseStore {
   async updateOrganizationFilter(
     organizationId: string,
     type: string,
-    filters: OrganizationFilter[]
+    filters: OrganizationFilter[],
   ): Promise<Result<string, string>> {
     try {
       const result = await dbExecute(
@@ -315,7 +315,7 @@ export class OrganizationStore extends BaseStore {
          WHERE organization_id = $2
          AND type = $3
          RETURNING id`,
-        [JSON.stringify(filters), organizationId, type]
+        [JSON.stringify(filters), organizationId, type],
       );
 
       if (result.error) {
@@ -328,7 +328,7 @@ export class OrganizationStore extends BaseStore {
   }
 
   async getOrganizationMembers(
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<OrganizationMember[], string>> {
     let query;
     if (process.env.NEXT_PUBLIC_BETTER_AUTH === "true") {
@@ -356,7 +356,7 @@ export class OrganizationStore extends BaseStore {
 
   async getOrganizationOwner(
     organizationId: string,
-    userId: string
+    userId: string,
   ): Promise<Result<OrganizationOwner[], string>> {
     const query = `
       select 
@@ -406,7 +406,7 @@ export class OrganizationStore extends BaseStore {
 
   async removeMemberFromOrganization(
     organizationId: string,
-    memberId: string
+    memberId: string,
   ): Promise<Result<null, string>> {
     if (!organizationId) {
       return err("Invalid OrgId");
@@ -420,7 +420,7 @@ export class OrganizationStore extends BaseStore {
         `DELETE FROM organization_member
          WHERE member = $1
          AND organization = $2`,
-        [memberId, organizationId]
+        [memberId, organizationId],
       );
 
       if (result.error) {
@@ -437,7 +437,7 @@ export class OrganizationStore extends BaseStore {
     organizationId: string,
     userId: string,
     orgRole: string,
-    memberId: string
+    memberId: string,
   ): Promise<Result<null, string>> {
     try {
       // Check if organization exists and user has access
@@ -446,7 +446,7 @@ export class OrganizationStore extends BaseStore {
          FROM organization
          WHERE id = $1
          LIMIT 1`,
-        [organizationId]
+        [organizationId],
       );
 
       if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
@@ -462,7 +462,7 @@ export class OrganizationStore extends BaseStore {
          WHERE member = $1
          AND organization = $2
          LIMIT 1`,
-        [userId, organizationId]
+        [userId, organizationId],
       );
 
       if (!orgMemberResult.data || orgMemberResult.data.length === 0) {
@@ -483,7 +483,7 @@ export class OrganizationStore extends BaseStore {
          SET org_role = $1
          WHERE member = $2
          AND organization = $3`,
-        [orgRole, memberId, organizationId]
+        [orgRole, memberId, organizationId],
       );
 
       if (updateResult.error) {
@@ -499,7 +499,7 @@ export class OrganizationStore extends BaseStore {
   async updateOrganizationOwner(
     organizationId: string,
     userId: string,
-    memberId: string
+    memberId: string,
   ): Promise<Result<null, string>> {
     try {
       // Check if organization exists and user has access
@@ -508,7 +508,7 @@ export class OrganizationStore extends BaseStore {
          FROM organization
          WHERE id = $1
          LIMIT 1`,
-        [organizationId]
+        [organizationId],
       );
 
       if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
@@ -529,7 +529,7 @@ export class OrganizationStore extends BaseStore {
          SET org_role = $1
          WHERE member = $2
          AND organization = $3`,
-        ["owner", memberId, organizationId]
+        ["owner", memberId, organizationId],
       );
 
       if (updateResult.error) {
@@ -542,7 +542,7 @@ export class OrganizationStore extends BaseStore {
          SET org_role = $1
          WHERE member = $2
          AND organization = $3`,
-        ["admin", userId, organizationId]
+        ["admin", userId, organizationId],
       );
 
       if (updateAdminResult.error) {
@@ -554,7 +554,7 @@ export class OrganizationStore extends BaseStore {
         `UPDATE organization
          SET owner = $1
          WHERE id = $2`,
-        [memberId, organizationId]
+        [memberId, organizationId],
       );
       if (updateOwnerResult.error) {
         return err(updateOwnerResult.error);
@@ -568,7 +568,7 @@ export class OrganizationStore extends BaseStore {
 
   async checkAccessToMutateOrg(
     orgId: string,
-    userId: string
+    userId: string,
   ): Promise<boolean> {
     try {
       // Check if organization exists
@@ -579,7 +579,7 @@ export class OrganizationStore extends BaseStore {
          FROM organization
          WHERE id = $1
          LIMIT 1`,
-        [orgId]
+        [orgId],
       );
 
       if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
@@ -602,7 +602,7 @@ export class OrganizationStore extends BaseStore {
 
   public async checkUserBelongsToOrg(
     orgId: string,
-    userId: string
+    userId: string,
   ): Promise<boolean> {
     const query = `
       select * from organization_member om
@@ -623,7 +623,7 @@ export class OrganizationStore extends BaseStore {
 
   private async _checkAccessToOrg(
     orgId: string,
-    userId: string
+    userId: string,
   ): Promise<boolean> {
     const query = `
   select * from organization_member om
@@ -641,14 +641,14 @@ export class OrganizationStore extends BaseStore {
 
   public async setupDemo(
     userId: string,
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<null, string>> {
     const tempKey: Result<BaseTempKey, string> =
       await generateTempHeliconeAPIKey(organizationId);
 
     const hasBeenSetup = await dbExecute<{ demoDataSetup: boolean }>(
       `select onboarding_status->>'demoDataSetup' as demoDataSetup from organization where id = $1`,
-      [organizationId]
+      [organizationId],
     );
 
     if (
@@ -673,7 +673,7 @@ export class OrganizationStore extends BaseStore {
          SET onboarding_status = COALESCE(onboarding_status, '{}'::jsonb) || '{"demoDataSetup": true}'::jsonb
          WHERE id = $1
          RETURNING id`,
-        [organizationId]
+        [organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -694,7 +694,7 @@ export class OrganizationStore extends BaseStore {
 
   async updateOnboardingStatus(
     onboardingStatus: OnboardingStatus,
-    name: string
+    name: string,
   ): Promise<Result<string, string>> {
     const hasOnboarded = onboardingStatus.hasOnboarded ?? false;
     const hasIntegrated = onboardingStatus.hasIntegrated ?? false;
@@ -706,7 +706,13 @@ export class OrganizationStore extends BaseStore {
            has_integrated = CASE WHEN has_integrated = true THEN true ELSE $4 END
        WHERE id = $5
        RETURNING id`,
-      [onboardingStatus, name, hasOnboarded, hasIntegrated, this.organizationId]
+      [
+        onboardingStatus,
+        name,
+        hasOnboarded,
+        hasIntegrated,
+        this.organizationId,
+      ],
     );
 
     if (result.error || !result.data || result.data.length === 0) {

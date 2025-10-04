@@ -45,7 +45,7 @@ export class StripeIntegrationManager extends BaseManager {
   public async testMeterEvent(
     integrationId: string,
     eventName: string,
-    customerId: string
+    customerId: string,
   ): Promise<Result<string, string>> {
     try {
       // 1. Validate integration exists and is active for this organization
@@ -71,7 +71,7 @@ export class StripeIntegrationManager extends BaseManager {
       }
 
       const stripeKey = stripeKeys.data?.find(
-        (key) => key.provider_name === "HELICONE_STRIPE_KEY"
+        (key) => key.provider_name === "HELICONE_STRIPE_KEY",
       );
 
       if (!stripeKey || !stripeKey.provider_key) {
@@ -113,7 +113,7 @@ export class StripeIntegrationManager extends BaseManager {
   }
 
   public async sendMeterEvents(
-    events: StripeMeterEvent[]
+    events: StripeMeterEvent[],
   ): Promise<Result<string, string>> {
     try {
       if (events.length === 0) {
@@ -143,7 +143,7 @@ export class StripeIntegrationManager extends BaseManager {
       }
 
       const stripeKey = stripeKeys.data?.find(
-        (key) => key.provider_name === "HELICONE_STRIPE_KEY"
+        (key) => key.provider_name === "HELICONE_STRIPE_KEY",
       );
 
       if (!stripeKey || !stripeKey.provider_key) {
@@ -184,12 +184,12 @@ export class StripeIntegrationManager extends BaseManager {
                 "Stripe-Version": "2025-03-31.preview",
               },
               body: JSON.stringify({ events: batch }),
-            }
+            },
           );
           if (!response.ok) {
             const errorText = await response.text();
             throw new Error(
-              `Error response from Stripe: ${response.status} ${errorText}`
+              `Error response from Stripe: ${response.status} ${errorText}`,
             );
           }
 
@@ -202,7 +202,7 @@ export class StripeIntegrationManager extends BaseManager {
 
       if (errors.length > 0) {
         return err(
-          `Processed ${totalProcessed}/${events.length} events. Errors: ${errors.join(", ")}`
+          `Processed ${totalProcessed}/${events.length} events. Errors: ${errors.join(", ")}`,
         );
       }
 

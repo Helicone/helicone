@@ -18,7 +18,7 @@ export class HeliconeRouterSocket {
   }
 
   onMessage(
-    callback: (data: MessageTypeTX | { error: string }) => Promise<void>
+    callback: (data: MessageTypeTX | { error: string }) => Promise<void>,
   ) {
     this._socket.on("message", (data: ArrayBufferLike, isBinary: boolean) => {
       const dataCopy = Buffer.from(data);
@@ -26,7 +26,7 @@ export class HeliconeRouterSocket {
       callback(
         safeJsonParse(message) ?? {
           error: "Invalid message",
-        }
+        },
       );
     });
   }

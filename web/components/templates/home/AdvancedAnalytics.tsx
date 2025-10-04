@@ -4,7 +4,6 @@ import {
   FolderArrowDownIcon,
   MagnifyingGlassCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
 import Image from "next/image";
 
 /* eslint-disable @next/next/no-img-element */
@@ -36,7 +35,6 @@ const metrics = [
 ];
 
 export default function AdvancedAnalytics() {
-  const router = useRouter();
   return (
     <div className="relative bg-gray-900 py-8">
       <div className="absolute bottom-0 h-80 w-full xl:inset-0 xl:h-full">

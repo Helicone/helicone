@@ -18,7 +18,7 @@ type UnPromise<T> = T extends Promise<infer U> ? U : T;
 
 function metaDataToCaseStudyStructure(
   folderName: string,
-  metadata: UnPromise<ReturnType<typeof getMetadata>>
+  metadata: UnPromise<ReturnType<typeof getMetadata>>,
 ): Omit<CaseStudy, "dynamicEntry"> {
   if (!metadata) {
     throw new Error(`Metadata is null for folder: ${folderName}`);
@@ -67,7 +67,7 @@ export async function CaseStudies() {
         ...metaDataToCaseStudyStructure(dynamicEntry.folderName, metadata),
         dynamicEntry,
       };
-    })
+    }),
   );
 
   return (
@@ -79,7 +79,7 @@ export async function CaseStudies() {
           logo={customer.logo}
           title={customer.title}
           subtitle={`Customer since ${formatCustomerSince(
-            customer.customerSince
+            customer.customerSince,
           )}`}
         />
       ))}

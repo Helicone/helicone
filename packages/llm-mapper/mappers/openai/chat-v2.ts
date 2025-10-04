@@ -85,7 +85,7 @@ const getRequestText = (messages: OpenAIChatRequest["messages"]): string => {
     return (
       lastMessage.content
         .map((c: any) =>
-          typeof c === "string" ? c : c.type === "text" ? c.text : ""
+          typeof c === "string" ? c : c.type === "text" ? c.text : "",
         )
         .filter((text) => !!text) // Remove empty strings
         .join(" ") + " "
@@ -116,7 +116,7 @@ const getResponseText = (responseBody: any): string => {
  * Convert request messages to internal Message format
  */
 const convertRequestMessages = (
-  messages?: OpenAIChatRequest["messages"]
+  messages?: OpenAIChatRequest["messages"],
 ): Message[] => {
   if (!Array.isArray(messages) || messages.length === 0) return [];
 
@@ -221,7 +221,7 @@ const convertResponseMessages = (responseBody: any): Message[] => {
  * Convert OpenAI tool_choice to internal format
  */
 const convertToolChoice = (
-  toolChoice?: OpenAIChatRequest["tool_choice"]
+  toolChoice?: OpenAIChatRequest["tool_choice"],
 ): LlmSchema["request"]["tool_choice"] => {
   if (!toolChoice) return undefined;
 
@@ -252,7 +252,7 @@ const convertToolChoice = (
  * Convert internal tool_choice back to OpenAI format
  */
 const toExternalToolChoice = (
-  toolChoice?: LlmSchema["request"]["tool_choice"]
+  toolChoice?: LlmSchema["request"]["tool_choice"],
 ): OpenAIChatRequest["tool_choice"] => {
   if (!toolChoice) return undefined;
 
@@ -285,7 +285,7 @@ const toExternalToolChoice = (
  * Convert internal Tool format back to OpenAI tools
  */
 const toExternalTools = (
-  tools?: LlmSchema["request"]["tools"]
+  tools?: LlmSchema["request"]["tools"],
 ): OpenAIChatRequest["tools"] => {
   if (!tools || !Array.isArray(tools)) return undefined;
 
@@ -303,7 +303,7 @@ const toExternalTools = (
  * Convert OpenAI tools to internal Tool format
  */
 const convertTools = (
-  tools?: OpenAIChatRequest["tools"]
+  tools?: OpenAIChatRequest["tools"],
 ): LlmSchema["request"]["tools"] => {
   if (!tools || !Array.isArray(tools)) return undefined;
 
@@ -318,7 +318,7 @@ const convertTools = (
  * Convert internal messages back to OpenAI message format
  */
 const toExternalMessages = (
-  messages: Message[]
+  messages: Message[],
 ): OpenAIChatRequest["messages"] => {
   if (!messages) return [];
 
@@ -358,7 +358,7 @@ const toExternalMessages = (
  * Build the simplified OpenAI Chat mapper with proper type safety
  */
 export const openaiChatMapper = new MapperBuilder<OpenAIChatRequest>(
-  "openai-chat-v2"
+  "openai-chat-v2",
 )
   // Map basic request parameters
   .map("model", "model")
@@ -372,7 +372,7 @@ export const openaiChatMapper = new MapperBuilder<OpenAIChatRequest>(
     "tool_choice",
     "tool_choice",
     convertToolChoice,
-    toExternalToolChoice
+    toExternalToolChoice,
   )
   .map("parallel_tool_calls", "parallel_tool_calls")
   .map("reasoning_effort", "reasoning_effort")
@@ -388,7 +388,7 @@ export const openaiChatMapper = new MapperBuilder<OpenAIChatRequest>(
     "messages",
     "messages",
     convertRequestMessages,
-    toExternalMessages
+    toExternalMessages,
   )
   .build();
 

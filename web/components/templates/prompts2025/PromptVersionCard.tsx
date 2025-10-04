@@ -75,7 +75,7 @@ interface PromptVersionCardProps {
 
 const PromptVersionCard = ({
   version,
-  isProductionVersion = false,
+  isProductionVersion: _isProductionVersion = false,
   onSetEnvironment,
   onOpenPromptVersion,
   onDeletePromptVersion,

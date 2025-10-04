@@ -28,7 +28,7 @@ export default async function Home({
     "blog",
     "blogs",
     params["file-path"],
-    "src.mdx"
+    "src.mdx",
   );
 
   const source = await fs.readFile(changelogFolder, "utf8");
@@ -39,10 +39,7 @@ export default async function Home({
         remarkGfm,
         [remarkToc, { heading: "Table of Contents", tight: true, maxDepth: 2 }],
       ],
-      rehypePlugins: [
-        rehypeSlug,
-        rehypeHighlight,
-      ],
+      rehypePlugins: [rehypeSlug, rehypeHighlight],
     },
   });
 

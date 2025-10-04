@@ -17,5 +17,5 @@ export async function getSSRHeliconeAuthClient({
 export type SSRContext<
   NextApiRequest extends { headers: Record<string, string> },
   NextApiResponse,
-  GetServerSidePropsContext
+  GetServerSidePropsContext,
 > = { req: NextApiRequest; res: NextApiResponse } | GetServerSidePropsContext;

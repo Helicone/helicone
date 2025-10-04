@@ -25,7 +25,7 @@ export interface ProxyRequestBody {
 /* -------------------------------------------------------------------------- */
 proxyRouter.post("/v1/gateway/:provider/{*path}", (async (
   req: ExpressRequest,
-  res: ExpressResponse
+  res: ExpressResponse,
 ) => {
   const { provider } = req.params;
 
@@ -39,7 +39,7 @@ proxyRouter.post("/v1/gateway/:provider/{*path}", (async (
 
   if (routerFunction) {
     const response: Response = await routerFunction(
-      { data: requestWrapper, error: requestWrapperErr }.data
+      { data: requestWrapper, error: requestWrapperErr }.data,
     );
 
     res.status(response.status);
@@ -100,7 +100,7 @@ proxyRouter.post(
     //   } else {
     //     res.status(400).json({ message: "Invalid provider" });
     //   }
-  }
+  },
 );
 
 /* -------------------------------------------------------------------------- */
@@ -113,7 +113,7 @@ const handleAnthropicProxy = async (requestWrapper: RequestWrapper) => {
 const handleOpenAIProxy = async (requestWrapper: RequestWrapper) => {
   if (requestWrapper.url.pathname.includes("audio")) {
     const new_url = new URL(
-      `https://api.openai.com${requestWrapper.url.pathname}`
+      `https://api.openai.com${requestWrapper.url.pathname}`,
     );
     return await fetch(new_url.href, {
       method: requestWrapper.getMethod(),

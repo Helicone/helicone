@@ -308,7 +308,7 @@ export const playgroundModels =
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const defaultProvider = providers.find(
-  (provider) => provider.provider === "OPENAI"
+  (provider) => provider.provider === "OPENAI",
 )!;
 
 export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
@@ -324,5 +324,5 @@ export const parentModelNames = providers.reduce(
     }
     return acc;
   },
-  {} as Record<ProviderName, string[]>
+  {} as Record<ProviderName, string[]>,
 );

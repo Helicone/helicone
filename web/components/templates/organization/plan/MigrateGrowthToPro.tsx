@@ -58,7 +58,7 @@ export const MigrateGrowthToPro = () => {
   });
 
   const handleUpgrade = async () => {
-    const result = await upgradeExistingCustomerToPro.mutateAsync();
+    await upgradeExistingCustomerToPro.mutateAsync();
     setIsUpgradeDialogOpen(false);
     subscription.refetch();
     window.location.reload();

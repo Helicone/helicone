@@ -13,7 +13,7 @@ export class ExperimentHandler extends AbstractLogHandler {
       return await super.handle(context);
     } catch (error) {
       return err(
-        `Error handling experiment: ${error}, Context: ${this.constructor.name}`
+        `Error handling experiment: ${error}, Context: ${this.constructor.name}`,
       );
     }
   }

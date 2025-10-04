@@ -196,20 +196,20 @@ export default function FeatureTable() {
                   <div
                     className={clsx(
                       tier.featured ? "border-sky-500" : "border-transparent",
-                      "-mt-px w-72 border-t-2 pt-10 md:w-80"
+                      "-mt-px w-72 border-t-2 pt-10 md:w-80",
                     )}
                   >
                     <div className="flex items-center space-x-1">
                       <tier.icon
                         className={clsx(
                           tier.featured ? "text-sky-500" : "text-gray-900",
-                          "w-4 h-4"
+                          "w-4 h-4",
                         )}
                       />
                       <p
                         className={clsx(
                           tier.featured ? "text-sky-500" : "text-gray-900",
-                          "text-sm font-semibold leading-6"
+                          "text-sm font-semibold leading-6",
                         )}
                       >
                         {tier.name}
@@ -238,7 +238,7 @@ export default function FeatureTable() {
                               tier.featured
                                 ? "ring-2 ring-sky-500"
                                 : "ring-1 ring-gray-900/10",
-                              "relative rounded-lg bg-sky-50 shadow-sm sm:rounded-none sm:bg-transparent sm:shadow-none sm:ring-0"
+                              "relative rounded-lg bg-sky-50 shadow-sm sm:rounded-none sm:bg-transparent sm:shadow-none sm:ring-0",
                             )}
                           >
                             <dl className="divide-y divide-gray-200 text-sm leading-6">
@@ -296,7 +296,7 @@ export default function FeatureTable() {
                               tier.featured
                                 ? "ring-2 ring-sky-500"
                                 : "ring-1 ring-gray-900/10",
-                              "pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 rounded-lg sm:block"
+                              "pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 rounded-lg sm:block",
                             )}
                           />
                         </div>
@@ -323,20 +323,20 @@ export default function FeatureTable() {
                   <div
                     className={clsx(
                       tier.featured ? "border-sky-500" : "border-transparent",
-                      "border-t-2 pt-10"
+                      "border-t-2 pt-10",
                     )}
                   >
                     <div className="flex items-center space-x-1">
                       <tier.icon
                         className={clsx(
                           tier.featured ? "text-sky-500" : "text-gray-900",
-                          "w-4 h-4"
+                          "w-4 h-4",
                         )}
                       />
                       <p
                         className={clsx(
                           tier.featured ? "text-sky-500" : "text-gray-900",
-                          "text-sm font-semibold leading-6"
+                          "text-sm font-semibold leading-6",
                         )}
                       >
                         {tier.name}
@@ -406,7 +406,7 @@ export default function FeatureTable() {
                                         tier.featured
                                           ? "font-semibold text-sky-500"
                                           : "text-gray-900",
-                                        "text-sm leading-6"
+                                        "text-sm leading-6",
                                       )}
                                     >
                                       {feature.tiers[tier.name]}
@@ -452,7 +452,7 @@ export default function FeatureTable() {
                             tier.featured
                               ? "ring-2 ring-sky-500"
                               : "ring-1 ring-gray-900/10",
-                            "rounded-lg"
+                            "rounded-lg",
                           )}
                         />
                       ))}

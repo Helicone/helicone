@@ -20,7 +20,7 @@ export const getFormattedMessageContent = (content: any): string => {
 // Helper functions
 export function getRequestMessages(
   llmSchema: LlmSchema | undefined,
-  requestBody: any
+  requestBody: any,
 ): Message[] {
   let messages = llmSchema?.request.messages ?? requestBody?.messages ?? [];
 
@@ -48,7 +48,7 @@ export function getRequestMessages(
     requestBody?.system &&
     !messages.some(
       (msg: any) =>
-        msg?.role === "system" && msg?.content === requestBody?.system
+        msg?.role === "system" && msg?.content === requestBody?.system,
     )
   ) {
     messages = [
@@ -66,7 +66,7 @@ export function getRequestMessages(
 export function getResponseMessage(
   llmSchema: LlmSchema | undefined,
   responseBody: any,
-  model: string
+  model: string,
 ): Message | null {
   if (/^claude/.test(model)) {
     if (responseBody?.content) {
@@ -121,7 +121,7 @@ export function getResponseMessage(
 export function getMessages(
   requestMessages: Message[],
   responseMessage: Message | null,
-  status: number
+  status: number,
 ): Message[] {
   let messages = requestMessages || [];
   if (status === 200 && responseMessage) {

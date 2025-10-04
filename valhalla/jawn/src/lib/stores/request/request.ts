@@ -55,7 +55,7 @@ export async function getRequests(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest
+  sort: SortLeafRequest,
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -139,7 +139,7 @@ export async function getRequests(
     process.env.S3_SECRET_KEY || undefined,
     process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
     process.env.S3_BUCKET_NAME ?? "",
-    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
   );
   const results = await mapLLMCalls(requests.data, s3Client, orgId);
   return resultMap(results, (data) => {
@@ -152,7 +152,7 @@ export async function getRequestsClickhouseNoSort(
   filter: FilterNode,
   offset: number,
   limit: number,
-  createdAtSort: SortDirection
+  createdAtSort: SortDirection,
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -211,7 +211,7 @@ export async function getRequestsClickhouseNoSort(
 
   const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
 
   const s3Client = new S3Client(
@@ -219,7 +219,7 @@ export async function getRequestsClickhouseNoSort(
     process.env.S3_SECRET_KEY || undefined,
     process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
     process.env.S3_BUCKET_NAME ?? "",
-    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
   );
 
   const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
@@ -232,7 +232,7 @@ export async function getRequestsClickhouse(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest
+  sort: SortLeafRequest,
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -292,7 +292,7 @@ export async function getRequestsClickhouse(
 
   const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
 
   const s3Client = new S3Client(
@@ -300,7 +300,7 @@ export async function getRequestsClickhouse(
     process.env.S3_SECRET_KEY || undefined,
     process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
     process.env.S3_BUCKET_NAME ?? "",
-    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
   );
 
   const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
@@ -311,7 +311,7 @@ export async function getRequestsClickhouse(
 async function mapLLMCalls(
   heliconeRequests: HeliconeRequest[] | null,
   s3Client: S3Client,
-  orgId: string
+  orgId: string,
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
@@ -328,7 +328,7 @@ async function mapLLMCalls(
             heliconeRequest.cache_reference_id === DEFAULT_UUID
               ? heliconeRequest.request_id
               : (heliconeRequest.cache_reference_id ??
-                  heliconeRequest.request_id)
+                  heliconeRequest.request_id),
           );
 
         if (signedBodyUrlErr || !signedBodyUrl) {
@@ -348,7 +348,7 @@ async function mapLLMCalls(
                   await s3Client.getRequestResponseImageSignedUrl(
                     orgId,
                     heliconeRequest.request_id,
-                    assetId
+                    assetId,
                   );
 
                 return {
@@ -356,7 +356,7 @@ async function mapLLMCalls(
                   signedImageUrl:
                     signedImageUrlErr || !signedImageUrl ? "" : signedImageUrl,
                 };
-              }
+              },
             );
 
             const signedUrls = await Promise.all(signedUrlPromises);
@@ -398,7 +398,7 @@ const getModelFromPath = (path: string) => {
 
 export async function getRequestsDateRange(
   orgId: string,
-  filter: FilterNode
+  filter: FilterNode,
 ): Promise<Result<{ min: Date; max: Date }, string>> {
   const builtFilter = await buildFilterWithAuth({
     org_id: orgId,
@@ -415,7 +415,7 @@ export async function getRequestsDateRange(
 
   const res = await dbExecute<{ min: Date; max: Date }>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
 
   return resultMap(res, (data) => {
@@ -428,7 +428,7 @@ export async function getRequestsDateRange(
 
 export async function getRequestCount(
   org_id: string,
-  filter: FilterNode
+  filter: FilterNode,
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuth({
     org_id,
@@ -448,7 +448,7 @@ export async function getRequestCount(
   `;
   const { data, error } = await dbExecute<{ count: number }>(
     query,
-    builtFilter.argsAcc
+    builtFilter.argsAcc,
   );
   if (error !== null) {
     return { data: null, error: error };
@@ -459,7 +459,7 @@ export async function getRequestCount(
 export async function getRequestAsset(
   assetId: string,
   requestId: string,
-  organizationId: string
+  organizationId: string,
 ): Promise<Result<Asset, string>> {
   const query = `
     SELECT * FROM asset

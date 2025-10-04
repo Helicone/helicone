@@ -1,2 +1,2 @@
 // Export all stripe fee calculation utilities
-export * from './stripe/feeCalculator';
+export * from "./stripe/feeCalculator";

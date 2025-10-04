@@ -35,7 +35,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -52,7 +54,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -75,7 +79,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ["Test message for Mistral Small model"],
@@ -99,7 +105,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -120,7 +128,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ['"stream":true'],
@@ -148,7 +158,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -170,7 +182,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the request supports the expected parameters
@@ -201,7 +215,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -218,7 +234,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // In a real implementation, this would verify that
@@ -387,7 +405,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   headers: {
@@ -415,7 +435,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                 },
@@ -439,7 +461,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                 },
@@ -460,7 +484,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the URL is correctly constructed
@@ -482,7 +508,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506", // Should map to the correct provider model ID
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -528,7 +556,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -553,7 +583,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -606,7 +638,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -623,7 +657,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -646,7 +682,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ["Test message for Mistral Nemo model"],
@@ -670,7 +708,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -691,7 +731,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ['"stream":true'],
@@ -719,7 +761,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -880,7 +924,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   headers: {
@@ -908,7 +954,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the request supports the expected parameters
@@ -939,7 +987,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -972,7 +1022,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // In a real implementation, this would verify that
@@ -999,7 +1051,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the URL is correctly constructed
@@ -1021,7 +1075,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407", // Should map to the correct provider model ID
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1067,7 +1123,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1092,7 +1150,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1141,9 +1201,7 @@ describe("Mistral Registry Tests", () => {
           model: "mistral-small/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -1153,7 +1211,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1168,9 +1228,7 @@ describe("Mistral Registry Tests", () => {
           model: "mistral-nemo/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -1180,7 +1238,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],

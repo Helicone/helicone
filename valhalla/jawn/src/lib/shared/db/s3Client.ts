@@ -48,7 +48,7 @@ export class S3Client {
     secretKey: string | undefined,
     private endpoint: string,
     private bucketName: string,
-    private region: string
+    private region: string,
   ) {
     const config: any = {
       region: this.region,
@@ -71,7 +71,7 @@ export class S3Client {
 
   async copyObject(
     sourceKey: string,
-    destinationKey: string
+    destinationKey: string,
   ): Promise<Result<string, string>> {
     try {
       const command = new CopyObjectCommand({
@@ -82,7 +82,7 @@ export class S3Client {
       const response = await this.awsClient.send(command);
       if (!response || response.$metadata.httpStatusCode !== 200) {
         return err(
-          `Failed to copy object: ${response.$metadata.httpStatusCode}`
+          `Failed to copy object: ${response.$metadata.httpStatusCode}`,
         );
       }
       return ok(`Success`);
@@ -113,13 +113,13 @@ export class S3Client {
           factor: 2,
           minTimeout: 350,
           maxTimeout: 1050,
-        }
+        },
       );
 
       if (!contentResponse.ok) {
         if (contentResponse.status === 404) {
           console.error(
-            `Content not found in S3: ${signedUrl}, ${contentResponse.status}, ${contentResponse.statusText}`
+            `Content not found in S3: ${signedUrl}, ${contentResponse.status}, ${contentResponse.statusText}`,
           );
 
           Sentry.captureException(new Error("Raw content not found in S3"), {
@@ -158,7 +158,7 @@ export class S3Client {
 
   async getRawRequestResponseBodySignedUrl(
     orgId: string,
-    requestId: string
+    requestId: string,
   ): Promise<Result<string, string>> {
     const key = this.getRawRequestResponseKey(requestId, orgId);
     return await this.getSignedUrl(key);
@@ -166,7 +166,7 @@ export class S3Client {
 
   async getRequestResponseBodySignedUrl(
     orgId: string,
-    requestId: string
+    requestId: string,
   ): Promise<Result<string, string>> {
     const key = this.getRequestResponseKey(requestId, orgId);
     return await this.getSignedUrl(key);
@@ -175,7 +175,7 @@ export class S3Client {
   async getRequestResponseImageSignedUrl(
     orgId: string,
     requestId: string,
-    assetId: string
+    assetId: string,
   ): Promise<Result<string, string>> {
     const key = this.getRequestResponseImageKey(requestId, orgId, assetId);
     return await this.getSignedUrl(key);
@@ -186,7 +186,7 @@ export class S3Client {
     assetType: string,
     requestId: string,
     orgId: string,
-    assetId: string
+    assetId: string,
   ): PromiseGenericResult<string> {
     const key = this.getRequestResponseImageUrl(requestId, orgId, assetId);
     return await this.uploadToS3(key, buffer, assetType);
@@ -196,18 +196,18 @@ export class S3Client {
     image: Blob,
     requestId: string,
     orgId: string,
-    assetId: string
+    assetId: string,
   ): Promise<Result<string, string>> {
     const uploadUrl = this.getRequestResponseImageUrl(
       requestId,
       orgId,
-      assetId
+      assetId,
     );
 
     return await this.uploadToS3(
       uploadUrl,
       await image.arrayBuffer(),
-      image.type
+      image.type,
     );
   }
 
@@ -232,7 +232,7 @@ export class S3Client {
   async putObjectSignedUrlWithExpiration(
     key: string,
     bodySize: number,
-    expiresIn: number
+    expiresIn: number,
   ): Promise<Result<string, string>> {
     try {
       this.awsClient;
@@ -255,7 +255,7 @@ export class S3Client {
   async uploadToS3(
     key: string,
     body: ArrayBuffer | Buffer,
-    contentType: string
+    contentType: string,
   ): Promise<Result<string, string>> {
     return await putLimiter.schedule(async () => {
       const command = new PutObjectCommand({
@@ -270,7 +270,7 @@ export class S3Client {
 
         if (!response || response.$metadata.httpStatusCode !== 200) {
           return err(
-            `Failed to store data: ${response.$metadata.httpStatusCode}`
+            `Failed to store data: ${response.$metadata.httpStatusCode}`,
           );
         }
 
@@ -285,7 +285,7 @@ export class S3Client {
   async store(
     key: string,
     value: string,
-    tags?: Record<string, string>
+    tags?: Record<string, string>,
   ): Promise<Result<string, string>> {
     return await putLimiter.schedule(async () => {
       try {
@@ -315,7 +315,7 @@ export class S3Client {
 
         if (!response || response.$metadata.httpStatusCode !== 200) {
           return err(
-            `Failed to store data: ${response.$metadata.httpStatusCode}`
+            `Failed to store data: ${response.$metadata.httpStatusCode}`,
           );
         }
 
@@ -338,7 +338,7 @@ export class S3Client {
 
       if (!response || response.$metadata.httpStatusCode !== 204) {
         return err(
-          `Failed to delete data: ${response.$metadata.httpStatusCode}`
+          `Failed to delete data: ${response.$metadata.httpStatusCode}`,
         );
       }
 
@@ -359,12 +359,12 @@ export class S3Client {
 
   getPromptKey = (promptId: string, promptVersionId: string, orgId: string) => {
     return `organizations/${orgId}/prompts/${promptId}/versions/${promptVersionId}/prompt_body`;
-  }
+  };
 
   getRequestResponseImageKey = (
     requestId: string,
     orgId: string,
-    assetId: string
+    assetId: string,
   ) => {
     return `organizations/${orgId}/requests/${requestId}/assets/${assetId}`;
   };
@@ -372,7 +372,7 @@ export class S3Client {
   getRequestResponseImageUrl = (
     requestId: string,
     orgId: string,
-    assetId: string
+    assetId: string,
   ) => {
     return `organizations/${orgId}/requests/${requestId}/assets/${assetId}`;
   };

@@ -16,10 +16,10 @@ const anthropicContentToMessage = (content: any, role: string): Message => {
         typeof content === "string"
           ? content
           : Array.isArray(content)
-          ? content
-              .map((item: any) => item.text || JSON.stringify(item))
-              .join(" ")
-          : JSON.stringify(content, null, 2),
+            ? content
+                .map((item: any) => item.text || JSON.stringify(item))
+                .join(" ")
+            : JSON.stringify(content, null, 2),
       _type: "message",
       role,
     };
@@ -54,10 +54,10 @@ const anthropicContentToMessage = (content: any, role: string): Message => {
         typeof content === "string"
           ? content
           : Array.isArray(content)
-          ? content
-              .map((item: any) => item.text || JSON.stringify(item))
-              .join(" ")
-          : JSON.stringify(content, null, 2),
+            ? content
+                .map((item: any) => item.text || JSON.stringify(item))
+                .join(" ")
+            : JSON.stringify(content, null, 2),
       _type: "message",
     };
   }
@@ -87,7 +87,7 @@ export const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
         for (const content of response.output.message.content) {
           const message = anthropicContentToMessage(
             content,
-            response.output.message.role || "assistant"
+            response.output.message.role || "assistant",
           );
           if (typeof message.content === "string") {
             message.content = message.content.replace(/undefined/g, "").trim();
@@ -97,7 +97,7 @@ export const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
       } else {
         const message = anthropicContentToMessage(
           response.output.message.content,
-          response.output.message.role || "assistant"
+          response.output.message.role || "assistant",
         );
         if (typeof message.content === "string") {
           message.content = message.content.replace(/undefined/g, "").trim();
@@ -122,7 +122,7 @@ export const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
       } else {
         const message = anthropicContentToMessage(
           response.content,
-          response.role
+          response.role,
         );
         // Clean up any undefined strings in the content
         if (typeof message.content === "string") {
@@ -138,7 +138,7 @@ export const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
           for (const content of choice.message.content) {
             const message = anthropicContentToMessage(
               content,
-              choice.message.role
+              choice.message.role,
             );
             // Clean up any undefined strings in the content
             if (typeof message.content === "string") {
@@ -156,7 +156,7 @@ export const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
               for (const content of parsedContent) {
                 const message = anthropicContentToMessage(
                   content,
-                  choice.message.role
+                  choice.message.role,
                 );
                 // Clean up any undefined strings in the content
                 if (typeof message.content === "string") {
@@ -169,7 +169,7 @@ export const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
             } else {
               const message = anthropicContentToMessage(
                 parsedContent,
-                choice.message.role
+                choice.message.role,
               );
               // Clean up any undefined strings in the content
               if (typeof message.content === "string") {
@@ -183,7 +183,7 @@ export const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
             // If parsing fails, treat it as regular text content
             const message = anthropicContentToMessage(
               { type: "text", text: choice.message.content },
-              choice.message.role
+              choice.message.role,
             );
             // Clean up any undefined strings in the content
             if (typeof message.content === "string") {
@@ -196,7 +196,7 @@ export const getLLMSchemaResponse = (response: any): LlmSchema["response"] => {
         } else if (choice.message?.content) {
           const message = anthropicContentToMessage(
             choice.message.content,
-            choice.message.role
+            choice.message.role,
           );
           // Clean up any undefined strings in the content
           if (typeof message.content === "string") {

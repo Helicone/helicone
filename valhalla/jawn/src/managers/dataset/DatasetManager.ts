@@ -35,7 +35,7 @@ export class DatasetManager extends BaseManager {
   }
 
   async getDatasets(
-    promptVersionId?: string
+    promptVersionId?: string,
   ): Promise<Result<DatasetResult[], string>> {
     const result = dbExecute<{
       id: string;
@@ -56,8 +56,8 @@ export class DatasetManager extends BaseManager {
     LIMIT 100
     `,
       [this.authParams.organizationId].concat(
-        promptVersionId ? [promptVersionId] : []
-      )
+        promptVersionId ? [promptVersionId] : [],
+      ),
     );
     return result;
   }
@@ -73,7 +73,7 @@ export class DatasetManager extends BaseManager {
           this.authParams.organizationId,
           params.meta ?? null,
           params.datasetType,
-        ]
+        ],
       );
 
       if (dataset.error || !dataset.data || dataset.data.length === 0) {
@@ -87,7 +87,7 @@ export class DatasetManager extends BaseManager {
          SELECT $1, id
          FROM prompt_input_record
          WHERE source_request = ANY($2)`,
-        [datasetId, params.requestIds]
+        [datasetId, params.requestIds],
       );
 
       if (res.error) {
@@ -103,7 +103,7 @@ export class DatasetManager extends BaseManager {
 
   async addDatasetRow(
     datasetId: string,
-    inputRecordId: string
+    inputRecordId: string,
   ): Promise<Result<string, string>> {
     try {
       // First verify the dataset exists and belongs to this organization
@@ -113,7 +113,7 @@ export class DatasetManager extends BaseManager {
          WHERE organization = $1
          AND id = $2
          LIMIT 1`,
-        [this.authParams.organizationId, datasetId]
+        [this.authParams.organizationId, datasetId],
       );
 
       if (
@@ -128,7 +128,7 @@ export class DatasetManager extends BaseManager {
         `INSERT INTO experiment_dataset_v2_row (dataset_id, input_record)
          VALUES ($1, $2)
          RETURNING id`,
-        [datasetId, inputRecordId]
+        [datasetId, inputRecordId],
       );
 
       if (dataset.error || !dataset.data || dataset.data.length === 0) {
@@ -143,7 +143,7 @@ export class DatasetManager extends BaseManager {
   }
 
   async getDatasetRowInputRecord(
-    datasetRowId: string
+    datasetRowId: string,
   ): Promise<
     Result<Database["public"]["Tables"]["prompt_input_record"]["Row"], string>
   > {
@@ -155,7 +155,7 @@ export class DatasetManager extends BaseManager {
          FROM prompt_input_record
          WHERE id = $1
          LIMIT 1`,
-        [datasetRowId]
+        [datasetRowId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -187,7 +187,7 @@ export class DatasetManager extends BaseManager {
         `INSERT INTO helicone_dataset (name, organization)
          VALUES ($1, $2)
          RETURNING id, name, organization`,
-        [params.datasetName, this.authParams.organizationId]
+        [params.datasetName, this.authParams.organizationId],
       );
 
       if (dataset.error || !dataset.data || dataset.data.length === 0) {
@@ -211,7 +211,7 @@ export class DatasetManager extends BaseManager {
         WHERE (${filterWithAuth.filter})
         ORDER BY random()
         `,
-        filterWithAuth.argsAcc
+        filterWithAuth.argsAcc,
       );
 
       if (res.error) {
@@ -228,7 +228,7 @@ export class DatasetManager extends BaseManager {
   }
 
   async getPromptVersions(
-    filter: FilterNode
+    filter: FilterNode,
   ): Promise<Result<PromptVersionResult[], string>> {
     const filterWithAuth = buildFilterPostgres({
       filter,
@@ -261,14 +261,14 @@ export class DatasetManager extends BaseManager {
     AND prompt_v2.soft_delete = false
     AND (${filterWithAuth.filter})
     `,
-      filterWithAuth.argsAcc
+      filterWithAuth.argsAcc,
     );
 
     return result;
   }
 
   async getPrompts(
-    params: PromptsQueryParams
+    params: PromptsQueryParams,
   ): Promise<Result<PromptsResult[], string>> {
     const filterWithAuth = buildFilterPostgres({
       filter: params.filter,
@@ -297,14 +297,14 @@ export class DatasetManager extends BaseManager {
     AND prompt_v2.soft_delete = false
     AND (${filterWithAuth.filter})
     `,
-      filterWithAuth.argsAcc
+      filterWithAuth.argsAcc,
     );
     return result;
   }
 
   async getPrompt(
     params: PromptQueryParams,
-    promptId: string
+    promptId: string,
   ): Promise<Result<PromptResult, string>> {
     const result = await dbExecute<{
       id: string;
@@ -349,7 +349,7 @@ export class DatasetManager extends BaseManager {
     AND prompt_v2.id = $2
     ORDER BY prompts_versions.major_version DESC, prompts_versions.minor_version DESC
     `,
-      [this.authParams.organizationId, promptId]
+      [this.authParams.organizationId, promptId],
     );
 
     return resultMap(result, (data) => data[0]);
@@ -382,7 +382,7 @@ export class DatasetManager extends BaseManager {
     WHERE prompts_versions.organization = $1
     AND prompts_versions.id = $2
     `,
-      [this.authParams.organizationId, params.promptVersionId]
+      [this.authParams.organizationId, params.promptVersionId],
     );
     return result;
   }

@@ -88,7 +88,7 @@ const getRequestText = (requestBody: GoogleChatRequest): string => {
     if (parts.length === 0) return "";
 
     const textParts = parts.filter(
-      (part: any) => part && typeof part.text === "string"
+      (part: any) => part && typeof part.text === "string",
     );
 
     return textParts.map((part: any) => part.text).join(" ");
@@ -136,7 +136,7 @@ const getResponseText = (responseBody: any, statusCode = 200): string => {
                   .map((part: any) => {
                     if (part?.functionCall) {
                       return `Function Call: ${JSON.stringify(
-                        part.functionCall
+                        part.functionCall,
                       )}`;
                     }
                     return part && typeof part.text === "string"
@@ -175,10 +175,10 @@ const convertRequestMessages = (contents: any): Message[] => {
 
       // Find text and image parts
       const textParts = parts.filter(
-        (part: any) => part && typeof part.text === "string"
+        (part: any) => part && typeof part.text === "string",
       );
       const imagePart = parts.find(
-        (part: any) => part && part.inlineData?.data
+        (part: any) => part && part.inlineData?.data,
       );
 
       return [
@@ -224,7 +224,7 @@ const convertResponseMessages = (responseBody: any): Message[] => {
 
         // Extract text content
         const textParts = parts.filter(
-          (part: any) => part && typeof part.text === "string"
+          (part: any) => part && typeof part.text === "string",
         );
         const combinedContent = textParts
           .map((part: any) => part.text)
@@ -232,7 +232,7 @@ const convertResponseMessages = (responseBody: any): Message[] => {
 
         // Check for function calls
         const functionCallPart = parts.find(
-          (part: any) => part && part.functionCall
+          (part: any) => part && part.functionCall,
         );
 
         const functionCall = functionCallPart?.functionCall;
@@ -312,7 +312,7 @@ const toExternalContents = (messages: Message[]): any[] => {
  * Build the Google Chat mapper with proper type safety
  */
 export const googleChatMapper = new MapperBuilder<GoogleChatRequest>(
-  "gemini-chat-v2"
+  "gemini-chat-v2",
 )
   // Map basic request parameters
   .map("model", "model")
@@ -322,31 +322,31 @@ export const googleChatMapper = new MapperBuilder<GoogleChatRequest>(
     "generationConfig",
     "temperature",
     (config) => config?.temperature,
-    (value) => ({ temperature: value })
+    (value) => ({ temperature: value }),
   )
   .mapWithTransform(
     "generationConfig",
     "top_p",
     (config) => config?.topP,
-    (value) => ({ topP: value })
+    (value) => ({ topP: value }),
   )
   .mapWithTransform(
     "generationConfig",
     "max_tokens",
     (config) => config?.maxOutputTokens,
-    (value) => ({ maxOutputTokens: value })
+    (value) => ({ maxOutputTokens: value }),
   )
   .mapWithTransform(
     "generationConfig",
     "n",
     (config) => config?.candidateCount,
-    (value) => ({ candidateCount: value })
+    (value) => ({ candidateCount: value }),
   )
   .mapWithTransform(
     "generationConfig",
     "stop",
     (config) => config?.stopSequences,
-    (value) => ({ stopSequences: value })
+    (value) => ({ stopSequences: value }),
   )
 
   // Map messages with transformation
@@ -354,7 +354,7 @@ export const googleChatMapper = new MapperBuilder<GoogleChatRequest>(
     "contents",
     "messages",
     convertRequestMessages,
-    toExternalContents
+    toExternalContents,
   )
   .build();
 

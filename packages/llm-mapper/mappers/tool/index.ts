@@ -70,7 +70,7 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
     summary.push(`Found ${responseBody.hotels.length} hotels`);
     if (responseBody.filters?.priceRange) {
       summary.push(
-        `Price range: $${responseBody.filters.priceRange.min} - $${responseBody.filters.priceRange.max}`
+        `Price range: $${responseBody.filters.priceRange.min} - $${responseBody.filters.priceRange.max}`,
       );
     }
   }

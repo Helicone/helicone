@@ -2,7 +2,7 @@ import { TestInput } from "../../controllers/public/evaluatorController";
 import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 
 export const convertTestInputToHeliconeRequest = (
-  testInput: TestInput
+  testInput: TestInput,
 ): HeliconeRequest => {
   return {
     cache_enabled: false,

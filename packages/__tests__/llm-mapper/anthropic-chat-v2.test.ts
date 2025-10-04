@@ -62,7 +62,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       // Verify user message is preserved as the second message
       expect(internalRequest.messages?.[1].role).toBe("user");
       expect(internalRequest.messages?.[1].content).toBe(
-        "Tell me about yourself."
+        "Tell me about yourself.",
       );
     });
 
@@ -94,7 +94,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
       // Verify system message is extracted as a parameter
       expect(convertedExternalRequest.system).toBe(
-        "You are Claude, an AI assistant by Anthropic."
+        "You are Claude, an AI assistant by Anthropic.",
       );
 
       // Verify other messages are preserved without the system message
@@ -129,7 +129,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
       // Verify message content was joined correctly
       expect(internalRequest.messages?.[0].content).toBe(
-        "What's in this image? "
+        "What's in this image? ",
       );
     });
 
@@ -162,7 +162,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
       // Verify system message is extracted as a parameter
       expect(convertedExternalRequest.system).toBe(
-        "You are Claude, an AI assistant by Anthropic."
+        "You are Claude, an AI assistant by Anthropic.",
       );
 
       // Verify other messages are preserved without the system message
@@ -189,7 +189,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       expect(internalRequest.messages).toHaveLength(2);
       expect(internalRequest.messages?.[0].role).toBe("system");
       expect(internalRequest.messages?.[0].content).toBe(
-        "You are Claude, the primary AI."
+        "You are Claude, the primary AI.",
       );
       expect(internalRequest.messages?.[1].role).toBe("user");
 
@@ -199,7 +199,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
       // Verify system parameter is set and no system message in the array
       expect(convertedExternalRequest.system).toBe(
-        "You are Claude, the primary AI."
+        "You are Claude, the primary AI.",
       );
       expect(convertedExternalRequest.messages).toHaveLength(1);
       expect(convertedExternalRequest.messages?.[0].role).toBe("user");
@@ -300,12 +300,12 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
       // Test the full mapper to ensure proper system message handling
       const externalRequest = anthropicChatMapper.toExternal(
-        partialInternalRequest
+        partialInternalRequest,
       );
 
       // Verify system message is extracted as a parameter
       expect(externalRequest.system).toBe(
-        "You are Claude, an AI assistant by Anthropic."
+        "You are Claude, an AI assistant by Anthropic.",
       );
 
       // Verify only the user message remains in the messages array
@@ -326,19 +326,19 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
       // Test each property mapping individually
       const modelMapping = anthropicChatMapper["mappings"].find(
-        (m) => m.external === "model"
+        (m) => m.external === "model",
       );
       const temperatureMapping = anthropicChatMapper["mappings"].find(
-        (m) => m.external === "temperature"
+        (m) => m.external === "temperature",
       );
       const topPMapping = anthropicChatMapper["mappings"].find(
-        (m) => m.external === "top_p"
+        (m) => m.external === "top_p",
       );
       const maxTokensMapping = anthropicChatMapper["mappings"].find(
-        (m) => m.external === "max_tokens"
+        (m) => m.external === "max_tokens",
       );
       const streamMapping = anthropicChatMapper["mappings"].find(
-        (m) => m.external === "stream"
+        (m) => m.external === "stream",
       );
 
       const getValueByPath = (obj: any, path: string) => {
@@ -347,19 +347,19 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
       // Verify each property is correctly mapped
       expect(getValueByPath(internalObject, modelMapping?.internal || "")).toBe(
-        "claude-3-opus-20240229"
+        "claude-3-opus-20240229",
       );
       expect(
-        getValueByPath(internalObject, temperatureMapping?.internal || "")
+        getValueByPath(internalObject, temperatureMapping?.internal || ""),
       ).toBe(0.7);
       expect(getValueByPath(internalObject, topPMapping?.internal || "")).toBe(
-        0.9
+        0.9,
       );
       expect(
-        getValueByPath(internalObject, maxTokensMapping?.internal || "")
+        getValueByPath(internalObject, maxTokensMapping?.internal || ""),
       ).toBe(200);
       expect(
-        getValueByPath(internalObject, streamMapping?.internal || "")
+        getValueByPath(internalObject, streamMapping?.internal || ""),
       ).toBe(true);
     });
   });
@@ -412,10 +412,10 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       expect(internalRequest.tools).toHaveLength(1);
       expect(internalRequest.tools?.[0].name).toBe("flight_search");
       expect(internalRequest.tools?.[0].description).toBe(
-        "Search for flights based on departure and destination locations"
+        "Search for flights based on departure and destination locations",
       );
       expect(internalRequest.tools?.[0].parameters).toEqual(
-        externalRequest.tools[0].input_schema
+        externalRequest.tools[0].input_schema,
       );
 
       // Verify tool_choice was transformed correctly
@@ -505,11 +505,11 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
       // Get the tools mapping and test
       const toolsMapping = anthropicChatMapper["mappings"].find(
-        (m) => m.external === "tools" && m.internal === "tools"
+        (m) => m.external === "tools" && m.internal === "tools",
       );
 
       const toolChoiceMapping = anthropicChatMapper["mappings"].find(
-        (m) => m.external === "tool_choice" && m.internal === "tool_choice"
+        (m) => m.external === "tool_choice" && m.internal === "tool_choice",
       );
 
       // Use the getValueByPath helper for type safety
@@ -520,7 +520,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       // Test tools mapping
       const tools = getValueByPath(
         internalObject,
-        toolsMapping?.internal || ""
+        toolsMapping?.internal || "",
       );
       const externalTools = toolsMapping?.transform?.toExternal(tools);
 
@@ -528,13 +528,13 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       expect(externalTools?.[0].name).toBe("flight_search");
       expect(externalTools?.[0].description).toBe("Search for flights");
       expect(externalTools?.[0].input_schema).toEqual(
-        internalObject.tools[0].parameters
+        internalObject.tools[0].parameters,
       );
 
       // Test tool_choice mapping
       const toolChoice = getValueByPath(
         internalObject,
-        toolChoiceMapping?.internal || ""
+        toolChoiceMapping?.internal || "",
       );
       const externalToolChoice =
         toolChoiceMapping?.transform?.toExternal(toolChoice);
@@ -551,7 +551,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
       };
 
       const toolChoiceMapping = anthropicChatMapper["mappings"].find(
-        (m) => m.external === "tool_choice" && m.internal === "tool_choice"
+        (m) => m.external === "tool_choice" && m.internal === "tool_choice",
       );
 
       const getValueByPath = (obj: any, path: string) => {
@@ -560,7 +560,7 @@ describe("Anthropic Chat Mapper Core Tests", () => {
 
       const toolChoice = getValueByPath(
         internalObject,
-        toolChoiceMapping?.internal || ""
+        toolChoiceMapping?.internal || "",
       );
       const externalToolChoice =
         toolChoiceMapping?.transform?.toExternal(toolChoice);

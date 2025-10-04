@@ -11,14 +11,14 @@ import Link from "next/link";
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
 const formatNumber = (
-  number: number
+  number: number,
 ): [
   number | null,
   number | null,
   "." | "," | number | null,
   number | null | ".",
   number | null,
-  number | null | "B" | "M"
+  number | null | "B" | "M",
 ] => {
   if (number < 10) {
     return [null, null, null, null, null, number];
@@ -147,7 +147,7 @@ const TotalRequestsPage = () => {
               >
                 {num}
               </div>
-            )
+            ),
           )}
         </div>
         <div className="bg-white p-2.5 border-2 border-black border-r-4 border-b-4 font-medium text-[14px]">

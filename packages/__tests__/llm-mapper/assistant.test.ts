@@ -61,7 +61,7 @@ describe("OpenAI Assistant Mapper", () => {
 
     expect(result.preview.response).toBe("Assistant encountered an error");
     expect(result.schema.response?.messages?.[0].content).toBe(
-      "Assistant encountered an error"
+      "Assistant encountered an error",
     );
   });
 
@@ -92,10 +92,10 @@ describe("OpenAI Assistant Mapper", () => {
     expect(result.preview.request).toContain("Assistant ID: asst_123");
     expect(result.preview.request).toContain("Thread ID: thread_456");
     expect(result.preview.request).toContain(
-      "Instructions: Help with data analysis"
+      "Instructions: Help with data analysis",
     );
     expect(result.preview.request).toContain(
-      "Available Tools: code_interpreter, retrieval, function"
+      "Available Tools: code_interpreter, retrieval, function",
     );
   });
 });

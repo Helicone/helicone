@@ -24,7 +24,10 @@ import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 import { mapOpenAIResponse } from "../mappers/openai/responses";
 import { registry } from "@helicone-package/cost/models/registry";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
-import { isValidAnthropicLog, toOpenAILog } from "@helicone-package/llm-mapper/transform/providers/anthropic/log/toOpenAILog";
+import {
+  isValidAnthropicLog,
+  toOpenAILog,
+} from "@helicone-package/llm-mapper/transform/providers/anthropic/log/toOpenAILog";
 import { AnthropicLog } from "@helicone-package/llm-mapper/transform/types/logs";
 
 const MAX_PREVIEW_LENGTH = 1_000;
@@ -52,7 +55,7 @@ export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
 } satisfies Record<MapperType, MapperFn<any, any>>;
 
 const getStatusType = (
-  heliconeRequest: HeliconeRequest
+  heliconeRequest: HeliconeRequest,
 ): MappedLLMRequest["heliconeMetadata"]["status"]["statusType"] => {
   if (heliconeRequest.response_body?.error?.message) {
     return "error";
@@ -70,7 +73,7 @@ const getStatusType = (
 
 const metaDataFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
-  model: string
+  model: string,
 ): MappedLLMRequest["heliconeMetadata"] => {
   return {
     requestId: heliconeRequest.request_id,
@@ -131,12 +134,12 @@ const getUnsanitizedMappedContent = ({
     const modelProviderConfig = registry.getModelProviderConfigByVersion(
       heliconeRequest.model,
       heliconeRequest.provider as ModelProviderName,
-      heliconeRequest.gateway_endpoint_version ?? ""
+      heliconeRequest.gateway_endpoint_version ?? "",
     );
     if (modelProviderConfig.data) {
       const responseFormat =
         modelProviderConfig.data.responseFormat ?? "OPENAI";
-      
+
       if (responseFormat === "ANTHROPIC" && isValidAnthropicLog(responseBody)) {
         try {
           responseBody = toOpenAILog(responseBody as AnthropicLog);
@@ -149,11 +152,13 @@ const getUnsanitizedMappedContent = ({
       const legacyMapperType = getMapperTypeFromHeliconeRequest(
         heliconeRequest,
         heliconeRequest.model,
-        true
+        true,
       );
       mapper = MAPPERS[legacyMapperType];
       if (!mapper) {
-        throw new Error(`Mapper not found: ${JSON.stringify(legacyMapperType)}`);
+        throw new Error(
+          `Mapper not found: ${JSON.stringify(legacyMapperType)}`,
+        );
       }
     }
   }
@@ -198,7 +203,7 @@ const getUnsanitizedMappedContent = ({
     },
     heliconeMetadata: metaDataFromHeliconeRequest(
       heliconeRequest,
-      heliconeRequest.model
+      heliconeRequest.model,
     ),
   };
 };
@@ -226,7 +231,7 @@ const messagesToText = (messages: Message[]): string => {
 };
 
 const sanitizeMappedContent = (
-  mappedContent: MappedLLMRequest
+  mappedContent: MappedLLMRequest,
 ): MappedLLMRequest => {
   const sanitizeMessage = (message: Message): Message => {
     if (!message) {
@@ -252,7 +257,7 @@ const sanitizeMappedContent = (
   };
 
   const sanitizeMessages = (
-    messages: Message[] | undefined | null
+    messages: Message[] | undefined | null,
   ): Message[] | undefined | null => {
     return messages?.map(sanitizeMessage);
   };
@@ -265,13 +270,13 @@ const sanitizeMappedContent = (
         mappedContent.schema.response.error.heliconeMessage = JSON.stringify(
           JSON.parse(mappedContent.schema.response.error.heliconeMessage),
           null,
-          2
+          2,
         );
       } else {
         mappedContent.schema.response.error.heliconeMessage = JSON.stringify(
           mappedContent.schema.response.error.heliconeMessage,
           null,
-          2
+          2,
         );
       }
     } catch (e) {}
@@ -298,7 +303,7 @@ const sanitizeMappedContent = (
               .slice(0, MAX_PREVIEW_LENGTH)
           : String(mappedContent.preview.request || "").slice(
               0,
-              MAX_PREVIEW_LENGTH
+              MAX_PREVIEW_LENGTH,
             ),
       response:
         typeof mappedContent.preview.response === "string"
@@ -307,7 +312,7 @@ const sanitizeMappedContent = (
               .slice(0, MAX_PREVIEW_LENGTH)
           : String(mappedContent.preview.response || "").slice(
               0,
-              MAX_PREVIEW_LENGTH
+              MAX_PREVIEW_LENGTH,
             ),
       concatenatedMessages:
         sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
@@ -346,11 +351,11 @@ export const getMappedContent = ({
 };
 
 export const heliconeRequestToMappedContent = (
-  heliconeRequest: HeliconeRequest
+  heliconeRequest: HeliconeRequest,
 ): MappedLLMRequest => {
   const mapperType = getMapperTypeFromHeliconeRequest(
     heliconeRequest,
-    heliconeRequest.model
+    heliconeRequest.model,
   );
   return getMappedContent({
     mapperType,

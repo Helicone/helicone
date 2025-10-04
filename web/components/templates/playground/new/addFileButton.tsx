@@ -12,7 +12,7 @@ interface AddFileButtonProps {
 }
 
 const AddFileButton = (props: AddFileButtonProps) => {
-  const { file, onFileChange, promptInput } = props;
+  const { file, onFileChange, promptInput: _promptInput } = props;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);

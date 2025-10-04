@@ -33,7 +33,7 @@ export function ThemedTextDropDown(props: ThemedTextDropDownProps) {
   } = props;
 
   const [query, setQuery] = useState("");
-  const [tabMode, _setTabMode] = useState<"smart" | "raw">("smart");
+  const [tabMode] = useState<"smart" | "raw">("smart");
   const [open, setOpen] = useState(false);
 
   const handleValueChange = (value: string) => {

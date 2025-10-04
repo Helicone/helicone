@@ -41,7 +41,7 @@ const Stats = ({
           observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (elementRef.current) {
@@ -56,7 +56,7 @@ const Stats = ({
       <div
         className={cn(
           ISLAND_WIDTH,
-          "flex justify-between items-start pt-0 pb-32"
+          "flex justify-between items-start pt-0 pb-32",
         )}
       >
         <h1 className="gap-y-4 text-3xl md:text-6xl font-semibold !leading-[150%] text-black max-w-[1100px] text-wrap">
@@ -65,7 +65,7 @@ const Stats = ({
             ref={elementRef}
             className={cn(
               "inline-block bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-1 px-5 text-brand translate-y-[-10px] transition-transform duration-500 text-nowrap",
-              isVisible ? "rotate-[-3deg]" : "rotate-[0  deg]"
+              isVisible ? "rotate-[-3deg]" : "rotate-[0  deg]",
             )}
           >
             {humanReadableNumber(totalValuesData?.total_requests ?? 0)}
@@ -78,7 +78,11 @@ const Stats = ({
           users tracked
         </h1>
         <div className="flex gap-2 items-center md:gap-4">
-          <Link href="https://us.helicone.ai/open-stats" target="_blank" rel="noopener">
+          <Link
+            href="https://us.helicone.ai/open-stats"
+            target="_blank"
+            rel="noopener"
+          >
             <Button
               variant="ghost"
               size="landing_page"

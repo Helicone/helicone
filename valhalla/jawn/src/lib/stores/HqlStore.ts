@@ -14,14 +14,14 @@ export class HqlStore {
       process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT ?? "",
       HQL_STORE_BUCKET,
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
     );
   }
 
   async uploadCsv(
     fileName: string,
     organizationId: string,
-    rows: Record<string, any>[]
+    rows: Record<string, any>[],
   ): Promise<Result<string, string>> {
     // if result is ok, if over 100k store in s3 and return url
     const key = `${organizationId}/${fileName}`;
@@ -51,7 +51,7 @@ export class HqlStore {
           }
         }
         return value;
-      })
+      }),
     );
 
     await csvWriter.writeRecords(records);
@@ -59,7 +59,7 @@ export class HqlStore {
     const uploadResult = await this.s3Client.uploadToS3(
       key,
       csvBuffer,
-      "text/csv"
+      "text/csv",
     );
 
     if (uploadResult.error) {

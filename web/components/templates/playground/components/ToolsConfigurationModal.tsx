@@ -51,7 +51,7 @@ export default function ToolsConfigurationModal({
     setCurrentTools(tools || []);
   }, [tools]);
 
-  const hasUnsavedChanges = useMemo(() => {
+  useMemo(() => {
     return JSON.stringify(tools) !== JSON.stringify(currentTools);
   }, [tools, currentTools]);
 

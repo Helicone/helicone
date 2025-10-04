@@ -35,13 +35,13 @@ export function mapScores(scores: Scores): Score[] {
       } else {
         // Throw an error if the value is a float
         throw new Error(
-          `Score value for key '${key}' must be an integer. Received: ${value}`
+          `Score value for key '${key}' must be an integer. Received: ${value}`,
         );
       }
     } else {
       // Throw an error if the value is neither boolean nor number
       throw new Error(
-        `Invalid score value for key '${key}': ${value}. Expected an integer or boolean.`
+        `Invalid score value for key '${key}': ${value}. Expected an integer or boolean.`,
       );
     }
   });
@@ -64,7 +64,7 @@ export class ScoreManager extends BaseManager {
     requestId: string,
     scores: Scores,
     delayMs?: number,
-    evaluatorId?: string
+    evaluatorId?: string,
   ): Promise<Result<null, string>> {
     const mappedScores = mapScores(scores);
     const res = await this.addBatchScores(
@@ -76,7 +76,7 @@ export class ScoreManager extends BaseManager {
           createdAt: new Date(),
         },
       ],
-      delayMs
+      delayMs,
     );
     if (res.error) {
       return err(`Error adding scores: ${res.error}`);
@@ -86,7 +86,7 @@ export class ScoreManager extends BaseManager {
 
   public async addBatchScores(
     scoresMessage: HeliconeScoresMessage[],
-    delayMs?: number
+    delayMs?: number,
   ): Promise<Result<null, string>> {
     if (!this.kafkaProducer.isQueueEnabled()) {
       console.log("Kafka is not enabled. Using score manager");
@@ -99,7 +99,7 @@ export class ScoreManager extends BaseManager {
           lastOffset: "",
           messageCount: 1,
         },
-        scoresMessage
+        scoresMessage,
       );
 
       // Schedule the delayed operation and register it with ShutdownService
@@ -111,7 +111,7 @@ export class ScoreManager extends BaseManager {
             lastOffset: "",
             messageCount: 1,
           },
-          scoresMessage
+          scoresMessage,
         );
       }, delayMs ?? this.getDefaultDelayMs());
 
@@ -124,8 +124,8 @@ export class ScoreManager extends BaseManager {
             lastOffset: "",
             messageCount: 1,
           },
-          scoresMessage
-        )
+          scoresMessage,
+        ),
       );
 
       return ok(null);
@@ -153,22 +153,22 @@ export class ScoreManager extends BaseManager {
     DelayedOperationService.getInstance().addDelayedOperation(timeoutId, () =>
       this.kafkaProducer.sendScoresMessage(
         scoresMessage,
-        "helicone-scores-prod"
-      )
+        "helicone-scores-prod",
+      ),
     );
 
     return ok(null);
   }
 
   private async procesScores(
-    scoresMessages: HeliconeScoresMessage[]
+    scoresMessages: HeliconeScoresMessage[],
   ): Promise<Result<null, string>> {
     try {
       if (scoresMessages.length === 0) {
         return ok(null);
       }
       const validScoresMessages = scoresMessages.filter((message) =>
-        uuidValidate(message.requestId)
+        uuidValidate(message.requestId),
       );
       // Filter out duplicate scores messages and only keep the latest one
       const filteredMessages = Array.from(
@@ -184,7 +184,7 @@ export class ScoreManager extends BaseManager {
             }
             return map;
           }, new Map<string, HeliconeScoresMessage>())
-          .values()
+          .values(),
       );
 
       const scoresScoreResult = await this.scoreStore.putScoresIntoClickhouse(
@@ -205,7 +205,7 @@ export class ScoreManager extends BaseManager {
                   return score;
                 }) ?? [],
           };
-        })
+        }),
       );
 
       if (
@@ -231,7 +231,7 @@ export class ScoreManager extends BaseManager {
       lastOffset: string;
       messageCount: number;
     },
-    scoresMessages: HeliconeScoresMessage[]
+    scoresMessages: HeliconeScoresMessage[],
   ): Promise<void> {
     const start = performance.now();
     const result = await this.procesScores(scoresMessages);
@@ -263,13 +263,13 @@ export class ScoreManager extends BaseManager {
       console.error(
         `Error inserting scores: ${JSON.stringify(result.error)} for batch ${
           batchContext.batchId
-        }`
+        }`,
       );
 
       const kafkaProducer = new HeliconeQueueProducer();
       const kafkaResult = await kafkaProducer.sendScoresMessage(
         scoresMessages,
-        "helicone-scores-prod-dlq"
+        "helicone-scores-prod-dlq",
       );
 
       if (kafkaResult.error) {

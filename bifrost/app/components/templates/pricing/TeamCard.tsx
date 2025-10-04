@@ -12,7 +12,6 @@ const TeamCard: React.FC = () => {
     <Card className="w-full h-full p-6 bg-background rounded-xl border-spacing-1.5 border-border md:border-transparent md:shadow-none mx-auto">
       <Col className="h-full justify-between gap-6">
         <Col className="gap-6">
-
           <Col className="h-full gap-2">
             <Row className="justify-between items-center">
               <div className="text-accent-foreground text-md font-semibold leading-tight">
@@ -21,7 +20,9 @@ const TeamCard: React.FC = () => {
               <Badge variant="secondary">BEST VALUE</Badge>
             </Row>
             <Row className="items-center gap-0.5">
-              <div className="text-accent-foreground text-3xl font-bold">$200</div>
+              <div className="text-accent-foreground text-3xl font-bold">
+                $200
+              </div>
               <div className="text-accent-foreground text-lg font-semibold">
                 per month
               </div>

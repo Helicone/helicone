@@ -45,7 +45,7 @@ const WebhooksPage = (props: WebhooksPageProps) => {
   const [webhookError, setWebhookError] = useState<string | undefined>(
     undefined,
   );
-  const [showChangelogBanner, setShowChangelogBanner] = useState(true);
+  const [showChangelogBanner] = useState(true);
   const [testingWebhook, setTestingWebhook] = useState<string | null>(null);
 
   const [visibleHmacKeys, setVisibleHmacKeys] = useState<
