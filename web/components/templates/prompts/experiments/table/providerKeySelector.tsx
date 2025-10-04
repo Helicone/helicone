@@ -55,7 +55,6 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
   const { setNotification } = useNotification();
-  const heliconeAuthClient = useHeliconeAuthClient();
 
   const [providerKey, setProviderKey] = useState(
     defaultProviderKey || orgProviderKey,
@@ -69,8 +68,6 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
     useState<DecryptedProviderKey>();
 
   const [isLoading, setIsLoading] = useState(false);
-  const org = useOrg();
-  const { data: orgMembers } = useGetOrgMembers(org?.currentOrg?.id || "");
 
   const changeProviderKeyHandler = useCallback(
     async (newProviderKey: string) => {
@@ -150,7 +147,7 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
                         setDecryptedKey(key.provider_key || "");
                       }
                     }}
-                    className={({ active, checked }) =>
+                    className={({ active: _active, checked }) =>
                       clsx(
                         checked
                           ? "bg-sky-100 ring-sky-300 dark:bg-sky-900 dark:ring-sky-700"
@@ -159,7 +156,7 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
                       )
                     }
                   >
-                    {({ active, checked }) => (
+                    {({ active: _active2, checked }) => (
                       <>
                         <div className="flex w-full items-center justify-between">
                           <div className="flex items-center">

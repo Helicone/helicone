@@ -72,7 +72,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
     isOriginal,
     onForkPromptVersion,
     experimentId,
-    originalPromptVersionId,
+    originalPromptVersionId: _originalPromptVersionId,
   } = props;
 
   const org = useOrg();
@@ -81,8 +81,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
   const [showViewPrompt, setShowViewPrompt] = useState(false);
   const jawnClient = useJawnClient();
 
-  const { data: promptTemplate, isLoading: isPromptTemplateLoading } = useQuery(
-    {
+  const { data: promptTemplate } = useQuery({
       queryKey: ["promptTemplate", promptVersionId],
       queryFn: async () => {
         if (!promptVersionId) return null;
@@ -260,7 +259,7 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
           <PromptPlayground
             prompt={promptTemplate?.helicone_template ?? ""}
             selectedInput={undefined}
-            onSubmit={(history, model) => {
+            onSubmit={() => {
               setShowViewPrompt(false);
             }}
             submitText="Save"

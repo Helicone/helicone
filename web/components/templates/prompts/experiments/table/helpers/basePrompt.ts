@@ -35,8 +35,6 @@ function generateRandomPostfix(length: number = 4): string {
   return result;
 }
 
-const generateBasePromptName = `city-temperature-prompt-${generateRandomPostfix()}`;
-
 export function getExampleExperimentPrompt() {
   const generateBasePromptName = `city-temperature-prompt-${generateRandomPostfix()}`;
   return {
