@@ -45,6 +45,9 @@ jobs:
 
       - name: Wait for services to be ready
         run: |
+          echo "Checking supervisord status..."
+          docker exec helicone-test supervisorctl status || true
+
           echo "Waiting for PostgreSQL..."
           timeout 120 bash -c 'until docker exec helicone-test pg_isready -U postgres; do sleep 2; done'
 
@@ -61,6 +64,8 @@ jobs:
           timeout 180 bash -c 'until curl -s http://localhost:8787 > /dev/null 2>&1; do echo "Waiting for Worker OpenAI..."; sleep 5; done'
 
           echo "All services are ready!"
+          echo "Final supervisord status..."
+          docker exec helicone-test supervisorctl status
 
       - name: Check service logs
         if: always()
