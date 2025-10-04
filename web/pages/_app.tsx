@@ -2,7 +2,7 @@ import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProps } from "next/app";
-import { ReactElement, ReactNode, useState } from "react";
+import React, { ReactElement, ReactNode, useState } from "react";
 import Notification from "../components/shared/notification/Notification";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
 import "react-grid-layout/css/styles.css";

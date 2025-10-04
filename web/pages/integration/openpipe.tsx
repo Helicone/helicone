@@ -1,7 +1,7 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { GetServerSidePropsContext } from "next";
 import Image from "next/image";
-import { useState } from "react";
+import React, { useState } from "react";
 import Footer from "../../components/layout/footer";
 import NavBarV2 from "../../components/layout/navbar/navBarV2";
 import MetaData from "../../components/layout/public/authMetaData";
