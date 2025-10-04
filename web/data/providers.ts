@@ -120,6 +120,7 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "xai-...",
     relevanceScore: 68,
   },
+
   // {
   //   id: "perplexity",
   //   name: "Perplexity",

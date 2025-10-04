@@ -6,12 +6,14 @@ import type {
   RequestBodyContext,
   RequestParams,
   ResponseFormat,
+  PluginId,
 } from "../types";
 
 export class AnthropicProvider extends BaseProvider {
   readonly displayName = "Anthropic";
   readonly baseUrl = "https://api.anthropic.com";
   readonly auth = "api-key" as const;
+  readonly supportedPlugins: PluginId[] = ["web"];
   readonly pricingPages = [
     "https://docs.anthropic.com/en/docs/build-with-claude/pricing",
   ];

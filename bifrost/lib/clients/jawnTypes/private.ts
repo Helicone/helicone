@@ -1599,6 +1599,13 @@ Json: JsonObject;
       ending_event_id?: string;
       trigger_event_id?: string;
       start_timestamp?: string;
+      annotations?: {
+          content?: string;
+          title: string;
+          url: string;
+          /** @enum {string} */
+          type: "url_citation";
+        }[];
       reasoning?: string;
       deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];

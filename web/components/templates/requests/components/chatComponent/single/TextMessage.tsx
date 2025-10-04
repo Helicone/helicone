@@ -1,4 +1,4 @@
-import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
+import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import { isJson } from "../ChatMessage";
 import { JsonRenderer } from "./JsonRenderer";
 import { ChatMode } from "../../Chat";
@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { BrainIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import CitationAnnotations from "./CitationAnnotations";
 
 // Dynamically import ReactMarkdown with no SSR
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
@@ -25,6 +26,7 @@ interface TextMessageProps {
   messageIndex?: number;
   onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
   mode: Mode;
+  annotations?: Message["annotations"];
 }
 export default function TextMessage({
   isPartOfContentArray,
@@ -36,6 +38,7 @@ export default function TextMessage({
   messageIndex,
   onChatChange,
   mode,
+  annotations,
 }: TextMessageProps) {
   if (isJson(displayContent) && chatMode !== "PLAYGROUND_INPUT") {
     return (
@@ -132,12 +135,17 @@ export default function TextMessage({
         </div>
       )}
       {displayContent ? (
-        <ReactMarkdown
-          components={markdownComponents}
-          className="w-full whitespace-pre-wrap break-words text-sm"
-        >
-          {displayContent}
-        </ReactMarkdown>
+        <>
+          <ReactMarkdown
+            components={markdownComponents}
+            className="w-full whitespace-pre-wrap break-words text-sm"
+          >
+            {displayContent}
+          </ReactMarkdown>
+          {annotations && annotations.length > 0 && (
+            <CitationAnnotations annotations={annotations} />
+          )}
+        </>
       ) : !displayReasoning ? (
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-full animate-pulse" />

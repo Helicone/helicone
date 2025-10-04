@@ -1,0 +1,189 @@
+---
+title: "Web Search with Helicone Gateway"
+description: "Enable web search capabilities for Anthropic models through Helicone's Gateway using the :online suffix"
+---
+
+# Web Search Overview
+
+Helicone Gateway supports web search for Anthropic models, allowing Claude to search the internet and provide up-to-date information with citations. This feature is enabled by appending `:online` to the model name, following the same pattern as OpenRouter.
+
+## How it Works
+
+When you append `:online` to an Anthropic model name (e.g., `claude-3-5-sonnet-20241022:online`), Helicone automatically:
+
+1. Enables the web search tool for the request
+2. Routes the request to Anthropic with the appropriate web search configuration
+3. Returns the response with citations formatted as annotations
+
+## Quick Start
+
+<Tabs>
+  <Tab title="Python">
+    ```python
+    import openai
+
+    client = openai.OpenAI(
+        api_key="YOUR_ANTHROPIC_API_KEY",
+        base_url="https://gateway.helicone.ai/v1",
+        default_headers={
+            "Helicone-Auth": "Bearer YOUR_HELICONE_API_KEY",
+            "Helicone-Target-Url": "https://api.anthropic.com",
+        }
+    )
+
+    response = client.chat.completions.create(
+        model="claude-3-5-sonnet-20241022:online",  # Note the :online suffix
+        messages=[
+            {"role": "user", "content": "What are the latest developments in AI?"}
+        ]
+    )
+
+    # Access citations if available
+    if response.choices[0].message.annotations:
+        for annotation in response.choices[0].message.annotations:
+            print(f"Source: {annotation['url_citation']['title']}")
+            print(f"URL: {annotation['url_citation']['url']}")
+    ```
+  </Tab>
+
+  <Tab title="Node.js">
+    ```javascript
+    import OpenAI from 'openai';
+
+    const openai = new OpenAI({
+      apiKey: 'YOUR_ANTHROPIC_API_KEY',
+      baseURL: 'https://gateway.helicone.ai/v1',
+      defaultHeaders: {
+        'Helicone-Auth': 'Bearer YOUR_HELICONE_API_KEY',
+        'Helicone-Target-Url': 'https://api.anthropic.com',
+      }
+    });
+
+    const response = await openai.chat.completions.create({
+      model: 'claude-3-5-sonnet-20241022:online',  // Note the :online suffix
+      messages: [
+        { role: 'user', content: 'What are the latest developments in AI?' }
+      ]
+    });
+
+    // Access citations if available
+    if (response.choices[0].message.annotations) {
+      response.choices[0].message.annotations.forEach(annotation => {
+        console.log(`Source: ${annotation.url_citation.title}`);
+        console.log(`URL: ${annotation.url_citation.url}`);
+      });
+    }
+    ```
+  </Tab>
+
+  <Tab title="cURL">
+    ```bash
+    curl https://gateway.helicone.ai/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer YOUR_ANTHROPIC_API_KEY" \
+      -H "Helicone-Auth: Bearer YOUR_HELICONE_API_KEY" \
+      -H "Helicone-Target-Url: https://api.anthropic.com" \
+      -d '{
+        "model": "claude-3-5-sonnet-20241022:online",
+        "messages": [
+          {
+            "role": "user",
+            "content": "What are the latest developments in AI?"
+          }
+        ]
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+## Advanced Configuration
+
+You can customize the web search behavior by including a `plugins` parameter in your request body:
+
+```json
+{
+  "model": "claude-3-5-sonnet-20241022:online",
+  "messages": [...],
+  "plugins": [
+    {
+      "id": "web",
+      "max_uses": 5,
+      "allowed_domains": ["wikipedia.org", "arxiv.org"],
+      "blocked_domains": ["example.com"],
+      "user_location": {
+        "type": "approximate",
+        "country": "US"
+      }
+    }
+  ]
+}
+```
+
+### Plugin Options
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `max_uses` | integer | Maximum number of web searches allowed per request (default: unlimited) |
+| `allowed_domains` | array | Restrict searches to specific domains |
+| `blocked_domains` | array | Exclude specific domains from search results |
+| `user_location` | object | Provide approximate user location for localized results |
+
+## Response Format
+
+When web search is used, the response includes annotations with citation information:
+
+```json
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "Based on recent developments, AI has made significant progress in...",
+        "annotations": [
+          {
+            "type": "url_citation",
+            "url_citation": {
+              "url": "https://example.com/article",
+              "title": "Recent AI Breakthroughs",
+              "content": "The source text that was cited...",
+              "start_index": 0,
+              "end_index": 67
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+### Understanding Annotations
+
+- **`url`**: The source URL of the cited information
+- **`title`**: The title of the source page
+- **`content`**: The relevant excerpt from the source
+- **`start_index`**: Character position where the citation begins in the response
+- **`end_index`**: Character position where the citation ends in the response
+
+## Pricing
+
+Web search requests are billed at standard Anthropic rates plus any additional costs for web search usage. The usage statistics include:
+
+```json
+{
+  "usage": {
+    "input_tokens": 1000,
+    "output_tokens": 500,
+    "server_tool_use": {
+      "web_search_requests": 1
+    }
+  }
+}
+```
+
+## Related Features
+
+- [Gateway Integration](/getting-started/integration-method/gateway)
+- [Gateway Fallbacks](/getting-started/integration-method/gateway-fallbacks)
+- [Caching](/features/advanced-usage/caching)
+- [Custom Headers](/helicone-headers/helicone-auth)

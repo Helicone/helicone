@@ -4,6 +4,7 @@ import {
   AnthropicUsage,
   AnthropicContentBlock,
   AnthropicTool,
+  AnthropicWebSearchTool,
   AnthropicToolChoice,
   BaseStreamEvent,
 } from "./common";
@@ -22,7 +23,7 @@ export interface AnthropicRequestBody {
   top_k?: number;
   stop_sequences?: string[];
   stream?: boolean;
-  tools?: AnthropicTool[];
+  tools?: (AnthropicTool | AnthropicWebSearchTool)[];
   tool_choice?: AnthropicToolChoice;
 }
 
@@ -64,7 +65,7 @@ export interface ContentBlockStartEvent extends BaseStreamEvent {
   index: number;
   content_block: Pick<
     AnthropicContentBlock,
-    "type" | "text" | "id" | "name" | "input" | "thinking"
+    "type" | "text" | "id" | "name" | "input" | "thinking" | "citations"
   >;
 }
 
@@ -123,5 +124,6 @@ export type {
   AnthropicUsage,
   AnthropicContentBlock,
   AnthropicTool,
+  AnthropicWebSearchTool,
   AnthropicToolChoice,
 } from "./common";
