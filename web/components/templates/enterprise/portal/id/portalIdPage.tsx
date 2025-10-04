@@ -35,8 +35,6 @@ const PortalIdPage = (props: PortalIdPageProps) => {
   const org = orgData?.data;
   const {
     data: members,
-    isLoading: isMembersLoading,
-    refetch: isRefetching,
   } = useGetOrgMembers(orgId || "");
   const orgContext = useOrg();
   const router = useRouter();
@@ -64,8 +62,6 @@ const PortalIdPage = (props: PortalIdPageProps) => {
 
   const {
     data,
-    isLoading: isRequestsLoading,
-    refetch: refetchRequests,
   } = useRequestsOverTime({
     timeFilter,
     organizationId: orgId || undefined,

@@ -30,7 +30,7 @@ const PortalPage = (props: PortalPageProps) => {
   const [currentSearch, setCurrentSearch] = useState<string>("");
   const [addCustomerModalOpen, setAddCustomerModalOpen] = useState(false);
 
-  const { data, isLoading, refetch } = usePortalPage();
+  const { data, refetch } = usePortalPage();
 
   const filteredData = data?.data?.data?.filter((org) => {
     if (currentSearch === null) {
@@ -130,7 +130,7 @@ const PortalPage = (props: PortalPageProps) => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredData?.map((org, index) => (
+                          {filteredData?.map((org) => (
                             <CustomerRow
                               org={org}
                               key={org.id}
