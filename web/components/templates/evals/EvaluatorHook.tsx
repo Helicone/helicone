@@ -8,7 +8,7 @@ import { useOrg } from "../../layout/org/organizationContext";
 import { SearchParams } from "../../shared/utils/useSearchParams";
 
 // Import Shadcn UI components for dropdown
-const getTimeFilterWithSearchParams = (searchParams: SearchParams) => {
+const _getTimeFilterWithSearchParams = (searchParams: SearchParams) => {
   const currentTimeFilter = searchParams.get("t");
   let range;
 

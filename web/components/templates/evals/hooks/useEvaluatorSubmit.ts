@@ -89,7 +89,7 @@ export const usePythonEvaluatorSubmit = (onSuccess: () => void) => {
   return useMutation({
     mutationFn: async ({
       name,
-      description,
+      _description,
       code,
       existingEvaluatorId,
     }: {
@@ -165,7 +165,7 @@ export const useLastMileEvaluatorSubmit = (onSuccess: () => void) => {
   return useMutation({
     mutationFn: async ({
       name,
-      description,
+      _description,
       config,
       existingEvaluatorId,
     }: {

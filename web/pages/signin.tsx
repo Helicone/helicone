@@ -51,7 +51,7 @@ const SignIn = ({
     ) {
       if (!refreshed) {
         // FIX: Clear the unauthorized parameter when redirecting to prevent infinite loop
-        const { unauthorized: _, ...cleanQuery } = router.query;
+        const { unauthorized: __, ...cleanQuery } = router.query;
         router
           .push({
             pathname: "/signin",
@@ -64,7 +64,7 @@ const SignIn = ({
           });
       } else {
         // If already refreshed, redirect to dashboard
-        const { unauthorized: _, ...cleanQuery } = router.query;
+        const { unauthorized: __, ...cleanQuery } = router.query;
         router.push({
           pathname: "/dashboard",
           query: cleanQuery,
@@ -72,7 +72,7 @@ const SignIn = ({
       }
       return;
     } else if (heliconeAuthClient.user?.id) {
-      const { pi_session, unauthorized: _, ...restQuery } = router.query;
+      const { pi_session, unauthorized: __, ...restQuery } = router.query;
       router.push({
         pathname: pi_session ? "/pi/onboarding" : "/dashboard",
         query: restQuery, // FIX: Don't include unauthorized in the query

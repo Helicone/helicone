@@ -89,7 +89,7 @@ export const QuantilesGraph = ({
                 <SelectValue placeholder="Select property" />
               </SelectTrigger>
               <SelectContent>
-                {Array.from(quantilesMetrics.entries()).map(([key, value]) => (
+                {Array.from(quantilesMetrics.entries()).map(([key, _value]) => (
                   <SelectItem key={key} value={key}>
                     {key}
                   </SelectItem>

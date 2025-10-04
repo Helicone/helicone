@@ -31,7 +31,7 @@ const OrgMember = (props: OrgMemberProps) => {
     },
   });
 
-  const { data, isLoading } = useQuery({
+  const { data, _isLoading } = useQuery({
     queryKey: ["admins"],
     queryFn: async () => {
       const jawn = getJawnClient();
@@ -40,7 +40,7 @@ const OrgMember = (props: OrgMemberProps) => {
     refetchOnWindowFocus: false,
   });
 
-  const { mutate: addAdminToOrg, isPending: isAddingAdminToOrg } = useMutation({
+  const { mutate: addAdminToOrg, isPending: _isAddingAdminToOrg } = useMutation({
     mutationKey: ["addAdminToOrg"],
     mutationFn: async ({
       orgId,
@@ -50,7 +50,7 @@ const OrgMember = (props: OrgMemberProps) => {
       adminIds: string[];
     }) => {
       const jawn = getJawnClient();
-      const { data, error } = await jawn.POST("/v1/admin/admins/org/query", {
+      const { _data, error } = await jawn.POST("/v1/admin/admins/org/query", {
         body: {
           orgId,
           adminIds,

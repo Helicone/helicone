@@ -104,12 +104,12 @@ const getToolsForRoute = (pathname: string): HeliconeAgentTool[] => {
 export const HeliconeAgentProvider: React.FC<{
   children: React.ReactNode;
   agentChatOpen: boolean;
-  setAgentChatOpen: (open: boolean) => void;
+  setAgentChatOpen: (_open: boolean) => void;
 }> = ({ children, agentChatOpen, setAgentChatOpen }) => {
   const router = useRouter();
   const [tools, setTools] = useState<HeliconeAgentTool[]>([]);
   const [toolHandlers, setToolHandlers] = useState<
-    Map<string, (args: any) => Promise<any> | any>
+    Map<string, (_args: any) => Promise<any> | any>
   >(new Map());
   const { data: threads, refetch: refetchThreads } = $JAWN_API.useQuery(
     "get",

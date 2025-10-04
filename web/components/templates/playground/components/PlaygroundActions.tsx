@@ -48,7 +48,7 @@ const PlaygroundActions = ({
   isLoading = false,
   createPrompt,
 }: PlaygroundActionsProps) => {
-  const organization = useOrg();
+  const _organization = useOrg();
   const resetToDefault = () => {
     logger.debug(
       {

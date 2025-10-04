@@ -69,7 +69,7 @@ export default function PromptForm({
   const [customTags, setCustomTags] = useState("");
   const [saveAsNewPrompt, setSaveAsNewPrompt] = useState(!saveAndVersion);
 
-  const { data: existingTags = [], isLoading: isLoadingTags } =
+  const { data: existingTags = [], isLoading: _isLoadingTags } =
     useGetPromptTags();
 
   const { data: environments = [], isLoading: isLoadingEnvironments } =

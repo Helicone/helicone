@@ -70,7 +70,7 @@ completion = client.chat.completions.create(
 
 const RouterUseDialog = ({
   routerHash,
-  hideTrigger = false,
+  _hideTrigger = false,
   open,
   setOpen,
 }: {

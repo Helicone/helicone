@@ -288,7 +288,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
 
     // Remove the highlighted feature from the general section
     if (highlightedFeature && features[highlightedFeature]) {
-      const { [highlightedFeature]: _, ...remainingFeatures } = features;
+      const { [highlightedFeature]: __, ...remainingFeatures } = features;
       features = remainingFeatures;
     }
 

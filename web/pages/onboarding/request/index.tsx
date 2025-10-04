@@ -25,7 +25,7 @@ const MODELS = [
 
 export default function RequestPage() {
   const org = useOrg();
-  const router = useRouter();
+  const _router = useRouter();
   const { setNotification } = useNotification();
   const [prompt, setPrompt] = useState("Write a haiku about AI");
   const [selectedModel, setSelectedModel] = useState("openai/gpt-4o-mini");

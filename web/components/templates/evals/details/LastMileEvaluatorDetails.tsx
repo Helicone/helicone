@@ -13,8 +13,8 @@ interface LastMileEvaluatorDetailsProps {
 
 const LastMileEvaluatorDetails: React.FC<LastMileEvaluatorDetailsProps> = ({
   evaluator,
-  deleteEvaluator,
-  setSelectedEvaluator,
+  _deleteEvaluator,
+  _setSelectedEvaluator,
 }) => {
   return (
     <Col className="space-y-4">

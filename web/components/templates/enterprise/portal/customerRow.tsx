@@ -26,14 +26,14 @@ interface CustomerRowProps {
 }
 
 const CustomerRow = (props: CustomerRowProps) => {
-  const { org, refetchCustomerOrgs } = props;
+  const { org, _refetchCustomerOrgs } = props;
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
   const orgContext = useOrg();
   const router = useRouter();
 
-  const { data: members, isLoading: isMembersLoading } = useGetOrgMembers(
+  const { data: members, isLoading: _isMembersLoading } = useGetOrgMembers(
     org.id,
   );
 

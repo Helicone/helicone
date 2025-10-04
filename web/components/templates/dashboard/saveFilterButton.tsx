@@ -68,7 +68,7 @@ const SaveFilterButton = (props: SaveFilterButtonProps) => {
       };
       if (savedFilters !== undefined) {
         const updatedFilters = [...savedFilters, saveFilter];
-        const { data, error } = await jawn.POST(
+        const { _data, error } = await jawn.POST(
           "/v1/organization/{organizationId}/update_filter",
           {
             params: {

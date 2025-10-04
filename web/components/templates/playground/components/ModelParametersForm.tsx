@@ -68,8 +68,8 @@ export default function ModelParametersForm({
   onParametersChange,
   responseFormat,
   onResponseFormatChange,
-  useAIGateway,
-  setUseAIGateway,
+  _useAIGateway,
+  _setUseAIGateway,
   error,
 }: ModelParametersFormProps) {
   const updateParameter = (key: keyof ModelParameters, value: any) => {

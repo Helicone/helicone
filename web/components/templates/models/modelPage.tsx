@@ -14,7 +14,7 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 
 interface ModelPageProps {}
 
-const ModelPage = (props: ModelPageProps) => {
+const ModelPage = (_props: ModelPageProps) => {
   const searchParams = useSearchParams();
 
   const getInterval = () => {
@@ -40,7 +40,7 @@ const ModelPage = (props: ModelPageProps) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["modelMetrics", timeFilter],
-    queryFn: async (query) => {
+    queryFn: async (_query) => {
       return await fetch("/api/models", {
         method: "POST",
         headers: {
@@ -67,7 +67,7 @@ const ModelPage = (props: ModelPageProps) => {
         skeletonLoading={isLoading}
         dataLoading={false}
         exportData={data?.data || []}
-        onRowSelect={(row) => {}}
+        onRowSelect={(_row) => {}}
         timeFilter={{
           currentTimeFilter: timeFilter,
           defaultValue: "all",

@@ -14,7 +14,7 @@ const Typewriter: React.FC<TypewriterProps> = ({
   onComplete,
 }) => {
   const [displayedText, setDisplayedText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [_currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;

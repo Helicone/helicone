@@ -218,7 +218,7 @@ const TopOrgs = (props: TopOrgsProps) => {
       <div>
         Estimated total MRR:
         {data?.data
-          ?.map((org, i) => handleLogCostCalculation(org.ct))
+          ?.map((org, _i) => handleLogCostCalculation(org.ct))
           .reduce((acc, curr) => acc + curr, 0)}
       </div>
       <h2>Top Organizations</h2>
@@ -231,7 +231,7 @@ const TopOrgs = (props: TopOrgsProps) => {
         <div className="col-span-1">Estimated spend</div>
       </div>
       <div className="grid grid-cols-8">
-        {data?.data?.map((org, i) => (
+        {data?.data?.map((org, _i) => (
           <>
             {/* Row 1 */}
             <div className="col-span-2 pl-2">

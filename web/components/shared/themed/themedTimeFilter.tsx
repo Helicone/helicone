@@ -57,10 +57,10 @@ const ThemedTimeFilter = (props: ThemedTimeFilterProps) => {
     return active === key;
   };
 
-  const [relative, _setRelative] = useState<
+  const [relative, __setRelative] = useState<
     "minute" | "hour" | "day" | "week" | "month"
   >("day");
-  const [relativeValue, _setRelativeValue] = useState<number>(1);
+  const [relativeValue, __setRelativeValue] = useState<number>(1);
 
   useEffect(() => {
     if (relative && relativeValue) {

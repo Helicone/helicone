@@ -123,7 +123,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               (message) =>
                 message.model === model.name || message.model === undefined,
             )
-            .map(({ id, model, latency, ...rest }) => rest); // Remove id, model, and latency fields
+            .map(({ _id, _model, _latency, ...rest }) => rest); // Remove id, model, and latency fields
         };
 
         const historyWithoutId = cleanMessages(history);
@@ -291,7 +291,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 <RoleButton
                   role={"assistant"}
                   onRoleChange={function (
-                    role: "function" | "assistant" | "user" | "system" | "tool",
+                    _role: "function" | "assistant" | "user" | "system" | "tool",
                   ): void {}}
                   disabled={true}
                 />
@@ -432,7 +432,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               <RoleButton
                 role={"assistant"}
                 onRoleChange={function (
-                  role: "function" | "assistant" | "user" | "system" | "tool",
+                  _role: "function" | "assistant" | "user" | "system" | "tool",
                 ): void {}}
                 disabled={true}
               />
@@ -514,7 +514,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 <RoleButton
                   role={"assistant"}
                   onRoleChange={function (
-                    role: "function" | "system" | "user" | "assistant" | "tool",
+                    _role: "function" | "system" | "user" | "assistant" | "tool",
                   ): void {}}
                   disabled={true}
                 />

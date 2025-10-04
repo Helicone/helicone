@@ -62,7 +62,7 @@ const CostBackfiller = () => {
     withoutCosts: null,
   });
 
-  const { backfillCosts, backfillCostsAsync, isBackfillingCosts } =
+  const { _backfillCosts, backfillCostsAsync, isBackfillingCosts } =
     useBackfillCosts(() => {
       toast.success("Cost backfill completed successfully!");
       setQueryPreview("");
@@ -381,7 +381,7 @@ const CostBackfiller = () => {
 
                   {isExpanded && (
                     <div className="pb-2 pl-6">
-                      {models.map((model, localIndex) => {
+                      {models.map((model, _localIndex) => {
                         const globalIndex = allModels.findIndex(
                           (m) =>
                             m.provider === model.provider &&

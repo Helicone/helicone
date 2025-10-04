@@ -47,7 +47,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
     onCancelHandler,
     initialValues,
     onSuccess,
-    firstOrg,
+    _firstOrg,
     onCloseHandler,
   } = props;
 
@@ -65,13 +65,13 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           }
       : null,
   );
-  const [selectedColor, setSelectedColor] = useState(
+  const [selectedColor, _setSelectedColor] = useState(
     initialValues?.color
       ? ORGANIZATION_COLORS.find((c) => c.name === initialValues.color) ||
           ORGANIZATION_COLORS[0]
       : ORGANIZATION_COLORS[0],
   );
-  const [selectedIcon, setSelectedIcon] = useState(
+  const [selectedIcon, _setSelectedIcon] = useState(
     initialValues?.icon
       ? ORGANIZATION_ICONS.find((i) => i.name === initialValues.icon) ||
           ORGANIZATION_ICONS[0]
@@ -168,7 +168,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                           id="org-costs"
                           value={limits?.cost !== -1 ? 1 : 0}
                           className=""
-                          onChange={(e) => {
+                          onChange={(_e) => {
                             if (limits?.cost === -1) {
                               setLimits((prev) =>
                                 prev ? { ...prev, cost: 1000 } : null,
@@ -226,7 +226,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                           id="org-requests"
                           value={limits?.requests !== -1 ? 1 : 0}
                           className=""
-                          onChange={(e) => {
+                          onChange={(_e) => {
                             if (limits?.requests === -1) {
                               setLimits((prev) =>
                                 prev ? { ...prev, requests: 1000 } : null,

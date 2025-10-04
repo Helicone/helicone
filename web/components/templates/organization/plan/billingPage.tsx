@@ -9,7 +9,7 @@ import { TeamPlanCard } from "./teamBillingPage";
 
 interface OrgPlanPageProps {}
 
-const BillingPlanPage = (props: OrgPlanPageProps) => {
+const BillingPlanPage = (_props: OrgPlanPageProps) => {
   const org = useOrg();
 
   const knownTiers = [

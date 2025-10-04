@@ -40,7 +40,7 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
   const heliconeAuthClient = useHeliconeAuthClient();
   const { theme, setTheme } = useTheme();
 
-  const { onboardingState, draftPlan, updateCurrentStep, isLoading } =
+  const { onboardingState, _draftPlan, updateCurrentStep, isLoading } =
     useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   useEffect(() => {

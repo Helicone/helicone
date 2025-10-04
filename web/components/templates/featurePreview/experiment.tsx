@@ -273,7 +273,7 @@ const ExperimentTable = () => {
   );
 };
 
-const evals = [
+const _evals = [
   {
     category: "LLM as a judge",
     name: "Similarity",

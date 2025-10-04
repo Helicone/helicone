@@ -34,7 +34,7 @@ export const PythonEvaluatorConfigForm: React.FC<{
   name: string;
   existingEvaluatorId?: string;
   onSubmit: () => void;
-  openTestPanel?: (testFunction: TestFunction) => void;
+  openTestPanel?: (_testFunction: TestFunction) => void;
 }> = ({
   configFormParams,
   name: defaultName,
@@ -46,7 +46,7 @@ export const PythonEvaluatorConfigForm: React.FC<{
   const jawn = useJawnClient();
   const invalidateEvaluators = useInvalidateEvaluators();
   const { setTestConfig } = useTestDataStore();
-  const { isSubmitting, hideFormButtons } = useEvalFormStore();
+  const { _isSubmitting, _hideFormButtons } = useEvalFormStore();
 
   // Use the config store
   const {
@@ -90,7 +90,7 @@ export const PythonEvaluatorConfigForm: React.FC<{
     });
   }, [pythonName, pythonCode, setTestConfig]);
 
-  const handleSubmit = async () => {
+  const _handleSubmit = async () => {
     // We don't need to set isSubmitting here as it's handled by the mutation hook
     try {
       if (existingEvaluatorId) {
@@ -145,7 +145,7 @@ export const PythonEvaluatorConfigForm: React.FC<{
     }
   };
 
-  const handleTest = () => {
+  const _handleTest = () => {
     const testFunction = async () => {
       const result = await jawn.POST("/v1/evaluator/python/test", {
         body: {

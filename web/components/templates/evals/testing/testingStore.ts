@@ -38,7 +38,7 @@ export const useTestDataStore = create<TestDataState>()(
           if (typeof by === "function") {
             set((state) => ({ testConfig: by(state.testConfig) }));
           } else {
-            set((state) => ({ testConfig: by }));
+            set((_state) => ({ testConfig: by }));
           }
         },
         testInput: defaultTestInput,
@@ -46,7 +46,7 @@ export const useTestDataStore = create<TestDataState>()(
           if (typeof by === "function") {
             set((state) => ({ testInput: by(state.testInput) }));
           } else {
-            set((state) => ({ testInput: by }));
+            set((_state) => ({ testInput: by }));
           }
         },
         resetTestData: () =>

@@ -7,8 +7,8 @@ interface KeyNameFieldProps {
 }
 
 const KeyNameField = (props: KeyNameFieldProps) => {
-  const { key } = props;
-  const [mode, setMode] = useState<"view" | "edit">("view");
+  const { _key } = props;
+  const [mode, _setMode] = useState<"view" | "edit">("view");
 
   return (
     <>

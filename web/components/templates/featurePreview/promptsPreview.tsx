@@ -135,7 +135,7 @@ const PromptsPreview = () => {
   const org = useOrg();
   const notification = useNotification();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const { handleConfirmTrial, proRequired } = useFeatureTrial(
+  const { handleConfirmTrial, _proRequired } = useFeatureTrial(
     "prompts",
     "Prompts",
   );

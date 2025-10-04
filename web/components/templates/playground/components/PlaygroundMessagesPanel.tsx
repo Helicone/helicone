@@ -74,7 +74,7 @@ const PlaygroundMessagesPanel = ({
 
     if (!needsIds) return;
 
-    const messagesWithIds = messages.map((message: Message, index: number) => ({
+    const messagesWithIds = messages.map((message: Message, _index: number) => ({
       ...message,
       id: message.id || `msg-${Date.now()}`,
     }));

@@ -36,7 +36,7 @@ const metrics = [
 ];
 
 export default function AdvancedAnalytics() {
-  const router = useRouter();
+  const _router = useRouter();
   return (
     <div className="relative bg-gray-900 py-8">
       <div className="absolute bottom-0 h-80 w-full xl:inset-0 xl:h-full">

@@ -2,7 +2,7 @@ import React from "react";
 
 const ChatPlaygroundHeader: React.FC<{
   mode: "pretty" | "json";
-  setMode: (mode: "pretty" | "json") => void;
+  setMode: (_mode: "pretty" | "json") => void;
 }> = ({ mode, setMode }) => {
   return (
     <ul className="relative h-fit w-full rounded-lg">

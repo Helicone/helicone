@@ -117,9 +117,9 @@ const topRequestsColumns: ColumnDef<CacheRequest>[] = [
 ];
 
 const CachePage = (props: CachePageProps) => {
-  const { currentPage, pageSize, sort, defaultIndex = "0" } = props;
+  const { _currentPage, _pageSize, _sort, _defaultIndex = "0" } = props;
   const [timePeriod, setTimePeriod] = useState<number>(30);
-  const [timeFilter, _] = useState<TimeFilter>({
+  const [_timeFilter, __] = useState<TimeFilter>({
     start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * timePeriod),
     end: new Date(),
   });
@@ -132,7 +132,7 @@ const CachePage = (props: CachePageProps) => {
     [timePeriod],
   );
 
-  const { store: filterStore, helpers } = useFilterAST();
+  const { store: filterStore, _helpers } = useFilterAST();
 
   const timeZoneDifference = new Date().getTimezoneOffset();
   const router = useRouter();
@@ -221,7 +221,7 @@ const CachePage = (props: CachePageProps) => {
     );
   }
 
-  const metrics = [
+  const _metrics = [
     {
       id: "caches",
       label: "Total Cache Hits",

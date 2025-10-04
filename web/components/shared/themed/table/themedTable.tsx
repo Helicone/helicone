@@ -129,7 +129,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   props: ThemedTableProps<T>,
 ) {
   const {
-    id,
+    _id,
     defaultData,
     defaultColumns,
     skeletonLoading,

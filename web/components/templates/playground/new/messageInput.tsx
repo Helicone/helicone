@@ -40,7 +40,7 @@ const MessageInput = (props: MessageInputProps) => {
   const {
     onMessageChange,
     initialValues,
-    deleteMessage,
+    _deleteMessage,
     editable = true,
   } = props;
 
@@ -48,7 +48,7 @@ const MessageInput = (props: MessageInputProps) => {
     initialValues || EMPTY_MESSAGE,
   );
 
-  const { setNotification } = useNotification();
+  const { _setNotification } = useNotification();
 
   const getContent = (content: string | ContentItem[]) => {
     if (typeof content === "string") {

@@ -35,7 +35,7 @@ export type FeaturePreviewSectionProps = {
 const FeaturePreviewSection = ({
   pageTitle,
   features,
-  ctaImage,
+  _ctaImage,
   showCTA = true,
   quote,
   onStartTrial,

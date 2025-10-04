@@ -212,7 +212,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
             ) : isUser ? (
               <button
                 onClick={async () => {
-                  const { data, error } = await jawn.DELETE(
+                  const { _data, error } = await jawn.DELETE(
                     `/v1/organization/{organizationId}/remove_member`,
                     {
                       params: {
@@ -274,7 +274,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
             <button
               className="flex items-center rounded-md bg-black px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
               onClick={async () => {
-                const { data, error } = await jawn.DELETE(
+                const { _data, error } = await jawn.DELETE(
                   `/v1/organization/{organizationId}/remove_member`,
                   {
                     params: {

@@ -44,8 +44,8 @@ export default function SortButton<T>(props: SortButtonProps<T>) {
             size="icon"
             onClick={() => {
               const {
-                sortDirection: _,
-                sortKey: __,
+                sortDirection: __,
+                sortKey: ___,
                 ...restQuery
               } = router.query;
               router.push({

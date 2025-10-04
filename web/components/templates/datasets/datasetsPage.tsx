@@ -46,9 +46,9 @@ interface DatasetsPageProps {
 }
 
 const DatasetsPage = (props: DatasetsPageProps) => {
-  const { currentPage, pageSize, sort, defaultIndex } = props;
+  const { _currentPage, _pageSize, _sort, _defaultIndex } = props;
 
-  const { datasets, isLoading, refetch, isRefetching, isFetched, status } =
+  const { datasets, isLoading, refetch, isRefetching, isFetched, _status } =
     useGetHeliconeDatasets();
 
   // Delete modal state
@@ -102,7 +102,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
           handleCloseDialog();
         }
       })
-      .catch((err) => {
+      .catch((_err) => {
         setNotification("Error deleting dataset", "error");
       })
       .finally(() => {

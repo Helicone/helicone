@@ -190,7 +190,7 @@ export const LastMileDevConfigForm: React.FC<{
 
   // Local state for form values
   const [evaluatorName, setEvaluatorName] = useState(lastMileName || "");
-  const [evaluatorDescription, setEvaluatorDescription] = useState(
+  const [evaluatorDescription, _setEvaluatorDescription] = useState(
     lastMileDescription || "",
   );
   const [evaluatorType, setEvaluatorType] = useState<LastMileConfigForm>(

@@ -40,7 +40,7 @@ export class SearchParams {
   }
 
   delete(key: string) {
-    const { [key]: _, ...rest } = this.query;
+    const { [key]: __, ...rest } = this.query;
     this.router.replace(
       {
         query: rest,

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getJawnClient } from "../../../lib/clients/jawn";
 
-const useAlertsPage = (orgId: string) => {
+const useAlertsPage = (_orgId: string) => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["alerts"],
     queryFn: async () => {

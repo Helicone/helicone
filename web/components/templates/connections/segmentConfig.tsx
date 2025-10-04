@@ -37,7 +37,7 @@ const getExampleEvent = () => {
 
 const SegmentConfig: React.FC<SegmentConfigProps> = ({ onClose }) => {
   const [apiKey, setApiKey] = useState("");
-  const [autoDatasetSync, setAutoDatasetSync] = useState(false);
+  const [autoDatasetSync, _setAutoDatasetSync] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
 
   const { existingKey, isLoadingVault, saveKey, isSavingKey } = useSegmentKey();

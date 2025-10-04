@@ -30,12 +30,12 @@ const RoleButton = (props: RoleButtonProps) => {
   const {
     role,
     onRoleChange,
-    onDelete,
+    _onDelete,
     size = "medium",
     disabled = false,
   } = props;
 
-  const { setNotification } = useNotification();
+  const { _setNotification } = useNotification();
 
   return (
     <Menu as="div" className="relative inline-block w-full text-left">
