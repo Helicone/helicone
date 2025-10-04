@@ -192,7 +192,7 @@ export const CtaButton = ({
 
 const FeatureText = ({
   feature,
-  isHighlighted,
+  isHighlighted: _isHighlighted,
 }: {
   feature: Feature;
   isHighlighted: boolean;
