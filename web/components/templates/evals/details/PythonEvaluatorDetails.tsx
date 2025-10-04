@@ -12,8 +12,8 @@ interface PythonEvaluatorDetailsProps {
 
 const PythonEvaluatorDetails: React.FC<PythonEvaluatorDetailsProps> = ({
   evaluator,
-  deleteEvaluator,
-  setSelectedEvaluator,
+  deleteEvaluator: _deleteEvaluator,
+  setSelectedEvaluator: _setSelectedEvaluator,
 }) => {
   return (
     <Col className="space-y-4">
