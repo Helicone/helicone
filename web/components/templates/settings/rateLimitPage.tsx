@@ -30,14 +30,10 @@ const RateLimitPage = () => {
   const startOfMonthFormatted = formatISO(currentMonth, {
     representation: "date",
   });
-  const endOfMonthFormatted = formatISO(endOfMonth(currentMonth), {
-    representation: "date",
-  });
 
   const {
     overTimeData,
     metrics,
-    refetch: refetchData,
     isLoading,
   } = useOrgPlanPage({
     timeFilter: {
