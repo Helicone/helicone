@@ -566,8 +566,10 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     callback(content || "", newRole, file);
   };
 
-  const setText = (text: string): void => {
-    const newMessages = { ...currentMessage };
+  if (false) {
+    // Unused function - may be needed in the future
+    const setText = (text: string): void => {
+      const newMessages = { ...currentMessage };
 
     // Check if this message originally had tool_calls
     if (currentMessage.tool_calls && currentMessage.tool_calls.length > 0) {
@@ -637,12 +639,13 @@ const PromptChatRow = (props: PromptChatRowProps) => {
       newMessages.content = replacedText;
     }
 
-    setCurrentMessage(newMessages);
-    if (fileObj instanceof File) {
-      handleCallback(replacedText, role, fileObj);
-    }
-    setPromptVariables(newVariables);
-  };
+      setCurrentMessage(newMessages);
+      if (fileObj instanceof File) {
+        handleCallback(replacedText, role, fileObj);
+      }
+      setPromptVariables(newVariables);
+    };
+  }
 
   if (playgroundMode === "experiment-compact") {
     return (

@@ -29,7 +29,7 @@ interface PromptCardProps {
 const PromptCard = (props: PromptCardProps) => {
   const { prompt } = props;
 
-  const { prompt: promptInfo, isLoading, refetch } = usePrompt(prompt.id);
+  const { prompt: promptInfo } = usePrompt(prompt.id);
 
   const getTimeFilter = () => {
     return {
@@ -38,7 +38,7 @@ const PromptCard = (props: PromptCardProps) => {
     };
   };
 
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
+  const [timeFilter] = useState<TimeFilter>(getTimeFilter());
 
   const timeIncrement = getTimeInterval(timeFilter);
 

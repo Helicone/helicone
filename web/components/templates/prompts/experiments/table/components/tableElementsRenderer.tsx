@@ -634,8 +634,6 @@ const InputCell = ({
     queryFn: () => rowInputs,
   });
 
-  const ref = useRef<HTMLInputElement>(null);
-
   return (
     <div
       className="h-full w-full cursor-pointer overflow-hidden px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800"
