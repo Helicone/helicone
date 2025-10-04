@@ -21,73 +21,73 @@ const data: {
   prompt1: string;
   prompt2: string;
 }[] = [
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `This beginner-friendly course guides you through foundational concepts with real-world examples...`,
-      prompt1: `Master the fundamentals in this hands-on learning journey, featuring practical exercises...`,
-      prompt2: `A practical journey through essential topics, designed to build your confidence...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `An introductory series covering key principles through interactive lessons and projects...`,
-      prompt1: `Step-by-step tutorials designed for newcomers, with comprehensive practice materials...`,
-      prompt2: `Build your skills with this comprehensive guide, featuring hands-on workshops...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Learn the basics through interactive sessions and guided practice assignments...`,
-      prompt1: `A structured approach to mastering core concepts, with real-world applications...`,
-      prompt2: `Dive into core concepts with guided exercises and practical implementations...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Start your journey with this accessible introduction to fundamental principles...`,
-      prompt1: `From novice to practitioner: a carefully structured learning experience...`,
-      prompt2: `An engaging introduction that transforms complex topics into digestible lessons...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `A comprehensive beginner's guide featuring step-by-step instruction and exercises...`,
-      prompt1: `Progress through carefully crafted lessons designed for optimal learning...`,
-      prompt2: `Experience a thoughtfully designed curriculum that builds lasting knowledge...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Begin your learning journey with this foundational course packed with examples...`,
-      prompt1: `A beginner-focused approach that ensures steady progress through key concepts...`,
-      prompt2: `Master essential skills through this methodically structured learning path...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Perfect for newcomers: a gentle introduction to core principles and practices...`,
-      prompt1: `Build confidence through structured learning and hands-on practice sessions...`,
-      prompt2: `Transform your understanding with this carefully paced learning experience...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Start strong with this beginner-oriented course featuring practical exercises...`,
-      prompt1: `An accessible approach to mastering fundamentals through guided practice...`,
-      prompt2: `Develop your skills progressively with this well-structured learning path...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `A foundation-building course designed to make complex concepts approachable...`,
-      prompt1: `Learn at your pace with this methodically structured beginner's guide...`,
-      prompt2: `A comprehensive introduction focusing on practical skill development...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `Begin your learning adventure with this accessible, example-rich course...`,
-      prompt1: `A carefully crafted journey from basic concepts to practical mastery...`,
-      prompt2: `Gain confidence through this structured approach to essential skills...`,
-    },
-    {
-      messages: `{"role": "system", "content": "Get...`,
-      original: `An entry-level course that breaks down complex topics into manageable steps...`,
-      prompt1: `Master the basics through this engaging, practice-oriented curriculum...`,
-      prompt2: `A systematic approach to building fundamental knowledge and skills...`,
-    },
-  ];
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `This beginner-friendly course guides you through foundational concepts with real-world examples...`,
+    prompt1: `Master the fundamentals in this hands-on learning journey, featuring practical exercises...`,
+    prompt2: `A practical journey through essential topics, designed to build your confidence...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `An introductory series covering key principles through interactive lessons and projects...`,
+    prompt1: `Step-by-step tutorials designed for newcomers, with comprehensive practice materials...`,
+    prompt2: `Build your skills with this comprehensive guide, featuring hands-on workshops...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Learn the basics through interactive sessions and guided practice assignments...`,
+    prompt1: `A structured approach to mastering core concepts, with real-world applications...`,
+    prompt2: `Dive into core concepts with guided exercises and practical implementations...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Start your journey with this accessible introduction to fundamental principles...`,
+    prompt1: `From novice to practitioner: a carefully structured learning experience...`,
+    prompt2: `An engaging introduction that transforms complex topics into digestible lessons...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `A comprehensive beginner's guide featuring step-by-step instruction and exercises...`,
+    prompt1: `Progress through carefully crafted lessons designed for optimal learning...`,
+    prompt2: `Experience a thoughtfully designed curriculum that builds lasting knowledge...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Begin your learning journey with this foundational course packed with examples...`,
+    prompt1: `A beginner-focused approach that ensures steady progress through key concepts...`,
+    prompt2: `Master essential skills through this methodically structured learning path...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Perfect for newcomers: a gentle introduction to core principles and practices...`,
+    prompt1: `Build confidence through structured learning and hands-on practice sessions...`,
+    prompt2: `Transform your understanding with this carefully paced learning experience...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Start strong with this beginner-oriented course featuring practical exercises...`,
+    prompt1: `An accessible approach to mastering fundamentals through guided practice...`,
+    prompt2: `Develop your skills progressively with this well-structured learning path...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `A foundation-building course designed to make complex concepts approachable...`,
+    prompt1: `Learn at your pace with this methodically structured beginner's guide...`,
+    prompt2: `A comprehensive introduction focusing on practical skill development...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `Begin your learning adventure with this accessible, example-rich course...`,
+    prompt1: `A carefully crafted journey from basic concepts to practical mastery...`,
+    prompt2: `Gain confidence through this structured approach to essential skills...`,
+  },
+  {
+    messages: `{"role": "system", "content": "Get...`,
+    original: `An entry-level course that breaks down complex topics into manageable steps...`,
+    prompt1: `Master the basics through this engaging, practice-oriented curriculum...`,
+    prompt2: `A systematic approach to building fundamental knowledge and skills...`,
+  },
+];
 
 const ExperimentTable = () => {
   const tableRef = useRef<HTMLDivElement>(null);
@@ -96,12 +96,12 @@ const ExperimentTable = () => {
   const [animationState, setAnimationState] = useState(() =>
     Array(data.length)
       .fill(0)
-      .map(() => Array(4).fill(0))
+      .map(() => Array(4).fill(0)),
   );
   const [highlightState, setHighlightState] = useState(() =>
     Array(data.length)
       .fill(0)
-      .map(() => Array(4).fill(false))
+      .map(() => Array(4).fill(false)),
   );
 
   // Set up intersection observer
@@ -114,7 +114,7 @@ const ExperimentTable = () => {
         root: null,
         rootMargin: "0px",
         threshold: 0.1, // Trigger when at least 10% of the element is visible
-      }
+      },
     );
 
     if (tableRef.current) {
@@ -168,12 +168,12 @@ const ExperimentTable = () => {
     setAnimationState(
       Array(data.length)
         .fill(0)
-        .map(() => Array(4).fill(0))
+        .map(() => Array(4).fill(0)),
     );
     setHighlightState(
       Array(data.length)
         .fill(0)
-        .map(() => Array(4).fill(false))
+        .map(() => Array(4).fill(false)),
     );
 
     data.forEach((_, rowIndex) => {
@@ -246,7 +246,7 @@ const ExperimentTable = () => {
                 <TableCell
                   className={cn(
                     "border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis",
-                    highlightState[index][1] && "bg-slate-100"
+                    highlightState[index][1] && "bg-slate-100",
                   )}
                 >
                   {getCellContent(row.original, animationState[index][1])}
@@ -254,7 +254,7 @@ const ExperimentTable = () => {
                 <TableCell
                   className={cn(
                     "border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis",
-                    highlightState[index][2] && "bg-slate-100"
+                    highlightState[index][2] && "bg-slate-100",
                   )}
                 >
                   {getCellContent(row.prompt1, animationState[index][2])}
@@ -262,7 +262,7 @@ const ExperimentTable = () => {
                 <TableCell
                   className={cn(
                     "border-r border-slate-200 whitespace-nowrap overflow-hidden text-ellipsis",
-                    highlightState[index][3] && "bg-slate-100"
+                    highlightState[index][3] && "bg-slate-100",
                   )}
                 >
                   {getCellContent(row.prompt2, animationState[index][3])}
@@ -328,18 +328,21 @@ const Experiment = () => {
               </p>
             </div>
             <div className="flex gap-3 items-center">
-              <Link href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">
-                <Button
-                  variant="landing_primary"
-                  size="landing_page">
+              <Link
+                href="https://docs.helicone.ai/features/prompts/editor"
+                target="_blank"
+                rel="noopener"
+              >
+                <Button variant="landing_primary" size="landing_page">
                   Try Prompt Editor
                 </Button>
               </Link>
-              <Link href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">
-                <Button
-                  variant="ghost"
-                  size="landing_page"
-                >
+              <Link
+                href="https://docs.helicone.ai/features/experiments"
+                target="_blank"
+                rel="noopener"
+              >
+                <Button variant="ghost" size="landing_page">
                   Experiments
                   <ArrowUpRight className="size-5" />
                 </Button>

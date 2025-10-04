@@ -20,10 +20,10 @@ export class TestClickhouseClientWrapper {
 
   constructor(env: ClickhouseEnv) {
     // Use url instead of deprecated host
-    const clickhouseUrl = env.CLICKHOUSE_HOST.startsWith('http') 
-      ? env.CLICKHOUSE_HOST 
+    const clickhouseUrl = env.CLICKHOUSE_HOST.startsWith("http")
+      ? env.CLICKHOUSE_HOST
       : `http://${env.CLICKHOUSE_HOST}`;
-    
+
     this.clickHouseClient = createClient({
       url: clickhouseUrl,
       username: env.CLICKHOUSE_USER,
@@ -39,7 +39,7 @@ export class TestClickhouseClientWrapper {
 
   async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
     table: T,
-    values: ClickhouseDB["Tables"][T][]
+    values: ClickhouseDB["Tables"][T][],
   ): Promise<Result<string, string>> {
     try {
       const queryResult = await this.clickHouseClient.insert({
@@ -67,7 +67,7 @@ export class TestClickhouseClientWrapper {
   async dbQuery<T>(
     query: string,
     parameters: (number | string | boolean | Date)[],
-    schema?: ZodType<T>
+    schema?: ZodType<T>,
   ): Promise<Result<T[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
@@ -97,7 +97,7 @@ export class TestClickhouseClientWrapper {
   async dbQueryHql<T>(
     query: string,
     parameters: (number | string | boolean | Date)[],
-    schema?: ZodType<T>
+    schema?: ZodType<T>,
   ): Promise<Result<T[], string>> {
     try {
       const query_params = this.paramsToValues(parameters);
@@ -148,7 +148,10 @@ export class TestClickhouseClientWrapper {
       }
 
       // Check if this is a DDL command that doesn't return data
-      const isDDL = /^\s*(grant|revoke|create\s+(user|role)|alter\s+(user|role)|drop\s+(user|role))/i.test(query);
+      const isDDL =
+        /^\s*(grant|revoke|create\s+(user|role)|alter\s+(user|role)|drop\s+(user|role))/i.test(
+          query,
+        );
 
       const queryOptions: any = {
         query,
@@ -176,7 +179,7 @@ export class TestClickhouseClientWrapper {
       }
 
       const queryResult = await this.clickHouseHqlClient.query(queryOptions);
-      
+
       if (isDDL) {
         // DDL commands don't return data
         return { data: [] as T[], error: null };
@@ -189,7 +192,12 @@ export class TestClickhouseClientWrapper {
         return { data: validated.data, error: null };
       }
     } catch (err) {
-      console.error("Error executing HQL query with context: ", query, organizationId, parameters);
+      console.error(
+        "Error executing HQL query with context: ",
+        query,
+        organizationId,
+        parameters,
+      );
       console.error(err);
       return {
         data: null,
@@ -253,7 +261,7 @@ export class TestClickhouseClientWrapper {
       const migrationsDir = path.join(
         process.cwd(),
         "clickhouse",
-        "migrations"
+        "migrations",
       );
 
       // Read all migration files
@@ -299,7 +307,7 @@ export class TestClickhouseClientWrapper {
       const migrationsDir = path.join(
         process.cwd(),
         "clickhouse",
-        "migrations"
+        "migrations",
       );
 
       // Read all migration files to get table names
@@ -322,7 +330,7 @@ export class TestClickhouseClientWrapper {
 
         // Extract table names from CREATE TABLE statements
         const tableMatches = migrationContent.match(
-          /CREATE TABLE (?:IF NOT EXISTS )?([^\s(]+)/gi
+          /CREATE TABLE (?:IF NOT EXISTS )?([^\s(]+)/gi,
         );
         if (tableMatches) {
           for (const match of tableMatches) {

@@ -17,7 +17,7 @@ export type ProxyResult = {
 
 function getStatus(
   responseStatus: number,
-  endReason?: CompletedChunk["reason"]
+  endReason?: CompletedChunk["reason"],
 ) {
   if (!endReason) {
     return responseStatus;
@@ -33,7 +33,7 @@ function getStatus(
 }
 
 export async function handleProxyRequest(
-  proxyRequest: HeliconeProxyRequest
+  proxyRequest: HeliconeProxyRequest,
 ): Promise<Result<ProxyResult, string>> {
   const { retryOptions } = proxyRequest;
 
@@ -66,7 +66,7 @@ export async function handleProxyRequest(
       loggable: new DBLoggable({
         request: dbLoggableRequestFromProxyRequest(
           proxyRequest,
-          requestStartTime
+          requestStartTime,
         ),
         response: {
           responseId: crypto.randomUUID(),
@@ -74,14 +74,14 @@ export async function handleProxyRequest(
             body: (await interceptor?.waitForChunk())?.body ?? "",
             endTime: new Date(
               (await interceptor?.waitForChunk())?.endTimeUnix ??
-                new Date().getTime()
+                new Date().getTime(),
             ),
           }),
           responseHeaders: new Headers(response.headers),
           status: async () => {
             return getStatus(
               response.status,
-              (await interceptor?.waitForChunk())?.reason
+              (await interceptor?.waitForChunk())?.reason,
             );
           },
           omitLog:

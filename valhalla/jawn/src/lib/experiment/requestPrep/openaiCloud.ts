@@ -5,7 +5,7 @@ function prepareRequestOpenAI(
   requestPath: string,
   proxyKey: string,
   requestId: string,
-  experimentId?: string
+  experimentId?: string,
 ): {
   url: URL;
   headers: { [key: string]: string };
@@ -47,7 +47,7 @@ export function prepareRequestOpenAIFull({
     requestPath ?? `${process.env.HELICONE_WORKER_URL}/v1/chat/completions`,
     proxyKey,
     requestId,
-    experimentId
+    experimentId,
   );
   return {
     url: fetchUrl,

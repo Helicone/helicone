@@ -39,8 +39,10 @@ export class AnthropicProvider extends BaseProvider {
         model: endpoint.providerModelId,
       });
     }
-    const anthropicBody = context.toAnthropic(context.parsedBody, endpoint.providerModelId);
+    const anthropicBody = context.toAnthropic(
+      context.parsedBody,
+      endpoint.providerModelId,
+    );
     return JSON.stringify(anthropicBody);
   }
-
 }

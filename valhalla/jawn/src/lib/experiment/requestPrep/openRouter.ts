@@ -8,7 +8,7 @@ function prepareRequestOpenRouter(
   heliconeApiKey: string,
   providerKey: string,
   requestId: string,
-  experimentId?: string
+  experimentId?: string,
 ): {
   url: URL;
   headers: { [key: string]: string };
@@ -58,7 +58,7 @@ export function prepareRequestOpenRouterFull({
     heliconeApiKey,
     providerKey ?? "",
     requestId,
-    experimentId
+    experimentId,
   );
 
   return {

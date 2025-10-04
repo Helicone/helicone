@@ -17,7 +17,7 @@ export class FluxImageParser extends ImageModelResponseBodyParser {
           if (item?.b64_json) {
             const assetId = this.generateAssetId(
               this.responseId,
-              this.assetIndex++
+              this.assetIndex++,
             );
             requestAssets.set(assetId, item.b64_json);
             item.b64_json = `<helicone-asset-id key="${assetId}"/>`;
@@ -26,7 +26,7 @@ export class FluxImageParser extends ImageModelResponseBodyParser {
       }
     } catch (error) {
       console.error(
-        `Error processing response body for model: ${this.modelName}, error: ${error}`
+        `Error processing response body for model: ${this.modelName}, error: ${error}`,
       );
     }
 

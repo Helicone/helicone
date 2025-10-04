@@ -43,7 +43,7 @@ export class IntegrationController extends Controller {
   @Post("/")
   public async createIntegration(
     @Body() params: IntegrationCreateParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ id: string }, string>> {
     const integrationManager = new IntegrationManager(request.authParams);
     return await integrationManager.createIntegration(params);
@@ -51,7 +51,7 @@ export class IntegrationController extends Controller {
 
   @Get("/")
   public async getIntegrations(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Array<Integration>, string>> {
     const integrationManager = new IntegrationManager(request.authParams);
     return await integrationManager.getIntegrations();
@@ -61,7 +61,7 @@ export class IntegrationController extends Controller {
   public async updateIntegration(
     @Path() integrationId: string,
     @Body() params: IntegrationUpdateParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const integrationManager = new IntegrationManager(request.authParams);
     return await integrationManager.updateIntegration(integrationId, params);
@@ -70,7 +70,7 @@ export class IntegrationController extends Controller {
   @Get("/{integrationId}")
   public async getIntegration(
     @Path() integrationId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Integration, string>> {
     const integrationManager = new IntegrationManager(request.authParams);
     return await integrationManager.getIntegration(integrationId);
@@ -79,7 +79,7 @@ export class IntegrationController extends Controller {
   @Get("/type/{type}")
   public async getIntegrationByType(
     @Path() type: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Integration, string>> {
     const integrationManager = new IntegrationManager(request.authParams);
     return await integrationManager.getIntegrationByType(type);
@@ -87,7 +87,7 @@ export class IntegrationController extends Controller {
 
   @Get("/slack/settings")
   public async getSlackSettings(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Integration, string>> {
     const integrationManager = new IntegrationManager(request.authParams);
     return await integrationManager.getIntegrationByType("slack");
@@ -95,7 +95,7 @@ export class IntegrationController extends Controller {
 
   @Get("/slack/channels")
   public async getSlackChannels(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Array<{ id: string; name: string }>, string>> {
     const integrationManager = new IntegrationManager(request.authParams);
     return await integrationManager.getSlackChannels();
@@ -105,16 +105,16 @@ export class IntegrationController extends Controller {
   public async testStripeMeterEvent(
     @Path() integrationId: string,
     @Body() body: TestStripeMeterEventRequest,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     const stripeIntegrationManager = new StripeIntegrationManager(
-      request.authParams
+      request.authParams,
     );
 
     const result = await stripeIntegrationManager.testMeterEvent(
       integrationId,
       body.event_name,
-      body.customer_id
+      body.customer_id,
     );
     if (result.error) {
       this.setStatus(500);

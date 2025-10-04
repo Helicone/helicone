@@ -31,10 +31,10 @@ export class DemoController extends Controller {
       max_tokens?: number;
       cache_enabled?: boolean;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<OpenAI.Chat.Completions.ChatCompletion, string>> {
     const heliconeOnHeliconeApiKey = await GET_KEY(
-      "key:helicone_on_helicone_key"
+      "key:helicone_on_helicone_key",
     );
     const heliconeLogger = new HeliconeManualLogger({
       apiKey: heliconeOnHeliconeApiKey,
@@ -49,7 +49,7 @@ export class DemoController extends Controller {
     }
 
     const tempAPIKey = await generateTempHeliconeAPIKey(
-      request.authParams.organizationId
+      request.authParams.organizationId,
     );
 
     if (!tempAPIKey) {
@@ -64,7 +64,7 @@ export class DemoController extends Controller {
       () => {
         tempAPIKey.data?.cleanup();
       },
-      1000 * 60 * 15
+      1000 * 60 * 15,
     );
 
     // dont include cache seed or enabled if cache is disabled
@@ -119,7 +119,7 @@ export class DemoController extends Controller {
             "Helicone-Property-Location": "demo",
             "Helicone-Property-Remote-Request-Id": requestId,
           },
-        }
+        },
       );
 
       return ok(completion);

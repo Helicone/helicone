@@ -37,7 +37,7 @@ export class ClickhouseClientWrapper {
 
   async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
     table: T,
-    values: ClickhouseDB["Tables"][T][]
+    values: ClickhouseDB["Tables"][T][],
   ): Promise<Result<string, string>> {
     try {
       const queryResult = await this.clickHouseClient.insert({
@@ -66,7 +66,7 @@ export class ClickhouseClientWrapper {
   async dbQuery<T>(
     query: string,
     parameters: (number | string | boolean | Date)[],
-    schema?: ZodType<T>
+    schema?: ZodType<T>,
   ): Promise<Result<T[], string>> {
     try {
       const query_params = paramsToValues(parameters);
@@ -150,7 +150,7 @@ export class ClickhouseClientWrapper {
         "Error executing HQL query with context: ",
         query,
         organizationId,
-        parameters
+        parameters,
       );
       console.error(err);
       return {

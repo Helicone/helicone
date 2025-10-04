@@ -17,7 +17,7 @@ export const STRIPE_FIXED_FEE_CENTS = 30;
  */
 export function calculateStripeFee(
   amountCents: number,
-  transactionCount: number = 1
+  transactionCount: number = 1,
 ): number {
   const percentageFee = Math.ceil(amountCents * STRIPE_PERCENT_FEE_RATE);
   const fixedFee = STRIPE_FIXED_FEE_CENTS * transactionCount;
@@ -35,12 +35,12 @@ export function calculateStripeFee(
  */
 export function reverseCalculateStripeFee(
   amountCents: number,
-  transactionCount: number = 1
+  transactionCount: number = 1,
 ): number {
   const fixedFee = STRIPE_FIXED_FEE_CENTS * transactionCount;
   const percentageFee = Math.ceil(
     ((amountCents - fixedFee) * STRIPE_PERCENT_FEE_RATE) /
-      (1 + STRIPE_PERCENT_FEE_RATE)
+      (1 + STRIPE_PERCENT_FEE_RATE),
   );
   return percentageFee + fixedFee;
 }
@@ -54,7 +54,7 @@ export function reverseCalculateStripeFee(
  */
 export function calculateNetAmount(
   grossAmountCents: number,
-  transactionCount: number
+  transactionCount: number,
 ): number {
   const fees = reverseCalculateStripeFee(grossAmountCents, transactionCount);
   return grossAmountCents - fees;
@@ -69,7 +69,7 @@ export function calculateNetAmount(
  */
 export function calculateGrossFromNet(
   netAmountCents: number,
-  transactionCount: number
+  transactionCount: number,
 ): number {
   // Formula: grossAmount = (netAmount + fixedFees) / (1 - percentFeeRate)
   const fixedFees = STRIPE_FIXED_FEE_CENTS * transactionCount;
@@ -86,7 +86,7 @@ export function calculateGrossFromNet(
  */
 export function calculateAverageFeePerTransaction(
   totalAmountCents: number,
-  transactionCount: number
+  transactionCount: number,
 ): number {
   if (transactionCount === 0) return 0;
   const totalFees = calculateStripeFee(totalAmountCents, transactionCount);
@@ -101,7 +101,7 @@ export function calculateAverageFeePerTransaction(
  */
 export function formatCentsAsDollars(
   cents: number,
-  includeSymbol: boolean = true
+  includeSymbol: boolean = true,
 ): string {
   const dollars = cents / 100;
   const formatted = dollars.toFixed(2);

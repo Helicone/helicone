@@ -65,7 +65,7 @@ function DirectComparisonCard({
 
   const compareMetric = (
     metricA: number | undefined,
-    metricB: number | undefined
+    metricB: number | undefined,
   ) => {
     if (!metricA || !metricB) return "none";
     return metricA > metricB ? "A" : "B";
@@ -74,15 +74,15 @@ function DirectComparisonCard({
   const betterBenchmarks = {
     mmlu: compareMetric(
       modelADetails.info.benchmarks?.mmlu,
-      modelBDetails.info.benchmarks?.mmlu
+      modelBDetails.info.benchmarks?.mmlu,
     ),
     hellaswag: compareMetric(
       modelADetails.info.benchmarks?.hellaswag,
-      modelBDetails.info.benchmarks?.hellaswag
+      modelBDetails.info.benchmarks?.hellaswag,
     ),
     bbh: compareMetric(
       modelADetails.info.benchmarks?.bbh,
-      modelBDetails.info.benchmarks?.bbh
+      modelBDetails.info.benchmarks?.bbh,
     ),
   };
 
@@ -90,21 +90,21 @@ function DirectComparisonCard({
     input:
       compareMetric(
         models[0].costs.prompt_token,
-        models[1].costs.prompt_token
+        models[1].costs.prompt_token,
       ) === "A"
         ? "B"
         : "A",
     output:
       compareMetric(
         models[0].costs.completion_token,
-        models[1].costs.completion_token
+        models[1].costs.completion_token,
       ) === "A"
         ? "B"
         : "A",
     total:
       compareMetric(
         models[0].costs.prompt_token + models[0].costs.completion_token,
-        models[1].costs.prompt_token + models[1].costs.completion_token
+        models[1].costs.prompt_token + models[1].costs.completion_token,
       ) === "A"
         ? "B"
         : "A",
@@ -112,7 +112,7 @@ function DirectComparisonCard({
 
   const betterFeedback = compareMetric(
     models[0].feedback?.positivePercentage,
-    models[1].feedback?.positivePercentage
+    models[1].feedback?.positivePercentage,
   );
 
   return (
@@ -311,7 +311,7 @@ function DirectComparisonCard({
               >
                 {formatCost(
                   models[0].costs.prompt_token +
-                    models[0].costs.completion_token
+                    models[0].costs.completion_token,
                 )}
                 {betterCosts.total === "A" && (
                   <span className="text-xs text-green-600 ml-1">Cheaper</span>
@@ -326,7 +326,7 @@ function DirectComparisonCard({
               >
                 {formatCost(
                   models[1].costs.prompt_token +
-                    models[1].costs.completion_token
+                    models[1].costs.completion_token,
                 )}
                 {betterCosts.total === "B" && (
                   <span className="text-xs text-green-600 ml-1">Cheaper</span>
@@ -358,7 +358,7 @@ function DirectComparisonCard({
                 >
                   {modelADetails.info.benchmarks?.mmlu
                     ? `${(modelADetails.info.benchmarks.mmlu * 100).toFixed(
-                        1
+                        1,
                       )}%`
                     : "-"}
                   {betterBenchmarks.mmlu === "A" && (
@@ -368,7 +368,7 @@ function DirectComparisonCard({
               </div>
               {renderBenchmarkBar(
                 modelADetails.info.benchmarks?.mmlu,
-                betterBenchmarks.mmlu === "A"
+                betterBenchmarks.mmlu === "A",
               )}
             </div>
             <div className="col-span-4">
@@ -380,7 +380,7 @@ function DirectComparisonCard({
                 >
                   {modelBDetails.info.benchmarks?.mmlu
                     ? `${(modelBDetails.info.benchmarks.mmlu * 100).toFixed(
-                        1
+                        1,
                       )}%`
                     : "-"}
                   {betterBenchmarks.mmlu === "B" && (
@@ -390,7 +390,7 @@ function DirectComparisonCard({
               </div>
               {renderBenchmarkBar(
                 modelBDetails.info.benchmarks?.mmlu,
-                betterBenchmarks.mmlu === "B"
+                betterBenchmarks.mmlu === "B",
               )}
             </div>
           </div>
@@ -418,7 +418,7 @@ function DirectComparisonCard({
               </div>
               {renderBenchmarkBar(
                 modelADetails.info.benchmarks?.hellaswag,
-                betterBenchmarks.hellaswag === "A"
+                betterBenchmarks.hellaswag === "A",
               )}
             </div>
             <div className="col-span-4">
@@ -440,7 +440,7 @@ function DirectComparisonCard({
               </div>
               {renderBenchmarkBar(
                 modelBDetails.info.benchmarks?.hellaswag,
-                betterBenchmarks.hellaswag === "B"
+                betterBenchmarks.hellaswag === "B",
               )}
             </div>
           </div>
@@ -464,7 +464,7 @@ function DirectComparisonCard({
               </div>
               {renderBenchmarkBar(
                 modelADetails.info.benchmarks?.bbh,
-                betterBenchmarks.bbh === "A"
+                betterBenchmarks.bbh === "A",
               )}
             </div>
             <div className="col-span-4">
@@ -484,7 +484,7 @@ function DirectComparisonCard({
               </div>
               {renderBenchmarkBar(
                 modelBDetails.info.benchmarks?.bbh,
-                betterBenchmarks.bbh === "B"
+                betterBenchmarks.bbh === "B",
               )}
             </div>
           </div>

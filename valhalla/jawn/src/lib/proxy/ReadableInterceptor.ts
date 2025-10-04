@@ -20,7 +20,7 @@ export class ReadableInterceptor {
     stream: NodeReadableStream,
     private isStream: boolean,
     private chunkEventName = "done",
-    private chunkTimeoutMs = 30 * 60 * 1000 // Default to 30 minutes
+    private chunkTimeoutMs = 30 * 60 * 1000, // Default to 30 minutes
   ) {
     this.stream = this.interceptStream(stream);
     this.setupChunkListener();
@@ -48,7 +48,7 @@ export class ReadableInterceptor {
       }
 
       this.responseBody += this.decoder.decode(chunk, { stream: true });
-    };     
+    };
 
     stream.on("data", onChunk);
     stream.on("end", () => onDone("done"));

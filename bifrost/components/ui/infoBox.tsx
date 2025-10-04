@@ -23,14 +23,14 @@ const InfoBox = React.forwardRef<HTMLDivElement, InfoBoxProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <div
         className={cn(
           "flex items-center space-x-2 rounded-md border px-4 py-2 border-l-4",
           variantStyles[variant],
-          className
+          className,
         )}
         ref={ref}
         {...props}
@@ -41,7 +41,7 @@ const InfoBox = React.forwardRef<HTMLDivElement, InfoBoxProps>(
         <div className="text-sm font-medium">{children}</div>
       </div>
     );
-  }
+  },
 );
 
 InfoBox.displayName = "InfoBox";

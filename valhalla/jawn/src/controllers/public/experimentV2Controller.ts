@@ -83,7 +83,7 @@ export interface CreateNewPromptVersionForExperimentParams
 export class ExperimentV2Controller extends Controller {
   @Post("/create/empty")
   public async createEmptyExperiment(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -116,7 +116,7 @@ export class ExperimentV2Controller extends Controller {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const experiment = await experimentManager.createNewExperiment(
       `experiment-${Date.now()}`,
-      promptVersionResult.data?.prompt_version_id!
+      promptVersionResult.data?.prompt_version_id!,
     );
 
     if (experiment.error || !experiment.data) {
@@ -130,7 +130,7 @@ export class ExperimentV2Controller extends Controller {
   @Post("/create/from-request/{requestId}")
   public async createExperimentFromRequest(
     @Path() requestId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -149,7 +149,7 @@ export class ExperimentV2Controller extends Controller {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const experiment = await experimentManager.createNewExperiment(
       `experiment-from-request-${requestId}-${Date.now()}`,
-      promptVersionResult.data!
+      promptVersionResult.data!,
     );
 
     if (experiment.error || !experiment.data) {
@@ -166,7 +166,7 @@ export class ExperimentV2Controller extends Controller {
       `SELECT id, inputs, auto_prompt_inputs 
        FROM prompt_input_record 
        WHERE source_request = $1`,
-      [requestId]
+      [requestId],
     );
 
     let inputRecordId: string;
@@ -184,7 +184,7 @@ export class ExperimentV2Controller extends Controller {
          (inputs, prompt_version, auto_prompt_inputs, source_request)
          VALUES ($1, $2, $3, $4)
          RETURNING id`,
-        [{}, promptVersionResult.data!, [], requestId]
+        [{}, promptVersionResult.data!, [], requestId],
       );
 
       if (
@@ -212,7 +212,7 @@ export class ExperimentV2Controller extends Controller {
           inputs: inputs,
           autoInputs: autoInputs,
         },
-      ]
+      ],
     );
 
     return ok({ experimentId: experiment.data.experimentId });
@@ -225,12 +225,12 @@ export class ExperimentV2Controller extends Controller {
       name: string;
       originalPromptVersion: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ experimentId: string }, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.createNewExperiment(
       requestBody.name,
-      requestBody.originalPromptVersion
+      requestBody.originalPromptVersion,
     );
 
     if (result.error || !result.data) {
@@ -243,7 +243,7 @@ export class ExperimentV2Controller extends Controller {
 
   @Get("/")
   public async getExperiments(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ExperimentV2[], string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.getExperiments();
@@ -259,7 +259,7 @@ export class ExperimentV2Controller extends Controller {
   @Delete("/{experimentId}")
   public async deleteExperiment(
     @Path() experimentId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.deleteExperiment(experimentId);
@@ -276,12 +276,11 @@ export class ExperimentV2Controller extends Controller {
   @Get("/{experimentId}")
   public async getExperimentById(
     @Path() experimentId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ExtendedExperimentData, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
-    const result = await experimentManager.getExperimentWithRowsById(
-      experimentId
-    );
+    const result =
+      await experimentManager.getExperimentWithRowsById(experimentId);
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {
@@ -294,12 +293,12 @@ export class ExperimentV2Controller extends Controller {
   public async createNewPromptVersionForExperiment(
     @Path() experimentId: string,
     @Body() requestBody: CreateNewPromptVersionForExperimentParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<PromptVersionResult, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.createNewPromptVersionForExperiment(
       experimentId,
-      requestBody
+      requestBody,
     );
 
     if (result.error || !result.data) {
@@ -314,12 +313,12 @@ export class ExperimentV2Controller extends Controller {
   public async deletePromptVersion(
     @Path() experimentId: string,
     @Path() promptVersionId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.deletePromptVersion(
       experimentId,
-      promptVersionId
+      promptVersionId,
     );
     return result;
   }
@@ -327,12 +326,11 @@ export class ExperimentV2Controller extends Controller {
   @Get("/{experimentId}/prompt-versions")
   public async getPromptVersionsForExperiment(
     @Path() experimentId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ExperimentV2PromptVersion[], string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
-    const result = await experimentManager.getPromptVersionsForExperiment(
-      experimentId
-    );
+    const result =
+      await experimentManager.getPromptVersionsForExperiment(experimentId);
 
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -345,12 +343,11 @@ export class ExperimentV2Controller extends Controller {
   @Get("/{experimentId}/input-keys")
   public async getInputKeysForExperiment(
     @Path() experimentId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string[], string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
-    const result = await experimentManager.getInputKeysForExperiment(
-      experimentId
-    );
+    const result =
+      await experimentManager.getInputKeysForExperiment(experimentId);
 
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -364,12 +361,12 @@ export class ExperimentV2Controller extends Controller {
   public async addManualRowToExperiment(
     @Path() experimentId: string,
     @Body() requestBody: { inputs: Record<string, string> },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.addManualRowToExperiment(
       experimentId,
-      requestBody.inputs
+      requestBody.inputs,
     );
 
     if (result.error || !result.data) {
@@ -384,12 +381,12 @@ export class ExperimentV2Controller extends Controller {
   public async addManualRowsToExperimentBatch(
     @Path() experimentId: string,
     @Body() requestBody: { inputs: Record<string, string>[] },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.addManualRowsToExperimentBatch(
       experimentId,
-      requestBody.inputs
+      requestBody.inputs,
     );
 
     if (result.error) {
@@ -404,12 +401,12 @@ export class ExperimentV2Controller extends Controller {
   public async deleteExperimentTableRows(
     @Path() experimentId: string,
     @Body() requestBody: { inputRecordIds: string[] },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.deleteExperimentTableRows(
       experimentId,
-      requestBody.inputRecordIds
+      requestBody.inputRecordIds,
     );
 
     if (result.error) {
@@ -431,12 +428,12 @@ export class ExperimentV2Controller extends Controller {
         autoInputs: any[];
       }[];
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.createExperimentTableRowBatch(
       experimentId,
-      requestBody.rows
+      requestBody.rows,
     );
 
     if (result.error || !result.data) {
@@ -451,13 +448,13 @@ export class ExperimentV2Controller extends Controller {
   public async createExperimentTableRowFromDataset(
     @Path() experimentId: string,
     @Path() datasetId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result =
       await experimentManager.createExperimentTableRowBatchFromDataset(
         experimentId,
-        datasetId
+        datasetId,
       );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -475,13 +472,13 @@ export class ExperimentV2Controller extends Controller {
       inputRecordId: string;
       inputs: Record<string, string>;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.updateExperimentTableRow(
       experimentId,
       requestBody.inputRecordId,
-      requestBody.inputs
+      requestBody.inputs,
     );
 
     if (result.error) {
@@ -496,13 +493,13 @@ export class ExperimentV2Controller extends Controller {
   public async runHypothesis(
     @Path() experimentId: string,
     @Body() requestBody: { promptVersionId: string; inputRecordId: string },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.runHypothesis(
       experimentId,
       requestBody.promptVersionId,
-      requestBody.inputRecordId
+      requestBody.inputRecordId,
     );
 
     if (result.error || !result.data) {
@@ -516,12 +513,11 @@ export class ExperimentV2Controller extends Controller {
   @Get("/{experimentId}/evaluators")
   public async getExperimentEvaluators(
     @Path() experimentId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<EvaluatorResult[], string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
-    const result = await evaluatorManager.getEvaluatorsForExperiment(
-      experimentId
-    );
+    const result =
+      await evaluatorManager.getEvaluatorsForExperiment(experimentId);
     return result;
   }
 
@@ -529,12 +525,12 @@ export class ExperimentV2Controller extends Controller {
   public async createExperimentEvaluator(
     @Path() experimentId: string,
     @Body() requestBody: { evaluatorId: string },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.createExperimentEvaluator(
       experimentId,
-      requestBody.evaluatorId
+      requestBody.evaluatorId,
     );
     return result;
   }
@@ -543,12 +539,12 @@ export class ExperimentV2Controller extends Controller {
   public async deleteExperimentEvaluator(
     @Path() experimentId: string,
     @Path() evaluatorId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.deleteExperimentEvaluator(
       experimentId,
-      evaluatorId
+      evaluatorId,
     );
     return result;
   }
@@ -556,7 +552,7 @@ export class ExperimentV2Controller extends Controller {
   @Post("/{experimentId}/evaluators/run")
   public async runExperimentEvaluators(
     @Path() experimentId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.runExperimentEvaluators(experimentId);
@@ -566,7 +562,7 @@ export class ExperimentV2Controller extends Controller {
   @Get("/{experimentId}/should-run-evaluators")
   public async shouldRunEvaluators(
     @Path() experimentId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<boolean, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.shouldRunEvaluators(experimentId);
@@ -577,12 +573,12 @@ export class ExperimentV2Controller extends Controller {
   public async getExperimentPromptVersionScores(
     @Path() experimentId: string,
     @Path() promptVersionId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Record<string, ScoreV2>, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.getExperimentPromptVersionScores(
       experimentId,
-      promptVersionId
+      promptVersionId,
     );
     return result;
   }
@@ -592,13 +588,13 @@ export class ExperimentV2Controller extends Controller {
     @Path() experimentId: string,
     @Path() requestId: string,
     @Path() scoreKey: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ScoreV2 | null, string>> {
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const result = await experimentManager.getExperimentRequestScore(
       experimentId,
       requestId,
-      scoreKey
+      scoreKey,
     );
     return result;
   }

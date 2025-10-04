@@ -55,7 +55,7 @@ export interface DBLoggableProps {
 
 export function dbLoggableRequestFromProxyRequest(
   proxyRequest: HeliconeProxyRequest,
-  requestStartTime: Date
+  requestStartTime: Date,
 ): DBLoggableProps["request"] {
   return {
     requestId: proxyRequest.requestId,
@@ -105,7 +105,7 @@ export class DBLoggable {
     },
     authParams: AuthParams,
     orgParams: OrgParams,
-    requestHeaders?: HeliconeHeaders<Headers>
+    requestHeaders?: HeliconeHeaders<Headers>,
   ) {
     // TODO: Add logging rate limiting
     if (
@@ -183,7 +183,7 @@ export class DBLoggable {
     // Send to Kafka or REST if not enabled
     await db.kafkaProducer.sendMessages(
       [kafkaMessage],
-      "request-response-logs-prod"
+      "request-response-logs-prod",
     );
 
     return ok(null);

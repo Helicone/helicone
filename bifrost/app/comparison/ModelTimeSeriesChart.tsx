@@ -51,7 +51,7 @@ const ModelTimeSeriesChart = ({
   const combinedData = models[0].timeSeriesData[metric]
     .map((point) => {
       const matchingPoint = models[1].timeSeriesData[metric].find(
-        (p) => p.timestamp === point.timestamp
+        (p) => p.timestamp === point.timestamp,
       );
 
       return {

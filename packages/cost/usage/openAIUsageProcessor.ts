@@ -3,7 +3,9 @@ import { ModelUsage } from "./types";
 import { Result } from "../../common/result";
 
 export class OpenAIUsageProcessor implements IUsageProcessor {
-  public async parse(parseInput: ParseInput): Promise<Result<ModelUsage, string>> {
+  public async parse(
+    parseInput: ParseInput,
+  ): Promise<Result<ModelUsage, string>> {
     try {
       if (parseInput.isStream) {
         return this.parseStreamResponse(parseInput.responseBody);
@@ -18,11 +20,13 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
   }
 
-  protected parseNonStreamResponse(responseBody: string): Result<ModelUsage, string> {
+  protected parseNonStreamResponse(
+    responseBody: string,
+  ): Result<ModelUsage, string> {
     try {
       const parsedResponse = JSON.parse(responseBody);
       const usage = this.extractUsageFromResponse(parsedResponse);
-      
+
       return {
         data: usage,
         error: null,
@@ -35,11 +39,16 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
   }
 
-  protected parseStreamResponse(responseBody: string): Result<ModelUsage, string> {
+  protected parseStreamResponse(
+    responseBody: string,
+  ): Result<ModelUsage, string> {
     try {
       const lines = responseBody
         .split("\n")
-        .filter((line) => line.trim() !== "" && !line.includes("OPENROUTER PROCESSING"))
+        .filter(
+          (line) =>
+            line.trim() !== "" && !line.includes("OPENROUTER PROCESSING"),
+        )
         .map((line) => {
           if (line === "data: [DONE]") return null;
           try {
@@ -66,7 +75,9 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
   }
 
   protected consolidateStreamData(streamData: any[]): any {
-    const lastChunkWithUsage = [...streamData].reverse().find(chunk => chunk?.usage);
+    const lastChunkWithUsage = [...streamData]
+      .reverse()
+      .find((chunk) => chunk?.usage);
     if (lastChunkWithUsage?.usage) {
       return lastChunkWithUsage;
     }
@@ -100,21 +111,28 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
 
     const usage = parsedResponse.usage || {};
-    
+
     const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
-    const completionTokens = usage.completion_tokens ?? usage.output_tokens ?? 0;
-    
+    const completionTokens =
+      usage.completion_tokens ?? usage.output_tokens ?? 0;
+
     const promptDetails = usage.prompt_tokens_details || {};
     const completionDetails = usage.completion_tokens_details || {};
-    
+
     const cachedTokens = promptDetails.cached_tokens ?? 0;
     const promptAudioTokens = promptDetails.audio_tokens ?? 0;
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
-    
-    const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
-    const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
-    
+
+    const effectivePromptTokens = Math.max(
+      0,
+      promptTokens - cachedTokens - promptAudioTokens,
+    );
+    const effectiveCompletionTokens = Math.max(
+      0,
+      completionTokens - completionAudioTokens - reasoningTokens,
+    );
+
     const modelUsage: ModelUsage = {
       input: effectivePromptTokens,
       output: effectiveCompletionTokens,
@@ -131,7 +149,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
 
     if (promptAudioTokens > 0 || completionAudioTokens > 0) {
-      // TODO: add audio output support since some models support it in the 
+      // TODO: add audio output support since some models support it in the
       // chat completions endpoint
       modelUsage.audio = promptAudioTokens + completionAudioTokens;
     }

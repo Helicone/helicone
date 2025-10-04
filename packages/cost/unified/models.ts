@@ -594,7 +594,7 @@ export function getModelsForCreator(creator: Creator): string[] {
  */
 export function getProvidersForModel(
   creator: Creator,
-  modelName: string
+  modelName: string,
 ): Provider[] {
   const creatorModels = modelMapping[creator];
   if (!creatorModels) return [];
@@ -611,7 +611,7 @@ export function getProvidersForModel(
 export function getModelString(
   creator: Creator,
   modelName: string,
-  provider: Provider
+  provider: Provider,
 ): string | null {
   const creatorModels = modelMapping[creator];
   if (!creatorModels) return null;
@@ -620,7 +620,7 @@ export function getModelString(
   if (!modelConfig) return null;
 
   const providerModel = modelConfig.providers.find(
-    (p) => p.provider === provider
+    (p) => p.provider === provider,
   );
   return providerModel?.modelString || null;
 }
@@ -631,7 +631,7 @@ export function getModelString(
 export function getModelConfig(
   creator: Creator,
   modelName: string,
-  provider: Provider
+  provider: Provider,
 ) {
   const creatorModels = modelMapping[creator];
   if (!creatorModels) return null;
@@ -640,7 +640,7 @@ export function getModelConfig(
   if (!modelConfig) return null;
 
   const providerModel = modelConfig.providers.find(
-    (p) => p.provider === provider
+    (p) => p.provider === provider,
   );
   if (!providerModel) return null;
 
@@ -668,7 +668,7 @@ export function getModelConfig(
  */
 export function findCreatorForProviderAndModel(
   provider: Provider,
-  modelString: string
+  modelString: string,
 ): Creator | null {
   // Iterate through all creators
   for (const creator of Object.keys(modelMapping) as Creator[]) {
@@ -680,7 +680,7 @@ export function findCreatorForProviderAndModel(
 
       // Check if any provider implementation matches
       const match = modelConfig.providers.find(
-        (p) => p.provider === provider && p.modelString === modelString
+        (p) => p.provider === provider && p.modelString === modelString,
       );
 
       if (match) {
@@ -696,7 +696,7 @@ export function findCreatorForProviderAndModel(
  * Get all available models for a specific provider
  */
 export function getModelsForProvider(
-  provider: Provider
+  provider: Provider,
 ): { creator: Creator; modelName: string; modelString: string }[] {
   const result: { creator: Creator; modelName: string; modelString: string }[] =
     [];
@@ -729,7 +729,7 @@ export function getModelsForProvider(
  * Get model information from a model string
  */
 export function getModelInfoFromModelString(
-  modelString: string
+  modelString: string,
 ): { creator: Creator; modelName: string; provider: Provider } | null {
   // Iterate through all creators
   for (const creator of Object.keys(modelMapping) as Creator[]) {

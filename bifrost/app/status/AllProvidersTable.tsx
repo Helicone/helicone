@@ -97,7 +97,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                 <TableCell className="p-0 font-medium">
                   <Link
                     href={`/status/provider/${encodeURIComponent(
-                      providerName
+                      providerName,
                     )}`}
                     className="block w-full h-full px-4 py-3 hover:text-blue-600 transition-colors"
                   >
@@ -107,7 +107,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                 <TableCell className="p-0">
                   <Link
                     href={`/status/provider/${encodeURIComponent(
-                      providerName
+                      providerName,
                     )}`}
                     className="block w-full h-full px-4 py-3"
                   >
@@ -123,7 +123,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                 <TableCell className="whitespace-nowrap p-0">
                   <Link
                     href={`/status/provider/${encodeURIComponent(
-                      providerName
+                      providerName,
                     )}`}
                     className="block w-full h-full px-6 py-2"
                   >
@@ -134,7 +134,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                 <TableCell className="p-0">
                   <Link
                     href={`/status/provider/${encodeURIComponent(
-                      providerName
+                      providerName,
                     )}`}
                     className="block w-full h-full px-6 py-2"
                   >
@@ -144,7 +144,7 @@ export function AllProvidersTable({ providers }: AllProvidersTableProps) {
                 <TableCell className="whitespace-nowrap p-0">
                   <Link
                     href={`/status/provider/${encodeURIComponent(
-                      providerName
+                      providerName,
                     )}`}
                     className="block w-full h-full px-6 py-2"
                   >

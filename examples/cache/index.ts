@@ -35,14 +35,14 @@ async function main() {
         stream: true,
         stream_options: {
           include_usage: true,
-        }
+        },
       },
       {
         headers: {
           "Helicone-Cache-Enabled": "true",
           "Helicone-Cache-Bucket-Max-Size": "3",
         },
-      }
+      },
     )
     .withResponse();
 

@@ -12,7 +12,7 @@ export interface CallProps {
 }
 
 export function callPropsFromProxyRequest(
-  proxyRequest: HeliconeProxyRequest
+  proxyRequest: HeliconeProxyRequest,
 ): CallProps {
   return {
     apiBase: proxyRequest.api_base,
@@ -60,7 +60,7 @@ export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
   const apiBaseUrl = new URL(apiBase.replace(/\/$/, ""));
   const pathname = originalUrl.pathname.replace(
     /^\/v1\/gateway(\/[^\/]+)?/,
-    ""
+    "",
   );
 
   return new URL(`${apiBaseUrl.origin}${pathname}${originalUrl.search}`);
@@ -68,7 +68,7 @@ export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
 
 export async function callProviderWithRetry(
   callProps: CallProps,
-  retryOptions: RetryOptions
+  retryOptions: RetryOptions,
 ): Promise<Response> {
   let lastResponse;
 
@@ -99,11 +99,11 @@ export async function callProviderWithRetry(
         onRetry: (error, attempt) => {
           console.log(`Retry attempt ${attempt}. Error: ${error}`);
         },
-      }
+      },
     );
   } catch (e) {
     console.warn(
-      `Retried ${retryOptions.retries} times but still failed. Error: ${e}`
+      `Retried ${retryOptions.retries} times but still failed. Error: ${e}`,
     );
   }
 

@@ -33,11 +33,11 @@ const DEFAULT_PRODUCT_PRICES = {
 } as const;
 
 const getMeterId = async (
-  meterName: "stripe:trace-meter-id"
+  meterName: "stripe:trace-meter-id",
 ): Promise<Result<string, string>> => {
   const result = await dbExecute<{ name: string; settings: any }>(
     `SELECT * FROM helicone_settings where name = $1`,
-    [meterName]
+    [meterName],
   );
 
   if (result.error) {
@@ -60,7 +60,7 @@ const getProProductPrices = async (): Promise<
   try {
     const result = await dbExecute<{ name: string; settings: any }>(
       `SELECT * FROM helicone_settings`,
-      []
+      [],
     );
 
     if (result.error) {
@@ -71,7 +71,7 @@ const getProProductPrices = async (): Promise<
     return Object.entries(DEFAULT_PRODUCT_PRICES)
       .map(([productId, defaultPriceId]) => {
         const setting = result.data?.find(
-          (setting) => setting.name === `price:${productId}`
+          (setting) => setting.name === `price:${productId}`,
         );
         if (setting) {
           return { [productId]: setting.settings as string };
@@ -82,7 +82,7 @@ const getProProductPrices = async (): Promise<
               `INSERT INTO helicone_settings (name, settings)
              VALUES ($1, $2)
              ON CONFLICT (name) DO UPDATE SET settings = $2`,
-              [`price:${productId}`, JSON.stringify(defaultPriceId)]
+              [`price:${productId}`, JSON.stringify(defaultPriceId)],
             );
           }
         }
@@ -90,7 +90,7 @@ const getProProductPrices = async (): Promise<
       })
       .reduce(
         (acc, curr) => ({ ...acc, ...curr }),
-        {}
+        {},
       ) as typeof DEFAULT_PRODUCT_PRICES;
   } catch (error) {
     console.error("Error in getProProductPrices:", error);
@@ -125,11 +125,11 @@ export class StripeManager extends BaseManager {
 
     if (
       subscription.items.data.some(
-        (item) => item.price.id === proProductPrices["prompts"]
+        (item) => item.price.id === proProductPrices["prompts"],
       )
     ) {
       const priceTheyArePayingForPrompts = subscription.items.data.find(
-        (item) => item.price.id === proProductPrices["prompts"]
+        (item) => item.price.id === proProductPrices["prompts"],
       );
       if (
         priceTheyArePayingForPrompts &&
@@ -145,7 +145,7 @@ export class StripeManager extends BaseManager {
   }
 
   public async trackStripeMeter(
-    events: StripeMeterEvent[]
+    events: StripeMeterEvent[],
   ): Promise<Result<string, string>> {
     try {
       // First create a meter event session to get an auth token
@@ -164,13 +164,13 @@ export class StripeManager extends BaseManager {
             "Stripe-Version": "2025-03-31.preview",
           },
           body: JSON.stringify({ events }),
-        }
+        },
       );
 
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
-          `Error response from Stripe: ${response.status} ${errorText}`
+          `Error response from Stripe: ${response.status} ${errorText}`,
         );
       }
 
@@ -191,11 +191,11 @@ export class StripeManager extends BaseManager {
 
     if (
       subscription.items.data.some(
-        (item) => item.price.id === proProductPrices["evals"]
+        (item) => item.price.id === proProductPrices["evals"],
       )
     ) {
       const priceTheyArePayingForEvals = subscription.items.data.find(
-        (item) => item.price.id === proProductPrices["evals"]
+        (item) => item.price.id === proProductPrices["evals"],
       );
       if (
         priceTheyArePayingForEvals &&
@@ -221,11 +221,11 @@ export class StripeManager extends BaseManager {
 
     if (
       subscription.items.data.some(
-        (item) => item.price.id === proProductPrices["experiments"]
+        (item) => item.price.id === proProductPrices["experiments"],
       )
     ) {
       const priceTheyArePayingForExperiments = subscription.items.data.find(
-        (item) => item.price.id === proProductPrices["experiments"]
+        (item) => item.price.id === proProductPrices["experiments"],
       );
       if (
         priceTheyArePayingForExperiments &&
@@ -248,7 +248,7 @@ export class StripeManager extends BaseManager {
          FROM organization
          WHERE id = $1
          LIMIT 1`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (orgResult.error) {
@@ -282,7 +282,7 @@ export class StripeManager extends BaseManager {
         `UPDATE organization
          SET stripe_customer_id = $1
          WHERE id = $2`,
-        [customer.id, this.authParams.organizationId]
+        [customer.id, this.authParams.organizationId],
       );
 
       if (updateResult.error) {
@@ -325,14 +325,14 @@ export class StripeManager extends BaseManager {
 SELECT count(*) as count
 from request_response_rmt
 WHERE (${builtFilter.filter})`,
-      builtFilter.argsAcc
+      builtFilter.argsAcc,
     );
     if (result.error) {
       return err("Error getting free usage");
     }
 
     return ok(
-      result.data?.[0]?.count === undefined ? -1 : +result.data?.[0]?.count
+      result.data?.[0]?.count === undefined ? -1 : +result.data?.[0]?.count,
     );
   }
 
@@ -378,7 +378,7 @@ WHERE (${builtFilter.filter})`,
   }
   public async upgradeToProExistingCustomer(
     origin: string,
-    body: UpgradeToProRequest
+    body: UpgradeToProRequest,
   ): Promise<Result<string, string>> {
     try {
       const customerId = await this.getOrCreateStripeCustomer();
@@ -397,7 +397,7 @@ WHERE (${builtFilter.filter})`,
         origin,
         customerId.data,
         seats,
-        body
+        body,
       );
 
       return ok(session.data?.url!);
@@ -407,7 +407,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   public async manageSubscriptionPaymentLink(
-    origin: string
+    origin: string,
   ): Promise<Result<string, string>> {
     try {
       const subscriptionResult = await this.getSubscription();
@@ -439,7 +439,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   private async shouldApplyWaterlooCoupon(
-    customerId: string
+    customerId: string,
   ): Promise<boolean> {
     try {
       const customer = await this.stripe.customers.retrieve(customerId);
@@ -461,7 +461,7 @@ WHERE (${builtFilter.filter})`,
     origin: string,
     customerId: string,
     orgMemberCount: number,
-    body: UpgradeToProRequest
+    body: UpgradeToProRequest,
   ): Promise<Result<Stripe.Checkout.Session, string>> {
     const proProductPrices = await getProProductPrices();
 
@@ -551,7 +551,7 @@ WHERE (${builtFilter.filter})`,
 
   public async upgradeToProLink(
     origin: string,
-    body: UpgradeToProRequest
+    body: UpgradeToProRequest,
   ): Promise<Result<string, string>> {
     try {
       const subscriptionResult = await this.getSubscription();
@@ -575,7 +575,7 @@ WHERE (${builtFilter.filter})`,
         origin,
         customerId.data,
         seats,
-        body
+        body,
       );
 
       // For embedded mode, return the client secret instead of the URL
@@ -593,7 +593,7 @@ WHERE (${builtFilter.filter})`,
     origin: string,
     customerId: string,
     isNewCustomer: boolean,
-    uiMode: "embedded" | "hosted"
+    uiMode: "embedded" | "hosted",
   ): Promise<Result<Stripe.Checkout.Session, string>> {
     const proProductPrices = await getProProductPrices();
 
@@ -650,7 +650,7 @@ WHERE (${builtFilter.filter})`,
 
   async upgradeToTeamBundleLink(
     returnUrl: string,
-    body: UpgradeToTeamBundleRequest
+    body: UpgradeToTeamBundleRequest,
   ): Promise<Result<string, string>> {
     try {
       const subscriptionResult = await this.getSubscription();
@@ -667,7 +667,7 @@ WHERE (${builtFilter.filter})`,
         returnUrl,
         customerId.data,
         true,
-        body.ui_mode ?? "hosted"
+        body.ui_mode ?? "hosted",
       );
 
       if (body.ui_mode === "embedded") {
@@ -682,7 +682,7 @@ WHERE (${builtFilter.filter})`,
 
   async upgradeToTeamBundleExistingCustomer(
     returnUrl: string,
-    body: UpgradeToTeamBundleRequest
+    body: UpgradeToTeamBundleRequest,
   ): Promise<Result<string, string>> {
     try {
       const subscriptionResult = await this.getSubscription();
@@ -705,7 +705,7 @@ WHERE (${builtFilter.filter})`,
           returnUrl,
           customerId.data,
           false,
-          body.ui_mode ?? "hosted"
+          body.ui_mode ?? "hosted",
         );
 
         if (body.ui_mode === "embedded") {
@@ -727,7 +727,7 @@ WHERE (${builtFilter.filter})`,
         returnUrl,
         customerId.data,
         false,
-        body.ui_mode ?? "hosted"
+        body.ui_mode ?? "hosted",
       );
 
       if (body.ui_mode === "embedded") {
@@ -795,7 +795,7 @@ WHERE (${builtFilter.filter})`,
             total_count: model.total_count,
           };
         })
-        .filter((item): item is LLMUsage => item !== null) ?? []
+        .filter((item): item is LLMUsage => item !== null) ?? [],
     );
   }
 
@@ -855,7 +855,7 @@ WHERE (${builtFilter.filter})`,
             total_count: model.total_count,
           };
         })
-        .filter((item): item is LLMUsage => item !== null) ?? []
+        .filter((item): item is LLMUsage => item !== null) ?? [],
     );
   }
 
@@ -901,7 +901,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   private async addProductToStripe(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
+    productType: "alerts" | "prompts" | "experiments" | "evals",
   ): Promise<Result<null, string>> {
     const proProductPrices = await getProProductPrices();
     try {
@@ -915,7 +915,7 @@ WHERE (${builtFilter.filter})`,
 
       // Check if the product is already included in the subscription
       const existingItem = subscription.items.data.find(
-        (item) => item.price.id === priceId
+        (item) => item.price.id === priceId,
       );
       if (existingItem && existingItem.quantity === 0) {
         await this.stripe.subscriptions.update(subscription.id, {
@@ -943,24 +943,24 @@ WHERE (${builtFilter.filter})`,
             },
           ],
           proration_behavior: "create_prorations",
-        }
+        },
       );
 
       console.log(
         `Subscription updated with ${productType}:`,
-        updatedSubscription.id
+        updatedSubscription.id,
       );
 
       return ok(null);
     } catch (error: any) {
       return err(
-        `Error adding ${productType} to subscription: ${error.message}`
+        `Error adding ${productType} to subscription: ${error.message}`,
       );
     }
   }
 
   public async addProductToSubscription(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
+    productType: "alerts" | "prompts" | "experiments" | "evals",
   ): Promise<Result<null, string>> {
     const stripeAddResult = await this.addProductToStripe(productType);
     if (stripeAddResult.error) {
@@ -995,7 +995,7 @@ WHERE (${builtFilter.filter})`,
           },
         }),
         this.authParams.organizationId,
-      ]
+      ],
     );
 
     return ok(null);
@@ -1012,7 +1012,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   private async deleteProductFromStripe(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
+    productType: "alerts" | "prompts" | "experiments" | "evals",
   ): Promise<Result<null, string>> {
     const proProductPrices = await getProProductPrices();
     try {
@@ -1026,7 +1026,7 @@ WHERE (${builtFilter.filter})`,
 
       // First try to find the item by the current price ID
       let itemToRemove = subscription.items.data.find(
-        (item) => item.price.id === currentPriceId
+        (item) => item.price.id === currentPriceId,
       );
 
       // If not found by current price ID, try to find by product name/type
@@ -1063,19 +1063,19 @@ WHERE (${builtFilter.filter})`,
       });
 
       console.log(
-        `${productType} scheduled for removal at the end of the billing cycle`
+        `${productType} scheduled for removal at the end of the billing cycle`,
       );
 
       return ok(null);
     } catch (error: any) {
       return err(
-        `Error deleting ${productType} from subscription: ${error.message}`
+        `Error deleting ${productType} from subscription: ${error.message}`,
       );
     }
   }
 
   public async deleteProductFromSubscription(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
+    productType: "alerts" | "prompts" | "experiments" | "evals",
   ): Promise<Result<null, string>> {
     const stripeDeleteResult = await this.deleteProductFromStripe(productType);
     if (stripeDeleteResult.error) {
@@ -1106,7 +1106,7 @@ WHERE (${builtFilter.filter})`,
           },
         }),
         this.authParams.organizationId,
-      ]
+      ],
     );
 
     return ok(null);
@@ -1123,7 +1123,7 @@ WHERE (${builtFilter.filter})`,
 
       const subscription = subscriptionResult.data;
       const existingProducts = subscription.items.data.map(
-        (item) => item.price.id
+        (item) => item.price.id,
       );
 
       const missingProducts = Object.values([
@@ -1154,7 +1154,7 @@ WHERE (${builtFilter.filter})`,
         `UPDATE organization
          SET tier = $1
          WHERE id = $2`,
-        ["pro-20250202", this.authParams.organizationId]
+        ["pro-20250202", this.authParams.organizationId],
       );
 
       if (updateResult.error) {
@@ -1172,7 +1172,7 @@ WHERE (${builtFilter.filter})`,
           `UPDATE organization
            SET tier = $1
            WHERE id = $2`,
-          ["pro-20250202", this.authParams.organizationId]
+          ["pro-20250202", this.authParams.organizationId],
         );
       }
       return err(`Error migrating to pro: ${error.message}`);
@@ -1190,7 +1190,7 @@ WHERE (${builtFilter.filter})`,
          FROM organization
          WHERE id = $1
          LIMIT 1`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -1219,7 +1219,7 @@ WHERE (${builtFilter.filter})`,
         organization.data.stripe_subscription_id,
         {
           expand: ["items.data.price.product"],
-        }
+        },
       );
 
       return ok(subscription);
@@ -1230,7 +1230,7 @@ WHERE (${builtFilter.filter})`,
 
   public async createCloudGatewayCheckoutSession(
     origin: string,
-    amount: number
+    amount: number,
   ): Promise<Result<string, string>> {
     try {
       const customerId = await this.getOrCreateStripeCustomer();
@@ -1255,7 +1255,7 @@ WHERE (${builtFilter.filter})`,
         const PERCENT_FEE_RATE = 0.03;
         const FIXED_FEE_CENTS = 30;
         const percentageFeeCents = Math.ceil(
-          creditsAmountCents * PERCENT_FEE_RATE
+          creditsAmountCents * PERCENT_FEE_RATE,
         );
         const stripeFeeCents = percentageFeeCents + FIXED_FEE_CENTS;
         const totalAmountCents = creditsAmountCents + stripeFeeCents;
@@ -1298,7 +1298,7 @@ WHERE (${builtFilter.filter})`,
 
         if (checkoutResult.lastResponse.statusCode !== 200) {
           return err(
-            `Got status code ${checkoutResult.lastResponse.statusCode} from Stripe`
+            `Got status code ${checkoutResult.lastResponse.statusCode} from Stripe`,
           );
         } else if (!checkoutResult.url) {
           return err("Stripe did not return a session URL");
@@ -1307,18 +1307,18 @@ WHERE (${builtFilter.filter})`,
         return ok(checkoutResult.url);
       } catch (error: any) {
         return err(
-          `Error creating cloud gateway checkout session: ${error.message}`
+          `Error creating cloud gateway checkout session: ${error.message}`,
         );
       }
     } catch (error: any) {
       return err(
-        `Error creating cloud gateway checkout session: ${error.message}`
+        `Error creating cloud gateway checkout session: ${error.message}`,
       );
     }
   }
 
   public async updateProUserCount(
-    count: number
+    count: number,
   ): Promise<Result<null, string>> {
     const proProductPrices = await getProProductPrices();
     try {
@@ -1331,7 +1331,7 @@ WHERE (${builtFilter.filter})`,
       const proUsersPriceId = proProductPrices["pro-users"];
 
       const proUsersItem = subscription.items.data.find(
-        (item) => item.price.id === proUsersPriceId
+        (item) => item.price.id === proUsersPriceId,
       );
 
       if (!proUsersItem) {
@@ -1348,18 +1348,18 @@ WHERE (${builtFilter.filter})`,
             },
           ],
           proration_behavior: "create_prorations",
-        }
+        },
       );
 
       console.log(
         "Pro-user count updated in subscription:",
-        updatedSubscription.id
+        updatedSubscription.id,
       );
 
       return ok(null);
     } catch (error: any) {
       return err(
-        `Error updating pro-user count in subscription: ${error.message}`
+        `Error updating pro-user count in subscription: ${error.message}`,
       );
     }
   }
@@ -1373,7 +1373,7 @@ WHERE (${builtFilter.filter})`,
 
       const proProductPrices = await getProProductPrices();
       const proUsersItem = subscriptionResult.data.items.data.find(
-        (item) => item.price.id === proProductPrices["pro-users"]
+        (item) => item.price.id === proProductPrices["pro-users"],
       );
 
       return ok(proUsersItem?.quantity ?? 0);
@@ -1385,7 +1385,7 @@ WHERE (${builtFilter.filter})`,
   public async searchPaymentIntents(
     searchKind: PaymentIntentSearchKind,
     limit: number = 10,
-    page?: string
+    page?: string,
   ): Promise<Result<StripePaymentIntentsResponse, string>> {
     try {
       let query: string;
@@ -1401,7 +1401,7 @@ WHERE (${builtFilter.filter})`,
             process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT;
           if (!productId) {
             console.error(
-              "[Stripe API] STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT not configured"
+              "[Stripe API] STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT not configured",
             );
             return err("Stripe product ID not configured");
           }
@@ -1447,7 +1447,7 @@ WHERE (${builtFilter.filter})`,
           if (refunds.data.length > 0) {
             totalRefunded = refunds.data.reduce(
               (sum, refund) => sum + refund.amount,
-              0
+              0,
             );
             isFullyRefunded = totalRefunded >= intent.amount;
             refundIds = refunds.data.map((refund) => refund.id);
@@ -1456,14 +1456,14 @@ WHERE (${builtFilter.filter})`,
             if (isFullyRefunded) {
               latestRefundDate = Math.max(
                 ...refunds.data.map((r) => r.created),
-                intent.created
+                intent.created,
               );
             }
           }
         } catch (refundError) {
           console.error(
             `Error fetching refunds for payment intent ${intent.id}:`,
-            refundError
+            refundError,
           );
           // Continue processing other payment intents even if one fails
         }

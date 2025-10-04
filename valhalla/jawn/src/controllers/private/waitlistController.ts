@@ -13,7 +13,6 @@ import { Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { WaitlistManager } from "../../managers/waitlist/WaitlistManager";
 
-
 @Route("v1/waitlist")
 @Tags("Waitlist")
 @Security("api_key")
@@ -26,7 +25,7 @@ export class WaitListController extends Controller {
       feature: string;
       organizationId?: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ success: boolean; position?: number }, string>> {
     const manager = new WaitlistManager();
     const organizationId =
@@ -35,7 +34,7 @@ export class WaitListController extends Controller {
     const result = await manager.addToWaitlist(
       body.email,
       body.feature,
-      organizationId
+      organizationId,
     );
 
     if (result.error) {
@@ -58,7 +57,7 @@ export class WaitListController extends Controller {
     @Query() email: string,
     @Query() feature: string,
     @Query() organizationId?: string,
-    @Request() request?: JawnAuthenticatedRequest
+    @Request() request?: JawnAuthenticatedRequest,
   ): Promise<Result<{ isOnWaitlist: boolean }, string>> {
     const manager = new WaitlistManager();
     const result = await manager.isOnWaitlist(email, feature);
@@ -78,7 +77,7 @@ export class WaitListController extends Controller {
 
   @Get("/feature/count")
   public async getWaitlistCount(
-    @Query() feature: string
+    @Query() feature: string,
   ): Promise<Result<{ count: number }, string>> {
     const manager = new WaitlistManager();
     const result = await manager.getWaitlistCount(feature);

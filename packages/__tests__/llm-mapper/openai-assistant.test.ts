@@ -29,10 +29,10 @@ describe("OpenAI Assistant Mapper", () => {
 
     expect(result.schema.request.model).toBe("gpt-4o-2024-08-06");
     expect(result.schema.request.messages?.[0].content).toContain(
-      "run_now4Ru31svCdy0QVQ0NwIa54"
+      "run_now4Ru31svCdy0QVQ0NwIa54",
     );
     expect(result.schema.response?.messages?.[0].content).toContain(
-      "Status: completed"
+      "Status: completed",
     );
     expect(result.preview.response).toContain("Model: gpt-4o-2024-08-06");
   });
@@ -54,7 +54,7 @@ describe("OpenAI Assistant Mapper", () => {
     });
 
     expect(result.schema.response?.messages?.[0].content).toBe(
-      "Assistant encountered an error"
+      "Assistant encountered an error",
     );
     expect(result.preview.response).toBe("Assistant encountered an error");
   });
@@ -75,7 +75,7 @@ describe("OpenAI Assistant Mapper", () => {
     });
 
     expect(result.schema.response?.messages?.[0].content).toBe(
-      "Invalid assistant ID"
+      "Invalid assistant ID",
     );
     expect(result.preview.response).toBe("Invalid assistant ID");
   });

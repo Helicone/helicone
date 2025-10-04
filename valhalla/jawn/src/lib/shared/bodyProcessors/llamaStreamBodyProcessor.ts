@@ -6,7 +6,7 @@ import { isParseInputJson } from "./helpers";
 
 export class LlamaStreamBodyProcessor implements IBodyProcessor {
   public async parse(
-    parseInput: ParseInput
+    parseInput: ParseInput,
   ): PromiseGenericResult<ParseOutput> {
     if (isParseInputJson(parseInput)) {
       return ok({
@@ -25,8 +25,11 @@ export class LlamaStreamBodyProcessor implements IBodyProcessor {
     let finalMetrics: any = null;
     let stopReason: string | undefined = undefined;
     let requestId: string | undefined = undefined;
-    
-    const toolCalls: Record<string, { id: string; function: { name?: string; arguments?: string } }> = {};
+
+    const toolCalls: Record<
+      string,
+      { id: string; function: { name?: string; arguments?: string } }
+    > = {};
 
     for (let i = 0; i < eventLines.length; i++) {
       const line = eventLines[i];
@@ -34,68 +37,72 @@ export class LlamaStreamBodyProcessor implements IBodyProcessor {
 
       try {
         const chunk = JSON.parse(line.replace("data:", "").trim());
-        
+
         if (!requestId && chunk.id) {
           requestId = chunk.id;
         }
 
         if (chunk.event) {
           const { event } = chunk;
-          
+
           switch (event.event_type) {
-            case 'start':
+            case "start":
               break;
-              
-            case 'progress':
-              if (event.delta?.type === 'text' && event.delta?.text) {
+
+            case "progress":
+              if (event.delta?.type === "text" && event.delta?.text) {
                 completionText += event.delta.text;
-              } else if (event.delta?.type === 'tool_call') {
+              } else if (event.delta?.type === "tool_call") {
                 const toolCallId = event.delta.id;
                 if (toolCallId) {
                   if (!toolCalls[toolCallId]) {
                     toolCalls[toolCallId] = {
                       id: toolCallId,
-                      function: { name: undefined, arguments: undefined }
+                      function: { name: undefined, arguments: undefined },
                     };
                   }
-                  
+
                   if (event.delta.function?.name) {
-                    toolCalls[toolCallId].function.name = event.delta.function.name;
+                    toolCalls[toolCallId].function.name =
+                      event.delta.function.name;
                   }
                   if (event.delta.function?.arguments) {
                     if (!toolCalls[toolCallId].function.arguments) {
-                      toolCalls[toolCallId].function.arguments = '';
+                      toolCalls[toolCallId].function.arguments = "";
                     }
-                    toolCalls[toolCallId].function.arguments += event.delta.function.arguments;
+                    toolCalls[toolCallId].function.arguments +=
+                      event.delta.function.arguments;
                   }
                 }
               }
               break;
-              
-            case 'complete':
-              if (event.delta?.type === 'text' && event.delta?.text) {
+
+            case "complete":
+              if (event.delta?.type === "text" && event.delta?.text) {
                 completionText += event.delta.text;
-              } else if (event.delta?.type === 'tool_call') {
+              } else if (event.delta?.type === "tool_call") {
                 const toolCallId = event.delta.id;
                 if (toolCallId && toolCalls[toolCallId]) {
                   if (event.delta.function?.name) {
-                    toolCalls[toolCallId].function.name = event.delta.function.name;
+                    toolCalls[toolCallId].function.name =
+                      event.delta.function.name;
                   }
                   if (event.delta.function?.arguments) {
                     if (!toolCalls[toolCallId].function.arguments) {
-                      toolCalls[toolCallId].function.arguments = '';
+                      toolCalls[toolCallId].function.arguments = "";
                     }
-                    toolCalls[toolCallId].function.arguments += event.delta.function.arguments;
+                    toolCalls[toolCallId].function.arguments +=
+                      event.delta.function.arguments;
                   }
                 }
               }
-              
+
               if (event.stop_reason) {
                 stopReason = event.stop_reason;
               }
               break;
-              
-            case 'metrics':
+
+            case "metrics":
               if (event.metrics) {
                 finalMetrics = event.metrics;
               }
@@ -112,25 +119,25 @@ export class LlamaStreamBodyProcessor implements IBodyProcessor {
 
     try {
       const completionMessage: any = {
-        role: 'assistant' as const,
+        role: "assistant" as const,
         stop_reason: stopReason,
       };
-      
+
       if (completionText) {
         completionMessage.content = completionText;
       }
-      
+
       const toolCallsArray = Object.values(toolCalls);
       if (toolCallsArray.length > 0) {
-        completionMessage.tool_calls = toolCallsArray.map(tc => ({
+        completionMessage.tool_calls = toolCallsArray.map((tc) => ({
           id: tc.id,
           function: {
-            name: tc.function.name || '',
-            arguments: tc.function.arguments || ''
-          }
+            name: tc.function.name || "",
+            arguments: tc.function.arguments || "",
+          },
         }));
       }
-      
+
       const processedBody = {
         id: requestId,
         completion_message: completionMessage,
@@ -143,13 +150,21 @@ export class LlamaStreamBodyProcessor implements IBodyProcessor {
 
       let usage: any = undefined;
       if (finalMetrics) {
-        const promptTokensMetric = finalMetrics.find((m: any) => m.metric === 'num_prompt_tokens');
-        const completionTokensMetric = finalMetrics.find((m: any) => m.metric === 'num_completion_tokens');
-        const totalTokensMetric = finalMetrics.find((m: any) => m.metric === 'num_total_tokens');
+        const promptTokensMetric = finalMetrics.find(
+          (m: any) => m.metric === "num_prompt_tokens",
+        );
+        const completionTokensMetric = finalMetrics.find(
+          (m: any) => m.metric === "num_completion_tokens",
+        );
+        const totalTokensMetric = finalMetrics.find(
+          (m: any) => m.metric === "num_total_tokens",
+        );
 
         if (promptTokensMetric && completionTokensMetric) {
           usage = {
-            totalTokens: totalTokensMetric?.value || (promptTokensMetric.value + completionTokensMetric.value),
+            totalTokens:
+              totalTokensMetric?.value ||
+              promptTokensMetric.value + completionTokensMetric.value,
             promptTokens: promptTokensMetric.value,
             completionTokens: completionTokensMetric.value,
             heliconeCalculated: false,
@@ -160,9 +175,11 @@ export class LlamaStreamBodyProcessor implements IBodyProcessor {
       if (!usage) {
         const completionTokens = await getTokenCountAnthropic(completionText);
         const promptTokens = await getTokenCountAnthropic(
-          JSON.parse(requestBody ?? "{}")?.messages?.map((m: any) => m.content).join("") ?? ""
+          JSON.parse(requestBody ?? "{}")
+            ?.messages?.map((m: any) => m.content)
+            .join("") ?? "",
         );
-        
+
         usage = {
           totalTokens: completionTokens + promptTokens,
           promptTokens: promptTokens,

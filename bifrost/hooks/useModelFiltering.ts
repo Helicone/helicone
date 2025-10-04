@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from "react";
 import {
   Model,
   FilterOptions,
@@ -6,7 +6,7 @@ import {
   applyFilters,
   sortModels,
   extractAvailableFilters,
-} from '../lib/filters/modelFilters';
+} from "../lib/filters/modelFilters";
 
 interface UseModelFilteringProps {
   models: Model[];
@@ -51,7 +51,7 @@ export function useModelFiltering({
   // Extract available filters from all models
   const availableFilters = useMemo(
     () => extractAvailableFilters(models),
-    [models]
+    [models],
   );
 
   // Check if any filters are applied
@@ -99,7 +99,7 @@ export function useModelFiltering({
 
     // Apply all filters
     const filtered = applyFilters(models, filterOptions);
-    
+
     // Apply sorting
     return sortModels(filtered, sortBy);
   }, [
@@ -128,13 +128,16 @@ export function useModelFiltering({
 // Hook for managing filter state
 export function useModelFilterState(searchParams: URLSearchParams) {
   const getSetFromParam = useCallback((param: string | null): Set<string> => {
-    return new Set(param?.split(',').filter(Boolean) || []);
+    return new Set(param?.split(",").filter(Boolean) || []);
   }, []);
 
-  const getNumberFromParam = useCallback((param: string | null, defaultValue: number): number => {
-    const value = Number(param);
-    return isNaN(value) ? defaultValue : value;
-  }, []);
+  const getNumberFromParam = useCallback(
+    (param: string | null, defaultValue: number): number => {
+      const value = Number(param);
+      return isNaN(value) ? defaultValue : value;
+    },
+    [],
+  );
 
   return {
     search: searchParams.get("search") || "",

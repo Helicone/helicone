@@ -8,7 +8,9 @@ describe("SlackAlertManager", () => {
     env = {
       SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/T000/B000/XXXX",
     } as any;
-    global.fetch = vi.fn(async () => new Response(null, { status: 200 })) as any;
+    global.fetch = vi.fn(
+      async () => new Response(null, { status: 200 })
+    ) as any;
   });
 
   it("sends message via webhook", async () => {
@@ -24,5 +26,3 @@ describe("SlackAlertManager", () => {
     expect(res.error).toBe("Slack webhook URL not configured");
   });
 });
-
-

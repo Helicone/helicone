@@ -20,7 +20,7 @@ const kvCache = new KVCache(60 * 1000); // 5 minute
 const SEGMENT_PROVIDER_NAME = "HELICONE_SEGMENT_KEY";
 
 async function getSegmentConfig(
-  organizationId: string
+  organizationId: string,
 ): Promise<Result<{ writeKey: string } | null, string>> {
   try {
     // Get active segment integration
@@ -34,7 +34,7 @@ async function getSegmentConfig(
        AND organization_id = $2
        AND active = true
        LIMIT 1`,
-      ["segment", organizationId]
+      ["segment", organizationId],
     );
 
     if (
@@ -52,7 +52,7 @@ async function getSegmentConfig(
        WHERE provider_name = $1
        AND org_id = $2
        LIMIT 1`,
-      [SEGMENT_PROVIDER_NAME, organizationId]
+      [SEGMENT_PROVIDER_NAME, organizationId],
     );
 
     if (
@@ -63,7 +63,7 @@ async function getSegmentConfig(
       if (writeKeyResult.error) {
         console.error(
           "Error fetching segment write key:",
-          writeKeyResult.error
+          writeKeyResult.error,
         );
       }
 
@@ -124,7 +124,7 @@ export class SegmentLogHandler extends AbstractLogHandler {
     const segmentConfig = await cacheResultCustom(
       `segment-config-${context.authParams?.organizationId}`,
       async () => getSegmentConfig(context.authParams?.organizationId ?? ""),
-      kvCache
+      kvCache,
     );
 
     if (segmentConfig.error) {
@@ -134,7 +134,7 @@ export class SegmentLogHandler extends AbstractLogHandler {
 
     const segmentEvent = this.mapSegmentEvent(
       context,
-      segmentConfig.data!.writeKey
+      segmentConfig.data!.writeKey,
     );
 
     this.segmentEvents.push(segmentEvent);
@@ -159,7 +159,7 @@ export class SegmentLogHandler extends AbstractLogHandler {
 
   private mapSegmentEvent(
     context: HandlerContext,
-    writeKey: string
+    writeKey: string,
   ): SegmentEvent {
     const request = context.message.log.request;
     const response = context.message.log.response;

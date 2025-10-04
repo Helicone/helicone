@@ -13,7 +13,7 @@ export const websocketListeners = new WebsocketListeners();
 export async function webSocketControlPlaneServer(
   requestWrapper: RequestWrapper,
   socket: internal.Duplex,
-  head: Buffer
+  head: Buffer,
 ) {
   const req = requestWrapper.getRequest();
   const auth = await authFromRequest(toExpressRequest(req));
@@ -23,7 +23,7 @@ export async function webSocketControlPlaneServer(
         JSON.stringify({
           _type: "Error",
           message: auth.error ?? "Unauthorized",
-        } as MessageTypeRX)
+        } as MessageTypeRX),
       );
     });
 

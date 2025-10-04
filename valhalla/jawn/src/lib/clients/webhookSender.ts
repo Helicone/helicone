@@ -49,7 +49,7 @@ type WebhookData = {
 
 export async function sendToWebhook(
   payload: WebhookPayload["payload"],
-  webhook: Database["public"]["Tables"]["webhooks"]["Row"]
+  webhook: Database["public"]["Tables"]["webhooks"]["Row"],
 ): PromiseGenericResult<string> {
   try {
     const hmacKey = webhook.hmac_key ?? "";
@@ -69,7 +69,7 @@ export async function sendToWebhook(
 
     const shouldWebhookProperties = propertyFilters.every(
       (propertyFilter) =>
-        payload.properties[propertyFilter.key] === propertyFilter.value
+        payload.properties[propertyFilter.key] === propertyFilter.value,
     );
 
     if (!shouldWebhookProperties) {
@@ -149,7 +149,7 @@ export async function sendToWebhook(
 
       if (!response.ok) {
         throw new Error(
-          `Webhook request failed with status ${response.status}`
+          `Webhook request failed with status ${response.status}`,
         );
       }
     } finally {
@@ -163,7 +163,7 @@ export async function sendToWebhook(
     return ok(
       `Failed to send webhook: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`
+      }`,
     );
   }
 
@@ -174,16 +174,16 @@ export async function sendToWebhook(
 function generateMockWebhookData(): WebhookData {
   const requestId = randomUUID();
   const timestamp = Math.floor(Date.now() / 1000);
-  
+
   // Mock OpenAI chat completion request
   const requestBody = {
     model: "gpt-4o",
     messages: [
       {
         role: "user",
-        content: "test message"
-      }
-    ]
+        content: "test message",
+      },
+    ],
   };
 
   // Mock OpenAI chat completion response
@@ -197,13 +197,14 @@ function generateMockWebhookData(): WebhookData {
         index: 0,
         message: {
           role: "assistant",
-          content: "Hey! Not much, just here to help you out. What's up with you?",
+          content:
+            "Hey! Not much, just here to help you out. What's up with you?",
           refusal: null,
-          annotations: []
+          annotations: [],
         },
         logprobs: null,
-        finish_reason: "stop"
-      }
+        finish_reason: "stop",
+      },
     ],
     usage: {
       prompt_tokens: 13,
@@ -211,21 +212,21 @@ function generateMockWebhookData(): WebhookData {
       total_tokens: 30,
       prompt_tokens_details: {
         cached_tokens: 0,
-        audio_tokens: 0
+        audio_tokens: 0,
       },
       completion_tokens_details: {
         reasoning_tokens: 0,
         audio_tokens: 0,
         accepted_prediction_tokens: 0,
-        rejected_prediction_tokens: 0
-      }
+        rejected_prediction_tokens: 0,
+      },
     },
     service_tier: "default",
-    system_fingerprint: `fp_${randomUUID().substring(0, 14)}`
+    system_fingerprint: `fp_${randomUUID().substring(0, 14)}`,
   };
 
   // Generate mock S3 URL with AWS signature
-  const s3Url = `https://s3.us-west-2.amazonaws.com/request-response-storage/organizations/${randomUUID()}/requests/${requestId}/request_response_body?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=MOCKAWSCREDENTIAL%2F${new Date().toISOString().split('T')[0].replace(/-/g, '')}%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=${new Date().toISOString().replace(/[:-]/g, '').split('.')[0]}Z&X-Amz-Expires=86400&X-Amz-Security-Token=MockSecurityToken&X-Amz-Signature=mocksignature123456789&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject`;
+  const s3Url = `https://s3.us-west-2.amazonaws.com/request-response-storage/organizations/${randomUUID()}/requests/${requestId}/request_response_body?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=MOCKAWSCREDENTIAL%2F${new Date().toISOString().split("T")[0].replace(/-/g, "")}%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=${new Date().toISOString().replace(/[:-]/g, "").split(".")[0]}Z&X-Amz-Expires=86400&X-Amz-Security-Token=MockSecurityToken&X-Amz-Signature=mocksignature123456789&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject`;
 
   return {
     request_id: requestId,
@@ -239,35 +240,35 @@ function generateMockWebhookData(): WebhookData {
       promptTokens: 13,
       completionTokens: 17,
       totalTokens: 30,
-      latencyMs: 930
-    }
+      latencyMs: 930,
+    },
   };
 }
 
 // Test webhook sender without delay
-export async function sendTestWebhook(
-  webhook: {
-    id: string;
-    destination: string;
-    config: string | any;
-    hmac_key: string;
-  }
-): PromiseGenericResult<string> {
+export async function sendTestWebhook(webhook: {
+  id: string;
+  destination: string;
+  config: string | any;
+  hmac_key: string;
+}): PromiseGenericResult<string> {
   try {
     const hmacKey = webhook.hmac_key ?? "";
     let config: WebhookConfig;
-    
+
     // Handle both string and object configs (database might return either)
-    if (typeof webhook.config === 'string') {
+    if (typeof webhook.config === "string") {
       try {
         config = (JSON.parse(webhook.config) as WebhookConfig) || {};
       } catch (parseError) {
-        return err(`Failed to parse webhook config: ${parseError instanceof Error ? parseError.message : 'Invalid JSON'}`);
+        return err(
+          `Failed to parse webhook config: ${parseError instanceof Error ? parseError.message : "Invalid JSON"}`,
+        );
       }
     } else {
       config = (webhook.config as WebhookConfig) || {};
     }
-    
+
     const includeData = config.includeData !== false;
 
     if (
@@ -280,7 +281,7 @@ export async function sendTestWebhook(
 
     // Generate mock data
     const mockData = generateMockWebhookData();
-    
+
     // Create webhook payload based on includeData setting
     const webHookPayloadObj: WebhookData = {
       request_id: mockData.request_id,
@@ -320,7 +321,7 @@ export async function sendTestWebhook(
 
       if (!response.ok) {
         throw new Error(
-          `Webhook test failed with status ${response.status}: ${response.statusText}`
+          `Webhook test failed with status ${response.status}: ${response.statusText}`,
         );
       }
     } finally {
@@ -333,7 +334,7 @@ export async function sendTestWebhook(
     return err(
       `Test webhook failed: ${
         error instanceof Error ? error.message : String(error)
-      }`
+      }`,
     );
   }
 

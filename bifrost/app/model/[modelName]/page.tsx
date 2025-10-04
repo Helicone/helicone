@@ -14,7 +14,7 @@ export async function generateStaticParams() {
   try {
     const jawnClient = getJawnClient();
     const response = await jawnClient.GET("/v1/public/model-registry/models");
-    
+
     if (response.data?.data?.models) {
       return response.data.data.models.map((model: ModelRegistryItem) => ({
         modelName: encodeURIComponent(model.id),
@@ -23,25 +23,27 @@ export async function generateStaticParams() {
   } catch (error) {
     console.error("Failed to generate static params for models:", error);
   }
-  
+
   return [];
 }
 
-async function fetchModelData(modelId: string): Promise<ModelRegistryItem | null> {
+async function fetchModelData(
+  modelId: string,
+): Promise<ModelRegistryItem | null> {
   try {
     const jawnClient = getJawnClient();
     const response = await jawnClient.GET("/v1/public/model-registry/models");
-    
+
     if (response.data?.data?.models) {
       const model = response.data.data.models.find(
-        (m: ModelRegistryItem) => m.id === modelId
+        (m: ModelRegistryItem) => m.id === modelId,
       );
       return model || null;
     }
   } catch (error) {
     console.error("Failed to fetch model data:", error);
   }
-  
+
   return null;
 }
 
@@ -52,11 +54,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const decodedModelName = decodeURIComponent(params.modelName);
   const model = await fetchModelData(decodedModelName);
-  
-  const displayName = model?.name || decodedModelName
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+
+  const displayName =
+    model?.name ||
+    decodedModelName
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
 
   return {
     title: `${displayName} - AI Model Details | Helicone`,
@@ -86,7 +90,7 @@ export default async function ModelPage({
 }) {
   const decodedModelName = decodeURIComponent(params.modelName);
   const model = await fetchModelData(decodedModelName);
-  
+
   return (
     <Layout noNavbarMargin={true}>
       <Suspense
@@ -96,10 +100,7 @@ export default async function ModelPage({
             <div className="h-4 w-96 bg-muted rounded animate-pulse" />
             <div className="grid gap-4 mt-8">
               {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-20 bg-muted rounded animate-pulse"
-                />
+                <div key={i} className="h-20 bg-muted rounded animate-pulse" />
               ))}
             </div>
           </div>

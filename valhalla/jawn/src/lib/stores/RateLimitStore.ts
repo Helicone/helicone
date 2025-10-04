@@ -19,11 +19,11 @@ type UpdateOrgRateLimitDB = Partial<
 
 export class RateLimitStore {
   public async batchInsertRateLimits(
-    rateLimitLogs: ClickhouseDB["Tables"]["rate_limit_log_v2"][]
+    rateLimitLogs: ClickhouseDB["Tables"]["rate_limit_log_v2"][],
   ): PromiseGenericResult<string> {
     const result = await clickhouseDb.dbInsertClickhouse(
       "rate_limit_log_v2",
-      rateLimitLogs
+      rateLimitLogs,
     );
 
     if (result.error || !result.data) {
@@ -34,7 +34,7 @@ export class RateLimitStore {
   }
 
   async getRateLimitsByOrgId(
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<OrgRateLimitDB[], string>> {
     const query = `
           SELECT * FROM org_rate_limits
@@ -46,7 +46,7 @@ export class RateLimitStore {
   }
 
   async createRateLimit(
-    params: CreateOrgRateLimitDB
+    params: CreateOrgRateLimitDB,
   ): Promise<Result<OrgRateLimitDB, string>> {
     const query = `
           INSERT INTO org_rate_limits (
@@ -72,10 +72,10 @@ export class RateLimitStore {
   async updateRateLimit(
     ruleId: string,
     organizationId: string,
-    params: UpdateOrgRateLimitDB
+    params: UpdateOrgRateLimitDB,
   ): Promise<Result<OrgRateLimitDB, string>> {
     const fieldsToUpdate = Object.entries(params).filter(
-      ([_, value]) => value !== undefined
+      ([_, value]) => value !== undefined,
     );
     if (fieldsToUpdate.length === 0) {
       return err("No fields provided for update.");
@@ -103,7 +103,7 @@ export class RateLimitStore {
 
     if (result.error || !result.data || result.data.length === 0) {
       return err(
-        result.error || "Failed to update rate limit rule or rule not found"
+        result.error || "Failed to update rate limit rule or rule not found",
       );
     }
     return ok(result.data[0]);
@@ -111,7 +111,7 @@ export class RateLimitStore {
 
   async softDeleteRateLimit(
     ruleId: string,
-    organizationId: string
+    organizationId: string,
   ): Promise<Result<null, string>> {
     const query = `
           UPDATE org_rate_limits

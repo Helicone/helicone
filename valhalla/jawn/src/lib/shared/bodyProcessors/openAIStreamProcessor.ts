@@ -90,7 +90,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
             ? Math.max(
                 0,
                 (usageData.prompt_tokens ?? 0) -
-                  (usageData.prompt_tokens_details?.cached_tokens ?? 0)
+                  (usageData.prompt_tokens_details?.cached_tokens ?? 0),
               )
             : usageData?.input_tokens;
 
@@ -99,7 +99,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
             ? Math.max(
                 0,
                 (usageData.completion_tokens ?? 0) -
-                  (usageData.completion_tokens_details?.audio_tokens ?? 0)
+                  (usageData.completion_tokens_details?.audio_tokens ?? 0),
               )
             : usageData?.output_tokens;
 

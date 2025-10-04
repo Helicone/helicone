@@ -35,11 +35,11 @@ export function CopyButton({
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       onCopy?.();
-      
+
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      
+
       timeoutRef.current = setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
@@ -62,14 +62,11 @@ export function CopyButton({
             onClick={handleCopy}
             className={cn(
               "p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors",
-              className
+              className,
             )}
           >
             {copied ? (
-              <Check
-                size={iconSize}
-                className="text-green-500"
-              />
+              <Check size={iconSize} className="text-green-500" />
             ) : (
               <Copy
                 size={iconSize}

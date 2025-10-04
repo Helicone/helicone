@@ -167,7 +167,7 @@ export class HeliconeHeaders<T extends IInternalHeaders>
     return parsedFallBacks.map((fb) => {
       if (!fb["target-url"] || !fb.headers || !fb.onCodes) {
         throw new Error(
-          "helicone-fallbacks must have target-url, headers, and onCodes"
+          "helicone-fallbacks must have target-url, headers, and onCodes",
         );
       }
 
@@ -179,7 +179,7 @@ export class HeliconeHeaders<T extends IInternalHeaders>
         typeof fb.headers !== "object" &&
         fb.headers.entries.every(
           ([key, value]: [object, object]) =>
-            typeof key === "string" && typeof value === "string"
+            typeof key === "string" && typeof value === "string",
         )
       ) {
         throw new Error("helicone-fallbacks headers must be an object");
@@ -192,7 +192,7 @@ export class HeliconeHeaders<T extends IInternalHeaders>
             typeof x === "number" ||
             (typeof x === "object" &&
               typeof x.from === "number" &&
-              typeof x.to === "number")
+              typeof x.to === "number"),
         )
       ) {
         throw new Error("helicone-fallbacks onCodes must be an array");
@@ -307,11 +307,11 @@ export class HeliconeHeaders<T extends IInternalHeaders>
       factor: parseFloat(this.headers.get("helicone-retry-factor") ?? "2"),
       minTimeout: parseInt(
         this.headers.get("helicone-retry-min-timeout") ?? "1000",
-        10
+        10,
       ),
       maxTimeout: parseInt(
         this.headers.get("helicone-retry-max-timeout") ?? "10000",
-        10
+        10,
       ),
     };
   }
@@ -327,7 +327,7 @@ export class HeliconeHeaders<T extends IInternalHeaders>
   }
 
   private getHeliconeProperties(
-    heliconeHeaders: IHeliconeHeaders
+    heliconeHeaders: IHeliconeHeaders,
   ): Record<string, string> {
     const propTag = "helicone-property-";
     const heliconePropertyHeaders = Object.fromEntries(
@@ -335,9 +335,9 @@ export class HeliconeHeaders<T extends IInternalHeaders>
         .filter(
           ([key]) =>
             key.toLowerCase().startsWith(propTag.toLowerCase()) &&
-            key.length > propTag.length
+            key.length > propTag.length,
         )
-        .map(([key, value]) => [key.substring(propTag.length), value])
+        .map(([key, value]) => [key.substring(propTag.length), value]),
     );
 
     if (this.headers.get("Helicone-Posthog-Key")) {

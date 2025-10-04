@@ -37,7 +37,7 @@ export function getModelFamilies(): ModelFamily[] {
     const providerName = provider.provider;
 
     for (const [parentModel, details] of Object.entries(
-      provider.modelDetails
+      provider.modelDetails,
     )) {
       families.push({
         id: parentModel,
@@ -93,7 +93,7 @@ export function findModelById(modelId: string): ModelFamily | null {
 // Create a URL-friendly comparison path
 export function createComparisonPath(
   model1Id: string,
-  model2Id: string
+  model2Id: string,
 ): string {
   const model1 = findModelById(model1Id);
   const model2 = findModelById(model2Id);
@@ -101,11 +101,11 @@ export function createComparisonPath(
   if (!model1 || !model2) return "#";
 
   const model1Path = `${encodeURIComponent(
-    model1.name
+    model1.name,
   )}-on-${encodeURIComponent(model1.provider.id)}`;
 
   const model2Path = `${encodeURIComponent(
-    model2.name
+    model2.name,
   )}-on-${encodeURIComponent(model2.provider.id)}`;
 
   return `/comparison/${model1Path}-vs-${model2Path}`;

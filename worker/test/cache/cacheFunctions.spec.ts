@@ -14,9 +14,9 @@ describe("cacheFunctions", () => {
       // Create a mock request
       const headers = new Headers({
         "Content-Type": "application/json",
-        "Authorization": "Bearer test-key",
+        Authorization: "Bearer test-key",
       });
-      
+
       mockRequest = {
         url: "https://api.openai.com/v1/chat/completions",
         requestWrapper: {
@@ -43,8 +43,10 @@ describe("cacheFunctions", () => {
         request_id: "unique-123",
         timestamp: "2024-01-01T00:00:00Z",
       });
-      
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody);
+
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        requestBody
+      );
 
       const result = await kvKeyFromRequest(mockRequest, 0, null);
 
@@ -61,9 +63,12 @@ describe("cacheFunctions", () => {
         request_id: "unique-123",
         timestamp: "2024-01-01T00:00:00Z",
       };
-      
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(JSON.stringify(requestBody));
-      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["request_id", "timestamp"];
+
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        JSON.stringify(requestBody)
+      );
+      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys =
+        ["request_id", "timestamp"];
 
       const result = await kvKeyFromRequest(mockRequest, 0, null);
 
@@ -72,7 +77,7 @@ describe("cacheFunctions", () => {
         model: "gpt-4",
         messages: [{ role: "user", content: "Hello" }],
       });
-      
+
       expect(result).toContain("hashed_");
       expect(result).toContain(expectedBody);
       expect(result).not.toContain("unique-123");
@@ -81,9 +86,12 @@ describe("cacheFunctions", () => {
 
     it("should handle non-JSON body gracefully", async () => {
       const textBody = "This is plain text, not JSON";
-      
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(textBody);
-      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["some_key"];
+
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        textBody
+      );
+      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys =
+        ["some_key"];
 
       const result = await kvKeyFromRequest(mockRequest, 0, null);
 
@@ -98,9 +106,12 @@ describe("cacheFunctions", () => {
         messages: [{ role: "user", content: "Hello" }],
         request_id: "unique-123",
       });
-      
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody);
-      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = [];
+
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        requestBody
+      );
+      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys =
+        [];
 
       const result = await kvKeyFromRequest(mockRequest, 0, null);
 
@@ -119,9 +130,12 @@ describe("cacheFunctions", () => {
         },
         request_id: "top-level-123",
       };
-      
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(JSON.stringify(requestBody));
-      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["request_id"];
+
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        JSON.stringify(requestBody)
+      );
+      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys =
+        ["request_id"];
 
       const result = await kvKeyFromRequest(mockRequest, 0, null);
 
@@ -134,7 +148,7 @@ describe("cacheFunctions", () => {
           timestamp: "2024-01-01T00:00:00Z",
         },
       });
-      
+
       expect(result).toContain("hashed_");
       expect(result).not.toContain("top-level-123");
       // The nested request_id should still be there
@@ -153,13 +167,18 @@ describe("cacheFunctions", () => {
         messages: [{ role: "user", content: "Hello" }],
         request_id: "unique-456",
       });
-      
-      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["request_id"];
 
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody1);
+      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys =
+        ["request_id"];
+
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        requestBody1
+      );
       const result1 = await kvKeyFromRequest(mockRequest, 0, null);
 
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody2);
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        requestBody2
+      );
       const result2 = await kvKeyFromRequest(mockRequest, 0, null);
 
       // Keys should be different because model is different (not ignored)
@@ -180,13 +199,18 @@ describe("cacheFunctions", () => {
         request_id: "unique-456",
         timestamp: "2024-02-02T00:00:00Z",
       });
-      
-      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["request_id", "timestamp"];
 
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody1);
+      mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys =
+        ["request_id", "timestamp"];
+
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        requestBody1
+      );
       const result1 = await kvKeyFromRequest(mockRequest, 0, null);
 
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody2);
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        requestBody2
+      );
       const result2 = await kvKeyFromRequest(mockRequest, 0, null);
 
       // Keys should be the same because only ignored fields are different
@@ -198,10 +222,16 @@ describe("cacheFunctions", () => {
         model: "gpt-4",
         messages: [{ role: "user", content: "Hello" }],
       });
-      
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody);
 
-      const resultWithSeed = await kvKeyFromRequest(mockRequest, 0, "test-seed");
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        requestBody
+      );
+
+      const resultWithSeed = await kvKeyFromRequest(
+        mockRequest,
+        0,
+        "test-seed"
+      );
       const resultWithoutSeed = await kvKeyFromRequest(mockRequest, 0, null);
 
       expect(resultWithSeed).toContain("test-seed");
@@ -214,8 +244,10 @@ describe("cacheFunctions", () => {
         model: "gpt-4",
         messages: [{ role: "user", content: "Hello" }],
       });
-      
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody);
+
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        requestBody
+      );
 
       const resultWithIndex0 = await kvKeyFromRequest(mockRequest, 0, null);
       const resultWithIndex1 = await kvKeyFromRequest(mockRequest, 1, null);
@@ -236,14 +268,16 @@ describe("cacheFunctions", () => {
         model: "gpt-4",
         messages: [{ role: "user", content: "Hello" }],
       });
-      
+
       const googleHeaders = new Headers({
         "Content-Type": "application/json",
-        "Authorization": "Bearer ya29.google-auth-token",
+        Authorization: "Bearer ya29.google-auth-token",
         "Helicone-Cache-Control": "max-age=3600",
       });
-      
-      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody);
+
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        requestBody
+      );
       mockRequest.requestWrapper.headers = googleHeaders;
       mockRequest.requestWrapper.getHeaders = vi.fn(() => googleHeaders);
 

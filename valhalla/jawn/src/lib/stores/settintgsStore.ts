@@ -7,7 +7,7 @@ import { err } from "../../packages/common/result";
 const kvCache = new KVCache(60 * 1000); // 5 minutes
 
 export async function getHeliconeSetting(
-  settingName: string
+  settingName: string,
 ): Promise<Result<string, string>> {
   return await cacheResultCustom(
     "getHeliconeSetting" + settingName,
@@ -18,7 +18,7 @@ export async function getHeliconeSetting(
            FROM helicone_settings
            WHERE name = $1
            LIMIT 1`,
-          [settingName]
+          [settingName],
         );
 
         if (result.error || !result.data || result.data.length === 0) {
@@ -31,6 +31,6 @@ export async function getHeliconeSetting(
         return err(String(error));
       }
     },
-    kvCache
+    kvCache,
   );
 }

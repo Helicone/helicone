@@ -25,7 +25,11 @@ export function SliderFilter({
   className = "",
 }: SliderFilterProps) {
   const isRange = Array.isArray(value);
-  const displayValue = formatLabel ? formatLabel(value) : isRange ? `${value[0]} - ${value[1]}` : value.toString();
+  const displayValue = formatLabel
+    ? formatLabel(value)
+    : isRange
+      ? `${value[0]} - ${value[1]}`
+      : value.toString();
 
   const handleChange = (newValue: number | number[]) => {
     if (isRange && Array.isArray(newValue)) {

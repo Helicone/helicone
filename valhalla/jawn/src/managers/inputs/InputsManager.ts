@@ -29,14 +29,14 @@ export async function getAllSignedURLsFromInputs(
   inputs: PromptInputRecord["inputs"],
   organizationId: string,
   sourceRequest: string,
-  replaceAssetWithContent: boolean = false
+  replaceAssetWithContent: boolean = false,
 ) {
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY || undefined,
     process.env.S3_SECRET_KEY || undefined,
     process.env.S3_ENDPOINT ?? "",
     process.env.S3_BUCKET_NAME ?? "",
-    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
   );
 
   const result = await Promise.all(
@@ -47,7 +47,7 @@ export async function getAllSignedURLsFromInputs(
         const signedUrl = await s3Client.getRequestResponseImageSignedUrl(
           organizationId,
           sourceRequest,
-          heliconeAssetIdKey
+          heliconeAssetIdKey,
         );
 
         if (replaceAssetWithContent && signedUrl.data) {
@@ -68,15 +68,18 @@ export async function getAllSignedURLsFromInputs(
         };
       }
       return { key, value };
-    })
+    }),
   );
 
-  return result.reduce((acc, { key, value }) => {
-    return {
-      ...acc,
-      [key]: value,
-    };
-  }, {} as PromptInputRecord["inputs"]);
+  return result.reduce(
+    (acc, { key, value }) => {
+      return {
+        ...acc,
+        [key]: value,
+      };
+    },
+    {} as PromptInputRecord["inputs"],
+  );
 }
 
 export class InputsManager extends BaseManager {
@@ -84,7 +87,7 @@ export class InputsManager extends BaseManager {
     promptVersionId: string,
     inputs: Record<string, string>,
     sourceRequest?: string,
-    experimentId?: string
+    experimentId?: string,
   ): Promise<Result<string, string>> {
     const inputRecordId = randomUUID();
 
@@ -95,7 +98,7 @@ export class InputsManager extends BaseManager {
          WHERE id = $1 
          AND organization = $2
          LIMIT 1`,
-        [promptVersionId, this.authParams.organizationId]
+        [promptVersionId, this.authParams.organizationId],
       );
 
       if (
@@ -133,7 +136,7 @@ export class InputsManager extends BaseManager {
     promptVersionId: string,
     inputs: Record<string, string>[],
     sourceRequest?: string,
-    experimentId?: string
+    experimentId?: string,
   ): Promise<Result<string[], string>> {
     try {
       const existingPromptResult = await dbExecute<{ id: string }>(
@@ -142,7 +145,7 @@ export class InputsManager extends BaseManager {
          WHERE id = $1 
          AND organization = $2
          LIMIT 1`,
-        [promptVersionId, this.authParams.organizationId]
+        [promptVersionId, this.authParams.organizationId],
       );
 
       if (
@@ -162,7 +165,7 @@ export class InputsManager extends BaseManager {
           (_, index) =>
             `($${index * 5 + 1}, $${index * 5 + 2}, $${index * 5 + 3}, $${
               index * 5 + 4
-            }, $${index * 5 + 5})`
+            }, $${index * 5 + 5})`,
         )
         .join(",");
 
@@ -181,7 +184,7 @@ export class InputsManager extends BaseManager {
         VALUES ${values}
         RETURNING id
         `,
-        params
+        params,
       );
 
       if (result.error) {
@@ -196,7 +199,7 @@ export class InputsManager extends BaseManager {
 
   async updateInputRecord(
     inputRecordId: string,
-    inputs: Record<string, string>
+    inputs: Record<string, string>,
   ): Promise<Result<string, string>> {
     const updateQuery = `
       UPDATE prompt_input_record
@@ -219,10 +222,10 @@ export class InputsManager extends BaseManager {
 
   async getInputsFromDataset(
     datasetId: string,
-    limit: number
+    limit: number,
   ): Promise<Result<PromptInputRecord[], string>> {
     const bodyStore = new RequestResponseBodyStore(
-      this.authParams.organizationId
+      this.authParams.organizationId,
     );
     const result = await dbExecute<PromptInputRecord>(
       `
@@ -243,32 +246,32 @@ export class InputsManager extends BaseManager {
       LIMIT $3
 
       `,
-      [this.authParams.organizationId, datasetId, limit]
+      [this.authParams.organizationId, datasetId, limit],
     );
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
           const requestResponseBody = await bodyStore.getRequestResponseBody(
-            record.source_request
+            record.source_request,
           );
           return {
             ...record,
             inputs: await getAllSignedURLsFromInputs(
               record.inputs,
               this.authParams.organizationId,
-              record.source_request
+              record.source_request,
             ),
             response_body: requestResponseBody.data?.response,
             request_body: requestResponseBody.data?.request,
           };
-        })
+        }),
       );
     });
   }
 
   async getInputsFromPromptVersionAndDataset(
     promptVersion: string,
-    datasetId: string
+    datasetId: string,
   ): Promise<Result<PromptInputRecord[], string>> {
     console.log(this.authParams.organizationId, promptVersion, datasetId);
     const result = await dbExecute<PromptInputRecord>(
@@ -289,17 +292,17 @@ export class InputsManager extends BaseManager {
       prompt_input_record.prompt_version = $2 AND
       hdr.dataset_id = $3
       `,
-      [this.authParams.organizationId, promptVersion, datasetId]
+      [this.authParams.organizationId, promptVersion, datasetId],
     );
     const bodyStore = new RequestResponseBodyStore(
-      this.authParams.organizationId
+      this.authParams.organizationId,
     );
 
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
           const requestResponseBody = await bodyStore.getRequestResponseBody(
-            record.source_request
+            record.source_request,
           );
           return {
             ...record,
@@ -308,17 +311,17 @@ export class InputsManager extends BaseManager {
             inputs: await getAllSignedURLsFromInputs(
               record.inputs,
               this.authParams.organizationId,
-              record.source_request
+              record.source_request,
             ),
           };
-        })
+        }),
       );
     });
   }
   async getInputs(
     limit: number,
     promptVersion: string,
-    random?: boolean
+    random?: boolean,
   ): Promise<Result<PromptInputRecord[], string>> {
     const result = await dbExecute<PromptInputRecord>(
       `
@@ -341,17 +344,17 @@ export class InputsManager extends BaseManager {
       LIMIT $3
 
       `,
-      [this.authParams.organizationId, promptVersion, limit]
+      [this.authParams.organizationId, promptVersion, limit],
     );
     const bodyStore = new RequestResponseBodyStore(
-      this.authParams.organizationId
+      this.authParams.organizationId,
     );
 
     return promiseResultMap(result, async (data) => {
       return Promise.all(
         data.map(async (record) => {
           const requestResponseBody = await bodyStore.getRequestResponseBody(
-            record.source_request
+            record.source_request,
           );
           return {
             ...record,
@@ -360,10 +363,10 @@ export class InputsManager extends BaseManager {
             inputs: await getAllSignedURLsFromInputs(
               record.inputs,
               this.authParams.organizationId,
-              record.source_request
+              record.source_request,
             ),
           };
-        })
+        }),
       );
     });
   }

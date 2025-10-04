@@ -13,11 +13,11 @@ export class UserFeedbackController extends Controller {
     body: {
       feedback: string;
       tag: string;
-    }
+    },
   ) {
     const result = await dbExecute(
       `INSERT INTO user_feedback (feedback, organization_id, tag) VALUES ($1, $2, $3)`,
-      [body.feedback, request.authParams.organizationId, body.tag]
+      [body.feedback, request.authParams.organizationId, body.tag],
     );
     if (result.error) {
       this.setStatus(500);

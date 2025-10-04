@@ -72,7 +72,7 @@ export class RequestController extends Controller {
   @Post("count/query")
   public async getRequestCount(
     @Body() requestBody: RequestQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const reqManager = new RequestManager(request.authParams);
     const count = await reqManager.getRequestCount(requestBody);
@@ -99,7 +99,7 @@ export class RequestController extends Controller {
   public async getRequests(
     @Body()
     requestBody: RequestQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<HeliconeRequest[], string>> {
     const reqManager = new RequestManager(request.authParams);
     const requests = await reqManager.getRequestsPostgres(requestBody);
@@ -126,7 +126,7 @@ export class RequestController extends Controller {
   public async getRequestsClickhouse(
     @Body()
     requestBody: RequestQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<HeliconeRequest[], string>> {
     // TODO we need to traverse and make point queries faster
     // TODO Basically we need to traverse and replace any filter RequestId: equals x, with all the PKs that are in the request_response_rmt, that we get from postgres
@@ -160,14 +160,13 @@ export class RequestController extends Controller {
   public async getRequestById(
     @Request() request: JawnAuthenticatedRequest,
     @Path() requestId: string,
-    @Query() includeBody: boolean = false
+    @Query() includeBody: boolean = false,
   ): Promise<Result<HeliconeRequest, string>> {
     const reqManager = new RequestManager(request.authParams);
     let returnRequest: Result<HeliconeRequest, string>;
     if (includeBody) {
-      returnRequest = await reqManager.uncachedGetRequestByIdWithBody(
-        requestId
-      );
+      returnRequest =
+        await reqManager.uncachedGetRequestByIdWithBody(requestId);
     } else {
       returnRequest = await reqManager.getRequestById(requestId);
     }
@@ -183,7 +182,7 @@ export class RequestController extends Controller {
   @Post("/query-ids")
   public async getRequestsByIds(
     @Body() requestBody: { requestIds: string[] },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<HeliconeRequest[], string>> {
     const reqManager = new RequestManager(request.authParams);
     return reqManager.getRequestByIds(requestBody.requestIds);
@@ -194,13 +193,13 @@ export class RequestController extends Controller {
     @Body()
     requestBody: { rating: boolean },
     @Request() request: JawnAuthenticatedRequest,
-    @Path() requestId: string
+    @Path() requestId: string,
   ): Promise<Result<null, string>> {
     const reqManager = new RequestManager(request.authParams);
 
     const requestFeedback = await reqManager.feedbackRequest(
       requestId,
-      requestBody.rating
+      requestBody.rating,
     );
     if (requestFeedback.error) {
       this.setStatus(500);
@@ -215,14 +214,14 @@ export class RequestController extends Controller {
     @Body()
     requestBody: { key: string; value: string },
     @Request() request: JawnAuthenticatedRequest,
-    @Path() requestId: string
+    @Path() requestId: string,
   ): Promise<Result<null, string>> {
     const reqManager = new RequestManager(request.authParams);
 
     const requestFeedback = await reqManager.addPropertyToRequest(
       requestId,
       requestBody.key,
-      requestBody.value
+      requestBody.value,
     );
     if (requestFeedback.error) {
       console.log(requestFeedback.error);
@@ -237,13 +236,13 @@ export class RequestController extends Controller {
   public async getRequestAssetById(
     @Request() request: JawnAuthenticatedRequest,
     @Path() requestId: string,
-    @Path() assetId: string
+    @Path() assetId: string,
   ): Promise<Result<HeliconeRequestAsset, string>> {
     const reqManager = new RequestManager(request.authParams);
 
     const requestAsset = await reqManager.getRequestAssetById(
       requestId,
-      assetId
+      assetId,
     );
     if (requestAsset.error) {
       console.log(requestAsset.error);
@@ -259,7 +258,7 @@ export class RequestController extends Controller {
     @Body()
     requestBody: ScoreRequest,
     @Request() request: JawnAuthenticatedRequest,
-    @Path() requestId: string
+    @Path() requestId: string,
   ): Promise<Result<null, string>> {
     const scoreManager = new ScoreManager(request.authParams);
 

@@ -15,7 +15,7 @@ export class OpenAIClient {
 
   async createFineTuneJob(
     fileId: string,
-    model: string
+    model: string,
   ): Promise<Result<FineTuningJob, string>> {
     const fineTune = await this.openai.fineTuning.jobs.create({
       training_file: fileId,
@@ -27,7 +27,7 @@ export class OpenAIClient {
 
   // TODO: Limit to 1 gb
   async uploadFineTuneFile(
-    trainingFilePath: string
+    trainingFilePath: string,
   ): Promise<Result<FileObject, string>> {
     const file = await this.openai.files.create({
       file: fs.createReadStream(trainingFilePath),

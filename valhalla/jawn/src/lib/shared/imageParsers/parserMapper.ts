@@ -7,7 +7,7 @@ import { FluxImageParser } from "./fluxImageParser";
 
 export function getRequestImageModelParser(
   modelName: string,
-  requestId: string
+  requestId: string,
 ): ImageModelRequestBodyParser | null {
   if (modelName.includes("gpt")) {
     return new GptVisionImageParser(modelName, requestId);
@@ -20,7 +20,7 @@ export function getRequestImageModelParser(
 
 export function getResponseImageModelParser(
   modelName: string,
-  responseId: string
+  responseId: string,
 ): ImageModelResponseBodyParser | null {
   switch (modelName) {
     case "dall-e-3":

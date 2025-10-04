@@ -3,7 +3,7 @@ import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 
 export function mapGeminiPro(
   request: HeliconeRequest,
-  model: string
+  model: string,
 ): LlmSchema {
   const requestBody = request.request_body;
   const generateConfig = requestBody?.generation_config;
@@ -36,7 +36,7 @@ export function mapGeminiPro(
     return contents.some((content: any) =>
       Array.isArray(content.parts)
         ? content.parts.some((part: any) => part.text || part.functionCall)
-        : content.parts.text
+        : content.parts.text,
     );
   });
 

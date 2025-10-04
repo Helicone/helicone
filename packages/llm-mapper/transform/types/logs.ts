@@ -1,10 +1,5 @@
-import {
-  ChatCompletionChunk,
-  OpenAIResponseBody
-} from "./openai";
-import {
-  AnthropicResponseBody
-} from "./anthropic";
+import { ChatCompletionChunk, OpenAIResponseBody } from "./openai";
+import { AnthropicResponseBody } from "./anthropic";
 
 export interface OpenAILog extends OpenAIResponseBody {
   streamed_data?: ChatCompletionChunk[]; // list of streamed data chunks

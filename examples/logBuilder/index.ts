@@ -38,7 +38,7 @@ async function runNonStreamingExample(question: string) {
     heliconeLogBuilder.setResponse(JSON.stringify(completion));
     console.log(
       "Non-streaming response:",
-      completion.choices[0].message.content
+      completion.choices[0].message.content,
     );
   } catch (error) {
     console.error("Error in non-streaming request:", error);

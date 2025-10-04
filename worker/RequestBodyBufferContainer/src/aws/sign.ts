@@ -13,7 +13,10 @@ function modelFromUrl(urlString: string): string {
   }
 }
 
-export async function signAws(body: SignAwsInput, payload: string): Promise<SignAwsOutput> {
+export async function signAws(
+  body: SignAwsInput,
+  payload: string
+): Promise<SignAwsOutput> {
   const { region, forwardToHost, requestHeaders, method, urlString } = body;
 
   const awsAccessKey = requestHeaders?.["aws-access-key"] ?? "";
@@ -73,4 +76,3 @@ export async function signAws(body: SignAwsInput, payload: string): Promise<Sign
     model: modelFromUrl(urlString),
   };
 }
-

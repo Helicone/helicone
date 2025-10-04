@@ -56,7 +56,11 @@ describe("RequestBodyBufferContainer (memory-only)", () => {
 
   it("returns metadata (isStream true) on ingest when stream: true", async () => {
     app = appWith();
-    const payload = JSON.stringify({ stream: true, user: "abc", model: "gpt-4" });
+    const payload = JSON.stringify({
+      stream: true,
+      user: "abc",
+      model: "gpt-4",
+    });
     const res = await app.inject({
       method: "POST",
       url: "/s",

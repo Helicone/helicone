@@ -17,7 +17,7 @@ export class DalleImageParser extends ImageModelResponseBodyParser {
           if (item?.url) {
             const assetId = this.generateAssetId(
               this.responseId,
-              this.assetIndex++
+              this.assetIndex++,
             );
             requestAssets.set(assetId, item.url);
             item.url = `<helicone-asset-id key="${assetId}"/>`;
@@ -26,7 +26,7 @@ export class DalleImageParser extends ImageModelResponseBodyParser {
       }
     } catch (error) {
       console.error(
-        `Error processing response body for model: ${this.modelName}, error: ${error}`
+        `Error processing response body for model: ${this.modelName}, error: ${error}`,
       );
     }
 

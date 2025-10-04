@@ -311,7 +311,7 @@ const EvaluateSVG = () => (
                     el.style.animation = "none";
                   }
                 },
-                { threshold: 0.1 }
+                { threshold: 0.1 },
               );
 
               // Start observing

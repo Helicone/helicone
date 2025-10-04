@@ -11,7 +11,7 @@ import {
 
 export function toAnthropic(
   openAIBody: HeliconeChatCreateParams,
-  providerModelId?: string
+  providerModelId?: string,
 ): AnthropicRequestBody {
   const antBody: AnthropicRequestBody = {
     model: providerModelId || openAIBody.model,
@@ -59,7 +59,7 @@ export function toAnthropic(
   // Legacy function_call/functions not supported
   if (openAIBody.function_call || openAIBody.functions) {
     throw new Error(
-      "Legacy function_call and functions are not supported. Use tools instead."
+      "Legacy function_call and functions are not supported. Use tools instead.",
     );
   }
 
@@ -71,7 +71,7 @@ export function toAnthropic(
 }
 
 function openAIContentToAnthropicContent(
-  content: string | HeliconeChatCompletionContentPart[] | null
+  content: string | HeliconeChatCompletionContentPart[] | null,
 ): string | AnthropicContentBlock[] {
   if (content === null) {
     return "";
@@ -192,7 +192,7 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
 }
 
 function mapMessages(
-  messages: HeliconeChatCreateParams["messages"]
+  messages: HeliconeChatCreateParams["messages"],
 ): AnthropicRequestBody["messages"] {
   if (!messages) {
     return [];
@@ -238,18 +238,15 @@ function mapMessages(
           }
         });
       }
-      
+
       let processedContent: string | AnthropicContentBlock[] = [];
       if (message.content) {
         const convertedContent = openAIContentToAnthropicContent(
-          message.content
+          message.content,
         );
         if (typeof convertedContent === "string") {
           // if the message requires forming a content array
-          if (
-            message.cache_control ||
-            processedToolCallContent.length > 0
-          ) {
+          if (message.cache_control || processedToolCallContent.length > 0) {
             processedContent.push({
               type: "text",
               text: convertedContent,
@@ -302,7 +299,7 @@ function mapTools(tools: HeliconeChatCreateParams["tools"]): AnthropicTool[] {
 }
 
 function mapToolChoice(
-  toolChoice: HeliconeChatCreateParams["tool_choice"]
+  toolChoice: HeliconeChatCreateParams["tool_choice"],
 ): AnthropicToolChoice {
   if (!toolChoice) {
     return { type: "auto" };

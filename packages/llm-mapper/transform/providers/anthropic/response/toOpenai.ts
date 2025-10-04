@@ -12,7 +12,7 @@ import {
 export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
   const textBlocks = response.content.filter((block) => block.type === "text");
   const toolUseBlocks = response.content.filter(
-    (block) => block.type === "tool_use"
+    (block) => block.type === "tool_use",
   );
 
   const content = textBlocks.map((block) => blockToString(block)).join("");
@@ -92,7 +92,7 @@ function blockToString(block: AnthropicContentBlock): string {
 }
 
 function mapStopReason(
-  reason: AnthropicResponseBody["stop_reason"]
+  reason: AnthropicResponseBody["stop_reason"],
 ): OpenAIChoice["finish_reason"] {
   switch (reason) {
     case "end_turn":

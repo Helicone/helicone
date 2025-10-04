@@ -36,7 +36,7 @@ const getChangeMdxs = async () => {
     process.cwd(),
     "app",
     "changelog",
-    "changes"
+    "changes",
   );
   const changes = fs.readdirSync(changelogFolder);
   console.log(changes);
@@ -47,7 +47,7 @@ const getChangeMdxs = async () => {
       const dateObject = new Date(
         Number(date.slice(0, 4)),
         Number(date.slice(4, 6)) - 1,
-        Number(date.slice(6, 8))
+        Number(date.slice(6, 8)),
       );
       const fullPath = path.join(changelogFolder, folder, "src.mdx");
       const source = fs.readFileSync(fullPath, "utf8");
@@ -57,16 +57,16 @@ const getChangeMdxs = async () => {
         "static",
         "changelog",
         "images",
-        `${folder}.webp`
+        `${folder}.webp`,
       );
       let imageExists = fs.existsSync(
-        path.join(process.cwd(), "public", imagePath)
+        path.join(process.cwd(), "public", imagePath),
       );
 
       if (!imageExists) {
         imagePath = path.join("static", "changelog", "images", `${folder}.gif`);
         imageExists = fs.existsSync(
-          path.join(process.cwd(), "public", imagePath)
+          path.join(process.cwd(), "public", imagePath),
         );
       }
       const metadata = await getMetadata(folder, "changelog", "changes");
@@ -81,7 +81,7 @@ const getChangeMdxs = async () => {
         imageExists,
         imagePath: path.join("/", imagePath),
       };
-    })
+    }),
   );
 };
 
@@ -105,7 +105,7 @@ export default async function Home() {
                 imageExists,
                 imagePath,
               },
-              i
+              i,
             ) => (
               <div
                 className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative"
@@ -147,7 +147,7 @@ export default async function Home() {
                   </p>
                 </article>
               </div>
-            )
+            ),
           )}
       </div>
     </>

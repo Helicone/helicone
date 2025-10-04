@@ -18,7 +18,7 @@ export const unauthorizedCacheMiddleware =
       return;
     }
     const cacheKey = getCacheKey(
-      req.originalUrl + JSON.stringify(req.body) + req.path + cacheKeyMiddle
+      req.originalUrl + JSON.stringify(req.body) + req.path + cacheKeyMiddle,
     );
 
     const cachedValue = await kvCache.get(cacheKey);

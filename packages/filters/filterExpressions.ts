@@ -106,7 +106,7 @@ type FilterExpression =
   | AllExpression
   | ConditionExpression
   | AndExpression
-  | OrExpression
+  | OrExpression;
 
 /**
  * Base interface for all expression types

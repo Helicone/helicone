@@ -35,7 +35,7 @@ export class ScoreStore extends BaseStore {
   }
 
   public async putScoresIntoClickhouse(
-    newVersions: BatchScores[]
+    newVersions: BatchScores[],
   ): Promise<Result<RequestResponseRMT[], string>> {
     const queryPlaceholders = newVersions
       .map((_, index) => {
@@ -64,16 +64,16 @@ export class ScoreStore extends BaseStore {
         WHERE (request_id, organization_id) IN (${queryPlaceholders})
         AND request_created_at > now() - INTERVAL 30 DAY
         `,
-        queryParams
+        queryParams,
       ),
-      (x) => x
+      (x) => x,
     );
 
     if (rowContents.error || !rowContents.data) {
       return err(
         `Could not find previous versions of all requests, requestId-orgId: ${newVersions
           .map((v) => `${v.requestId}-${v.organizationId}`)
-          .join(", ")}`
+          .join(", ")}`,
       );
     }
     const uniqueRequestResponseLogs = rowContents.data.reduce(
@@ -89,11 +89,11 @@ export class ScoreStore extends BaseStore {
         }
         return acc;
       },
-      {} as Record<string, RequestResponseRMT>
+      {} as Record<string, RequestResponseRMT>,
     );
 
     const filteredRequestResponseLogs = Object.values(
-      uniqueRequestResponseLogs
+      uniqueRequestResponseLogs,
     );
 
     const res = await clickhouseDb.dbInsertClickhouse(
@@ -108,14 +108,14 @@ export class ScoreStore extends BaseStore {
             (acc, score) => {
               if (!Number.isInteger(score.score_attribute_value)) {
                 console.log(
-                  `Skipping score ${score.score_attribute_key} with value ${score.score_attribute_value}`
+                  `Skipping score ${score.score_attribute_key} with value ${score.score_attribute_value}`,
                 );
               } else {
                 acc[score.score_attribute_key] = score.score_attribute_value;
               }
               return acc;
             },
-            {} as Record<string, number>
+            {} as Record<string, number>,
           ),
         };
 
@@ -127,7 +127,7 @@ export class ScoreStore extends BaseStore {
             }
             return acc;
           },
-          {} as Record<string, number>
+          {} as Record<string, number>,
         );
         return [
           {
@@ -167,7 +167,7 @@ export class ScoreStore extends BaseStore {
             is_passthrough_billing: row.is_passthrough_billing,
           },
         ];
-      })
+      }),
     );
 
     if (res.error) {
@@ -196,7 +196,7 @@ export class ScoreStore extends BaseStore {
   }
 
   public async bumpRequestVersion(
-    requests: { id: string; organizationId: string }[]
+    requests: { id: string; organizationId: string }[],
   ): Promise<Result<UpdatedRequestVersion[], string>> {
     const placeholders = requests
       .map((_, index) => `($${index * 2 + 1}::uuid, $${index * 2 + 2}::uuid)`)

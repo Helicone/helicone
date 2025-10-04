@@ -17,7 +17,7 @@ const getRequestText = (requestBody: any) => {
   if (requestBody.tooLarge) {
     return "Helicone Message: Input too large";
   }
-  
+
   if (requestBody.messages && Array.isArray(requestBody.messages)) {
     const lastMessage = requestBody.messages[requestBody.messages.length - 1];
     if (typeof lastMessage?.content === "string") {
@@ -29,7 +29,7 @@ const getRequestText = (requestBody: any) => {
         .join(" ");
     }
   }
-  
+
   return JSON.stringify(requestBody);
 };
 
@@ -59,15 +59,17 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
 
 const llamaMessageToMessage = (message: any): Message => {
   const messageRole = message.role || "user";
-  
+
   if (Array.isArray(message.content)) {
     return {
       role: messageRole,
       _type: "contentArray",
-      contentArray: message.content.map((c: any) => llamaMessageToMessage({
-        ...c,
-        role: messageRole
-      })),
+      contentArray: message.content.map((c: any) =>
+        llamaMessageToMessage({
+          ...c,
+          role: messageRole,
+        }),
+      ),
       id: randomId(),
     };
   }
@@ -83,9 +85,10 @@ const llamaMessageToMessage = (message: any): Message => {
   }
 
   return {
-    content: typeof message.content === "string" 
-      ? message.content 
-      : (message.text || JSON.stringify(message.content || "")),
+    content:
+      typeof message.content === "string"
+        ? message.content
+        : message.text || JSON.stringify(message.content || ""),
     role: messageRole,
     _type: "message",
     id: randomId(),
@@ -97,7 +100,7 @@ const getRequestMessages = (request: any): Message[] => {
 
   if (request.messages && Array.isArray(request.messages)) {
     requestMessages.push(
-      ...request.messages.map((message: any) => llamaMessageToMessage(message))
+      ...request.messages.map((message: any) => llamaMessageToMessage(message)),
     );
   }
 
@@ -109,8 +112,11 @@ const getResponseMessages = (response: any): Message[] => {
 
   if (response?.completion_message) {
     const completionMessage = response.completion_message;
-    
-    if (completionMessage.tool_calls && Array.isArray(completionMessage.tool_calls)) {
+
+    if (
+      completionMessage.tool_calls &&
+      Array.isArray(completionMessage.tool_calls)
+    ) {
       messages.push({
         id: randomId(),
         role: "assistant",
@@ -119,15 +125,16 @@ const getResponseMessages = (response: any): Message[] => {
         tool_calls: completionMessage.tool_calls.map((toolCall: any) => ({
           id: toolCall.id,
           name: toolCall.function?.name || "",
-          arguments: typeof toolCall.function?.arguments === "string" 
-            ? JSON.parse(toolCall.function.arguments) 
-            : toolCall.function?.arguments || {},
+          arguments:
+            typeof toolCall.function?.arguments === "string"
+              ? JSON.parse(toolCall.function.arguments)
+              : toolCall.function?.arguments || {},
         })),
       });
     } else if (completionMessage.content) {
       const content = completionMessage.content;
       let textContent = "";
-      
+
       if (typeof content === "string") {
         textContent = content;
       } else if (typeof content === "object" && content.text) {
@@ -174,20 +181,18 @@ export const mapLlamaRequest: MapperFn<any, any> = ({
     },
     response: response?.error
       ? {
-        error: {
-          heliconeMessage: response.error.message || JSON.stringify(response.error),
-        },
-      }
+          error: {
+            heliconeMessage:
+              response.error.message || JSON.stringify(response.error),
+          },
+        }
       : {
-        messages: responseMessages,
-        model: response?.completion_message?.model || request.model || model,
-      },
+          messages: responseMessages,
+          model: response?.completion_message?.model || request.model || model,
+        },
   };
 
-  const concatenatedMessages = [
-    ...requestMessages,
-    ...responseMessages,
-  ];
+  const concatenatedMessages = [...requestMessages, ...responseMessages];
 
   return {
     schema: llmSchema,

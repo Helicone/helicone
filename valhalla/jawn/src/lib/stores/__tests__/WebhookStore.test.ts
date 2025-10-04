@@ -60,7 +60,7 @@ describe("WebhookStore", () => {
         `SELECT *
          FROM webhooks
          WHERE org_id = $1`,
-        [testOrgId]
+        [testOrgId],
       );
     });
 
@@ -78,7 +78,7 @@ describe("WebhookStore", () => {
         `SELECT *
          FROM webhooks
          WHERE org_id = $1`,
-        [testOrgId]
+        [testOrgId],
       );
     });
 
@@ -91,7 +91,9 @@ describe("WebhookStore", () => {
 
       const result = await webhookStore.getWebhooksByOrgId(testOrgId);
 
-      expect(result.error).toBe(`Failed to get webhooks for org ${testOrgId}: ${dbError}`);
+      expect(result.error).toBe(
+        `Failed to get webhooks for org ${testOrgId}: ${dbError}`,
+      );
       expect(result.data).toBeNull();
     });
 
@@ -111,13 +113,20 @@ describe("WebhookStore", () => {
       const error = new Error("Unexpected database error");
       mockDbExecute.mockRejectedValueOnce(error);
 
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       const result = await webhookStore.getWebhooksByOrgId(testOrgId);
 
-      expect(result.error).toBe(`Failed to get webhooks for org ${testOrgId}: ${error.toString()}`);
+      expect(result.error).toBe(
+        `Failed to get webhooks for org ${testOrgId}: ${error.toString()}`,
+      );
       expect(result.data).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith("Error fetching webhooks:", error);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Error fetching webhooks:",
+        error,
+      );
 
       consoleSpy.mockRestore();
     });
@@ -126,13 +135,20 @@ describe("WebhookStore", () => {
       const errorString = "String error message";
       mockDbExecute.mockRejectedValueOnce(errorString);
 
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       const result = await webhookStore.getWebhooksByOrgId(testOrgId);
 
-      expect(result.error).toBe(`Failed to get webhooks for org ${testOrgId}: ${errorString}`);
+      expect(result.error).toBe(
+        `Failed to get webhooks for org ${testOrgId}: ${errorString}`,
+      );
       expect(result.data).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith("Error fetching webhooks:", errorString);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Error fetching webhooks:",
+        errorString,
+      );
 
       consoleSpy.mockRestore();
     });
@@ -203,7 +219,8 @@ describe("WebhookStore", () => {
         },
       ];
 
-      const webhooksOrg3: Database["public"]["Tables"]["webhooks"]["Row"][] = [];
+      const webhooksOrg3: Database["public"]["Tables"]["webhooks"]["Row"][] =
+        [];
 
       // Mock the database responses for each org
       mockDbExecute.mockResolvedValueOnce({
@@ -246,21 +263,21 @@ describe("WebhookStore", () => {
         `SELECT *
          FROM webhooks
          WHERE org_id = $1`,
-        [orgId1]
+        [orgId1],
       );
       expect(mockDbExecute).toHaveBeenNthCalledWith(
         2,
         `SELECT *
          FROM webhooks
          WHERE org_id = $1`,
-        [orgId2]
+        [orgId2],
       );
       expect(mockDbExecute).toHaveBeenNthCalledWith(
         3,
         `SELECT *
          FROM webhooks
          WHERE org_id = $1`,
-        [orgId3]
+        [orgId3],
       );
     });
 
@@ -269,23 +286,22 @@ describe("WebhookStore", () => {
       const numberOfWebhooks = 100;
 
       // Create a large array of webhooks
-      const manyWebhooks: Database["public"]["Tables"]["webhooks"]["Row"][] = Array.from(
-        { length: numberOfWebhooks },
-        (_, index) => ({
+      const manyWebhooks: Database["public"]["Tables"]["webhooks"]["Row"][] =
+        Array.from({ length: numberOfWebhooks }, (_, index) => ({
           id: index + 1,
           org_id: largeOrgId,
           destination: `https://example.com/webhook${index + 1}`,
           version: "v1",
-          config: { 
+          config: {
             sampleRate: Math.floor(Math.random() * 100) + 1,
-            propertyFilters: index % 3 === 0 ? [{ key: "env", value: "production" }] : [],
+            propertyFilters:
+              index % 3 === 0 ? [{ key: "env", value: "production" }] : [],
           },
           created_at: new Date(2024, 0, index + 1).toISOString(),
           hmac_key: `key-${index + 1}`,
           is_verified: index % 2 === 0,
           txt_record: `verify-${index + 1}`,
-        })
-      );
+        }));
 
       mockDbExecute.mockResolvedValueOnce({
         data: manyWebhooks,
@@ -297,9 +313,9 @@ describe("WebhookStore", () => {
       expect(result.error).toBeNull();
       expect(result.data).toHaveLength(numberOfWebhooks);
       expect(result.data).toEqual(manyWebhooks);
-      
+
       // Verify all webhooks have the correct org_id
-      result.data?.forEach(webhook => {
+      result.data?.forEach((webhook) => {
         expect(webhook.org_id).toBe(largeOrgId);
       });
     });
@@ -307,51 +323,52 @@ describe("WebhookStore", () => {
     test("should correctly retrieve webhooks with various configurations", async () => {
       const testOrgWithConfigs = "org-with-configs";
 
-      const webhooksWithDifferentConfigs: Database["public"]["Tables"]["webhooks"]["Row"][] = [
-        {
-          id: 101,
-          org_id: testOrgWithConfigs,
-          destination: "https://example.com/webhook-full",
-          version: "v2",
-          config: {
-            sampleRate: 100,
-            includeData: true,
-            propertyFilters: [
-              { key: "environment", value: "production" },
-              { key: "model", value: "gpt-4" },
-            ],
-            headers: { "X-Custom-Header": "value" },
+      const webhooksWithDifferentConfigs: Database["public"]["Tables"]["webhooks"]["Row"][] =
+        [
+          {
+            id: 101,
+            org_id: testOrgWithConfigs,
+            destination: "https://example.com/webhook-full",
+            version: "v2",
+            config: {
+              sampleRate: 100,
+              includeData: true,
+              propertyFilters: [
+                { key: "environment", value: "production" },
+                { key: "model", value: "gpt-4" },
+              ],
+              headers: { "X-Custom-Header": "value" },
+            },
+            created_at: "2024-06-01T00:00:00Z",
+            hmac_key: "full-config-key",
+            is_verified: true,
+            txt_record: "verify-full",
           },
-          created_at: "2024-06-01T00:00:00Z",
-          hmac_key: "full-config-key",
-          is_verified: true,
-          txt_record: "verify-full",
-        },
-        {
-          id: 102,
-          org_id: testOrgWithConfigs,
-          destination: "https://example.com/webhook-minimal",
-          version: "v1",
-          config: null,
-          created_at: "2024-06-02T00:00:00Z",
-          hmac_key: null,
-          is_verified: false,
-          txt_record: "verify-minimal",
-        },
-        {
-          id: 103,
-          org_id: testOrgWithConfigs,
-          destination: "https://example.com/webhook-partial",
-          version: "v1",
-          config: {
-            sampleRate: 50,
+          {
+            id: 102,
+            org_id: testOrgWithConfigs,
+            destination: "https://example.com/webhook-minimal",
+            version: "v1",
+            config: null,
+            created_at: "2024-06-02T00:00:00Z",
+            hmac_key: null,
+            is_verified: false,
+            txt_record: "verify-minimal",
           },
-          created_at: "2024-06-03T00:00:00Z",
-          hmac_key: "partial-key",
-          is_verified: true,
-          txt_record: "verify-partial",
-        },
-      ];
+          {
+            id: 103,
+            org_id: testOrgWithConfigs,
+            destination: "https://example.com/webhook-partial",
+            version: "v1",
+            config: {
+              sampleRate: 50,
+            },
+            created_at: "2024-06-03T00:00:00Z",
+            hmac_key: "partial-key",
+            is_verified: true,
+            txt_record: "verify-partial",
+          },
+        ];
 
       mockDbExecute.mockResolvedValueOnce({
         data: webhooksWithDifferentConfigs,
@@ -362,9 +379,9 @@ describe("WebhookStore", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toHaveLength(3);
-      
+
       // Check webhook with full config
-      const fullConfigWebhook = result.data?.find(w => w.id === 101);
+      const fullConfigWebhook = result.data?.find((w) => w.id === 101);
       expect(fullConfigWebhook?.config).toEqual({
         sampleRate: 100,
         includeData: true,
@@ -376,12 +393,12 @@ describe("WebhookStore", () => {
       });
 
       // Check webhook with null config
-      const minimalWebhook = result.data?.find(w => w.id === 102);
+      const minimalWebhook = result.data?.find((w) => w.id === 102);
       expect(minimalWebhook?.config).toBeNull();
       expect(minimalWebhook?.hmac_key).toBeNull();
 
       // Check webhook with partial config
-      const partialWebhook = result.data?.find(w => w.id === 103);
+      const partialWebhook = result.data?.find((w) => w.id === 103);
       expect(partialWebhook?.config).toEqual({ sampleRate: 50 });
     });
   });
@@ -390,29 +407,31 @@ describe("WebhookStore", () => {
     const testWebhookId = 123;
 
     test("should successfully retrieve subscriptions for a webhook", async () => {
-      const mockSubscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] = [
-        {
-          id: 1,
-          webhook_id: testWebhookId,
-          event: "request.created",
-          created_at: "2024-01-01T00:00:00Z",
-          payload_type: { type: "full" },
-        },
-        {
-          id: 2,
-          webhook_id: testWebhookId,
-          event: "request.updated",
-          created_at: "2024-01-02T00:00:00Z",
-          payload_type: { type: "minimal" },
-        },
-      ];
+      const mockSubscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] =
+        [
+          {
+            id: 1,
+            webhook_id: testWebhookId,
+            event: "request.created",
+            created_at: "2024-01-01T00:00:00Z",
+            payload_type: { type: "full" },
+          },
+          {
+            id: 2,
+            webhook_id: testWebhookId,
+            event: "request.updated",
+            created_at: "2024-01-02T00:00:00Z",
+            payload_type: { type: "minimal" },
+          },
+        ];
 
       mockDbExecute.mockResolvedValueOnce({
         data: mockSubscriptions,
         error: null,
       });
 
-      const result = await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
+      const result =
+        await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
 
       expect(result.error).toBeNull();
       expect(result.data).toEqual(mockSubscriptions);
@@ -420,7 +439,7 @@ describe("WebhookStore", () => {
         `SELECT *
          FROM webhook_subscriptions
          WHERE webhook_id = $1`,
-        [testWebhookId]
+        [testWebhookId],
       );
     });
 
@@ -430,7 +449,8 @@ describe("WebhookStore", () => {
         error: null,
       });
 
-      const result = await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
+      const result =
+        await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
 
       expect(result.error).toBeNull();
       expect(result.data).toEqual([]);
@@ -438,7 +458,7 @@ describe("WebhookStore", () => {
         `SELECT *
          FROM webhook_subscriptions
          WHERE webhook_id = $1`,
-        [testWebhookId]
+        [testWebhookId],
       );
     });
 
@@ -449,10 +469,11 @@ describe("WebhookStore", () => {
         error: dbError,
       });
 
-      const result = await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
+      const result =
+        await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
 
       expect(result.error).toBe(
-        `Failed to get webhook subscriptions for webhook ${testWebhookId}: ${dbError}`
+        `Failed to get webhook subscriptions for webhook ${testWebhookId}: ${dbError}`,
       );
       expect(result.data).toBeNull();
     });
@@ -463,7 +484,8 @@ describe("WebhookStore", () => {
         error: null,
       } as any);
 
-      const result = await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
+      const result =
+        await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
 
       expect(result.error).toBeNull();
       expect(result.data).toEqual([]);
@@ -473,15 +495,21 @@ describe("WebhookStore", () => {
       const error = new Error("Connection timeout");
       mockDbExecute.mockRejectedValueOnce(error);
 
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
-      const result = await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
+      const result =
+        await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
 
       expect(result.error).toBe(
-        `Failed to get webhook subscriptions for webhook ${testWebhookId}: ${error.toString()}`
+        `Failed to get webhook subscriptions for webhook ${testWebhookId}: ${error.toString()}`,
       );
       expect(result.data).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith("Error fetching webhook subscriptions:", error);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Error fetching webhook subscriptions:",
+        error,
+      );
 
       consoleSpy.mockRestore();
     });
@@ -490,15 +518,21 @@ describe("WebhookStore", () => {
       const errorObject = { code: "DB_ERROR", message: "Database unavailable" };
       mockDbExecute.mockRejectedValueOnce(errorObject);
 
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
-      const result = await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
+      const result =
+        await webhookStore.getWebhookSubscriptionByWebhookId(testWebhookId);
 
       expect(result.error).toBe(
-        `Failed to get webhook subscriptions for webhook ${testWebhookId}: ${String(errorObject)}`
+        `Failed to get webhook subscriptions for webhook ${testWebhookId}: ${String(errorObject)}`,
       );
       expect(result.data).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith("Error fetching webhook subscriptions:", errorObject);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Error fetching webhook subscriptions:",
+        errorObject,
+      );
 
       consoleSpy.mockRestore();
     });
@@ -507,25 +541,27 @@ describe("WebhookStore", () => {
       const webhookId1 = 456;
       const webhookId2 = 789;
 
-      const mockSubscriptions1: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] = [
-        {
-          id: 3,
-          webhook_id: webhookId1,
-          event: "response.received",
-          created_at: "2024-01-03T00:00:00Z",
-          payload_type: { type: "full" },
-        },
-      ];
+      const mockSubscriptions1: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] =
+        [
+          {
+            id: 3,
+            webhook_id: webhookId1,
+            event: "response.received",
+            created_at: "2024-01-03T00:00:00Z",
+            payload_type: { type: "full" },
+          },
+        ];
 
-      const mockSubscriptions2: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] = [
-        {
-          id: 4,
-          webhook_id: webhookId2,
-          event: "error.occurred",
-          created_at: "2024-01-04T00:00:00Z",
-          payload_type: { type: "error" },
-        },
-      ];
+      const mockSubscriptions2: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] =
+        [
+          {
+            id: 4,
+            webhook_id: webhookId2,
+            event: "error.occurred",
+            created_at: "2024-01-04T00:00:00Z",
+            payload_type: { type: "error" },
+          },
+        ];
 
       mockDbExecute.mockResolvedValueOnce({
         data: mockSubscriptions1,
@@ -537,8 +573,10 @@ describe("WebhookStore", () => {
         error: null,
       });
 
-      const result1 = await webhookStore.getWebhookSubscriptionByWebhookId(webhookId1);
-      const result2 = await webhookStore.getWebhookSubscriptionByWebhookId(webhookId2);
+      const result1 =
+        await webhookStore.getWebhookSubscriptionByWebhookId(webhookId1);
+      const result2 =
+        await webhookStore.getWebhookSubscriptionByWebhookId(webhookId2);
 
       expect(result1.data).toEqual(mockSubscriptions1);
       expect(result2.data).toEqual(mockSubscriptions2);
@@ -548,14 +586,14 @@ describe("WebhookStore", () => {
         `SELECT *
          FROM webhook_subscriptions
          WHERE webhook_id = $1`,
-        [webhookId1]
+        [webhookId1],
       );
       expect(mockDbExecute).toHaveBeenNthCalledWith(
         2,
         `SELECT *
          FROM webhook_subscriptions
          WHERE webhook_id = $1`,
-        [webhookId2]
+        [webhookId2],
       );
     });
 
@@ -566,59 +604,69 @@ describe("WebhookStore", () => {
       const webhook4Id = 1004;
 
       // Webhook 1: Has multiple subscriptions
-      const webhook1Subscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] = [
-        {
-          id: 1,
-          webhook_id: webhook1Id,
-          event: "request.created",
-          created_at: "2024-01-01T00:00:00Z",
-          payload_type: { type: "full" },
-        },
-        {
-          id: 2,
-          webhook_id: webhook1Id,
-          event: "request.updated",
-          created_at: "2024-01-01T00:00:00Z",
-          payload_type: { type: "full" },
-        },
-        {
-          id: 3,
-          webhook_id: webhook1Id,
-          event: "request.deleted",
-          created_at: "2024-01-01T00:00:00Z",
-          payload_type: { type: "minimal" },
-        },
-        {
-          id: 4,
-          webhook_id: webhook1Id,
-          event: "response.received",
-          created_at: "2024-01-01T00:00:00Z",
-          payload_type: { type: "full" },
-        },
-      ];
+      const webhook1Subscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] =
+        [
+          {
+            id: 1,
+            webhook_id: webhook1Id,
+            event: "request.created",
+            created_at: "2024-01-01T00:00:00Z",
+            payload_type: { type: "full" },
+          },
+          {
+            id: 2,
+            webhook_id: webhook1Id,
+            event: "request.updated",
+            created_at: "2024-01-01T00:00:00Z",
+            payload_type: { type: "full" },
+          },
+          {
+            id: 3,
+            webhook_id: webhook1Id,
+            event: "request.deleted",
+            created_at: "2024-01-01T00:00:00Z",
+            payload_type: { type: "minimal" },
+          },
+          {
+            id: 4,
+            webhook_id: webhook1Id,
+            event: "response.received",
+            created_at: "2024-01-01T00:00:00Z",
+            payload_type: { type: "full" },
+          },
+        ];
 
       // Webhook 2: Has one subscription
-      const webhook2Subscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] = [
-        {
-          id: 5,
-          webhook_id: webhook2Id,
-          event: "error.occurred",
-          created_at: "2024-01-02T00:00:00Z",
-          payload_type: { type: "error" },
-        },
-      ];
+      const webhook2Subscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] =
+        [
+          {
+            id: 5,
+            webhook_id: webhook2Id,
+            event: "error.occurred",
+            created_at: "2024-01-02T00:00:00Z",
+            payload_type: { type: "error" },
+          },
+        ];
 
       // Webhook 3: Has no subscriptions
-      const webhook3Subscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] = [];
+      const webhook3Subscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] =
+        [];
 
       // Webhook 4: Has many subscriptions (testing scale)
-      const webhook4Subscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] = 
+      const webhook4Subscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] =
         Array.from({ length: 50 }, (_, index) => ({
           id: 100 + index,
           webhook_id: webhook4Id,
           event: `event.type.${index}`,
-          created_at: new Date(2024, 0, Math.floor(index / 10) + 1).toISOString(),
-          payload_type: { type: index % 3 === 0 ? "full" : index % 3 === 1 ? "minimal" : "error" },
+          created_at: new Date(
+            2024,
+            0,
+            Math.floor(index / 10) + 1,
+          ).toISOString(),
+          payload_type: {
+            type:
+              index % 3 === 0 ? "full" : index % 3 === 1 ? "minimal" : "error",
+          },
         }));
 
       // Mock the responses
@@ -643,34 +691,40 @@ describe("WebhookStore", () => {
       });
 
       // Test webhook 1 - multiple subscriptions
-      const result1 = await webhookStore.getWebhookSubscriptionByWebhookId(webhook1Id);
+      const result1 =
+        await webhookStore.getWebhookSubscriptionByWebhookId(webhook1Id);
       expect(result1.error).toBeNull();
       expect(result1.data).toHaveLength(4);
       expect(result1.data).toEqual(webhook1Subscriptions);
 
       // Test webhook 2 - single subscription
-      const result2 = await webhookStore.getWebhookSubscriptionByWebhookId(webhook2Id);
+      const result2 =
+        await webhookStore.getWebhookSubscriptionByWebhookId(webhook2Id);
       expect(result2.error).toBeNull();
       expect(result2.data).toHaveLength(1);
       expect(result2.data?.[0].event).toBe("error.occurred");
 
       // Test webhook 3 - no subscriptions
-      const result3 = await webhookStore.getWebhookSubscriptionByWebhookId(webhook3Id);
+      const result3 =
+        await webhookStore.getWebhookSubscriptionByWebhookId(webhook3Id);
       expect(result3.error).toBeNull();
       expect(result3.data).toHaveLength(0);
 
       // Test webhook 4 - many subscriptions
-      const result4 = await webhookStore.getWebhookSubscriptionByWebhookId(webhook4Id);
+      const result4 =
+        await webhookStore.getWebhookSubscriptionByWebhookId(webhook4Id);
       expect(result4.error).toBeNull();
       expect(result4.data).toHaveLength(50);
-      
+
       // Verify all subscriptions belong to the correct webhook
-      result4.data?.forEach(subscription => {
+      result4.data?.forEach((subscription) => {
         expect(subscription.webhook_id).toBe(webhook4Id);
       });
 
       // Verify the variety of payload types
-      const payloadTypes = result4.data?.map(s => (s.payload_type as any).type);
+      const payloadTypes = result4.data?.map(
+        (s) => (s.payload_type as any).type,
+      );
       expect(payloadTypes).toContain("full");
       expect(payloadTypes).toContain("minimal");
       expect(payloadTypes).toContain("error");
@@ -681,17 +735,20 @@ describe("WebhookStore", () => {
 
     test("should handle concurrent calls for different webhook subscriptions", async () => {
       const webhookIds = [2001, 2002, 2003, 2004, 2005];
-      
+
       // Create different subscription sets for each webhook
-      const subscriptionSets = webhookIds.map(webhookId => ({
+      const subscriptionSets = webhookIds.map((webhookId) => ({
         webhookId,
-        subscriptions: Array.from({ length: webhookId % 5 + 1 }, (_, index) => ({
-          id: webhookId * 100 + index,
-          webhook_id: webhookId,
-          event: `event.${webhookId}.${index}`,
-          created_at: "2024-01-01T00:00:00Z",
-          payload_type: { type: "full" },
-        })),
+        subscriptions: Array.from(
+          { length: (webhookId % 5) + 1 },
+          (_, index) => ({
+            id: webhookId * 100 + index,
+            webhook_id: webhookId,
+            event: `event.${webhookId}.${index}`,
+            created_at: "2024-01-01T00:00:00Z",
+            payload_type: { type: "full" },
+          }),
+        ),
       }));
 
       // Mock all responses
@@ -703,8 +760,8 @@ describe("WebhookStore", () => {
       });
 
       // Make concurrent calls
-      const promises = webhookIds.map(webhookId => 
-        webhookStore.getWebhookSubscriptionByWebhookId(webhookId)
+      const promises = webhookIds.map((webhookId) =>
+        webhookStore.getWebhookSubscriptionByWebhookId(webhookId),
       );
 
       const results = await Promise.all(promises);
@@ -712,28 +769,31 @@ describe("WebhookStore", () => {
       // Verify all results
       results.forEach((result, index) => {
         expect(result.error).toBeNull();
-        expect(result.data).toHaveLength(subscriptionSets[index].subscriptions.length);
+        expect(result.data).toHaveLength(
+          subscriptionSets[index].subscriptions.length,
+        );
         expect(result.data).toEqual(subscriptionSets[index].subscriptions);
       });
 
       // Verify all database calls were made
       expect(mockDbExecute).toHaveBeenCalledTimes(webhookIds.length);
     });
-    
+
     test("should handle mixed success and failure scenarios for multiple webhooks", async () => {
       const successWebhookId = 3001;
       const failureWebhookId = 3002;
       const emptyWebhookId = 3003;
 
-      const successSubscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] = [
-        {
-          id: 1,
-          webhook_id: successWebhookId,
-          event: "success.event",
-          created_at: "2024-01-01T00:00:00Z",
-          payload_type: { type: "full" },
-        },
-      ];
+      const successSubscriptions: Database["public"]["Tables"]["webhook_subscriptions"]["Row"][] =
+        [
+          {
+            id: 1,
+            webhook_id: successWebhookId,
+            event: "success.event",
+            created_at: "2024-01-01T00:00:00Z",
+            payload_type: { type: "full" },
+          },
+        ];
 
       // First call succeeds
       mockDbExecute.mockResolvedValueOnce({
@@ -753,9 +813,12 @@ describe("WebhookStore", () => {
         error: null,
       });
 
-      const result1 = await webhookStore.getWebhookSubscriptionByWebhookId(successWebhookId);
-      const result2 = await webhookStore.getWebhookSubscriptionByWebhookId(failureWebhookId);
-      const result3 = await webhookStore.getWebhookSubscriptionByWebhookId(emptyWebhookId);
+      const result1 =
+        await webhookStore.getWebhookSubscriptionByWebhookId(successWebhookId);
+      const result2 =
+        await webhookStore.getWebhookSubscriptionByWebhookId(failureWebhookId);
+      const result3 =
+        await webhookStore.getWebhookSubscriptionByWebhookId(emptyWebhookId);
 
       // Verify success case
       expect(result1.error).toBeNull();
@@ -764,7 +827,7 @@ describe("WebhookStore", () => {
 
       // Verify failure case
       expect(result2.error).toBe(
-        `Failed to get webhook subscriptions for webhook ${failureWebhookId}: Database connection lost`
+        `Failed to get webhook subscriptions for webhook ${failureWebhookId}: Database connection lost`,
       );
       expect(result2.data).toBeNull();
 

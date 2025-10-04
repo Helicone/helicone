@@ -34,7 +34,7 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
     // Handle new format
     if (responseBody?.content && Array.isArray(responseBody.content)) {
       const textContent = responseBody.content.find(
-        (item: any) => item.type === "text"
+        (item: any) => item.type === "text",
       );
       if (textContent) {
         // Remove any undefined values and clean up the text
@@ -51,7 +51,7 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
           const parsedContent = JSON.parse(choice.message.content);
           if (Array.isArray(parsedContent)) {
             const textContent = parsedContent.find(
-              (item: any) => item.type === "text"
+              (item: any) => item.type === "text",
             );
             if (textContent) {
               return (textContent.text || "").replace(/undefined/g, "").trim();
@@ -68,14 +68,14 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
     // Handle old format with content array
     if (Array.isArray(responseBody?.content)) {
       const toolUse = responseBody.content.find(
-        (item: any) => item.type === "tool_use"
+        (item: any) => item.type === "tool_use",
       );
       if (toolUse) {
         return `${toolUse.name}(${JSON.stringify(toolUse.input)})`;
       }
 
       const textContent = responseBody.content?.find(
-        (item: any) => item.type === "text"
+        (item: any) => item.type === "text",
       );
       if (textContent) {
         // Remove any undefined values and clean up the text
@@ -84,8 +84,8 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
     }
 
     return responseBody?.body
-      ? responseBody?.body?.completion ?? ""
-      : responseBody?.completion ?? "";
+      ? (responseBody?.body?.completion ?? "")
+      : (responseBody?.completion ?? "");
   } else if (statusCode === 0 || statusCode === null) {
     return "";
   } else {

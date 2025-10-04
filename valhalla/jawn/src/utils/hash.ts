@@ -5,7 +5,7 @@ export async function hashAuth(key: string): Promise<string> {
   key = `Bearer ${key}`;
   const hashedKey = await crypto.subtle.digest(
     { name: "SHA-256" },
-    encoder.encode(key)
+    encoder.encode(key),
   );
   const uintArray = new Uint8Array(hashedKey);
   const byteArray = Array.from(uintArray);

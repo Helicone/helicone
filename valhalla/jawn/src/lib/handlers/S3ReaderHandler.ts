@@ -31,13 +31,13 @@ export class S3ReaderHandler extends AbstractLogHandler {
 
       const signedUrl = await this.s3Client.getRawRequestResponseBodySignedUrl(
         context.orgParams.id,
-        requestIdWithData
+        requestIdWithData,
       );
 
       if (signedUrl.error || !signedUrl.data) {
         // There should always be a signed URL for the request/response even if omitted
         return err(
-          `Error getting signed URL for request/response: ${signedUrl.error}`
+          `Error getting signed URL for request/response: ${signedUrl.error}`,
         );
       }
 
@@ -50,7 +50,7 @@ export class S3ReaderHandler extends AbstractLogHandler {
           return ok(`Content not found in S3: ${signedUrl.data}`);
         }
         return err(
-          `Error fetching content from S3: ${JSON.stringify(content.error)}`
+          `Error fetching content from S3: ${JSON.stringify(content.error)}`,
         );
       }
 
@@ -60,7 +60,7 @@ export class S3ReaderHandler extends AbstractLogHandler {
       return await super.handle(context);
     } catch (error) {
       return err(
-        `Error fetching content from S3: ${error}, Context: ${this.constructor.name}`
+        `Error fetching content from S3: ${error}, Context: ${this.constructor.name}`,
       );
     }
   }

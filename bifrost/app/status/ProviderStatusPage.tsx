@@ -71,7 +71,7 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
     components["schemas"]["ProviderMetrics"] | null
   >(null);
   const [timeFrame, setTimeFrame] = useState<TimeFrame>(
-    (searchParams.get("timeFrame") as TimeFrame) || "24h"
+    (searchParams.get("timeFrame") as TimeFrame) || "24h",
   );
 
   const updateUrlParams = (newTimeFrame: TimeFrame) => {
@@ -119,7 +119,7 @@ export function ProviderStatusPage({ provider }: ProviderStatusPageProps) {
           "/v1/public/status/provider/{provider}",
           {
             params: { path: { provider }, query: { timeFrame } },
-          }
+          },
         );
 
         setSelectedProvider(response.data?.data ?? null);

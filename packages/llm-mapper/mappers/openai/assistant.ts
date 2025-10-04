@@ -18,7 +18,7 @@ const getRequestText = (requestBody: any) => {
   }
   if (requestBody.tools) {
     parts.push(
-      `Available Tools: ${requestBody.tools.map((t: any) => t.type).join(", ")}`
+      `Available Tools: ${requestBody.tools.map((t: any) => t.type).join(", ")}`,
     );
   }
 

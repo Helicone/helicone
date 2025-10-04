@@ -64,12 +64,15 @@ const providerBaseUrlMappings: Record<
 export class HeliconeProxyRequestMapper {
   heliconeErrors: string[] = [];
 
-  constructor(private request: RequestWrapper, private provider: Provider) {}
+  constructor(
+    private request: RequestWrapper,
+    private provider: Provider,
+  ) {}
 
   private async getHeliconeTemplate() {
     if (this.request.heliconeHeaders.promptHeaders.promptId) {
       const { templateWithInputs } = parseJSXObject(
-        JSON.parse(await this.request.getRawText())
+        JSON.parse(await this.request.getRawText()),
       );
       return templateWithInputs;
     }
@@ -96,7 +99,8 @@ export class HeliconeProxyRequestMapper {
 
     if (this.provider === "AWS" || this.provider === "BEDROCK") {
       // Bedrock uses invoke-with-response-stream endpoint for streaming
-      isStream = isStream || targetUrl.pathname.includes("invoke-with-response-stream");
+      isStream =
+        isStream || targetUrl.pathname.includes("invoke-with-response-stream");
     }
 
     return {
@@ -185,7 +189,7 @@ export class HeliconeProxyRequestMapper {
 
   rateLimitOptions(): HeliconeProxyRequest["rateLimitOptions"] {
     const rateLimitOptions = new RateLimitOptionsBuilder(
-      this.request.heliconeHeaders.rateLimitPolicy
+      this.request.heliconeHeaders.rateLimitPolicy,
     ).build();
 
     if (rateLimitOptions.error) {

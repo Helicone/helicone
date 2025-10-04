@@ -7,7 +7,7 @@ const isAssistantRequest = (request: HeliconeRequest) => {
     request.response_body.hasOwnProperty("metadata") ||
     (Array.isArray(request.response_body.data) &&
       request.response_body.data.some((item: any) =>
-        item.hasOwnProperty("metadata")
+        item.hasOwnProperty("metadata"),
       ))
   );
 };
@@ -16,7 +16,7 @@ const isRealtimeRequest = (request: HeliconeRequest) => {
   return (
     request.response_body?.object === "realtime.session" ||
     request.response_body?.messages?.some(
-      (msg: any) => msg.content?.type === "session.created"
+      (msg: any) => msg.content?.type === "session.created",
     )
   );
 };
@@ -24,7 +24,7 @@ const isRealtimeRequest = (request: HeliconeRequest) => {
 export const getMapperTypeFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
   model: string,
-  ignoreAIGateway: boolean = false // optional override to ignore ai-gateway option
+  ignoreAIGateway: boolean = false, // optional override to ignore ai-gateway option
 ) => {
   if (!ignoreAIGateway && heliconeRequest.request_referrer === "ai-gateway") {
     return "ai-gateway";
@@ -120,7 +120,7 @@ export const getMapperType = ({
   if (
     /^mistralai\/Mistral-7B-Instruct-v\d+\.\d+$/.test(model) ||
     /^(ft:)?gpt-(4|3\.5|35)(?!-turbo-instruct)(-turbo)?(-\d{2}k)?(-\d{4})?/.test(
-      model
+      model,
     ) ||
     /^o1-(preview|mini)(-\d{4}-\d{2}-\d{2})?$/.test(model) ||
     /^meta-llama\/.*/i.test(model) ||

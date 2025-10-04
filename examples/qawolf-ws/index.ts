@@ -64,19 +64,20 @@ const sessionUpdate = {
       {
         type: "function",
         name: "get_weather",
-        description: "Get the current weather for a location with detailed information",
+        description:
+          "Get the current weather for a location with detailed information",
         parameters: {
           type: "object",
           properties: {
-            location: { 
+            location: {
               type: "string",
-              description: "The city and country/state to get weather for"
+              description: "The city and country/state to get weather for",
             },
-            units: { 
+            units: {
               type: "string",
               enum: ["celsius", "fahrenheit"],
-              description: "Temperature units to return"
-            }
+              description: "Temperature units to return",
+            },
           },
           required: ["location"],
         },
@@ -88,15 +89,15 @@ const sessionUpdate = {
         parameters: {
           type: "object",
           properties: {
-            symbol: { 
+            symbol: {
               type: "string",
-              description: "The stock ticker symbol (e.g. AAPL, GOOGL)"
+              description: "The stock ticker symbol (e.g. AAPL, GOOGL)",
             },
             exchange: {
               type: "string",
               enum: ["NYSE", "NASDAQ"],
-              description: "The stock exchange"
-            }
+              description: "The stock exchange",
+            },
           },
           required: ["symbol"],
         },
@@ -104,30 +105,32 @@ const sessionUpdate = {
       {
         type: "function",
         name: "calculate_mortgage",
-        description: "Calculate monthly mortgage payments based on loan details",
+        description:
+          "Calculate monthly mortgage payments based on loan details",
         parameters: {
           type: "object",
           properties: {
-            principal: { 
+            principal: {
               type: "number",
-              description: "The loan amount in dollars"
+              description: "The loan amount in dollars",
             },
             annual_interest_rate: {
               type: "number",
-              description: "Annual interest rate as a percentage (e.g. 5.5 for 5.5%)"
+              description:
+                "Annual interest rate as a percentage (e.g. 5.5 for 5.5%)",
             },
             loan_term_years: {
               type: "number",
-              description: "The length of the loan in years"
+              description: "The length of the loan in years",
             },
             down_payment: {
               type: "number",
               description: "Down payment amount in dollars (optional)",
-            }
+            },
           },
           required: ["principal", "annual_interest_rate", "loan_term_years"],
         },
-      }
+      },
     ],
     tool_choice: "auto",
     temperature: 0.8,
@@ -189,13 +192,13 @@ function startRecording() {
         const int16Array = new Int16Array(
           data.buffer,
           data.byteOffset,
-          data.byteLength / 2
+          data.byteLength / 2,
         );
 
         // Log original data info
         if (process.env.DEBUG) {
           console.log(
-            `Original audio: ${data.byteLength} bytes, ${int16Array.length} samples at 44.1kHz`
+            `Original audio: ${data.byteLength} bytes, ${int16Array.length} samples at 44.1kHz`,
           );
         }
 
@@ -210,7 +213,7 @@ function startRecording() {
         // Log resampled data info
         if (process.env.DEBUG) {
           console.log(
-            `Resampled audio: ${resampledBuffer.byteLength} bytes, ${resampledInt16.length} samples at 24kHz`
+            `Resampled audio: ${resampledBuffer.byteLength} bytes, ${resampledInt16.length} samples at 24kHz`,
           );
         }
 
@@ -219,7 +222,7 @@ function startRecording() {
           JSON.stringify({
             type: "input_audio_buffer.append",
             audio: resampledBuffer.toString("base64"),
-          })
+          }),
         );
       }
     });
@@ -248,7 +251,7 @@ function stopRecording() {
       ws.send(
         JSON.stringify({
           type: "input_audio_buffer.commit",
-        })
+        }),
       );
     }
 
@@ -284,7 +287,7 @@ ws.on("open", function open() {
         output: "success",
         type: "function_call_output",
       },
-    })
+    }),
   );
   console.log("Sent simulated function_call_output with call_id:", callId);
   /* ------------------------------------------------------------------------- */
@@ -295,7 +298,7 @@ ws.on("open", function open() {
 
   console.log("Enter your message (or 'quit' to exit):");
   console.log(
-    "Commands: 'mic' to toggle microphone, 'update' to send session update, 'delete' to delete last message"
+    "Commands: 'mic' to toggle microphone, 'update' to send session update, 'delete' to delete last message",
   );
   startCliLoop();
 });
@@ -305,7 +308,7 @@ ws.on("message", function incoming(message: WebSocket.RawData) {
     const response = JSON.parse(message.toString());
     console.log(
       "\nReceived:",
-      inspect(response, { colors: true, depth: null })
+      inspect(response, { colors: true, depth: null }),
     );
 
     // Handle specific event types
@@ -335,7 +338,7 @@ ws.on("message", function incoming(message: WebSocket.RawData) {
     if (response.type === "response.done" && response.response.output) {
       const functionCalls = response.response.output.filter(
         (item: any) =>
-          item.type === "function_call" && item.status === "completed"
+          item.type === "function_call" && item.status === "completed",
       );
 
       for (const functionCall of functionCalls) {
@@ -367,7 +370,7 @@ function handleFunctionCall(functionCall: any) {
         location: parsedArgs.location,
         humidity: 45,
         wind_speed: 10,
-        units: parsedArgs.units || "fahrenheit"
+        units: parsedArgs.units || "fahrenheit",
       };
       break;
 
@@ -378,25 +381,26 @@ function handleFunctionCall(functionCall: any) {
         exchange: parsedArgs.exchange || "NASDAQ",
         change_percent: 2.5,
         volume: 1000000,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       break;
 
     case "calculate_mortgage":
       const principal = parsedArgs.principal - (parsedArgs.down_payment || 0);
-      const monthlyRate = (parsedArgs.annual_interest_rate / 100) / 12;
+      const monthlyRate = parsedArgs.annual_interest_rate / 100 / 12;
       const totalPayments = parsedArgs.loan_term_years * 12;
-      
-      const monthlyPayment = principal * 
-        (monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / 
+
+      const monthlyPayment =
+        (principal * (monthlyRate * Math.pow(1 + monthlyRate, totalPayments))) /
         (Math.pow(1 + monthlyRate, totalPayments) - 1);
 
       response = {
         monthly_payment: Math.round(monthlyPayment * 100) / 100,
         total_payments: totalPayments,
-        total_interest: Math.round((monthlyPayment * totalPayments - principal) * 100) / 100,
+        total_interest:
+          Math.round((monthlyPayment * totalPayments - principal) * 100) / 100,
         principal_amount: principal,
-        down_payment: parsedArgs.down_payment || 0
+        down_payment: parsedArgs.down_payment || 0,
       };
       break;
 
@@ -417,14 +421,14 @@ function handleFunctionCall(functionCall: any) {
 
   console.log(
     "\nSending function response:",
-    inspect(dummyResponse, { colors: true, depth: null })
+    inspect(dummyResponse, { colors: true, depth: null }),
   );
   ws.send(JSON.stringify(dummyResponse));
   ws.send(
     JSON.stringify({
       type: "response.create",
       response: {},
-    })
+    }),
   );
 }
 
@@ -504,7 +508,7 @@ function startCliLoop() {
             role: "user",
             content: [{ type: "input_text", text: "Test message 1" }],
           },
-        })
+        }),
       );
       console.log("Created message 1:", msgId1);
 
@@ -513,7 +517,7 @@ function startCliLoop() {
           event_id: `event_${Date.now()}`,
           type: "conversation.item.delete",
           item_id: msgId1,
-        })
+        }),
       );
       console.log("Deleted message 1:", msgId1);
 
@@ -528,7 +532,7 @@ function startCliLoop() {
             role: "user",
             content: [{ type: "input_text", text: "Test message 2" }],
           },
-        })
+        }),
       );
       console.log("Created message 2:", msgId2);
 
@@ -537,7 +541,7 @@ function startCliLoop() {
           event_id: `event_${Date.now()}`,
           type: "conversation.item.delete",
           item_id: msgId2,
-        })
+        }),
       );
       console.log("Deleted message 2:", msgId2);
 
@@ -552,7 +556,7 @@ function startCliLoop() {
             role: "user",
             content: [{ type: "input_text", text: "Test message 3" }],
           },
-        })
+        }),
       );
       console.log("Created message 3:", msgId3);
 
@@ -561,7 +565,7 @@ function startCliLoop() {
           event_id: `event_${Date.now()}`,
           type: "conversation.item.delete",
           item_id: msgId3,
-        })
+        }),
       );
       console.log("Deleted message 3:", msgId3);
       console.log("Delete-list test sequence completed!");
@@ -590,7 +594,7 @@ function startCliLoop() {
               },
             ],
           },
-        })
+        }),
       );
 
       // Then create a response
@@ -598,7 +602,7 @@ function startCliLoop() {
         JSON.stringify({
           type: "response.create",
           response: {},
-        })
+        }),
       );
     } catch (error) {
       console.error("Error sending message:", error);

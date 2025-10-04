@@ -29,7 +29,7 @@ export interface CreditBalanceResponse {
 export class CreditsController extends Controller {
   @Get("/balance")
   public async getCreditsBalance(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<CreditBalanceResponse, string>> {
     const creditsManager = new CreditsManager(request.authParams);
     const result = await creditsManager.getCreditsBalance();
@@ -46,7 +46,7 @@ export class CreditsController extends Controller {
   public async listTokenUsagePayments(
     @Request() request: JawnAuthenticatedRequest,
     @Query() page?: number,
-    @Query() pageSize?: number
+    @Query() pageSize?: number,
   ): Promise<Result<PaginatedPurchasedCredits, string>> {
     const creditsManager = new CreditsManager(request.authParams);
 

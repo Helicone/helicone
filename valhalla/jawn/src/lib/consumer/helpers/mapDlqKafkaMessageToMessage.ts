@@ -4,7 +4,7 @@ import { mapMessageDates } from "./mapKafkaMessageToMessage";
 import { KafkaMessageContents } from "../../handlers/HandlerContext";
 
 export function mapDlqKafkaMessageToMessage(
-  kafkaMessage: KafkaMessage[]
+  kafkaMessage: KafkaMessage[],
 ): GenericResult<KafkaMessageContents[]> {
   const messages: KafkaMessageContents[] = [];
   for (const message of kafkaMessage) {

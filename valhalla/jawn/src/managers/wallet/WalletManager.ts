@@ -30,7 +30,7 @@ export class WalletManager {
             Authorization: `Bearer ${ADMIN_ACCESS_KEY}`,
           },
           signal: controller.signal,
-        }
+        },
       );
 
       clearTimeout(timeoutId);

@@ -2405,7 +2405,7 @@ const LLMLifecycle = () => {
       <div
         className={cn(
           ISLAND_WIDTH,
-          "py-16 md:py-36 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-16 relative z-10"
+          "py-16 md:py-36 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-16 relative z-10",
         )}
       >
         <div className="flex flex-col flex-1 gap-6">

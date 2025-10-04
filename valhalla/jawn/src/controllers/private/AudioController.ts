@@ -46,7 +46,7 @@ interface ConvertToWavResponse {
 export class AudioController extends Controller {
   @Post("/convert-to-wav")
   public async convertToWav(
-    @Body() body: ConvertToWavRequestBody
+    @Body() body: ConvertToWavRequestBody,
   ): Promise<ConvertToWavResponse> {
     const { audioData } = body;
 
@@ -86,13 +86,13 @@ export class AudioController extends Controller {
         if (
           probeError.message &&
           (probeError.message.includes(
-            "Invalid data found when processing input"
+            "Invalid data found when processing input",
           ) ||
             probeError.message.includes("ffprobe exited with code 1"))
         ) {
           // Log message for new assumed format
           console.warn(
-            "Assuming default input format (s16le, 24kHz, mono) due to ffprobe failure."
+            "Assuming default input format (s16le, 24kHz, mono) due to ffprobe failure.",
           );
           assumedInput = true; // Set flag
           // No inputMetadata, parameters will be set below
@@ -108,7 +108,7 @@ export class AudioController extends Controller {
       let audioStream: ffmpeg.FfprobeStream | undefined;
       if (inputMetadata) {
         audioStream = inputMetadata.streams.find(
-          (s) => s.codec_type === "audio"
+          (s) => s.codec_type === "audio",
         );
       }
 
@@ -132,7 +132,7 @@ export class AudioController extends Controller {
           detectedRate || "N/A"
         }, Channels=${detectedChannels || "N/A"} ${
           assumedInput ? "(Assumed)" : "(Detected)"
-        }`
+        }`,
       );
 
       // --- Prepare ffmpeg command with detected or assumed parameters ---
@@ -158,7 +158,7 @@ export class AudioController extends Controller {
           // If codec detected but not in our map (e.g., 'mp3', 'aac'),
           // ffmpeg *should* handle it without -f, so don't add format.
           console.log(
-            `Codec ${detectedCodec} detected, relying on ffmpeg internal handling.`
+            `Codec ${detectedCodec} detected, relying on ffmpeg internal handling.`,
           );
         } else {
           // No codec detected by ffprobe? Very unlikely, but log it.
@@ -215,7 +215,7 @@ export class AudioController extends Controller {
         } catch (cleanupError) {
           console.error(
             `Failed to clean up temporary file ${pathToClean}:`,
-            cleanupError
+            cleanupError,
           );
         }
       }

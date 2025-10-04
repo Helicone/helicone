@@ -29,14 +29,14 @@ export class HeliconePromptManager {
    * @returns Object containing the compiled prompt body and any validation/substitution errors
    */
   async pullPromptVersion(
-    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming
+    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming,
   ): Promise<Prompt2025Version> {
     const { prompt_id, version_id, environment } = params;
-    
+
     if (!prompt_id) {
       throw new Error("No prompt ID provided");
     }
-    
+
     if (environment) {
       return await this.getEnvironmentVersion(prompt_id, environment);
     }
@@ -53,13 +53,13 @@ export class HeliconePromptManager {
    * @returns The raw prompt body from storage
    */
   async pullPromptBody(
-    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming
+    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming,
   ): Promise<ChatCompletionCreateParams> {
     try {
       const promptVersion = await this.pullPromptVersion(params);
 
       const promptBody = await this.fetchPromptBodyFromS3(
-        promptVersion?.s3_url
+        promptVersion?.s3_url,
       );
       return promptBody as ChatCompletionCreateParams;
     } catch (error) {
@@ -73,11 +73,13 @@ export class HeliconePromptManager {
    * @param versionId - The unique identifier of the prompt version
    * @returns The raw prompt body from storage
    */
-  async pullPromptBodyByVersionId(versionId: string): Promise<ChatCompletionCreateParams> {
+  async pullPromptBodyByVersionId(
+    versionId: string,
+  ): Promise<ChatCompletionCreateParams> {
     try {
       const promptVersion = await this.getPromptVersion(versionId);
       const promptBody = await this.fetchPromptBodyFromS3(
-        promptVersion?.s3_url
+        promptVersion?.s3_url,
       );
       return promptBody as ChatCompletionCreateParams;
     } catch (error) {
@@ -87,7 +89,7 @@ export class HeliconePromptManager {
   }
 
   /**
-   * Merge 
+   * Merge
    * @param params - The chat completion parameters containing prompt_id, optional version_id, inputs, and other OpenAI parameters
    * @returns Object containing the compiled prompt body and any validation/substitution errors
    */
@@ -108,7 +110,7 @@ export class HeliconePromptManager {
       if (typeof message.content === "string") {
         const substituted = HeliconeTemplateManager.substituteVariables(
           message.content,
-          substitutionValues
+          substitutionValues,
         );
         if (!substituted.success) {
           errors.push(...(substituted.errors || []));
@@ -121,12 +123,13 @@ export class HeliconePromptManager {
       return message;
     });
 
-    let finalResponseFormat = params.response_format ?? sourcePromptBody.response_format;
+    let finalResponseFormat =
+      params.response_format ?? sourcePromptBody.response_format;
     if (finalResponseFormat) {
       const substitutedResponseFormat =
         HeliconeTemplateManager.substituteVariablesJSON(
           finalResponseFormat,
-          substitutionValues
+          substitutionValues,
         );
       if (!substitutedResponseFormat.success) {
         errors.push(...(substitutedResponseFormat.errors || []));
@@ -136,13 +139,15 @@ export class HeliconePromptManager {
         : finalResponseFormat;
     }
 
-    let finalTools = [...(sourcePromptBody.tools ?? []), ...(params.tools ?? [])];
+    let finalTools = [
+      ...(sourcePromptBody.tools ?? []),
+      ...(params.tools ?? []),
+    ];
     if (finalTools) {
-      const substitutedTools =
-        HeliconeTemplateManager.substituteVariablesJSON(
-          finalTools,
-          substitutionValues
-        );
+      const substitutedTools = HeliconeTemplateManager.substituteVariablesJSON(
+        finalTools,
+        substitutionValues,
+      );
       if (!substitutedTools.success) {
         errors.push(...(substitutedTools.errors || []));
       }
@@ -151,7 +156,8 @@ export class HeliconePromptManager {
         : finalTools;
     }
 
-    const { prompt_id, version_id, inputs, environment, ...inputOpenaiParams } = params;
+    const { prompt_id, version_id, inputs, environment, ...inputOpenaiParams } =
+      params;
     const mergedBody = {
       ...sourcePromptBody,
       ...inputOpenaiParams,
@@ -169,15 +175,16 @@ export class HeliconePromptManager {
    * @returns Object containing the compiled prompt body and any validation/substitution errors
    */
   async getPromptBody(
-    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming
+    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming,
   ): Promise<{ body: ChatCompletionCreateParams; errors: ValidationError[] }> {
     if (!params.prompt_id) {
-      const { prompt_id, version_id, inputs, environment, ...openaiParams } = params;
+      const { prompt_id, version_id, inputs, environment, ...openaiParams } =
+        params;
       return { body: openaiParams as ChatCompletionCreateParams, errors: [] };
     }
 
     try {
-      const pulledPromptBody = await this.pullPromptBody(params); 
+      const pulledPromptBody = await this.pullPromptBody(params);
       return await this.mergePromptBody(params, pulledPromptBody);
     } catch (error) {
       console.error("Error getting prompt body:", error);
@@ -186,7 +193,7 @@ export class HeliconePromptManager {
   }
 
   private async getPromptVersion(
-    versionId: string
+    versionId: string,
   ): Promise<Prompt2025Version> {
     const response = await fetch(
       `${this.baseUrl}/v1/prompt-2025/query/version`,
@@ -199,7 +206,7 @@ export class HeliconePromptManager {
         body: JSON.stringify({
           promptVersionId: versionId,
         }),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -218,7 +225,7 @@ export class HeliconePromptManager {
   }
 
   private async getProductionVersion(
-    promptId: string
+    promptId: string,
   ): Promise<Prompt2025Version> {
     const response = await fetch(
       `${this.baseUrl}/v1/prompt-2025/query/production-version`,
@@ -231,12 +238,12 @@ export class HeliconePromptManager {
         body: JSON.stringify({
           promptId: promptId,
         }),
-      }
+      },
     );
 
     if (!response.ok) {
       throw new Error(
-        `Failed to get production version: ${response.statusText}`
+        `Failed to get production version: ${response.statusText}`,
       );
     }
 
@@ -253,7 +260,7 @@ export class HeliconePromptManager {
 
   private async getEnvironmentVersion(
     promptId: string,
-    environment: string
+    environment: string,
   ): Promise<Prompt2025Version> {
     const response = await fetch(
       `${this.baseUrl}/v1/prompt-2025/query/environment-version`,
@@ -267,12 +274,12 @@ export class HeliconePromptManager {
           promptId: promptId,
           environment: environment,
         }),
-      }
+      },
     );
 
     if (!response.ok) {
       throw new Error(
-        `Failed to get environment version: ${response.statusText}`
+        `Failed to get environment version: ${response.statusText}`,
       );
     }
 
@@ -296,7 +303,7 @@ export class HeliconePromptManager {
 
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch prompt body from S3: ${response.statusText}`
+        `Failed to fetch prompt body from S3: ${response.statusText}`,
       );
     }
 

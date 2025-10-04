@@ -172,7 +172,11 @@ export const mockRequestResponseData: Partial<RequestResponseRMT>[] = [
 // Mock system table data (should be blocked by security rules)
 export const mockSystemTables = {
   "system.tables": [
-    { name: "request_response_rmt", database: "default", engine: "ReplicatedMergeTree" },
+    {
+      name: "request_response_rmt",
+      database: "default",
+      engine: "ReplicatedMergeTree",
+    },
     { name: "users", database: "default", engine: "Memory" },
   ],
   "system.columns": [

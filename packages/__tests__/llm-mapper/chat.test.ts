@@ -225,7 +225,7 @@ describe("OpenAI Chat Mapper", () => {
 
       // Verify tool calls are properly formatted in preview
       expect(result.preview.response).toBe(
-        '[REDACTED_FUNCTION_NAME]({"param":"[REDACTED]"})'
+        '[REDACTED_FUNCTION_NAME]({"param":"[REDACTED]"})',
       );
 
       // Verify schema structure
@@ -332,7 +332,7 @@ describe("OpenAI Chat Mapper", () => {
 
       // Verify tool calls are properly formatted in preview
       expect(result.preview.response).toBe(
-        '[REDACTED_FUNCTION_NAME]({"cards":[{"question":"[REDACTED QUESTION]","answer":"[REDACTED ANSWER]","pageNumber":3}],"deckId":"[REDACTED UUID]","userId":"[REDACTED UUID]"})'
+        '[REDACTED_FUNCTION_NAME]({"cards":[{"question":"[REDACTED QUESTION]","answer":"[REDACTED ANSWER]","pageNumber":3}],"deckId":"[REDACTED UUID]","userId":"[REDACTED UUID]"})',
       );
 
       // Verify schema structure
@@ -499,7 +499,7 @@ describe("OpenAI Chat Mapper", () => {
       // Verify concatenated messages
       expect(result.preview.concatenatedMessages).toHaveLength(3);
       expect(result.preview.concatenatedMessages).toEqual(
-        result.schema.request?.messages
+        result.schema.request?.messages,
       );
     });
   });
@@ -545,11 +545,11 @@ describe("Response Preview", () => {
         ],
       },
       200,
-      "gpt-4"
+      "gpt-4",
     );
 
     expect(result).toBe(
-      '[REDACTED_FUNCTION_NAME]({"deckId":"[REDACTED]","pageNumber":7})'
+      '[REDACTED_FUNCTION_NAME]({"deckId":"[REDACTED]","pageNumber":7})',
     );
   });
 });

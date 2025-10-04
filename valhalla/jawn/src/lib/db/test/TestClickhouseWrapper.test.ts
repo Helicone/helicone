@@ -13,35 +13,35 @@ describe("TestClickhouseWrapper Unit Tests", () => {
   describe("Database Setup Methods", () => {
     it("should successfully create test database", async () => {
       const result = await wrapper.createTestDatabase();
-      
+
       expect(result.error).toBeNull();
       expect(result.data).toBeNull();
     });
 
     it("should successfully drop test database", async () => {
       const result = await wrapper.dropTestDatabase();
-      
+
       expect(result.error).toBeNull();
       expect(result.data).toBeNull();
     });
 
     it("should successfully create tables", async () => {
       const result = await wrapper.createTables();
-      
+
       expect(result.error).toBeNull();
       expect(result.data).toBeNull();
     });
 
     it("should successfully drop tables", async () => {
       const result = await wrapper.dropTables();
-      
+
       expect(result.error).toBeNull();
       expect(result.data).toBeNull();
     });
 
     it("should successfully insert test data", async () => {
       const result = await wrapper.insertTestData();
-      
+
       expect(result.error).toBeNull();
       expect(result.data).toBeNull();
     });
@@ -51,13 +51,13 @@ describe("TestClickhouseWrapper Unit Tests", () => {
     it("should execute basic SELECT query", async () => {
       const result = await wrapper.dbQuery<any>(
         "SELECT * FROM request_response_rmt LIMIT 5",
-        []
+        [],
       );
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
       expect(Array.isArray(result.data)).toBe(true);
-      // Mock data has 7 items, but since we don't apply LIMIT in dbQuery (only in queryWithContext), 
+      // Mock data has 7 items, but since we don't apply LIMIT in dbQuery (only in queryWithContext),
       // we get all data. This is expected behavior for the mock.
       expect(result.data?.length).toBeGreaterThan(0);
     });
@@ -76,7 +76,7 @@ describe("TestClickhouseWrapper Unit Tests", () => {
     it("should block DDL operations in readonly mode", async () => {
       const result = await wrapper.dbQuery<any>(
         "CREATE TABLE test_table (id INT)",
-        []
+        [],
       );
 
       expect(result.error).toBeTruthy();
@@ -87,7 +87,7 @@ describe("TestClickhouseWrapper Unit Tests", () => {
     it("should block DML operations in readonly mode", async () => {
       const result = await wrapper.dbQuery<any>(
         "INSERT INTO request_response_rmt (request_id) VALUES ('test')",
-        []
+        [],
       );
 
       expect(result.error).toBeTruthy();
@@ -109,7 +109,7 @@ describe("TestClickhouseWrapper Unit Tests", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      
+
       // All results should belong to the test organization
       result.data?.forEach((row: any) => {
         if (row.organization_id) {
@@ -146,14 +146,15 @@ describe("TestClickhouseWrapper Unit Tests", () => {
 
     it("should handle GROUP BY with organization filtering", async () => {
       const result = await wrapper.queryWithContext<any>({
-        query: "SELECT organization_id, COUNT(*) as cnt FROM request_response_rmt GROUP BY organization_id",
+        query:
+          "SELECT organization_id, COUNT(*) as cnt FROM request_response_rmt GROUP BY organization_id",
         organizationId: testOrgId,
         parameters: [],
       });
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      
+
       // Should only see one organization in results
       if (result.data && result.data.length > 0) {
         expect(result.data.length).toBe(1);
@@ -170,7 +171,7 @@ describe("TestClickhouseWrapper Unit Tests", () => {
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      
+
       // Should only return the current org
       if (result.data && result.data.length > 0) {
         expect(result.data.length).toBe(1);
@@ -197,7 +198,8 @@ describe("TestClickhouseWrapper Unit Tests", () => {
 
     it("should block queries containing SQL_helicone_organization_id", async () => {
       const result = await wrapper.queryWithContext<any>({
-        query: "SELECT * FROM request_response_rmt SETTINGS SQL_helicone_organization_id = 'malicious'",
+        query:
+          "SELECT * FROM request_response_rmt SETTINGS SQL_helicone_organization_id = 'malicious'",
         organizationId: testOrgId,
         parameters: [],
       });
@@ -233,7 +235,7 @@ describe("TestClickhouseWrapper Unit Tests", () => {
 
     it("should block dangerous table functions", async () => {
       const dangerousFunctions = ["file", "url", "s3", "hdfs"];
-      
+
       for (const func of dangerousFunctions) {
         const result = await wrapper.queryWithContext<any>({
           query: `SELECT * FROM ${func}('/path/to/file', 'CSV')`,
@@ -287,15 +289,12 @@ describe("TestClickhouseWrapper Unit Tests", () => {
 
   describe("Insert Operations", () => {
     it("should block inserts in readonly mode", async () => {
-      const result = await wrapper.dbInsertClickhouse(
-        "request_response_rmt",
-        [
-          {
-            response_id: "test-id",
-            organization_id: "test-org",
-          } as any,
-        ]
-      );
+      const result = await wrapper.dbInsertClickhouse("request_response_rmt", [
+        {
+          response_id: "test-id",
+          organization_id: "test-org",
+        } as any,
+      ]);
 
       expect(result.error).toBeTruthy();
       expect(result.data).toBeNull();
@@ -307,12 +306,12 @@ describe("TestClickhouseWrapper Unit Tests", () => {
     it("should return consistent mock data", async () => {
       const result1 = await wrapper.dbQuery<any>(
         "SELECT * FROM request_response_rmt",
-        []
+        [],
       );
-      
+
       const result2 = await wrapper.dbQuery<any>(
         "SELECT * FROM request_response_rmt",
-        []
+        [],
       );
 
       expect(result1.data).toEqual(result2.data);
@@ -321,7 +320,7 @@ describe("TestClickhouseWrapper Unit Tests", () => {
     it("should handle empty table queries", async () => {
       const result = await wrapper.dbQuery<any>(
         "SELECT * FROM non_existent_table",
-        []
+        [],
       );
 
       expect(result.error).toBeNull();
@@ -339,7 +338,7 @@ describe("TestClickhouseWrapper Unit Tests", () => {
 
       for (const query of queries) {
         const result = await wrapper.dbQuery<any>(query, []);
-        
+
         expect(result.error).toBeNull();
         expect(result.data).toBeDefined();
         // Should get data from the mock table

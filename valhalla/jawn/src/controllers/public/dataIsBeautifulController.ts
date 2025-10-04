@@ -118,7 +118,7 @@ export const modelNames = [
 ] as const;
 
 export const allModelVariations = modelNames.flatMap(
-  (model) => model.variations
+  (model) => model.variations,
 );
 
 for (const model of modelNames) {
@@ -191,12 +191,12 @@ export type TotalValuesForAllOfTime = {
 export class DataIsBeautifulRouter extends Controller {
   @Post("/total-values")
   public async getTotalValues(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<TotalValuesForAllOfTime, string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await cacheResult("total-values", async () =>
-      dataIsBeautifulManager.getTotalValues()
+      dataIsBeautifulManager.getTotalValues(),
     );
 
     if (result.error) {
@@ -209,12 +209,12 @@ export class DataIsBeautifulRouter extends Controller {
 
   @Post("/model/usage/overtime")
   public async getModelUsageOverTime(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ModelUsageOverTime[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await cacheResult("model-usage-overtime", async () =>
-      dataIsBeautifulManager.getModelUsageOverTime()
+      dataIsBeautifulManager.getModelUsageOverTime(),
     );
 
     if (result.error) {
@@ -227,12 +227,12 @@ export class DataIsBeautifulRouter extends Controller {
 
   @Post("/provider/usage/overtime")
   public async getProviderUsageOverTime(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ProviderUsageOverTime[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await cacheResult("provider-usage-overtime", async () =>
-      dataIsBeautifulManager.providerUsageOverTime()
+      dataIsBeautifulManager.providerUsageOverTime(),
     );
 
     if (result.error) {
@@ -247,13 +247,13 @@ export class DataIsBeautifulRouter extends Controller {
   public async getTotalRequests(
     @Body()
     requestBody: DataIsBeautifulRequestBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await cacheResult(
       "total-requests" + JSON.stringify(requestBody),
-      async () => dataIsBeautifulManager.getTotalRequests(requestBody)
+      async () => dataIsBeautifulManager.getTotalRequests(requestBody),
     );
 
     if (result.error) {
@@ -268,13 +268,14 @@ export class DataIsBeautifulRouter extends Controller {
   public async getTTFTvsPromptInputLength(
     @Body()
     requestBody: DataIsBeautifulRequestBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<TTFTvsPromptLength[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await cacheResult(
       "ttft-vs-prompt-length" + JSON.stringify(requestBody),
-      async () => dataIsBeautifulManager.getTTFTvsPromptInputLength(requestBody)
+      async () =>
+        dataIsBeautifulManager.getTTFTvsPromptInputLength(requestBody),
     );
 
     if (result.error) {
@@ -289,13 +290,13 @@ export class DataIsBeautifulRouter extends Controller {
   public async getModelPercentage(
     @Body()
     requestBody: DataIsBeautifulRequestBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ModelBreakdown[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await cacheResult(
       "model-percentage" + JSON.stringify(requestBody),
-      async () => dataIsBeautifulManager.getModelPercentage(requestBody)
+      async () => dataIsBeautifulManager.getModelPercentage(requestBody),
     );
 
     if (result.error) {
@@ -310,13 +311,13 @@ export class DataIsBeautifulRouter extends Controller {
   public async getModelCost(
     @Body()
     requestBody: DataIsBeautifulRequestBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ModelCost[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await cacheResult(
       "model-cost" + JSON.stringify(requestBody),
-      async () => dataIsBeautifulManager.getModelCost(requestBody)
+      async () => dataIsBeautifulManager.getModelCost(requestBody),
     );
 
     if (result.error) {
@@ -331,13 +332,13 @@ export class DataIsBeautifulRouter extends Controller {
   public async getProviderPercentage(
     @Body()
     requestBody: DataIsBeautifulRequestBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ProviderBreakdown[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await cacheResult(
       "provider-percentage" + JSON.stringify(requestBody),
-      async () => dataIsBeautifulManager.getProviderPercentage(requestBody)
+      async () => dataIsBeautifulManager.getProviderPercentage(requestBody),
     );
 
     if (result.error) {
@@ -352,14 +353,14 @@ export class DataIsBeautifulRouter extends Controller {
   public async getModelPercentageOverTime(
     @Body()
     requestBody: DataIsBeautifulRequestBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ModelBreakdownOverTime[], string>> {
     const dataIsBeautifulManager = new DataIsBeautifulManager();
 
     const result = await cacheResult(
       "model-percentage-overtime" + JSON.stringify(requestBody),
       async () =>
-        await dataIsBeautifulManager.getModelPercentageOverTime(requestBody)
+        await dataIsBeautifulManager.getModelPercentageOverTime(requestBody),
     );
 
     if (result.error) {

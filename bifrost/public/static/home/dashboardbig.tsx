@@ -24,7 +24,7 @@ const DashboardBig = () => {
             if (ref.current) ref.current.style.transform = "translateY(0px)";
           }
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
       if (ref.current) {

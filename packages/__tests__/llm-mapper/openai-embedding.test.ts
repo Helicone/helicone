@@ -35,20 +35,20 @@ describe("OpenAI Embedding Mapper", () => {
     // Verify request
     expect(result.schema.request.model).toBe("text-embedding-3-large");
     expect(result.schema.request.input).toBe(
-      "GetPersonaByName needs error handling"
+      "GetPersonaByName needs error handling",
     );
     expect(result.schema.request.messages?.[0].content).toBe(
-      "GetPersonaByName needs error handling"
+      "GetPersonaByName needs error handling",
     );
 
     // Verify response
     expect(result.schema.response?.messages?.[0].content).toContain(
-      "-0.018790, -0.000189"
+      "-0.018790, -0.000189",
     );
 
     // Verify preview
     expect(result.preview.request).toBe(
-      "GetPersonaByName needs error handling"
+      "GetPersonaByName needs error handling",
     );
     expect(result.preview.response).toContain("-0.018790");
     expect(result.preview.concatenatedMessages).toHaveLength(2);

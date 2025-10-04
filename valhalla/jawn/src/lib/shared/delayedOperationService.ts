@@ -13,14 +13,14 @@ export class DelayedOperationService {
 
   public addDelayedOperation(
     timeoutId: NodeJS.Timeout,
-    operation: () => Promise<any>
+    operation: () => Promise<any>,
   ): void {
     this.delayedOperations.set(timeoutId, operation);
   }
 
   public static getTimeoutId(
     operation: () => Promise<any>,
-    delayMs: number
+    delayMs: number,
   ): NodeJS.Timeout {
     return setTimeout(() => {
       operation().catch((error) => {
@@ -50,14 +50,14 @@ export class DelayedOperationService {
               })
               .finally(() => {
                 this.removeDelayedOperation(timeoutId);
-              })
-          )
+              }),
+          ),
         ),
         new Promise((_, reject) =>
           setTimeout(
             () => reject(new Error("Shutdown timed out")),
-            DelayedOperationService.SHUTDOWN_TIMEOUT
-          )
+            DelayedOperationService.SHUTDOWN_TIMEOUT,
+          ),
         ),
       ]);
 

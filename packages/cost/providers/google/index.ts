@@ -82,10 +82,10 @@ export const costs: ModelRow[] = [
       value: "gemini-2.5-flash",
     },
     cost: {
-      prompt_token: 0.00000030,
+      prompt_token: 0.0000003,
       completion_token: 0.0000025,
       prompt_cache_read_token: 0.000000075,
-    }
+    },
   },
   {
     model: {
@@ -96,7 +96,7 @@ export const costs: ModelRow[] = [
       prompt_token: 0.00000125,
       completion_token: 0.00001,
       prompt_cache_read_token: 0.00000031,
-    }
+    },
   },
   {
     model: {
@@ -499,7 +499,11 @@ export const modelDetails: ModelDetailsMap = {
   },
   "gemini-2.5-flash-lite": {
     matches: ["gemini-2.5-flash-lite", "gemini-2.5-flash-lite-001"],
-    searchTerms: ["gemini 2.5 flash lite", "gemini 2.5 lite", "google 2.5 lite"],
+    searchTerms: [
+      "gemini 2.5 flash lite",
+      "gemini 2.5 lite",
+      "google 2.5 lite",
+    ],
     info: {
       maxTokens: 1000000,
       releaseDate: "2025-01-14",

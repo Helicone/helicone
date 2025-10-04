@@ -38,7 +38,7 @@ export class EvalManager extends BaseManager {
   }
 
   public async getEvals(
-    evalQueryParams: EvalQueryParams
+    evalQueryParams: EvalQueryParams,
   ): Promise<Result<Eval[], string>> {
     const result = await getXOverTime<{
       average_score: Record<string, number>;
@@ -60,13 +60,13 @@ export class EvalManager extends BaseManager {
           "countMap(scores) AS count_score",
         ],
         orgId: this.authParams.organizationId,
-      }
+      },
     );
 
     const scoreNames = await cacheResultCustom(
       "v1/evals/scores" + this.authParams.organizationId,
       async () => await this.getEvalScores(),
-      kvCache
+      kvCache,
     );
 
     if (scoreNames.error) {
@@ -94,11 +94,11 @@ export class EvalManager extends BaseManager {
 
           evalItem.minScore = Math.min(
             evalItem.minScore,
-            +(row.min_score?.[scoreName] ?? 0)
+            +(row.min_score?.[scoreName] ?? 0),
           );
           evalItem.maxScore = Math.max(
             evalItem.maxScore,
-            +(row.max_score?.[scoreName] ?? 0)
+            +(row.max_score?.[scoreName] ?? 0),
           );
           evalItem.count += +(row.count_score?.[scoreName] ?? 0);
           evalItem.overTime.push({
@@ -137,7 +137,7 @@ export class EvalManager extends BaseManager {
     `;
     const result = await dbQueryClickhouse<{ score: string }>(
       query,
-      builtFilter.argsAcc
+      builtFilter.argsAcc,
     );
 
     return resultMap(result, (r) => r.map((r) => r.score));
@@ -145,7 +145,7 @@ export class EvalManager extends BaseManager {
 
   public async addEval(
     requestId: string,
-    evalData: { name: string; score: number }
+    evalData: { name: string; score: number },
   ): Promise<Result<null, string>> {
     // Implement the logic to add an eval to the database
     // This is a placeholder implementation
@@ -154,7 +154,7 @@ export class EvalManager extends BaseManager {
   }
 
   public async getScoreDistributions(
-    evalQueryParams: EvalQueryParams
+    evalQueryParams: EvalQueryParams,
   ): Promise<Result<ScoreDistribution[], string>> {
     const timeFilter: FilterNode = {
       left: {
@@ -213,7 +213,7 @@ export class EvalManager extends BaseManager {
           upper: d[1],
           value: d[2],
         })),
-      }))
+      })),
     );
   }
 }

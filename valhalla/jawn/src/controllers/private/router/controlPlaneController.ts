@@ -34,7 +34,7 @@ export class RouterControlPlaneController extends Controller {
     body: {
       requestId: string;
       payloadSize: number;
-    }
+    },
   ): Promise<
     Result<
       {
@@ -54,7 +54,7 @@ export class RouterControlPlaneController extends Controller {
     let signedUrl = await controlPlaneManager.signS3Url(
       requestId,
       payloadSize,
-      request.authParams
+      request.authParams,
     );
     if (signedUrl.error) {
       this.setStatus(500);
@@ -73,7 +73,7 @@ export class RouterControlPlaneController extends Controller {
     body: {
       promptId: string;
       versionId: string;
-    }
+    },
   ): Promise<
     Result<
       {
@@ -84,13 +84,13 @@ export class RouterControlPlaneController extends Controller {
   > {
     const controlPlaneManager = new ControlPlaneManager(request.authParams);
     const { promptId, versionId } = body;
-    
+
     let signedUrl = await controlPlaneManager.signS3GetUrlForPrompt(
       promptId,
       versionId,
-      request.authParams
+      request.authParams,
     );
-    
+
     if (signedUrl.error) {
       this.setStatus(500);
       return err(signedUrl.error);

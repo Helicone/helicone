@@ -15,7 +15,7 @@ export class PosthogUserClient {
     event: string,
     properties: Record<string, any>,
     timestamp: Date,
-    distinctId: string = crypto.randomUUID()
+    distinctId: string = crypto.randomUUID(),
   ): void {
     this.posthogClient.capture({
       distinctId: distinctId,

@@ -36,7 +36,7 @@ export class OnlineEvalStore extends BaseStore {
       count: number;
     }>(
       `SELECT COUNT(*) as count FROM online_evaluators WHERE organization = $1`,
-      [orgId]
+      [orgId],
     );
 
     if (error) {
@@ -47,7 +47,7 @@ export class OnlineEvalStore extends BaseStore {
   }
 
   public async getOnlineEvalsByOrgId(
-    orgId: string
+    orgId: string,
   ): PromiseGenericResult<OnlineEvaluatorByOrgId[]> {
     const { data, error } = await dbExecute<OnlineEvaluatorByOrgId>(
       `SELECT 
@@ -63,7 +63,7 @@ export class OnlineEvalStore extends BaseStore {
       FROM online_evaluators 
       JOIN evaluator ON online_evaluators.evaluator = evaluator.id 
       WHERE online_evaluators.organization = $1`,
-      [orgId]
+      [orgId],
     );
 
     if (error) {
@@ -74,7 +74,7 @@ export class OnlineEvalStore extends BaseStore {
   }
 
   public async getOnlineEvaluatorsByEvaluatorId(
-    evaluatorId: string
+    evaluatorId: string,
   ): PromiseGenericResult<OnlineEvaluatorByEvaluatorId[]> {
     const { data, error } = await dbExecute<OnlineEvaluatorByOrgId>(
       `SELECT 
@@ -82,7 +82,7 @@ export class OnlineEvalStore extends BaseStore {
         online_evaluators.config
       FROM online_evaluators 
       WHERE online_evaluators.evaluator = $1`,
-      [evaluatorId]
+      [evaluatorId],
     );
 
     if (error) {
@@ -93,11 +93,11 @@ export class OnlineEvalStore extends BaseStore {
   }
 
   public async deleteOnlineEvaluator(
-    onlineEvaluatorId: string
+    onlineEvaluatorId: string,
   ): PromiseGenericResult<null> {
     const { error } = await dbExecute(
       `DELETE FROM online_evaluators WHERE id = $1`,
-      [onlineEvaluatorId]
+      [onlineEvaluatorId],
     );
 
     if (error) {

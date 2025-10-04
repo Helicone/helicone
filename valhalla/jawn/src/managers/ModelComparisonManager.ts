@@ -63,7 +63,7 @@ export class ModelComparisonManager {
   constructor() {}
 
   public async getModelComparison(
-    modelsToCompare: ModelsToCompare[]
+    modelsToCompare: ModelsToCompare[],
   ): Promise<Result<Model[], string>> {
     // Map over all models to get their info in parallel
     const modelResults = await Promise.all(
@@ -72,9 +72,9 @@ export class ModelComparisonManager {
         return this.getModelInfo(
           model.parent,
           formattedModelNames,
-          model.provider
+          model.provider,
         );
-      })
+      }),
     );
 
     const errorResult = modelResults.find((result) => result.error);
@@ -84,14 +84,14 @@ export class ModelComparisonManager {
     return ok(
       modelResults
         .map((result) => result.data)
-        .filter((model): model is Model => model !== null)
+        .filter((model): model is Model => model !== null),
     );
   }
 
   private async getModelInfo(
     model: string,
     formattedModelNames: string,
-    provider: string
+    provider: string,
   ): Promise<Result<Model, string>> {
     const normalizedProvider = provider.toUpperCase();
 
@@ -104,23 +104,23 @@ export class ModelComparisonManager {
     ] = await Promise.all([
       clickhouseDb.dbQuery<ModelMetricsQueryResult>(
         this.getModelMetricsQuery(formattedModelNames, normalizedProvider),
-        []
+        [],
       ),
       clickhouseDb.dbQuery<GeographicLatencyQueryResult>(
         this.getGeographicLatencyQuery(formattedModelNames, normalizedProvider),
-        []
+        [],
       ),
       clickhouseDb.dbQuery<TimeSeriesQueryResult>(
         this.getTimeSeriesQuery(formattedModelNames, normalizedProvider),
-        []
+        [],
       ),
       clickhouseDb.dbQuery<CostQueryResult>(
         this.getCostQuery(formattedModelNames, normalizedProvider),
-        []
+        [],
       ),
       clickhouseDb.dbQuery<GeographicTtftQueryResult>(
         this.getGeographicTtftQuery(formattedModelNames, normalizedProvider),
-        []
+        [],
       ),
     ]);
 
@@ -136,7 +136,7 @@ export class ModelComparisonManager {
     }
 
     const providerCosts = providers.find(
-      (p) => p.provider.toUpperCase() === normalizedProvider
+      (p) => p.provider.toUpperCase() === normalizedProvider,
     );
     if (!providerCosts) {
       return err("Provider not found");
@@ -211,7 +211,7 @@ export class ModelComparisonManager {
 
   private getModelMetricsQuery(
     formattedModelNames: string,
-    provider: string
+    provider: string,
   ): string {
     return `
       SELECT
@@ -259,7 +259,7 @@ export class ModelComparisonManager {
 
   private getGeographicLatencyQuery(
     formattedModelNames: string,
-    provider: string
+    provider: string,
   ): string {
     return `
       SELECT
@@ -283,7 +283,7 @@ export class ModelComparisonManager {
 
   private getGeographicTtftQuery(
     formattedModelNames: string,
-    provider: string
+    provider: string,
   ): string {
     return `
       SELECT
@@ -300,7 +300,7 @@ export class ModelComparisonManager {
 
   private getTimeSeriesQuery(
     formattedModelNames: string,
-    provider: string
+    provider: string,
   ): string {
     return `
       WITH daily_stats AS (

@@ -257,7 +257,7 @@ client = OpenAI(
                       "flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200",
                       currentProvider === key
                         ? "bg-brand/10 border-brand text-brand"
-                        : "bg-background border-border hover:border-brand/50 hover:bg-brand/5"
+                        : "bg-background border-border hover:border-brand/50 hover:bg-brand/5",
                     )}
                     onClick={() =>
                       setCurrentProvider(key as keyof typeof CODE_SNIPPETS)

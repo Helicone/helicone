@@ -12,7 +12,7 @@ export async function generateMetadata({
   const { model, provider } = params;
   const decodedModel = decodeURIComponent(model || "");
   const decodedProvider = formatProviderName(
-    decodeURIComponent(provider || "")
+    decodeURIComponent(provider || ""),
   );
 
   const title = `${decodedProvider} ${decodedModel} Pricing Calculator | API Cost Estimation`;

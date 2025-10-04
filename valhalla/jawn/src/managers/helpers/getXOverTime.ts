@@ -36,7 +36,7 @@ function buildFill(
   endDate: Date,
   dbIncrement: TimeIncrement,
   timeZoneDifference: number,
-  argsAcc: any[]
+  argsAcc: any[],
 ): {
   fill: string;
   argsAcc: any[];
@@ -45,16 +45,16 @@ function buildFill(
   const startDateVal = buildDateTrunc(
     dbIncrement,
     timeZoneDifference,
-    clickhouseParam(i, startDate)
+    clickhouseParam(i, startDate),
   );
   const endDateVal = buildDateTrunc(
     dbIncrement,
     timeZoneDifference,
-    clickhouseParam(i + 1, endDate)
+    clickhouseParam(i + 1, endDate),
   );
 
   const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + INTERVAL 1 ${convertDbIncrement(
-    dbIncrement
+    dbIncrement,
   )} STEP INTERVAL 1 ${convertDbIncrement(dbIncrement)}`;
   return { fill, argsAcc: [...argsAcc, startDate, endDate] };
 }
@@ -62,7 +62,7 @@ function buildFill(
 function buildDateTrunc(
   dbIncrement: TimeIncrement,
   timeZoneDifference: number,
-  column: string
+  column: string,
 ): string {
   const minutes = Math.abs(timeZoneDifference);
   const operator = timeZoneDifference >= 0 ? "-" : "+";
@@ -84,7 +84,7 @@ export async function getXOverTime<T>(
     orgId: string;
     countColumns: string[];
     groupByColumns?: string[];
-  }
+  },
 ): Promise<
   Result<
     (T & {
@@ -138,12 +138,12 @@ export async function getXOverTime<T>(
     endDate,
     dbIncrement,
     timeZoneDifference,
-    builtFilterArgsAcc
+    builtFilterArgsAcc,
   );
   const dateTrunc = buildDateTrunc(
     dbIncrement,
     timeZoneDifference,
-    "request_created_at"
+    "request_created_at",
   );
   const query = `
   -- getXOverTime
@@ -169,8 +169,8 @@ ORDER BY ${dateTrunc} ASC ${fill}
           .utc(r.created_at_trunc, "YYYY-MM-DD HH:mm:ss")
           .toDate()
           .getTime() +
-          timeZoneDifference * 60 * 1000
+          timeZoneDifference * 60 * 1000,
       ).toISOString(),
-    }))
+    })),
   );
 }

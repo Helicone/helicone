@@ -27,7 +27,7 @@ export default function WaitlistPage() {
             headers: {
               Authorization: "Bearer undefined",
             },
-          }
+          },
         );
         if (response.ok) {
           const result = await response.json();
@@ -47,13 +47,13 @@ export default function WaitlistPage() {
   // Highlight code with Shiki
   useEffect(() => {
     let mounted = true;
-    
+
     const highlightCode = async () => {
       try {
         const { createHighlighter } = await import("shiki");
-        
+
         if (!mounted) return;
-        
+
         const highlighter = await createHighlighter({
           themes: ["github-dark"],
           langs: ["javascript"],
@@ -286,7 +286,7 @@ const response = await client.chat.completions.create({
                   </p>
                   {/* Code snippet */}
                   {highlightedCode ? (
-                    <div 
+                    <div
                       className="rounded-lg overflow-hidden max-w-2xl [&_pre]:!m-0 [&_pre]:!p-4"
                       dangerouslySetInnerHTML={{ __html: highlightedCode }}
                     />
@@ -355,10 +355,10 @@ const response = await client.chat.completions.create({
                     You add credits to your account, and we deduct the exact
                     provider cost for each API call.{" "}
                     <strong>No Helicone AI Gateway fees</strong> — you only pay
-                    the provider&apos;s list price plus standard payment processing
-                    fees (3% + $0.30 per transaction). No markups, no platform
-                    fees, no surprises. Your credits work across all supported
-                    providers from a single balance.
+                    the provider&apos;s list price plus standard payment
+                    processing fees (3% + $0.30 per transaction). No markups, no
+                    platform fees, no surprises. Your credits work across all
+                    supported providers from a single balance.
                   </AccordionContent>
                 </AccordionItem>
 

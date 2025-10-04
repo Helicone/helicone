@@ -15,7 +15,7 @@ export enum TagType {
 
 type KeyMapper<T> = (
   filter: T,
-  placeValueSafely: (val: string | number) => string | number
+  placeValueSafely: (val: string | number) => string | number,
 ) => {
   column?: string;
   operator: AllOperators;
@@ -27,7 +27,7 @@ type KeyMappings = {
 };
 
 const extractOperatorAndValueFromAnOperator = (
-  operator: AnyOperator
+  operator: AnyOperator,
 ): { operator: AllOperators; value: any } => {
   for (const key in operator) {
     return {
@@ -42,13 +42,13 @@ function easyKeyMappings<T extends keyof TablesAndViews>(
   keyMappings: {
     [key in keyof TablesAndViews[T]]: string;
   },
-  table?: T
+  table?: T,
 ): KeyMapper<TablesAndViews[T]> {
   return (key, placeValueSafely) => {
     const column = Object.keys(key)[0] as keyof typeof keyMappings;
     const columnFromMapping = keyMappings[column];
     const { operator, value } = extractOperatorAndValueFromAnOperator(
-      key[column as keyof typeof keyMappings] as AnyOperator
+      key[column as keyof typeof keyMappings] as AnyOperator,
     );
 
     let columnToUse = undefined;
@@ -93,7 +93,7 @@ const whereKeyMappings: KeyMappings = {
       api_key_hash: "api_key_hash",
       api_key_name: "api_key_name",
     },
-    "user_api_keys"
+    "user_api_keys",
   ),
   properties: (filter, placeValueSafely) => {
     const keys = Object.keys(filter);
@@ -102,7 +102,7 @@ const whereKeyMappings: KeyMappings = {
     }
     const key = keys[0];
     const { operator, value } = extractOperatorAndValueFromAnOperator(
-      filter[key as keyof typeof filter]
+      filter[key as keyof typeof filter],
     );
 
     if (operator === "equals") {
@@ -110,7 +110,7 @@ const whereKeyMappings: KeyMappings = {
         column: `properties`,
         operator: "gin-contains",
         value: `jsonb_build_object(${placeValueSafely(
-          key
+          key,
         )}::text, ${placeValueSafely(value)}::text)`,
       };
     } else {
@@ -186,7 +186,7 @@ const whereKeyMappings: KeyMappings = {
     if ("properties" in filter && filter.properties) {
       const key = Object.keys(filter.properties)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.properties[key as keyof typeof filter.properties]
+        filter.properties[key as keyof typeof filter.properties],
       );
       return {
         column: `request_response_rmt.properties[${placeValueSafely(key)}]`,
@@ -197,7 +197,7 @@ const whereKeyMappings: KeyMappings = {
     if ("search_properties" in filter && filter.search_properties) {
       const key = Object.keys(filter.search_properties)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.search_properties[key as keyof typeof filter.search_properties]
+        filter.search_properties[key as keyof typeof filter.search_properties],
       );
       return {
         column: `key`,
@@ -208,11 +208,11 @@ const whereKeyMappings: KeyMappings = {
     if ("scores" in filter && filter.scores) {
       const key = Object.keys(filter.scores)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.scores[key as keyof typeof filter.scores]
+        filter.scores[key as keyof typeof filter.scores],
       );
       return {
         column: `has(scores, ${placeValueSafely(
-          key
+          key,
         )}) AND scores[${placeValueSafely(key)}]`,
         operator: operator,
         value: `${placeValueSafely(value)}`,
@@ -220,7 +220,7 @@ const whereKeyMappings: KeyMappings = {
     }
     if ("cached" in filter && filter.cached) {
       const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.cached
+        filter.cached,
       );
       if (operator !== "equals") {
         throw new Error("Cached filter only supports 'equals' operator");
@@ -236,13 +236,15 @@ const whereKeyMappings: KeyMappings = {
     }
     if ("cost" in filter && filter.cost) {
       const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.cost
+        filter.cost,
       );
       return {
         column: "request_response_rmt.cost",
         operator: operator,
-        value: placeValueSafely(Math.floor((value as number) * COST_PRECISION_MULTIPLIER)),
-      }
+        value: placeValueSafely(
+          Math.floor((value as number) * COST_PRECISION_MULTIPLIER),
+        ),
+      };
     }
     return easyKeyMappings<"request_response_rmt">({
       country_code: "request_response_rmt.country_code",
@@ -264,7 +266,8 @@ const whereKeyMappings: KeyMappings = {
       prompt_tokens: "request_response_rmt.prompt_tokens",
       completion_tokens: "request_response_rmt.completion_tokens",
       request_body: "request_response_rmt.request_body",
-      "helicone-score-feedback": "request_response_rmt.scores['helicone-score-feedback']",
+      "helicone-score-feedback":
+        "request_response_rmt.scores['helicone-score-feedback']",
       response_body: "request_response_rmt.response_body",
       scores_column: "request_response_rmt.scores",
       cache_enabled: "request_response_rmt.cache_enabled",
@@ -451,7 +454,7 @@ export function buildFilterLeaf(
   filter: FilterLeaf,
   argsAcc: any[],
   keyMappings: KeyMappings,
-  argPlaceHolder: (arg_index: number, arg: any) => string
+  argPlaceHolder: (arg_index: number, arg: any) => string,
 ): {
   filters: string[];
   argsAcc: any[];
@@ -521,7 +524,7 @@ export function buildFilterLeaf(
 }
 
 export function buildFilterBranch(
-  args: Omit<BuildFilterArgs, "filter"> & { filter: FilterBranch }
+  args: Omit<BuildFilterArgs, "filter"> & { filter: FilterBranch },
 ): {
   filter: string;
   argsAcc: any[];
@@ -575,7 +578,7 @@ export function buildFilter(args: BuildFilterArgs): {
     filter,
     argsAcc,
     having ? havingKeyMappings : whereKeyMappings,
-    argPlaceHolder
+    argPlaceHolder,
   );
 
   if (res.filters.length === 0) {
@@ -607,7 +610,7 @@ export function clickhouseParam(index: number, parameter: any) {
 }
 
 export function buildFilterClickHouse(
-  args: ExternalBuildFilterArgs
+  args: ExternalBuildFilterArgs,
 ): ReturnType<typeof buildFilter> {
   return buildFilter({
     ...args,
@@ -616,7 +619,7 @@ export function buildFilterClickHouse(
 }
 
 export function buildFilterPostgres(
-  args: ExternalBuildFilterArgs
+  args: ExternalBuildFilterArgs,
 ): ReturnType<typeof buildFilter> {
   return buildFilter({
     ...args,
@@ -636,7 +639,7 @@ export type ExternalBuildFilterArgs = Omit<
 >;
 
 export async function buildFilterWithAuthClickHouse(
-  args: ExternalBuildFilterArgs & { org_id: string }
+  args: ExternalBuildFilterArgs & { org_id: string },
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     request_response_rmt: {
@@ -648,7 +651,7 @@ export async function buildFilterWithAuthClickHouse(
 }
 
 export async function buildFilterWithAuthClickHousePropResponse(
-  args: ExternalBuildFilterArgs & { org_id: string }
+  args: ExternalBuildFilterArgs & { org_id: string },
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     property_with_response_v1: {
@@ -660,7 +663,7 @@ export async function buildFilterWithAuthClickHousePropResponse(
 }
 
 export async function buildFilterWithAuthClickHouseProperties(
-  args: ExternalBuildFilterArgs & { org_id: string }
+  args: ExternalBuildFilterArgs & { org_id: string },
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     properties_v3: {
@@ -672,7 +675,7 @@ export async function buildFilterWithAuthClickHouseProperties(
 }
 
 export async function buildFilterWithAuthClickHousePropertiesV2(
-  args: ExternalBuildFilterArgs & { org_id: string }
+  args: ExternalBuildFilterArgs & { org_id: string },
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     request_response_rmt: {
@@ -684,7 +687,7 @@ export async function buildFilterWithAuthClickHousePropertiesV2(
 }
 
 export async function buildFilterWithAuthClickHouseCacheMetrics(
-  args: ExternalBuildFilterArgs & { org_id: string }
+  args: ExternalBuildFilterArgs & { org_id: string },
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     cache_metrics: {
@@ -696,7 +699,7 @@ export async function buildFilterWithAuthClickHouseCacheMetrics(
 }
 
 export async function buildFilterWithAuthClickHouseRateLimits(
-  args: ExternalBuildFilterArgs & { org_id: string }
+  args: ExternalBuildFilterArgs & { org_id: string },
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     rate_limit_log: {
@@ -708,7 +711,7 @@ export async function buildFilterWithAuthClickHouseRateLimits(
 }
 
 export async function buildFilterWithAuthClickHouseOrganizationProperties(
-  args: ExternalBuildFilterArgs & { org_id: string }
+  args: ExternalBuildFilterArgs & { org_id: string },
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     organization_properties: {
@@ -730,7 +733,7 @@ export async function buildFilterWithAuth(
         equals: orgId,
       },
     },
-  })
+  }),
 ): Promise<{ filter: string; argsAcc: any[] }> {
   const { org_id, filter } = args;
 

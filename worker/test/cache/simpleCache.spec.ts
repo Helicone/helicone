@@ -7,7 +7,7 @@ vi.mock("../../src", () => ({
     let hash = 0;
     for (let i = 0; i < input.length; i++) {
       const char = input.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return Promise.resolve(`hashed_${Math.abs(hash).toString(16)}`);
@@ -33,7 +33,7 @@ describe("Simple Cache Test", () => {
   beforeEach(() => {
     // Reset cache storage
     cacheStorage = new Map();
-    
+
     // Create mock KVNamespace
     mockCacheKv = {
       get: vi.fn(async (key: string) => {
@@ -85,7 +85,7 @@ describe("Simple Cache Test", () => {
     const cacheKey = await kvKeyFromRequest(mockRequest, 0, null);
     expect(cacheKey).toBeDefined();
     expect(cacheKey).toContain("hashed_");
-    
+
     // Step 2: Check cache is initially empty
     const initialCache = await getCachedResponse(
       mockRequest,
@@ -94,7 +94,7 @@ describe("Simple Cache Test", () => {
       null
     );
     expect(initialCache).toBeNull();
-    
+
     // Step 3: Save response to cache
     const mockResponse = new Response(JSON.stringify({ answer: "4" }), {
       headers: new Headers({
@@ -102,7 +102,7 @@ describe("Simple Cache Test", () => {
         "X-Custom-Header": "test-value",
       }),
     });
-    
+
     const saveResult = await saveToCache({
       request: mockRequest,
       response: mockResponse,
@@ -113,9 +113,9 @@ describe("Simple Cache Test", () => {
       cacheKv: mockCacheKv,
       cacheSeed: null,
     });
-    
+
     expect(saveResult).toBe(true);
-    
+
     // Step 4: Retrieve from cache
     const cachedResponse = await getCachedResponse(
       mockRequest,
@@ -123,12 +123,12 @@ describe("Simple Cache Test", () => {
       mockCacheKv,
       null
     );
-    
+
     expect(cachedResponse).not.toBeNull();
     expect(cachedResponse?.headers.get("Helicone-Cache")).toBe("HIT");
     expect(cachedResponse?.headers.get("Helicone-Cache-Bucket-Idx")).toBe("0");
     expect(cachedResponse?.headers.get("Helicone-Cache-Latency")).toBe("123");
-    
+
     // Step 5: Verify response body
     const body = await cachedResponse?.text();
     expect(body).toBe('{"answer":"4"}');
@@ -160,14 +160,14 @@ describe("Simple Cache Test", () => {
         },
       };
     };
-    
+
     // Request 1
     const request1Body = JSON.stringify({
       model: "gpt-4",
       messages: [{ role: "user", content: "What is 2+2?" }],
     });
     const mockRequest1 = createMockRequest(request1Body);
-    
+
     // Manually populate cache for request 1
     const key1 = await kvKeyFromRequest(mockRequest1, 0, null);
     cacheStorage.set(key1, {
@@ -175,26 +175,26 @@ describe("Simple Cache Test", () => {
       latency: 100,
       body: ['{"answer":"4"}'],
     });
-    
+
     // Request 2 with different content
     const request2Body = JSON.stringify({
       model: "gpt-4",
       messages: [{ role: "user", content: "What is 3+3?" }],
     });
     const mockRequest2 = createMockRequest(request2Body);
-    
+
     // Manually populate cache for request 2
     const key2 = await kvKeyFromRequest(mockRequest2, 0, null);
-    
+
     // Keys should be different for different requests
     expect(key1).not.toBe(key2);
-    
+
     cacheStorage.set(key2, {
       headers: { "Content-Type": "application/json" },
       latency: 150,
       body: ['{"answer":"6"}'],
     });
-    
+
     // Retrieve request 1
     const cached1 = await getCachedResponse(
       mockRequest1,
@@ -204,7 +204,7 @@ describe("Simple Cache Test", () => {
     );
     const body1 = await cached1?.text();
     expect(body1).toBe('{"answer":"4"}');
-    
+
     // Retrieve request 2
     const cached2 = await getCachedResponse(
       mockRequest2,
@@ -242,7 +242,7 @@ describe("Simple Cache Test", () => {
       cacheKv: mockCacheKv,
       cacheSeed: null,
     });
-    
+
     // Second request with different timestamp and request_id but same content
     const request2 = JSON.stringify({
       model: "gpt-4",
@@ -290,7 +290,7 @@ describe("Simple Cache Test", () => {
         body: [responses[i]],
       });
     }
-    
+
     // Retrieve from cache - should get one of the 3 responses
     const cachedResponse = await getCachedResponse(
       mockRequest,

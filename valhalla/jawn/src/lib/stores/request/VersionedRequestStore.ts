@@ -20,11 +20,11 @@ export class VersionedRequestStore {
   constructor(private orgId: string) {}
 
   async insertRequestResponseVersioned(
-    requestResponseLog: RequestResponseRMT[]
+    requestResponseLog: RequestResponseRMT[],
   ): PromiseGenericResult<string> {
     const result = await clickhouseDb.dbInsertClickhouse(
       "request_response_rmt",
-      requestResponseLog
+      requestResponseLog,
     );
 
     if (result.error || !result.data) {
@@ -35,11 +35,11 @@ export class VersionedRequestStore {
   }
 
   async insertCacheMetricVersioned(
-    cacheMetricLog: CacheMetricSMT[]
+    cacheMetricLog: CacheMetricSMT[],
   ): PromiseGenericResult<string> {
     const result = await clickhouseDb.dbInsertClickhouse(
       "cache_metrics",
-      cacheMetricLog
+      cacheMetricLog,
     );
 
     if (result.error || !result.data) {
@@ -55,7 +55,7 @@ export class VersionedRequestStore {
   private async putPropertyAndBumpVersion(
     requestId: string,
     property: string,
-    value: string
+    value: string,
   ) {
     return await dbExecute<{
       id: string;
@@ -71,7 +71,7 @@ export class VersionedRequestStore {
       AND id = $3
       RETURNING version, id, provider, properties
       `,
-      [{ [property]: value }, this.orgId, requestId]
+      [{ [property]: value }, this.orgId, requestId],
     );
   }
 
@@ -94,9 +94,9 @@ export class VersionedRequestStore {
       ORDER BY updated_at DESC
       LIMIT 1
     `,
-        [newVersion.id, this.orgId, newVersion.provider]
+        [newVersion.id, this.orgId, newVersion.provider],
       ),
-      (x) => x[0]
+      (x) => x[0],
     );
 
     if (rowContents.error || !rowContents.data) {
@@ -169,7 +169,7 @@ export class VersionedRequestStore {
 
   private async addPropertiesToLegacyTables(
     request: RequestResponseRMT,
-    newProperties: { key: string; value: string }[]
+    newProperties: { key: string; value: string }[],
   ): Promise<Result<null, string>> {
     const { error: e } = await clickhouseDb.dbInsertClickhouse(
       "property_with_response_v1",
@@ -180,7 +180,7 @@ export class VersionedRequestStore {
           property_key: p.key,
           property_value: p.value,
         };
-      })
+      }),
     );
     if (e) {
       console.error("Error inserting into clickhouse:", e);
@@ -197,7 +197,7 @@ export class VersionedRequestStore {
           organization_id: request.organization_id,
           created_at: formatTimeString(new Date().toISOString()),
         };
-      })
+      }),
     );
 
     return ok(null);
@@ -206,12 +206,12 @@ export class VersionedRequestStore {
   async addPropertyToRequest(
     requestId: string,
     property: string,
-    value: string
+    value: string,
   ): Promise<Result<null, string>> {
     const request = await this.putPropertyAndBumpVersion(
       requestId,
       property,
-      value
+      value,
     );
 
     if (request.error || !request.data) {
@@ -219,7 +219,7 @@ export class VersionedRequestStore {
     }
 
     const requestInClickhouse = await this.putPropertyIntoClickhouse(
-      request.data[0]
+      request.data[0],
     );
 
     if (requestInClickhouse.error || !requestInClickhouse.data) {

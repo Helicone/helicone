@@ -15,7 +15,7 @@ export const toolCallsOutput = z.array(
       arguments: z.string(),
     }),
     type: z.literal("function"),
-  })
+  }),
 );
 
 const chatCompletionAssistantMessageParamSchema = z.object({

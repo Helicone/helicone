@@ -67,7 +67,7 @@ export class SessionManager {
   constructor(private authParams: AuthParams) {}
 
   async getMetrics(
-    requestBody: SessionMetricsQueryParams
+    requestBody: SessionMetricsQueryParams,
   ): Promise<Result<SessionMetrics, string>> {
     const {
       nameContains,
@@ -191,7 +191,7 @@ export class SessionManager {
   }
 
   async getSessionNames(
-    requestBody: SessionNameQueryParams
+    requestBody: SessionNameQueryParams,
   ): Promise<Result<SessionNameResult[], string>> {
     const { nameContains, timezoneDifference, timeFilter, filter } =
       requestBody;
@@ -256,29 +256,22 @@ export class SessionManager {
 
     const results = await clickhouseDb.dbQuery<SessionNameResult>(
       query,
-      builtFilter.argsAcc
+      builtFilter.argsAcc,
     );
 
     return resultMap(results, (x) =>
       x.map((y) => ({
         ...y,
         avg_latency: +y.avg_latency,
-      }))
+      })),
     );
   }
 
-  private async buildSessionFilters(
-    requestBody: SessionQueryParams
-  ): Promise<{
+  private async buildSessionFilters(requestBody: SessionQueryParams): Promise<{
     builtFilter: any;
     havingFilter: any;
   }> {
-    const {
-      search,
-      timeFilter,
-      filter: filterTree,
-      nameEquals,
-    } = requestBody;
+    const { search, timeFilter, filter: filterTree, nameEquals } = requestBody;
 
     const filters: FilterNode[] = [...timeFilterNodes(timeFilter), filterTree];
 
@@ -317,8 +310,8 @@ export class SessionManager {
               },
             },
           ],
-          "or"
-        )
+          "or",
+        ),
       );
     }
 
@@ -339,19 +332,16 @@ export class SessionManager {
   }
 
   async getSessions(
-    requestBody: SessionQueryParams
+    requestBody: SessionQueryParams,
   ): Promise<Result<SessionResult[], string>> {
-    const {
-      timezoneDifference,
-      offset = 0,
-      limit = 50,
-    } = requestBody;
+    const { timezoneDifference, offset = 0, limit = 50 } = requestBody;
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
     }
 
-    const { builtFilter, havingFilter } = await this.buildSessionFilters(requestBody);
+    const { builtFilter, havingFilter } =
+      await this.buildSessionFilters(requestBody);
 
     // Step 1 get all the properties given this filter
     const query = `
@@ -382,7 +372,7 @@ export class SessionManager {
 
     const results = await clickhouseDb.dbQuery<SessionResult>(
       query,
-      builtFilter.argsAcc
+      builtFilter.argsAcc,
     );
 
     const mappedResults = resultMap(results, (x) =>
@@ -392,7 +382,7 @@ export class SessionManager {
         prompt_tokens: +y.prompt_tokens,
         total_tokens: +y.total_tokens,
         avg_latency: +y.avg_latency,
-      }))
+      })),
     );
 
     if (!mappedResults.data) {
@@ -403,7 +393,7 @@ export class SessionManager {
   }
 
   async getSessionsCount(
-    requestBody: SessionQueryParams
+    requestBody: SessionQueryParams,
   ): Promise<Result<SessionsAggregateMetrics, string>> {
     const { timezoneDifference } = requestBody;
 
@@ -411,7 +401,8 @@ export class SessionManager {
       return err("Invalid timezone difference");
     }
 
-    const { builtFilter, havingFilter } = await this.buildSessionFilters(requestBody);
+    const { builtFilter, havingFilter } =
+      await this.buildSessionFilters(requestBody);
 
     const countQuery = `
     SELECT
@@ -428,7 +419,7 @@ export class SessionManager {
 
     const countResult = await clickhouseDb.dbQuery<{ count: number }>(
       countQuery,
-      builtFilter.argsAcc
+      builtFilter.argsAcc,
     );
 
     if (!countResult.data) {
@@ -454,14 +445,11 @@ export class SessionManager {
     `;
 
     const metricsResult = await clickhouseDb.dbQuery<{
-      total_cost: number,
-      avg_cost: number,
-      avg_latency: number,
-      avg_requests: number,
-    }>(
-      metricsQuery,
-      builtFilter.argsAcc
-    );
+      total_cost: number;
+      avg_cost: number;
+      avg_latency: number;
+      avg_requests: number;
+    }>(metricsQuery, builtFilter.argsAcc);
 
     if (!metricsResult.data) {
       return err(metricsResult.error ?? "Error getting sessions metrics");
@@ -478,7 +466,7 @@ export class SessionManager {
 
   async updateSessionFeedback(
     sessionId: string,
-    rating: boolean
+    rating: boolean,
   ): Promise<Result<null, string>> {
     try {
       const result = await dbExecute<{ id: string }>(
@@ -488,7 +476,7 @@ export class SessionManager {
          AND helicone_org_id = $2
          ORDER BY created_at ASC
          LIMIT 1`,
-        [sessionId, this.authParams.organizationId]
+        [sessionId, this.authParams.organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -499,7 +487,7 @@ export class SessionManager {
       const res = await requestManager.addPropertyToRequest(
         result.data[0].id,
         "Helicone-Session-Feedback",
-        rating ? "1" : "0"
+        rating ? "1" : "0",
       );
 
       if (res.error) {
@@ -513,7 +501,7 @@ export class SessionManager {
   }
 
   async getSessionTag(
-    sessionId: string
+    sessionId: string,
   ): Promise<Result<string | null, string>> {
     try {
       const query = `
@@ -547,7 +535,7 @@ export class SessionManager {
 
   async updateSessionTag(
     sessionId: string,
-    tag: string
+    tag: string,
   ): Promise<Result<null, string>> {
     try {
       const valuesToInsert: Tags = {

@@ -95,6 +95,6 @@ export const costs: ModelRow[] = [
       prompt_token: 0.000003,
       prompt_cache_read_token: 0.00000075,
       completion_token: 0.000015,
-    }
-  }
+    },
+  },
 ];

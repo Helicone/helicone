@@ -28,7 +28,7 @@ export class PiController extends Controller {
   public async addSession(
     @Body()
     body: { sessionUUID: string },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     // clean sessions should probably be done in a cron job
     let one_hour_ago = new Date(new Date().getTime() - 1 * 60 * 60 * 1000);
@@ -39,7 +39,7 @@ export class PiController extends Controller {
       await dbExecute(
         `DELETE FROM pi_session 
          WHERE created_at < $1`,
-        [one_hour_ago]
+        [one_hour_ago],
       );
     }
 
@@ -47,7 +47,7 @@ export class PiController extends Controller {
       `INSERT INTO pi_session 
        (session_id, organization_id) 
        VALUES ($1, $2)`,
-      [body.sessionUUID, request.authParams.organizationId]
+      [body.sessionUUID, request.authParams.organizationId],
     );
 
     if (error) {
@@ -62,14 +62,14 @@ export class PiController extends Controller {
 
   @Post("/org-name/query")
   public async getOrgName(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     const result = await dbExecute<{
       name: string;
     }>(
       `SELECT name FROM organization
        WHERE id = $1`,
-      [request.authParams.organizationId]
+      [request.authParams.organizationId],
     );
 
     if (result.error || !result.data || result.data.length === 0) {
@@ -83,7 +83,7 @@ export class PiController extends Controller {
 
   @Post("/total-costs")
   public async getTotalCosts(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const startTime = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
     const endTime = new Date(Date.now());
@@ -97,7 +97,7 @@ export class PiController extends Controller {
               start: startTime,
               end: endTime,
             },
-            "request_response_rmt"
+            "request_response_rmt",
           ),
           right: "all",
           operator: "and",
@@ -126,7 +126,7 @@ export class PiController extends Controller {
 
   @Post("/total_requests")
   public async piGetTotalRequests(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const startTime = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
     const endTime = new Date(Date.now());
@@ -140,7 +140,7 @@ export class PiController extends Controller {
               start: startTime,
               end: endTime,
             },
-            "request_response_rmt"
+            "request_response_rmt",
           ),
           right: "all",
           operator: "and",
@@ -180,7 +180,7 @@ export class PiController extends Controller {
   public async getCostsOverTime(
     @Body()
     requestBody: DataOverTimeRequest,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -194,7 +194,9 @@ export class PiController extends Controller {
       cost: number;
     }>(requestBody, {
       orgId: request.authParams.organizationId,
-      countColumns: [`sum(request_response_rmt.cost) / ${COST_PRECISION_MULTIPLIER} as cost`],
+      countColumns: [
+        `sum(request_response_rmt.cost) / ${COST_PRECISION_MULTIPLIER} as cost`,
+      ],
       groupByColumns: ["created_at_trunc"],
     });
   }

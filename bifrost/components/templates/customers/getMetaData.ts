@@ -16,14 +16,14 @@ export interface CaseStudyStructureMetaData {
 export async function getMetadata(
   filePath: string,
   caseStudyFolder: string = "customers",
-  caseStudySubFolder: string = "case-studies"
+  caseStudySubFolder: string = "case-studies",
 ): Promise<CaseStudyStructureMetaData | null> {
   const basePath = path.join(
     process.cwd(),
     "app",
     caseStudyFolder,
     caseStudySubFolder,
-    filePath
+    filePath,
   );
   const jsonPath = path.join(basePath, "metadata.json");
 
@@ -46,7 +46,7 @@ export async function getMetadata(
     console.error(`[CaseStudy] Error loading metadata for ${filePath}:`, error);
     if (error instanceof Error) {
       console.error(
-        `[CaseStudy] Error name: ${error.name}, message: ${error.message}`
+        `[CaseStudy] Error name: ${error.name}, message: ${error.message}`,
       );
       console.error(`[CaseStudy] Error stack: ${error.stack}`);
     }

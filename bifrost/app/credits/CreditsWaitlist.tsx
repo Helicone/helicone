@@ -140,7 +140,7 @@ export function CreditsWaitlistForm({
       shareWindow = window.open(
         tweetUrl,
         "twitter-share",
-        "width=600,height=700,left=200,top=100"
+        "width=600,height=700,left=200,top=100",
       );
       setPendingShareTwitter(true);
     } else {
@@ -149,7 +149,7 @@ export function CreditsWaitlistForm({
       shareWindow = window.open(
         linkedinUrl,
         "linkedin-share",
-        "width=700,height=700,left=200,top=100"
+        "width=700,height=700,left=200,top=100",
       );
       setPendingShareLinkedIn(true);
     }
@@ -194,7 +194,7 @@ export function CreditsWaitlistForm({
             feature: "credits",
             platform,
           }),
-        }
+        },
       );
 
       if (response.ok) {

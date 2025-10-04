@@ -49,7 +49,7 @@ export const HEADSHOTS = {
 
 function metaDataToBlogStructure(
   folderName: string,
-  metadata: UnPromise<ReturnType<typeof getMetadata>>
+  metadata: UnPromise<ReturnType<typeof getMetadata>>,
 ): ManualBlogStructure {
   if (!metadata) {
     throw new Error("Metadata is null");
@@ -853,8 +853,8 @@ export default async function Blog({
           return (metadata?.badge || "insight").toLowerCase();
         }
         return blog.badgeText.toLowerCase();
-      })
-    )
+      }),
+    ),
   );
 
   // Always keep featured post visible

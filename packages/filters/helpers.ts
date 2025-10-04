@@ -1,18 +1,29 @@
 import { z } from "zod";
-import { TimeFilter, FilterNode, TablesAndViews, FilterLeaf } from "./filterDefs";
+import {
+  TimeFilter,
+  FilterNode,
+  TablesAndViews,
+  FilterLeaf,
+} from "./filterDefs";
 import { UIFilterRow, UIFilterRowNode, UIFilterRowTree } from "./types";
 import { SingleFilterDef } from "./frontendFilterDefs";
 
 export const TimeFilterSchema = z.object({
   timeFilter: z.object({
-    start: z.string().datetime().transform(str => new Date(str)),
-    end: z.string().datetime().transform(str => new Date(str)),
+    start: z
+      .string()
+      .datetime()
+      .transform((str) => new Date(str)),
+    end: z
+      .string()
+      .datetime()
+      .transform((str) => new Date(str)),
   }),
 });
 
 export function timeFilterToFilterNode(
   filter: TimeFilter,
-  table: keyof TablesAndViews
+  table: keyof TablesAndViews,
 ): FilterNode {
   if (table === "request_response_rmt") {
     return {
@@ -75,7 +86,7 @@ export function timeFilterToFilterNode(
 
 export function filterListToTree(
   list: FilterNode[],
-  operator: "or" | "and"
+  operator: "or" | "and",
 ): FilterNode {
   if (list.length === 0) {
     return "all";
@@ -91,7 +102,7 @@ export function filterListToTree(
 }
 
 export function isFilterRowNode(
-  filter: UIFilterRowTree
+  filter: UIFilterRowTree,
 ): filter is UIFilterRowNode {
   return (filter as UIFilterRowNode).rows !== undefined;
 }
@@ -108,7 +119,7 @@ export const getRootFilterNode = (): UIFilterRowNode => {
 
 export function uiFilterRowToFilterLeaf(
   filterMap: SingleFilterDef<any>[],
-  filter: UIFilterRow
+  filter: UIFilterRow,
 ): FilterLeaf {
   const filterDef = filterMap[filter.filterMapIdx];
   const operator = filterDef?.operators[filter.operatorIdx]?.value;
@@ -152,7 +163,7 @@ export function uiFilterRowToFilterLeaf(
 
 export function filterUITreeToFilterNode(
   filterMap: SingleFilterDef<any>[],
-  uiFilterRowNode: UIFilterRowTree
+  uiFilterRowNode: UIFilterRowTree,
 ): FilterNode {
   if ("operator" in uiFilterRowNode) {
     const filterNodes = uiFilterRowNode.rows
@@ -169,7 +180,7 @@ export function filterUITreeToFilterNode(
 
 export function filterUIToFilterLeafs(
   filterMap: SingleFilterDef<any>[],
-  filters: UIFilterRow[]
+  filters: UIFilterRow[],
 ): FilterLeaf[] {
   return filters
     .filter((filter) => filter.value !== "")
@@ -178,7 +189,7 @@ export function filterUIToFilterLeafs(
 
 export function uiFilterRowTreeToFilterLeafArray(
   filterMap: SingleFilterDef<any>[],
-  tree: UIFilterRowTree
+  tree: UIFilterRowTree,
 ): FilterLeaf[] {
   let filterLeafArray: FilterLeaf[] = [];
 

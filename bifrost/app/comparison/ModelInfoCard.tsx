@@ -188,7 +188,7 @@ const ModelInfoCard = ({
               <span className="font-medium">
                 {modelDetails.info.benchmarks?.hellaswag
                   ? `${(modelDetails.info.benchmarks.hellaswag * 100).toFixed(
-                      1
+                      1,
                     )}%`
                   : "-"}
               </span>

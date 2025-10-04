@@ -106,7 +106,7 @@ const PrototypeSidebar = ({
                           openedPage === "dashboard" ? "secondary" : "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[12px] h-8 px-2 cursor-pointer"
+                      "justify-start w-full text-[12px] h-8 px-2 cursor-pointer",
                     )}
                     onClick={() => setOpenedPage("dashboard")}
                   >
@@ -130,7 +130,7 @@ const PrototypeSidebar = ({
                           openedPage === "requests" ? "secondary" : "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[12px] h-8 px-2 cursor-pointer"
+                      "justify-start w-full text-[12px] h-8 px-2 cursor-pointer",
                     )}
                     onClick={() => setOpenedPage("requests")}
                   >
@@ -160,7 +160,7 @@ const PrototypeSidebar = ({
                           openedPage === "sessions" ? "secondary" : "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[12px] h-8 px-2 cursor-pointer"
+                      "justify-start w-full text-[12px] h-8 px-2 cursor-pointer",
                     )}
                     onClick={() => setOpenedPage("sessions")}
                   >
@@ -183,7 +183,7 @@ const PrototypeSidebar = ({
                         variant: "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[12px] h-8 px-2"
+                      "justify-start w-full text-[12px] h-8 px-2",
                     )}
                   >
                     <div className="flex items-center">
@@ -197,7 +197,7 @@ const PrototypeSidebar = ({
                         variant: "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[12px] h-8 px-2"
+                      "justify-start w-full text-[12px] h-8 px-2",
                     )}
                   >
                     <div className="flex items-center">
@@ -217,7 +217,7 @@ const PrototypeSidebar = ({
                         variant: "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[12px] h-8 px-2"
+                      "justify-start w-full text-[12px] h-8 px-2",
                     )}
                   >
                     <div className="flex items-center">
@@ -231,7 +231,7 @@ const PrototypeSidebar = ({
                         variant: "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[12px] h-8 px-2"
+                      "justify-start w-full text-[12px] h-8 px-2",
                     )}
                   >
                     <div className="flex items-center">
@@ -245,7 +245,7 @@ const PrototypeSidebar = ({
                         variant: "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[12px] h-8 px-2"
+                      "justify-start w-full text-[12px] h-8 px-2",
                     )}
                   >
                     <div className="flex items-center">
@@ -259,7 +259,7 @@ const PrototypeSidebar = ({
                         variant: "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[12px] h-8 px-2"
+                      "justify-start w-full text-[12px] h-8 px-2",
                     )}
                   >
                     <div className="flex items-center">
@@ -273,7 +273,7 @@ const PrototypeSidebar = ({
                         variant: "ghost",
                         size: "sm",
                       }),
-                      "justify-start w-full text-[11px] h-8 px-2"
+                      "justify-start w-full text-[11px] h-8 px-2",
                     )}
                   >
                     <div className="flex items-center text-[11px]">

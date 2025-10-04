@@ -15,7 +15,7 @@ import { Provider } from "@helicone-package/llm-mapper/types";
 import { CacheProvider } from "../../common/cache/provider";
 
 export function heliconeProviderToModelProviderName(
-  provider: Provider
+  provider: Provider,
 ): ModelProviderName | null {
   if (provider === "CUSTOM") {
     return null;
@@ -93,7 +93,7 @@ export function getProviderDisplayName(providerName: string): string {
 
 // TODO: Remove once we normalize provider names in provider_keys table.
 export const dbProviderToProvider = (
-  provider: string
+  provider: string,
 ): ModelProviderName | null => {
   if (provider === "openai" || provider === "OpenAI") {
     return "openai";
@@ -137,7 +137,7 @@ export const dbProviderToProvider = (
 
 export function buildEndpointUrl(
   endpoint: Endpoint,
-  requestParams: RequestParams
+  requestParams: RequestParams,
 ): Result<string> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
@@ -160,7 +160,7 @@ export function buildEndpointUrl(
 // Helper function to build model ID for an endpoint
 export function buildModelId(
   modelProviderConfig: ModelProviderConfig,
-  userConfig: UserEndpointConfig = {}
+  userConfig: UserEndpointConfig = {},
 ): Result<string> {
   const providerResult = getProvider(modelProviderConfig.provider);
   if (providerResult.error) {
@@ -181,7 +181,7 @@ export function buildModelId(
     return ok(modelId);
   } catch (error) {
     return err(
-      error instanceof Error ? error.message : "Failed to build model ID"
+      error instanceof Error ? error.message : "Failed to build model ID",
     );
   }
 }
@@ -190,7 +190,7 @@ export function buildModelId(
 export async function authenticateRequest(
   endpoint: Endpoint,
   authContext: AuthContext,
-  cacheProvider?: CacheProvider
+  cacheProvider?: CacheProvider,
 ): Promise<Result<AuthResult>> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
@@ -215,19 +215,19 @@ export async function authenticateRequest(
     const result = await provider.authenticate(
       authContext,
       endpoint,
-      cacheProvider
+      cacheProvider,
     );
     return ok(result);
   } catch (error) {
     return err(
-      error instanceof Error ? error.message : "Failed to authenticate request"
+      error instanceof Error ? error.message : "Failed to authenticate request",
     );
   }
 }
 
 export async function buildRequestBody(
   endpoint: Endpoint,
-  context: RequestBodyContext
+  context: RequestBodyContext,
 ): Promise<Result<string>> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
@@ -244,7 +244,7 @@ export async function buildRequestBody(
       JSON.stringify({
         ...context.parsedBody,
         model: endpoint.providerModelId,
-      })
+      }),
     );
   }
 
@@ -253,14 +253,14 @@ export async function buildRequestBody(
     return ok(result);
   } catch (error) {
     return err(
-      error instanceof Error ? error.message : "Failed to build request body"
+      error instanceof Error ? error.message : "Failed to build request body",
     );
   }
 }
 
 export async function buildErrorMessage(
   endpoint: Endpoint,
-  response: Response
+  response: Response,
 ): Promise<Result<string>> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {

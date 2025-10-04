@@ -41,7 +41,7 @@ export class GroqStreamProcessor implements IBodyProcessor {
           chunk &&
           typeof chunk === "object" &&
           chunk.x_groq &&
-          chunk.x_groq.usage
+          chunk.x_groq.usage,
       );
 
       let usage = {};
@@ -67,7 +67,7 @@ export class GroqStreamProcessor implements IBodyProcessor {
       } else {
         // Fallback to regular usage field
         const chunkWithUsage = data.find(
-          (chunk) => chunk && typeof chunk === "object" && chunk.usage
+          (chunk) => chunk && typeof chunk === "object" && chunk.usage,
         );
 
         if (chunkWithUsage?.usage) {

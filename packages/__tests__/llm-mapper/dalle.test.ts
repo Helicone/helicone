@@ -48,7 +48,7 @@ describe("mapDalleRequest", () => {
     // Test preview
     expect(result.preview.request).toBe("A beautiful image of a cat");
     expect(result.preview.response).toContain(
-      "Render a detailed image of a majestic cat"
+      "Render a detailed image of a majestic cat",
     );
     expect(result.preview.concatenatedMessages).toHaveLength(2);
     expect(result.preview.concatenatedMessages[0]).toEqual({

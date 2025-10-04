@@ -7,7 +7,7 @@ export class DualWriteProducer implements MessageProducer {
 
   constructor(
     primaryProducer: MessageProducer,
-    secondaryProducer: MessageProducer
+    secondaryProducer: MessageProducer,
   ) {
     this.primary = primaryProducer;
     this.secondary = secondaryProducer;

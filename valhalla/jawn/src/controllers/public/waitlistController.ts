@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Query,
-  Route,
-  Tags,
-} from "tsoa";
+import { Body, Controller, Get, Post, Query, Route, Tags } from "tsoa";
 import { Result } from "../../packages/common/result";
 import { WaitlistManager } from "../../managers/waitlist/WaitlistManager";
 
@@ -19,13 +11,18 @@ export class WaitListController extends Controller {
     body: {
       email: string;
       feature: string;
-    }
-  ): Promise<Result<{ 
-    success: boolean; 
-    position?: number;
-    alreadyOnList?: boolean;
-    sharedPlatforms?: string[];
-  }, string>> {
+    },
+  ): Promise<
+    Result<
+      {
+        success: boolean;
+        position?: number;
+        alreadyOnList?: boolean;
+        sharedPlatforms?: string[];
+      },
+      string
+    >
+  > {
     const manager = new WaitlistManager();
     const result = await manager.addToWaitlist(body.email, body.feature);
 
@@ -48,7 +45,7 @@ export class WaitListController extends Controller {
   @Get("/feature/status")
   public async isOnWaitlist(
     @Query() email: string,
-    @Query() feature: string
+    @Query() feature: string,
   ): Promise<Result<{ isOnWaitlist: boolean }, string>> {
     const manager = new WaitlistManager();
     const result = await manager.isOnWaitlist(email, feature);
@@ -68,7 +65,7 @@ export class WaitListController extends Controller {
 
   @Get("/feature/count")
   public async getWaitlistCount(
-    @Query() feature: string
+    @Query() feature: string,
   ): Promise<Result<{ count: number }, string>> {
     const manager = new WaitlistManager();
     const result = await manager.getWaitlistCount(feature);
@@ -93,14 +90,23 @@ export class WaitListController extends Controller {
       email: string;
       feature: string;
       platform: "twitter" | "linkedin";
-    }
-  ): Promise<Result<{ 
-    success: boolean; 
-    newPosition?: number;
-    message: string;
-  }, string>> {
+    },
+  ): Promise<
+    Result<
+      {
+        success: boolean;
+        newPosition?: number;
+        message: string;
+      },
+      string
+    >
+  > {
     const manager = new WaitlistManager();
-    const result = await manager.trackShare(body.email, body.feature, body.platform);
+    const result = await manager.trackShare(
+      body.email,
+      body.feature,
+      body.platform,
+    );
 
     if (result.error) {
       if (result.error === "Already shared on this platform") {

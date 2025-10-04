@@ -20,7 +20,7 @@ export function safeJsonParse<T>(text: string, errorMsg?: string): T | null {
       `JSON parsing error${errorMsg ? ` (${errorMsg})` : ""}: ${error}`,
       `Input excerpt: ${text.substring(0, 100)}${
         text.length > 100 ? "..." : ""
-      }`
+      }`,
     );
     return null;
   }
@@ -67,7 +67,7 @@ export function stringToNumberHash(str: string): number {
 }
 
 export async function compressData(
-  value: string
+  value: string,
 ): PromiseGenericResult<Buffer> {
   const buffer = Buffer.from(value, "utf-8");
   return new Promise((resolve, reject) => {

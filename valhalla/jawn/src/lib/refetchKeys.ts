@@ -19,7 +19,7 @@ export const MAX_RETRIES = 3;
 async function setProviderKeyDev(
   orgId: string,
   providerKeys: ProviderKey[],
-  retries = MAX_RETRIES
+  retries = MAX_RETRIES,
 ) {
   try {
     const res = await fetch(
@@ -40,15 +40,15 @@ async function setProviderKeyDev(
             orgId: providerKey.orgId,
             cuid: providerKey.cuid,
             byokEnabled: providerKey.byok_enabled,
-          }))
+          })),
         ),
-      }
+      },
     );
     if (!res.ok) {
       console.error(res);
       if (retries > 0) {
         await new Promise((resolve) =>
-          setTimeout(resolve, 10_000 * (MAX_RETRIES - retries))
+          setTimeout(resolve, 10_000 * (MAX_RETRIES - retries)),
         );
         await setProviderKeyDev(orgId, providerKeys, retries - 1);
       }
@@ -60,7 +60,7 @@ async function setProviderKeyDev(
 
 export async function setProviderKeys(
   orgId: string,
-  providerKeys: ProviderKey[]
+  providerKeys: ProviderKey[],
 ) {
   if (ENVIRONMENT === "production") {
     await storeInCache(`provider_keys_${orgId}`, JSON.stringify(providerKeys));
@@ -72,7 +72,7 @@ export async function setProviderKeys(
 export async function setAPIKey(
   apiKeyHash: string,
   organizationId: string,
-  softDelete: boolean
+  softDelete: boolean,
 ) {
   if (ENVIRONMENT === "production") {
     if (softDelete) {
@@ -89,7 +89,7 @@ export async function setAPIKeyDev(
   apiKeyHash: string,
   organizationId: string,
   softDelete: boolean,
-  retries = MAX_RETRIES
+  retries = MAX_RETRIES,
 ) {
   try {
     const res = await fetch(
@@ -104,13 +104,13 @@ export async function setAPIKeyDev(
           organizationId,
           softDelete,
         }),
-      }
+      },
     );
     if (!res.ok) {
       console.error(res);
       if (retries > 0) {
         await new Promise((resolve) =>
-          setTimeout(resolve, 10_000 * (MAX_RETRIES - retries))
+          setTimeout(resolve, 10_000 * (MAX_RETRIES - retries)),
         );
         await setAPIKeyDev(apiKeyHash, organizationId, softDelete, retries - 1);
       }

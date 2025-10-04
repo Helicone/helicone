@@ -125,7 +125,7 @@ export function ProviderStatusInfo({
 
   const maxErrorCount = Math.max(
     ...chartData.map((data) => data.errorCount || 0),
-    1
+    1,
   );
   const maxLatency = Math.max(...chartData.map((data) => data.latency || 0), 1);
 
@@ -288,7 +288,7 @@ export function ProviderStatusInfo({
                 <div className="text-muted-foreground">Peak latency</div>
                 <div className="font-medium">
                   {formatLatency(
-                    Math.max(...chartData.map((data) => data.latency))
+                    Math.max(...chartData.map((data) => data.latency)),
                   )}
                 </div>
               </div>
@@ -298,7 +298,7 @@ export function ProviderStatusInfo({
                   {formatLatency(
                     chartData.map((data) => data.latency).sort((a, b) => a - b)[
                       Math.floor(chartData.length * 0.95)
-                    ]
+                    ],
                   )}
                 </div>
               </div>

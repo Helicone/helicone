@@ -3,7 +3,7 @@ import React from "react";
 
 export const Col = React.forwardRef(function Col(
   props: JSX.IntrinsicElements["div"],
-  ref: React.Ref<HTMLDivElement>
+  ref: React.Ref<HTMLDivElement>,
 ) {
   const { children, className, ...rest } = props;
 

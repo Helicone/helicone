@@ -64,7 +64,7 @@ export class AdminWalletManager extends BaseManager {
       const controller = new AbortController();
       const timeoutId = setTimeout(
         () => controller.abort(),
-        WALLET_STATE_FETCH_TIMEOUT
+        WALLET_STATE_FETCH_TIMEOUT,
       );
 
       // Fetch wallet state
@@ -76,7 +76,7 @@ export class AdminWalletManager extends BaseManager {
             Authorization: `Bearer ${adminAccessKey}`,
           },
           signal: controller.signal,
-        }
+        },
       );
 
       clearTimeout(timeoutId);
@@ -91,7 +91,7 @@ export class AdminWalletManager extends BaseManager {
       const eventsController = new AbortController();
       const eventsTimeoutId = setTimeout(
         () => eventsController.abort(),
-        WALLET_EVENTS_FETCH_TIMEOUT
+        WALLET_EVENTS_FETCH_TIMEOUT,
       );
 
       let processedEventsCount = 0;
@@ -104,7 +104,7 @@ export class AdminWalletManager extends BaseManager {
               Authorization: `Bearer ${adminAccessKey}`,
             },
             signal: eventsController.signal,
-          }
+          },
         );
         clearTimeout(eventsTimeoutId);
 
@@ -150,7 +150,7 @@ export class AdminWalletManager extends BaseManager {
       orgIds.map(async (orgId) => ({
         orgId,
         state: await this.fetchWalletState(orgId),
-      }))
+      })),
     );
 
     const walletStateMap = new Map<
@@ -181,7 +181,7 @@ export class AdminWalletManager extends BaseManager {
     search: string,
     tokenUsageProductId: string,
     _sortBy: "total_spend",
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
   ): Promise<Result<DashboardData, string>> {
     const order = sortOrder === "asc" ? "ASC" : "DESC";
 
@@ -196,12 +196,12 @@ export class AdminWalletManager extends BaseManager {
         ORDER BY total_cost ${order}
         LIMIT 100
       `,
-      []
+      [],
     );
 
     if (clickhouseSpendResult.error || !clickhouseSpendResult.data) {
       return err(
-        clickhouseSpendResult.error || "Failed to fetch ClickHouse data"
+        clickhouseSpendResult.error || "Failed to fetch ClickHouse data",
       );
     }
 
@@ -282,7 +282,7 @@ export class AdminWalletManager extends BaseManager {
           organization.allow_negative_balance,
           organization.credit_limit
         `,
-      [...queryParams, ...orgIds]
+      [...queryParams, ...orgIds],
     );
 
     if (orgsResult.error) {
@@ -306,7 +306,7 @@ export class AdminWalletManager extends BaseManager {
     clickhouseSpendResult.data.forEach((row) => {
       clickhouseSpendMap.set(
         row.organization_id,
-        Number(row.total_cost) / COST_PRECISION_MULTIPLIER
+        Number(row.total_cost) / COST_PRECISION_MULTIPLIER,
       );
     });
 
@@ -315,7 +315,7 @@ export class AdminWalletManager extends BaseManager {
 
     // Combine the data, maintaining ClickHouse sort order
     const orgDetailsMap = new Map(
-      orgsResult.data.map((org) => [org.org_id, org])
+      orgsResult.data.map((org) => [org.org_id, org]),
     );
 
     const organizations = orgIds
@@ -352,11 +352,11 @@ export class AdminWalletManager extends BaseManager {
     // Calculate summary
     const totalCreditsIssued = organizations.reduce(
       (sum, org) => sum + org.totalPayments,
-      0
+      0,
     );
     const totalCreditsSpent = organizations.reduce(
       (sum, org) => sum + org.clickhouseTotalSpend,
-      0
+      0,
     );
 
     return ok({
@@ -378,7 +378,7 @@ export class AdminWalletManager extends BaseManager {
       | "total_payments"
       | "credit_limit"
       | "amount_received",
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
   ): Promise<Result<DashboardData, string>> {
     // Build search filter
     const searchFilter = search
@@ -469,7 +469,7 @@ export class AdminWalletManager extends BaseManager {
         ${orderClause}
         LIMIT 100
         `,
-      queryParams
+      queryParams,
     );
 
     if (orgsResult.error) {
@@ -508,7 +508,7 @@ export class AdminWalletManager extends BaseManager {
         and is_passthrough_billing = true
         GROUP BY organization_id
         `,
-      orgIds
+      orgIds,
     );
 
     const clickhouseSpendMap = new Map<string, number>();
@@ -517,7 +517,7 @@ export class AdminWalletManager extends BaseManager {
         // Divide by precision multiplier to get dollars
         clickhouseSpendMap.set(
           row.organization_id,
-          Number(row.total_cost) / COST_PRECISION_MULTIPLIER
+          Number(row.total_cost) / COST_PRECISION_MULTIPLIER,
         );
       });
     }
@@ -555,11 +555,11 @@ export class AdminWalletManager extends BaseManager {
     // Calculate summary
     const totalCreditsIssued = organizations.reduce(
       (sum, org) => sum + org.totalPayments,
-      0
+      0,
     );
     const totalCreditsSpent = organizations.reduce(
       (sum, org) => sum + org.clickhouseTotalSpend,
-      0
+      0,
     );
 
     return ok({

@@ -28,7 +28,7 @@ const Terms = () => {
   const privacyPageSection = (
     index: number,
     title: string,
-    description: string
+    description: string,
   ) => (
     <div className="text-lg flex flex-col space-y-4">
       <p className="text-xl font-semibold">{`${index}. ${title}`}</p>
@@ -45,7 +45,7 @@ const Terms = () => {
         </div>
 
         {pageContent.map((page, index) =>
-          privacyPageSection(index + 1, page.title, page.description)
+          privacyPageSection(index + 1, page.title, page.description),
         )}
       </div>
     </div>

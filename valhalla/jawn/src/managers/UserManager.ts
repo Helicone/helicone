@@ -68,7 +68,7 @@ const sortMappings: { [K in keyof UserMetric]: string } = {
 
 export function buildUserSort(
   sort: SortLeafUsers,
-  argsAcc: any[] = []
+  argsAcc: any[] = [],
 ): {
   orderByString: string;
   argsAcc: any[];
@@ -97,7 +97,7 @@ export class UserManager extends BaseManager {
   async getUserMetricsOverview(
     filter: FilterNode,
     pSize: PSize,
-    useInterquartile: boolean
+    useInterquartile: boolean,
   ): Promise<
     Result<{ request_count: HistogramRow[]; user_cost: HistogramRow[] }, string>
   > {
@@ -140,8 +140,13 @@ export class UserManager extends BaseManager {
   }
 
   async getUserMetrics(
-    queryParams: UserMetricsQueryParams
-  ): Promise<Result<{ users: UserMetricsResult[]; count: number; hasUsers: boolean }, string>> {
+    queryParams: UserMetricsQueryParams,
+  ): Promise<
+    Result<
+      { users: UserMetricsResult[]; count: number; hasUsers: boolean },
+      string
+    >
+  > {
     const {
       filter,
       offset,
@@ -163,7 +168,10 @@ export class UserManager extends BaseManager {
     LIMIT 1
     `;
 
-    const hasUsersResult = await dbQueryClickhouse<{ has_users: number }>(hasUsersQuery, [organizationId]);
+    const hasUsersResult = await dbQueryClickhouse<{ has_users: number }>(
+      hasUsersQuery,
+      [organizationId],
+    );
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: organizationId,
@@ -247,12 +255,15 @@ export class UserManager extends BaseManager {
       async () =>
         await dbQueryClickhouse<{ count: number }>(
           countQuery,
-          builtFilter.argsAcc
+          builtFilter.argsAcc,
         ),
-      kv
+      kv,
     );
 
-    const results = await clickhouseDb.dbQuery<UserMetric>(query, builtFilter.argsAcc);
+    const results = await clickhouseDb.dbQuery<UserMetric>(
+      query,
+      builtFilter.argsAcc,
+    );
 
     const users = resultMap(results, (x) =>
       x.map((y) => ({
@@ -267,7 +278,7 @@ export class UserManager extends BaseManager {
         last_active: new Date(y.last_active).toISOString(),
         total_requests: +y.total_requests,
         user_id: y.user_id,
-      }))
+      })),
     );
     if (users.error) {
       return users;

@@ -59,30 +59,30 @@ export class RequestManager extends BaseManager {
     super(authParams);
 
     this.versionedRequestStore = new VersionedRequestStore(
-      authParams.organizationId
+      authParams.organizationId,
     );
     this.s3Client = new S3Client(
       process.env.S3_ACCESS_KEY || undefined,
       process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT ?? "",
       process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
     );
   }
 
   async getRequestById(
-    requestId: string
+    requestId: string,
   ): Promise<Result<HeliconeRequest, string>> {
     return await cacheResultCustom(
       "v1/request/" + requestId + this.authParams.organizationId,
       () => this.uncachedGetRequestById(requestId),
-      kvCache
+      kvCache,
     );
   }
 
   // Never cache this unless you have a good reason
   async uncachedGetRequestByIdWithBody(
-    requestId: string
+    requestId: string,
   ): Promise<Result<HeliconeRequest, string>> {
     const request = await this.getRequestById(requestId);
     if (request.error || !request.data) {
@@ -108,17 +108,21 @@ export class RequestManager extends BaseManager {
   }
 
   async getRequestByIds(
-    requestIds: string[]
+    requestIds: string[],
   ): Promise<Result<HeliconeRequest[], string>> {
     const requests = await Promise.all(
-      requestIds.map((requestId) => this.getRequestById(requestId))
+      requestIds.map((requestId) => this.getRequestById(requestId)),
     );
 
-    return ok(requests.map((r) => r.data).filter((r) => r !== null) as HeliconeRequest[]);
+    return ok(
+      requests
+        .map((r) => r.data)
+        .filter((r) => r !== null) as HeliconeRequest[],
+    );
   }
 
   private async uncachedGetRequestById(
-    requestId: string
+    requestId: string,
   ): Promise<Result<HeliconeRequest, string>> {
     const requestClickhouse = await this.getRequestsClickhouse({
       filter: {
@@ -149,11 +153,11 @@ export class RequestManager extends BaseManager {
   async addPropertyToRequest(
     requestId: string,
     property: string,
-    value: string
+    value: string,
   ): Promise<Result<null, string>> {
     const requestResponse = await this.waitForRequestAndResponse(
       requestId,
-      this.authParams.organizationId
+      this.authParams.organizationId,
     );
     if (requestResponse.error) {
       return err("Request not found");
@@ -162,7 +166,7 @@ export class RequestManager extends BaseManager {
     const res = await this.versionedRequestStore.addPropertyToRequest(
       requestId,
       property,
-      value
+      value,
     );
 
     if (res.error) {
@@ -174,7 +178,7 @@ export class RequestManager extends BaseManager {
 
   private async waitForRequestAndResponse(
     heliconeId: string,
-    organizationId: string
+    organizationId: string,
   ): Promise<
     Result<
       {
@@ -200,7 +204,7 @@ export class RequestManager extends BaseManager {
         WHERE request.helicone_org_id = $1
         AND request.id = $2
         `,
-        [organizationId, heliconeId]
+        [organizationId, heliconeId],
       );
 
       if (responseError) {
@@ -223,7 +227,7 @@ export class RequestManager extends BaseManager {
   }
   async feedbackRequest(
     requestId: string,
-    feedback: boolean
+    feedback: boolean,
   ): Promise<Result<null, string>> {
     if (!this.isUUID(requestId)) {
       return err("Invalid requestId: must be a valid UUID");
@@ -277,7 +281,7 @@ export class RequestManager extends BaseManager {
 
   private addScoreFilterClickhouse(
     isScored: boolean,
-    filter: FilterNode
+    filter: FilterNode,
   ): FilterNode {
     if (isScored) {
       return {
@@ -308,7 +312,7 @@ export class RequestManager extends BaseManager {
 
   private addPartOfExperimentFilter(
     isPartOfExperiment: boolean,
-    filter: FilterNode
+    filter: FilterNode,
   ): FilterNode {
     if (isPartOfExperiment) {
       return {
@@ -338,7 +342,7 @@ export class RequestManager extends BaseManager {
   }
 
   async getRequestsPostgres(
-    params: RequestQueryParams
+    params: RequestQueryParams,
   ): Promise<Result<HeliconeRequest[], string>> {
     const {
       filter,
@@ -367,7 +371,7 @@ export class RequestManager extends BaseManager {
       newFilter,
       offset,
       limit,
-      sort
+      sort,
     );
 
     return resultMap(requests, (req) => {
@@ -409,7 +413,7 @@ export class RequestManager extends BaseManager {
 
     const { data, error } = await dbQueryClickhouse<{ count: number }>(
       query,
-      builtFilter.argsAcc
+      builtFilter.argsAcc,
     );
 
     if (error) {
@@ -420,7 +424,7 @@ export class RequestManager extends BaseManager {
   }
 
   async getRequestsClickhouse(
-    params: RequestQueryParams
+    params: RequestQueryParams,
   ): Promise<Result<HeliconeRequest[], string>> {
     const {
       filter,
@@ -445,14 +449,14 @@ export class RequestManager extends BaseManager {
             newFilter,
             offset,
             limit,
-            sort.created_at
+            sort.created_at,
           )
         : await getRequestsClickhouse(
             this.authParams.organizationId,
             newFilter,
             offset,
             limit,
-            sort
+            sort,
           );
 
     return resultMap(requests, (req) => {
@@ -508,12 +512,12 @@ export class RequestManager extends BaseManager {
 
   async getRequestAssetById(
     requestId: string,
-    assetId: string
+    assetId: string,
   ): Promise<Result<HeliconeRequestAsset, string>> {
     const { data: assetData, error: assetError } = await getRequestAsset(
       assetId,
       requestId,
-      this.authParams.organizationId
+      this.authParams.organizationId,
     );
 
     if (assetError || !assetData) {
@@ -522,7 +526,7 @@ export class RequestManager extends BaseManager {
     const assetUrl = await this.s3Client.getRequestResponseImageSignedUrl(
       this.authParams.organizationId,
       requestId,
-      assetData.id
+      assetData.id,
     );
     if (assetUrl.error || !assetUrl.data) {
       return err(`Error getting asset: ${assetUrl.error}`);

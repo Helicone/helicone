@@ -33,36 +33,51 @@ export interface ExperimentOutputForScores {
 }
 
 function getCustomScores(
-  scores: Record<string, ScoreV2>[]
+  scores: Record<string, ScoreV2>[],
 ): Record<string, ScoreV2> {
-  const scoresValues = scores.reduce((acc, record) => {
-    for (const key in record) {
-      if (record.hasOwnProperty(key) && typeof record[key].value === "number") {
-        if (!acc[key]) {
-          acc[key] = {
-            sum: 0,
-            count: 0,
-            valueType: record[key].valueType,
-            max: record[key].value as number,
-            min: record[key].value as number,
-          };
+  const scoresValues = scores.reduce(
+    (acc, record) => {
+      for (const key in record) {
+        if (
+          record.hasOwnProperty(key) &&
+          typeof record[key].value === "number"
+        ) {
+          if (!acc[key]) {
+            acc[key] = {
+              sum: 0,
+              count: 0,
+              valueType: record[key].valueType,
+              max: record[key].value as number,
+              min: record[key].value as number,
+            };
+          }
+          acc[key].sum += record[key].value as number;
+          acc[key].count += 1;
+          acc[key].max = Math.max(acc[key].max, record[key].value as number);
+          acc[key].min = Math.min(acc[key].min, record[key].value as number);
         }
-        acc[key].sum += record[key].value as number;
-        acc[key].count += 1;
-        acc[key].max = Math.max(acc[key].max, record[key].value as number);
-        acc[key].min = Math.min(acc[key].min, record[key].value as number);
       }
-    }
-    return acc;
-  }, {} as Record<string, { sum: number; count: number; valueType: string; max: number; min: number }>);
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        sum: number;
+        count: number;
+        valueType: string;
+        max: number;
+        min: number;
+      }
+    >,
+  );
 
   return Object.fromEntries(
     Object.entries(scoresValues).map(
       ([key, { sum, count, valueType, max, min }]) => [
         key,
         { value: sum / count, valueType, max, min },
-      ]
-    )
+      ],
+    ),
   );
 }
 
@@ -74,7 +89,7 @@ export class ExperimentV2Manager extends BaseManager {
   }
 
   async getPromptVersionFromRequest(
-    requestId: string
+    requestId: string,
   ): Promise<Result<string, string>> {
     const requestManager = new RequestManager(this.authParams);
     const requestResult = await requestManager.getRequestById(requestId);
@@ -88,7 +103,7 @@ export class ExperimentV2Manager extends BaseManager {
          FROM prompt_input_record
          WHERE source_request = $1
          LIMIT 1`,
-        [requestId]
+        [requestId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -109,7 +124,7 @@ export class ExperimentV2Manager extends BaseManager {
          WHERE id = $1
          AND organization = $2
          LIMIT 1`,
-        [experimentId, this.authParams.organizationId]
+        [experimentId, this.authParams.organizationId],
       );
 
       return !!(result.data && result.data.length > 0);
@@ -127,7 +142,7 @@ export class ExperimentV2Manager extends BaseManager {
          WHERE organization = $1
          AND soft_delete = false
          ORDER BY created_at DESC`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (result.error) {
@@ -148,7 +163,7 @@ export class ExperimentV2Manager extends BaseManager {
          WHERE id = $1
          AND organization = $2
          LIMIT 1`,
-        [experimentId, this.authParams.organizationId]
+        [experimentId, this.authParams.organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -174,7 +189,7 @@ export class ExperimentV2Manager extends BaseManager {
          SET soft_delete = true
          WHERE id = $1
          AND organization = $2`,
-        [experimentId, this.authParams.organizationId]
+        [experimentId, this.authParams.organizationId],
       );
 
       if (result.error) {
@@ -190,7 +205,7 @@ export class ExperimentV2Manager extends BaseManager {
   // this query needs to be better imo
   async createNewExperiment(
     name: string,
-    originalPromptVersion: string
+    originalPromptVersion: string,
   ): Promise<Result<{ experimentId: string }, string>> {
     try {
       const promptManager = new PromptManager(this.authParams);
@@ -217,7 +232,7 @@ export class ExperimentV2Manager extends BaseManager {
         `SELECT key
          FROM prompt_input_keys
          WHERE prompt_version = $1`,
-        [originalPromptVersion]
+        [originalPromptVersion],
       );
 
       // Create new experiment
@@ -230,7 +245,7 @@ export class ExperimentV2Manager extends BaseManager {
           originalPromptVersion,
           this.authParams.organizationId,
           inputKeysResult.data?.map((row) => row.key) || [],
-        ]
+        ],
       );
 
       if (
@@ -239,7 +254,7 @@ export class ExperimentV2Manager extends BaseManager {
         experimentResult.data.length === 0
       ) {
         return err(
-          `Failed to create new experiment: ${experimentResult.error}`
+          `Failed to create new experiment: ${experimentResult.error}`,
         );
       }
 
@@ -254,7 +269,7 @@ export class ExperimentV2Manager extends BaseManager {
           metadata: {
             label: "Original",
           },
-        }
+        },
       );
 
       if (newPromptVersion.error || !newPromptVersion.data) {
@@ -266,7 +281,7 @@ export class ExperimentV2Manager extends BaseManager {
         `UPDATE experiment_v3
          SET copied_original_prompt_version = $1
          WHERE id = $2`,
-        [newPromptVersion.data.id, experimentId]
+        [newPromptVersion.data.id, experimentId],
       );
 
       if (updateResult.error) {
@@ -280,7 +295,7 @@ export class ExperimentV2Manager extends BaseManager {
   }
 
   async getExperimentWithRowsById(
-    experimentId: string
+    experimentId: string,
   ): Promise<Result<ExtendedExperimentData, string>> {
     try {
       const experimentResult = await dbExecute<ExperimentV2>(
@@ -289,7 +304,7 @@ export class ExperimentV2Manager extends BaseManager {
          WHERE id = $1
          AND organization = $2
          LIMIT 1`,
-        [experimentId, this.authParams.organizationId]
+        [experimentId, this.authParams.organizationId],
       );
 
       if (
@@ -329,7 +344,7 @@ export class ExperimentV2Manager extends BaseManager {
         WHERE pir.experiment_id = $1
         ORDER BY pir.created_at ASC
         `,
-        [experimentId]
+        [experimentId],
       );
 
       if (rows.error || !rows.data) {
@@ -346,7 +361,7 @@ export class ExperimentV2Manager extends BaseManager {
   }
 
   async getExperimentOutputForScores(
-    experimentId: string
+    experimentId: string,
   ): Promise<Result<ExperimentOutputForScores[], string>> {
     try {
       const rows = await dbExecute<ExperimentOutputForScores>(
@@ -379,7 +394,7 @@ export class ExperimentV2Manager extends BaseManager {
     JOIN prompt_input_record pir ON pir.id = eo.input_record_id
     WHERE eo.experiment_id = $1
         `,
-        [experimentId]
+        [experimentId],
       );
 
       if (rows.error || !rows.data) {
@@ -394,13 +409,13 @@ export class ExperimentV2Manager extends BaseManager {
 
   async createNewPromptVersionForExperiment(
     experimentId: string,
-    requestBody: CreateNewPromptVersionForExperimentParams
+    requestBody: CreateNewPromptVersionForExperimentParams,
   ): Promise<Result<PromptVersionResult, string>> {
     try {
       const promptManager = new PromptManager(this.authParams);
       const result = await promptManager.createNewPromptVersion(
         requestBody.parentPromptVersionId,
-        requestBody
+        requestBody,
       );
 
       if (result.error || !result.data) {
@@ -409,8 +424,8 @@ export class ExperimentV2Manager extends BaseManager {
 
       const newPromptVersionInputKeys = Array.from(
         JSON.stringify(result.data.helicone_template).matchAll(
-          /<helicone-prompt-input key=\\"(\w+)\\" \/>/g
-        )
+          /<helicone-prompt-input key=\\"(\w+)\\" \/>/g,
+        ),
       ).map((match) => match[1]);
 
       // Get existing input keys
@@ -419,7 +434,7 @@ export class ExperimentV2Manager extends BaseManager {
          FROM experiment_v3
          WHERE id = $1
          LIMIT 1`,
-        [experimentId]
+        [experimentId],
       );
 
       const existingInputKeys = existingKeysResult.data?.[0]?.input_keys || [];
@@ -434,14 +449,14 @@ export class ExperimentV2Manager extends BaseManager {
           [...new Set([...existingInputKeys, ...newPromptVersionInputKeys])],
           this.authParams.organizationId,
           experimentId,
-        ]
+        ],
       );
 
       const insertPromptKeysResult = await dbExecute(
         `INSERT INTO prompt_input_keys (key, prompt_version)
          SELECT unnest($1::text[]), $2
          ON CONFLICT (key, prompt_version) DO NOTHING`,
-        [`{${newPromptVersionInputKeys.join(",")}}`, result.data.id]
+        [`{${newPromptVersionInputKeys.join(",")}}`, result.data.id],
       );
 
       if (updateExperimentResult.error || insertPromptKeysResult.error) {
@@ -451,14 +466,14 @@ export class ExperimentV2Manager extends BaseManager {
       return ok(result.data);
     } catch (error) {
       return err(
-        `Failed to create new prompt version for experiment: ${error}`
+        `Failed to create new prompt version for experiment: ${error}`,
       );
     }
   }
 
   async deletePromptVersion(
     experimentId: string,
-    promptVersionId: string
+    promptVersionId: string,
   ): Promise<Result<null, string>> {
     const experiment = await this.hasAccessToExperiment(experimentId);
     if (!experiment) {
@@ -468,7 +483,7 @@ export class ExperimentV2Manager extends BaseManager {
     const promptManager = new PromptManager(this.authParams);
     const result = await promptManager.removePromptVersionFromExperiment(
       promptVersionId,
-      experimentId
+      experimentId,
     );
     if (result.error) {
       return err("Failed to delete prompt version");
@@ -477,7 +492,7 @@ export class ExperimentV2Manager extends BaseManager {
   }
 
   async getPromptVersionsForExperiment(
-    experimentId: string
+    experimentId: string,
   ): Promise<Result<ExperimentV2PromptVersion[], string>> {
     try {
       const result = await dbExecute<ExperimentV2PromptVersion>(
@@ -486,7 +501,7 @@ export class ExperimentV2Manager extends BaseManager {
          WHERE experiment_id = $1
          AND organization = $2
          ORDER BY minor_version ASC`,
-        [experimentId, this.authParams.organizationId]
+        [experimentId, this.authParams.organizationId],
       );
 
       if (result.error) {
@@ -500,7 +515,7 @@ export class ExperimentV2Manager extends BaseManager {
   }
 
   async getInputKeysForExperiment(
-    experimentId: string
+    experimentId: string,
   ): Promise<Result<string[], string>> {
     try {
       const result = await dbExecute<{ input_keys: string[] }>(
@@ -509,7 +524,7 @@ export class ExperimentV2Manager extends BaseManager {
          WHERE id = $1
          AND organization = $2
          LIMIT 1`,
-        [experimentId, this.authParams.organizationId]
+        [experimentId, this.authParams.organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -524,7 +539,7 @@ export class ExperimentV2Manager extends BaseManager {
 
   async addManualRowToExperiment(
     experimentId: string,
-    inputs: Record<string, string>
+    inputs: Record<string, string>,
   ): Promise<Result<string, string>> {
     try {
       const experiment = await this.getExperimentById(experimentId);
@@ -537,7 +552,7 @@ export class ExperimentV2Manager extends BaseManager {
         experiment.copied_original_prompt_version ?? "",
         inputs,
         undefined,
-        experimentId
+        experimentId,
       );
       if (result.error || !result.data) {
         return err("Failed to add manual row to experiment");
@@ -550,7 +565,7 @@ export class ExperimentV2Manager extends BaseManager {
 
   async addManualRowsToExperimentBatch(
     experimentId: string,
-    inputs: Record<string, string>[]
+    inputs: Record<string, string>[],
   ): Promise<Result<null, string>> {
     try {
       const experiment = await this.getExperimentById(experimentId);
@@ -563,7 +578,7 @@ export class ExperimentV2Manager extends BaseManager {
         experiment.copied_original_prompt_version ?? "",
         inputs,
         undefined,
-        experimentId
+        experimentId,
       );
 
       return ok(null);
@@ -578,7 +593,7 @@ export class ExperimentV2Manager extends BaseManager {
       inputRecordId: string;
       inputs: Record<string, string>;
       autoInputs: Record<string, any>;
-    }[]
+    }[],
   ): Promise<Result<null, string>> {
     try {
       await Promise.all(
@@ -587,9 +602,9 @@ export class ExperimentV2Manager extends BaseManager {
             experimentId,
             row.inputRecordId,
             row.inputs,
-            row.autoInputs
+            row.autoInputs,
           );
-        })
+        }),
       );
 
       return ok(null);
@@ -600,7 +615,7 @@ export class ExperimentV2Manager extends BaseManager {
 
   async createExperimentTableRowBatchFromDataset(
     experimentId: string,
-    datasetId: string
+    datasetId: string,
   ): Promise<Result<null, string>> {
     const experiment = await this.getExperimentById(experimentId);
     if (!experiment) {
@@ -611,7 +626,7 @@ export class ExperimentV2Manager extends BaseManager {
     const inputRecords =
       await inputManager.getInputsFromPromptVersionAndDataset(
         experiment.original_prompt_version ?? "",
-        datasetId
+        datasetId,
       );
 
     if (!inputRecords.data) {
@@ -625,15 +640,15 @@ export class ExperimentV2Manager extends BaseManager {
             experimentId,
             row.id,
             row.inputs,
-            row.auto_prompt_inputs
+            row.auto_prompt_inputs,
           );
-        })
+        }),
       );
 
       return ok(null);
     } catch (error) {
       return err(
-        `Failed to create experiment table row with cells batch: ${error}`
+        `Failed to create experiment table row with cells batch: ${error}`,
       );
     }
   }
@@ -642,7 +657,7 @@ export class ExperimentV2Manager extends BaseManager {
     experimentId: string,
     inputRecordId: string,
     inputs: Record<string, string>,
-    autoInputs: Record<string, any>
+    autoInputs: Record<string, any>,
   ): Promise<Result<null, string>> {
     try {
       // Get the original prompt input record
@@ -651,7 +666,7 @@ export class ExperimentV2Manager extends BaseManager {
          FROM prompt_input_record
          WHERE id = $1
          LIMIT 1`,
-        [inputRecordId]
+        [inputRecordId],
       );
 
       if (
@@ -682,7 +697,7 @@ export class ExperimentV2Manager extends BaseManager {
           autoInputs,
           experiment.copied_original_prompt_version || "",
           experimentId,
-        ]
+        ],
       );
 
       if (
@@ -709,7 +724,7 @@ export class ExperimentV2Manager extends BaseManager {
           true,
           experimentId,
           originalPIRResult.data[0].source_request,
-        ]
+        ],
       );
 
       if (outputResult.error) {
@@ -724,7 +739,7 @@ export class ExperimentV2Manager extends BaseManager {
 
   async deleteExperimentTableRows(
     experimentId: string,
-    inputRecordIds: string[]
+    inputRecordIds: string[],
   ): Promise<Result<null, string>> {
     const experiment = await this.getExperimentById(experimentId);
     if (!experiment) {
@@ -744,7 +759,7 @@ export class ExperimentV2Manager extends BaseManager {
          SET experiment_id = null
          WHERE id IN (${placeholders})
          AND experiment_id = $1`,
-        [experimentId, ...inputRecordIds]
+        [experimentId, ...inputRecordIds],
       );
 
       if (result.error) {
@@ -760,7 +775,7 @@ export class ExperimentV2Manager extends BaseManager {
   async updateExperimentTableRow(
     experimentId: string,
     inputRecordId: string,
-    inputs: Record<string, string>
+    inputs: Record<string, string>,
   ): Promise<Result<null, string>> {
     try {
       const experiment = await this.getExperimentById(experimentId);
@@ -773,7 +788,7 @@ export class ExperimentV2Manager extends BaseManager {
          SET inputs = $1
          WHERE id = $2
          AND experiment_id = $3`,
-        [inputs, inputRecordId, experimentId]
+        [inputs, inputRecordId, experimentId],
       );
 
       if (result.error) {
@@ -789,7 +804,7 @@ export class ExperimentV2Manager extends BaseManager {
   async runHypothesis(
     experimentId: string,
     promptVersionId: string,
-    inputRecordId: string
+    inputRecordId: string,
   ): Promise<Result<string, string>> {
     try {
       const experiment = await this.getExperimentById(experimentId);
@@ -800,7 +815,7 @@ export class ExperimentV2Manager extends BaseManager {
         experimentId,
         promptVersionId,
         inputRecordId,
-        this.authParams.organizationId
+        this.authParams.organizationId,
       );
 
       return result;
@@ -811,7 +826,7 @@ export class ExperimentV2Manager extends BaseManager {
 
   async getExperimentPromptVersionScores(
     experimentId: string,
-    promptVersionId: string
+    promptVersionId: string,
   ): Promise<Result<Record<string, ScoreV2>, string>> {
     const experiment = await this.hasAccessToExperiment(experimentId);
     if (!experiment) {
@@ -840,7 +855,7 @@ export class ExperimentV2Manager extends BaseManager {
     WHERE eo.experiment_id = $1
     AND eo.prompt_version_id = $2
     `,
-      [experimentId, promptVersionId]
+      [experimentId, promptVersionId],
     );
 
     const scoresArray = rows.data?.map((row) => row.scores) ?? [];
@@ -853,7 +868,7 @@ export class ExperimentV2Manager extends BaseManager {
   async getExperimentRequestScore(
     experimentId: string,
     requestId: string,
-    scoreKey: string
+    scoreKey: string,
   ): Promise<Result<ScoreV2 | null, string>> {
     const rows = await dbExecute<{ score: ScoreV2 }>(
       `SELECT jsonb_build_object(
@@ -867,7 +882,7 @@ export class ExperimentV2Manager extends BaseManager {
         sv.request_id = $1 
         AND sa.score_key = $2
         AND r.helicone_org_id = $3`,
-      [requestId, scoreKey, this.authParams.organizationId]
+      [requestId, scoreKey, this.authParams.organizationId],
     );
 
     return ok(rows.data?.[0]?.score ?? null);

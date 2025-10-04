@@ -96,7 +96,7 @@ export class EvaluatorController extends Controller {
   @Post("/")
   public async createEvaluator(
     @Body() requestBody: CreateEvaluatorParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<EvaluatorResult, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.createEvaluator(requestBody);
@@ -112,7 +112,7 @@ export class EvaluatorController extends Controller {
   @Get("{evaluatorId}")
   public async getEvaluator(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() evaluatorId: string
+    @Path() evaluatorId: string,
   ): Promise<Result<EvaluatorResult, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.getEvaluator(evaluatorId);
@@ -128,7 +128,7 @@ export class EvaluatorController extends Controller {
   @Post("query")
   public async queryEvaluators(
     @Body() requestBody: {},
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<EvaluatorResult[], string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.queryEvaluators();
@@ -145,12 +145,12 @@ export class EvaluatorController extends Controller {
   public async updateEvaluator(
     @Path() evaluatorId: string,
     @Body() requestBody: UpdateEvaluatorParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<EvaluatorResult, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.updateEvaluator(
       evaluatorId,
-      requestBody
+      requestBody,
     );
 
     if (result.error || !result.data) {
@@ -164,7 +164,7 @@ export class EvaluatorController extends Controller {
   @Delete("{evaluatorId}")
   public async deleteEvaluator(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() evaluatorId: string
+    @Path() evaluatorId: string,
   ): Promise<Result<null, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.deleteEvaluator(evaluatorId);
@@ -180,7 +180,7 @@ export class EvaluatorController extends Controller {
   @Get("{evaluatorId}/experiments")
   public async getExperimentsForEvaluator(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() evaluatorId: string
+    @Path() evaluatorId: string,
   ): Promise<Result<EvaluatorExperiment[], string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.getExperiments(evaluatorId);
@@ -196,14 +196,13 @@ export class EvaluatorController extends Controller {
   @Get("{evaluatorId}/onlineEvaluators")
   public async getOnlineEvaluators(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() evaluatorId: string
+    @Path() evaluatorId: string,
   ): Promise<Result<OnlineEvaluatorByEvaluatorId[], string>> {
     const onlineEvalStore = new OnlineEvalStore(
-      request.authParams.organizationId
+      request.authParams.organizationId,
     );
-    const result = await onlineEvalStore.getOnlineEvaluatorsByEvaluatorId(
-      evaluatorId
-    );
+    const result =
+      await onlineEvalStore.getOnlineEvaluatorsByEvaluatorId(evaluatorId);
 
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -217,7 +216,7 @@ export class EvaluatorController extends Controller {
   public async createOnlineEvaluator(
     @Request() request: JawnAuthenticatedRequest,
     @Path() evaluatorId: string,
-    @Body() requestBody: CreateOnlineEvaluatorParams
+    @Body() requestBody: CreateOnlineEvaluatorParams,
   ): Promise<Result<null, string>> {
     const sampleRate = requestBody.config?.sampleRate ?? 100;
 
@@ -241,7 +240,7 @@ export class EvaluatorController extends Controller {
       ) {
         this.setStatus(400);
         return err(
-          "Property filters must be an array of objects with key and value properties"
+          "Property filters must be an array of objects with key and value properties",
         );
       }
     }
@@ -259,7 +258,7 @@ export class EvaluatorController extends Controller {
             value: propertyFilter.value,
           })),
         }),
-      ]
+      ],
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -274,14 +273,13 @@ export class EvaluatorController extends Controller {
   public async deleteOnlineEvaluator(
     @Request() request: JawnAuthenticatedRequest,
     @Path() evaluatorId: string,
-    @Path() onlineEvaluatorId: string
+    @Path() onlineEvaluatorId: string,
   ): Promise<Result<null, string>> {
     const onlineEvalStore = new OnlineEvalStore(
-      request.authParams.organizationId
+      request.authParams.organizationId,
     );
-    const result = await onlineEvalStore.deleteOnlineEvaluator(
-      onlineEvaluatorId
-    );
+    const result =
+      await onlineEvalStore.deleteOnlineEvaluator(onlineEvaluatorId);
     if (result.error) {
       this.setStatus(500);
       return err(result.error || "Failed to delete online evaluator");
@@ -298,7 +296,7 @@ export class EvaluatorController extends Controller {
     requestBody: {
       code: string;
       testInput: TestInput;
-    }
+    },
   ): Promise<
     Result<
       {
@@ -332,7 +330,7 @@ export class EvaluatorController extends Controller {
       evaluatorConfig: EvaluatorConfig;
       testInput: TestInput;
       evaluatorName: string;
-    }
+    },
   ): Promise<EvaluatorScoreResult> {
     // convert "boolean" | "choice" | "range" to "LLM-CHOICE" | "LLM-BOOLEAN" | "LLM-RANGE"
     if (requestBody.evaluatorConfig.evaluator_scoring_type === "boolean") {
@@ -351,7 +349,7 @@ export class EvaluatorController extends Controller {
         | "LLM-BOOLEAN"
         | "LLM-RANGE",
       llmTemplate: JSON.parse(
-        requestBody.evaluatorConfig.evaluator_llm_template ?? "{}"
+        requestBody.evaluatorConfig.evaluator_llm_template ?? "{}",
       ),
       inputRecord: requestBody.testInput.inputs,
       outputBody: requestBody.testInput.outputBody,
@@ -374,7 +372,7 @@ export class EvaluatorController extends Controller {
     requestBody: {
       config: LastMileConfigForm;
       testInput: TestInput;
-    }
+    },
   ): Promise<
     Result<
       {
@@ -400,7 +398,7 @@ export class EvaluatorController extends Controller {
   @Get("{evaluatorId}/stats")
   public async getEvaluatorStats(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() evaluatorId: string
+    @Path() evaluatorId: string,
   ): Promise<Result<EvaluatorStats, string>> {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.getEvaluatorStats(evaluatorId);

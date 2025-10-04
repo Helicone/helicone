@@ -14,13 +14,13 @@ const LogoBox = ({
     <div
       className={cn(
         "bg-[#E2F1FD66] rounded-2xl p-3 2xl:p-3.5 shadow-xl hidden lg:block border-2 border-white",
-        className
+        className,
       )}
     >
       <div
         className={cn(
           "w-full h-full flex items-center justify-center rounded-2xl",
-          innerClassName
+          innerClassName,
         )}
       >
         <Image

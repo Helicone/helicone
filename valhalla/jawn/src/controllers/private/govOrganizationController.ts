@@ -25,7 +25,7 @@ export class GovOrganizationController extends Controller {
     body: {
       limitUSD: number;
       days: number;
-    }
+    },
   ) {
     const isAdminResult = await dbExecute<{
       id: string;
@@ -38,7 +38,7 @@ export class GovOrganizationController extends Controller {
        WHERE organization = $1
        AND member = $2
        AND (org_role = 'admin' OR org_role = 'owner')`,
-      [request.authParams.organizationId, request.authParams.userId!]
+      [request.authParams.organizationId, request.authParams.userId!],
     );
 
     if (
@@ -58,7 +58,7 @@ export class GovOrganizationController extends Controller {
         { limitUSD: body.limitUSD, days: body.days },
         memberId,
         request.authParams.organizationId,
-      ]
+      ],
     );
 
     if (error) {
@@ -81,7 +81,7 @@ export class GovOrganizationController extends Controller {
        FROM organization_member
        WHERE member = $1
        AND organization = $2`,
-      [request.authParams.userId!, request.authParams.organizationId]
+      [request.authParams.userId!, request.authParams.organizationId],
     );
 
     if (result.error || !result.data || result.data.length === 0) {
@@ -94,7 +94,7 @@ export class GovOrganizationController extends Controller {
   @Get("/limits/member/{memberId}")
   public async getMemberLimits(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() memberId: string
+    @Path() memberId: string,
   ) {
     const result = await dbExecute<{
       id: string;
@@ -107,7 +107,7 @@ export class GovOrganizationController extends Controller {
        FROM organization_member
        WHERE member = $1
        AND organization = $2`,
-      [memberId, request.authParams.organizationId]
+      [memberId, request.authParams.organizationId],
     );
 
     if (result.error || !result.data || result.data.length === 0) {
@@ -126,7 +126,7 @@ export class GovOrganizationController extends Controller {
        FROM organization
        WHERE id = $1
        AND governance_settings IS NOT NULL`,
-      [request.authParams.organizationId]
+      [request.authParams.organizationId],
     );
 
     if (result.error || !result.data || result.data.length === 0) {

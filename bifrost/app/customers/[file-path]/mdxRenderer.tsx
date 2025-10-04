@@ -23,5 +23,4 @@ export function RemoteMdxPage({ mdxSource, relatedStudiesData = [] }: Props) {
   };
 
   return <MDXRemote {...mdxSource} components={components} />;
-
 }

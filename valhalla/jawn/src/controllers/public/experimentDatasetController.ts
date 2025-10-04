@@ -64,7 +64,7 @@ export class ExperimentDatasetController extends Controller {
   public async addDataset(
     @Body()
     requestBody: NewDatasetParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -92,7 +92,7 @@ export class ExperimentDatasetController extends Controller {
   public async addRandomDataset(
     @Body()
     requestBody: RandomDatasetParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -121,11 +121,11 @@ export class ExperimentDatasetController extends Controller {
     requestBody: {
       promptVersionId?: string;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<DatasetResult[], string>> {
     const datasetManager = new DatasetManager(request.authParams);
     const result = await datasetManager.getDatasets(
-      requestBody.promptVersionId
+      requestBody.promptVersionId,
     );
     if (result.error || !result.data) {
       this.setStatus(500);
@@ -144,12 +144,12 @@ export class ExperimentDatasetController extends Controller {
       originalColumnId?: string;
     },
     @Request() request: JawnAuthenticatedRequest,
-    @Path() datasetId: string
+    @Path() datasetId: string,
   ): Promise<Result<string, string>> {
     const datasetManager = new DatasetManager(request.authParams);
     const datasetRowResult = await datasetManager.addDatasetRow(
       datasetId,
-      requestBody.inputRecordId
+      requestBody.inputRecordId,
     );
     if (datasetRowResult.error || !datasetRowResult.data) {
       console.error(datasetRowResult.error);
@@ -170,14 +170,14 @@ export class ExperimentDatasetController extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest,
     @Path() datasetId: string,
-    @Path() promptVersionId: string
+    @Path() promptVersionId: string,
   ): Promise<Result<string, string>> {
     const inputManager = new InputsManager(request.authParams);
 
     const inputRecordResult = await inputManager.createInputRecord(
       promptVersionId,
       requestBody.inputs,
-      requestBody.sourceRequest
+      requestBody.sourceRequest,
     );
 
     if (inputRecordResult.error || !inputRecordResult.data) {
@@ -189,7 +189,7 @@ export class ExperimentDatasetController extends Controller {
     const datasetManager = new DatasetManager(request.authParams);
     const datasetRowResult = await datasetManager.addDatasetRow(
       datasetId,
-      inputRecordResult.data
+      inputRecordResult.data,
     );
 
     if (datasetRowResult.error || !datasetRowResult.data) {
@@ -206,7 +206,7 @@ export class ExperimentDatasetController extends Controller {
   public async getDataset(
     // @Body() requestBody: {},
     @Request() request: JawnAuthenticatedRequest,
-    @Path() datasetId: string
+    @Path() datasetId: string,
   ) {
     const inputManager = new InputsManager(request.authParams);
     return inputManager.getInputsFromDataset(datasetId, 1_000);
@@ -219,7 +219,7 @@ export class ExperimentDatasetController extends Controller {
       addRequests: string[];
       removeRequests: string[];
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{}[], string>> {
     return err("Not implemented");
   }

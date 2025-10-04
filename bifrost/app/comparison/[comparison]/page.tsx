@@ -18,10 +18,10 @@ export default async function Home({
 
   // Find the provider info
   const providerInfoA = providers.find(
-    (p) => p.provider === providerA.toUpperCase()
+    (p) => p.provider === providerA.toUpperCase(),
   );
   const providerInfoB = providers.find(
-    (p) => p.provider === providerB.toUpperCase()
+    (p) => p.provider === providerB.toUpperCase(),
   );
 
   // Helper function to find model details
@@ -32,7 +32,7 @@ export default async function Home({
     }
     // If no direct match, search through matches
     for (const [parentModel, details] of Object.entries<{ matches: string[] }>(
-      providerInfo?.modelDetails || {}
+      providerInfo?.modelDetails || {},
     )) {
       if (details.matches.includes(modelName)) {
         return details;
@@ -86,10 +86,10 @@ export async function generateStaticParams() {
       const [modelB, providerB] = modelProviderPairs[j];
 
       const modelAPath = `${encodeURIComponent(
-        modelA.toLowerCase()
+        modelA.toLowerCase(),
       )}-on-${encodeURIComponent(providerA.toLowerCase())}`;
       const modelBPath = `${encodeURIComponent(
-        modelB.toLowerCase()
+        modelB.toLowerCase(),
       )}-on-${encodeURIComponent(providerB.toLowerCase())}`;
 
       paths.push({

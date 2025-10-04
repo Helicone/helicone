@@ -44,7 +44,7 @@ export class KVCache {
         key,
         Buffer.from(JSON.stringify(value)),
         "PX",
-        this.ttl
+        this.ttl,
       );
     }
   }

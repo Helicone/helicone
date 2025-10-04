@@ -68,7 +68,7 @@ export class AdminWalletController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Query() search?: string,
     @Query() sortBy?: string,
-    @Query() sortOrder?: "asc" | "desc"
+    @Query() sortOrder?: "asc" | "desc",
   ): Promise<Result<DashboardData, string>> {
     await authCheckThrow(request.authParams.userId);
 
@@ -92,21 +92,21 @@ export class AdminWalletController extends Controller {
         search || "",
         tokenUsageProductId,
         sortBy as any,
-        sortOrder
+        sortOrder,
       );
     }
     return adminWalletManager.getDashboardWithPostgresSort(
       search || "",
       tokenUsageProductId,
       sortBy as any,
-      sortOrder
+      sortOrder,
     );
   }
 
   @Post("/{orgId}")
   public async getWalletDetails(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() orgId: string
+    @Path() orgId: string,
   ): Promise<Result<WalletState, string>> {
     await authCheckThrow(request.authParams.userId);
 
@@ -120,7 +120,7 @@ export class AdminWalletController extends Controller {
     @Path() orgId: string,
     @Path() tableName: string,
     @Query() page?: number,
-    @Query() pageSize?: number
+    @Query() pageSize?: number,
   ): Promise<Result<TableDataResponse, string>> {
     // Validate pagination parameters
     const validatedPage = Math.max(0, page ?? 0);
@@ -170,7 +170,7 @@ export class AdminWalletController extends Controller {
             Authorization: `Bearer ${adminAccessKey}`,
           },
           signal: controller.signal,
-        }
+        },
       );
 
       clearTimeout(timeoutId);
@@ -222,7 +222,7 @@ export class AdminWalletController extends Controller {
     @Path() orgId: string,
     @Query() amount: number,
     @Query() type: "credit" | "debit",
-    @Query() reason: string
+    @Query() reason: string,
   ): Promise<Result<WalletState, string>> {
     await authCheckThrow(request.authParams.userId);
 
@@ -277,7 +277,7 @@ export class AdminWalletController extends Controller {
             adminUserId: request.authParams.userId,
           }),
           signal: controller.signal,
-        }
+        },
       );
 
       clearTimeout(timeoutId);
@@ -306,10 +306,10 @@ export class AdminWalletController extends Controller {
       // Fallback for local development when Durable Objects don't work
       if (ENVIRONMENT !== "production") {
         console.warn(
-          "Wallet modification not available in local development mode"
+          "Wallet modification not available in local development mode",
         );
         return err(
-          "Wallet modification is not available in local development mode. This feature requires production Durable Objects."
+          "Wallet modification is not available in local development mode. This feature requires production Durable Objects.",
         );
       }
 
@@ -322,7 +322,7 @@ export class AdminWalletController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string,
     @Query() allowNegativeBalance?: boolean,
-    @Query() creditLimit?: number
+    @Query() creditLimit?: number,
   ): Promise<
     Result<
       {
@@ -377,7 +377,7 @@ export class AdminWalletController extends Controller {
         WHERE id = $${paramIndex}
         RETURNING allow_negative_balance, credit_limit
         `,
-        values
+        values,
       );
 
       if (updateResult.error) {
@@ -405,7 +405,7 @@ export class AdminWalletController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string,
     @Query() provider: string,
-    @Query() model: string
+    @Query() model: string,
   ): Promise<Result<WalletState, string>> {
     await authCheckThrow(request.authParams.userId);
 
@@ -438,7 +438,7 @@ export class AdminWalletController extends Controller {
           },
           body: JSON.stringify({ provider, model }),
           signal: controller.signal,
-        }
+        },
       );
 
       clearTimeout(timeoutId);

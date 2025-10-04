@@ -15,7 +15,7 @@ export function isError<T, K>(result: Result<T, K>): result is ResultError<K> {
 }
 
 export function isSuccess<T, K>(
-  result: Result<T, K>
+  result: Result<T, K>,
 ): result is ResultSuccess<T> {
   return result.error === null;
 }
@@ -28,7 +28,7 @@ export function unwrap<T, K>(result: Result<T, K>): T {
 }
 
 export async function unwrapAsync<T, K>(
-  result: Promise<Result<T, K>>
+  result: Promise<Result<T, K>>,
 ): Promise<T> {
   return unwrap(await result);
 }
@@ -39,7 +39,7 @@ export function unwrapList<T extends unknown, K>(results: Result<T, K>[]): T[] {
 
 export function resultMap<T, K, Z>(
   result: Result<T, K>,
-  f: (data: T) => Z
+  f: (data: T) => Z,
 ): Result<Z, K> {
   if (isError(result)) {
     return result;
@@ -63,7 +63,7 @@ type AllSuccessTuple<T extends Result<any, any>[]> = {
 };
 
 export function resultsAll<T extends Result<any, any>[]>(
-  results: [...T]
+  results: [...T],
 ): Result<AllSuccessTuple<T>, UnwrapError<T[number]>> {
   const data: any[] = [];
 

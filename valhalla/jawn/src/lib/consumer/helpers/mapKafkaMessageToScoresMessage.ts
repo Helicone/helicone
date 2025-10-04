@@ -3,7 +3,7 @@ import { GenericResult, err, ok } from "../../../packages/common/result";
 import { HeliconeScoresMessage } from "../../handlers/HandlerContext";
 
 export function mapKafkaMessageToScoresMessage(
-  kafkaMessage: KafkaMessage[]
+  kafkaMessage: KafkaMessage[],
 ): GenericResult<HeliconeScoresMessage[]> {
   const messages: HeliconeScoresMessage[] = [];
   for (const message of kafkaMessage) {

@@ -48,10 +48,8 @@ const PromptUsageChart = (props: PromptUsageChartProps) => {
     timeZoneDifference: new Date().getTimezoneOffset(),
   };
 
-  const {
-    data,
-    isLoading: isPromptRequestsLoading,
-  } = usePromptRequestsOverTime(params, "promptRequests" + promptId);
+  const { data, isLoading: isPromptRequestsLoading } =
+    usePromptRequestsOverTime(params, "promptRequests" + promptId);
 
   return (
     <>

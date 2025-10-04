@@ -29,7 +29,7 @@ describe("buildRequestSortClickhouse", () => {
     const sort: SortLeafRequest = { total_tokens: "desc" };
     const result = buildRequestSortClickhouse(sort);
     expect(result).toBe(
-      "(request_response_rmt.prompt_tokens + request_response_rmt.completion_tokens) desc"
+      "(request_response_rmt.prompt_tokens + request_response_rmt.completion_tokens) desc",
     );
   });
 });

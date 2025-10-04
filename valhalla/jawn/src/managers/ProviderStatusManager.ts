@@ -92,7 +92,7 @@ const TIME_FILTER_MAP = {
 export class ProviderStatusManager {
   private getTimeSeriesQuery(
     providerFilter: string,
-    timeFilter: TimeFrame = "24h"
+    timeFilter: TimeFrame = "24h",
   ): string {
     const { interval, groupingInterval } = TIME_FILTER_MAP[timeFilter];
 
@@ -180,7 +180,7 @@ export class ProviderStatusManager {
   }
 
   private transformTimeSeriesData(
-    data: TimeSeriesQueryResult[]
+    data: TimeSeriesQueryResult[],
   ): TimeSeriesDataPoint[] {
     return data.map((d) => ({
       timestamp: new Date(d.timestamp),
@@ -194,7 +194,7 @@ export class ProviderStatusManager {
 
   private transformTotalMetrics(
     data?: TotalMetricsQueryResult,
-    timeSeriesData: TimeSeriesDataPoint[] = []
+    timeSeriesData: TimeSeriesDataPoint[] = [],
   ): ProviderMetrics {
     let providerName = data?.provider ?? "";
     if (providerName === "https://api.hyperbolic.xyz") {
@@ -222,17 +222,17 @@ export class ProviderStatusManager {
 
   async getAllProviderStatus(): Promise<Result<ProviderMetrics[], string>> {
     const providerList = `(${PROVIDERS.map((p) =>
-      p === "HYPERBOLIC" ? "'https://api.hyperbolic.xyz'" : `'${p}'`
+      p === "HYPERBOLIC" ? "'https://api.hyperbolic.xyz'" : `'${p}'`,
     ).join(",")})`;
 
     const [timeSeriesResult, totalResult] = await Promise.all([
       clickhouseDb.dbQuery<TimeSeriesQueryResult>(
         this.getTimeSeriesQuery(providerList),
-        []
+        [],
       ),
       clickhouseDb.dbQuery<TotalMetricsQueryResult>(
         this.getTotalMetricsQuery(providerList),
-        []
+        [],
       ),
     ]);
 
@@ -248,12 +248,12 @@ export class ProviderStatusManager {
         acc[provider].push(curr);
         return acc;
       },
-      {} as Record<Provider, TimeSeriesQueryResult[]>
+      {} as Record<Provider, TimeSeriesQueryResult[]>,
     );
 
     const metrics = PROVIDERS.map((provider) => {
       const providerData = totalResult.data?.find(
-        (d) => d.provider === provider
+        (d) => d.provider === provider,
       );
 
       if (!providerData) {
@@ -261,7 +261,7 @@ export class ProviderStatusManager {
       }
 
       const timeSeriesData = this.transformTimeSeriesData(
-        timeSeriesByProvider[provider] ?? []
+        timeSeriesByProvider[provider] ?? [],
       );
 
       return this.transformTotalMetrics(providerData, timeSeriesData);
@@ -272,7 +272,7 @@ export class ProviderStatusManager {
 
   async getProviderStatus(
     provider: string,
-    timeFrame: TimeFrame
+    timeFrame: TimeFrame,
   ): Promise<Result<ProviderMetrics, string>> {
     let upperProvider = provider.toUpperCase();
 
@@ -292,11 +292,11 @@ export class ProviderStatusManager {
     const [timeSeriesResult, totalResult] = await Promise.all([
       clickhouseDb.dbQuery<TimeSeriesQueryResult>(
         this.getTimeSeriesQuery(providerList, timeFrame),
-        []
+        [],
       ),
       clickhouseDb.dbQuery<TotalMetricsQueryResult>(
         this.getTotalMetricsQuery(providerList),
-        []
+        [],
       ),
     ]);
 
@@ -308,7 +308,7 @@ export class ProviderStatusManager {
     }
 
     const timeSeriesData = this.transformTimeSeriesData(
-      timeSeriesResult.data ?? []
+      timeSeriesResult.data ?? [],
     );
     return ok(this.transformTotalMetrics(totalResult.data[0], timeSeriesData));
   }

@@ -21,7 +21,7 @@ export class PromptHandler extends AbstractLogHandler {
       let heliconeTemplate: TemplateWithInputs;
       try {
         heliconeTemplate = sanitizeObject(
-          context.message.log.request.heliconeTemplate
+          context.message.log.request.heliconeTemplate,
         );
       } catch {
         console.error(`Error sanitizing helicone template`);

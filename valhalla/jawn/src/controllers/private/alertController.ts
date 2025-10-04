@@ -21,7 +21,7 @@ import { Result } from "../../packages/common/result";
 export class AlertController extends Controller {
   @Get("/query")
   public async getAlerts(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<AlertResponse, string>> {
     const manager = new AlertManager(request.authParams);
     const result = await manager.getAlerts();
@@ -32,7 +32,7 @@ export class AlertController extends Controller {
   public async createAlert(
     @Body()
     alert: AlertRequest,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     const manager = new AlertManager(request.authParams);
     const result = await manager.createAlert(alert);
@@ -42,7 +42,7 @@ export class AlertController extends Controller {
   @Delete("/{alertId}")
   public async deleteAlert(
     @Path() alertId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const manager = new AlertManager(request.authParams);
     const result = await manager.deleteAlert(alertId);

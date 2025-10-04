@@ -28,7 +28,7 @@ export class SecretManagerClass {
 
   getSecret(
     secretName: string,
-    fallback: string | undefined = undefined
+    fallback: string | undefined = undefined,
   ): string | undefined {
     const result = this.resolveSecret(secretName);
     if (!result.value && fallback) {
@@ -77,7 +77,7 @@ export class SecretManagerClass {
     const blueValue = this.getSecretFromEnv(blueKey);
     const greenValue = this.getSecretFromEnv(greenKey);
     const activeColor = this.getSecretFromEnv(
-      "ACTIVE_SECRET_CYCLE"
+      "ACTIVE_SECRET_CYCLE",
     )?.toLowerCase();
 
     // If rotation variables don't exist, fall back to original
@@ -92,7 +92,7 @@ export class SecretManagerClass {
     // Validate active color
     if (activeColor !== "blue" && activeColor !== "green") {
       console.warn(
-        `SecretManager: Invalid ACTIVE_SECRET_CYCLE value '${activeColor}', falling back to original`
+        `SecretManager: Invalid ACTIVE_SECRET_CYCLE value '${activeColor}', falling back to original`,
       );
       return {
         value: this.getSecretFromEnv(secretName),

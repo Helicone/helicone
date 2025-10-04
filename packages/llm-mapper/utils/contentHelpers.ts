@@ -18,13 +18,13 @@ export const hasFunctionCall = (message: any): boolean =>
         typeof item === "object" &&
         item !== null &&
         "type" in item &&
-        item.type === "tool_use"
+        item.type === "tool_use",
     ));
 
 export const hasImage = (message: Message): boolean =>
   Array.isArray(message?.content) &&
   message?.content?.some(
-    (item) => item?.type === "image_url" || item?.type === "image"
+    (item) => item?.type === "image_url" || item?.type === "image",
   );
 
 export function getContentType(message: any): Message["_type"] {

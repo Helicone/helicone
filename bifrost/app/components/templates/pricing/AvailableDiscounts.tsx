@@ -9,11 +9,7 @@ export default function AvailableDiscounts() {
         <span className="text-[36px] font-bold text-slate-900">
           Available discounts
         </span>
-        <Button
-          asChild
-          variant="outline"
-          className="w-fit"
-        >
+        <Button asChild variant="outline" className="w-fit">
           <Link href="/contact">Apply here</Link>
         </Button>
       </Col>

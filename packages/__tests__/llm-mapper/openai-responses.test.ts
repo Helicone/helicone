@@ -668,7 +668,7 @@ describe("OpenAI Responses API Mapper", () => {
 
       // Verify request mapping
       expect(result.schema.request?.messages).toHaveLength(4);
-      
+
       // System message
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "message",
@@ -732,7 +732,9 @@ describe("OpenAI Responses API Mapper", () => {
       // Verify preview - should extract content from the last message with actual content
       // which is the tool result "[REDACTED SEARCH RESULTS]"
       expect(result.preview.request).toBe("[REDACTED SEARCH RESULTS]");
-      expect(result.preview.response).toBe("[REDACTED FINAL ANSWER BASED ON SEARCH]");
+      expect(result.preview.response).toBe(
+        "[REDACTED FINAL ANSWER BASED ON SEARCH]",
+      );
       expect(result.preview.concatenatedMessages).toHaveLength(5); // 4 request + 1 response
     });
 

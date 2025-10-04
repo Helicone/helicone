@@ -43,7 +43,7 @@ export class HeliconeLogBuilder {
   constructor(
     logger: HeliconeManualLogger,
     request: HeliconeLogRequest,
-    additionalHeaders?: Record<string, string>
+    additionalHeaders?: Record<string, string>,
   ) {
     this.logger = logger;
     this.request = request;

@@ -26,13 +26,10 @@ export class AnthropicToOpenAIStreamConverter {
     this.created = Math.floor(Date.now() / 1000);
   }
 
-  processLines(
-    raw: string,
-    onChunk: (chunk: ChatCompletionChunk) => void
-  ) {
+  processLines(raw: string, onChunk: (chunk: ChatCompletionChunk) => void) {
     const chunks: ChatCompletionChunk[] = [];
     const lines = raw.split("\n");
-    
+
     for (const line of lines) {
       if (line.startsWith("data: ")) {
         try {
@@ -82,7 +79,7 @@ export class AnthropicToOpenAIStreamConverter {
                 finish_reason: null,
               },
             ],
-          })
+          }),
         );
         break;
 
@@ -120,7 +117,7 @@ export class AnthropicToOpenAIStreamConverter {
                   finish_reason: null,
                 },
               ],
-            })
+            }),
           );
         }
         break;
@@ -137,7 +134,7 @@ export class AnthropicToOpenAIStreamConverter {
                   finish_reason: null,
                 },
               ],
-            })
+            }),
           );
         } else if (event.delta.type === "input_json_delta") {
           const toolCall = this.toolCallState.get(event.index);
@@ -172,7 +169,7 @@ export class AnthropicToOpenAIStreamConverter {
                       finish_reason: null,
                     },
                   ],
-                })
+                }),
               );
             }
           }
@@ -207,8 +204,7 @@ export class AnthropicToOpenAIStreamConverter {
                 cache_write_tokens: cacheWriteTokens,
                 cache_write_details: {
                   write_5m_tokens:
-                    event.usage.cache_creation?.ephemeral_5m_input_tokens ??
-                    0,
+                    event.usage.cache_creation?.ephemeral_5m_input_tokens ?? 0,
                   write_1h_tokens:
                     event.usage.cache_creation?.ephemeral_1h_input_tokens ?? 0,
                 },
@@ -235,7 +231,7 @@ export class AnthropicToOpenAIStreamConverter {
                 finish_reason: finishReason,
               },
             ],
-          })
+          }),
         );
         break;
 
@@ -244,7 +240,7 @@ export class AnthropicToOpenAIStreamConverter {
           this.createChunk({
             choices: [],
             usage: this.finalUsage || undefined,
-          })
+          }),
         );
         break;
 
@@ -259,7 +255,7 @@ export class AnthropicToOpenAIStreamConverter {
   }
 
   private createChunk(
-    overrides: Partial<ChatCompletionChunk>
+    overrides: Partial<ChatCompletionChunk>,
   ): ChatCompletionChunk {
     return {
       id: this.messageId,
@@ -273,7 +269,7 @@ export class AnthropicToOpenAIStreamConverter {
   }
 
   private mapStopReason(
-    reason: string | null
+    reason: string | null,
   ): OpenAIStreamChoice["finish_reason"] {
     switch (reason) {
       case "max_tokens":
@@ -293,7 +289,7 @@ export class AnthropicToOpenAIStreamConverter {
       toolCallIndex: number;
       hasNonEmptyDelta: boolean;
     },
-    chunks: OpenAIStreamEvent[]
+    chunks: OpenAIStreamEvent[],
   ): void {
     // this was a tool call made with empty arguments, so emit the {} pattern
     // When tools are called with empty args, Anthropic just does nothing
@@ -319,7 +315,7 @@ export class AnthropicToOpenAIStreamConverter {
             finish_reason: null,
           },
         ],
-      })
+      }),
     );
 
     chunks.push(
@@ -343,7 +339,7 @@ export class AnthropicToOpenAIStreamConverter {
             finish_reason: null,
           },
         ],
-      })
+      }),
     );
 
     toolCall.arguments = "{}";

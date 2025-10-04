@@ -32,7 +32,7 @@ const RateLimitRuleSchema = z.object({
       {
         message:
           "Segment must be 'user', an empty string, or alphanumeric characters including underscores and hyphens",
-      }
+      },
     )
     .nullable()
     .optional(),
@@ -81,7 +81,7 @@ export class RateLimitManager extends BaseManager {
 
   async getOrgRateLimits(): Promise<Result<RateLimitRuleView[], string>> {
     const result = await this.rateLimitStore.getRateLimitsByOrgId(
-      this.authParams.organizationId
+      this.authParams.organizationId,
     );
     if (result.error || !result.data) {
       return err(result.error || "Failed to fetch rate limits");
@@ -90,12 +90,12 @@ export class RateLimitManager extends BaseManager {
   }
 
   async createRateLimit(
-    params: CreateRateLimitRuleParams
+    params: CreateRateLimitRuleParams,
   ): Promise<Result<RateLimitRuleView, string>> {
     const validationResult = CreateRateLimitRuleSchema.safeParse(params);
     if (!validationResult.success) {
       return err(
-        validationResult.error.errors.map((e) => e.message).join(", ")
+        validationResult.error.errors.map((e) => e.message).join(", "),
       );
     }
 
@@ -118,13 +118,13 @@ export class RateLimitManager extends BaseManager {
   // Accepts API Params, Returns API View type
   async updateRateLimit(
     ruleId: string,
-    params: Partial<UpdateRateLimitRuleParams> // Allow partial updates
+    params: Partial<UpdateRateLimitRuleParams>, // Allow partial updates
   ): Promise<Result<RateLimitRuleView, string>> {
     // Validate the input parameters using the partial Zod schema
     const validationResult = UpdateRateLimitRuleSchema.safeParse(params);
     if (!validationResult.success) {
       return err(
-        validationResult.error.errors.map((e) => e.message).join(", ")
+        validationResult.error.errors.map((e) => e.message).join(", "),
       );
     }
 
@@ -146,7 +146,7 @@ export class RateLimitManager extends BaseManager {
     const result = await this.rateLimitStore.updateRateLimit(
       ruleId,
       this.authParams.organizationId,
-      dbParams // Pass validated & mapped DB update params
+      dbParams, // Pass validated & mapped DB update params
     );
     if (result.error || !result.data) {
       return err(result.error || "Failed to update rate limit rule");
@@ -158,7 +158,7 @@ export class RateLimitManager extends BaseManager {
   async deleteRateLimit(ruleId: string): Promise<Result<null, string>> {
     const result = await this.rateLimitStore.softDeleteRateLimit(
       ruleId,
-      this.authParams.organizationId
+      this.authParams.organizationId,
     );
     return result;
   }

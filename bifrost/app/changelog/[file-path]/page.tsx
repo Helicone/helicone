@@ -32,7 +32,7 @@ export default async function Home({
     "changelog",
     "changes",
     params["file-path"],
-    "src.mdx"
+    "src.mdx",
   );
   const contentResult = await getContent(changelogFolder);
   if (!contentResult) {
@@ -47,7 +47,7 @@ export default async function Home({
   const dateObject = new Date(
     Number(date.slice(0, 4)),
     Number(date.slice(4, 6)) - 1,
-    Number(date.slice(6, 8))
+    Number(date.slice(6, 8)),
   );
   return (
     <>

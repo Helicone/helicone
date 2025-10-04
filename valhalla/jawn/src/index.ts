@@ -39,11 +39,14 @@ if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
 }
 const getAppUrlRegex = () => {
-  const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl =
+    process.env.APP_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "http://localhost:3000";
   try {
     const url = new URL(appUrl);
     const protocol = url.protocol.replace(":", "");
-    const hostname = url.hostname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const hostname = url.hostname.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const port = url.port ? `:${url.port}` : "";
     return new RegExp(`^${protocol}:\/\/${hostname}${port}$`);
   } catch {
@@ -61,12 +64,8 @@ const allowedOriginsEnv = {
     /^https?:\/\/(www\.)?eu\.helicone\.ai$/, // Added eu.helicone.ai
     /^https?:\/\/(www\.)?us\.helicone\.ai$/,
   ],
-  development: [
-    getAppUrlRegex(),
-  ],
-  preview: [
-    getAppUrlRegex(),
-  ],
+  development: [getAppUrlRegex()],
+  preview: [getAppUrlRegex()],
 };
 
 const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
@@ -76,7 +75,7 @@ const app = express();
 const corsOptions = {
   origin: function (
     origin: string | undefined,
-    callback: (err: Error | null, allow?: boolean) => void
+    callback: (err: Error | null, allow?: boolean) => void,
   ) {
     if (!origin) {
       // Allow requests with no origin (like server-to-server, curl)
@@ -121,7 +120,7 @@ app.use(
     extended: true,
     limit: "50mb",
     parameterLimit: 50000,
-  })
+  }),
 );
 app.use(bodyParser.raw({ verify: rawBodySaver, type: "*/*", limit: "50mb" }));
 
@@ -177,7 +176,7 @@ app.use(v1ProxyRouter);
 unAuthenticatedRouter.use(
   "/docs",
   swaggerUi.serve,
-  swaggerUi.setup(publicSwaggerDoc as any)
+  swaggerUi.setup(publicSwaggerDoc as any),
 );
 
 unAuthenticatedRouter.use(tokenRouter);
@@ -204,7 +203,7 @@ v1APIRouter.use(
     limit: "50mb",
     extended: true,
     parameterLimit: 50000,
-  })
+  }),
 );
 
 registerPublicTSOARoutes(v1APIRouter);
@@ -217,7 +216,7 @@ function errorHandler(
   err: unknown,
   req: express.Request,
   res: express.Response,
-  next: NextFunction
+  next: NextFunction,
 ): express.Response | void {
   if (err instanceof ValidateError) {
     console.warn(`Caught Validation Error for ${req.path}:`, err.fields);
@@ -229,8 +228,9 @@ function errorHandler(
   if (err instanceof Error) {
     return res.status(500).json({
       message: "Internal Server Error",
-      details: ENVIRONMENT === 'production' ? 'Internal Server Error' : err.message,
-      stack: ENVIRONMENT === 'production' ? undefined : err.stack,
+      details:
+        ENVIRONMENT === "production" ? "Internal Server Error" : err.message,
+      stack: ENVIRONMENT === "production" ? undefined : err.stack,
     });
   }
 
@@ -242,7 +242,7 @@ app.use(errorHandler);
 function setRouteTimeout(
   req: express.Request,
   res: express.Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const timeout = setTimeout(() => {
     if (!res.headersSent) {
@@ -299,7 +299,7 @@ async function gracefulShutdown(signal: string) {
   // If server hasn't closed in 30 seconds, force shutdown
   setTimeout(() => {
     console.error(
-      "Could not close connections in time, forcefully shutting down"
+      "Could not close connections in time, forcefully shutting down",
     );
     process.exit(1);
   }, 30000);

@@ -60,7 +60,7 @@ type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 const cache = new KVCache(60 * 1000); // 1 minute
 
 const getStripeIntegrationSettings = async (
-  organizationId: string
+  organizationId: string,
 ): Promise<Result<{ event_name: string; active: boolean }, string>> => {
   const integrationManager = new IntegrationManager({
     organizationId: organizationId,
@@ -118,7 +118,7 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
     const integrationSettings = await cacheResultCustom(
       "stripe_integration_settings_" + organizationId,
       async () => getStripeIntegrationSettings(organizationId),
-      cache
+      cache,
     );
 
     if (
@@ -142,12 +142,12 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
     // Get token counts and model information with validation
     const promptTokens = Math.max(
       0,
-      Math.floor(context.legacyUsage?.promptTokens || 0)
+      Math.floor(context.legacyUsage?.promptTokens || 0),
     );
 
     const completionTokens = Math.max(
       0,
-      Math.floor(context.legacyUsage?.completionTokens || 0)
+      Math.floor(context.legacyUsage?.completionTokens || 0),
     );
 
     // Validate and sanitize model and provider names
@@ -174,7 +174,7 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
     // Format model as "provider/model" with validation
     const formattedModel = `${sanitizedProvider}/${sanitizedModel}`.substring(
       0,
-      100
+      100,
     ); // Limit length
 
     if (!AVAILABLE_MODELS_IN_STRIPE.includes(formattedModel)) {
@@ -292,17 +292,17 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
       if (errors.length > 0 && results.length === 0) {
         // All organizations failed
         return err(
-          `Failed to process events for all organizations. Errors: ${errors.join("; ")}`
+          `Failed to process events for all organizations. Errors: ${errors.join("; ")}`,
         );
       } else if (errors.length > 0) {
         // Partial success
         return err(
-          `Processed ${totalProcessed}/${totalEvents} events. Successes: ${results.length} orgs, Failures: ${errors.length} orgs. Errors: ${errors.join("; ")}`
+          `Processed ${totalProcessed}/${totalEvents} events. Successes: ${results.length} orgs, Failures: ${errors.length} orgs. Errors: ${errors.join("; ")}`,
         );
       } else {
         // All successful
         return ok(
-          `Successfully processed ${totalProcessed} stripe meter events across ${results.length} organizations`
+          `Successfully processed ${totalProcessed} stripe meter events across ${results.length} organizations`,
         );
       }
     } catch (error) {

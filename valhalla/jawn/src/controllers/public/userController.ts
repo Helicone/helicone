@@ -67,13 +67,13 @@ export class UserController extends Controller {
       pSize: PSize;
       useInterquartile: boolean;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ) {
     const userManager = new UserManager(request.authParams);
     return userManager.getUserMetricsOverview(
       requestBody.filter,
       requestBody.pSize,
-      requestBody.useInterquartile
+      requestBody.useInterquartile,
     );
   }
 
@@ -81,8 +81,13 @@ export class UserController extends Controller {
   public async getUserMetrics(
     @Body()
     requestBody: UserMetricsQueryParams,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{ users: UserMetricsResult[]; count: number; hasUsers: boolean }, string>> {
+    @Request() request: JawnAuthenticatedRequest,
+  ): Promise<
+    Result<
+      { users: UserMetricsResult[]; count: number; hasUsers: boolean },
+      string
+    >
+  > {
     const userManager = new UserManager(request.authParams);
     if (requestBody.limit > 1000) {
       this.setStatus(400);
@@ -105,7 +110,7 @@ export class UserController extends Controller {
   public async getUsers(
     @Body()
     requestBody: UserQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       {
@@ -128,10 +133,10 @@ export class UserController extends Controller {
       })) ?? [];
 
     const endTime = new Date(
-      requestBody.timeFilter?.endTimeUnixSeconds ?? Date.now()
+      requestBody.timeFilter?.endTimeUnixSeconds ?? Date.now(),
     );
     const startTime = new Date(
-      requestBody.timeFilter?.startTimeUnixSeconds ?? 0
+      requestBody.timeFilter?.startTimeUnixSeconds ?? 0,
     );
     const filter = await buildFilterWithAuthClickHouse({
       argsAcc: [],
@@ -179,7 +184,7 @@ export class UserController extends Controller {
     GROUP BY user_id
     LIMIT 100
     `,
-      filter.argsAcc
+      filter.argsAcc,
     );
     return users;
   }

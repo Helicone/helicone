@@ -56,21 +56,18 @@ function validateSql(sql: string): Result<null, HqlError> {
       if (type !== "select") {
         return hqlError(
           HqlErrorCode.INVALID_STATEMENT,
-          `Found ${type.toUpperCase()} statement`
+          `Found ${type.toUpperCase()} statement`,
         );
       }
       return hqlError(
         HqlErrorCode.INVALID_TABLE,
-        `Table '${tableName}' is not allowed. Allowed tables: ${CLICKHOUSE_TABLES.join(', ')}`
+        `Table '${tableName}' is not allowed. Allowed tables: ${CLICKHOUSE_TABLES.join(", ")}`,
       );
     }
 
     return ok(null);
   } catch (e) {
-    return hqlError(
-      HqlErrorCode.SYNTAX_ERROR,
-      String(e)
-    );
+    return hqlError(HqlErrorCode.SYNTAX_ERROR, String(e));
   }
 }
 
@@ -128,19 +125,16 @@ export class HeliconeSqlManager {
       process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
       process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
     );
   }
 
-  @Traced(
-    "hql.getClickHouseSchema",
-    ({ thisArg }) => ({
-      organizationId: thisArg.authParams.organizationId,
-      service: "helicone-sql",
-      operation: "getClickhouseSchema",
-      "tables.count": CLICKHOUSE_TABLES.length,
-    })
-  )
+  @Traced("hql.getClickHouseSchema", ({ thisArg }) => ({
+    organizationId: thisArg.authParams.organizationId,
+    service: "helicone-sql",
+    operation: "getClickhouseSchema",
+    "tables.count": CLICKHOUSE_TABLES.length,
+  }))
   async getClickhouseSchema(): Promise<
     Result<ClickHouseTableSchema[], HqlError>
   > {
@@ -149,11 +143,13 @@ export class HeliconeSqlManager {
         const columns = await clickhouseDb.dbQuery<ClickHouseTableRow>(
           `DESCRIBE TABLE ${table_name}`,
           [],
-          describeRowSchema
+          describeRowSchema,
         );
 
         if (isError(columns)) {
-          throw new Error(`Failed to describe table ${table_name}: ${columns.error}`);
+          throw new Error(
+            `Failed to describe table ${table_name}: ${columns.error}`,
+          );
         }
 
         return {
@@ -172,20 +168,20 @@ export class HeliconeSqlManager {
               .filter((col) => col.name !== "organization_id") ?? [],
         };
       });
-      
+
       const schema = await Promise.all(schemaPromises);
-      
-      const totalColumns = schema.reduce((sum, table) => sum + table.columns.length, 0);
+
+      const totalColumns = schema.reduce(
+        (sum, table) => sum + table.columns.length,
+        0,
+      );
       withActiveSpan()?.setTag("schema.total_columns", totalColumns);
       withActiveSpan()?.setTag("schema.tables", CLICKHOUSE_TABLES.join(","));
-      
+
       return ok(schema);
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : String(e);
-      return hqlError(
-        HqlErrorCode.SCHEMA_FETCH_FAILED,
-        errorMessage
-      );
+      return hqlError(HqlErrorCode.SCHEMA_FETCH_FAILED, errorMessage);
     }
   }
 
@@ -193,19 +189,16 @@ export class HeliconeSqlManager {
   // Validate sql by only allowing select statements and tables in CLICKHOUSE_TABLES
   // Add limit check
   // Execute it
-  @Traced(
-    "hql.executeSql",
-    ({ thisArg, args }) => ({
-      organizationId: thisArg.authParams.organizationId,
-      service: "helicone-sql",
-      operation: "executeSql",
-      "sql.length": (args[0] as string)?.length || 0,
-      "sql.limit": (args[1] as number) ?? 100,
-    })
-  )
+  @Traced("hql.executeSql", ({ thisArg, args }) => ({
+    organizationId: thisArg.authParams.organizationId,
+    service: "helicone-sql",
+    operation: "executeSql",
+    "sql.length": (args[0] as string)?.length || 0,
+    "sql.limit": (args[1] as number) ?? 100,
+  }))
   async executeSql(
     sql: string,
-    limit: number = 100
+    limit: number = 100,
   ): Promise<Result<ExecuteSqlResponse, HqlError>> {
     withActiveSpan()?.setTag("sql.query", sql.substring(0, 200));
     try {
@@ -216,14 +209,15 @@ export class HeliconeSqlManager {
       } catch (parseError) {
         withActiveSpan()?.setTag("error.type", "SYNTAX_ERROR");
         withActiveSpan()?.setTag("error.phase", "parsing");
-        const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
+        const errorMessage =
+          parseError instanceof Error ? parseError.message : String(parseError);
         withActiveSpan()?.setTag("error.message", errorMessage);
         return hqlError(HqlErrorCode.SYNTAX_ERROR, errorMessage);
       }
-      
+
       // Always get first statement to prevent SQL injection
       const normalizedAst = normalizeAst(ast)[0];
-      
+
       // Add limit to prevent excessive data retrieval
       let limitedAst;
       try {
@@ -235,7 +229,7 @@ export class HeliconeSqlManager {
         withActiveSpan()?.setTag("error.message", errorMessage);
         return hqlError(HqlErrorCode.SYNTAX_ERROR, errorMessage);
       }
-      
+
       const firstSql = parser.sqlify(limitedAst, { database: "Postgresql" });
       withActiveSpan()?.setTag("sql.processed", firstSql.substring(0, 200));
 
@@ -276,9 +270,12 @@ export class HeliconeSqlManager {
       const enrichmentStart = Date.now();
       const enrichedRows = await this.enrichResultsWithS3Bodies(rows);
       const enrichmentTime = Date.now() - enrichmentStart;
-      
-      const responseSize = Buffer.byteLength(JSON.stringify(enrichedRows), "utf8");
-      
+
+      const responseSize = Buffer.byteLength(
+        JSON.stringify(enrichedRows),
+        "utf8",
+      );
+
       withActiveSpan()?.setTag("result.row_count", enrichedRows.length);
       withActiveSpan()?.setTag("result.size_bytes", responseSize);
       withActiveSpan()?.setTag("result.elapsed_ms", elapsedMilliseconds);
@@ -300,7 +297,7 @@ export class HeliconeSqlManager {
   }
 
   private async enrichResultsWithS3Bodies(
-    rows: Record<string, any>[]
+    rows: Record<string, any>[],
   ): Promise<Record<string, any>[]> {
     // Early return for edge cases
     if (!rows || rows.length === 0) {
@@ -308,26 +305,29 @@ export class HeliconeSqlManager {
     }
 
     // Check if rows have request_id field
-    if (!rows[0].hasOwnProperty('request_id')) {
+    if (!rows[0].hasOwnProperty("request_id")) {
       return rows;
     }
 
     // Process rows in batches for better performance
     const BATCH_SIZE = 10;
     const enrichedRows: Record<string, any>[] = [];
-    
+
     for (let i = 0; i < rows.length; i += BATCH_SIZE) {
       const batch = rows.slice(i, i + BATCH_SIZE);
       const enrichedBatch = await Promise.all(
-        batch.map(row => this.fetchRowBodiesFromS3(row))
+        batch.map((row) => this.fetchRowBodiesFromS3(row)),
       );
       enrichedRows.push(...enrichedBatch);
     }
-    
+
     return enrichedRows;
   }
 
-  private getRequestIdForS3(requestId: string, cacheReferenceId?: string): string {
+  private getRequestIdForS3(
+    requestId: string,
+    cacheReferenceId?: string,
+  ): string {
     // Use cache reference ID if it exists and is not the default UUID
     if (cacheReferenceId && cacheReferenceId !== DEFAULT_UUID) {
       return cacheReferenceId;
@@ -336,30 +336,34 @@ export class HeliconeSqlManager {
   }
 
   private async fetchRowBodiesFromS3(
-    row: Record<string, any>
+    row: Record<string, any>,
   ): Promise<Record<string, any>> {
     try {
       const requestId = row.request_id;
-      const requestIdForS3 = this.getRequestIdForS3(requestId, row.cache_reference_id);
-      
-      // Get signed URL for the request/response body
-      const signedUrlResult = await this.s3Client.getRequestResponseBodySignedUrl(
-        this.authParams.organizationId,
-        requestIdForS3
+      const requestIdForS3 = this.getRequestIdForS3(
+        requestId,
+        row.cache_reference_id,
       );
-      
+
+      // Get signed URL for the request/response body
+      const signedUrlResult =
+        await this.s3Client.getRequestResponseBodySignedUrl(
+          this.authParams.organizationId,
+          requestIdForS3,
+        );
+
       if (signedUrlResult.error || !signedUrlResult.data) {
         return this.createRowWithNullBodies(row);
       }
-      
+
       // Fetch and parse the body data from S3
       const bodyData = await this.fetchBodyFromS3Url(signedUrlResult.data);
-      
+
       if (!bodyData) {
         console.error(`Failed to fetch S3 content for request ${requestId}`);
         return this.createRowWithNullBodies(row);
       }
-      
+
       return {
         ...row,
         request_body: bodyData.request || null,
@@ -372,15 +376,15 @@ export class HeliconeSqlManager {
   }
 
   private async fetchBodyFromS3Url(
-    signedUrl: string
+    signedUrl: string,
   ): Promise<{ request: any; response: any } | null> {
     try {
       const response = await fetch(signedUrl);
-      
+
       if (!response.ok) {
         return null;
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error(`Failed to fetch from S3 URL:`, error);
@@ -388,7 +392,9 @@ export class HeliconeSqlManager {
     }
   }
 
-  private createRowWithNullBodies(row: Record<string, any>): Record<string, any> {
+  private createRowWithNullBodies(
+    row: Record<string, any>,
+  ): Record<string, any> {
     return {
       ...row,
       request_body: null,
@@ -396,16 +402,13 @@ export class HeliconeSqlManager {
     };
   }
 
-  @Traced(
-    "hql.downloadCsv",
-    ({ thisArg, args }) => ({
-      organizationId: thisArg.authParams.organizationId,
-      service: "helicone-sql",
-      operation: "downloadCsv",
-      "sql.length": (args[0] as string)?.length || 0,
-      "sql.limit": MAX_LIMIT,
-    })
-  )
+  @Traced("hql.downloadCsv", ({ thisArg, args }) => ({
+    organizationId: thisArg.authParams.organizationId,
+    service: "helicone-sql",
+    operation: "downloadCsv",
+    "sql.length": (args[0] as string)?.length || 0,
+    "sql.limit": MAX_LIMIT,
+  }))
   async downloadCsv(sql: string): Promise<Result<string, HqlError>> {
     try {
       const result = await this.executeSql(sql, MAX_LIMIT);
@@ -427,16 +430,16 @@ export class HeliconeSqlManager {
       withActiveSpan()?.setTag("csv.data_size_bytes", result.data.size);
 
       // Generate filename with timestamp
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const filename = `hql-export-${timestamp}.csv`;
       withActiveSpan()?.setTag("csv.filename", filename);
-      
+
       // Upload to S3
       const uploadStart = Date.now();
       const uploadResult = await this.hqlStore.uploadCsv(
         filename,
         this.authParams.organizationId,
-        result.data.rows
+        result.data.rows,
       );
       const uploadTime = Date.now() - uploadStart;
       withActiveSpan()?.setTag("csv.upload_time_ms", uploadTime);

@@ -85,7 +85,7 @@ export const consume = async ({
           await admin?.connect();
           const result = await admin?.fetchTopicOffsetsByTimestamp(
             topic,
-            startTimestamp
+            startTimestamp,
           );
 
           for (const { partition, offset } of result ?? []) {
@@ -107,9 +107,8 @@ export const consume = async ({
         let i = 0;
 
         while (i < batch.messages.length) {
-          const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-            "kafka:log"
-          );
+          const messagesPerMiniBatchSetting =
+            await settingsManager.getSetting("kafka:log");
 
           const miniBatchSize =
             miniBatchSizeOverride ??
@@ -132,7 +131,7 @@ export const consume = async ({
               miniBatch.length
             } messages. Mini batch ID: ${miniBatchId}. Handling ${i}-${
               i + miniBatchSize
-            } of ${batch.messages.length} messages.`
+            } of ${batch.messages.length} messages.`,
           );
 
           i += miniBatchSize;
@@ -149,7 +148,7 @@ export const consume = async ({
               ? mappedMessages.data.filter(
                   (msg) =>
                     new Date(msg.log.request.requestCreatedAt).getTime() <=
-                    endTimestamp
+                    endTimestamp,
                 )
               : mappedMessages.data;
 
@@ -178,7 +177,7 @@ export const consume = async ({
               lastOffset,
               miniBatchId,
               batch.partition,
-              topic
+              topic,
             );
 
             if (consumeResult.error) {
@@ -238,12 +237,11 @@ export const consumeDlq = async () => {
       commitOffsetsIfNecessary,
     }) => {
       console.log(
-        `DLQ: Received batch with ${batch.messages.length} messages.`
+        `DLQ: Received batch with ${batch.messages.length} messages.`,
       );
 
-      const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-        "kafka:dlq"
-      );
+      const messagesPerMiniBatchSetting =
+        await settingsManager.getSetting("kafka:dlq");
 
       const miniBatchSize =
         messagesPerMiniBatchSetting?.miniBatchSize ??
@@ -267,7 +265,7 @@ export const consumeDlq = async () => {
             if (mappedMessages.error || !mappedMessages.data) {
               console.error(
                 "DLQ: Failed to map messages",
-                mappedMessages.error
+                mappedMessages.error,
               );
               return;
             }
@@ -278,12 +276,12 @@ export const consumeDlq = async () => {
               lastOffset,
               miniBatchId,
               batch.partition,
-              "request-response-logs-prod-dlq"
+              "request-response-logs-prod-dlq",
             );
             if (consumeResult.error) {
               console.error(
                 "DLQ: Failed to consume batch",
-                consumeResult.error
+                consumeResult.error,
               );
             }
           } catch (error) {
@@ -346,9 +344,8 @@ export const consumeScores = async () => {
         let i = 0;
 
         while (i < batch.messages.length) {
-          const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-            "kafka:score"
-          );
+          const messagesPerMiniBatchSetting =
+            await settingsManager.getSetting("kafka:score");
 
           const miniBatchSize =
             messagesPerMiniBatchSetting?.miniBatchSize ??
@@ -370,7 +367,7 @@ export const consumeScores = async () => {
               miniBatch.length
             } messages. Mini batch ID: ${miniBatchId}. Handling ${i}-${
               i + miniBatchSize
-            } of ${batch.messages.length} messages.`
+            } of ${batch.messages.length} messages.`,
           );
 
           i += miniBatchSize;
@@ -387,7 +384,7 @@ export const consumeScores = async () => {
               lastOffset,
               miniBatchId,
               batch.partition,
-              "helicone-scores-prod"
+              "helicone-scores-prod",
             );
 
             if (consumeResult.error) {
@@ -453,9 +450,8 @@ export const consumeScoresDlq = async () => {
         let i = 0;
 
         while (i < batch.messages.length) {
-          const messagesPerMiniBatchSetting = await settingsManager.getSetting(
-            "kafka:dlq:score"
-          );
+          const messagesPerMiniBatchSetting =
+            await settingsManager.getSetting("kafka:dlq:score");
 
           const miniBatchSize =
             messagesPerMiniBatchSetting?.miniBatchSize ??
@@ -477,7 +473,7 @@ export const consumeScoresDlq = async () => {
               miniBatch.length
             } messages. Mini batch ID: ${miniBatchId}. Handling ${i}-${
               i + miniBatchSize
-            } of ${batch.messages.length} messages.`
+            } of ${batch.messages.length} messages.`,
           );
 
           i += miniBatchSize;
@@ -494,7 +490,7 @@ export const consumeScoresDlq = async () => {
               lastOffset,
               miniBatchId,
               batch.partition,
-              "helicone-scores-prod-dlq"
+              "helicone-scores-prod-dlq",
             );
 
             if (consumeResult.error) {

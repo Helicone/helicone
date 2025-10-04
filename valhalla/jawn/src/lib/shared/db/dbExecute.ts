@@ -27,7 +27,7 @@ export function paramsToValues(params: (number | string | boolean | Date)[]) {
 
 export function printRunnableQuery(
   query: string,
-  parameters: (number | string | boolean | Date)[]
+  parameters: (number | string | boolean | Date)[],
 ) {
   const queryParams = paramsToValues(parameters);
   const setParams = Object.entries(queryParams)
@@ -40,7 +40,7 @@ export function printRunnableQuery(
 // DEPRECATED
 export async function dbQueryClickhouse<T>(
   query: string,
-  parameters: (number | string | boolean | Date)[]
+  parameters: (number | string | boolean | Date)[],
 ): Promise<Result<T[], string>> {
   return clickhouseDb.dbQuery<T>(query, parameters);
 }
@@ -70,11 +70,11 @@ export function getPGClient() {
  */
 export async function dbExecute<T>(
   query: string,
-  parameters: any[]
+  parameters: any[],
 ): Promise<Result<T[], string>> {
   const databaseUrl = SecretManager.getSecret(
     "SUPABASE_DATABASE_URL", // TODO remove supabase URL eventually
-    "DATABASE_URL"
+    "DATABASE_URL",
   );
   if (!databaseUrl) {
     console.error("SUPABASE_DATABASE_URL not set");

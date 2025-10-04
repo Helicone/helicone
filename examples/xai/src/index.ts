@@ -9,8 +9,8 @@ async function main() {
     apiKey: process.env.XAI_API_KEY,
     baseURL: "https://x.helicone.ai/v1",
     defaultHeaders: {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
-    }
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    },
   });
 
   try {
@@ -18,7 +18,7 @@ async function main() {
       model: "grok-4-latest",
       messages: [{ role: "user", content: "Hello, how are you?" }],
       max_tokens: 1024,
-      temperature: 0.7
+      temperature: 0.7,
     });
 
     console.log(response);

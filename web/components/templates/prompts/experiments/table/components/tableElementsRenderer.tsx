@@ -82,43 +82,39 @@ const ExperimentTableHeader = (props: ExperimentHeaderProps) => {
   const jawnClient = useJawnClient();
 
   const { data: promptTemplate } = useQuery({
-      queryKey: ["promptTemplate", promptVersionId],
-      queryFn: async () => {
-        if (!promptVersionId) return null;
+    queryKey: ["promptTemplate", promptVersionId],
+    queryFn: async () => {
+      if (!promptVersionId) return null;
 
-        const res = await jawnClient.GET(
-          "/v1/prompt/version/{promptVersionId}",
-          {
-            params: {
-              path: {
-                promptVersionId: promptVersionId,
-              },
+      const res = await jawnClient.GET("/v1/prompt/version/{promptVersionId}", {
+        params: {
+          path: {
+            promptVersionId: promptVersionId,
+          },
+        },
+      });
+
+      const parentPromptVersion = await jawnClient.GET(
+        "/v1/prompt/version/{promptVersionId}",
+        {
+          params: {
+            path: {
+              promptVersionId: res.data?.data?.parent_prompt_version ?? "",
             },
           },
-        );
+        },
+      );
 
-        const parentPromptVersion = await jawnClient.GET(
-          "/v1/prompt/version/{promptVersionId}",
-          {
-            params: {
-              path: {
-                promptVersionId: res.data?.data?.parent_prompt_version ?? "",
-              },
-            },
-          },
-        );
-
-        return {
-          ...res.data?.data,
-          parent_prompt_version: parentPromptVersion?.data?.data,
-        };
-      },
-      staleTime: Infinity,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
+      return {
+        ...res.data?.data,
+        parent_prompt_version: parentPromptVersion?.data?.data,
+      };
     },
-  );
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
 
   const queryClient = useQueryClient();
 

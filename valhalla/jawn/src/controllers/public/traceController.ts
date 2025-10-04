@@ -17,7 +17,7 @@ export class TraceController extends Controller {
   @Post("custom/v1/log")
   public async logCustomTraceLegacy(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() traceBody: any
+    @Body() traceBody: any,
   ) {
     await this.processCustomTrace(request, traceBody);
   }
@@ -25,7 +25,7 @@ export class TraceController extends Controller {
   @Post("custom/log")
   public async logCustomTrace(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() traceBody: any
+    @Body() traceBody: any,
   ) {
     await this.processCustomTrace(request, traceBody);
   }
@@ -33,7 +33,7 @@ export class TraceController extends Controller {
   @Post("custom/log/typed")
   public async logCustomTraceTyped(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() traceBody: TypedAsyncLogModel
+    @Body() traceBody: TypedAsyncLogModel,
   ): Promise<ValidationResult | void> {
     const validation = validateTypedAsyncLogModel(traceBody);
 
@@ -79,7 +79,7 @@ export class TraceController extends Controller {
 
   private async processCustomTrace(
     request: JawnAuthenticatedRequest,
-    traceBody: any
+    traceBody: any,
   ) {
     console.log("Received traces.");
     const traceManager = new CustomTraceManager();
@@ -95,7 +95,7 @@ export class TraceController extends Controller {
         traceBody,
         headers,
         request.header("authorization") ?? "",
-        request.authParams
+        request.authParams,
       );
       this.setStatus(200);
     } catch (error: any) {
@@ -107,7 +107,7 @@ export class TraceController extends Controller {
   @Post("log")
   public async logTrace(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() traceBody: OTELTrace
+    @Body() traceBody: OTELTrace,
   ) {
     console.log("Received traces.");
     const traceManager = new TraceManager();
@@ -115,7 +115,7 @@ export class TraceController extends Controller {
       await traceManager.consumeTraces(
         traceBody,
         request.header("authorization") ?? "",
-        request.authParams
+        request.authParams,
       );
       this.setStatus(200);
     } catch (error: any) {
@@ -128,7 +128,7 @@ export class TraceController extends Controller {
   @Post("log-python")
   public async logPythonTrace(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() traceBody: any
+    @Body() traceBody: any,
   ) {
     try {
       const protoFile = path.join(
@@ -136,11 +136,11 @@ export class TraceController extends Controller {
         "..",
         "..",
         "utils",
-        "trace.proto"
+        "trace.proto",
       );
       const root = await protobuf.load(protoFile);
       const TracesData = root.lookupType(
-        "opentelemetry.proto.trace.v1.TracesData"
+        "opentelemetry.proto.trace.v1.TracesData",
       );
       const tracesData = TracesData.decode(traceBody);
       const jsonSpan = tracesData.toJSON();
@@ -149,7 +149,7 @@ export class TraceController extends Controller {
       await traceManager.consumeTraces(
         jsonSpan as any,
         request.header("authorization") ?? "",
-        request.authParams
+        request.authParams,
       );
 
       this.setStatus(200);

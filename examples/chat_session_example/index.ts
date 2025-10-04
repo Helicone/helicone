@@ -62,7 +62,7 @@ async function main() {
         "Helicone-Session-Id": session,
         "Helicone-Session-Name": sessionName,
       },
-    }
+    },
   );
 
   console.log(chatCompletion.choices[0].message.content);
@@ -120,7 +120,7 @@ async function main() {
         "Helicone-Session-Id": session,
         "Helicone-Session-Name": sessionName,
       },
-    }
+    },
   );
 
   console.log(chatCompletion2.choices[0].message.content);
@@ -187,7 +187,7 @@ async function main() {
         "Helicone-Session-Id": session,
         "Helicone-Session-Name": sessionName,
       },
-    }
+    },
   );
 
   console.log(chatCompletion3.choices[0].message.content);

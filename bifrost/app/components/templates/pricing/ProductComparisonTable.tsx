@@ -97,7 +97,7 @@ export default function ProductComparisonTable() {
                 key={feature.name}
                 className={clsx(
                   "h-[56px]",
-                  index % 2 === 1 ? "bg-slate-50" : "bg-white"
+                  index % 2 === 1 ? "bg-slate-50" : "bg-white",
                 )}
               >
                 <td
@@ -107,7 +107,7 @@ export default function ProductComparisonTable() {
                     index % 2 === 1 ? "bg-slate-50" : "bg-white",
                     index === featureMatrix.length - 1
                       ? "rounded-bl-lg"
-                      : "rounded-b-none"
+                      : "rounded-b-none",
                   )}
                 >
                   {feature.name}
@@ -119,7 +119,7 @@ export default function ProductComparisonTable() {
                       "p-2 text-center last:bg-white last:border-r-2 last:border-l-2 last:border-brand",
                       index === featureMatrix.length - 1
                         ? "last:border-b-2 last:rounded-br-lg"
-                        : "last:border-b-0"
+                        : "last:border-b-0",
                     )}
                   >
                     {renderSupportCell(supported)}

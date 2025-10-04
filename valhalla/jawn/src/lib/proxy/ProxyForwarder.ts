@@ -16,7 +16,7 @@ import { S3Manager } from "./S3Manager";
 
 export async function proxyForwarder(
   request: RequestWrapper,
-  provider: Provider
+  provider: Provider,
 ): Promise<Response> {
   const { data: proxyRequest, error: proxyRequestError } =
     await new HeliconeProxyRequestMapper(request, provider).tryToProxyRequest();
@@ -45,7 +45,7 @@ export async function proxyForwarder(
 
     responseBuilder.addRateLimitHeaders(
       rateLimitCheckResult,
-      proxyRequest.rateLimitOptions
+      proxyRequest.rateLimitOptions,
     );
 
     if (rateLimitCheckResult.status === "rate_limited") {
@@ -75,7 +75,7 @@ export async function proxyForwarder(
 async function log(
   loggable: DBLoggable,
   request: RequestWrapper,
-  proxyRequest: HeliconeProxyRequest
+  proxyRequest: HeliconeProxyRequest,
 ) {
   const { data: auth, error: authError } = await request.auth();
   if (authError !== null) {
@@ -108,14 +108,14 @@ async function log(
           process.env.S3_SECRET_KEY || undefined,
           process.env.S3_ENDPOINT ?? "",
           process.env.S3_BUCKET_NAME ?? "",
-          (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
-        )
+          (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2",
+        ),
       ),
       kafkaProducer: new HeliconeQueueProducer(),
     },
     authParams,
     orgParams,
-    proxyRequest?.requestWrapper.heliconeHeaders
+    proxyRequest?.requestWrapper.heliconeHeaders,
   );
 
   if (res.error !== null) {

@@ -125,9 +125,7 @@ const PythonGatewayRequest = () => (
         width="1"
         height="1"
       >
-        <use
-          transform="matrix(0.00125 0 0 0.00335137 0 -0.505411)"
-        />
+        <use transform="matrix(0.00125 0 0 0.00335137 0 -0.505411)" />
       </pattern>
       <image
         id="image0_69_37"

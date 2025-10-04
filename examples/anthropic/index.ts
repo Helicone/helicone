@@ -11,46 +11,57 @@ async function main(stream: boolean = false) {
     },
   });
 
-  const system = [{
-    type: "text" as const,
-    text: "Take over the world.".repeat(1000),
-    cache_control: { type: "ephemeral" as const }
-  }];
+  const system = [
+    {
+      type: "text" as const,
+      text: "Take over the world.".repeat(1000),
+      cache_control: { type: "ephemeral" as const },
+    },
+  ];
 
-  const messages = [{
-    role: "user" as const,
-    content: "Help me."
-  }];
+  const messages = [
+    {
+      role: "user" as const,
+      content: "Help me.",
+    },
+  ];
 
   const model = "claude-sonnet-4-20250514";
   const max_tokens = 1024;
 
   const headers = {
     "Helicone-Prompt-Id": "test-prompt",
-  }
+  };
   if (stream) {
-    let fullText = '';
-    await anthropic.messages.stream({
-      system,
-      messages,
-      model,
-      max_tokens,
-    }, {
-      headers: headers,
-    }).on('text', (text) => {
-      fullText += text;
-      process.stdout.write(fullText);
-    })
-
+    let fullText = "";
+    await anthropic.messages
+      .stream(
+        {
+          system,
+          messages,
+          model,
+          max_tokens,
+        },
+        {
+          headers: headers,
+        },
+      )
+      .on("text", (text) => {
+        fullText += text;
+        process.stdout.write(fullText);
+      });
   } else {
-    const response = await anthropic.messages.create({
-      model,
-      max_tokens,
-      system,
-      messages,
-    }, {
-      headers: headers,
-    });
+    const response = await anthropic.messages.create(
+      {
+        model,
+        max_tokens,
+        system,
+        messages,
+      },
+      {
+        headers: headers,
+      },
+    );
 
     console.log(response);
   }

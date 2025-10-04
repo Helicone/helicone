@@ -40,21 +40,21 @@ export async function safePut({
         account_id: process.env.CLOUDFLARE_ACCOUNT_ID ?? "",
         expiration_ttl: expirationTTL,
         value: value,
-      }
+      },
     );
 
     return { success: true };
   } catch (e) {
     console.error(
       `Error putting in cache (attempt ${currentRetry + 1}/${maxRetries})`,
-      e
+      e,
     );
     if (currentRetry >= maxRetries) {
       return { success: false, error: JSON.stringify(e) };
     }
 
     const delay = Math.floor(
-      baseDelay * Math.pow(2, currentRetry) * (0.5 + Math.random())
+      baseDelay * Math.pow(2, currentRetry) * (0.5 + Math.random()),
     );
 
     await new Promise((resolve) => setTimeout(resolve, delay));
@@ -74,7 +74,7 @@ export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
   const hashedKey = await crypto.subtle.digest(
     { name: "SHA-256" },
-    encoder.encode(key)
+    encoder.encode(key),
   );
   const byteArray = Array.from(new Uint8Array(hashedKey));
   const hexCodes = byteArray.map((value) => {
@@ -100,7 +100,7 @@ async function getCacheKey(): Promise<CryptoKey> {
 }
 
 export async function encrypt(
-  text: string
+  text: string,
 ): Promise<{ iv: string; content: string }> {
   const key = getCacheKey();
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -112,7 +112,7 @@ export async function encrypt(
       iv: iv,
     },
     await key,
-    encoded
+    encoded,
   );
 
   return {
@@ -128,14 +128,14 @@ export async function removeFromCache(key: string): Promise<void> {
     hashedKey,
     {
       account_id: process.env.CLOUDFLARE_ACCOUNT_ID ?? "",
-    }
+    },
   );
 }
 
 export async function storeInCache(
   key: string,
   value: string,
-  expirationTtl?: number
+  expirationTtl?: number,
 ): Promise<void> {
   const encrypted = await encrypt(value);
   const hashedKey = await hashWithHmac(key, 2);

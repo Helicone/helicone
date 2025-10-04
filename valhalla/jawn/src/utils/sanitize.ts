@@ -74,11 +74,11 @@ export function safeJSONStringify(obj: any): string {
             Object.entries(obj).map(([k, v]) => [
               k,
               typeof v === "string" ? v.replace(/[\uD800-\uDFFF]/g, "") : v,
-            ])
+            ]),
           )
         : typeof obj === "string"
-        ? obj.replace(/[\uD800-\uDFFF]/g, "")
-        : obj
+          ? obj.replace(/[\uD800-\uDFFF]/g, "")
+          : obj,
     );
   }
 }

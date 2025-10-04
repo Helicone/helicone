@@ -24,38 +24,35 @@ export async function GET() {
   });
 
   const mdxs = await Promise.all(
-    BLOG_CONTENT
-      .filter(
-        (contentPath) =>
-          "dynmaicEntry" in contentPath ||
-          !contentPath.href.includes("https://")
-      )
-      .map(async (contentPath) => {
-        let blogPath;
-        if ("dynmaicEntry" in contentPath) {
-          blogPath = contentPath.dynmaicEntry.folderName;
-        } else {
-          blogPath = contentPath.href.replace("/blog/", "");
-        }
+    BLOG_CONTENT.filter(
+      (contentPath) =>
+        "dynmaicEntry" in contentPath || !contentPath.href.includes("https://"),
+    ).map(async (contentPath) => {
+      let blogPath;
+      if ("dynmaicEntry" in contentPath) {
+        blogPath = contentPath.dynmaicEntry.folderName;
+      } else {
+        blogPath = contentPath.href.replace("/blog/", "");
+      }
 
-        const fullPath = path.join(blogsFolder, blogPath, "src.mdx");
-        const source = fs.readFileSync(fullPath, "utf8");
+      const fullPath = path.join(blogsFolder, blogPath, "src.mdx");
+      const source = fs.readFileSync(fullPath, "utf8");
 
-        const metadata = await getMetadata(blogPath);
+      const metadata = await getMetadata(blogPath);
 
-        return {
-          path: fullPath,
-          title: metadata?.title ?? "",
-          description: metadata?.description ?? "",
-          link: path.join("/blog", blogPath),
-          folder: blogPath,
-          content: source,
-          date: metadata?.date ?? "",
-          imageExists: metadata?.images ? true : false,
-          imagePath: metadata?.images ?? "",
-          source,
-        };
-      })
+      return {
+        path: fullPath,
+        title: metadata?.title ?? "",
+        description: metadata?.description ?? "",
+        link: path.join("/blog", blogPath),
+        folder: blogPath,
+        content: source,
+        date: metadata?.date ?? "",
+        imageExists: metadata?.images ? true : false,
+        imagePath: metadata?.images ?? "",
+        source,
+      };
+    }),
   );
 
   mdxs.forEach((mdx) => {

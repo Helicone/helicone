@@ -6,7 +6,7 @@ import * as express from "express";
 export async function expressAuthentication(
   req: express.Request,
   securityName: string,
-  scopes?: string[]
+  scopes?: string[],
 ): Promise<any> {
   return null;
 }

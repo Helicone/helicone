@@ -38,17 +38,17 @@ export class ModelController extends Controller {
           GROUP BY model
           ORDER BY count() DESC
           `,
-          [request.authParams.organizationId]
+          [request.authParams.organizationId],
         );
         return ok(result);
       },
-      kvCache
+      kvCache,
     );
 
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(
-        JSON.stringify(result.error) || "Failed to fetch model comparison"
+        JSON.stringify(result.error) || "Failed to fetch model comparison",
       );
     } else {
       this.setStatus(200);

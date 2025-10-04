@@ -228,7 +228,11 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
 
       const applyOverride = (body: any, override: object): object => {
         for (const [key, value] of Object.entries(override)) {
-          if (typeof value !== "object" || value === null || Array.isArray(value)) {
+          if (
+            typeof value !== "object" ||
+            value === null ||
+            Array.isArray(value)
+          ) {
             body[key] = value;
           } else {
             if (!body[key] || typeof body[key] !== "object") {

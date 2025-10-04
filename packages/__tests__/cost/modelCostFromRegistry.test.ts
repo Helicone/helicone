@@ -108,10 +108,12 @@ describe("modelCostBreakdownFromRegistry", () => {
     if (breakdown) {
       // GPT-4o pricing: $0.0025 per 1K input, $0.01 per 1K output
       // Cache multiplier for cached input: 0.5
-      expect(breakdown.inputCost).toBe(800 * 0.0025 / 1000);
-      expect(breakdown.cachedInputCost).toBe(200 * 0.0025 / 1000 * 0.5);
-      expect(breakdown.outputCost).toBe(500 * 0.01 / 1000);
-      expect(breakdown.totalCost).toBe(breakdown.inputCost + breakdown.cachedInputCost + breakdown.outputCost);
+      expect(breakdown.inputCost).toBe((800 * 0.0025) / 1000);
+      expect(breakdown.cachedInputCost).toBe(((200 * 0.0025) / 1000) * 0.5);
+      expect(breakdown.outputCost).toBe((500 * 0.01) / 1000);
+      expect(breakdown.totalCost).toBe(
+        breakdown.inputCost + breakdown.cachedInputCost + breakdown.outputCost,
+      );
     }
   });
 

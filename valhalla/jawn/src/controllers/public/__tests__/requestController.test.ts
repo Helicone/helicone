@@ -12,7 +12,7 @@ const TEST_ORG_ID = "83635a30-5ba6-41a8-8cc6-fb7df941b24a";
 const mockAuthParams: AuthParams = {
   organizationId: TEST_ORG_ID,
   userId: "test-user-id",
-  role: "admin"
+  role: "admin",
 };
 
 const mockRequest: JawnAuthenticatedRequest = {
@@ -36,7 +36,9 @@ jest.mock("../../../managers/score/ScoreManager", () => ({
 }));
 
 // Helper to construct a fully-typed HeliconeRequest with sensible defaults
-function makeHeliconeRequest(overrides: Partial<HeliconeRequest>): HeliconeRequest {
+function makeHeliconeRequest(
+  overrides: Partial<HeliconeRequest>,
+): HeliconeRequest {
   return {
     response_id: null,
     response_created_at: null,
@@ -119,7 +121,8 @@ const mockRequestData: HeliconeRequest[] = [
     properties: {},
     scores: { "helicone-score-feedback": 1 },
     request_body: "Hello, how are you?user",
-    response_body: "Hello! I'm just a computer program, so I don't have feelings, but I'm here and ready to help you. How can I assist you today?assistant",
+    response_body:
+      "Hello! I'm just a computer program, so I don't have feelings, but I'm here and ready to help you. How can I assist you today?assistant",
     cost: 19950,
   }),
   makeHeliconeRequest({
@@ -164,10 +167,10 @@ describe("RequestController - Unit Tests", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Create a new controller instance
     controller = new RequestController();
-    
+
     // Get the mocked RequestManager
     sharedMockGetRequestsClickhouse.mockReset();
     mockGetRequestsClickhouse = sharedMockGetRequestsClickhouse;
@@ -177,7 +180,7 @@ describe("RequestController - Unit Tests", () => {
     test("should filter requests with positive feedback", async () => {
       // Set up mock to return filtered data
       const expectedData = mockRequestData.filter(
-        r => r.scores?.["helicone-score-feedback"] === 1
+        (r) => r.scores?.["helicone-score-feedback"] === 1,
       );
       mockGetRequestsClickhouse.mockResolvedValue(ok(expectedData));
 
@@ -197,7 +200,10 @@ describe("RequestController - Unit Tests", () => {
         isCached: false,
       };
 
-      const result = await controller.getRequestsClickhouse(requestBody, mockRequest);
+      const result = await controller.getRequestsClickhouse(
+        requestBody,
+        mockRequest,
+      );
 
       // Verify the controller called the manager with the correct params
       expect(mockGetRequestsClickhouse).toHaveBeenCalledWith(requestBody);
@@ -206,7 +212,7 @@ describe("RequestController - Unit Tests", () => {
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
       expect(Array.isArray(result.data)).toBe(true);
-      
+
       const expectedIds = [
         "06a3e048-2407-4e88-851f-5a7890dda2c9",
         "fac84b2d-fd86-4ee8-b246-08ba0c7ddab3",
@@ -218,7 +224,7 @@ describe("RequestController - Unit Tests", () => {
     test("should filter requests with negative feedback", async () => {
       // Set up mock to return filtered data
       const expectedData = mockRequestData.filter(
-        r => r.scores?.["helicone-score-feedback"] === 0
+        (r) => r.scores?.["helicone-score-feedback"] === 0,
       );
       mockGetRequestsClickhouse.mockResolvedValue(ok(expectedData));
 
@@ -238,12 +244,15 @@ describe("RequestController - Unit Tests", () => {
         isCached: false,
       };
 
-      const result = await controller.getRequestsClickhouse(requestBody, mockRequest);
+      const result = await controller.getRequestsClickhouse(
+        requestBody,
+        mockRequest,
+      );
 
       expect(mockGetRequestsClickhouse).toHaveBeenCalledWith(requestBody);
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      
+
       const expectedIds = ["test-request-negative-feedback-1"];
       const actualIds = result.data?.map((r: any) => r.request_id) || [];
       expect(actualIds).toEqual(expectedIds);
@@ -269,7 +278,10 @@ describe("RequestController - Unit Tests", () => {
         isCached: false,
       };
 
-      const result = await controller.getRequestsClickhouse(requestBody, mockRequest);
+      const result = await controller.getRequestsClickhouse(
+        requestBody,
+        mockRequest,
+      );
 
       expect(mockGetRequestsClickhouse).toHaveBeenCalledWith(requestBody);
       expect(result.error).toBeNull();
@@ -280,7 +292,9 @@ describe("RequestController - Unit Tests", () => {
     test("should combine feedback filter with model filter", async () => {
       // Set up mock to return filtered data
       const expectedData = mockRequestData.filter(
-        r => r.scores?.["helicone-score-feedback"] === 1 && r.model === "gpt-4o-mini"
+        (r) =>
+          r.scores?.["helicone-score-feedback"] === 1 &&
+          r.model === "gpt-4o-mini",
       );
       mockGetRequestsClickhouse.mockResolvedValue(ok(expectedData));
 
@@ -310,19 +324,26 @@ describe("RequestController - Unit Tests", () => {
         isCached: false,
       };
 
-      const result = await controller.getRequestsClickhouse(requestBody, mockRequest);
+      const result = await controller.getRequestsClickhouse(
+        requestBody,
+        mockRequest,
+      );
 
       expect(mockGetRequestsClickhouse).toHaveBeenCalledWith(requestBody);
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
       expect(result.data?.length).toBe(1);
-      expect(result.data?.[0]?.request_id).toBe("06a3e048-2407-4e88-851f-5a7890dda2c9");
+      expect(result.data?.[0]?.request_id).toBe(
+        "06a3e048-2407-4e88-851f-5a7890dda2c9",
+      );
     });
 
     test("should handle OR operator with feedback filter", async () => {
       // Set up mock to return data matching either condition
       const expectedData = mockRequestData.filter(
-        r => r.scores?.["helicone-score-feedback"] === 1 || r.model === "gpt-3.5-turbo"
+        (r) =>
+          r.scores?.["helicone-score-feedback"] === 1 ||
+          r.model === "gpt-3.5-turbo",
       );
       mockGetRequestsClickhouse.mockResolvedValue(ok(expectedData));
 
@@ -352,12 +373,15 @@ describe("RequestController - Unit Tests", () => {
         isCached: false,
       };
 
-      const result = await controller.getRequestsClickhouse(requestBody, mockRequest);
+      const result = await controller.getRequestsClickhouse(
+        requestBody,
+        mockRequest,
+      );
 
       expect(mockGetRequestsClickhouse).toHaveBeenCalledWith(requestBody);
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
-      
+
       const requestIds = result.data?.map((r: any) => r.request_id) || [];
       expect(requestIds).toContain("06a3e048-2407-4e88-851f-5a7890dda2c9"); // has feedback
       expect(requestIds).toContain("fac84b2d-fd86-4ee8-b246-08ba0c7ddab3"); // has feedback
@@ -386,7 +410,10 @@ describe("RequestController - Unit Tests", () => {
         isCached: false,
       };
 
-      const firstResult = await controller.getRequestsClickhouse(firstPageRequest, mockRequest);
+      const firstResult = await controller.getRequestsClickhouse(
+        firstPageRequest,
+        mockRequest,
+      );
       expect(firstResult.data?.length).toBe(1);
 
       // Second page
@@ -398,11 +425,16 @@ describe("RequestController - Unit Tests", () => {
         offset: 1,
       };
 
-      const secondResult = await controller.getRequestsClickhouse(secondPageRequest, mockRequest);
+      const secondResult = await controller.getRequestsClickhouse(
+        secondPageRequest,
+        mockRequest,
+      );
       expect(secondResult.data?.length).toBe(1);
-      
+
       // Ensure different results
-      expect(firstResult.data?.[0]?.request_id).not.toBe(secondResult.data?.[0]?.request_id);
+      expect(firstResult.data?.[0]?.request_id).not.toBe(
+        secondResult.data?.[0]?.request_id,
+      );
     });
   });
 });

@@ -26,7 +26,7 @@ export default function ComparisonContent() {
     popularModels.find(
       (m) =>
         m.name.toLowerCase().includes("claude") &&
-        m.name.toLowerCase().includes("sonnet")
+        m.name.toLowerCase().includes("sonnet"),
     )?.id || "";
 
   // Find the GPT-4o model ID to ensure it exists
@@ -34,7 +34,7 @@ export default function ComparisonContent() {
     popularModels.find(
       (m) =>
         m.name.toLowerCase().includes("gpt-4o") ||
-        m.name.toLowerCase().includes("gpt4o")
+        m.name.toLowerCase().includes("gpt4o"),
     )?.id || "";
 
   // Pre-select models if they exist in the registry
@@ -46,7 +46,7 @@ export default function ComparisonContent() {
   const filteredModels = popularModels.filter(
     (model) =>
       model.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      model.provider.toLowerCase().includes(searchTerm.toLowerCase())
+      model.provider.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const isCompareDisabled =

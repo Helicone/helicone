@@ -10,7 +10,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { provider } = params;
   const decodedProvider = formatProviderName(
-    decodeURIComponent(provider || "")
+    decodeURIComponent(provider || ""),
   );
 
   const title = getProviderTitle(decodedProvider);

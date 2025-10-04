@@ -76,7 +76,7 @@ export default function Home() {
         console.error("Error response:", errorText);
         setDebug((prev) => [...prev, `Error response: ${errorText}`]);
         throw new Error(
-          `Network response was not ok: ${response.status} ${response.statusText}`
+          `Network response was not ok: ${response.status} ${response.statusText}`,
         );
       }
 
@@ -140,8 +140,8 @@ export default function Home() {
                   prev.map((msg) =>
                     msg.id === assistantMessageId
                       ? { ...msg, content: accumulatedContent }
-                      : msg
-                  )
+                      : msg,
+                  ),
                 );
               } else {
                 // Try another pattern: 0:"part1" 0:"part2"
@@ -165,8 +165,8 @@ export default function Home() {
                         prev.map((msg) =>
                           msg.id === assistantMessageId
                             ? { ...msg, content: accumulatedContent }
-                            : msg
-                        )
+                            : msg,
+                        ),
                       );
                     }
                   }
@@ -205,7 +205,7 @@ export default function Home() {
               const parsedData = JSON.parse(data);
               console.log(
                 "Parsed data structure:",
-                JSON.stringify(parsedData, null, 2)
+                JSON.stringify(parsedData, null, 2),
               );
               setDebug((prev) => [
                 ...prev,
@@ -226,8 +226,8 @@ export default function Home() {
                 prev.map((msg) =>
                   msg.id === assistantMessageId
                     ? { ...msg, content: accumulatedContent }
-                    : msg
-                )
+                    : msg,
+                ),
               );
             } catch (e) {
               console.error("Error parsing data:", e);
@@ -254,8 +254,8 @@ export default function Home() {
                 ...msg,
                 content: "Error: Failed to get a response. Please try again.",
               }
-            : msg
-        )
+            : msg,
+        ),
       );
     } finally {
       setIsLoading(false);

@@ -11,7 +11,7 @@ import { IUsageProcessor } from "./IUsageProcessor";
 import { ModelProviderName } from "../models/providers";
 
 export function getUsageProcessor(
-  provider: ModelProviderName
+  provider: ModelProviderName,
 ): IUsageProcessor | null {
   switch (provider) {
     case "openai":

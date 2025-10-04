@@ -19,7 +19,7 @@ export class ResponseBuilder {
 
   addRateLimitHeaders(
     rateLimitCheckResult: RateLimitResponse,
-    rateLimitOptions: RateLimitOptions
+    rateLimitOptions: RateLimitOptions,
   ): void {
     const policy = `${rateLimitOptions.quota};w=${rateLimitOptions.time_window};u=${rateLimitOptions.unit}`;
     const headers: { [key: string]: string } = {

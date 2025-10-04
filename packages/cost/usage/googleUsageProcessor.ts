@@ -3,7 +3,9 @@ import { ModelUsage } from "./types";
 import { Result } from "../../common/result";
 
 export class GoogleUsageProcessor implements IUsageProcessor {
-  public async parse(parseInput: ParseInput): Promise<Result<ModelUsage, string>> {
+  public async parse(
+    parseInput: ParseInput,
+  ): Promise<Result<ModelUsage, string>> {
     try {
       const response = JSON.parse(parseInput.responseBody);
 
@@ -11,8 +13,14 @@ export class GoogleUsageProcessor implements IUsageProcessor {
       if (response.usageMetadata) {
         return {
           data: {
-            input: response.usageMetadata.promptTokens || response.usageMetadata.promptTokenCount || 0,
-            output: response.usageMetadata.candidatesTokens || response.usageMetadata.candidatesTokenCount || 0,
+            input:
+              response.usageMetadata.promptTokens ||
+              response.usageMetadata.promptTokenCount ||
+              0,
+            output:
+              response.usageMetadata.candidatesTokens ||
+              response.usageMetadata.candidatesTokenCount ||
+              0,
           },
           error: null,
         };
@@ -22,8 +30,12 @@ export class GoogleUsageProcessor implements IUsageProcessor {
       if (response.usage) {
         return {
           data: {
-            input: response.usage.prompt_tokens || response.usage.promptTokens || 0,
-            output: response.usage.completion_tokens || response.usage.completionTokens || 0,
+            input:
+              response.usage.prompt_tokens || response.usage.promptTokens || 0,
+            output:
+              response.usage.completion_tokens ||
+              response.usage.completionTokens ||
+              0,
           },
           error: null,
         };

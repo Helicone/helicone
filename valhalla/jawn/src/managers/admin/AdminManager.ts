@@ -26,7 +26,7 @@ export class AdminManager extends BaseManager {
       SecretManager.getSecret("STRIPE_SECRET_KEY") || "",
       {
         apiVersion: "2025-02-24.acacia",
-      }
+      },
     );
   }
 
@@ -35,7 +35,7 @@ export class AdminManager extends BaseManager {
    */
   private async fetchPage<T>(
     fetchFunction: (params: any) => Promise<Stripe.ApiList<T>>,
-    params: any = {}
+    params: any = {},
   ): Promise<{
     items: T[];
     hasMore: boolean;
@@ -63,7 +63,7 @@ export class AdminManager extends BaseManager {
           retryCount++;
           const delay = baseDelay * Math.pow(2, retryCount - 1); // Exponential backoff
           console.warn(
-            `[AdminManager] Rate limit hit, retry ${retryCount}/${maxRetries} after ${delay}ms delay`
+            `[AdminManager] Rate limit hit, retry ${retryCount}/${maxRetries} after ${delay}ms delay`,
           );
           await new Promise((resolve) => setTimeout(resolve, delay));
         } else {
@@ -97,7 +97,7 @@ export class AdminManager extends BaseManager {
         this.stripe.subscriptions.list({
           limit: 1,
           status: "all",
-        })
+        }),
       );
 
       // Using Stripe has_more and a single item, we can estimate total pages
@@ -129,7 +129,7 @@ export class AdminManager extends BaseManager {
                 ],
                 limit: 100,
               }),
-            thisCursor ? { starting_after: thisCursor } : {}
+            thisCursor ? { starting_after: thisCursor } : {},
           ).then((result) => {
             // Save next cursor
             if (result.hasMore && result.lastId) {
@@ -165,7 +165,7 @@ export class AdminManager extends BaseManager {
 
         // Rate limiting between batches
         await new Promise((resolve) =>
-          setTimeout(resolve, 1000 / this.config.subscriptionRateLimit)
+          setTimeout(resolve, 1000 / this.config.subscriptionRateLimit),
         );
       }
 
@@ -231,7 +231,7 @@ export class AdminManager extends BaseManager {
           return this.fetchInvoicesForDay(chunk).catch((error) => {
             console.error(
               `[AdminManager] Error fetching invoices for ${chunk.label}:`,
-              error
+              error,
             );
             return [] as Stripe.Invoice[]; // Return empty array on error
           });
@@ -301,7 +301,7 @@ export class AdminManager extends BaseManager {
             ],
             limit: 100,
           }),
-        lastId ? { starting_after: lastId } : {}
+        lastId ? { starting_after: lastId } : {},
       );
 
       dayInvoices.push(...items);
@@ -316,13 +316,13 @@ export class AdminManager extends BaseManager {
    * Process discounts from subscriptions
    */
   private async processDiscounts(
-    subscriptions: Stripe.Subscription[]
+    subscriptions: Stripe.Subscription[],
   ): Promise<Record<string, Stripe.Discount>> {
     const discounts: Record<string, Stripe.Discount> = {};
 
     // Find subscriptions with discounts
     const subsWithDiscounts = subscriptions.filter(
-      (sub) => sub.discount !== null
+      (sub) => sub.discount !== null,
     );
 
     // Extract unique coupon IDs
@@ -359,7 +359,7 @@ export class AdminManager extends BaseManager {
       } catch (error) {
         console.error(
           `[AdminManager] Error fetching coupon ${couponId}:`,
-          error
+          error,
         );
         return { couponId, fullCoupon: null, error };
       }
@@ -409,15 +409,15 @@ export class AdminManager extends BaseManager {
     if (forceRefresh) {
       await adminKVCache.set(
         `subscriptions-${this.authParams.organizationId}`,
-        null
+        null,
       );
       await adminKVCache.set(
         `invoices-${this.authParams.organizationId}`,
-        null
+        null,
       );
       await adminKVCache.set(
         `upcoming-invoices-${this.authParams.organizationId}`,
-        null
+        null,
       );
       await adminKVCache.set(cacheKey, null);
     }
@@ -494,7 +494,7 @@ export class AdminManager extends BaseManager {
     if (subscriptionsResult.error || !subscriptionsResult.data) {
       console.error(
         "[AdminManager] Error getting subscriptions:",
-        subscriptionsResult.error
+        subscriptionsResult.error,
       );
       return [];
     }
@@ -502,7 +502,7 @@ export class AdminManager extends BaseManager {
     // Filter active and trialing subscriptions
     const activeSubscriptions = subscriptionsResult.data.filter(
       (s: Stripe.Subscription) =>
-        s.status === "active" || s.status === "trialing"
+        s.status === "active" || s.status === "trialing",
     );
 
     // Create a concurrency limiter that allows exactly 95 simultaneous requests
@@ -519,12 +519,12 @@ export class AdminManager extends BaseManager {
           } catch (error) {
             console.error(
               `Error fetching upcoming invoice for ${subscription.id}:`,
-              error
+              error,
             );
             return null;
           }
-        })
-      )
+        }),
+      ),
     );
 
     // Filter out null results and convert to plain objects to avoid Stripe Response object issues

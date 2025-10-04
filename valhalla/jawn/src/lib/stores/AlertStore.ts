@@ -21,7 +21,7 @@ export class AlertStore extends BaseStore {
          FROM alert
          WHERE org_id = $1
          AND (soft_delete IS NULL OR soft_delete = false)`,
-        [this.organizationId]
+        [this.organizationId],
       );
 
       const alertHistoryResult = await dbExecute<
@@ -31,7 +31,7 @@ export class AlertStore extends BaseStore {
          FROM alert_history
          WHERE org_id = $1
          AND (soft_delete IS NULL OR soft_delete = false)`,
-        [this.organizationId]
+        [this.organizationId],
       );
 
       if (alertResult.error) {
@@ -53,7 +53,7 @@ export class AlertStore extends BaseStore {
   }
 
   public async createAlert(
-    createAlert: AlertRequest
+    createAlert: AlertRequest,
   ): Promise<Result<string, string>> {
     const alert = {
       ...createAlert,
@@ -97,7 +97,7 @@ export class AlertStore extends BaseStore {
          SET soft_delete = true
          WHERE id = $1
          AND org_id = $2`,
-        [alertId, this.organizationId]
+        [alertId, this.organizationId],
       );
 
       if (result.error) {

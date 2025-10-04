@@ -104,13 +104,13 @@ const ModelSelector = ({
     modelA: string,
     modelB: string,
     providerA: string,
-    providerB: string
+    providerB: string,
   ) => {
     const model1Path = `${encodeURIComponent(modelA)}-on-${encodeURIComponent(
-      providerA
+      providerA,
     ).toLowerCase()}`;
     const model2Path = `${encodeURIComponent(modelB)}-on-${encodeURIComponent(
-      providerB
+      providerB,
     ).toLowerCase()}`;
     return `/comparison/${model1Path}-vs-${model2Path}`;
   };

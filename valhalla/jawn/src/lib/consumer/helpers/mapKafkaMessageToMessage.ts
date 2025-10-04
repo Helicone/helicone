@@ -3,7 +3,7 @@ import { GenericResult, err, ok } from "../../../packages/common/result";
 import { KafkaMessageContents } from "../../handlers/HandlerContext";
 
 export function mapKafkaMessageToMessage(
-  kafkaMessage: KafkaMessage[]
+  kafkaMessage: KafkaMessage[],
 ): GenericResult<KafkaMessageContents[]> {
   const messages: KafkaMessageContents[] = [];
   for (const message of kafkaMessage) {
@@ -23,7 +23,7 @@ export function mapKafkaMessageToMessage(
   return ok(messages);
 }
 export function mapMessageDates(
-  message: KafkaMessageContents
+  message: KafkaMessageContents,
 ): KafkaMessageContents {
   return {
     ...message,

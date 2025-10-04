@@ -6,7 +6,7 @@ export class WebhookStore {
   constructor() {}
 
   async getWebhooksByOrgId(
-    orgId: string
+    orgId: string,
   ): PromiseGenericResult<Database["public"]["Tables"]["webhooks"]["Row"][]> {
     try {
       const result = await dbExecute<
@@ -15,7 +15,7 @@ export class WebhookStore {
         `SELECT *
          FROM webhooks
          WHERE org_id = $1`,
-        [orgId]
+        [orgId],
       );
 
       if (result.error) {
@@ -30,7 +30,7 @@ export class WebhookStore {
   }
 
   async getWebhookSubscriptionByWebhookId(
-    webhookId: number
+    webhookId: number,
   ): PromiseGenericResult<
     Database["public"]["Tables"]["webhook_subscriptions"]["Row"][]
   > {
@@ -41,12 +41,12 @@ export class WebhookStore {
         `SELECT *
          FROM webhook_subscriptions
          WHERE webhook_id = $1`,
-        [webhookId]
+        [webhookId],
       );
 
       if (result.error) {
         return err(
-          `Failed to get webhook subscriptions for webhook ${webhookId}: ${result.error}`
+          `Failed to get webhook subscriptions for webhook ${webhookId}: ${result.error}`,
         );
       }
 
@@ -55,8 +55,8 @@ export class WebhookStore {
       console.error("Error fetching webhook subscriptions:", error);
       return err(
         `Failed to get webhook subscriptions for webhook ${webhookId}: ${String(
-          error
-        )}`
+          error,
+        )}`,
       );
     }
   }

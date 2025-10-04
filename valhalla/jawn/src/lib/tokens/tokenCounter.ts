@@ -74,7 +74,7 @@ const TIKTOKEN_MODELS = [
 ];
 export async function getTokenCountGPT3(
   inputText: string,
-  model: string
+  model: string,
 ): Promise<number> {
   if (!inputText) return 0;
   return -1;
@@ -86,7 +86,7 @@ export async function getTokenCountGPT3(
 }
 
 export async function getTokenCountAnthropic(
-  inputText: string
+  inputText: string,
 ): Promise<number> {
   if (!inputText) return 0;
   // Normalize the potentially unicode input to Anthropic standard of normalization

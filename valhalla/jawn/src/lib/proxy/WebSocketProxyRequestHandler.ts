@@ -19,10 +19,10 @@ export async function handleSocketSession(
   const responseId = crypto.randomUUID();
 
   const startTime = new Date(
-    messages[0]?.timestamp ?? new Date().toISOString()
+    messages[0]?.timestamp ?? new Date().toISOString(),
   );
   const endTime = new Date(
-    messages[messages.length - 1]?.timestamp ?? new Date().toISOString()
+    messages[messages.length - 1]?.timestamp ?? new Date().toISOString(),
   );
 
   const responseHeaders = new Headers();
@@ -127,7 +127,7 @@ export async function handleSocketSession(
  */
 function calculateTokenUsage(messages: SocketMessage[]) {
   const doneMessages = messages.filter(
-    (msg) => msg.from === "target" && msg.content?.type === "response.done"
+    (msg) => msg.from === "target" && msg.content?.type === "response.done",
   );
 
   return doneMessages.reduce(
@@ -157,6 +157,6 @@ function calculateTokenUsage(messages: SocketMessage[]) {
       totalTokens: 0,
       promptAudioTokens: 0,
       completionAudioTokens: 0,
-    }
+    },
   );
 }

@@ -53,7 +53,7 @@ export class EvalController extends Controller {
   public async queryEvals(
     @Body()
     evalQueryParams: EvalQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Eval[], string>> {
     const evalManager = new EvalManager(request.authParams);
 
@@ -71,13 +71,13 @@ export class EvalController extends Controller {
   @Get("/scores")
   //old
   public async getEvalScores(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string[], string>> {
     const evalManager = new EvalManager(request.authParams);
     const result = await cacheResultCustom(
       "v1/evals/scores" + request.authParams.organizationId,
       async () => await evalManager.getEvalScores(),
-      kvCache
+      kvCache,
     );
 
     if (result.error || !result.data) {
@@ -93,7 +93,7 @@ export class EvalController extends Controller {
   public async addEval(
     @Path() requestId: string,
     @Body() evalData: { name: string; score: number },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const evalManager = new EvalManager(request.authParams);
     const result = await evalManager.addEval(requestId, evalData);
@@ -110,7 +110,7 @@ export class EvalController extends Controller {
   @Post("/score-distributions/query")
   public async queryScoreDistributions(
     @Body() evalQueryParams: EvalQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ScoreDistribution[], string>> {
     const evalManager = new EvalManager(request.authParams);
 

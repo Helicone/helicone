@@ -181,7 +181,7 @@ const OpenStatsSVG = () => (
 
 const OpenSource = async () => {
   const githubResponse = await fetch(
-    "https://api.github.com/repos/helicone/helicone"
+    "https://api.github.com/repos/helicone/helicone",
   );
   const githubData = await githubResponse.json();
   const stars = githubData.stargazers_count;

@@ -49,7 +49,7 @@ export class VertexProvider extends BaseProvider {
     if (modelId.toLowerCase().includes("gemini")) {
       if (!projectId) {
         throw new Error(
-          "Vertex AI requires projectId in config for Gemini models"
+          "Vertex AI requires projectId in config for Gemini models",
         );
       }
       const baseUrlWithRegion =
@@ -62,7 +62,7 @@ export class VertexProvider extends BaseProvider {
 
     if (!projectId || !region) {
       throw new Error(
-        "Vertex AI requires projectId and region in config for non-Gemini models"
+        "Vertex AI requires projectId and region in config for non-Gemini models",
       );
     }
 
@@ -76,9 +76,7 @@ export class VertexProvider extends BaseProvider {
 
     // Gemini models use Google's predict format; all others use rawPredict for native format
     const isStreaming = requestParams.isStreaming === true;
-    const endpointMethod = isStreaming
-        ? "streamRawPredict"
-        : "rawPredict";
+    const endpointMethod = isStreaming ? "streamRawPredict" : "rawPredict";
 
     return `${baseEndpointUrl}:${endpointMethod}`;
   }
@@ -117,11 +115,11 @@ export class VertexProvider extends BaseProvider {
   async authenticate(
     authContext: AuthContext,
     endpoint: Endpoint,
-    cacheProvider?: CacheProvider
+    cacheProvider?: CacheProvider,
   ): Promise<AuthResult> {
     if (!authContext.apiKey) {
       throw new Error(
-        "Service account JSON is required for Vertex AI authentication"
+        "Service account JSON is required for Vertex AI authentication",
       );
     }
 
@@ -129,7 +127,7 @@ export class VertexProvider extends BaseProvider {
       authContext.apiKey,
       authContext.orgId,
       ["https://www.googleapis.com/auth/cloud-platform"],
-      cacheProvider
+      cacheProvider,
     );
 
     return {
@@ -154,5 +152,4 @@ export class VertexProvider extends BaseProvider {
       return `Request failed with status ${response.status}`;
     }
   }
-
 }

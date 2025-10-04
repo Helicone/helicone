@@ -153,14 +153,14 @@ export interface CreatePromptResponse {
 export class PromptController extends Controller {
   @Get("has-prompts")
   public async hasPrompts(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<{ hasPrompts: boolean }, string>> {
     const promptManager = new PromptManager(request.authParams);
 
     const result = await promptManager.getPrompts({
-      filter: {}
+      filter: {},
     });
-    
+
     if (result.error) {
       this.setStatus(500);
       return result;
@@ -170,9 +170,9 @@ export class PromptController extends Controller {
     this.setStatus(200);
     return {
       data: {
-        hasPrompts: hasPrompts
+        hasPrompts: hasPrompts,
       },
-      error: null
+      error: null,
     };
   }
 
@@ -180,7 +180,7 @@ export class PromptController extends Controller {
   public async getPrompts(
     @Body()
     requestBody: PromptsQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<PromptsResult[], string>> {
     const promptManager = new PromptManager(request.authParams);
 
@@ -198,7 +198,7 @@ export class PromptController extends Controller {
     @Body()
     requestBody: PromptQueryParams,
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptId: string
+    @Path() promptId: string,
   ): Promise<Result<PromptResult, string>> {
     const promptManager = new PromptManager(request.authParams);
 
@@ -214,7 +214,7 @@ export class PromptController extends Controller {
   @Delete("{promptId}")
   public async deletePrompt(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptId: string
+    @Path() promptId: string,
   ): Promise<void> {
     const promptManager = new PromptManager(request.authParams);
 
@@ -237,7 +237,7 @@ export class PromptController extends Controller {
       prompt: any;
       metadata: Record<string, any>;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<CreatePromptResponse, string>> {
     const promptManager = new PromptManager(request.authParams);
 
@@ -254,12 +254,12 @@ export class PromptController extends Controller {
   public async updatePromptUserDefinedId(
     @Request() request: JawnAuthenticatedRequest,
     @Path() promptId: string,
-    @Body() requestBody: { userDefinedId: string }
+    @Body() requestBody: { userDefinedId: string },
   ): Promise<Result<null, string>> {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.updatePromptUserDefinedId(
       promptId,
-      requestBody.userDefinedId
+      requestBody.userDefinedId,
     );
     if (result.error) {
       this.setStatus(500);
@@ -274,13 +274,13 @@ export class PromptController extends Controller {
     @Body()
     requestBody: PromptEditSubversionLabelParams,
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptVersionId: string
+    @Path() promptVersionId: string,
   ): Promise<Result<{ metadata: Record<string, any> }, string>> {
     const promptManager = new PromptManager(request.authParams);
 
     const result = await promptManager.editPromptVersionLabel(
       promptVersionId,
-      requestBody
+      requestBody,
     );
     if (result.error || !result.data) {
       console.log(result.error);
@@ -296,13 +296,13 @@ export class PromptController extends Controller {
     @Body()
     requestBody: PromptEditSubversionTemplateParams,
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptVersionId: string
+    @Path() promptVersionId: string,
   ): Promise<Result<null, string>> {
     const promptManager = new PromptManager(request.authParams);
 
     const result = await promptManager.editPromptVersionTemplate(
       promptVersionId,
-      requestBody
+      requestBody,
     );
     if (result.error) {
       console.log(result.error);
@@ -318,13 +318,13 @@ export class PromptController extends Controller {
     @Body()
     requestBody: PromptCreateSubversionParams,
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptVersionId: string
+    @Path() promptVersionId: string,
   ): Promise<Result<PromptVersionResult, string>> {
     const promptManager = new PromptManager(request.authParams);
 
     const result = await promptManager.createNewPromptVersion(
       promptVersionId,
-      requestBody
+      requestBody,
     );
 
     if (result.error || !result.data) {
@@ -335,7 +335,7 @@ export class PromptController extends Controller {
 
     const inputKeysResult = await promptManager.createPromptInputKeys(
       result.data.id,
-      requestBody.newHeliconeTemplate
+      requestBody.newHeliconeTemplate,
     );
 
     if (inputKeysResult.error) {
@@ -352,13 +352,13 @@ export class PromptController extends Controller {
     @Body()
     requestBody: PromptCreateSubversionParams,
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptVersionId: string
+    @Path() promptVersionId: string,
   ): Promise<Result<PromptVersionResult, string>> {
     const promptManager = new PromptManager(request.authParams);
 
     const result = await promptManager.createNewPromptVersion(
       promptVersionId,
-      requestBody
+      requestBody,
     );
     if (result.error || !result.data) {
       console.log(result.error);
@@ -376,12 +376,12 @@ export class PromptController extends Controller {
     @Body()
     requestBody: {
       previousProductionVersionId: string;
-    }
+    },
   ): Promise<Result<PromptVersionResult, string>> {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.promotePromptVersionToProduction(
       promptVersionId,
-      requestBody.previousProductionVersionId
+      requestBody.previousProductionVersionId,
     );
     if (result.error || !result.data) {
       console.log(result.error);
@@ -399,14 +399,14 @@ export class PromptController extends Controller {
       random?: boolean;
     },
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptVersionId: string
+    @Path() promptVersionId: string,
   ): Promise<Result<PromptInputRecord[], string>> {
     const inputManager = new InputsManager(request.authParams);
 
     const result = await inputManager.getInputs(
       requestBody.limit,
       promptVersionId,
-      requestBody.random
+      requestBody.random,
     );
     if (result.error || !result.data) {
       console.log(result.error);
@@ -420,7 +420,7 @@ export class PromptController extends Controller {
   @Get("{promptId}/experiments")
   public async getPromptExperiments(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptId: string
+    @Path() promptId: string,
   ) {
     const result = await dbExecute<{
       id: string;
@@ -443,7 +443,7 @@ export class PromptController extends Controller {
       WHERE experiment_v2.meta->>'prompt_id' = $1
       AND experiment_v2.organization = $2
       `,
-      [promptId, request.authParams.organizationId]
+      [promptId, request.authParams.organizationId],
     );
     if (result.error || !result.data) {
       console.error(result.error);
@@ -459,7 +459,7 @@ export class PromptController extends Controller {
     @Body()
     requestBody: PromptVersionsQueryParams,
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptId: string
+    @Path() promptId: string,
   ): Promise<Result<PromptVersionResult[], string>> {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getPromptVersions(
@@ -474,7 +474,7 @@ export class PromptController extends Controller {
           },
         },
       },
-      requestBody.includeExperimentVersions
+      requestBody.includeExperimentVersions,
     );
     if (result.error || !result.data) {
       console.error(result.error);
@@ -488,7 +488,7 @@ export class PromptController extends Controller {
   @Get("version/{promptVersionId}")
   public async getPromptVersion(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptVersionId: string
+    @Path() promptVersionId: string,
   ): Promise<Result<PromptVersionResult, string>> {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getPromptVersions({
@@ -511,7 +511,7 @@ export class PromptController extends Controller {
   @Delete("version/{promptVersionId}")
   public async deletePromptVersion(
     @Request() request: JawnAuthenticatedRequest,
-    @Path() promptVersionId: string
+    @Path() promptVersionId: string,
   ): Promise<Result<null, string>> {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.deletePromptVersion(promptVersionId);
@@ -529,7 +529,7 @@ export class PromptController extends Controller {
     @Body()
     requestBody: PromptVersiosQueryParamsCompiled,
     @Request() request: JawnAuthenticatedRequest,
-    @Path() user_defined_id: string
+    @Path() user_defined_id: string,
   ): Promise<Result<PromptVersionResultCompiled, string>> {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getCompiledPromptVersions(
@@ -544,7 +544,7 @@ export class PromptController extends Controller {
           },
         },
       },
-      requestBody.inputs
+      requestBody.inputs,
     );
     if (result.error || !result.data) {
       console.error(result.error);
@@ -560,7 +560,7 @@ export class PromptController extends Controller {
     @Body()
     requestBody: PromptVersiosQueryParamsCompiled,
     @Request() request: JawnAuthenticatedRequest,
-    @Path() user_defined_id: string
+    @Path() user_defined_id: string,
   ): Promise<Result<PromptVersionResultFilled, string>> {
     const promptManager = new PromptManager(request.authParams);
     const result = await promptManager.getPormptVersionsTemplates(
@@ -575,7 +575,7 @@ export class PromptController extends Controller {
           },
         },
       },
-      requestBody.inputs
+      requestBody.inputs,
     );
     if (result.error || !result.data) {
       console.error(result.error);

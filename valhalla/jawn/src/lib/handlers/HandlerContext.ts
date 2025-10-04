@@ -127,7 +127,7 @@ export type HeliconeMeta = {
   promptInputs?: Record<string, any>;
   heliconeManualAccessKey?: string;
   stripeCustomerId?: string;
-  
+
   // Deprecated gateway metadata
   gatewayRouterId?: string;
   gatewayDeploymentTarget?: string;
@@ -135,7 +135,7 @@ export type HeliconeMeta = {
   // AI Gateway metadata
   isPassthroughBilling?: boolean;
   gatewayProvider?: ModelProviderName;
-  
+
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
   gatewayResponseFormat?: ResponseFormat;
@@ -184,17 +184,14 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
 
   const promptTokens = getPromptTokens(modelUsage, legacyUsage);
   const completionTokens = getCompletionTokens(modelUsage, legacyUsage);
-  const totalTokens = getTotalTokens(
+  const totalTokens = getTotalTokens(modelUsage, legacyUsage);
+  const promptCacheWriteTokens = getPromptCacheWriteTokens(
     modelUsage,
     legacyUsage,
   );
-  const promptCacheWriteTokens = getPromptCacheWriteTokens(
-    modelUsage,
-    legacyUsage
-  );
   const promptCacheReadTokens = getPromptCacheReadTokens(
     modelUsage,
-    legacyUsage
+    legacyUsage,
   );
   const promptAudioTokens = getPromptAudioTokens(modelUsage, legacyUsage);
   const completionAudioTokens = legacyUsage.completionAudioTokens ?? null;
@@ -210,14 +207,19 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     response_created_at:
       context.message.log.response.responseCreatedAt.toISOString(),
     response_status: context.message.log.response.status,
-    request_model: context.message.heliconeMeta.gatewayModel ?? context.processedLog.request.model ?? null,
+    request_model:
+      context.message.heliconeMeta.gatewayModel ??
+      context.processedLog.request.model ??
+      null,
     response_model: null,
     request_path: context.message.log.request.path,
     request_user_id: context.message.log.request.userId ?? null,
     request_properties: context.message.log.request.properties ?? null,
     model_override: null,
     helicone_user: null,
-    provider: context.message.heliconeMeta.gatewayProvider ?? context.message.log.request.provider,
+    provider:
+      context.message.heliconeMeta.gatewayProvider ??
+      context.message.log.request.provider,
     delay_ms: context.message.log.response.delayMs ?? null,
     time_to_first_token: context.message.log.response.timeToFirstToken ?? null,
 
@@ -246,17 +248,21 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     properties: context.message.log.request.properties ?? {},
     assets: [],
     target_url: context.message.log.request.targetUrl,
-    model: context.message.heliconeMeta.gatewayModel ?? context.processedLog.model ?? "",
+    model:
+      context.message.heliconeMeta.gatewayModel ??
+      context.processedLog.model ??
+      "",
     cache_reference_id: context.message.log.request.cacheReferenceId ?? null,
     cache_enabled: context.message.log.request.cacheEnabled ?? false,
     request_referrer: context.message.log.request.requestReferrer ?? null,
-    gateway_endpoint_version: context.message.heliconeMeta.gatewayEndpointVersion ?? null,
+    gateway_endpoint_version:
+      context.message.heliconeMeta.gatewayEndpointVersion ?? null,
   };
 };
 
 export function getPromptTokens(
   modelUsage: ModelUsage | undefined,
-  legacyUsage: Usage
+  legacyUsage: Usage,
 ): number | null {
   if (modelUsage?.input) {
     return modelUsage.input;
@@ -266,7 +272,7 @@ export function getPromptTokens(
 
 export function getCompletionTokens(
   modelUsage: ModelUsage | undefined,
-  legacyUsage: Usage
+  legacyUsage: Usage,
 ): number | null {
   if (modelUsage?.output) {
     return modelUsage.output;
@@ -286,7 +292,7 @@ function getTotalTokens(
 
 export function getPromptCacheWriteTokens(
   modelUsage: ModelUsage | undefined,
-  legacyUsage: Usage
+  legacyUsage: Usage,
 ): number | null {
   const cacheDetails = modelUsage?.cacheDetails;
   if (cacheDetails) {
@@ -299,7 +305,7 @@ export function getPromptCacheWriteTokens(
 
 export function getPromptCacheReadTokens(
   modelUsage: ModelUsage | undefined,
-  legacyUsage: Usage
+  legacyUsage: Usage,
 ): number | null {
   const cacheDetails = modelUsage?.cacheDetails;
   if (cacheDetails?.cachedInput) {
@@ -310,7 +316,7 @@ export function getPromptCacheReadTokens(
 
 export function getPromptAudioTokens(
   modelUsage: ModelUsage | undefined,
-  legacyUsage: Usage
+  legacyUsage: Usage,
 ): number | null {
   if (modelUsage?.audio) {
     return modelUsage.audio;

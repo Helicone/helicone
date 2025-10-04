@@ -62,7 +62,7 @@ async function main() {
           environments[Math.floor(Math.random() * environments.length)],
         "Helicone-Posthog-Key": process.env.POSTHOG_API_KEY,
       },
-    }
+    },
   );
   // console.log(chatCompletion.choices[0].message.content);
 }
@@ -77,7 +77,7 @@ if (process.env.LOOP === "true") {
     await main();
     setTimeout(
       loop,
-      Math.floor(Math.random() * (MAX_TIME - MIN_TIME)) + MIN_TIME
+      Math.floor(Math.random() * (MAX_TIME - MIN_TIME)) + MIN_TIME,
     );
   };
 

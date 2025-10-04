@@ -145,7 +145,9 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "deepseek-ai/DeepSeek-V3.1-Terminus", // Provider model ID on DeepInfra
-                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-V3.1-Terminus"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -162,7 +164,9 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "deepseek-ai/DeepSeek-V3.1-Terminus",
-                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-V3.1-Terminus"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -251,7 +255,9 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
-                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -633,7 +639,7 @@ describe("DeepSeek Registry Tests", () => {
         },
       }));
 
-      it("should construct correct DeepInfra URL for DeepSeek R1", () =>
+    it("should construct correct DeepInfra URL for DeepSeek R1", () =>
       runGatewayTest({
         model: "deepseek-reasoner/deepinfra",
         expected: {
@@ -712,8 +718,6 @@ describe("DeepSeek Registry Tests", () => {
         },
       }));
 
-
-
     it("should construct correct DeepInfra URL for DeepSeek V3.1 Terminus", () =>
       runGatewayTest({
         model: "deepseek-v3.1-terminus/deepinfra",
@@ -723,7 +727,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-V3.1-Terminus",
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-V3.1-Terminus"
+              ),
               expects: deepinfraAuthExpectations,
               customVerify: (call) => {
                 // Verify that the URL is correctly constructed for V3.1 Terminus
@@ -745,7 +751,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-V3.1-Terminus", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-V3.1-Terminus"
+              ),
               expects: deepinfraAuthExpectations,
             },
           ],
@@ -765,7 +773,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-V3.1-Terminus",
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-V3.1-Terminus"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: ["user", "Test"],
@@ -847,7 +857,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+              ),
               expects: deepinfraAuthExpectations,
               customVerify: (call) => {
                 // Verify that the URL is correctly constructed for R1 Distill Llama 70B
@@ -869,7 +881,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+              ),
               expects: deepinfraAuthExpectations,
             },
           ],
@@ -889,7 +903,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: ["user", "Test"],
@@ -908,9 +924,7 @@ describe("DeepSeek Registry Tests", () => {
           model: "deepseek-v3/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -935,9 +949,7 @@ describe("DeepSeek Registry Tests", () => {
           model: "deepseek-v3.1-terminus/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -947,7 +959,9 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "deepseek-ai/DeepSeek-V3.1-Terminus",
-                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-V3.1-Terminus"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -962,9 +976,7 @@ describe("DeepSeek Registry Tests", () => {
           model: "deepseek-v3.2/novita",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },

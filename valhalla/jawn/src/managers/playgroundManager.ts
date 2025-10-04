@@ -10,11 +10,11 @@ export class PlaygroundManager extends BaseManager {
 
   async setPlaygroundRequestsThroughHelicone(
     orgId: string,
-    requestsThroughHelicone: boolean
+    requestsThroughHelicone: boolean,
   ): Promise<Result<string, string>> {
     const { data, error } = await dbExecute<{ id: string }>(
       `UPDATE organization SET playground_helicone = $1 WHERE id = $2`,
-      [requestsThroughHelicone, this.authParams.organizationId]
+      [requestsThroughHelicone, this.authParams.organizationId],
     );
     if (error) {
       return err(`Failed to update organization playground setting: ${error}`);
@@ -23,11 +23,11 @@ export class PlaygroundManager extends BaseManager {
   }
 
   async getRequestsThroughHelicone(
-    orgId: string
+    orgId: string,
   ): Promise<Result<boolean, string>> {
     const { data, error } = await dbExecute<{ playground_helicone: boolean }>(
       `SELECT playground_helicone FROM organization WHERE id = $1`,
-      [orgId]
+      [orgId],
     );
     if (error) {
       return err(`Failed to get organization playground setting: ${error}`);

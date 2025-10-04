@@ -10,20 +10,27 @@ export type SupportedFeature = (typeof SUPPORTED_FEATURES)[number];
 const LEGACY_WAITLIST_OFFSET = 370;
 
 export class WaitlistManager {
-  public static isSupportedFeature(feature: string): feature is SupportedFeature {
+  public static isSupportedFeature(
+    feature: string,
+  ): feature is SupportedFeature {
     return SUPPORTED_FEATURES.includes(feature as SupportedFeature);
   }
 
   public async addToWaitlist(
     email: string,
     feature: string,
-    organizationId?: string
-  ): Promise<Result<{ 
-    success: boolean; 
-    position?: number;
-    alreadyOnList?: boolean;
-    sharedPlatforms?: string[];
-  }, string>> {
+    organizationId?: string,
+  ): Promise<
+    Result<
+      {
+        success: boolean;
+        position?: number;
+        alreadyOnList?: boolean;
+        sharedPlatforms?: string[];
+      },
+      string
+    >
+  > {
     if (!WaitlistManager.isSupportedFeature(feature)) {
       return err(`Unsupported feature: ${feature}`);
     }
@@ -34,7 +41,7 @@ export class WaitlistManager {
          VALUES ($1, $2, $3, (SELECT COUNT(*) + 1 FROM feature_waitlist WHERE feature = $2), $4)
          ON CONFLICT (email, feature, organization_id) DO NOTHING
          RETURNING original_position as position`,
-        [email, feature, organizationId || null, !!organizationId]
+        [email, feature, organizationId || null, !!organizationId],
       );
 
       if (dbError) {
@@ -44,11 +51,11 @@ export class WaitlistManager {
         console.error(`Error adding to waitlist: ${dbError}`);
         return err("Failed to add to waitlist");
       }
-      
+
       // Check if user was actually added (data exists) or if they were already on the list
       if (!data || data.length === 0) {
         // User is already on waitlist, get their current position and share status
-        const existingResult = await dbExecute<{ 
+        const existingResult = await dbExecute<{
           position: string;
           metadata: { shared_platforms?: string[] };
         }>(
@@ -57,20 +64,21 @@ export class WaitlistManager {
             metadata
           FROM feature_waitlist
           WHERE email = $1 AND feature = $2`,
-          [email, feature]
+          [email, feature],
         );
 
         if (existingResult.data && existingResult.data.length > 0) {
           const userInfo = existingResult.data[0];
-          const adjustedPosition = parseInt(userInfo.position) + LEGACY_WAITLIST_OFFSET;
+          const adjustedPosition =
+            parseInt(userInfo.position) + LEGACY_WAITLIST_OFFSET;
           return ok({
             success: false,
             alreadyOnList: true,
             position: adjustedPosition,
-            sharedPlatforms: userInfo.metadata?.shared_platforms || []
+            sharedPlatforms: userInfo.metadata?.shared_platforms || [],
           });
         }
-        
+
         return err("already_on_waitlist");
       }
 
@@ -99,7 +107,9 @@ export class WaitlistManager {
         console.error("Error updating Loops contact:", loopsError);
       }
 
-      const adjustedPosition = position ? parseInt(position) + LEGACY_WAITLIST_OFFSET : undefined;
+      const adjustedPosition = position
+        ? parseInt(position) + LEGACY_WAITLIST_OFFSET
+        : undefined;
       return ok({
         success: true,
         position: adjustedPosition,
@@ -112,7 +122,7 @@ export class WaitlistManager {
 
   public async isOnWaitlist(
     email: string,
-    feature: string
+    feature: string,
   ): Promise<Result<{ isOnWaitlist: boolean }, string>> {
     if (!WaitlistManager.isSupportedFeature(feature)) {
       return err(`Unsupported feature: ${feature}`);
@@ -123,7 +133,7 @@ export class WaitlistManager {
         `SELECT 1 FROM feature_waitlist 
          WHERE email = $1 AND feature = $2
          LIMIT 1`,
-        [email, feature]
+        [email, feature],
       );
 
       if (result.error) {
@@ -134,13 +144,15 @@ export class WaitlistManager {
       const isOnWaitlist = (result.data && result.data.length > 0) || false;
       return ok({ isOnWaitlist });
     } catch (error: any) {
-      console.error(`Failed to check waitlist status: ${error.message || error}`);
+      console.error(
+        `Failed to check waitlist status: ${error.message || error}`,
+      );
       return err("Failed to check waitlist status");
     }
   }
 
   public async getWaitlistCount(
-    feature: string
+    feature: string,
   ): Promise<Result<{ count: number }, string>> {
     if (!WaitlistManager.isSupportedFeature(feature)) {
       return err(`Unsupported feature: ${feature}`);
@@ -149,7 +161,7 @@ export class WaitlistManager {
     try {
       const result = await dbExecute<{ count: string }>(
         `SELECT COUNT(*) as count FROM feature_waitlist WHERE feature = $1`,
-        [feature]
+        [feature],
       );
 
       if (result.error) {
@@ -169,12 +181,17 @@ export class WaitlistManager {
   public async trackShare(
     email: string,
     feature: string,
-    platform: "twitter" | "linkedin"
-  ): Promise<Result<{ 
-    success: boolean; 
-    newPosition?: number;
-    message: string;
-  }, string>> {
+    platform: "twitter" | "linkedin",
+  ): Promise<
+    Result<
+      {
+        success: boolean;
+        newPosition?: number;
+        message: string;
+      },
+      string
+    >
+  > {
     if (!WaitlistManager.isSupportedFeature(feature)) {
       return err(`Unsupported feature: ${feature}`);
     }
@@ -183,19 +200,22 @@ export class WaitlistManager {
       const boostAmount = 10;
 
       // Check if this platform was already shared
-      const checkResult = await dbExecute<{ metadata: { shared_platforms?: string[] } }>(
+      const checkResult = await dbExecute<{
+        metadata: { shared_platforms?: string[] };
+      }>(
         `SELECT metadata FROM feature_waitlist 
          WHERE email = $1 AND feature = $2`,
-        [email, feature]
+        [email, feature],
       );
 
-      const sharedPlatforms = checkResult.data?.[0]?.metadata?.shared_platforms || [];
+      const sharedPlatforms =
+        checkResult.data?.[0]?.metadata?.shared_platforms || [];
       if (sharedPlatforms.includes(platform)) {
         return err("Already shared on this platform");
       }
 
       // Update priority_boost and add platform to shared_platforms array
-      const updateResult = await dbExecute<{ 
+      const updateResult = await dbExecute<{
         priority_boost: string;
         original_position: string;
         new_position: string;
@@ -218,7 +238,7 @@ export class WaitlistManager {
             AND COALESCE(original_position, 999999) - COALESCE(priority_boost, 0) < 
                 COALESCE(original_position, 999999) - priority_boost
            ) as new_position`,
-        [email, feature, boostAmount, platform]
+        [email, feature, boostAmount, platform],
       );
 
       if (updateResult.error || !updateResult.data?.length) {
@@ -226,12 +246,16 @@ export class WaitlistManager {
       }
 
       const newPosition = updateResult.data[0].new_position;
-      const adjustedNewPosition = newPosition ? parseInt(newPosition) + LEGACY_WAITLIST_OFFSET : undefined;
+      const adjustedNewPosition = newPosition
+        ? parseInt(newPosition) + LEGACY_WAITLIST_OFFSET
+        : undefined;
 
       return ok({
         success: true,
         newPosition: adjustedNewPosition,
-        message: adjustedNewPosition ? `New position: #${adjustedNewPosition}` : `You moved up!`
+        message: adjustedNewPosition
+          ? `New position: #${adjustedNewPosition}`
+          : `You moved up!`,
       });
     } catch (error: any) {
       console.error(`Failed to track share: ${error.message || error}`);

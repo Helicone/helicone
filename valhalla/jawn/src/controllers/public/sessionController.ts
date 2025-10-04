@@ -73,7 +73,7 @@ const kvCache = new KVCache(60 * 1000); // 5 minutes
 export class SessionController extends Controller {
   @Get("/has-session")
   public async hasSession(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<boolean, string>> {
     const found = await cacheResultCustom<boolean, string>(
       `has-session-${request.authParams.organizationId}`,
@@ -98,7 +98,7 @@ export class SessionController extends Controller {
           }
         }
       },
-      kvCache
+      kvCache,
     );
     if (found.error) {
       console.error("Error finding sessions", found.error);
@@ -114,7 +114,7 @@ export class SessionController extends Controller {
   public async getSessions(
     @Body()
     requestBody: SessionQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<SessionResult[], string>> {
     const sessionManager = new SessionManager(request.authParams);
 
@@ -131,7 +131,7 @@ export class SessionController extends Controller {
   public async getSessionsCount(
     @Body()
     requestBody: SessionQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<SessionsAggregateMetrics, string>> {
     const sessionManager = new SessionManager(request.authParams);
 
@@ -148,7 +148,7 @@ export class SessionController extends Controller {
   public async getNames(
     @Body()
     requestBody: SessionNameQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<SessionNameResult[], string>> {
     const sessionManager = new SessionManager(request.authParams);
 
@@ -165,7 +165,7 @@ export class SessionController extends Controller {
   public async getMetrics(
     @Body()
     requestBody: SessionMetricsQueryParams,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<SessionMetrics, string>> {
     const sessionManager = new SessionManager(request.authParams);
 
@@ -183,13 +183,13 @@ export class SessionController extends Controller {
   public async updateSessionFeedback(
     @Path() sessionId: string,
     @Body() requestBody: { rating: boolean },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const sessionManager = new SessionManager(request.authParams);
 
     const result = await sessionManager.updateSessionFeedback(
       sessionId,
-      requestBody.rating
+      requestBody.rating,
     );
     if (result.error) {
       this.setStatus(500);
@@ -202,7 +202,7 @@ export class SessionController extends Controller {
   @Get("/{sessionId}/tag")
   public async getSessionTag(
     @Path() sessionId: string,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string | null, string>> {
     const sessionManager = new SessionManager(request.authParams);
 
@@ -219,13 +219,13 @@ export class SessionController extends Controller {
   public async updateSessionTag(
     @Path() sessionId: string,
     @Body() requestBody: { tag: string },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<null, string>> {
     const sessionManager = new SessionManager(request.authParams);
 
     const result = await sessionManager.updateSessionTag(
       sessionId,
-      requestBody.tag
+      requestBody.tag,
     );
     if (result.error) {
       this.setStatus(500);

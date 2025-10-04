@@ -9,7 +9,9 @@ export interface OpenRouterUsage extends ModelUsage {
 }
 
 export class OpenRouterUsageProcessor implements IUsageProcessor {
-  public async parse(parseInput: ParseInput): Promise<Result<OpenRouterUsage, string>> {
+  public async parse(
+    parseInput: ParseInput,
+  ): Promise<Result<OpenRouterUsage, string>> {
     try {
       if (parseInput.isStream) {
         return this.parseStreamResponse(parseInput.responseBody);
@@ -24,7 +26,9 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     }
   }
 
-  protected parseNonStreamResponse(responseBody: string): Result<OpenRouterUsage, string> {
+  protected parseNonStreamResponse(
+    responseBody: string,
+  ): Result<OpenRouterUsage, string> {
     try {
       const parsedResponse = JSON.parse(responseBody);
       const usage = this.extractUsageFromResponse(parsedResponse);
@@ -41,11 +45,16 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     }
   }
 
-  protected parseStreamResponse(responseBody: string): Result<OpenRouterUsage, string> {
+  protected parseStreamResponse(
+    responseBody: string,
+  ): Result<OpenRouterUsage, string> {
     try {
       const lines = responseBody
         .split("\n")
-        .filter((line) => line.trim() !== "" && !line.includes("OPENROUTER PROCESSING"))
+        .filter(
+          (line) =>
+            line.trim() !== "" && !line.includes("OPENROUTER PROCESSING"),
+        )
         .map((line) => {
           if (line === "data: [DONE]") return null;
           try {
@@ -73,7 +82,9 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
 
   protected consolidateStreamData(streamData: any[]): any {
     // Look for the last chunk with usage data
-    const lastChunkWithUsage = [...streamData].reverse().find(chunk => chunk?.usage);
+    const lastChunkWithUsage = [...streamData]
+      .reverse()
+      .find((chunk) => chunk?.usage);
     if (lastChunkWithUsage?.usage) {
       return lastChunkWithUsage;
     }
@@ -116,7 +127,8 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
 
     // OpenRouter still provides token counts for compatibility
     const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
-    const completionTokens = usage.completion_tokens ?? usage.output_tokens ?? 0;
+    const completionTokens =
+      usage.completion_tokens ?? usage.output_tokens ?? 0;
 
     const promptDetails = usage.prompt_tokens_details || {};
     const completionDetails = usage.completion_tokens_details || {};
@@ -127,8 +139,14 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
 
     // Calculate effective tokens (for logging/analytics, not for cost)
-    const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
-    const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
+    const effectivePromptTokens = Math.max(
+      0,
+      promptTokens - cachedTokens - promptAudioTokens,
+    );
+    const effectiveCompletionTokens = Math.max(
+      0,
+      completionTokens - completionAudioTokens - reasoningTokens,
+    );
 
     const modelUsage: OpenRouterUsage = {
       input: effectivePromptTokens,

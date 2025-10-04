@@ -84,7 +84,7 @@ const vercelMessageToMessage = (message: any): Message => {
 
     // Check if there are any images
     const imageContent = message.content.find(
-      (c: any) => c.type === "image" || c.type === "image_url"
+      (c: any) => c.type === "image" || c.type === "image_url",
     );
 
     if (imageContent) {
@@ -132,13 +132,15 @@ const getRequestMessages = (request: any): Message[] => {
   // Handle Vercel AI SDK format with 'prompt' field
   if (request.prompt && Array.isArray(request.prompt)) {
     requestMessages.push(
-      ...request.prompt.map((message: any) => vercelMessageToMessage(message))
+      ...request.prompt.map((message: any) => vercelMessageToMessage(message)),
     );
   }
   // Handle standard format with 'messages' field
   else if (request.messages && Array.isArray(request.messages)) {
     requestMessages.push(
-      ...request.messages.map((message: any) => vercelMessageToMessage(message))
+      ...request.messages.map((message: any) =>
+        vercelMessageToMessage(message),
+      ),
     );
   }
 
@@ -214,7 +216,7 @@ const getResponseMessages = (response: any): Message[] => {
 const getModelFromResponse = (
   response: any,
   request: any,
-  model: string
+  model: string,
 ): string => {
   // Try to get model from Vercel's provider metadata
   return (

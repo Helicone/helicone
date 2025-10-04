@@ -50,7 +50,7 @@ export class FineTuningManager {
   async createFineTuneJob(
     requests: HeliconeRequest[],
     model: string,
-    suffix: string
+    suffix: string,
   ): Promise<Result<FineTuningJob, string>> {
     const formattedRows = requests
       .map((request) => {
@@ -77,7 +77,7 @@ export class FineTuningManager {
 
         return {
           messages: [...prunedInputMessages, outputMessage].map(
-            this.convertToolCallMessageToFunction
+            this.convertToolCallMessageToFunction,
           ),
         };
       })
@@ -95,7 +95,7 @@ export class FineTuningManager {
       if (!writeStream.write(row)) {
         // Wait for the stream to drain if it returns false
         await new Promise((resolve) =>
-          writeStream.once("drain", resolve as () => void)
+          writeStream.once("drain", resolve as () => void),
         );
       }
     }
@@ -115,7 +115,7 @@ export class FineTuningManager {
 
       const fineTuneJob = await this.openAIClient.createFineTuneJob(
         file.data.id,
-        "gpt-3.5-turbo-1106"
+        "gpt-3.5-turbo-1106",
       );
 
       if (fineTuneJob.error || !fineTuneJob.data) {
@@ -134,7 +134,7 @@ export class FineTuningManager {
   }
 
   convertToolCallMessageToFunction = (
-    message: ChatCompletionCreateParamsBase["messages"][0]
+    message: ChatCompletionCreateParamsBase["messages"][0],
   ) => {
     switch (message.role) {
       case "system":
@@ -163,7 +163,7 @@ export class FineTuningManager {
         message.content !== "" ||
         ("tool_calls" in message &&
           message.tool_calls &&
-          message.tool_calls.length > 0)
+          message.tool_calls.length > 0),
     );
     return messages;
   };

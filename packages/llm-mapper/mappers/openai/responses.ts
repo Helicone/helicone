@@ -105,12 +105,12 @@ export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
 
     if (Array.isArray(input) && input.length > 0) {
       const lastItem = input[input.length - 1];
-      
+
       // Handle function_call_output items - they don't have extractable text
       if ((lastItem as any)?.type === "function_call_output") {
         return "";
       }
-      
+
       const content = (lastItem as any)?.content;
 
       // Content can be a string or an array of typed items
@@ -121,7 +121,7 @@ export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
       if (Array.isArray(content)) {
         // Prefer text content if available
         const textItems = content.filter(
-          (c: any) => c?.type === "input_text" && typeof c?.text === "string"
+          (c: any) => c?.type === "input_text" && typeof c?.text === "string",
         );
         if (textItems.length > 0) {
           return textItems.map((c: any) => c.text).join(" ");
@@ -155,20 +155,23 @@ export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
  */
 export const getResponseText = (
   responseBody: any,
-  statusCode: number = 200
+  statusCode: number = 200,
 ): string => {
   try {
     if (statusCode === 0 || statusCode === null) {
       return "";
     }
-    
+
     // Handle null/undefined inputs
     if (responseBody === null || responseBody === undefined) {
       return "";
     }
-    
+
     // Handle empty objects
-    if (typeof responseBody === "object" && Object.keys(responseBody).length === 0) {
+    if (
+      typeof responseBody === "object" &&
+      Object.keys(responseBody).length === 0
+    ) {
       return "";
     }
 
@@ -180,7 +183,7 @@ export const getResponseText = (
     // Responses API returns an `output` array with message items
     if (Array.isArray(responseBody?.output)) {
       const firstMessage = responseBody.output.find(
-        (item: any) => item?.type === "message"
+        (item: any) => item?.type === "message",
       );
       const content = firstMessage?.content;
       if (Array.isArray(content)) {
@@ -199,7 +202,7 @@ export const getResponseText = (
     ) {
       const contentArray = responseBody.item.content;
       const textContent = contentArray.find(
-        (c: any) => c?.type === "output_text"
+        (c: any) => c?.type === "output_text",
       );
       if (textContent?.text) {
         return textContent.text;
@@ -219,7 +222,10 @@ export const getResponseText = (
     try {
       return JSON.stringify(responseBody);
     } catch (stringifyError) {
-      if (stringifyError instanceof Error && stringifyError.message.includes('circular')) {
+      if (
+        stringifyError instanceof Error &&
+        stringifyError.message.includes("circular")
+      ) {
         return "error_circular_reference";
       }
       throw stringifyError;
@@ -231,7 +237,7 @@ export const getResponseText = (
 };
 
 const convertRequestInputToMessages = (
-  input: OpenAIResponseRequest["input"]
+  input: OpenAIResponseRequest["input"],
 ): Message[] => {
   if (!input) return [];
 
@@ -353,7 +359,7 @@ const convertRequestInputToMessages = (
             }
 
             return baseResponse;
-          }
+          },
         );
 
         messages.push({
@@ -371,7 +377,7 @@ const convertRequestInputToMessages = (
 };
 
 const toExternalRequest = (
-  responses: Message[]
+  responses: Message[],
 ): OpenAIResponseRequest["input"] => {
   if (!responses) return [];
 
@@ -419,13 +425,13 @@ const toExternalRequest = (
 
     if (_type === "contentArray" && contentArray) {
       const textContent = contentArray.filter(
-        (c: any): c is Message & { _type: "message" } => c._type === "message"
+        (c: any): c is Message & { _type: "message" } => c._type === "message",
       );
       const imageContent = contentArray.filter(
-        (c: any): c is Message & { _type: "image" } => c._type === "image"
+        (c: any): c is Message & { _type: "image" } => c._type === "image",
       );
       const fileContent = contentArray.filter(
-        (c: any): c is Message & { _type: "file" } => c._type === "file"
+        (c: any): c is Message & { _type: "file" } => c._type === "file",
       );
 
       if (textContent.length > 0) {
@@ -475,7 +481,7 @@ const toExternalRequest = (
 };
 
 const convertTools = (
-  tools?: OpenAIResponseRequest["tools"]
+  tools?: OpenAIResponseRequest["tools"],
 ): LlmSchema["request"]["tools"] => {
   if (!tools) return [];
   return tools.map((tool) => ({
@@ -487,7 +493,7 @@ const convertTools = (
 };
 
 const toExternalTools = (
-  tools?: LlmSchema["request"]["tools"]
+  tools?: LlmSchema["request"]["tools"],
 ): OpenAIResponseRequest["tools"] => {
   if (!tools || !Array.isArray(tools)) return undefined;
 
@@ -505,7 +511,7 @@ const toExternalTools = (
  * Convert OpenAI tool_choice to internal format
  */
 const convertToolChoice = (
-  toolChoice?: OpenAIResponseRequest["tool_choice"]
+  toolChoice?: OpenAIResponseRequest["tool_choice"],
 ): LlmSchema["request"]["tool_choice"] => {
   if (!toolChoice) return undefined;
 
@@ -536,7 +542,7 @@ const convertToolChoice = (
  * Convert internal tool_choice back to OpenAI format
  */
 const toExternalToolChoice = (
-  toolChoice?: LlmSchema["request"]["tool_choice"]
+  toolChoice?: LlmSchema["request"]["tool_choice"],
 ): OpenAIResponseRequest["tool_choice"] => {
   if (!toolChoice) return undefined;
 
@@ -566,42 +572,42 @@ const toExternalToolChoice = (
 };
 
 function convertToReasoningEffort(
-  reasoning?: OpenAIResponseRequest["reasoning"]
+  reasoning?: OpenAIResponseRequest["reasoning"],
 ): LlmSchema["request"]["reasoning_effort"] {
   if (!reasoning) return undefined;
   return reasoning.effort;
 }
 
 function convertFromReasoningEffort(
-  reasoning_effort: LlmSchema["request"]["reasoning_effort"]
+  reasoning_effort: LlmSchema["request"]["reasoning_effort"],
 ): OpenAIResponseRequest["reasoning"] {
   if (!reasoning_effort) return undefined;
   return { effort: reasoning_effort };
 }
 
 function convertToVerbosity(
-  text?: OpenAIResponseRequest["text"]
+  text?: OpenAIResponseRequest["text"],
 ): LlmSchema["request"]["verbosity"] {
   if (!text) return undefined;
   return text.verbosity;
 }
 
 function convertFromVerbosity(
-  verbosity: LlmSchema["request"]["verbosity"]
+  verbosity: LlmSchema["request"]["verbosity"],
 ): OpenAIResponseRequest["text"] {
   if (!verbosity) return undefined;
   return { verbosity };
 }
 
 export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
-  "openai-response"
+  "openai-response",
 )
   .map("model", "model")
   .mapWithTransform(
     "input",
     "messages",
     convertRequestInputToMessages,
-    toExternalRequest
+    toExternalRequest,
   )
   .map("instructions", "instructions")
   .map("temperature", "temperature")
@@ -614,20 +620,20 @@ export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
     "reasoning",
     "reasoning_effort",
     convertToReasoningEffort,
-    convertFromReasoningEffort
+    convertFromReasoningEffort,
   )
   .mapWithTransform(
     "text",
     "verbosity",
     convertToVerbosity,
-    convertFromVerbosity
+    convertFromVerbosity,
   )
   .mapWithTransform("tools", "tools", convertTools, toExternalTools)
   .mapWithTransform(
     "tool_choice",
     "tool_choice",
     convertToolChoice,
-    toExternalToolChoice
+    toExternalToolChoice,
   )
   .map("frequency_penalty", "frequency_penalty")
   .map("presence_penalty", "presence_penalty")
@@ -673,7 +679,7 @@ const convertResponse = (responseBody: any): Message[] => {
       // The content is an array, find the 'output_text' item
       if (Array.isArray(outputItem.content)) {
         const textContent = outputItem.content.find(
-          (c: any) => c.type === "output_text"
+          (c: any) => c.type === "output_text",
         );
         if (textContent && textContent.text) {
           messageText = textContent.text;
@@ -729,15 +735,19 @@ export const mapOpenAIResponse = ({
     if (!requestMessages || requestMessages.length === 0) {
       return getRequestText(request); // Fallback to original method
     }
-    
+
     // Look for the last user message or any message with content
     for (let i = requestMessages.length - 1; i >= 0; i--) {
       const message = requestMessages[i];
-      if (message?.content && typeof message.content === "string" && message.content.trim().length > 0) {
+      if (
+        message?.content &&
+        typeof message.content === "string" &&
+        message.content.trim().length > 0
+      ) {
         return message.content;
       }
     }
-    
+
     return "";
   };
 
@@ -745,7 +755,7 @@ export const mapOpenAIResponse = ({
     schema,
     preview: {
       concatenatedMessages: (schema.request.messages ?? []).concat(
-        schema.response?.messages || []
+        schema.response?.messages || [],
       ),
       request: getRequestPreviewText(),
       response: getResponseText(response),

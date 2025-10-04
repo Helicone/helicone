@@ -16,13 +16,15 @@ export function Traced(name: string, baseTags?: Tags | TagFactory) {
   return function (
     target: any,
     propertyKey: string,
-    descriptor: PropertyDescriptor
+    descriptor: PropertyDescriptor,
   ) {
     const original = descriptor.value;
     descriptor.value = async function (...args: any[]) {
       return tracer.trace(name, async (span) => {
         const tags =
-          typeof baseTags === "function" ? baseTags({ thisArg: this, args }) : baseTags;
+          typeof baseTags === "function"
+            ? baseTags({ thisArg: this, args })
+            : baseTags;
         if (tags) {
           for (const [k, v] of Object.entries(tags)) {
             if (v !== undefined) span.setTag(k, v);
@@ -40,7 +42,10 @@ export function Traced(name: string, baseTags?: Tags | TagFactory) {
         } catch (e) {
           span.setTag("error", true);
           span.setTag("error.type", "UNEXPECTED_ERROR");
-          span.setTag("error.message", e instanceof Error ? e.message : String(e));
+          span.setTag(
+            "error.message",
+            e instanceof Error ? e.message : String(e),
+          );
           throw e;
         }
       });
@@ -49,25 +54,29 @@ export function Traced(name: string, baseTags?: Tags | TagFactory) {
   };
 }
 
-export function TracedController<TError extends { statusCode?: number; code?: string; message: string }>(
+export function TracedController<
+  TError extends { statusCode?: number; code?: string; message: string },
+>(
   name: string,
   options: {
     baseTags?: Tags | TagFactory;
     formatError: (e: TError) => string;
     successStatus?: number | ((res: any) => number);
-  }
+  },
 ) {
   const { baseTags, formatError, successStatus = 200 } = options;
   return function (
     target: any,
     propertyKey: string,
-    descriptor: PropertyDescriptor
+    descriptor: PropertyDescriptor,
   ) {
     const original = descriptor.value;
     descriptor.value = async function (...args: any[]) {
       return tracer.trace(name, async (span) => {
         const tags =
-          typeof baseTags === "function" ? baseTags({ thisArg: this, args }) : baseTags;
+          typeof baseTags === "function"
+            ? baseTags({ thisArg: this, args })
+            : baseTags;
         if (tags) {
           for (const [k, v] of Object.entries(tags)) {
             if (v !== undefined) span.setTag(k, v);
@@ -87,7 +96,9 @@ export function TracedController<TError extends { statusCode?: number; code?: st
             return err(formatError(e));
           }
           const status =
-            typeof successStatus === "function" ? successStatus(res) : successStatus;
+            typeof successStatus === "function"
+              ? successStatus(res)
+              : successStatus;
           if (typeof (this as any).setStatus === "function") {
             (this as any).setStatus(status);
           }
@@ -95,16 +106,21 @@ export function TracedController<TError extends { statusCode?: number; code?: st
         } catch (e) {
           span.setTag("error", true);
           span.setTag("error.type", "UNEXPECTED_ERROR");
-          span.setTag("error.message", e instanceof Error ? e.message : String(e));
+          span.setTag(
+            "error.message",
+            e instanceof Error ? e.message : String(e),
+          );
           if (typeof (this as any).setStatus === "function") {
             (this as any).setStatus(500);
           }
-          return err(formatError({ message: e instanceof Error ? e.message : String(e) } as TError));
+          return err(
+            formatError({
+              message: e instanceof Error ? e.message : String(e),
+            } as TError),
+          );
         }
       });
     };
     return descriptor;
   };
 }
-
-

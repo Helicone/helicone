@@ -376,7 +376,7 @@ export default function ExperimentsWaitlist() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ email }),
-        }
+        },
       );
 
       const result = await response.json();
@@ -388,7 +388,7 @@ export default function ExperimentsWaitlist() {
         toast.error(
           result.error.includes("duplicate")
             ? "You're already on the waitlist"
-            : "Failed to add to waitlist"
+            : "Failed to add to waitlist",
         );
       }
     } catch (error) {
@@ -597,10 +597,10 @@ const data: {
 
 const ExperimentsTable = () => {
   const [animationState, setAnimationState] = useState(
-    Array(data.length).fill(Array(3).fill(0))
+    Array(data.length).fill(Array(3).fill(0)),
   );
   const [highlightState, setHighlightState] = useState(
-    Array(data.length).fill(Array(3).fill(false))
+    Array(data.length).fill(Array(3).fill(false)),
   );
 
   const animateCell = useCallback((row: number, col: number) => {
@@ -691,12 +691,12 @@ const ExperimentsTable = () => {
                 index < 2
                   ? "opacity-0"
                   : index === 2
-                  ? "opacity-10"
-                  : index === 3
-                  ? "opacity-20"
-                  : index === 4
-                  ? "opacity-80 rounded-t-lg border-t border-x border-white border-opacity-15"
-                  : "opacity-50"
+                    ? "opacity-10"
+                    : index === 3
+                      ? "opacity-20"
+                      : index === 4
+                        ? "opacity-80 rounded-t-lg border-t border-x border-white border-opacity-15"
+                        : "opacity-50",
               )}
             >
               {column.name}
@@ -732,12 +732,12 @@ const ExperimentsTable = () => {
                     colIndex < 2
                       ? "opacity-0"
                       : colIndex === 2
-                      ? "opacity-10"
-                      : colIndex === 3
-                      ? "opacity-20"
-                      : colIndex === 4
-                      ? "opacity-80" // Increased opacity for emphasis
-                      : "opacity-50"
+                        ? "opacity-10"
+                        : colIndex === 3
+                          ? "opacity-20"
+                          : colIndex === 4
+                            ? "opacity-80" // Increased opacity for emphasis
+                            : "opacity-50",
                   )}
                 >
                   {key === "original" ||
@@ -747,7 +747,7 @@ const ExperimentsTable = () => {
                         value,
                         animationState[rowIndex][
                           key === "original" ? 0 : key === "experiment1" ? 1 : 2
-                        ]
+                        ],
                       )
                     : value}
                 </div>

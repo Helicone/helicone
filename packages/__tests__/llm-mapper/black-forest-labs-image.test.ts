@@ -35,7 +35,7 @@ describe("Black Forest Labs Image Mapper", () => {
 
     // Verify request
     expect(result.schema.request.model).toBe(
-      "black-forest-labs/FLUX.1-schnell"
+      "black-forest-labs/FLUX.1-schnell",
     );
     expect(result.schema.request.prompt).toBe("Dos");
     expect(result.schema.request.messages?.[0].content).toBe("Dos");
@@ -43,14 +43,14 @@ describe("Black Forest Labs Image Mapper", () => {
 
     // Verify response
     expect(result.schema.response?.model).toBe(
-      "black-forest-labs/FLUX.1-schnell"
+      "black-forest-labs/FLUX.1-schnell",
     );
     expect(result.schema.response?.messages?.[0].content).toBe(
-      "Image generated"
+      "Image generated",
     );
     expect(result.schema.response?.messages?.[0]._type).toBe("image");
     expect(result.schema.response?.messages?.[0].image_url).toBe(
-      "https://example.com/image.jpg"
+      "https://example.com/image.jpg",
     );
 
     // Verify preview
@@ -59,7 +59,7 @@ describe("Black Forest Labs Image Mapper", () => {
     expect(result.preview.concatenatedMessages).toHaveLength(2);
     expect(result.preview.concatenatedMessages[0].content).toBe("Dos");
     expect(result.preview.concatenatedMessages[1].image_url).toBe(
-      "https://example.com/image.jpg"
+      "https://example.com/image.jpg",
     );
   });
 

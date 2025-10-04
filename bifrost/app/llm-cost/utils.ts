@@ -53,7 +53,7 @@ export const getInitialCostData = (): CostData[] => {
         });
       } else {
         console.warn(
-          `[Server Cost Calc] Cost details not found for model: ${modelCost.model.value} by provider: ${prov.provider}`
+          `[Server Cost Calc] Cost details not found for model: ${modelCost.model.value} by provider: ${prov.provider}`,
         );
       }
     });
@@ -63,10 +63,10 @@ export const getInitialCostData = (): CostData[] => {
 
 // Server-side function to prepare data for filters
 export const getProviderWithModelsData = (
-  costData: CostData[]
+  costData: CostData[],
 ): ProviderWithModels[] => {
   const uniqueProviders = Array.from(
-    new Set(costData.map((data) => data.provider))
+    new Set(costData.map((data) => data.provider)),
   ).sort();
   return uniqueProviders.map((provider) => ({
     provider,

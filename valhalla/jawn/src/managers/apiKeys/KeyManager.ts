@@ -62,7 +62,7 @@ export class KeyManager extends BaseManager {
          AND api_key_name != 'auto-generated-experiment-key'
          AND temp_key = false
          AND organization_id = $1`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (result.error) {
@@ -80,7 +80,7 @@ export class KeyManager extends BaseManager {
    */
   async updateAPIKey(
     apiKeyId: number,
-    updateData: { api_key_name: string }
+    updateData: { api_key_name: string },
   ): Promise<Result<{ hashedKey: string }, string>> {
     try {
       const result = await dbExecute<{ api_key_hash: string }>(
@@ -89,7 +89,7 @@ export class KeyManager extends BaseManager {
              updated_at = now()
          WHERE id = $2
          AND organization_id = $3 RETURNING api_key_hash`,
-        [updateData.api_key_name, apiKeyId, this.authParams.organizationId]
+        [updateData.api_key_name, apiKeyId, this.authParams.organizationId],
       );
 
       if (result.error) {
@@ -110,7 +110,7 @@ export class KeyManager extends BaseManager {
    * Soft delete an API key
    */
   async deleteAPIKey(
-    apiKeyId: number
+    apiKeyId: number,
   ): Promise<Result<{ hashedKey: string }, string>> {
     try {
       const result = await dbExecute<{ api_key_hash: string }>(
@@ -119,7 +119,7 @@ export class KeyManager extends BaseManager {
              updated_at = now()
          WHERE id = $1
          AND organization_id = $2 RETURNING api_key_hash`,
-        [apiKeyId, this.authParams.organizationId]
+        [apiKeyId, this.authParams.organizationId],
       );
 
       if (result.error) {
@@ -140,7 +140,7 @@ export class KeyManager extends BaseManager {
    * Delete a provider key
    */
   async deleteProviderKey(
-    providerKeyId: string
+    providerKeyId: string,
   ): Promise<Result<{ providerName: ModelProviderName | null }, string>> {
     try {
       const providerName = await dbExecute<{ provider_name: string }>(
@@ -148,7 +148,7 @@ export class KeyManager extends BaseManager {
          FROM provider_keys
          WHERE id = $1
          LIMIT 1`,
-        [providerKeyId]
+        [providerKeyId],
       );
 
       if (
@@ -165,7 +165,7 @@ export class KeyManager extends BaseManager {
         `DELETE FROM provider_keys
          WHERE id = $1
          AND org_id = $2`,
-        [providerKeyId, this.authParams.organizationId]
+        [providerKeyId, this.authParams.organizationId],
       );
 
       if (result.error) {
@@ -183,7 +183,7 @@ export class KeyManager extends BaseManager {
    */
   async createNormalKey(
     keyName: string,
-    keyPermissions: "rw" | "r" | "w" | "g" = "rw"
+    keyPermissions: "rw" | "r" | "w" | "g" = "rw",
   ): Promise<
     Result<{ id: string; apiKey: string; hashedKey: string }, string>
   > {
@@ -200,7 +200,7 @@ export class KeyManager extends BaseManager {
          FROM organization
          WHERE id = $1
          LIMIT 1`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
@@ -219,7 +219,7 @@ export class KeyManager extends BaseManager {
           this.authParams.organizationId,
           keyPermissions,
           false,
-        ]
+        ],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -247,7 +247,7 @@ export class KeyManager extends BaseManager {
          WHERE org_id = $1
          AND soft_delete = false
          ORDER BY created_at DESC`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (isError(result)) {
@@ -296,7 +296,7 @@ export class KeyManager extends BaseManager {
          AND soft_delete = false
          AND provider_name IS NOT NULL
          ORDER BY created_at DESC`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (result.error) {
@@ -313,7 +313,7 @@ export class KeyManager extends BaseManager {
    * Create a provider key
    */
   async createProviderKey(
-    data: CreateProviderKeyRequest
+    data: CreateProviderKeyRequest,
   ): Promise<Result<{ id: string }, string>> {
     try {
       const {
@@ -344,7 +344,7 @@ export class KeyManager extends BaseManager {
           config,
           providerKeyCUID,
           byokEnabled,
-        ]
+        ],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -425,7 +425,7 @@ export class KeyManager extends BaseManager {
          WHERE id = $${paramIndex++}
          AND org_id = $${paramIndex}
          RETURNING id, provider_name`,
-        values
+        values,
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -445,7 +445,7 @@ export class KeyManager extends BaseManager {
    * Get decrypted provider key by ID
    */
   async getDecryptedProviderKeyById(
-    providerKeyId: string
+    providerKeyId: string,
   ): Promise<Result<DecryptedProviderKey, string>> {
     const hasAccess = await this.hasAccessToProviderKey(providerKeyId);
 
@@ -469,7 +469,7 @@ export class KeyManager extends BaseManager {
          AND org_id = $2
          AND soft_delete = false
          LIMIT 1`,
-        [providerKeyId, this.authParams.organizationId]
+        [providerKeyId, this.authParams.organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -494,7 +494,7 @@ export class KeyManager extends BaseManager {
   }
 
   private async hasAccessToProviderKey(
-    providerKeyId: string
+    providerKeyId: string,
   ): Promise<Result<boolean, string>> {
     try {
       const result = await dbExecute<{ id: string }>(
@@ -503,7 +503,7 @@ export class KeyManager extends BaseManager {
          WHERE id = $1
          AND org_id = $2
          LIMIT 1`,
-        [providerKeyId, this.authParams.organizationId]
+        [providerKeyId, this.authParams.organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -587,7 +587,7 @@ export class KeyManager extends BaseManager {
           providerKeyIdSafe,
           experimentUse,
           proxyKeyId,
-        ]
+        ],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -608,7 +608,7 @@ export class KeyManager extends BaseManager {
    */
   async createTempKey(
     keyName: string = "auto-generated-experiment-key",
-    keyPermissions: "rw" | "r" | "w" = "w"
+    keyPermissions: "rw" | "r" | "w" = "w",
   ): Promise<Result<{ id: string; apiKey: string }, string>> {
     try {
       const IS_EU = process.env.AWS_REGION === "eu-west-1";
@@ -623,7 +623,7 @@ export class KeyManager extends BaseManager {
          FROM organization
          WHERE id = $1
          LIMIT 1`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
@@ -649,7 +649,7 @@ export class KeyManager extends BaseManager {
           this.authParams.organizationId,
           keyPermissions,
           true,
-        ]
+        ],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -690,7 +690,7 @@ export class KeyManager extends BaseManager {
               byok_enabled: key.byok_enabled,
             };
           })
-          .filter((key): key is NonNullable<typeof key> => key !== null) ?? []
+          .filter((key): key is NonNullable<typeof key> => key !== null) ?? [],
       );
 
       return ok(true);

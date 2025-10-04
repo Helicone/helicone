@@ -7,7 +7,7 @@ export class SetOnce {
       set: (target, prop, value) => {
         if (Reflect.has(target._isSet, prop) && target._isSet[prop]) {
           throw new Error(
-            `Property ${String(prop)} is already set and cannot be modified.`
+            `Property ${String(prop)} is already set and cannot be modified.`,
           );
         }
         target._values[prop] = value;

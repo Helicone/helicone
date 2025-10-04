@@ -135,7 +135,7 @@ function writeCSVHeader(outputStream: fs.WriteStream): void {
 async function makeRequest(
   offset: number,
   limit: number,
-  options: QueryOptions
+  options: QueryOptions,
 ): Promise<RequestResponse[]> {
   const requestBody = {
     filter: {},
@@ -157,13 +157,13 @@ async function makeRequest(
         Authorization: `Bearer ${HELICONE_API_KEY}`,
       },
       body: JSON.stringify(requestBody),
-    }
+    },
   );
 
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(
-      `API request failed: ${response.status} ${response.statusText} - ${errorText}`
+      `API request failed: ${response.status} ${response.statusText} - ${errorText}`,
     );
   }
 
@@ -220,7 +220,7 @@ async function getAllData(options: QueryOptions): Promise<RequestResponse[]> {
               }
             }
             return record;
-          })
+          }),
         );
 
         // Write processed records to file
@@ -230,7 +230,7 @@ async function getAllData(options: QueryOptions): Promise<RequestResponse[]> {
               JSON.stringify(record, null, 2) +
                 (allData.length + 1 < (options.limit || Infinity)
                   ? ",\n"
-                  : "\n")
+                  : "\n"),
             );
           } else if (options.format === "jsonl") {
             outputStream.write(JSON.stringify(record) + "\n");
@@ -291,14 +291,14 @@ try {
   console.error("  --end-date <date>      End date (default: now)");
   console.error("  --limit <number>       Maximum number of records to fetch");
   console.error(
-    "  --format <format>      Output format: json, jsonl, or csv (default: jsonl)"
+    "  --format <format>      Output format: json, jsonl, or csv (default: jsonl)",
   );
   console.error(
-    "  --include-body         Include full request/response bodies (default: false)"
+    "  --include-body         Include full request/response bodies (default: false)",
   );
   console.error("\nDate format: YYYY-MM-DD or ISO string");
   console.error(
-    "Example: ts-node index.ts --start-date 2024-01-01 --end-date 2024-02-01 --limit 5000 --format csv --include-body"
+    "Example: ts-node index.ts --start-date 2024-01-01 --end-date 2024-02-01 --limit 5000 --format csv --include-body",
   );
   process.exit(1);
 }

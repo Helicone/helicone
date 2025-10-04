@@ -37,7 +37,7 @@ const FirstPageContent = () => {
           timeZoneDifference: new Date().getTimezoneOffset(),
           timeFilter: {
             start: new Date(
-              Date.now() - 30 * 24 * 60 * 60 * 1000
+              Date.now() - 30 * 24 * 60 * 60 * 1000,
             ).toISOString(),
             end: new Date().toISOString(),
           },

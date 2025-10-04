@@ -99,7 +99,7 @@ export class SettingsManager {
   }
 
   public async getSetting<T extends keyof SettingsType>(
-    name: T
+    name: T,
   ): Promise<SettingsType[T] | undefined> {
     try {
       const setting = this.settingsCache.get(name) as
