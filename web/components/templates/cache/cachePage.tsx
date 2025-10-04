@@ -117,12 +117,8 @@ const topRequestsColumns: ColumnDef<CacheRequest>[] = [
 ];
 
 const CachePage = (props: CachePageProps) => {
-  const { currentPage, pageSize, sort, defaultIndex = "0" } = props;
+  const { defaultIndex = "0" } = props;
   const [timePeriod, setTimePeriod] = useState<number>(30);
-  const [timeFilter, _] = useState<TimeFilter>({
-    start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * timePeriod),
-    end: new Date(),
-  });
 
   const currentTimeFilter = useMemo<TimeFilter>(
     () => ({
@@ -132,7 +128,7 @@ const CachePage = (props: CachePageProps) => {
     [timePeriod],
   );
 
-  const { store: filterStore, helpers } = useFilterAST();
+  const { store: filterStore } = useFilterAST();
 
   const timeZoneDifference = new Date().getTimezoneOffset();
   const router = useRouter();
@@ -220,30 +216,6 @@ const CachePage = (props: CachePageProps) => {
       </div>
     );
   }
-
-  const metrics = [
-    {
-      id: "caches",
-      label: "Total Cache Hits",
-      value: `${chMetrics.totalCacheHits.data?.data ?? 0} hits`,
-      isLoading: isAnyLoading,
-      icon: CircleStackIcon,
-    },
-    {
-      id: "savings",
-      label: "Cost Savings",
-      value: `$${formatNumber(chMetrics.totalSavings.data?.data ?? 0)}`,
-      isLoading: isAnyLoading,
-      icon: BanknotesIcon,
-    },
-    {
-      id: "time-saved",
-      label: "Time Saved",
-      value: formatTimeSaved(chMetrics.timeSaved.data?.data ?? 0),
-      isLoading: isAnyLoading,
-      icon: ClockIcon,
-    },
-  ];
 
   const cacheData = overTimeData.cacheHits.data?.data ?? [];
 

@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { $JAWN_API } from "@/lib/clients/jawn";
-import React, { useRef, useState as useReactState } from "react";
+import React, { useRef } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -37,8 +37,6 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  ChevronDown,
-  ChevronRight,
   Trash2,
 } from "lucide-react";
 import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";

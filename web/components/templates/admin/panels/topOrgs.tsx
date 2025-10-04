@@ -231,7 +231,7 @@ const TopOrgs = (props: TopOrgsProps) => {
         <div className="col-span-1">Estimated spend</div>
       </div>
       <div className="grid grid-cols-8">
-        {data?.data?.map((org, i) => (
+        {data?.data?.map((org) => (
           <>
             {/* Row 1 */}
             <div className="col-span-2 pl-2">
