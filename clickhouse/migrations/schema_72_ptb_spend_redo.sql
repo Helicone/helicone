@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS organization_ptb_spend;
 CREATE TABLE IF NOT EXISTS organization_ptb_spend
 (
     organization_id UUID,
-    spend UInt64,
+    spend UInt64
 )
 ENGINE = SummingMergeTree
 PRIMARY KEY (organization_id)
