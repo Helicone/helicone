@@ -41,7 +41,7 @@ const AddManualRowPanel = ({
   const accordionRef = useRef(null);
 
   const hasUnsavedChanges = Object.entries(inputKV).some(
-    ([key, value]) => value !== "",
+    ([_key, value]) => value !== "",
   );
 
   useEffect(() => {

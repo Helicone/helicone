@@ -94,7 +94,7 @@ export function ExperimentTable({
   const variantCount = promptVersionsData?.length || 0;
   const {
     canCreate: canCreateVariant,
-    hasAccess: hasAccess,
+    _hasAccess: hasAccess,
     freeLimit: MAX_VARIANTS,
   } = useFeatureLimit("experiments", variantCount, "variants");
 
@@ -113,7 +113,7 @@ export function ExperimentTable({
     autoInputs: Record<string, any>;
   } | null>(null);
   const [showScores, setShowScores] = useState(false);
-  const [showDeleteRowsConfirmation, setShowDeleteRowsConfirmation] =
+  const [_showDeleteRowsConfirmation, _setShowDeleteRowsConfirmation] =
     useState(false);
 
   const cellRefs = useRef<Record<string, any>>({});
@@ -380,7 +380,7 @@ export function ExperimentTable({
         columns: [
           columnHelper.accessor("add_prompt", {
             header: () => <></>,
-            cell: ({ row }) => <div></div>,
+            cell: ({ _row }) => <div></div>,
           }),
         ],
       }),
@@ -757,7 +757,7 @@ export function ExperimentTable({
                 promptVersionId={
                   experimentTableQuery?.original_prompt_version ?? ""
                 }
-                onSuccess={async (success) => {}}
+                onSuccess={async (_success) => {}}
               />
 
               <ExperimentInputSelector
@@ -767,7 +767,7 @@ export function ExperimentTable({
                   experimentTableQuery?.original_prompt_version ?? ""
                 }
                 handleAddRows={handleAddRowInsertBatch}
-                onSuccess={async (success) => {}}
+                onSuccess={async (_success) => {}}
               />
 
               <ExperimentDatasetSelector
@@ -778,7 +778,7 @@ export function ExperimentTable({
                   experimentTableQuery?.original_prompt_version ?? ""
                 }
                 handleAddRows={handleAddRowInsertBatchFromDataset}
-                onSuccess={async (success) => {}}
+                onSuccess={async (_success) => {}}
               />
             </div>
           </ResizablePanel>

@@ -145,7 +145,7 @@ export const HypothesisCellRenderer = forwardRef<
       refetchOnReconnect: false,
     });
 
-    const handleCellClick = (e: React.MouseEvent) => {
+    const _handleCellClick = (e: React.MouseEvent) => {
       e.stopPropagation();
     };
 

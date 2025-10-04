@@ -272,7 +272,7 @@ const ImportCSVDialog = ({
                             .filter(([key]) =>
                               experimentPromptInputKeys.includes(key),
                             )
-                            .map(([key, value], cellIndex) => (
+                            .map(([_key, value], cellIndex) => (
                               <td
                                 key={cellIndex}
                                 className="max-h-[100px] max-w-[200px] border border-slate-200 p-2 dark:border-slate-700"

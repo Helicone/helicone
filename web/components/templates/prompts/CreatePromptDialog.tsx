@@ -20,16 +20,16 @@ interface CreatePromptDialogProps {
 
 const CreatePromptDialog: React.FC<CreatePromptDialogProps> = ({
   hasAccess,
-  onCreatePrompt,
+  _onCreatePrompt,
 }) => {
   const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
-  const [newPromptName, setNewPromptName] = useState<string>("");
-  const [newPromptModel, setNewPromptModel] = useState(MODEL_LIST[0].value);
-  const [newPromptContent, setNewPromptContent] = useState("");
-  const [promptVariables, setPromptVariables] = useState<string[]>([]);
-  const newPromptInputRef = useRef<HTMLInputElement>(null);
+  const [_newPromptName, _setNewPromptName] = useState<string>("");
+  const [_newPromptModel, _setNewPromptModel] = useState(MODEL_LIST[0].value);
+  const [_newPromptContent, _setNewPromptContent] = useState("");
+  const [_promptVariables, _setPromptVariables] = useState<string[]>([]);
+  const _newPromptInputRef = useRef<HTMLInputElement>(null);
 
-  const extractVariables = useCallback((content: string) => {
+  const _extractVariables = useCallback((content: string) => {
     const regex = /\{\{([^}]+)\}\}/g;
     const matches = content.match(regex);
     return matches ? matches.map((match) => match.slice(2, -2).trim()) : [];

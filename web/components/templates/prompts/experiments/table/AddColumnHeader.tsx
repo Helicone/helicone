@@ -35,11 +35,11 @@ interface AddColumnHeaderProps {
 }
 
 const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
-  promptVersionId,
+  _promptVersionId,
   experimentId,
-  selectedProviderKey,
-  handleAddColumn,
-  wrapText,
+  _selectedProviderKey,
+  _handleAddColumn,
+  _wrapText,
   originalColumnPromptVersionId,
   experimentPromptVersions,
   numberOfExistingPromptVersions = 0,
@@ -82,7 +82,7 @@ const AddColumnHeader: React.FC<AddColumnHeaderProps> = ({
             <DropdownMenuLabel className="text-sm font-normal leading-[140%] text-slate-500">
               Fork new prompt from
             </DropdownMenuLabel>
-            {experimentPromptVersions?.map((pv, i) => (
+            {experimentPromptVersions?.map((pv, _i) => (
               <DropdownMenuItem
                 key={pv.id}
                 onSelect={(e) => {
