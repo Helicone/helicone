@@ -68,4 +68,20 @@ export class CreditsController extends Controller {
 
     return ok(result.data);
   }
+
+  @Get("/totalSpend")
+  public async getTotalSpend(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<{ totalSpend: number }, string>> {
+    const creditsManager = new CreditsManager(request.authParams);
+
+    const result = await creditsManager.getTotalSpend();
+
+    if (isError(result)) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok({ totalSpend: result.data });
+  }
 }

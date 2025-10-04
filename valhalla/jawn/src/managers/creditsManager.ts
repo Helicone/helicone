@@ -1,12 +1,14 @@
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { err, ok, Result } from "../../../../packages/common/result";
 import {
   CreditBalanceResponse,
   PaginatedPurchasedCredits,
 } from "../controllers/public/creditsController";
 import { AuthParams } from "../packages/common/auth/types";
-import { isError } from "../packages/common/result";
+import { isError, resultMap } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 import { WalletManager } from "./wallet/WalletManager";
+import { dbQueryClickhouse } from "../lib/shared/db/dbExecute";
 
 export class CreditsManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -67,5 +69,27 @@ export class CreditsManager extends BaseManager {
         `Error retrieving credit balance transactions: ${error.message}`
       );
     }
+  }
+
+  getTotalSpend(): Promise<Result<number, string>> {
+    return new Promise(async (resolve) => {
+      try {
+        const query = `
+          SELECT spend / ${COST_PRECISION_MULTIPLIER / 100} as spend_cents
+          FROM organization_ptb_spend_mv FINAL
+          WHERE organization_id = {val_0 : String}
+        `;
+
+        const res = await dbQueryClickhouse<{ spend_cents: string }>(query, [
+          this.authParams.organizationId,
+        ]);
+
+        return resultMap(res, (d) => ({
+          spend_cents: +(d?.[0]?.spend_cents ?? 0),
+        }));
+      } catch (error: any) {
+        resolve(err(`Error retrieving total spend: ${error.message}`));
+      }
+    });
   }
 }

@@ -192,7 +192,7 @@ export class AdminWalletManager extends BaseManager {
     }>(
       `
         SELECT organization_id, spend as total_cost
-        FROM organization_ptb_spend_mv
+        FROM organization_ptb_spend_mv FINAL
         ORDER BY total_cost ${order}
         LIMIT 100
       `,
