@@ -218,7 +218,7 @@ const TopOrgs = (props: TopOrgsProps) => {
       <div>
         Estimated total MRR:
         {data?.data
-          ?.map((org, i) => handleLogCostCalculation(org.ct))
+          ?.map((org) => handleLogCostCalculation(org.ct))
           .reduce((acc, curr) => acc + curr, 0)}
       </div>
       <h2>Top Organizations</h2>
