@@ -11,7 +11,6 @@ import _ from "lodash";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { DEFAULT_EMPTY_CHAT } from "../playgroundPage";
 import { CommandIcon, Undo2Icon } from "lucide-react";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { logger } from "@/lib/telemetry/logger";
 
 interface PlaygroundActionsProps {

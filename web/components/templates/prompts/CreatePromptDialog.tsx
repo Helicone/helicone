@@ -1,5 +1,5 @@
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,6 @@ import {
 } from "../../ui/dialog";
 import { Label } from "../../ui/label";
 import { Switch } from "../../ui/switch";
-import { MODEL_LIST } from "../playground/new/modelList";
 import { DiffHighlight } from "../welcome/diffHighlight";
 import { Button } from "@/components/ui/button";
 
