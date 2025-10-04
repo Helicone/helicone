@@ -9,7 +9,7 @@ import clsx from "clsx";
 import PromptPlayground from "../../../id/promptPlayground";
 
 export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
-  const { data, colDef, context, prompt, wrapText } = params;
+  const { data, colDef, prompt, wrapText } = params;
   const hypothesisId = colDef.field;
 
   const [showPromptPlayground, setShowPromptPlayground] = useState(false);
@@ -50,7 +50,7 @@ export const OriginalMessagesCellRenderer: React.FC<any> = (params) => {
           <PromptPlayground
             prompt={formatPromptForPlayground() || ""}
             selectedInput={data}
-            onSubmit={(history, model) => {
+            onSubmit={() => {
               setShowPromptPlayground(false);
             }}
             submitText="Save"
