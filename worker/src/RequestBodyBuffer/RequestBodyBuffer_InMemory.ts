@@ -212,25 +212,22 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   ): Promise<Result<string, string>> {
     const providerRequest = await this.unsafeGetRawText();
 
-    // Build nested structure if we have both OpenAI formats
+    // Version 2: Store OpenAI format as default, native provider format for reference
     if (this.originalOpenAIRequest && openAIResponse) {
       return this.s3Client.store(
         url,
         JSON.stringify({
-          request: {
-            openai: this.originalOpenAIRequest,
-            provider: providerRequest,
-          },
-          response: {
-            provider: providerResponse,
-            openai: openAIResponse,
-          },
+          version: 2,
+          request: this.originalOpenAIRequest,
+          response: openAIResponse,
+          request_native: providerRequest,
+          response_native: providerResponse,
         }),
         tags
       );
     }
 
-    // Default: flat structure
+    // Version 1 (legacy): flat structure
     return this.s3Client.store(
       url,
       JSON.stringify({
