@@ -14,7 +14,6 @@ const Typewriter: React.FC<TypewriterProps> = ({
   onComplete,
 }) => {
   const [displayedText, setDisplayedText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -31,16 +30,15 @@ const Typewriter: React.FC<TypewriterProps> = ({
   }, []);
 
   const startTyping = () => {
+    let currentIndex = 0;
     const intervalId = setInterval(() => {
-      setCurrentIndex((prevIndex) => {
-        if (prevIndex >= text.length) {
-          clearInterval(intervalId);
-          onComplete && onComplete();
-          return prevIndex;
-        }
-        setDisplayedText((prevText) => prevText + text[prevIndex]);
-        return prevIndex + 1;
-      });
+      if (currentIndex >= text.length) {
+        clearInterval(intervalId);
+        onComplete && onComplete();
+        return;
+      }
+      setDisplayedText((prevText) => prevText + text[currentIndex]);
+      currentIndex++;
     }, speed);
 
     return () => clearInterval(intervalId);

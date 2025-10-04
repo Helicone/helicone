@@ -26,7 +26,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
   const heliconeAuthClient = useHeliconeAuthClient();
   const orgContext = useOrg();
 
-  const [currentMonth, _setCurrentMonth] = useState(startOfMonth(new Date()));
+  const [currentMonth] = useState(startOfMonth(new Date()));
 
   const startOfMonthFormatted = formatISO(currentMonth, {
     representation: "date",
