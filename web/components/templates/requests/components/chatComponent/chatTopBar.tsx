@@ -8,7 +8,6 @@ import {
 import { useRouter } from "next/router";
 import React from "react";
 import { PiPlayBold } from "react-icons/pi";
-import { useCreatePrompt } from "../../../../../services/hooks/prompts/prompts";
 
 export const PROMPT_MODES = ["Pretty", "JSON", "Markdown", "Debug"] as const;
 
