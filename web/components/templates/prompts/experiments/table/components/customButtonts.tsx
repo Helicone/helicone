@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../../../../ui/dropdown-menu";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Check } from "lucide-react";
 import { Switch } from "../../../../../ui/switch";
 import { InfoBox } from "../../../../../ui/helicone/infoBox";

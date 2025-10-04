@@ -2,6 +2,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { PROMPT_MODES } from "../chatComponent/chatTopBar";
 import { JsonView } from "../chatComponent/jsonView";
+import React from "react";
 
 interface AssistantContentProps {
   mode: (typeof PROMPT_MODES)[number];

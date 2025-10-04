@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import React, { forwardRef, Ref } from "react";
 export const Card = forwardRef(function Grid(
-  props: JSX.IntrinsicElements["div"],
+  props: React.JSX.IntrinsicElements["div"],
   ref: Ref<HTMLDivElement>,
 ) {
   const { children, className, ...rest } = props;

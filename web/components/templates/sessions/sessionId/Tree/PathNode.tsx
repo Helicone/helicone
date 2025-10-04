@@ -1,5 +1,6 @@
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
+import React from "react";
 
 export function PathNode(props: {
   node: TreeNodeData;

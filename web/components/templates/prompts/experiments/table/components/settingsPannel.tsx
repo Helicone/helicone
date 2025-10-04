@@ -1,5 +1,6 @@
 import ThemedDrawer from "../../../../../shared/themed/themedDrawer";
 import ProviderKeyList from "../../../../enterprise/portal/id/providerKeyList";
+import React from "react";
 
 interface SettingsPanelProps {
   setSelectedProviderKey: (key: string | null) => void;

@@ -9,8 +9,7 @@ import {
 } from "@/components/ui/select";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { BarChart, Card, Title } from "@tremor/react";
-import { useState } from "react";
-
+import React, { useState } from "react";
 import { Row } from "../../layout/common";
 import { Col } from "../../layout/common/col";
 import LoadingAnimation from "../../shared/loadingAnimation";

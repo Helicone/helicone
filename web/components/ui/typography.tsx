@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
-import { type HTMLAttributes } from "react";
-
+import React, { type HTMLAttributes } from "react";
 // Style variables for typography
 export const typography = {
   // Headings

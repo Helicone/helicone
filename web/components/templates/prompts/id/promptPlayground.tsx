@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import {
   getMessages,

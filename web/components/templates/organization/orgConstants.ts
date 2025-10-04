@@ -1,5 +1,5 @@
-import {
 import React from "react";
+import {
   BuildingOfficeIcon,
   CakeIcon,
   CloudIcon,

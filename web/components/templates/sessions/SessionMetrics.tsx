@@ -10,7 +10,7 @@ import {
 import { formatSeconds } from "@/lib/sql/timeHelpers";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { BarChart, Card } from "@tremor/react";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   useSessionMetrics,
   useSessionNames,

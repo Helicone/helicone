@@ -30,7 +30,7 @@ import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
 import { Check, ChevronDown, PieChart, Table } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,

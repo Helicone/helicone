@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { SidebarCloseIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { Trace, TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { clsx } from "../../../../shared/clsx";

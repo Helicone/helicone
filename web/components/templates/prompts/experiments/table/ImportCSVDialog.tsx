@@ -10,7 +10,7 @@ import {
 import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { InfoIcon, Trash2 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import Papa from "papaparse";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useJawnClient } from "@/lib/clients/jawnHook";
