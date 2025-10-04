@@ -402,7 +402,6 @@ export default function ChatMessage({
 }: ChatMessageProps) {
   const { mode } = useRequestRenderModeStore();
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFileAction, setPendingFileAction] = useState<
     "add" | "change" | null

@@ -47,7 +47,6 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   promptData,
 }) => {
   const router = useRouter();
-  const createPrompt = useCreatePrompt();
 
   return (
     <div className="flex h-10 w-full flex-row items-center justify-between rounded-md bg-slate-50 px-2 text-slate-900 dark:bg-black dark:text-slate-100">

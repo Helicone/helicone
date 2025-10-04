@@ -30,10 +30,6 @@ export const ErrorMessage = ({
   );
   const [allExpanded, setAllExpanded] = useState(false);
 
-  const toggleAllExpanded = () => {
-    setAllExpanded(!allExpanded);
-  };
-
   const errorData = useMemo(() => {
     const response:
       | string
@@ -115,7 +111,7 @@ export const ErrorMessage = ({
     }
   }, [mapperContent]);
 
-  const renderErrorContent = (isModal = false) => {
+  const renderErrorContent = () => {
     return (
       <div
         className={`h-full w-full divide-y divide-gray-300 border border-slate-200 dark:divide-gray-700 dark:border-gray-700 ${className}`}
