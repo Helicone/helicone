@@ -20,12 +20,12 @@ interface CreatePromptDialogProps {
 
 const CreatePromptDialog: React.FC<CreatePromptDialogProps> = ({
   hasAccess,
-  onCreatePrompt,
+  onCreatePrompt: _onCreatePrompt,
 }) => {
   const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
-  const [newPromptName, setNewPromptName] = useState<string>("");
-  const [newPromptModel, setNewPromptModel] = useState(MODEL_LIST[0].value);
-  const [newPromptContent, setNewPromptContent] = useState("");
+  const [newPromptName] = useState<string>("");
+  const [newPromptModel] = useState(MODEL_LIST[0].value);
+  const [newPromptContent] = useState("");
   const [promptVariables, setPromptVariables] = useState<string[]>([]);
   const newPromptInputRef = useRef<HTMLInputElement>(null);
 
