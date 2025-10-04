@@ -287,6 +287,7 @@ const renderTextContent = (
       messageIndex={messageIndex}
       onChatChange={options.onChatChange}
       mode={mode}
+      annotations={message.annotations}
     />
   );
 
