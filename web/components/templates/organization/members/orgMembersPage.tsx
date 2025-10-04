@@ -19,7 +19,7 @@ interface OrgMembersPageProps {
 }
 
 const OrgMembersPage = (props: OrgMembersPageProps) => {
-  const { org, wFull = false } = props;
+  const { org, wFull: _wFull = false } = props;
 
   const { data, isLoading, refetch } = useGetOrgMembers(org.id);
   const orgContext = useOrg();

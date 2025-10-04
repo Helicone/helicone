@@ -175,7 +175,7 @@ const VaultPage = ({
                             type="radio"
                             name="providerKey"
                             value={+(selectedProviderKeyForRadio === x.id)}
-                            onChange={(e) => {
+                            onChange={() => {
                               setSelectedProviderKeyForRadio(x.id);
                               onRadioSelect && onRadioSelect(x?.id ?? null);
                             }}

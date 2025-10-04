@@ -47,7 +47,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
     onCancelHandler,
     initialValues,
     onSuccess,
-    firstOrg,
+    firstOrg: _firstOrg,
     onCloseHandler,
   } = props;
 
@@ -65,13 +65,13 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
           }
       : null,
   );
-  const [selectedColor, setSelectedColor] = useState(
+  const [selectedColor] = useState(
     initialValues?.color
       ? ORGANIZATION_COLORS.find((c) => c.name === initialValues.color) ||
           ORGANIZATION_COLORS[0]
       : ORGANIZATION_COLORS[0],
   );
-  const [selectedIcon, setSelectedIcon] = useState(
+  const [selectedIcon] = useState(
     initialValues?.icon
       ? ORGANIZATION_ICONS.find((i) => i.name === initialValues.icon) ||
           ORGANIZATION_ICONS[0]
