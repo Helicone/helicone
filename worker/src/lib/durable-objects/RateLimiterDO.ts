@@ -201,117 +201,145 @@ export class RateLimiterDO extends DurableObject {
 
     const quotaInUnits = Math.round(req.quota * this.PRECISION_MULTIPLIER);
 
-    // Use the storage transaction API for atomic operations
-    // Wrap in try-catch to handle potential transaction conflicts
-    try {
-      return this.state.storage.transactionSync(() => {
-        // Clean up old buckets outside the window
-        // This is much faster than deleting individual entries
-        this.sql.exec(
-          "DELETE FROM rate_limit_buckets WHERE segment_key = ? AND bucket_timestamp < ?",
-          req.segmentKey,
-          windowStartBucket
-        );
+    // Retry logic for transaction conflicts
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 10;
 
-        // Get current usage within the window (in integer units)
-        const currentUsageResult = this.sql
-          .exec(
-            `SELECT COALESCE(SUM(unit_count), 0) as total
-           FROM rate_limit_buckets
-           WHERE segment_key = ? AND bucket_timestamp >= ?`,
-            req.segmentKey,
-            windowStartBucket
-          )
-          .one();
-
-        const currentUsageInUnits = Number(currentUsageResult?.total || 0);
-
-        // Check if adding this request would exceed the quota
-        // Use > instead of >= so that hitting exactly the quota is allowed
-        const wouldExceed =
-          currentUsageInUnits + requestUnitCount > quotaInUnits;
-
-        // If not check-only and not rate limited, record the usage
-        if (!req.checkOnly && !wouldExceed) {
-          // Insert or update the bucket for the current time
-          // This aggregates multiple requests in the same second
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        return this.state.storage.transactionSync(() => {
+          // Clean up old buckets outside the window
+          // This is much faster than deleting individual entries
           this.sql.exec(
-            `INSERT INTO rate_limit_buckets (segment_key, bucket_timestamp, unit_count)
-             VALUES (?, ?, ?)
-             ON CONFLICT(segment_key, bucket_timestamp)
-             DO UPDATE SET unit_count = unit_count + ?`,
-            req.segmentKey,
-            currentBucket,
-            requestUnitCount,
-            requestUnitCount
-          );
-        }
-
-        // Get the oldest bucket timestamp for reset calculation
-        const oldestBucket = this.sql
-          .exec(
-            `SELECT MIN(bucket_timestamp) as oldest
-           FROM rate_limit_buckets
-           WHERE segment_key = ? AND bucket_timestamp >= ?`,
+            "DELETE FROM rate_limit_buckets WHERE segment_key = ? AND bucket_timestamp < ?",
             req.segmentKey,
             windowStartBucket
-          )
-          .one();
-
-        // Calculate reset time (when the oldest bucket will fall out of the window)
-        let reset: number | undefined;
-        if (oldestBucket?.oldest) {
-          reset = Math.ceil(
-            (Number(oldestBucket.oldest) + req.timeWindow * 1000 - now) / 1000
           );
-          reset = Math.max(0, reset);
+
+          // Get current usage within the window (in integer units)
+          const currentUsageResult = this.sql
+            .exec(
+              `SELECT COALESCE(SUM(unit_count), 0) as total
+             FROM rate_limit_buckets
+             WHERE segment_key = ? AND bucket_timestamp >= ?`,
+              req.segmentKey,
+              windowStartBucket
+            )
+            .one();
+
+          const currentUsageInUnits = Number(currentUsageResult?.total || 0);
+
+          // Check if adding this request would exceed the quota
+          // Use > instead of >= so that hitting exactly the quota is allowed
+          const wouldExceed =
+            currentUsageInUnits + requestUnitCount > quotaInUnits;
+
+          // If not check-only and not rate limited, record the usage
+          if (!req.checkOnly && !wouldExceed) {
+            // Insert or update the bucket for the current time
+            // This aggregates multiple requests in the same second
+            this.sql.exec(
+              `INSERT INTO rate_limit_buckets (segment_key, bucket_timestamp, unit_count)
+               VALUES (?, ?, ?)
+               ON CONFLICT(segment_key, bucket_timestamp)
+               DO UPDATE SET unit_count = unit_count + ?`,
+              req.segmentKey,
+              currentBucket,
+              requestUnitCount,
+              requestUnitCount
+            );
+          }
+
+          // Get the oldest bucket timestamp for reset calculation
+          const oldestBucket = this.sql
+            .exec(
+              `SELECT MIN(bucket_timestamp) as oldest
+             FROM rate_limit_buckets
+             WHERE segment_key = ? AND bucket_timestamp >= ?`,
+              req.segmentKey,
+              windowStartBucket
+            )
+            .one();
+
+          // Calculate reset time (when the oldest bucket will fall out of the window)
+          let reset: number | undefined;
+          if (oldestBucket?.oldest) {
+            reset = Math.ceil(
+              (Number(oldestBucket.oldest) + req.timeWindow * 1000 - now) / 1000
+            );
+            reset = Math.max(0, reset);
+          }
+
+          // Convert back to original units for the response
+          const currentUsage =
+            currentUsageInUnits / this.PRECISION_MULTIPLIER;
+          const remaining = Math.max(
+            0,
+            (quotaInUnits - currentUsageInUnits) / this.PRECISION_MULTIPLIER
+          );
+          const finalRemaining = wouldExceed
+            ? remaining
+            : Math.max(
+                0,
+                (quotaInUnits -
+                  currentUsageInUnits -
+                  requestUnitCount) /
+                  this.PRECISION_MULTIPLIER
+              );
+          const finalCurrentUsage = wouldExceed
+            ? currentUsage
+            : (currentUsageInUnits + requestUnitCount) /
+              this.PRECISION_MULTIPLIER;
+
+          return {
+            status: wouldExceed ? "rate_limited" : "ok",
+            limit: req.quota,
+            remaining: finalRemaining,
+            reset,
+            currentUsage: finalCurrentUsage,
+          };
+        });
+      } catch (error) {
+        // If this is not the last attempt, wait and retry
+        if (attempt < MAX_RETRIES - 1) {
+          // Small delay before retry to reduce contention
+          const delay = RETRY_DELAY_MS * (attempt + 1);
+          // Note: We can't use async sleep in transactionSync, so we use a busy wait
+          const start = Date.now();
+          while (Date.now() - start < delay) {
+            // Busy wait
+          }
+          continue;
         }
 
-        // Convert back to original units for the response
-        const currentUsage =
-          currentUsageInUnits / this.PRECISION_MULTIPLIER;
-        const remaining = Math.max(
-          0,
-          (quotaInUnits - currentUsageInUnits) / this.PRECISION_MULTIPLIER
+        // All retries exhausted - fail-safe by rate limiting
+        // This is safer than allowing all requests through
+        console.error(
+          `[RateLimiterDO] Transaction failed after ${MAX_RETRIES} attempts for ${req.segmentKey}:`,
+          error
         );
-        const finalRemaining = wouldExceed
-          ? remaining
-          : Math.max(
-              0,
-              (quotaInUnits -
-                currentUsageInUnits -
-                requestUnitCount) /
-                this.PRECISION_MULTIPLIER
-            );
-        const finalCurrentUsage = wouldExceed
-          ? currentUsage
-          : (currentUsageInUnits + requestUnitCount) /
-            this.PRECISION_MULTIPLIER;
 
+        // CRITICAL FIX: Return "rate_limited" instead of "ok" when failing
+        // This prevents bypassing rate limits during high load/contention
+        // Better to deny a request than allow unlimited throughput
         return {
-          status: wouldExceed ? "rate_limited" : "ok",
+          status: "rate_limited",
           limit: req.quota,
-          remaining: finalRemaining,
-          reset,
-          currentUsage: finalCurrentUsage,
+          remaining: 0,
+          reset: req.timeWindow,
+          currentUsage: req.quota,
         };
-      });
-    } catch (error) {
-      // If transaction fails (e.g., due to contention), log and return a safe response
-      console.error(
-        `[RateLimiterDO] Transaction failed for ${req.segmentKey}:`,
-        error
-      );
-      // Return "ok" to avoid blocking requests when the rate limiter has issues
-      // This is better than crashing and prevents cascading failures
-      return {
-        status: "ok",
-        limit: req.quota,
-        remaining: req.quota,
-        reset: undefined,
-        currentUsage: 0,
-      };
+      }
     }
+
+    // Should never reach here, but TypeScript requires a return
+    return {
+      status: "rate_limited",
+      limit: req.quota,
+      remaining: 0,
+      reset: req.timeWindow,
+      currentUsage: req.quota,
+    };
   }
 
   async cleanup(olderThanMs: number): Promise<number> {
