@@ -168,7 +168,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                           id="org-costs"
                           value={limits?.cost !== -1 ? 1 : 0}
                           className=""
-                          onChange={(e) => {
+                          onChange={() => {
                             if (limits?.cost === -1) {
                               setLimits((prev) =>
                                 prev ? { ...prev, cost: 1000 } : null,
@@ -226,7 +226,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                           id="org-requests"
                           value={limits?.requests !== -1 ? 1 : 0}
                           className=""
-                          onChange={(e) => {
+                          onChange={() => {
                             if (limits?.requests === -1) {
                               setLimits((prev) =>
                                 prev ? { ...prev, requests: 1000 } : null,
