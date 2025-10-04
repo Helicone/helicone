@@ -24,7 +24,6 @@ const ExperimentDatasetSelector = (props: ExperimentDatasetSelectorProps) => {
     promptVersionId,
     onSuccess,
     handleAddRows,
-    experimentId,
   } = props;
   const jawn = useJawnClient();
   const { setNotification } = useNotification();
