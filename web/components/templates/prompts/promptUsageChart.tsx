@@ -23,7 +23,7 @@ const PromptUsageChart = (props: PromptUsageChartProps) => {
     };
   };
 
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
+  const [timeFilter] = useState<TimeFilter>(getTimeFilter());
 
   const timeIncrement = getTimeInterval(timeFilter);
 
@@ -51,8 +51,6 @@ const PromptUsageChart = (props: PromptUsageChartProps) => {
   const {
     data,
     isLoading: isPromptRequestsLoading,
-    refetch,
-    total,
   } = usePromptRequestsOverTime(params, "promptRequests" + promptId);
 
   return (

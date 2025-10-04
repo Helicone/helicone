@@ -34,7 +34,7 @@ const ScoresGraph = ({
     }
   >;
 }) => {
-  const { outputColumns, scores: scoreCriterias } = promptVersions.reduce(
+  const { scores: scoreCriterias } = promptVersions.reduce(
     (acc, promptVersion) => {
       const promptVersionScores = scores[promptVersion?.id]?.data;
       if (promptVersionScores) {
@@ -45,7 +45,6 @@ const ScoresGraph = ({
       return acc;
     },
     {
-      outputColumns: promptVersions,
       scores: [] as string[],
     },
   );

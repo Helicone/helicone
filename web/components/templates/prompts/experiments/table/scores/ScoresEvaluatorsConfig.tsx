@@ -29,7 +29,6 @@ const ScoresEvaluatorsConfig = memo(
       shouldRunEvaluators,
     } = useExperimentScores(experimentId);
 
-    const [open, setOpen] = useState<boolean>(false);
     const [value, setValue] = useState<string>("");
 
     const [showSuccess, setShowSuccess] = useState(false);
@@ -106,7 +105,7 @@ const ScoresEvaluatorsConfig = memo(
                       (e) => e.id === evaluator.id,
                     ).length,
                 )
-                .map((evaluator, i) => (
+                .map((evaluator) => (
                   <SelectItemRawNotText
                     key={evaluator.id}
                     value={evaluator.id}
