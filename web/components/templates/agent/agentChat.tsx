@@ -235,7 +235,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
           model: selectedModel,
           messages: currentMessages,
           temperature: 0.7,
-          tools: tools.map(({ handler, ...tool }) => tool),
+          tools: tools.map(({ handler: _handler, ...tool }) => tool),
         };
 
         const stream = await generateStream({

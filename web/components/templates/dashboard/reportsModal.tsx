@@ -38,7 +38,7 @@ const ReportsModal = (props: ReportsModalProps) => {
   const orgContext = useOrg();
   const { setNotification } = useNotification();
 
-  const { data, isLoading, refetch } = useGetOrgMembers(
+  const { data } = useGetOrgMembers(
     orgContext?.currentOrg?.id || "",
   );
 
@@ -90,10 +90,10 @@ const ReportsModal = (props: ReportsModalProps) => {
     report?.settings?.slack_channels,
   ]);
 
-  const { data: slackIntegration, isLoading: isLoadingSlackIntegration } =
+  const { data: slackIntegration } =
     useGetOrgSlackIntegration(orgContext?.currentOrg?.id || "");
 
-  const { data: slackChannelsData, isLoading: isLoadingSlackChannels } =
+  const { data: slackChannelsData } =
     useGetOrgSlackChannels(orgContext?.currentOrg?.id || "");
 
   const slackChannels: {

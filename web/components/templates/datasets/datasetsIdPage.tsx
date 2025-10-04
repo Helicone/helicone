@@ -52,7 +52,6 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     useGetHeliconeDatasetRows(id, page, currentPageSize);
   const {
     datasets,
-    refetch: refetchDatasets,
   } = useGetHeliconeDatasets([id]);
   const { setNotification } = useNotification();
   const jawn = useJawnClient();
@@ -147,7 +146,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
   };
 
   const handleSelectAll = useCallback(
-    (isSelected: boolean) => {
+    (_isSelected: boolean) => {
       selectAll();
     },
     [selectAll],
