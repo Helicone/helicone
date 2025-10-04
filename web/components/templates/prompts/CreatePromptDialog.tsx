@@ -23,17 +23,6 @@ const CreatePromptDialog: React.FC<CreatePromptDialogProps> = ({
   onCreatePrompt: _onCreatePrompt,
 }) => {
   const [imNotTechnical, setImNotTechnical] = useState<boolean>(false);
-  const [newPromptName] = useState<string>("");
-  const [newPromptModel] = useState(MODEL_LIST[0].value);
-  const [newPromptContent] = useState("");
-  const [promptVariables, setPromptVariables] = useState<string[]>([]);
-  const newPromptInputRef = useRef<HTMLInputElement>(null);
-
-  const extractVariables = useCallback((content: string) => {
-    const regex = /\{\{([^}]+)\}\}/g;
-    const matches = content.match(regex);
-    return matches ? matches.map((match) => match.slice(2, -2).trim()) : [];
-  }, []);
 
   return (
     <Dialog>

@@ -2,7 +2,6 @@ import { Menu, Transition } from "@headlessui/react";
 import { clsx } from "../../../shared/clsx";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { Fragment } from "react";
-import useNotification from "../../../shared/notification/useNotification";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 export const ROLE_COLORS = {

@@ -2,7 +2,6 @@ import { PlusIcon } from "@heroicons/react/20/solid";
 import { ChangeEvent, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 
-import useNotification from "../../../shared/notification/useNotification";
 import ResizeTextArea from "../resizeTextArea";
 
 type ImageUrlItem =
