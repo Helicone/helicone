@@ -11,7 +11,7 @@ on:
 jobs:
   e2e-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout code
@@ -21,8 +21,13 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        run: |
-          docker build -t helicone-test:latest .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: helicone-test:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Run Helicone container
         run: |
