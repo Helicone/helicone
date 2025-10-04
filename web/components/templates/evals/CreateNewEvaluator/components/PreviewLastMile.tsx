@@ -6,8 +6,8 @@ export function RenderDataEntry(dataEntry: DataEntry) {
 }
 
 export function PreviewLastMile({
-  testDataConfig,
-  testInput,
+  testDataConfig: _testDataConfig,
+  testInput: _testInput,
 }: {
   testDataConfig: LastMileConfigForm;
   testInput: TestInput;

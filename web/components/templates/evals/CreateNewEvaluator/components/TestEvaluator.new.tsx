@@ -21,7 +21,7 @@ import { AlertCircle, CheckCircle2, PlayCircle, XCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function TestEvaluator() {
-  const { testConfig, setTestConfig, testInput, setTestInput } =
+  const { testConfig, testInput, setTestInput } =
     useTestDataStore();
 
   const [promptTemplate, setPromptTemplate] = useState<string | undefined>(

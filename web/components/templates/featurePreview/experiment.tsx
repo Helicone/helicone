@@ -273,33 +273,6 @@ const ExperimentTable = () => {
   );
 };
 
-const evals = [
-  {
-    category: "LLM as a judge",
-    name: "Similarity",
-    value: 77,
-  },
-  {
-    category: "LLM as a judge",
-    name: "Humor",
-    value: 81,
-  },
-  {
-    category: "LLM as a judge",
-    name: "SQL",
-    value: 94,
-  },
-  {
-    category: "RAG",
-    name: "ContextRecall",
-    value: 63,
-  },
-  {
-    category: "Composite",
-    name: "StringContains",
-    value: 98,
-  },
-];
 
 const Experiment = () => {
   return <ExperimentTable />;
