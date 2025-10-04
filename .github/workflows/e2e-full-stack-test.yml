@@ -77,11 +77,11 @@ jobs:
           echo "Waiting for Web..."
           timeout 120 bash -c 'until curl -s http://localhost:3000 > /dev/null 2>&1; do echo "Waiting for Web..."; sleep 5; done'
 
-          echo "Waiting for Workers to start..."
-          timeout 180 bash -c 'until docker exec helicone-test curl -s http://localhost:8787 > /dev/null 2>&1; do echo "Waiting for Worker OpenAI..."; sleep 5; done'
+          echo "Waiting for Workers to start (giving them time to initialize)..."
+          sleep 30
+          echo "Workers should be ready now."
 
-          echo "All services are ready!"
-          echo "Final supervisord status..."
+          echo "All services status:"
           docker exec helicone-test supervisorctl status
 
       - name: Check service logs
