@@ -278,8 +278,7 @@ export class RequestBodyBuffer_Remote implements IRequestBodyBuffer {
     tags?: Record<string, string>
   ): Promise<Result<string, string>> {
     await this.ingestPromise.catch(() => undefined);
-    // TODO: Implement nested format support in container
-    // For now, always use flat format (ignore openAIResponse)
+    // TODO: Implement version 2 mapping for AI Gateway
 
     const res = await this.requestBodyBuffer.fetch(
       `${BASE_URL}/${this.uniqueId}/s3/upload-body`,
