@@ -116,8 +116,7 @@ const topRequestsColumns: ColumnDef<CacheRequest>[] = [
   },
 ];
 
-const CachePage = (props: CachePageProps) => {
-  const { defaultIndex = "0" } = props;
+const CachePage = (_props: CachePageProps) => {
   const [timePeriod, setTimePeriod] = useState<number>(30);
 
   const currentTimeFilter = useMemo<TimeFilter>(
