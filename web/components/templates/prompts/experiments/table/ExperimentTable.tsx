@@ -92,10 +92,8 @@ export function ExperimentTable({
 
   // Variant limit check
   const variantCount = promptVersionsData?.length || 0;
-  const {
-    canCreate: canCreateVariant,
-    freeLimit: MAX_VARIANTS,
-  } = useFeatureLimit("experiments", variantCount, "variants");
+  const { canCreate: canCreateVariant, freeLimit: MAX_VARIANTS } =
+    useFeatureLimit("experiments", variantCount, "variants");
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
@@ -377,7 +375,7 @@ export function ExperimentTable({
         columns: [
           columnHelper.accessor("add_prompt", {
             header: () => <></>,
-            cell: ({ row }) => <div></div>,
+            cell: () => <div></div>,
           }),
         ],
       }),
@@ -754,7 +752,7 @@ export function ExperimentTable({
                 promptVersionId={
                   experimentTableQuery?.original_prompt_version ?? ""
                 }
-                onSuccess={async (success) => {}}
+                onSuccess={async () => {}}
               />
 
               <ExperimentInputSelector
@@ -764,7 +762,7 @@ export function ExperimentTable({
                   experimentTableQuery?.original_prompt_version ?? ""
                 }
                 handleAddRows={handleAddRowInsertBatch}
-                onSuccess={async (success) => {}}
+                onSuccess={async () => {}}
               />
 
               <ExperimentDatasetSelector
@@ -775,7 +773,7 @@ export function ExperimentTable({
                   experimentTableQuery?.original_prompt_version ?? ""
                 }
                 handleAddRows={handleAddRowInsertBatchFromDataset}
-                onSuccess={async (success) => {}}
+                onSuccess={async () => {}}
               />
             </div>
           </ResizablePanel>
