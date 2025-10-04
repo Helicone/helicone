@@ -35,8 +35,6 @@ type PricingAddon = {
   description: string;
 };
 
-const TEAM_BUNDLE_PRICE = 200;
-
 const FEATURE_MESSAGES: Record<string, string> = {
   time_filter: "Extended time filters require Pro plan.",
   users: "Track per-user metrics and usage patterns with Pro.",
