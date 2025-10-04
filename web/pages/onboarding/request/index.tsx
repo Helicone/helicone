@@ -12,7 +12,6 @@ import { useEffect, useState, useRef } from "react";
 import { ArrowRight, Loader, Play } from "lucide-react";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useRouter } from "next/navigation";
 import { H1, Muted } from "@/components/ui/typography";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
@@ -25,7 +24,6 @@ const MODELS = [
 
 export default function RequestPage() {
   const org = useOrg();
-  const router = useRouter();
   const { setNotification } = useNotification();
   const [prompt, setPrompt] = useState("Write a haiku about AI");
   const [selectedModel, setSelectedModel] = useState("openai/gpt-4o-mini");

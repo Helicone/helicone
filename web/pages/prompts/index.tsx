@@ -11,7 +11,7 @@ import { useRouter } from "next/router";
 const Prompts: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = (props) => {
-  const { hasPrompts: hasOldPrompts, isLoading } = useHasPrompts();
+  const { isLoading } = useHasPrompts();
   const router = useRouter();
   const forceOldVersion = router.query.legacy === "true";
 

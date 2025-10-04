@@ -83,8 +83,6 @@ export default async function handler(
         .json({ error: "Slack webhook URL not configured" });
     }
 
-    const payload = JSON.stringify(req.body);
-
     // Debug: Log incoming webhook data
 
     // Verify webhook signature (temporarily disabled for testing)
