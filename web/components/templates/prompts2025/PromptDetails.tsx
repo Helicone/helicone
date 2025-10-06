@@ -102,7 +102,11 @@ const PromptDetails = ({
     if (currentTags.length !== draftTags.length) {
       return true;
     }
-    return draftTags.some((tag, index) => tag !== currentTags[index]);
+
+    const sortedCurrent = [...currentTags].sort((a, b) => a.localeCompare(b));
+    const sortedDraft = [...draftTags].sort((a, b) => a.localeCompare(b));
+
+    return sortedDraft.some((tag, index) => tag !== sortedCurrent[index]);
   }, [draftTags, promptTagsKey]);
 
   const allTagOptions = useMemo(() => {
