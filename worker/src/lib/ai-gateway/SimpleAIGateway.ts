@@ -134,10 +134,9 @@ export class SimpleAIGateway {
         const validationResult = validateOpenAIChatPayload(finalBody);
         if (isErr(validationResult)) {
           errors.push({
-            attempt: attempt.source,
-            error: validationResult.error,
             type: "invalid_format",
             statusCode: 400,
+            message: validationResult.error,
           });
           continue;
         }
@@ -405,7 +404,7 @@ export class SimpleAIGateway {
       code = "request_failed";
     } else if (firstInvalid) {
       statusCode = 400;
-      message = firstInvalid.error;
+      message = firstInvalid.message;
       code = "request_failed";
     } else if (allDisallowed) {
       statusCode = 400;
