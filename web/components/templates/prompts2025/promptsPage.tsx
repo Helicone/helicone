@@ -145,7 +145,10 @@ const PromptsPage = (props: PromptsPageProps) => {
 
       if (result.error) {
         setNotification("Error updating tags", "error");
-        logger.error({ error: result.error, promptId, tags }, "Error updating tags");
+        logger.error(
+          { error: result.error, promptId, tags },
+          "Error updating tags",
+        );
         return false;
       }
 

@@ -37,12 +37,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  useState,
-  useEffect,
-  useMemo,
-  type KeyboardEvent,
-} from "react";
+import { useState, useEffect, useMemo, type KeyboardEvent } from "react";
 import { Edit3, Loader2, Plus, Trash2, X } from "lucide-react";
 import type { PromptWithVersions } from "@/services/hooks/prompts";
 import { useGetPromptTags } from "@/services/hooks/prompts";
@@ -54,7 +49,10 @@ import useNotification from "@/components/shared/notification/useNotification";
 interface PromptDetailsProps {
   promptWithVersions: PromptWithVersions | null;
   onRenamePrompt: (promptId: string, newName: string) => void;
-  onUpdatePromptTags: (promptId: string, tags: string[]) => Promise<boolean> | boolean;
+  onUpdatePromptTags: (
+    promptId: string,
+    tags: string[],
+  ) => Promise<boolean> | boolean;
   onSetEnvironment: (
     promptId: string,
     promptVersionId: string,
@@ -127,9 +125,7 @@ const PromptDetails = ({
 
   const suggestionTags = useMemo(() => {
     const selected = new Set(draftTags.map((tag) => tag.toLowerCase()));
-    return allTagOptions.filter(
-      (tag) => !selected.has(tag.toLowerCase()),
-    );
+    return allTagOptions.filter((tag) => !selected.has(tag.toLowerCase()));
   }, [allTagOptions, draftTags]);
 
   useEffect(() => {
