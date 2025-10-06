@@ -606,7 +606,11 @@ export default function RequestDrawer(props: RequestDivProps) {
                 <TooltipProvider>
                   <Tooltip delayDuration={100}>
                     <TooltipTrigger asChild>
-                      <Badge variant={"secondary"} asPill={false} className="border border-border">
+                      <Badge
+                        variant={"secondary"}
+                        asPill={false}
+                        className="border border-border"
+                      >
                         <ShuffleIcon className="h-3 w-3" />
                       </Badge>
                     </TooltipTrigger>
@@ -672,7 +676,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                   copyText={specialProperties.sessionId}
                   href={`/sessions/${encodeURIComponent(
                     specialProperties.sessionName ?? EMPTY_SESSION_NAME,
-                  )}/${specialProperties.sessionId}`}
+                  )}/${encodeURIComponent(specialProperties.sessionId)}`}
                   truncateLength={dynamicTruncateLength}
                 />
               )}
