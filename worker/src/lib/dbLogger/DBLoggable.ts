@@ -27,8 +27,9 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { parseVercelStream } from "./streamParsers/vercelStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { costOfPrompt } from "@helicone-package/cost";
+import { costOfPrompt, getUsageProcessor } from "@helicone-package/cost";
 import { toOpenAI } from "@helicone-package/llm-mapper/transform/providers/anthropic/response/toOpenai";
+import { mapModelUsageToOpenAI } from "@helicone-package/cost/usage/mapModelUsageToOpenAI";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
@@ -690,8 +691,31 @@ export class DBLoggable {
 
         if (isAIGatewayNonOpenAI) {
           try {
-            const anthropicBody = JSON.parse(providerResponse);
-            openAIResponse = JSON.stringify(toOpenAI(anthropicBody));
+            const providerBody = JSON.parse(providerResponse);
+            const mappedResponse = toOpenAI(providerBody);
+
+            // Normalize usage via usage processors for all providers
+            const provider = this.request.attempt?.endpoint.provider;
+            if (provider) {
+              const usageProcessor = getUsageProcessor(provider);
+              if (usageProcessor) {
+                const modelUsageResult = await usageProcessor.parse({
+                  responseBody: providerResponse,
+                  isStream: this.request.isStream,
+                  model:
+                    this.request.attempt?.endpoint.providerModelId ?? "",
+                });
+
+                if (modelUsageResult.data) {
+                  // Map normalized ModelUsage to OpenAI format and replace in response
+                  mappedResponse.usage = mapModelUsageToOpenAI(
+                    modelUsageResult.data
+                  );
+                }
+              }
+            }
+
+            openAIResponse = JSON.stringify(mappedResponse);
           } catch (e) {
             console.error("Failed to map response to OpenAI:", e);
           }
