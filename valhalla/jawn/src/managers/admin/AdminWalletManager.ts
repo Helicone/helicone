@@ -62,7 +62,10 @@ export class AdminWalletManager extends BaseManager {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), WALLET_STATE_FETCH_TIMEOUT);
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        WALLET_STATE_FETCH_TIMEOUT
+      );
 
       // Fetch wallet state
       const stateResponse = await fetch(
@@ -86,7 +89,10 @@ export class AdminWalletManager extends BaseManager {
 
       // Fetch processed webhook events count
       const eventsController = new AbortController();
-      const eventsTimeoutId = setTimeout(() => eventsController.abort(), WALLET_EVENTS_FETCH_TIMEOUT);
+      const eventsTimeoutId = setTimeout(
+        () => eventsController.abort(),
+        WALLET_EVENTS_FETCH_TIMEOUT
+      );
 
       let processedEventsCount = 0;
       try {
@@ -127,9 +133,7 @@ export class AdminWalletManager extends BaseManager {
   /**
    * Fetches wallet states for multiple organizations in parallel
    */
-  async fetchWalletStates(
-    orgIds: string[]
-  ): Promise<
+  async fetchWalletStates(orgIds: string[]): Promise<
     Map<
       string,
       {
@@ -166,10 +170,7 @@ export class AdminWalletManager extends BaseManager {
         walletStateMap.set(result.value.orgId, result.value.state);
       } else {
         // Log failed wallet state fetches for debugging
-        console.error(
-          `Failed to fetch wallet state for org:`,
-          result.reason
-        );
+        console.error(`Failed to fetch wallet state for org:`, result.reason);
       }
     });
 
@@ -190,12 +191,8 @@ export class AdminWalletManager extends BaseManager {
       total_cost: number;
     }>(
       `
-        SELECT
-          organization_id,
-          SUM(cost) as total_cost
-        FROM request_response_rmt
-        WHERE is_passthrough_billing = true
-        GROUP BY organization_id
+        SELECT organization_id, spend as total_cost
+        FROM organization_ptb_spend_mv FINAL
         ORDER BY total_cost ${order}
         LIMIT 100
       `,

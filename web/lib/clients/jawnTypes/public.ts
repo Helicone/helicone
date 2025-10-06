@@ -681,9 +681,6 @@ export interface paths {
   "/v1/credits/payments": {
     get: operations["ListTokenUsagePayments"];
   };
-  "/v1/credits/totalSpend": {
-    get: operations["GetTotalSpend"];
-  };
   "/v1/public/alert-banner": {
     get: operations["GetAlertBanners"];
     patch: operations["UpdateAlertBannerActive"];
@@ -3883,15 +3880,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_PaginatedPurchasedCredits.string_": components["schemas"]["ResultSuccess_PaginatedPurchasedCredits_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__totalSpend-number__": {
-      data: {
-        /** Format: double */
-        totalSpend: number;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__totalSpend-number_.string_": components["schemas"]["ResultSuccess__totalSpend-number__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
       data: {
           updated_at: string;
@@ -7698,16 +7686,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PaginatedPurchasedCredits.string_"];
-        };
-      };
-    };
-  };
-  GetTotalSpend: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__totalSpend-number_.string_"];
         };
       };
     };
