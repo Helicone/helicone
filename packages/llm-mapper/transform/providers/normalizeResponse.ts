@@ -1,7 +1,7 @@
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { mapModelUsageToOpenAI } from "@helicone-package/cost/usage/mapModelUsageToOpenAI";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
-import { OpenAIResponseBody } from "../types/openai";
+import { OpenAIResponseBody, ChatCompletionChunk } from "../types/openai";
 
 export async function toOpenAIResponse(
   response: Response,
@@ -45,17 +45,6 @@ export async function toOpenAIResponse(
   }
 }
 
-/**
- * Normalizes usage in an OpenAI-formatted streaming response.
- *
- * Processes SSE events from the stream and normalizes the usage field
- * in the final chunk using provider-specific usage processors.
- *
- * @param response - The OpenAI-formatted streaming response
- * @param provider - The provider name (e.g., "anthropic", "openai")
- * @param providerModelId - The model ID used by the provider
- * @returns A new streaming response with normalized usage
- */
 export function toOpenAIStreamResponse(
   response: Response,
   provider: ModelProviderName,
@@ -84,7 +73,77 @@ export function toOpenAIStreamResponse(
 }
 
 /**
- * Transforms an OpenAI SSE stream to normalize usage in the final chunk.
+ * Normalizes usage in OpenAI-formatted streaming responses.
+ *
+ * Processes OpenAI SSE streams and normalizes usage fields in chunks
+ * that contain usage data using provider-specific usage processors.
+ */
+export class OpenAIStreamUsageNormalizer {
+  private provider: ModelProviderName;
+  private providerModelId: string;
+  private accumulatedChunks: string[] = [];
+
+  constructor(provider: ModelProviderName, providerModelId: string) {
+    this.provider = provider;
+    this.providerModelId = providerModelId;
+  }
+
+  async processLines(
+    raw: string,
+    onChunk: (chunk: ChatCompletionChunk) => void
+  ): Promise<void> {
+    const lines = raw.split("\n");
+
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        try {
+          const jsonStr = line.slice(6);
+
+          // Skip the [DONE] message
+          if (jsonStr.trim() === "[DONE]") {
+            continue;
+          }
+
+          const chunk: ChatCompletionChunk = JSON.parse(jsonStr);
+
+          // Accumulate all chunks for usage parsing
+          this.accumulatedChunks.push(jsonStr);
+
+          // If this chunk has usage, normalize it
+          if (chunk.usage) {
+            const usageProcessor = getUsageProcessor(this.provider);
+            if (usageProcessor) {
+              // Reconstruct full response text from accumulated chunks
+              const fullResponseText = this.accumulatedChunks
+                .map((c) => `data: ${c}\n\n`)
+                .join("");
+
+              const modelUsageResult = await usageProcessor.parse({
+                responseBody: fullResponseText,
+                isStream: true,
+                model: this.providerModelId,
+              });
+
+              if (modelUsageResult.data) {
+                chunk.usage = mapModelUsageToOpenAI(modelUsageResult.data);
+              }
+            }
+          }
+
+          onChunk(chunk);
+        } catch (error) {
+          console.error("Failed to parse SSE data:", error);
+        }
+      } else if (line.startsWith("event:") || line.startsWith(":")) {
+        // Skip event type lines and comments
+        continue;
+      }
+    }
+  }
+}
+
+/**
+ * Transforms an OpenAI SSE stream to normalize usage in chunks.
  */
 function normalizeOpenAIStream(
   stream: ReadableStream<Uint8Array>,
@@ -93,8 +152,8 @@ function normalizeOpenAIStream(
 ): ReadableStream<Uint8Array> {
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
+  const normalizer = new OpenAIStreamUsageNormalizer(provider, providerModelId);
   let buffer = "";
-  let fullResponseText = "";
 
   return new ReadableStream({
     async start(controller) {
@@ -105,74 +164,29 @@ function normalizeOpenAIStream(
           const { done, value } = await reader.read();
 
           if (done) {
-            // Process any remaining buffer
             if (buffer.trim()) {
-              controller.enqueue(encoder.encode(buffer));
+              await processBuffer(buffer, controller, encoder, normalizer);
             }
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
             controller.close();
             break;
           }
 
-          const chunk = decoder.decode(value, { stream: true });
-          buffer += chunk;
-          fullResponseText += chunk;
+          buffer += decoder.decode(value, { stream: true });
 
-          // Process complete SSE messages (ending with \n\n)
           const messages = buffer.split("\n\n");
+
           buffer = messages.pop() || "";
 
           for (const message of messages) {
-            if (!message.trim()) continue;
-
-            // Check if this is a data line with usage
-            if (message.includes("data: ") && message.includes('"usage"')) {
-              try {
-                const dataLine = message
-                  .split("\n")
-                  .find((line) => line.startsWith("data: "));
-                if (dataLine) {
-                  const jsonStr = dataLine.slice(6); // Remove "data: " prefix
-
-                  // Skip [DONE] message
-                  if (jsonStr.trim() === "[DONE]") {
-                    controller.enqueue(encoder.encode(message + "\n\n"));
-                    continue;
-                  }
-
-                  const chunk = JSON.parse(jsonStr);
-
-                  // If this chunk has usage, normalize it
-                  if (chunk.usage) {
-                    const usageProcessor = getUsageProcessor(provider);
-                    if (usageProcessor) {
-                      const modelUsageResult = await usageProcessor.parse({
-                        responseBody: fullResponseText,
-                        isStream: true,
-                        model: providerModelId,
-                      });
-
-                      if (modelUsageResult.data) {
-                        chunk.usage = mapModelUsageToOpenAI(
-                          modelUsageResult.data
-                        );
-                      }
-                    }
-
-                    // Re-emit the normalized chunk
-                    controller.enqueue(
-                      encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`)
-                    );
-                    continue;
-                  }
-                }
-              } catch (error) {
-                console.error("Failed to normalize streaming usage:", error);
-                // If normalization fails, emit original message
-              }
+            if (message.trim()) {
+              await processBuffer(
+                message + "\n\n",
+                controller,
+                encoder,
+                normalizer
+              );
             }
-
-            // Emit the message as-is
-            controller.enqueue(encoder.encode(message + "\n\n"));
           }
         }
       } catch (error) {
@@ -181,5 +195,17 @@ function normalizeOpenAIStream(
         reader.releaseLock();
       }
     },
+  });
+}
+
+async function processBuffer(
+  buffer: string,
+  controller: ReadableStreamDefaultController<Uint8Array>,
+  encoder: TextEncoder,
+  normalizer: OpenAIStreamUsageNormalizer
+) {
+  await normalizer.processLines(buffer, (chunk) => {
+    const sseMessage = `data: ${JSON.stringify(chunk)}\n\n`;
+    controller.enqueue(encoder.encode(sseMessage));
   });
 }
