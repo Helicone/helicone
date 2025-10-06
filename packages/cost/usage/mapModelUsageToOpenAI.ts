@@ -6,13 +6,13 @@ import { OpenAIUsage } from "@helicone-package/llm-mapper/transform/types/common
  * Used by AI Gateway to normalize usage from all providers to OpenAI format
  */
 export function mapModelUsageToOpenAI(modelUsage: ModelUsage): OpenAIUsage {
-  const promptTokens = modelUsage.input;
-  const completionTokens = modelUsage.output;
+  const inputTokens = modelUsage.input;
+  const outputTokens = modelUsage.output;
 
   const usage: OpenAIUsage = {
-    prompt_tokens: promptTokens,
-    completion_tokens: completionTokens,
-    total_tokens: promptTokens + completionTokens,
+    prompt_tokens: inputTokens,
+    completion_tokens: outputTokens,
+    total_tokens: inputTokens + outputTokens,
   };
 
   // Map cache details if present
@@ -26,7 +26,8 @@ export function mapModelUsageToOpenAI(modelUsage: ModelUsage): OpenAIUsage {
 
     // Add cache write details if present
     if (write5m || write1h) {
-      usage.prompt_tokens_details.cache_write_tokens = (write5m ?? 0) + (write1h ?? 0);
+      usage.prompt_tokens_details.cache_write_tokens =
+        (write5m ?? 0) + (write1h ?? 0);
       usage.prompt_tokens_details.cache_write_details = {
         write_5m_tokens: write5m ?? 0,
         write_1h_tokens: write1h ?? 0,
