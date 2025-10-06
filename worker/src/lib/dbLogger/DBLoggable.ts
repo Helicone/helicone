@@ -684,41 +684,49 @@ export class DBLoggable {
         const providerResponse = rawResponseBody.join("");
         let openAIResponse: string | undefined;
 
-        // For AI Gateway non-OpenAI: map response to OpenAI format
-        const isAIGatewayNonOpenAI =
-          this.request.attempt?.endpoint.modelConfig.responseFormat &&
-          this.request.attempt.endpoint.modelConfig.responseFormat !== "OPENAI";
+        // Check if this is an AI Gateway request
+        const isAIGateway = this.request.attempt?.endpoint;
 
-        if (isAIGatewayNonOpenAI) {
-          // If AI Gateway request is not OpenAI, map response to OpenAI format
-          // This normalizes usage for all providers for easier processing
+        if (isAIGateway) {
+          // Process AI Gateway response: convert to OpenAI format and normalize usage
           try {
             const providerBody = JSON.parse(providerResponse);
-            const mappedResponse = toOpenAI(providerBody);
-
-            // Normalize usage via usage processors for all providers
             const provider = this.request.attempt?.endpoint.provider;
+            const responseFormat =
+              this.request.attempt?.endpoint.modelConfig.responseFormat;
+
+            // Step 1: Convert to OpenAI format if needed (Anthropic only)
+            let openAIBody = providerBody;
+            if (responseFormat !== "OPENAI" && provider === "anthropic") {
+              openAIBody = toOpenAI(providerBody);
+            }
+
+            // Step 2: Normalize usage for ALL AI Gateway providers
             if (provider) {
               const usageProcessor = getUsageProcessor(provider);
+              console.log(`Provider: ${provider}`);
+              console.log(`Usage processor: ${usageProcessor}`);
               if (usageProcessor) {
                 const modelUsageResult = await usageProcessor.parse({
                   responseBody: providerResponse,
                   isStream: this.request.isStream,
                   model: this.request.attempt?.endpoint.providerModelId ?? "",
                 });
-
+                console.log(
+                  `Model usage result: ${JSON.stringify(modelUsageResult)}`
+                );
                 if (modelUsageResult.data) {
                   // Map normalized ModelUsage to OpenAI format and replace in response
-                  mappedResponse.usage = mapModelUsageToOpenAI(
+                  openAIBody.usage = mapModelUsageToOpenAI(
                     modelUsageResult.data
                   );
                 }
               }
             }
 
-            openAIResponse = JSON.stringify(mappedResponse);
+            openAIResponse = JSON.stringify(openAIBody);
           } catch (e) {
-            console.error("Failed to map response to OpenAI:", e);
+            console.error("Failed to process AI Gateway response:", e);
           }
         }
 
