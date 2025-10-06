@@ -690,6 +690,8 @@ export class DBLoggable {
           this.request.attempt.endpoint.modelConfig.responseFormat !== "OPENAI";
 
         if (isAIGatewayNonOpenAI) {
+          // If AI Gateway request is not OpenAI, map response to OpenAI format
+          // This normalizes usage for all providers for easier processing
           try {
             const providerBody = JSON.parse(providerResponse);
             const mappedResponse = toOpenAI(providerBody);
@@ -702,8 +704,7 @@ export class DBLoggable {
                 const modelUsageResult = await usageProcessor.parse({
                   responseBody: providerResponse,
                   isStream: this.request.isStream,
-                  model:
-                    this.request.attempt?.endpoint.providerModelId ?? "",
+                  model: this.request.attempt?.endpoint.providerModelId ?? "",
                 });
 
                 if (modelUsageResult.data) {
