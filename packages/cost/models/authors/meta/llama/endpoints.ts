@@ -73,6 +73,40 @@ export const endpoints = {
       "*": {},
     },
   },
+  "llama-4-maverick:novita": {
+    providerModelId: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
+    provider: "novita",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000017,
+        output: 0.00000085,
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 1_048_576,
+    maxCompletionTokens: 1_048_576,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+      "functions",
+      "tools"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "llama-guard-4:groq": {
     providerModelId: "meta-llama/Llama-Guard-4-12B",
     provider: "groq",
@@ -198,11 +232,7 @@ export const endpoints = {
     ],
     contextLength: 512,
     maxCompletionTokens: 2,
-    supportedParameters: [
-      "max_tokens",
-      "temperature",
-      "top_p",
-    ],
+    supportedParameters: ["max_tokens", "temperature", "top_p"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -225,11 +255,7 @@ export const endpoints = {
     ],
     contextLength: 512,
     maxCompletionTokens: 2,
-    supportedParameters: [
-      "max_tokens",
-      "temperature",
-      "top_p",
-    ],
+    supportedParameters: ["max_tokens", "temperature", "top_p"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -262,6 +288,41 @@ export const endpoints = {
     ],
     ptbEnabled: true,
     priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-4-scout:novita": {
+    provider: "novita",
+    author: "meta-llama",
+    providerModelId: "meta-llama/llama-4-scout-17b-16e-instruct",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000001, // $0.1/1M tokens
+        output: 0.0000005, // $0.5/1M tokens
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+      "functions",
+      "tools"
+    ],
+    priority: 2,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -392,6 +453,139 @@ export const endpoints = {
     ],
     ptbEnabled: true,
     priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-3.1-8b-instruct-turbo:deepinfra": {
+    providerModelId: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    provider: "deepinfra",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000002, // $0.02/1M tokens
+        output: 0.00000003, // $0.03/1M tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 128_000,
+    maxCompletionTokens: 128_000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+      "tool_choice",
+      "tools",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-3.1-8b-instruct:novita": {
+    providerModelId: "meta-llama/llama-3.1-8b-instruct",
+    provider: "novita",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000002,
+        output: 0.00000005,
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 16_384,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-3.1-8b-instruct:deepinfra": {
+    providerModelId: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+    provider: "deepinfra",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000003, // $0.03 per 1M tokens - DeepInfra pricing from https://deepinfra.com/meta-llama/Meta-Llama-3-8B-Instruct
+        output: 0.00000005, // $0.06 per 1M tokens - DeepInfra pricing from https://deepinfra.com/meta-llama/Meta-Llama-3-8B-Instruct
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+      "tool_choice",
+      "tools",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-3.3-70b-instruct:novita": {
+    providerModelId: "meta-llama/llama-3.3-70b-instruct",
+    provider: "novita",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000013,
+        output: 0.00000039,
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 131_072,
+    maxCompletionTokens: 120_000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "tool_choice",
+      "tools",
+    ],
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

@@ -18,14 +18,6 @@ export const ALERT_ID = "total_spend_delta_alert";
 export const ALERT_STATE_ON = "on";
 export const ALERT_STATE_OFF = "off";
 
-// Stripe dispute status values that indicate a resolved/closed dispute
-// These are the official Stripe dispute status values for closed disputes
-const RESOLVED_DISPUTE_STATUSES: Stripe.Dispute.Status[] = [
-  "won",
-  "lost",
-  "warning_closed",
-];
-
 // Stripe dispute status values that indicate an unresolved/active dispute
 // These are the official Stripe dispute status values for active disputes
 const UNRESOLVED_DISPUTE_STATUSES: Stripe.Dispute.Status[] = [
@@ -189,6 +181,14 @@ export class Wallet extends DurableObject<Env> {
     );
   }
 
+  removeFromDisallowList(provider: string, model: string): void {
+    this.ctx.storage.sql.exec(
+      "DELETE FROM disallow_list WHERE provider = ? AND model = ?",
+      provider,
+      model
+    );
+  }
+
   getDisallowList(): DisallowListEntry[] {
     const result = this.ctx.storage.sql
       .exec<{
@@ -204,11 +204,15 @@ export class Wallet extends DurableObject<Env> {
     const count = this.ctx.storage.sql
       .exec<{
         count: number;
-      }>("SELECT COALESCE(count(*), 0) as count FROM processed_webhook_events WHERE id = ?", eventId)
+      }>(
+        "SELECT COALESCE(count(*), 0) as count FROM processed_webhook_events WHERE id = ?",
+        eventId
+      )
       .one().count;
     return count > 0;
   }
 
+  // amount is in cents
   addCredits(amount: number, eventId: string): void {
     const scaledAmount = amount * SCALE_FACTOR;
     this.ctx.storage.transactionSync(() => {
@@ -227,6 +231,7 @@ export class Wallet extends DurableObject<Env> {
     });
   }
 
+  // amount is in cents
   setCredits(amount: number, eventId: string): void {
     if (this.env.ENVIRONMENT !== "development") {
       return;
@@ -249,6 +254,7 @@ export class Wallet extends DurableObject<Env> {
     });
   }
 
+  // amount is in cents
   deductCredits(
     amount: number,
     eventId: string,
@@ -266,7 +272,10 @@ export class Wallet extends DurableObject<Env> {
       const totalDebits = this.ctx.storage.sql
         .exec<{
           total: number;
-        }>("SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?", orgId)
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
         .one().total;
 
       const escrowSum = this.ctx.storage.sql
@@ -313,7 +322,9 @@ export class Wallet extends DurableObject<Env> {
     const result = this.ctx.storage.sql
       .exec<{
         totalCredits: number;
-      }>("SELECT COALESCE(SUM(credits), 0) as totalCredits FROM credit_purchases")
+      }>(
+        "SELECT COALESCE(SUM(credits), 0) as totalCredits FROM credit_purchases"
+      )
       .one().totalCredits;
     return { totalCredits: result / SCALE_FACTOR };
   }
@@ -323,7 +334,10 @@ export class Wallet extends DurableObject<Env> {
       const debits = this.ctx.storage.sql
         .exec<{
           total: number;
-        }>("SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?", orgId)
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
         .one().total;
 
       const alertState =
@@ -368,19 +382,27 @@ export class Wallet extends DurableObject<Env> {
       const debits = this.ctx.storage.sql
         .exec<{
           total: number;
-        }>("SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?", orgId)
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
         .one().total;
 
       const totalCreditsPurchased = this.ctx.storage.sql
         .exec<{
           totalCreditsPurchased: number;
-        }>("SELECT COALESCE(SUM(credits), 0) as totalCreditsPurchased FROM credit_purchases")
+        }>(
+          "SELECT COALESCE(SUM(credits), 0) as totalCreditsPurchased FROM credit_purchases"
+        )
         .one().totalCreditsPurchased;
 
       const activeDisputesCount = this.ctx.storage.sql
         .exec<{
           count: number;
-        }>(`SELECT COUNT(*) as count FROM disputes WHERE status IN (${UNRESOLVED_DISPUTE_STATUSES.map(() => "?").join(", ")})`, ...UNRESOLVED_DISPUTE_STATUSES)
+        }>(
+          `SELECT COUNT(*) as count FROM disputes WHERE status IN (${UNRESOLVED_DISPUTE_STATUSES.map(() => "?").join(", ")})`,
+          ...UNRESOLVED_DISPUTE_STATUSES
+        )
         .one().count;
 
       const disputeStatus =
@@ -430,7 +452,11 @@ export class Wallet extends DurableObject<Env> {
   reserveCostInEscrow(
     orgId: string,
     requestId: string,
-    amountToReserve: number
+    amountToReserve: number,
+    creditLine: {
+      limit: number; // in cents
+      enabled: boolean;
+    }
   ): Result<{ escrowId: string }, { statusCode: number; message: string }> {
     const amountToReserveScaled = amountToReserve * SCALE_FACTOR;
     return this.ctx.storage.transactionSync(() => {
@@ -438,7 +464,10 @@ export class Wallet extends DurableObject<Env> {
       const activeDisputesCount = this.ctx.storage.sql
         .exec<{
           count: number;
-        }>(`SELECT COUNT(*) as count FROM disputes WHERE status IN (${UNRESOLVED_DISPUTE_STATUSES.map(() => "?").join(", ")})`, ...UNRESOLVED_DISPUTE_STATUSES)
+        }>(
+          `SELECT COUNT(*) as count FROM disputes WHERE status IN (${UNRESOLVED_DISPUTE_STATUSES.map(() => "?").join(", ")})`,
+          ...UNRESOLVED_DISPUTE_STATUSES
+        )
         .one().count;
 
       if (activeDisputesCount > 0) {
@@ -463,14 +492,20 @@ export class Wallet extends DurableObject<Env> {
       const totalDebits = this.ctx.storage.sql
         .exec<{
           total: number;
-        }>("SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?", orgId)
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
         .one().total;
-      const availableBalance =
-        totalCreditsPurchased - totalEscrow - totalDebits;
+      let availableBalance = totalCreditsPurchased - totalEscrow - totalDebits;
+
+      if (creditLine.enabled) {
+        availableBalance += creditLine.limit * SCALE_FACTOR;
+      }
 
       if (availableBalance - amountToReserveScaled < MINIMUM_RESERVE) {
         const availableScaled = availableBalance / SCALE_FACTOR;
-        const neededScaled = amountToReserve + (MINIMUM_RESERVE / SCALE_FACTOR);
+        const neededScaled = amountToReserve + MINIMUM_RESERVE / SCALE_FACTOR;
         return err({
           statusCode: 429,
           message: `Insufficient balance for escrow. Available: ${availableScaled} cents, needed: ${neededScaled} cents`,
@@ -501,6 +536,8 @@ export class Wallet extends DurableObject<Env> {
     const actualCostScaled = actualCost * SCALE_FACTOR;
     return this.ctx.storage.transactionSync(() => {
       const now = Date.now();
+
+      // This does an upsert update and += the deebits... it's confusing but I am writing a comment here so now you know, you're welcome and i love you.
       this.ctx.storage.sql.exec(
         `INSERT INTO aggregated_debits (org_id, debits, updated_at, ch_last_checked_at, ch_last_value) 
           VALUES (?, ?, ?, ?, ?) 
@@ -517,7 +554,10 @@ export class Wallet extends DurableObject<Env> {
       const result = this.ctx.storage.sql
         .exec<{
           checked_at: number;
-        }>("SELECT ch_last_checked_at as checked_at FROM aggregated_debits WHERE org_id = ?", orgId)
+        }>(
+          "SELECT ch_last_checked_at as checked_at FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
         .one();
       return { clickhouseLastCheckedAt: result.checked_at };
     });
@@ -540,9 +580,124 @@ export class Wallet extends DurableObject<Env> {
     );
   }
 
+  getTableData(
+    tableName: string,
+    page: number,
+    pageSize: number
+  ): { data: any[]; total: number } {
+    return this.ctx.storage.transactionSync(() => {
+      const offset = page * pageSize;
+
+      // Use hardcoded queries to prevent SQL injection
+      switch (tableName) {
+        case "processed_webhook_events": {
+          const webhookCountResult = this.ctx.storage.sql
+            .exec<{
+              count: number;
+            }>("SELECT COUNT(*) as count FROM processed_webhook_events")
+            .one();
+          const webhookRows = this.ctx.storage.sql
+            .exec(
+              "SELECT * FROM processed_webhook_events LIMIT ? OFFSET ?",
+              pageSize,
+              offset
+            )
+            .toArray();
+          return { data: webhookRows, total: webhookCountResult.count };
+        }
+
+        case "disallow_list": {
+          const disallowCountResult = this.ctx.storage.sql
+            .exec<{
+              count: number;
+            }>("SELECT COUNT(*) as count FROM disallow_list")
+            .one();
+          const disallowRows = this.ctx.storage.sql
+            .exec(
+              "SELECT * FROM disallow_list LIMIT ? OFFSET ?",
+              pageSize,
+              offset
+            )
+            .toArray();
+          return { data: disallowRows, total: disallowCountResult.count };
+        }
+        case "escrows": {
+          const escrowCountResult = this.ctx.storage.sql
+            .exec<{ count: number }>("SELECT COUNT(*) as count FROM escrows")
+            .one();
+          const escrowRows = this.ctx.storage.sql
+            .exec("SELECT * FROM escrows LIMIT ? OFFSET ?", pageSize, offset)
+            .toArray();
+          return { data: escrowRows, total: escrowCountResult.count };
+        }
+
+        case "credit_purchases": {
+          const creditCountResult = this.ctx.storage.sql
+            .exec<{
+              count: number;
+            }>("SELECT COUNT(*) as count FROM credit_purchases")
+            .one();
+          const creditRows = this.ctx.storage.sql
+            .exec(
+              "SELECT * FROM credit_purchases LIMIT ? OFFSET ?",
+              pageSize,
+              offset
+            )
+            .toArray();
+          return { data: creditRows, total: creditCountResult.count };
+        }
+
+        case "aggregated_debits": {
+          const debitCountResult = this.ctx.storage.sql
+            .exec<{
+              count: number;
+            }>("SELECT COUNT(*) as count FROM aggregated_debits")
+            .one();
+          const debitRows = this.ctx.storage.sql
+            .exec(
+              "SELECT * FROM aggregated_debits LIMIT ? OFFSET ?",
+              pageSize,
+              offset
+            )
+            .toArray();
+          return { data: debitRows, total: debitCountResult.count };
+        }
+
+        case "alert_state": {
+          const alertCountResult = this.ctx.storage.sql
+            .exec<{
+              count: number;
+            }>("SELECT COUNT(*) as count FROM alert_state")
+            .one();
+          const alertRows = this.ctx.storage.sql
+            .exec(
+              "SELECT * FROM alert_state LIMIT ? OFFSET ?",
+              pageSize,
+              offset
+            )
+            .toArray();
+          return { data: alertRows, total: alertCountResult.count };
+        }
+
+        case "disputes": {
+          const disputeCountResult = this.ctx.storage.sql
+            .exec<{ count: number }>("SELECT COUNT(*) as count FROM disputes")
+            .one();
+          const disputeRows = this.ctx.storage.sql
+            .exec("SELECT * FROM disputes LIMIT ? OFFSET ?", pageSize, offset)
+            .toArray();
+          return { data: disputeRows, total: disputeCountResult.count };
+        }
+
+        default:
+          throw new Error(`Invalid table name: ${tableName}`);
+      }
+    });
+  }
+
   addDispute(
     disputeId: string,
-    charge: string | Stripe.Charge,
+    chargeId: string,
     amount: number,
     currency: string,
     reason: string,
@@ -550,28 +705,35 @@ export class Wallet extends DurableObject<Env> {
     eventId: string
   ): Result<void, string> {
     const scaledAmount = amount * SCALE_FACTOR;
+
     return this.ctx.storage.transactionSync(() => {
       try {
-        const now = Date.now();
-        const chargeId = typeof charge === "string" ? charge : charge.id;
+        // Check if dispute already exists
+        const existingDispute = this.ctx.storage.sql
+          .exec<{
+            count: number;
+          }>("SELECT COUNT(*) as count FROM disputes WHERE id = ?", disputeId)
+          .one();
 
-        // Add the dispute record (wallet is automatically suspended due to active dispute)
+        if (existingDispute.count > 0) {
+          return err(`Dispute ${disputeId} already exists`);
+        }
+
+        // Insert the dispute
         this.ctx.storage.sql.exec(
-          `INSERT INTO disputes (id, charge_id, amount, currency, reason, status, created_at, event_id) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          "INSERT INTO disputes (id, charge_id, amount, currency, reason, status, created_at, event_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
           disputeId,
           chargeId,
           scaledAmount,
           currency,
           reason,
           status,
-          now,
+          Date.now(),
           eventId
         );
 
         return ok(undefined);
       } catch (error) {
-        console.error("Error adding dispute:", error);
         return err(`Failed to add dispute: ${error}`);
       }
     });
@@ -579,57 +741,34 @@ export class Wallet extends DurableObject<Env> {
 
   updateDispute(
     disputeId: string,
-    status: Stripe.Dispute.Status,
+    status: string,
     eventId: string
   ): Result<void, string> {
     return this.ctx.storage.transactionSync(() => {
       try {
-        this.ctx.storage.sql.exec(
-          "UPDATE disputes SET status = ? WHERE id = ?",
-          status,
-          disputeId
-        );
+        // Check if dispute exists
+        const existingDispute = this.ctx.storage.sql
+          .exec<{
+            count: number;
+          }>("SELECT COUNT(*) as count FROM disputes WHERE id = ?", disputeId)
+          .one();
 
-        // Mark event as processed
+        if (existingDispute.count === 0) {
+          return err(`Dispute ${disputeId} not found`);
+        }
+
+        // Update the dispute status
         this.ctx.storage.sql.exec(
-          "INSERT INTO processed_webhook_events (id, processed_at) VALUES (?, ?)",
+          "UPDATE disputes SET status = ?, event_id = ? WHERE id = ?",
+          status,
           eventId,
-          Date.now()
+          disputeId
         );
 
         return ok(undefined);
       } catch (error) {
-        console.error("Error updating dispute:", error);
         return err(`Failed to update dispute: ${error}`);
       }
     });
-  }
-
-  getActiveDisputes(): Dispute[] {
-    return this.ctx.storage.sql
-      .exec<{
-        id: string;
-        charge_id: string;
-        amount: number;
-        currency: string;
-        reason: string;
-        status: Stripe.Dispute.Status;
-        created_at: number;
-        event_id: string;
-      }>(
-        `SELECT id, charge_id, amount, currency, reason, status, created_at, event_id FROM disputes WHERE status IN (${UNRESOLVED_DISPUTE_STATUSES.map(() => "?").join(", ")})`,
-        ...UNRESOLVED_DISPUTE_STATUSES
-      )
-      .toArray()
-      .map((dispute) => ({
-        id: dispute.id,
-        chargeId: dispute.charge_id,
-        amount: dispute.amount / SCALE_FACTOR,
-        currency: dispute.currency,
-        reason: dispute.reason,
-        status: dispute.status,
-        createdAt: dispute.created_at,
-        eventId: dispute.event_id,
-      }));
   }
 }

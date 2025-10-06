@@ -90,7 +90,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     null,
   );
   const [configValues, setConfigValues] = useState<Record<string, string>>({});
-  const [byokEnabled, setByokEnabled] = useState(false);
+  const [byokEnabled, setByokEnabled] = useState(true);
 
   // Ref for the name input to programmatically focus it
   const nameInputRef = React.useRef<HTMLInputElement>(null);

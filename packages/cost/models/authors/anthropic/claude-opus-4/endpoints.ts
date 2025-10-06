@@ -32,6 +32,7 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
     },
@@ -66,6 +67,7 @@ export const endpoints = {
       "tools",
       "tool_choice",
     ],
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       global: {
         providerModelId: "claude-opus-4@20250514",
@@ -102,7 +104,8 @@ export const endpoints = {
       "top_p",
       "top_k",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "us-east-1": {},
     },

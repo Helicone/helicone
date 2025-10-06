@@ -47,8 +47,11 @@ export const getOpenAIProxyRouter = (router: BaseRouter) => {
           body: requestWrapper.getBody(),
         });
       }
-      
-      if (requestWrapper.heliconeHeaders.openaiBaseUrl && azurePattern.test(requestWrapper.heliconeHeaders.openaiBaseUrl)) {
+
+      if (
+        requestWrapper.heliconeHeaders.openaiBaseUrl &&
+        azurePattern.test(requestWrapper.heliconeHeaders.openaiBaseUrl)
+      ) {
         return await proxyForwarder(requestWrapper, env, ctx, "AZURE");
       } else {
         return await proxyForwarder(requestWrapper, env, ctx, "OPENAI");

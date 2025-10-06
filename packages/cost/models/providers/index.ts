@@ -11,6 +11,7 @@ import { XAIProvider } from "./xai";
 import { GoogleProvider } from "./google";
 import { DeepInfraProvider } from "./deepinfra";
 import { OpenRouterProvider } from "./openrouter";
+import { NovitaProvider } from "./novita";
 
 // Create singleton instances (stateless, so safe to share)
 export const providers = {
@@ -27,6 +28,7 @@ export const providers = {
   deepinfra: new DeepInfraProvider(),
   "google-ai-studio": new GoogleProvider(),
   openrouter: new OpenRouterProvider(),
+  novita: new NovitaProvider(),
 } as const;
 
 export type ModelProviderName = keyof typeof providers;

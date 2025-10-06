@@ -23,8 +23,13 @@ const isRealtimeRequest = (request: HeliconeRequest) => {
 
 export const getMapperTypeFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
-  model: string
+  model: string,
+  ignoreAIGateway: boolean = false // optional override to ignore ai-gateway option
 ) => {
+  if (!ignoreAIGateway && heliconeRequest.request_referrer === "ai-gateway") {
+    return "ai-gateway";
+  }
+
   if (heliconeRequest.request_body?._type === "vector_db") {
     return "vector-db";
   }
@@ -53,6 +58,7 @@ export const getMapperTypeFromHeliconeRequest = (
     path: heliconeRequest.request_path,
     isAssistant: isAssistantRequest(heliconeRequest),
     targetUrl: heliconeRequest.target_url,
+    requestReferrer: heliconeRequest.request_referrer,
   });
 };
 

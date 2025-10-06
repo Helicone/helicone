@@ -78,6 +78,28 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
+  "llama-3.1-8b-instruct": {
+    name: "Meta Llama 3.1 8B Instruct",
+    author: "meta-llama",
+    description:
+      "Meta's latest class of models, Llama 3.1, launched with a variety of sizes and configurations. The 8B instruct-tuned version is particularly fast and efficient. It has demonstrated strong performance in human evaluations, outperforming several leading closed-source models.",
+    contextLength: 16_384,
+    maxOutputTokens: 16_384,
+    created: "2024-07-23T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
+  "llama-3.1-8b-instruct-turbo": {
+    name: "Meta Llama 3.1 8B Instruct Turbo",
+    author: "meta-llama",
+    description:
+      "Optimized version of Llama 3.1 8B Instruct with 128K context window, designed for high-speed inference in multilingual chat and dialogue use cases with improved throughput and efficiency.",
+    contextLength: 128_000,
+    maxOutputTokens: 128_000,
+    created: "2024-07-23T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type LlamaModelName = keyof typeof models;

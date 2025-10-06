@@ -1,5 +1,5 @@
-import { AnthropicToOpenAIStreamConverter } from "../../providers/anthropic/streamedResponse/toOpenai";
-import { toAnthropic } from "../../providers/openai/request/toAnthropic";
+import { AnthropicToOpenAIStreamConverter } from "@helicone-package/llm-mapper/transform/providers/anthropic/streamedResponse/toOpenai";
+import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 
 // transform the readable stream from Anthropic SSE to OpenAI SSE format
@@ -18,7 +18,7 @@ export function oai2antStream(
       try {
         while (true) {
           const { done, value } = await reader.read();
-          
+
           if (done) {
             if (buffer.trim()) {
               processBuffer(buffer, controller, encoder, converter);
@@ -29,11 +29,11 @@ export function oai2antStream(
           }
 
           buffer += decoder.decode(value, { stream: true });
-          
+
           const messages = buffer.split("\n\n");
-          
+
           buffer = messages.pop() || "";
-          
+
           for (const message of messages) {
             if (message.trim()) {
               processBuffer(message + "\n\n", controller, encoder, converter);
@@ -55,33 +55,10 @@ function processBuffer(
   encoder: TextEncoder,
   converter: AnthropicToOpenAIStreamConverter
 ) {
-  const lines = buffer.split("\n");
-  
-  for (const line of lines) {
-    if (line.startsWith("data: ")) {
-      try {
-        const jsonStr = line.slice(6);
-        
-        // Skip the [DONE] message from Anthropic
-        if (jsonStr.trim() === "[DONE]") {
-          continue;
-        }
-        
-        const anthropicEvent = JSON.parse(jsonStr);
-        const openAIEvents = converter.convert(anthropicEvent);
-        
-        for (const openAIEvent of openAIEvents) {
-          const sseMessage = `data: ${JSON.stringify(openAIEvent)}\n\n`;
-          controller.enqueue(encoder.encode(sseMessage));
-        }
-      } catch (error) {
-        console.error("Failed to parse SSE data:", error);
-      }
-    } else if (line.startsWith("event:") || line.startsWith(":")) {
-      // Skip event type lines and comments
-      continue;
-    }
-  }
+  converter.processLines(buffer, (chunk) => {
+    const sseMessage = `data: ${JSON.stringify(chunk)}\n\n`;
+    controller.enqueue(encoder.encode(sseMessage));
+  });
 }
 
 // Anthro SSE Response to OpenAI SSE Response
@@ -91,14 +68,14 @@ export function oai2antStreamResponse(response: Response): Response {
   }
 
   const transformedStream = oai2antStream(response.body);
-  
+
   return new Response(transformedStream, {
     status: response.status,
     statusText: response.statusText,
     headers: {
       "content-type": "text/event-stream; charset=utf-8",
       "cache-control": "no-cache",
-      "connection": "keep-alive",
+      connection: "keep-alive",
     },
   });
 }
@@ -149,7 +126,9 @@ export async function oaiStream2antStream({
     console.error("Error in oaiStream2antStream:", error);
     return new Response(
       `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }

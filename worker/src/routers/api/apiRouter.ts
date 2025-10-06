@@ -4,7 +4,7 @@ import { Job, isValidStatus, validateRun } from "../../lib/models/Runs";
 import { HeliconeNode, validateHeliconeNode } from "../../lib/models/Tasks";
 import { validateAlertCreate } from "../../lib/util/validators/alertValidators";
 
-import crypto, { timingSafeEqual } from "crypto";
+import crypto from "crypto";
 import { OpenAPIRouterType } from "@cloudflare/itty-router-openapi";
 import { Route } from "itty-router";
 import { logAsync } from "../../lib/managers/AsyncLogManager";
@@ -16,8 +16,7 @@ import { APIKeysStore } from "../../lib/db/APIKeysStore";
 import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
-import { StripeManager } from "../../lib/managers/StripeManager";
-import { InternalResponse } from "../../api/lib/internalResponse";
+import { getWalletRouter } from "./walletRouter";
 
 function getAPIRouterV1(
   router: OpenAPIRouterType<
@@ -487,149 +486,8 @@ function getAPIRouterV1(
     }
   );
 
-  // Get the current wallet state, useful for debugging.
-  router.get(
-    "/wallet/state",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      const client = await createAPIClient(env, _ctx, requestWrapper);
-      const authParams = await client.db.getAuthParams();
-      if (authParams.error !== null) {
-        return client.response.unauthorized();
-      }
-
-      const orgId = authParams.data.organizationId;
-      const walletId = env.WALLET.idFromName(orgId);
-      const walletStub = env.WALLET.get(walletId);
-
-      try {
-        const state = await walletStub.getWalletState(orgId);
-        return client.response.successJSON(state);
-      } catch (e) {
-        return client.response.newError(
-          e instanceof Error ? e.message : "Failed to fetch credits",
-          500
-        );
-      }
-    }
-  );
-
-  // get total credits purchased
-  router.get(
-    "/wallet/credits/total",
-    async (
-      { query: { orgId } },
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      if (!orgId || Array.isArray(orgId)) {
-        return InternalResponse.newError(
-          "orgId is required and must be a string",
-          400
-        );
-      }
-      const authHeader = requestWrapper.headers.get("Authorization");
-      if (!authHeader) {
-        return InternalResponse.unauthorized();
-      }
-
-      const providedToken = authHeader.replace("Bearer ", "");
-      const expectedToken = env.HELICONE_MANUAL_ACCESS_KEY;
-
-      if (!expectedToken) {
-        console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
-        return InternalResponse.newError("Server configuration error", 500);
-      }
-
-      const providedBuffer = Buffer.from(providedToken);
-      const expectedBuffer = Buffer.from(expectedToken);
-
-      // Check length first to avoid timingSafeEqual error
-      if (providedBuffer.length !== expectedBuffer.length) {
-        return InternalResponse.unauthorized();
-      }
-
-      if (!timingSafeEqual(providedBuffer, expectedBuffer)) {
-        return InternalResponse.unauthorized();
-      }
-
-      const walletId = env.WALLET.idFromName(orgId);
-      const walletStub = env.WALLET.get(walletId);
-
-      try {
-        const creditsPurchases = await walletStub.getTotalCreditsPurchased();
-        return InternalResponse.successJSON(creditsPurchases);
-      } catch (e) {
-        return InternalResponse.newError(
-          e instanceof Error
-            ? e.message
-            : "Failed to fetch total credits purchased",
-          500
-        );
-      }
-    }
-  );
-
-  // Stripe Webhook Handler
-  router.post(
-    "/stripe/webhook",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      if (!env.STRIPE_WEBHOOK_SECRET) {
-        console.error("STRIPE_WEBHOOK_SECRET not configured");
-        return new Response("Webhook endpoint not configured", { status: 500 });
-      }
-
-      const signature = requestWrapper.headers.get("stripe-signature");
-      if (!signature) {
-        return new Response("Missing stripe-signature header", { status: 400 });
-      }
-
-      const body = await requestWrapper.requestBodyBuffer.unsafeGetRawText();
-      if (!body) {
-        return new Response("Missing request body", { status: 400 });
-      }
-
-      const webhookManager = new StripeManager(
-        env.STRIPE_WEBHOOK_SECRET,
-        env.STRIPE_SECRET_KEY,
-        env.WALLET,
-        env
-      );
-
-      const { data, error: verifyError } =
-        await webhookManager.verifyAndConstructEvent(body, signature);
-
-      if (verifyError || !data) {
-        console.error("Webhook verification failed:", verifyError);
-        return new Response(verifyError || "Invalid webhook", { status: 400 });
-      }
-
-      const { error: handleError } = await webhookManager.handleEvent(data);
-
-      if (handleError) {
-        console.error("Error handling webhook event:", handleError);
-
-        // Check if error is related to insufficient balance (refund exceeds effective balance)
-        if (handleError.includes("Refund amount exceeds effective balance")) {
-          return new Response(handleError, { status: 400 });
-        }
-
-        return new Response("", { status: 500 });
-      }
-
-      return new Response("", { status: 200 });
-    }
-  );
+  // Register wallet endpoints
+  getWalletRouter(router);
 
   router.options(
     "*",

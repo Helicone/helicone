@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { StandardParameter } from "@helicone-package/cost/models/types";
@@ -61,7 +62,6 @@ export function ModelDetailPage({ initialModel, modelName }: ModelDetailPageProp
   >("typescript");
   const [highlightedCode, setHighlightedCode] = useState<string>("");
   const [copiedCode, setCopiedCode] = useState(false);
-  const [copiedModelId, setCopiedModelId] = useState(false);
 
   const toggleProviderExpansion = (provider: string) => {
     setExpandedProviders((prev) => {
@@ -232,21 +232,12 @@ completion = client.chat.completions.create(
                 <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-mono text-xs">
                   {model.id}
                 </code>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(model.id);
-                    setCopiedModelId(true);
-                    setTimeout(() => setCopiedModelId(false), 2000);
-                  }}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
-                  title="Copy model ID"
-                >
-                  {copiedModelId ? (
-                    <Check className="h-3 w-3 text-green-500" />
-                  ) : (
-                    <Copy className="h-3 w-3 text-gray-500 dark:text-gray-400" />
-                  )}
-                </button>
+                <CopyButton
+                  textToCopy={model.id}
+                  tooltipContent={`Copy: ${model.id}`}
+                  iconSize={12}
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
+                />
               </div>
               {(model as ModelRegistryItem & { created?: string }).created && (
                 <span className="text-gray-500 dark:text-gray-400">
@@ -376,6 +367,12 @@ completion = client.chat.completions.create(
                             <span className="text-base font-medium text-gray-900 dark:text-gray-100">
                               {endpoint.provider}
                             </span>
+                            <CopyButton
+                              textToCopy={`${model.id}/${endpoint.provider}`}
+                              tooltipContent={`Copy: ${model.id}/${endpoint.provider}`}
+                              iconSize={12}
+                              className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                            />
                             {endpoint.supportsPtb && (
                               <div className="flex items-center gap-1">
                                 <span className="text-xs font-normal text-blue-800 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5">

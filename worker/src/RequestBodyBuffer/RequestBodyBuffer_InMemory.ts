@@ -18,6 +18,7 @@ async function concatUint8Arrays(
 export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   private cachedText: string | null = null;
   private s3Client: S3Client;
+  private originalOpenAIRequest: string | null = null;
 
   constructor(
     private request: Request | null,
@@ -46,6 +47,33 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
 
   public async tempSetBody(body: string): Promise<void> {
     this.cachedText = body;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private applyOverride(body: any, override: object): object {
+    for (const [key, value] of Object.entries(override)) {
+      if (typeof value !== "object" || value === null || Array.isArray(value)) {
+        body[key] = value;
+      } else {
+        if (!body[key] || typeof body[key] !== "object") {
+          body[key] = {};
+        }
+        body[key] = this.applyOverride(body[key], value);
+      }
+    }
+    return body;
+  }
+
+  public async setBodyOverride(override: object): Promise<void> {
+    try {
+      const text = await this.unsafeGetRawText();
+      const bodyJson = JSON.parse(text);
+      const modifiedBody = this.applyOverride(bodyJson, override);
+      this.cachedText = JSON.stringify(modifiedBody);
+    } catch (e) {
+      console.error("Failed to apply body override:", e);
+      throw e;
+    }
   }
 
   // super unsafe and should only be used for cases we know will be smaller bodies
@@ -148,6 +176,7 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   }
 
   async getReadableStreamToBody(): Promise<string> {
+    // Override is already applied in setBodyOverride, just return cached text
     return await this.unsafeGetRawText();
   }
 
@@ -176,15 +205,34 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   }
 
   async uploadS3Body(
-    responseBody: any,
+    providerResponse: string,
+    openAIResponse: string | undefined,
     url: string,
     tags?: Record<string, string>
   ): Promise<Result<string, string>> {
+    const providerRequest = await this.unsafeGetRawText();
+
+    // Version 2: Store OpenAI format as default, native provider format for reference
+    if (this.originalOpenAIRequest && openAIResponse) {
+      return this.s3Client.store(
+        url,
+        JSON.stringify({
+          version: 2,
+          request: this.originalOpenAIRequest,
+          response: openAIResponse,
+          request_native: providerRequest,
+          response_native: providerResponse,
+        }),
+        tags
+      );
+    }
+
+    // Version 1 (legacy): flat structure
     return this.s3Client.store(
       url,
       JSON.stringify({
-        request: await this.unsafeGetRawText(),
-        response: responseBody,
+        request: providerRequest,
+        response: providerResponse,
       }),
       tags
     );
@@ -196,5 +244,13 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
 
   async delete(): Promise<void> {
     // no-op
+  }
+
+  setOriginalOpenAIRequest(body: string): void {
+    this.originalOpenAIRequest = body;
+  }
+
+  getOriginalOpenAIRequest(): string | null {
+    return this.originalOpenAIRequest;
   }
 }

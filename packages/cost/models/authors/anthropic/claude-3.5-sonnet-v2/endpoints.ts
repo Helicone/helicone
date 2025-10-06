@@ -31,6 +31,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
     },
@@ -40,7 +41,7 @@ export const endpoints = {
     provider: "vertex",
     author: "anthropic",
     version: "vertex-2023-10-16",
-    crossRegion: false,
+    crossRegion: true,
     pricing: [
       {
         threshold: 0,
@@ -64,6 +65,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       global: {
         providerModelId: "claude-3-5-sonnet-v2@20241022",
@@ -98,7 +100,8 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "us-east-1": {},
     },

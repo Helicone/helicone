@@ -394,6 +394,26 @@ export interface paths {
   "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
     get: operations["GetExperimentScore"];
   };
+  "/v1/integration": {
+    get: operations["GetIntegrations"];
+    post: operations["CreateIntegration"];
+  };
+  "/v1/integration/{integrationId}": {
+    get: operations["GetIntegration"];
+    post: operations["UpdateIntegration"];
+  };
+  "/v1/integration/type/{type}": {
+    get: operations["GetIntegrationByType"];
+  };
+  "/v1/integration/slack/settings": {
+    get: operations["GetSlackSettings"];
+  };
+  "/v1/integration/slack/channels": {
+    get: operations["GetSlackChannels"];
+  };
+  "/v1/integration/{integrationId}/stripe/test-meter-event": {
+    post: operations["TestStripeMeterEvent"];
+  };
   "/v1/log/request": {
     post: operations["LogRequests"];
   };
@@ -501,6 +521,24 @@ export interface paths {
   };
   "/v1/admin/helix-thread/{sessionId}": {
     get: operations["GetHelixThread"];
+  };
+  "/v1/admin/wallet/gateway/dashboard_data": {
+    post: operations["GetGatewayDashboardData"];
+  };
+  "/v1/admin/wallet/{orgId}": {
+    post: operations["GetWalletDetails"];
+  };
+  "/v1/admin/wallet/{orgId}/tables/{tableName}": {
+    post: operations["GetWalletTableData"];
+  };
+  "/v1/admin/wallet/{orgId}/modify-balance": {
+    post: operations["ModifyWalletBalance"];
+  };
+  "/v1/admin/wallet/{orgId}/update-settings": {
+    post: operations["UpdateWalletSettings"];
+  };
+  "/v1/admin/wallet/{orgId}/disallow-list": {
+    delete: operations["RemoveFromDisallowList"];
   };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
@@ -762,8 +800,11 @@ Json: JsonObject;
           has_integrated: boolean;
           governance_settings: components["schemas"]["Json"] | null;
           domain: string | null;
+          /** Format: double */
+          credit_limit: number;
           created_at: string | null;
           color: string;
+          allow_negative_balance: boolean;
         }) & {
           role: string;
         })[];
@@ -801,14 +842,17 @@ Json: JsonObject;
         has_integrated: boolean;
         governance_settings: components["schemas"]["Json"] | null;
         domain: string | null;
+        /** Format: double */
+        credit_limit: number;
         created_at: string | null;
         color: string;
+        allow_negative_balance: boolean;
       };
       /** @enum {number|null} */
       error: null;
     };
     "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+    "ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
       data: {
           tier: string;
           subscription_status: string;
@@ -838,15 +882,18 @@ Json: JsonObject;
           has_integrated: boolean;
           governance_settings: components["schemas"]["Json"];
           domain: string;
+          /** Format: double */
+          credit_limit: number;
           created_at: string;
           color: string;
+          allow_negative_balance: boolean;
         }[];
       /** @enum {number|null} */
       error: null;
     };
-    "Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
-      data: components["schemas"]["Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
+    "Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+      data: components["schemas"]["Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
       /** @enum {number|null} */
       error: null;
     };
@@ -855,7 +902,7 @@ Json: JsonObject;
       data: null;
       error: unknown;
     };
-    "Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
+    "Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
     ResultSuccess_string_: {
       data: string;
       /** @enum {number|null} */
@@ -891,8 +938,11 @@ Json: JsonObject;
       has_integrated?: boolean;
       governance_settings?: components["schemas"]["Json"] | null;
       domain?: string | null;
+      /** Format: double */
+      credit_limit?: number;
       created_at?: string | null;
       color?: string;
+      allow_negative_balance?: boolean;
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_": {
@@ -1535,7 +1585,9 @@ Json: JsonObject;
     };
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
-    Provider: components["schemas"]["ProviderName"] | "CUSTOM";
+    /** @enum {string} */
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita";
+    Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
@@ -1761,6 +1813,7 @@ Json: JsonObject;
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
+      gateway_endpoint_version: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2121,11 +2174,59 @@ Json: JsonObject;
       error: null;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
+    IntegrationCreateParams: {
+      integration_name: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+    };
+    Integration: {
+      integration_name?: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+      id: string;
+    };
+    ResultSuccess_Array_Integration__: {
+      data: components["schemas"]["Integration"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
+    IntegrationUpdateParams: {
+      integration_name?: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+    };
+    ResultSuccess_Integration_: {
+      data: components["schemas"]["Integration"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Array__id-string--name-string___": {
+      data: {
+          name: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
+    TestStripeMeterEventRequest: {
+      event_name: string;
+      customer_id: string;
+    };
+    /** @enum {string} */
+    ResponseFormat: "ANTHROPIC" | "OPENAI";
     HeliconeMeta: {
+      gatewayEndpointVersion?: string;
+      gatewayResponseFormat?: components["schemas"]["ResponseFormat"];
       providerModelId?: string;
+      gatewayModel?: string;
+      gatewayProvider?: components["schemas"]["ModelProviderName"];
       isPassthroughBilling?: boolean;
       gatewayDeploymentTarget?: string;
       gatewayRouterId?: string;
+      stripeCustomerId?: string;
       heliconeManualAccessKey?: string;
       promptInputs?: components["schemas"]["Record_string.any_"];
       promptVersionId?: string;
@@ -15786,6 +15887,104 @@ Json: JsonObject;
       error: null;
     };
     "Result_InAppThread.string_": components["schemas"]["ResultSuccess_InAppThread_"] | components["schemas"]["ResultError_string_"];
+    DashboardData: {
+      organizations: ({
+          /** Format: double */
+          walletProcessedEventsCount?: number;
+          /** Format: double */
+          walletDisallowedModelCount?: number;
+          /** Format: double */
+          walletTotalDebits?: number;
+          /** Format: double */
+          walletTotalCredits?: number;
+          /** Format: double */
+          walletEffectiveBalance?: number;
+          /** Format: double */
+          walletBalance?: number;
+          /** Format: double */
+          creditLimit: number;
+          allowNegativeBalance: boolean;
+          ownerEmail: string;
+          tier: string;
+          /** Format: double */
+          lastPaymentDate: number | null;
+          /** Format: double */
+          clickhouseTotalSpend: number;
+          /** Format: double */
+          paymentsCount: number;
+          /** Format: double */
+          totalPayments: number;
+          stripeCustomerId: string;
+          orgName: string;
+          orgId: string;
+        })[];
+      summary: {
+        /** Format: double */
+        totalCreditsSpent: number;
+        /** Format: double */
+        totalCreditsIssued: number;
+        /** Format: double */
+        totalOrgsWithCredits: number;
+      };
+      isProduction: boolean;
+    };
+    ResultSuccess_DashboardData_: {
+      data: components["schemas"]["DashboardData"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DashboardData.string_": components["schemas"]["ResultSuccess_DashboardData_"] | components["schemas"]["ResultError_string_"];
+    WalletState: {
+      /** Format: double */
+      balance: number;
+      /** Format: double */
+      effectiveBalance: number;
+      /** Format: double */
+      totalCredits: number;
+      /** Format: double */
+      totalDebits: number;
+      /** Format: double */
+      totalEscrow: number;
+      disallowList: {
+          model: string;
+          provider: string;
+          helicone_request_id: string;
+        }[];
+    };
+    ResultSuccess_WalletState_: {
+      data: components["schemas"]["WalletState"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_WalletState.string_": components["schemas"]["ResultSuccess_WalletState_"] | components["schemas"]["ResultError_string_"];
+    TableDataResponse: {
+      /** Format: double */
+      pageSize: number;
+      data: {
+        message?: string;
+        /** Format: double */
+        page: number;
+        /** Format: double */
+        total: number;
+        data: unknown[];
+      };
+    };
+    ResultSuccess_TableDataResponse_: {
+      data: components["schemas"]["TableDataResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TableDataResponse.string_": components["schemas"]["ResultSuccess_TableDataResponse_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__": {
+      data: {
+        /** Format: double */
+        creditLimit: number;
+        allowNegativeBalance: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__allowNegativeBalance-boolean--creditLimit-number_.string_": components["schemas"]["ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"] | components["schemas"]["ResultError_string_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -15996,7 +16195,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita";
           }) | {
             error: string;
           };
@@ -16463,7 +16662,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
+          "application/json": components["schemas"]["Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
         };
       };
     };
@@ -18145,6 +18344,121 @@ export interface operations {
       };
     };
   };
+  GetIntegrations: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array_Integration_.string_"];
+        };
+      };
+    };
+  };
+  CreateIntegration: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IntegrationCreateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  GetIntegration: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  UpdateIntegration: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IntegrationUpdateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetIntegrationByType: {
+    parameters: {
+      path: {
+        type: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  GetSlackSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  GetSlackChannels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
+        };
+      };
+    };
+  };
+  TestStripeMeterEvent: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TestStripeMeterEventRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
   LogRequests: {
     /** @description Log message to log */
     requestBody: {
@@ -18915,6 +19229,116 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  GetGatewayDashboardData: {
+    parameters: {
+      query?: {
+        search?: string;
+        sortBy?: string;
+        sortOrder?: "asc" | "desc";
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DashboardData.string_"];
+        };
+      };
+    };
+  };
+  GetWalletDetails: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_WalletState.string_"];
+        };
+      };
+    };
+  };
+  GetWalletTableData: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+      };
+      path: {
+        orgId: string;
+        tableName: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TableDataResponse.string_"];
+        };
+      };
+    };
+  };
+  ModifyWalletBalance: {
+    parameters: {
+      query: {
+        amount: number;
+        type: "credit" | "debit";
+        reason: string;
+      };
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_WalletState.string_"];
+        };
+      };
+    };
+  };
+  UpdateWalletSettings: {
+    parameters: {
+      query?: {
+        allowNegativeBalance?: boolean;
+        creditLimit?: number;
+      };
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__allowNegativeBalance-boolean--creditLimit-number_.string_"];
+        };
+      };
+    };
+  };
+  RemoveFromDisallowList: {
+    parameters: {
+      query: {
+        provider: string;
+        model: string;
+      };
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_WalletState.string_"];
         };
       };
     };

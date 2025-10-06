@@ -231,7 +231,9 @@ const generateHandler = async (
         `Missing ${provider}_API_KEY in headers`,
         "missing_api_key",
         400,
-        { provider }
+        {
+          provider,
+        }
       );
     }
     // b. Set basic headers

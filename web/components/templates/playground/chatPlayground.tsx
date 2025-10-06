@@ -291,7 +291,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 <RoleButton
                   role={"assistant"}
                   onRoleChange={function (
-                    role: "function" | "assistant" | "user" | "system",
+                    role: "function" | "assistant" | "user" | "system" | "tool",
                   ): void {}}
                   disabled={true}
                 />
@@ -432,7 +432,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
               <RoleButton
                 role={"assistant"}
                 onRoleChange={function (
-                  role: "function" | "assistant" | "user" | "system",
+                  role: "function" | "assistant" | "user" | "system" | "tool",
                 ): void {}}
                 disabled={true}
               />
@@ -514,7 +514,7 @@ const ChatPlayground = (props: ChatPlaygroundProps) => {
                 <RoleButton
                   role={"assistant"}
                   onRoleChange={function (
-                    role: "function" | "system" | "user" | "assistant",
+                    role: "function" | "system" | "user" | "assistant" | "tool",
                   ): void {}}
                   disabled={true}
                 />

@@ -28,6 +28,7 @@ import { parseVercelStream } from "./streamParsers/vercelStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "@helicone-package/cost";
+import { toOpenAI } from "@helicone-package/llm-mapper/transform/providers/anthropic/response/toOpenai";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
@@ -36,6 +37,8 @@ import {
   IRequestBodyBuffer,
   ValidRequestBody,
 } from "../../RequestBodyBuffer/IRequestBodyBuffer";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import { ResponseFormat } from "@helicone-package/cost/models/types";
 
 export interface DBLoggableProps {
   response: {
@@ -93,6 +96,10 @@ export interface AuthParams {
   tier: string;
   accessDict: {
     cache: boolean;
+  };
+  metaData: {
+    allowNegativeBalance: boolean;
+    creditLimit: number;
   };
 }
 
@@ -673,12 +680,30 @@ export class DBLoggable {
 
     if (S3_ENABLED === "true") {
       try {
+        const providerResponse = rawResponseBody.join("");
+        let openAIResponse: string | undefined;
+
+        // For AI Gateway non-OpenAI: map response to OpenAI format
+        const isAIGatewayNonOpenAI =
+          this.request.attempt?.endpoint.modelConfig.responseFormat &&
+          this.request.attempt.endpoint.modelConfig.responseFormat !== "OPENAI";
+
+        if (isAIGatewayNonOpenAI) {
+          try {
+            const anthropicBody = JSON.parse(providerResponse);
+            openAIResponse = JSON.stringify(toOpenAI(anthropicBody));
+          } catch (e) {
+            console.error("Failed to map response to OpenAI:", e);
+          }
+        }
+
         const s3Result =
           await db.requestResponseManager.storeRequestResponseRaw({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
             requestBodyBuffer: this.request.requestBodyBuffer,
-            responseBody: rawResponseBody.join(""),
+            providerResponse,
+            openAIResponse,
           });
 
         if (s3Result.error) {
@@ -703,6 +728,22 @@ export class DBLoggable {
         ? cachedHeaders.get("Helicone-Id")
         : DEFAULT_UUID;
 
+    let gatewayProvider: ModelProviderName | undefined;
+    let gatewayModel: string | undefined;
+    let gatewayResponseFormat: ResponseFormat | undefined;
+    let gatewayEndpointVersion: string | undefined;
+    if (this.request.attempt?.source && this.request.attempt?.endpoint) {
+      const endpoint = this.request.attempt?.endpoint;
+      const sourceParts = this.request.attempt?.source.split("/");
+      const model = sourceParts[0];
+      const provider = sourceParts[1];
+
+      gatewayProvider = provider as ModelProviderName;
+      gatewayModel = model as string;
+      gatewayResponseFormat = endpoint.modelConfig.responseFormat ?? "OPENAI";
+      gatewayEndpointVersion = endpoint.modelConfig.version;
+    }
+
     const kafkaMessage: MessageData = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,
@@ -722,7 +763,13 @@ export class DBLoggable {
         promptInputs: this.request.prompt2025Settings.promptInputs,
         promptEnvironment: this.request.prompt2025Settings.environment,
         isPassthroughBilling: this.request.escrowInfo ? true : false,
-        providerModelId: this.request.attempt?.endpoint.providerModelId ?? undefined,
+        gatewayProvider: gatewayProvider ?? undefined,
+        gatewayModel: gatewayModel ?? undefined,
+        providerModelId:
+          this.request.attempt?.endpoint.providerModelId ?? undefined,
+        gatewayResponseFormat: gatewayResponseFormat ?? undefined,
+        stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
+        gatewayEndpointVersion: gatewayEndpointVersion ?? undefined,
       },
       log: {
         request: {

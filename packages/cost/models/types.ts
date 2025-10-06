@@ -165,6 +165,8 @@ export interface ModelProviderConfig extends BaseConfig {
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;
   priority?: number;
+  quantization?: "fp4" | "fp8" | "bf16";
+  responseFormat?: ResponseFormat;
 }
 
 export interface EndpointConfig extends UserEndpointConfig {

@@ -16,7 +16,10 @@ import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/ope
 import OpenAI from "openai";
 import { getHeliconeDefaultTempKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { ENVIRONMENT, GET_KEY } from "../../lib/clients/constant";
-import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
+import {
+  HeliconeChatCreateParams,
+  HeliconeChatCreateParamsStreaming,
+} from "@helicone-package/prompts/types";
 import {
   InAppThreadsManager,
   InAppThread,
@@ -79,37 +82,40 @@ export class AgentController extends Controller {
               request.authParams.organizationId,
             "Helicone-User-Id": request.authParams.userId,
             "Helicone-Property-Is-Agent": "true",
+            "Helicone-RateLimit-Policy": "100;w=86400;s=user",
           },
         });
         const abortController = new AbortController();
 
         try {
-          const response = await openai.chat.completions.create(
-            {
-              model: params.model,
-              messages: params.messages,
-              temperature: params.temperature,
-              max_tokens: params.max_tokens,
-              top_p: params.top_p,
-              frequency_penalty: params.frequency_penalty,
-              presence_penalty: params.presence_penalty,
-              stop: params.stop,
-              stream: params.stream !== undefined,
-              response_format: params.response_format,
-              tools: params.tools,
-              reasoning_effort: params.reasoning_effort,
-              verbosity: params.verbosity,
-              stream_options: { include_usage: true },
+          const body = {
+            model: params.model as string,
+            messages:
+              (params.messages as HeliconeChatCreateParams["messages"]) || [],
+            temperature: params.temperature,
+            max_tokens: params.max_tokens,
+            top_p: params.top_p,
+            frequency_penalty: params.frequency_penalty,
+            presence_penalty: params.presence_penalty,
+            stop: params.stop,
+            stream: Boolean(params.stream),
+            response_format: params.response_format as any,
+            tools: params.tools,
+            reasoning_effort: params.reasoning_effort,
+            verbosity: params.verbosity,
+            stream_options: { include_usage: true },
 
-              // Helicone Prompt Params
-              prompt_id: bodyParams.prompt_id ?? PROMPT_ID,
-              environment: bodyParams.environment,
-              inputs: bodyParams.inputs,
-            } as HeliconeChatCreateParams,
-            {
-              signal: abortController.signal,
-            }
-          );
+            // Helicone Prompt Params
+            prompt_id: bodyParams.prompt_id ?? PROMPT_ID,
+            environment: bodyParams.environment,
+            inputs: bodyParams.inputs,
+          } satisfies
+            | HeliconeChatCreateParams
+            | HeliconeChatCreateParamsStreaming;
+
+          const response = await openai.chat.completions.create(body as any, {
+            signal: abortController.signal,
+          });
 
           if (params.stream) {
             // Set up streaming response

@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Query,
-  Request,
-  Route,
-  Security,
-  Tags,
-} from "tsoa";
+import { Controller, Get, Query, Request, Route, Security, Tags } from "tsoa";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { CreditsManager } from "../../managers/creditsManager";
 import { err, isError, ok, Result } from "../../packages/common/result";
@@ -36,7 +28,9 @@ export interface CreditBalanceResponse {
 @Security("api_key")
 export class CreditsController extends Controller {
   @Get("/balance")
-  public async getCreditsBalance(@Request() request: JawnAuthenticatedRequest): Promise<Result<CreditBalanceResponse, string>> {
+  public async getCreditsBalance(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<CreditBalanceResponse, string>> {
     const creditsManager = new CreditsManager(request.authParams);
     const result = await creditsManager.getCreditsBalance();
 
@@ -52,10 +46,10 @@ export class CreditsController extends Controller {
   public async listTokenUsagePayments(
     @Request() request: JawnAuthenticatedRequest,
     @Query() page?: number,
-    @Query() pageSize?: number,
+    @Query() pageSize?: number
   ): Promise<Result<PaginatedPurchasedCredits, string>> {
     const creditsManager = new CreditsManager(request.authParams);
-    
+
     const pageSizeValue = pageSize ?? 10;
     if (pageSizeValue > 100) {
       this.setStatus(400);
@@ -77,10 +71,10 @@ export class CreditsController extends Controller {
 
   @Get("/totalSpend")
   public async getTotalSpend(
-    @Request() request: JawnAuthenticatedRequest,
+    @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ totalSpend: number }, string>> {
     const creditsManager = new CreditsManager(request.authParams);
-    
+
     const result = await creditsManager.getTotalSpend();
 
     if (isError(result)) {

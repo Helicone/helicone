@@ -34,6 +34,7 @@ export const endpoints = {
     endpointConfigs: {
       "*": {},
     },
+    responseFormat: "ANTHROPIC",
   },
   "claude-3.5-haiku:vertex": {
     provider: "vertex",
@@ -64,8 +65,9 @@ export const endpoints = {
     ],
     ptbEnabled: true,
     endpointConfigs: {
-      global: {},
+      "us-east5": {},  // Use specific region for Claude
     },
+    responseFormat: "ANTHROPIC",
   },
   "claude-3.5-haiku:bedrock": {
     provider: "bedrock",
@@ -95,10 +97,11 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "us-east-1": {},
     },
+    responseFormat: "ANTHROPIC",
   },
   "claude-3.5-haiku:openrouter": {
     provider: "openrouter",

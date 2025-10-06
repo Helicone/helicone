@@ -224,6 +224,30 @@ const Datadog = ({ className }: { className: string }) => {
   );
 };
 
+const Stripe = ({ className }: { className: string }) => {
+  return (
+    <Image
+      src="/assets/home/integrations/stripe-logo.png"
+      alt="Stripe"
+      width={100}
+      height={100}
+      className={className}
+    />
+  );
+};
+
+const Segment = ({ className }: { className: string }) => {
+  return (
+    <Image
+      src="/assets/home/integrations/segment.png"
+      alt="Segment"
+      width={100}
+      height={100}
+      className={className}
+    />
+  );
+};
+
 export const LOGOS = {
   OpenAI,
   Anthropic,
@@ -243,4 +267,6 @@ export const LOGOS = {
   PostHog,
   Lytix,
   Datadog,
+  Stripe,
+  Segment,
 };

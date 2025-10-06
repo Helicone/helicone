@@ -1,9 +1,7 @@
 name = "helicone-worker-dev"
 main = "src/index.ts"
 compatibility_date = "2025-08-03"
-compatibility_flags = [
-	"nodejs_compat_v2"
-]
+compatibility_flags = ["nodejs_compat_v2"]
 logpush = true
 keep_vars = true
 
@@ -90,8 +88,6 @@ EU_REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY = ""
 EU_AWS_REGION = "eu-west-1"
 SLACK_WEBHOOK_URL = ""
 SLACK_ALERT_CHANNEL = "C092GFJQP43"
-
-# only required for pass through billing development
 STRIPE_SECRET_KEY = "sk_test_"
 
 STRIPE_WEBHOOK_SECRET = ""

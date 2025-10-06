@@ -1,4 +1,3 @@
-
 export class SentryManager {
   sentryAPIKey: string;
   sentryProjectId: string;

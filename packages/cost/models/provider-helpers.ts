@@ -45,6 +45,10 @@ export function heliconeProviderToModelProviderName(
       return "cohere";
     case "OPENROUTER":
       return "openrouter";
+    case "DEEPINFRA":
+      return "deepinfra";
+    case "NOVITA":
+      return "novita";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -57,12 +61,10 @@ export function heliconeProviderToModelProviderName(
     case "FIREWORKS":
     case "WISDOMINANUTSHELL":
     case "MISTRAL":
-    case "DEEPINFRA":
     case "QSTASH":
     case "FIRECRAWL":
     case "AVIAN":
     case "NEBIUS":
-    case "NOVITA":
     case "OPENPIPE":
     case "CHUTES":
     case "LLAMA":
@@ -123,6 +125,12 @@ export const dbProviderToProvider = (
   }
   if (provider === "openrouter" || provider === "OpenRouter") {
     return "openrouter";
+  }
+  if (provider === "novita" || provider === "Novita") {
+    return "novita";
+  }
+  if (provider === "deepinfra" || provider === "DeepInfra") {
+    return "deepinfra";
   }
   return null;
 };
@@ -265,18 +273,4 @@ export async function buildErrorMessage(
   }
 
   return ok(await provider.buildErrorMessage(response));
-}
-
-export function determineResponseFormat(endpoint: Endpoint): Result<ResponseFormat> {
-  const providerResult = getProvider(endpoint.provider);
-  if (providerResult.error) {
-    return err(providerResult.error);
-  }
-
-  const provider = providerResult.data;
-  if (!provider) {
-    return err(`Provider data is null for: ${endpoint.provider}`);
-  }
-
-  return ok(provider.determineResponseFormat(endpoint));
 }

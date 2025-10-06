@@ -165,8 +165,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.00009,
-        output: 0.00045,
+        input: 0.00000004,
+        output: 0.00000016,
         request: 0.0,
         image: 0.0,
         audio: 0.0,
@@ -191,6 +191,7 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: false,
+    quantization: "fp4",
     endpointConfigs: {
       "*": {},
     },

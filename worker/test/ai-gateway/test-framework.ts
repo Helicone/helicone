@@ -78,6 +78,8 @@ export type ProviderExpectation = {
     method?: string;
     /** Strings that should be in the body */
     bodyContains?: string[];
+    /** Strings that should NOT be in the body */
+    bodyDoesNotContain?: string[];
   };
 
   /** Custom verification function for complex cases */
@@ -141,7 +143,7 @@ export async function runGatewayTest(
 
       // Automatic verifications from 'expects'
       if (expectation?.expects) {
-        const { escrowInfo, headers, method, bodyContains } =
+        const { escrowInfo, headers, method, bodyContains, bodyDoesNotContain } =
           expectation.expects;
 
         // Check escrow info
@@ -172,17 +174,27 @@ export async function runGatewayTest(
           expect(requestWrapper.getMethod()).toBe(method);
         }
 
-        if (bodyContains && requestWrapper.unsafeGetText) {
-          const body = await requestWrapper.unsafeGetText();
+        // TODO: change to use safelyGetBody
+        if (bodyContains && requestWrapper.unsafeGetBodyText) {
+          const body = await requestWrapper.unsafeGetBodyText();
           for (const text of bodyContains) {
             expect(body).toContain(text);
+          }
+        }
+
+        // TODO: change to use safelyGetBody
+        if (bodyDoesNotContain && requestWrapper.unsafeGetBodyText) {
+          const body = await requestWrapper.unsafeGetBodyText();
+          for (const text of bodyDoesNotContain) {
+            expect(body).not.toContain(text);
           }
         }
       }
 
       // Automatic model validation - validate request body contains expected model
-      if (expectation?.model && requestWrapper.unsafeGetText) {
-        const body = await requestWrapper.unsafeGetText();
+      // TODO: change to use safelyGetBody
+      if (expectation?.model && requestWrapper.unsafeGetBodyText) {
+        const body = await requestWrapper.unsafeGetBodyText();
         try {
           const parsed = JSON.parse(body);
           expect(parsed.model).toBe(expectation.model);

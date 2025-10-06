@@ -1,7 +1,8 @@
-scripts/ 
+scripts/
 !valhalla/jawn/scripts/
 dist/
 server.py
+.agent/
 
 .vercel
 .env
@@ -50,3 +51,7 @@ settings.local.json
 examples/**/*/package-lock.json
 examples/**/*/yarn.lock
 coverage/
+
+.playwright-mcp/
+prompt.md
+run-prompt.sh

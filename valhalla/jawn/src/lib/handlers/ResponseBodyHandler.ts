@@ -12,7 +12,6 @@ import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropic
 import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
 import { LlamaBodyProcessor } from "../shared/bodyProcessors/llamaBodyProcessor";
 import { LlamaStreamBodyProcessor } from "../shared/bodyProcessors/llamaStreamBodyProcessor";
-import { OpenAIBodyProcessor } from "../shared/bodyProcessors/openaiBodyProcessor";
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
 import { GroqStreamProcessor } from "../shared/bodyProcessors/groqStreamProcessor";
@@ -36,7 +35,8 @@ import {
   modelCost,
   modelCostBreakdownFromRegistry,
 } from "@helicone-package/cost/costCalc";
-import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
+import { getProvider, heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
+import { ResponseFormat } from "@helicone-package/cost/models/types";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -168,9 +168,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       }
 
       // Parse structured usage via the registry-aware processors when available
-      const provider = heliconeProviderToModelProviderName(
-        context.message.log.request.provider
-      );
+      const gatewayProvider = context.message.heliconeMeta.gatewayProvider;
+      const provider = gatewayProvider ?? heliconeProviderToModelProviderName(context.message.log.request.provider);
       const rawResponse = context.rawLog.rawResponseBody;
       if (provider && rawResponse) {
         const usageProcessor = getUsageProcessor(provider);
@@ -178,6 +177,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           const parsedUsage = await usageProcessor.parse({
             responseBody: rawResponse,
             isStream: context.message.log.request.isStream,
+            model: context.processedLog.model ?? "",
           });
           if (parsedUsage.error !== null) {
             console.error(
@@ -293,7 +293,15 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     const isStream =
       log.request.isStream || context.processedLog.request.body?.stream;
 
-    const provider = log.request.provider;
+    const isAIGateway = log.request.requestReferrer === "ai-gateway";
+    // gatewayProvider and gatewayResponseFormat are always set for AI Gateway requests
+    // but tie all values to the isAIGateway flag to avoid edge cases
+    const provider = isAIGateway 
+      ? context.message.heliconeMeta.gatewayProvider ?? log.request.provider 
+      : log.request.provider;
+    const gatewayResponseFormat = isAIGateway
+      ? context.message.heliconeMeta.gatewayResponseFormat
+      : undefined;
 
     let responseBody = context.rawLog.rawResponseBody;
     const requestBody = context.rawLog.rawRequestBody;
@@ -326,6 +334,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         isStream,
         provider,
         responseBody,
+        isAIGateway,
+        gatewayResponseFormat,
         model,
       );
       return await parser.parse({
@@ -412,9 +422,19 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     isStream: boolean,
     provider: string,
     responseBody: any,
+    isAIGateway: boolean,
+    gatewayResponseFormat: ResponseFormat | undefined,
     model?: string,
   ): IBodyProcessor {
     if (!isStream) {
+      if (isAIGateway && gatewayResponseFormat) {
+        switch (gatewayResponseFormat) {
+          case "ANTHROPIC":
+            return new AnthropicBodyProcessor();
+          default:
+            return new GenericBodyProcessor();
+        }
+      }
       if (provider === "ANTHROPIC" && responseBody) {
         return new AnthropicBodyProcessor();
       }
@@ -438,6 +458,14 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     if (isStream) {
+      if (isAIGateway && gatewayResponseFormat) {
+        switch (gatewayResponseFormat) {
+          case "ANTHROPIC":
+            return new AnthropicStreamBodyProcessor();
+          default:
+            return new OpenAIStreamProcessor();
+        }
+      }
       if (provider === "ANTHROPIC" || model?.includes("claude")) {
         return new AnthropicStreamBodyProcessor();
       }

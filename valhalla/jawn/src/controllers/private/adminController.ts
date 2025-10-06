@@ -17,7 +17,7 @@ import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import type { JawnAuthenticatedRequest } from "../../types/request";
-import { Setting } from "../../utils/settings";
+import { Setting, SettingsManager } from "../../utils/settings";
 import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
@@ -28,6 +28,8 @@ import {
 } from "@helicone-package/cost";
 
 import { err, ok, Result } from "../../packages/common/result";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import { ENVIRONMENT } from "../../lib/clients/constant";
 import { InAppThread } from "../../managers/InAppThreadsManager";
 
 export const authCheckThrow = async (userId: string | undefined) => {

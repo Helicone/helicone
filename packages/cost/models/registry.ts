@@ -58,7 +58,12 @@ const modelProviderConfigs = {
   ...mistralEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
-const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
+// Combine all archived endpoints
+const archivedModelProviderConfigs = {
+  // TODO: if any archived endpoints are added, make sure they are included here
+} satisfies Record<string, ModelProviderConfig>;
+
+const indexes: ModelIndexes = buildIndexes(modelProviderConfigs, archivedModelProviderConfigs);
 
 function getAllModelIds(): Result<ModelName[]> {
   return ok(Object.keys(allModels) as ModelName[]);
@@ -149,9 +154,11 @@ function getModelProviderConfig(
 }
 
 function getModelProviderConfigByProviderModelId(
-  providerModelId: string
+  providerModelId: string,
+  provider: ModelProviderName
 ): Result<ModelProviderConfig> {
-  const result = indexes.providerModelIdToConfig.get(providerModelId);
+  const providerModelIdKey = `${providerModelId}:${provider}`;
+  const result = indexes.providerModelIdToConfig.get(providerModelIdKey);
   return result
     ? ok(result)
     : err(`Config not found for providerModelId: ${providerModelId}`);
@@ -178,7 +185,7 @@ function getModelProviderEntriesByModel(
 
 function getModelProviderEntry(
   model: string,
-  provider: string
+  provider: ModelProviderName
 ): Result<ModelProviderEntry | null> {
   const configId = `${model}:${provider}` as ModelProviderConfigId;
   const providerData = indexes.modelProviderToData.get(configId) || null;
@@ -207,6 +214,26 @@ function getPtbEndpointsForProvider(
   return ok(topLevelEndpoints);
 }
 
+function getModelProviderConfigByVersion(
+  model: string,
+  provider: ModelProviderName,
+  version: string
+): Result<ModelProviderConfig | null> {
+  const currentEntry = getModelProviderEntry(model, provider);
+  // if the given version matches the active config version (or both are undefined/empty)
+  if (
+    (!currentEntry.data?.config.version && !version) ||
+    (currentEntry.data?.config.version === version)
+  ) { 
+    return ok(currentEntry.data?.config ?? null);
+  }
+
+  const versionKey = `${model}:${provider}:${version}`;
+  const archivedConfig = indexes.modelToArchivedEndpointConfigs.get(versionKey);
+
+  return ok(archivedConfig || null);
+}
+
 export const registry = {
   getAllModelIds,
   getAllModelsWithIds,
@@ -223,4 +250,5 @@ export const registry = {
   getEndpointsByModel,
   getModelProviderEntriesByModel,
   getModelProviderEntry,
+  getModelProviderConfigByVersion,
 };

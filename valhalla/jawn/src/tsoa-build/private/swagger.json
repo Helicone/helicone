@@ -932,12 +932,19 @@
 											"type": "string",
 											"nullable": true
 										},
+										"credit_limit": {
+											"type": "number",
+											"format": "double"
+										},
 										"created_at": {
 											"type": "string",
 											"nullable": true
 										},
 										"color": {
 											"type": "string"
+										},
+										"allow_negative_balance": {
+											"type": "boolean"
 										}
 									},
 									"required": [
@@ -967,8 +974,10 @@
 										"has_integrated",
 										"governance_settings",
 										"domain",
+										"credit_limit",
 										"created_at",
-										"color"
+										"color",
+										"allow_negative_balance"
 									],
 									"type": "object"
 								},
@@ -1117,12 +1126,19 @@
 								"type": "string",
 								"nullable": true
 							},
+							"credit_limit": {
+								"type": "number",
+								"format": "double"
+							},
 							"created_at": {
 								"type": "string",
 								"nullable": true
 							},
 							"color": {
 								"type": "string"
+							},
+							"allow_negative_balance": {
+								"type": "boolean"
 							}
 						},
 						"required": [
@@ -1152,8 +1168,10 @@
 							"has_integrated",
 							"governance_settings",
 							"domain",
+							"credit_limit",
 							"created_at",
-							"color"
+							"color",
+							"allow_negative_balance"
 						],
 						"type": "object"
 					},
@@ -1182,7 +1200,7 @@
 					}
 				]
 			},
-			"ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+			"ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
 				"properties": {
 					"data": {
 						"items": {
@@ -1267,11 +1285,18 @@
 								"domain": {
 									"type": "string"
 								},
+								"credit_limit": {
+									"type": "number",
+									"format": "double"
+								},
 								"created_at": {
 									"type": "string"
 								},
 								"color": {
 									"type": "string"
+								},
+								"allow_negative_balance": {
+									"type": "boolean"
 								}
 							},
 							"required": [
@@ -1301,8 +1326,10 @@
 								"has_integrated",
 								"governance_settings",
 								"domain",
+								"credit_limit",
 								"created_at",
-								"color"
+								"color",
+								"allow_negative_balance"
 							],
 							"type": "object"
 						},
@@ -1323,20 +1350,20 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": {
+			"Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+			"ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
 				"properties": {
 					"data": {
-						"$ref": "#/components/schemas/Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"
+						"$ref": "#/components/schemas/Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"
 					},
 					"error": {
 						"type": "number",
@@ -1371,10 +1398,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": {
+			"Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"
+						"$ref": "#/components/schemas/ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_unknown_"
@@ -1514,12 +1541,19 @@
 						"type": "string",
 						"nullable": true
 					},
+					"credit_limit": {
+						"type": "number",
+						"format": "double"
+					},
 					"created_at": {
 						"type": "string",
 						"nullable": true
 					},
 					"color": {
 						"type": "string"
+					},
+					"allow_negative_balance": {
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -3945,10 +3979,33 @@
 					"VERCEL"
 				]
 			},
+			"ModelProviderName": {
+				"type": "string",
+				"enum": [
+					"anthropic",
+					"openai",
+					"bedrock",
+					"vertex",
+					"azure",
+					"perplexity",
+					"groq",
+					"deepseek",
+					"cohere",
+					"xai",
+					"deepinfra",
+					"google-ai-studio",
+					"openrouter",
+					"novita"
+				],
+				"nullable": false
+			},
 			"Provider": {
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ProviderName"
+					},
+					{
+						"$ref": "#/components/schemas/ModelProviderName"
 					},
 					{
 						"type": "string",
@@ -4794,6 +4851,10 @@
 					"request_referrer": {
 						"type": "string",
 						"nullable": true
+					},
+					"gateway_endpoint_version": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -4833,7 +4894,8 @@
 					"target_url",
 					"model",
 					"cache_reference_id",
-					"cache_enabled"
+					"cache_enabled",
+					"gateway_endpoint_version"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -6382,10 +6444,207 @@
 					}
 				]
 			},
+			"IntegrationCreateParams": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"integration_name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Integration": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Array_Integration__": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Integration"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array_Integration_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array_Integration__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"IntegrationUpdateParams": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Integration_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/Integration"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Integration.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Integration_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_Array__id-string--name-string___": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"name",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array__id-string--name-string__.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array__id-string--name-string___"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TestStripeMeterEventRequest": {
+				"properties": {
+					"event_name": {
+						"type": "string"
+					},
+					"customer_id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"event_name",
+					"customer_id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResponseFormat": {
+				"type": "string",
+				"enum": [
+					"ANTHROPIC",
+					"OPENAI"
+				]
+			},
 			"HeliconeMeta": {
 				"properties": {
+					"gatewayEndpointVersion": {
+						"type": "string"
+					},
+					"gatewayResponseFormat": {
+						"$ref": "#/components/schemas/ResponseFormat"
+					},
 					"providerModelId": {
 						"type": "string"
+					},
+					"gatewayModel": {
+						"type": "string"
+					},
+					"gatewayProvider": {
+						"$ref": "#/components/schemas/ModelProviderName"
 					},
 					"isPassthroughBilling": {
 						"type": "boolean"
@@ -6394,6 +6653,9 @@
 						"type": "string"
 					},
 					"gatewayRouterId": {
+						"type": "string"
+					},
+					"stripeCustomerId": {
 						"type": "string"
 					},
 					"heliconeManualAccessKey": {
@@ -47012,6 +47274,354 @@
 					}
 				]
 			},
+			"DashboardData": {
+				"properties": {
+					"organizations": {
+						"items": {
+							"properties": {
+								"walletProcessedEventsCount": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletDisallowedModelCount": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletTotalDebits": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletTotalCredits": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletEffectiveBalance": {
+									"type": "number",
+									"format": "double"
+								},
+								"walletBalance": {
+									"type": "number",
+									"format": "double"
+								},
+								"creditLimit": {
+									"type": "number",
+									"format": "double"
+								},
+								"allowNegativeBalance": {
+									"type": "boolean"
+								},
+								"ownerEmail": {
+									"type": "string"
+								},
+								"tier": {
+									"type": "string"
+								},
+								"lastPaymentDate": {
+									"type": "number",
+									"format": "double",
+									"nullable": true
+								},
+								"clickhouseTotalSpend": {
+									"type": "number",
+									"format": "double"
+								},
+								"paymentsCount": {
+									"type": "number",
+									"format": "double"
+								},
+								"totalPayments": {
+									"type": "number",
+									"format": "double"
+								},
+								"stripeCustomerId": {
+									"type": "string"
+								},
+								"orgName": {
+									"type": "string"
+								},
+								"orgId": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"creditLimit",
+								"allowNegativeBalance",
+								"ownerEmail",
+								"tier",
+								"lastPaymentDate",
+								"clickhouseTotalSpend",
+								"paymentsCount",
+								"totalPayments",
+								"stripeCustomerId",
+								"orgName",
+								"orgId"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"summary": {
+						"properties": {
+							"totalCreditsSpent": {
+								"type": "number",
+								"format": "double"
+							},
+							"totalCreditsIssued": {
+								"type": "number",
+								"format": "double"
+							},
+							"totalOrgsWithCredits": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"totalCreditsSpent",
+							"totalCreditsIssued",
+							"totalOrgsWithCredits"
+						],
+						"type": "object"
+					},
+					"isProduction": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"organizations",
+					"summary",
+					"isProduction"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_DashboardData_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/DashboardData"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_DashboardData.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_DashboardData_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"WalletState": {
+				"properties": {
+					"balance": {
+						"type": "number",
+						"format": "double"
+					},
+					"effectiveBalance": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalCredits": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalDebits": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalEscrow": {
+						"type": "number",
+						"format": "double"
+					},
+					"disallowList": {
+						"items": {
+							"properties": {
+								"model": {
+									"type": "string"
+								},
+								"provider": {
+									"type": "string"
+								},
+								"helicone_request_id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"model",
+								"provider",
+								"helicone_request_id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"balance",
+					"effectiveBalance",
+					"totalCredits",
+					"totalDebits",
+					"totalEscrow",
+					"disallowList"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_WalletState_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/WalletState"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_WalletState.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_WalletState_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TableDataResponse": {
+				"properties": {
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"data": {
+						"properties": {
+							"message": {
+								"type": "string"
+							},
+							"page": {
+								"type": "number",
+								"format": "double"
+							},
+							"total": {
+								"type": "number",
+								"format": "double"
+							},
+							"data": {
+								"items": {},
+								"type": "array"
+							}
+						},
+						"required": [
+							"page",
+							"total",
+							"data"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"pageSize",
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_TableDataResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/TableDataResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_TableDataResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_TableDataResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"creditLimit": {
+								"type": "number",
+								"format": "double"
+							},
+							"allowNegativeBalance": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"creditLimit",
+							"allowNegativeBalance"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__allowNegativeBalance-boolean--creditLimit-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ConvertToWavResponse": {
 				"properties": {
 					"data": {
@@ -47508,7 +48118,8 @@
 														"xai",
 														"deepinfra",
 														"google-ai-studio",
-														"openrouter"
+														"openrouter",
+														"novita"
 													]
 												}
 											},
@@ -48913,7 +49524,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
+									"$ref": "#/components/schemas/Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
 								}
 							}
 						}
@@ -53149,6 +53760,276 @@
 				]
 			}
 		},
+		"/v1/integration": {
+			"post": {
+				"operationId": "CreateIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IntegrationCreateParams"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetIntegrations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array_Integration_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/{integrationId}": {
+			"post": {
+				"operationId": "UpdateIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IntegrationUpdateParams"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/integration/type/{type}": {
+			"get": {
+				"operationId": "GetIntegrationByType",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/integration/slack/settings": {
+			"get": {
+				"operationId": "GetSlackSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/slack/channels": {
+			"get": {
+				"operationId": "GetSlackChannels",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array__id-string--name-string__.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/{integrationId}/stripe/test-meter-event": {
+			"post": {
+				"operationId": "TestStripeMeterEvent",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TestStripeMeterEventRequest"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/log/request": {
 			"post": {
 				"operationId": "LogRequests",
@@ -55409,6 +56290,324 @@
 					{
 						"in": "path",
 						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/gateway/dashboard_data": {
+			"post": {
+				"operationId": "GetGatewayDashboardData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_DashboardData.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "search",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sortBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sortOrder",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							]
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/{orgId}": {
+			"post": {
+				"operationId": "GetWalletDetails",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_WalletState.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/{orgId}/tables/{tableName}": {
+			"post": {
+				"operationId": "GetWalletTableData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_TableDataResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "tableName",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/{orgId}/modify-balance": {
+			"post": {
+				"operationId": "ModifyWalletBalance",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_WalletState.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "amount",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"credit",
+								"debit"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "reason",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/{orgId}/update-settings": {
+			"post": {
+				"operationId": "UpdateWalletSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__allowNegativeBalance-boolean--creditLimit-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "allowNegativeBalance",
+						"required": false,
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"in": "query",
+						"name": "creditLimit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/{orgId}/disallow-list": {
+			"delete": {
+				"operationId": "RemoveFromDisallowList",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_WalletState.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "provider",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "model",
 						"required": true,
 						"schema": {
 							"type": "string"

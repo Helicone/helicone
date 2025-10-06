@@ -145,7 +145,7 @@ export class FineTuningManager {
         return {
           ...message,
           function_call:
-            message.function_call || message.tool_calls?.[0]?.function,
+            message.function_call || (message.tool_calls?.[0] as any)?.function,
           tool_calls: undefined,
         };
       case "tool":

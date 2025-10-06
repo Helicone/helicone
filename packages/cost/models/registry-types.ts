@@ -12,6 +12,8 @@ import { googleEndpointConfig, googleModels } from "./authors/google";
 import { grokEndpointConfig, grokModels } from "./authors/xai";
 import { openaiEndpointConfig, openaiModels } from "./authors/openai";
 import { mistralEndpointConfig, mistralModels } from "./authors/mistralai";
+import { alibabaEndpointConfig, alibabaModels } from "./authors/alibaba";
+import { metaEndpointConfig, metaModels } from "./authors/meta";
 
 // Combine all models for type derivation
 const allModels = {
@@ -20,7 +22,9 @@ const allModels = {
   ...googleModels,
   ...grokModels,
   ...mistralModels,
-  ...deepseekModels
+  ...deepseekModels,
+  ...alibabaModels,
+  ...metaModels
 };
 
 export type ModelName = keyof typeof allModels;
@@ -32,7 +36,9 @@ const modelProviderConfigs = {
   ...googleEndpointConfig,
   ...grokEndpointConfig,
   ...mistralEndpointConfig,
-  ...deepseekEndpointConfig
+  ...deepseekEndpointConfig,
+  ...alibabaEndpointConfig,
+  ...metaEndpointConfig
 };
 
 export type ModelProviderConfigId = keyof typeof modelProviderConfigs;

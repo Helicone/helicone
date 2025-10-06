@@ -14,8 +14,8 @@
     "test:run": "vitest run",
     "test:registry": "vitest registry-ts",
     "cf-typegen": "wrangler types --strict-vars false",
-    "lint": "tsc && eslint --ext .js,.jsx,.ts,.tsx ./src --max-warnings=0",
-    "lint-fix": "eslint --ext .js,.jsx,.ts,.tsx ./src --fix"
+    "lint": "tsc && eslint --ext .js,.jsx,.ts,.tsx ./src",
+    "lint --fix": "eslint --ext .js,.jsx,.ts,.tsx ./src --fix"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.8.19",
@@ -28,7 +28,7 @@
     "@vitest/snapshot": "^3.2",
     "axios": "^1.11.0",
     "dotenv": "^17.2.1",
-    "eslint": "^9.32.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.3",

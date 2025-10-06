@@ -15,6 +15,8 @@ export interface IRequestBodyBuffer {
 
   tempSetBody(body: string): Promise<void>;
 
+  setBodyOverride(override: object): Promise<void>;
+
   // For forwarding to providers without reading into memory when possible.
   getReadableStreamToBody(): Promise<ValidRequestBody>;
 
@@ -25,7 +27,8 @@ export interface IRequestBodyBuffer {
   model(): Promise<string | undefined>;
 
   uploadS3Body(
-    responseBody: any,
+    providerResponse: string,
+    openAIResponse: string | undefined,
     url: string,
     tags?: Record<string, string>
   ): Promise<Result<string, string>>;
@@ -36,4 +39,9 @@ export interface IRequestBodyBuffer {
   resetS3Client(env: Env): void;
 
   delete(): Promise<void>;
+
+  // For AI Gateway: store original OpenAI request (from client)
+  setOriginalOpenAIRequest(body: string): void;
+
+  getOriginalOpenAIRequest(): string | null;
 }

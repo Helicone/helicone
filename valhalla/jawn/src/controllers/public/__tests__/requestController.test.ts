@@ -81,6 +81,7 @@ function makeHeliconeRequest(overrides: Partial<HeliconeRequest>): HeliconeReque
     cache_reference_id: null,
     cache_enabled: false,
     updated_at: new Date().toISOString(),
+    gateway_endpoint_version: null,
     ...overrides,
   };
 }

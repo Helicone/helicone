@@ -34,7 +34,8 @@ export const endpoints = {
       "min_p",
       "response_format",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
+    quantization: "fp8",
     endpointConfigs: {
       "*": {},
     },

@@ -65,6 +65,14 @@ const maxResponseLength = 100_000;
 const MAX_CONTENT_LENGTH = maxContentLength * avgTokenLength; // 2 MB
 const MAX_RESPONSE_LENGTH = maxResponseLength * avgTokenLength; // 100k
 
+function cleanAndTruncateString(text: string, maxLength: number): string {
+  return text
+    .replace(/[^\x20-\x7E]/g, "")
+    .replace(/[\uD800-\uDFFF]/g, "")
+    .trim()
+    .slice(0, maxLength);
+}
+
 export class LoggingHandler extends AbstractLogHandler {
   private batchPayload: BatchPayload;
   private logStore: LogStore;
@@ -550,7 +558,9 @@ export class LoggingHandler extends AbstractLogHandler {
     // set cost to zero if we cannot calculate it from the new usage processor+registry
     // rather than falling back to legacy usage cost
     if (context.message.heliconeMeta.providerModelId) {
-      rawCost = atLeastZero(context.costBreakdown?.totalCost ?? context.legacyUsage.cost ?? 0);
+      rawCost = atLeastZero(
+        context.costBreakdown?.totalCost ?? context.legacyUsage.cost ?? 0
+      );
     } else {
       rawCost = atLeastZero(context.legacyUsage.cost ?? 0);
     }
@@ -563,7 +573,10 @@ export class LoggingHandler extends AbstractLogHandler {
           : String(request.userId),
       request_id: request.id,
       latency: response.delayMs ?? 0,
-      model: context.processedLog.model ?? "",
+      model:
+        context.message.heliconeMeta.gatewayModel ??
+        context.processedLog.model ??
+        "",
       completion_tokens: atLeastZero(isCacheHit ? 0 : completionTokens),
       prompt_tokens: atLeastZero(isCacheHit ? 0 : promptTokens),
       prompt_cache_write_tokens: atLeastZero(
@@ -591,7 +604,8 @@ export class LoggingHandler extends AbstractLogHandler {
       threat: request.threat ?? false,
       time_to_first_token: Math.round(response.timeToFirstToken ?? 0),
       target_url: request.targetUrl ?? "",
-      provider: request.provider ?? "",
+      provider:
+        context.message.heliconeMeta.gatewayProvider ?? request.provider ?? "",
       country_code: request.countryCode ?? "",
       properties: context.processedLog.request.properties ?? {},
       assets: context.processedLog.assets
@@ -612,6 +626,8 @@ export class LoggingHandler extends AbstractLogHandler {
       request_referrer: context.message.log.request.requestReferrer ?? "",
       is_passthrough_billing:
         context.message.heliconeMeta.isPassthroughBilling ?? false,
+      gateway_endpoint_version:
+        context.message.heliconeMeta.gatewayEndpointVersion ?? "",
     };
 
     return requestResponseLog;
@@ -677,13 +693,17 @@ export class LoggingHandler extends AbstractLogHandler {
       const mappedContent = heliconeRequestToMappedContent(
         toHeliconeRequest(context)
       );
+      const requestText =
+        mappedContent.preview?.fullRequestText?.() ??
+        JSON.stringify(mappedContent.raw.request);
+
+      const responseText =
+        mappedContent.preview?.fullResponseText?.() ??
+        JSON.stringify(mappedContent.raw.response);
+
       return {
-        requestText:
-          mappedContent.preview?.fullRequestText?.() ??
-          JSON.stringify(mappedContent.raw.request),
-        responseText:
-          mappedContent.preview?.fullResponseText?.() ??
-          JSON.stringify(mappedContent.raw.request),
+        requestText: cleanAndTruncateString(requestText, MAX_CONTENT_LENGTH),
+        responseText: cleanAndTruncateString(responseText, MAX_RESPONSE_LENGTH),
       };
     } catch (error) {
       console.error("Error mapping request/response for preview:", error);

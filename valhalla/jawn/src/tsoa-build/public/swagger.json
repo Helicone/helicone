@@ -3238,10 +3238,33 @@
 					"VERCEL"
 				]
 			},
+			"ModelProviderName": {
+				"type": "string",
+				"enum": [
+					"anthropic",
+					"openai",
+					"bedrock",
+					"vertex",
+					"azure",
+					"perplexity",
+					"groq",
+					"deepseek",
+					"cohere",
+					"xai",
+					"deepinfra",
+					"google-ai-studio",
+					"openrouter",
+					"novita"
+				],
+				"nullable": false
+			},
 			"Provider": {
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ProviderName"
+					},
+					{
+						"$ref": "#/components/schemas/ModelProviderName"
 					},
 					{
 						"type": "string",
@@ -4087,6 +4110,10 @@
 					"request_referrer": {
 						"type": "string",
 						"nullable": true
+					},
+					"gateway_endpoint_version": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -4126,7 +4153,8 @@
 					"target_url",
 					"model",
 					"cache_reference_id",
-					"cache_enabled"
+					"cache_enabled",
+					"gateway_endpoint_version"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -5915,6 +5943,184 @@
 					"has_more",
 					"next_page",
 					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IntegrationCreateParams": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"integration_name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Integration": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Array_Integration__": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Integration"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array_Integration_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array_Integration__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"IntegrationUpdateParams": {
+				"properties": {
+					"integration_name": {
+						"type": "string"
+					},
+					"settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"active": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Integration_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/Integration"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Integration.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Integration_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_Array__id-string--name-string___": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"id": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"name",
+								"id"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array__id-string--name-string__.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array__id-string--name-string___"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TestStripeMeterEventRequest": {
+				"properties": {
+					"event_name": {
+						"type": "string"
+					},
+					"customer_id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"event_name",
+					"customer_id"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -7899,25 +8105,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ModelProviderName": {
-				"type": "string",
-				"enum": [
-					"anthropic",
-					"openai",
-					"bedrock",
-					"vertex",
-					"azure",
-					"perplexity",
-					"groq",
-					"deepseek",
-					"cohere",
-					"xai",
-					"deepinfra",
-					"google-ai-studio",
-					"openrouter"
-				],
-				"nullable": false
-			},
 			"AuthorName": {
 				"type": "string",
 				"enum": [
@@ -7970,6 +8157,24 @@
 					"structured_outputs",
 					"verbosity"
 				]
+			},
+			"RateLimits": {
+				"properties": {
+					"rpm": {
+						"type": "number",
+						"format": "double"
+					},
+					"tpm": {
+						"type": "number",
+						"format": "double"
+					},
+					"tpd": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ModelPricing": {
 				"properties": {
@@ -8042,6 +8247,207 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"EndpointConfig": {
+				"properties": {
+					"region": {
+						"type": "string"
+					},
+					"location": {
+						"type": "string"
+					},
+					"projectId": {
+						"type": "string"
+					},
+					"baseUri": {
+						"type": "string"
+					},
+					"deploymentName": {
+						"type": "string"
+					},
+					"resourceName": {
+						"type": "string"
+					},
+					"apiVersion": {
+						"type": "string"
+					},
+					"crossRegion": {
+						"type": "boolean"
+					},
+					"gatewayMapping": {
+						"type": "string",
+						"enum": [
+							"OPENAI",
+							"NO_MAPPING"
+						]
+					},
+					"modelName": {
+						"type": "string"
+					},
+					"providerModelId": {
+						"type": "string"
+					},
+					"pricing": {
+						"items": {
+							"$ref": "#/components/schemas/ModelPricing"
+						},
+						"type": "array"
+					},
+					"contextLength": {
+						"type": "number",
+						"format": "double"
+					},
+					"maxCompletionTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"ptbEnabled": {
+						"type": "boolean"
+					},
+					"version": {
+						"type": "string"
+					},
+					"rateLimits": {
+						"$ref": "#/components/schemas/RateLimits"
+					},
+					"priority": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Record_string.EndpointConfig_": {
+				"properties": {},
+				"additionalProperties": {
+					"$ref": "#/components/schemas/EndpointConfig"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ResponseFormat": {
+				"type": "string",
+				"enum": [
+					"ANTHROPIC",
+					"OPENAI"
+				]
+			},
+			"ModelProviderConfig": {
+				"properties": {
+					"pricing": {
+						"items": {
+							"$ref": "#/components/schemas/ModelPricing"
+						},
+						"type": "array"
+					},
+					"contextLength": {
+						"type": "number",
+						"format": "double"
+					},
+					"maxCompletionTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"ptbEnabled": {
+						"type": "boolean"
+					},
+					"version": {
+						"type": "string"
+					},
+					"providerModelId": {
+						"type": "string"
+					},
+					"provider": {
+						"$ref": "#/components/schemas/ModelProviderName"
+					},
+					"author": {
+						"$ref": "#/components/schemas/AuthorName"
+					},
+					"supportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					},
+					"rateLimits": {
+						"$ref": "#/components/schemas/RateLimits"
+					},
+					"endpointConfigs": {
+						"$ref": "#/components/schemas/Record_string.EndpointConfig_"
+					},
+					"crossRegion": {
+						"type": "boolean"
+					},
+					"priority": {
+						"type": "number",
+						"format": "double"
+					},
+					"quantization": {
+						"type": "string",
+						"enum": [
+							"fp4",
+							"fp8",
+							"bf16"
+						]
+					},
+					"responseFormat": {
+						"$ref": "#/components/schemas/ResponseFormat"
+					}
+				},
+				"required": [
+					"pricing",
+					"contextLength",
+					"maxCompletionTokens",
+					"ptbEnabled",
+					"providerModelId",
+					"provider",
+					"author",
+					"supportedParameters",
+					"endpointConfigs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserEndpointConfig": {
+				"properties": {
+					"region": {
+						"type": "string"
+					},
+					"location": {
+						"type": "string"
+					},
+					"projectId": {
+						"type": "string"
+					},
+					"baseUri": {
+						"type": "string"
+					},
+					"deploymentName": {
+						"type": "string"
+					},
+					"resourceName": {
+						"type": "string"
+					},
+					"apiVersion": {
+						"type": "string"
+					},
+					"crossRegion": {
+						"type": "boolean"
+					},
+					"gatewayMapping": {
+						"type": "string",
+						"enum": [
+							"OPENAI",
+							"NO_MAPPING"
+						]
+					},
+					"modelName": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Endpoint": {
 				"properties": {
 					"pricing": {
@@ -8064,8 +8470,11 @@
 					"version": {
 						"type": "string"
 					},
-					"baseUrl": {
-						"type": "string"
+					"modelConfig": {
+						"$ref": "#/components/schemas/ModelProviderConfig"
+					},
+					"userConfig": {
+						"$ref": "#/components/schemas/UserEndpointConfig"
 					},
 					"provider": {
 						"$ref": "#/components/schemas/ModelProviderName"
@@ -8092,7 +8501,8 @@
 					"contextLength",
 					"maxCompletionTokens",
 					"ptbEnabled",
-					"baseUrl",
+					"modelConfig",
+					"userConfig",
 					"provider",
 					"author",
 					"providerModelId",
@@ -8725,168 +9135,6 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__unsafe-boolean__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"IntegrationCreateParams": {
-				"properties": {
-					"integration_name": {
-						"type": "string"
-					},
-					"settings": {
-						"$ref": "#/components/schemas/Json"
-					},
-					"active": {
-						"type": "boolean"
-					}
-				},
-				"required": [
-					"integration_name"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Integration": {
-				"properties": {
-					"integration_name": {
-						"type": "string"
-					},
-					"settings": {
-						"$ref": "#/components/schemas/Json"
-					},
-					"active": {
-						"type": "boolean"
-					},
-					"id": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"id"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_Array_Integration__": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/Integration"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_Array_Integration_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_Array_Integration__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"IntegrationUpdateParams": {
-				"properties": {
-					"integration_name": {
-						"type": "string"
-					},
-					"settings": {
-						"$ref": "#/components/schemas/Json"
-					},
-					"active": {
-						"type": "boolean"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ResultSuccess_Integration_": {
-				"properties": {
-					"data": {
-						"$ref": "#/components/schemas/Integration"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_Integration.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_Integration_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess_Array__id-string--name-string___": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"name": {
-									"type": "string"
-								},
-								"id": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"name",
-								"id"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_Array__id-string--name-string__.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_Array__id-string--name-string___"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -11592,45 +11840,6 @@
 					}
 				]
 			},
-			"ResultSuccess__totalSpend-number__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"totalSpend": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"totalSpend"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__totalSpend-number_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__totalSpend-number__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
 				"properties": {
 					"data": {
@@ -12502,7 +12711,8 @@
 														"xai",
 														"deepinfra",
 														"google-ai-studio",
-														"openrouter"
+														"openrouter",
+														"novita"
 													]
 												}
 											},
@@ -17356,6 +17566,276 @@
 				"parameters": []
 			}
 		},
+		"/v1/integration": {
+			"post": {
+				"operationId": "CreateIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IntegrationCreateParams"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetIntegrations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array_Integration_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/{integrationId}": {
+			"post": {
+				"operationId": "UpdateIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IntegrationUpdateParams"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetIntegration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/integration/type/{type}": {
+			"get": {
+				"operationId": "GetIntegrationByType",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/integration/slack/settings": {
+			"get": {
+				"operationId": "GetSlackSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Integration.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/slack/channels": {
+			"get": {
+				"operationId": "GetSlackChannels",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array__id-string--name-string__.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/integration/{integrationId}/stripe/test-meter-event": {
+			"post": {
+				"operationId": "TestStripeMeterEvent",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Integration"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "integrationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TestStripeMeterEventRequest"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/trace/custom/v1/log": {
 			"post": {
 				"operationId": "LogCustomTraceLegacy",
@@ -18560,231 +19040,6 @@
 						}
 					}
 				}
-			}
-		},
-		"/v1/integration": {
-			"post": {
-				"operationId": "CreateIntegration",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__id-string_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/IntegrationCreateParams"
-							}
-						}
-					}
-				}
-			},
-			"get": {
-				"operationId": "GetIntegrations",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Array_Integration_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/integration/{integrationId}": {
-			"post": {
-				"operationId": "UpdateIntegration",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_null.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "integrationId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/IntegrationUpdateParams"
-							}
-						}
-					}
-				}
-			},
-			"get": {
-				"operationId": "GetIntegration",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Integration.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "integrationId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/integration/type/{type}": {
-			"get": {
-				"operationId": "GetIntegrationByType",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Integration.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "type",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/integration/slack/settings": {
-			"get": {
-				"operationId": "GetSlackSettings",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Integration.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
-		"/v1/integration/slack/channels": {
-			"get": {
-				"operationId": "GetSlackChannels",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_Array__id-string--name-string__.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Integration"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
 			}
 		},
 		"/v1/helicone-sql/schema": {
@@ -21413,32 +21668,6 @@
 						}
 					}
 				]
-			}
-		},
-		"/v1/credits/totalSpend": {
-			"get": {
-				"operationId": "GetTotalSpend",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__totalSpend-number_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Credits"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
 			}
 		},
 		"/v1/public/alert-banner": {

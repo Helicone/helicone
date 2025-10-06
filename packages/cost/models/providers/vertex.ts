@@ -76,12 +76,7 @@ export class VertexProvider extends BaseProvider {
 
     // Gemini models use Google's predict format; all others use rawPredict for native format
     const isStreaming = requestParams.isStreaming === true;
-    const isGemini = modelId.toLowerCase().includes("gemini");
-    const endpointMethod = isGemini
-      ? isStreaming
-        ? "streamPredict"
-        : "predict"
-      : isStreaming
+    const endpointMethod = isStreaming
         ? "streamRawPredict"
         : "rawPredict";
 
@@ -91,27 +86,25 @@ export class VertexProvider extends BaseProvider {
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
     const modelId = endpoint.providerModelId || "";
 
-    if (endpoint.author !== "passthrough") {
-      if (modelId.toLowerCase().includes("gemini")) {
-        const updatedBody = {
-          ...context.parsedBody,
-          model: `google/${modelId}`,
-        };
-        return JSON.stringify(updatedBody);
-      }
+    if (modelId.toLowerCase().includes("gemini")) {
+      const updatedBody = {
+        ...context.parsedBody,
+        model: `google/${modelId}`,
+      };
+      return JSON.stringify(updatedBody);
+    }
 
-      if (endpoint.author === "anthropic") {
-        const anthropicBody =
-          context.bodyMapping === "OPENAI"
-            ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
-            : context.parsedBody;
-        const updatedBody = {
-          ...anthropicBody,
-          anthropic_version: "vertex-2023-10-16",
-          model: undefined, // model is not needed in Vertex inputs (as its defined via URL)
-        };
-        return JSON.stringify(updatedBody);
-      }
+    if (endpoint.providerModelId.includes("claude-")) {
+      const anthropicBody =
+        context.bodyMapping === "OPENAI"
+          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
+          : context.parsedBody;
+      const updatedBody = {
+        ...anthropicBody,
+        anthropic_version: "vertex-2023-10-16",
+        model: undefined, // model is not needed in Vertex inputs (as its defined via URL)
+      };
+      return JSON.stringify(updatedBody);
     }
 
     // Pass through
@@ -162,13 +155,4 @@ export class VertexProvider extends BaseProvider {
     }
   }
 
-  determineResponseFormat(endpoint: Endpoint): ResponseFormat {
-    if (
-      endpoint.author === "anthropic" ||
-      endpoint.providerModelId.includes("claude-")
-    ) {
-      return "ANTHROPIC";
-    }
-    return "OPENAI";
-  }
 }

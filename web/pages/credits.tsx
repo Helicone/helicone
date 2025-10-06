@@ -88,7 +88,7 @@ const Credits: NextPageWithLayout<void> = () => {
         rightActions={
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
-              Beta
+              Early Access
             </Badge>
             {hasAccess && (
               <Button
@@ -110,7 +110,7 @@ const Credits: NextPageWithLayout<void> = () => {
       />
 
       <div className="flex flex-1 justify-center">
-        <div className="flex w-full max-w-6xl flex-col border-l border-r border-border">
+        <div className="flex w-full flex-col">
           <div className="flex-1 overflow-auto">
             {/* Waitlist Experience - Show when no access */}
             {!hasAccess ? (
@@ -256,12 +256,12 @@ const Credits: NextPageWithLayout<void> = () => {
                           return balance.toFixed(2);
                         }
                         if (balance >= 100) {
-                          return balance.toFixed(4);
+                          return balance.toFixed(5);
                         }
                         if (balance >= 10) {
-                          return balance.toFixed(3);
+                          return balance.toFixed(4);
                         }
-                        const formattedBalance = balance.toFixed(5);
+                        const formattedBalance = balance.toFixed(6);
                         return formattedBalance;
                       })()}`
                     )}

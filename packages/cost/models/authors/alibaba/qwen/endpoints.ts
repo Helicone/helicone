@@ -113,6 +113,122 @@ export const endpoints = {
       "min_p",
     ],
     ptbEnabled: true,
+    quantization: "fp8",
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3-coder:deepinfra": {
+    providerModelId: "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
+    provider: "deepinfra",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000029,
+        output: 0.0000012,
+      },
+    ],
+    rateLimits: {
+      rpm: 12000,
+      tpm: 60000000,
+      tpd: 6000000000,
+    },
+    contextLength: 262_144,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+    ],
+    ptbEnabled: true,
+    quantization: "fp4",
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3-next-80b-a3b-instruct:deepinfra": {
+    providerModelId: "Qwen/Qwen3-Next-80B-A3B-Instruct",
+    provider: "deepinfra",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000014, // $0.14 per million tokens
+        output: 0.0000014, // $1.40 per million tokens
+      },
+    ],
+    rateLimits: {
+      rpm: 12000,
+      tpm: 60000000,
+      tpd: 6000000000,
+    },
+    quantization: "bf16",
+    contextLength: 262_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3-235b-a22b-thinking:deepinfra": {
+    providerModelId: "Qwen/Qwen3-235B-A22B-Thinking-2507",
+    provider: "deepinfra",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003, // $0.30 per million tokens
+        output: 0.0000029, // $2.90 per million tokens
+      },
+    ],
+    rateLimits: {
+      rpm: 12000,
+      tpm: 60000000,
+      tpd: 6000000000,
+    },
+    quantization: "fp8",
+    contextLength: 262_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+    ],
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
