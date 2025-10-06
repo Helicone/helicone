@@ -704,17 +704,14 @@ export class DBLoggable {
             // Step 2: Normalize usage for ALL AI Gateway providers
             if (provider) {
               const usageProcessor = getUsageProcessor(provider);
-              console.log(`Provider: ${provider}`);
-              console.log(`Usage processor: ${usageProcessor}`);
+
               if (usageProcessor) {
                 const modelUsageResult = await usageProcessor.parse({
                   responseBody: providerResponse,
                   isStream: this.request.isStream,
                   model: this.request.attempt?.endpoint.providerModelId ?? "",
                 });
-                console.log(
-                  `Model usage result: ${JSON.stringify(modelUsageResult)}`
-                );
+
                 if (modelUsageResult.data) {
                   // Map normalized ModelUsage to OpenAI format and replace in response
                   openAIBody.usage = mapModelUsageToOpenAI(
