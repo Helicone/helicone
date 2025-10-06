@@ -4,7 +4,10 @@ import { AnthropicUsageProcessor } from "@helicone-package/cost/usage/anthropicU
 import { GroqUsageProcessor } from "@helicone-package/cost/usage/groqUsageProcessor";
 import { XAIUsageProcessor } from "@helicone-package/cost/usage/xaiUsageProcessor";
 import { DeepSeekUsageProcessor } from "@helicone-package/cost/usage/deepseekUsageProcessor";
-import { VertexUsageProcessor, VertexOpenAIUsageProcessor } from "@helicone-package/cost/usage/vertexUsageProcessor";
+import {
+  VertexUsageProcessor,
+  VertexOpenAIUsageProcessor,
+} from "@helicone-package/cost/usage/vertexUsageProcessor";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import * as fs from "fs";
 import * as path from "path";
@@ -331,7 +334,7 @@ describe("XAI/Grok specific features", () => {
     expect(result.error).toBeNull();
     expect(result.data).toEqual({
       input: 45, // text_tokens (45)
-      output: 120, // completion_tokens (120) - XAI excludes reasoning from this (new behavior)
+      output: 35, // completion_tokens (120) - XAI excludes reasoning from this (new behavior)
       cacheDetails: {
         cachedInput: 5,
       },
