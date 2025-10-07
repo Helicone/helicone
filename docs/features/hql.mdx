@@ -100,27 +100,12 @@ Saved queries can be revisited and shared within your organization.
 
 ### Via API
 
-HQL endpoints are namespaced under `/v1/helicone-sql` and require an authenticated request scoped to your organization.
+Interactive API documentation is available at: [https://api.helicone.ai/docs/#/HeliconeSql](https://api.helicone.ai/docs/#/HeliconeSql) 
 
-```bash
-curl -X POST "https://api.helicone.ai/v1/helicone-sql/execute" \
-  -H "Authorization: Bearer $HELICONE_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sql": "SELECT request_model, COUNT() AS c FROM request_response_rmt GROUP BY request_model ORDER BY c DESC LIMIT 50"
-  }'
-```
+### API Limits
 
-Download large result sets as CSV:
-
-```bash
-curl -X POST "https://api.helicone.ai/v1/helicone-sql/download" \
-  -H "Authorization: Bearer $HELICONE_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sql": "SELECT * FROM request_response_rmt WHERE request_created_at >= toDateTime64(now(), 3) - INTERVAL 7 DAY"
-  }'
-```
+- **Query limit**: 300,000 rows maximum per query
+- **Rate limits**: 100 queries/min, 10 CSV downloads/min
 
 ## Related
 

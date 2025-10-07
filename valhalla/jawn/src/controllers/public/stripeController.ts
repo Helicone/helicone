@@ -16,6 +16,7 @@ import type { JawnAuthenticatedRequest } from "../../types/request";
 import { isError } from "../../packages/common/result";
 import express from "express";
 import { checkFeatureFlag } from "../../lib/utils/featureFlags";
+import Stripe from "stripe";
 
 export interface UpgradeToProRequest {
   addons?: {
@@ -34,6 +35,33 @@ export interface UpgradeToTeamBundleRequest {
 
 export interface CreateCloudGatewayCheckoutSessionRequest {
   amount: number;
+}
+
+export enum PaymentIntentSearchKind {
+  CREDIT_PURCHASES = "credit_purchases",
+}
+
+export interface SearchPaymentIntentsRequest {
+  search_kind: PaymentIntentSearchKind;
+  limit?: number;
+  page?: string;
+}
+
+export interface PaymentIntentRecord {
+  id: string; // Always the payment intent ID
+  amount: number;
+  created: number;
+  status: string;
+  isRefunded?: boolean;
+  refundedAmount?: number;
+  refundIds?: string[];
+}
+
+export interface StripePaymentIntentsResponse {
+  data: PaymentIntentRecord[];
+  has_more: boolean;
+  next_page: string | null;
+  count: number;
 }
 
 
@@ -361,6 +389,35 @@ export class StripeController extends Controller {
   public async migrateToPro(@Request() request: JawnAuthenticatedRequest) {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.migrateToPro();
+  }
+
+  @Get("/payment-intents/search")
+  public async searchPaymentIntents(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() search_kind: string,
+    @Query() limit?: number,
+    @Query() page?: string
+  ): Promise<StripePaymentIntentsResponse> {
+    // Check if search_kind is valid
+    if (!Object.values(PaymentIntentSearchKind).includes(search_kind as PaymentIntentSearchKind)) {
+      this.setStatus(400);
+      throw new Error(`Invalid search_kind: ${search_kind}. Supported types: ${Object.values(PaymentIntentSearchKind).join(", ")}`);
+    }
+
+    const searchKind = search_kind as PaymentIntentSearchKind;
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.searchPaymentIntents(
+      searchKind,
+      limit ?? 10,
+      page
+    );
+
+    if (isError(result)) {
+      this.setStatus(500);
+      throw new Error(result.error);
+    }
+
+    return result.data;
   }
 
   @Get("/subscription")

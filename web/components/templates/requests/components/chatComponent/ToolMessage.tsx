@@ -21,7 +21,7 @@ export default function ToolMessage({
   onChatChange,
 }: ToolMessageProps) {
   const updateMessageField = (field: string, value: string) => {
-    if (!mappedRequest || !onChatChange || !messageIndex) {
+    if (!mappedRequest || !onChatChange || messageIndex === undefined) {
       return;
     }
     onChatChange?.({
@@ -81,9 +81,13 @@ export default function ToolMessage({
         <div className="max-h-[400px] overflow-y-auto">
           <MarkdownEditor
             className="w-full rounded-none bg-white dark:bg-slate-950"
-            language="markdown"
+            language="json"
             setText={(text) => {
-              if (!mappedRequest || !onChatChange || !messageIndex) {
+              if (
+                !mappedRequest ||
+                !onChatChange ||
+                messageIndex === undefined
+              ) {
                 return;
               }
               onChatChange?.({

@@ -1,7 +1,6 @@
 import { autoFillInputs } from "@helicone/prompts";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { type IRequest, type RouterType } from "itty-router";
-import { z } from "zod";
 import { Database } from "../../supabase/database.types";
 import { DBWrapper } from "../lib/db/DBWrapper";
 import { RequestWrapper } from "../lib/RequestWrapper";
@@ -18,27 +17,132 @@ import {
 import { LLMRequestBody } from "@helicone-package/llm-mapper/types";
 import { gatewayForwarder } from "./gatewayRouter";
 
-const generateParamsSchema = z.object({
-  promptId: z.string().min(1, "promptId is required"),
-  version: z
-    .union([z.number(), z.literal("production")])
-    .optional()
-    .default("production"),
-  inputs: z.record(z.string()).optional().default({}),
-  chat: z.array(z.string()).optional(),
-  stream: z.boolean().optional().default(false),
+// Type definition for generate parameters
+interface GenerateParams {
+  promptId: string;
+  version?: number | "production";
+  inputs?: Record<string, string>;
+  chat?: string[];
+  stream?: boolean;
+  properties?: {
+    userId?: string;
+    sessionId?: string;
+    cache?: boolean;
+  };
+}
 
-  // Optional Helicone properties for tracking
-  properties: z
-    .object({
-      userId: z.string().optional(),
-      sessionId: z.string().optional(),
-      cache: z.boolean().optional(),
-    })
-    .optional(),
-});
+// Manual validation function
+function validateGenerateParams(
+  data: any
+): { success: true; data: GenerateParams } | { success: false; error: any } {
+  const errors: any = {};
+
+  // Validate promptId (required string)
+  if (
+    !data.promptId ||
+    typeof data.promptId !== "string" ||
+    data.promptId.length === 0
+  ) {
+    errors.promptId = "promptId is required and must be a non-empty string";
+  }
+
+  // Validate version (optional number or "production")
+  if (data.version !== undefined) {
+    if (data.version !== "production" && typeof data.version !== "number") {
+      errors.version = "version must be a number or 'production'";
+    }
+  }
+
+  // Validate inputs (optional record)
+  if (data.inputs !== undefined) {
+    if (
+      typeof data.inputs !== "object" ||
+      data.inputs === null ||
+      Array.isArray(data.inputs)
+    ) {
+      errors.inputs = "inputs must be an object";
+    } else {
+      // Check all values are strings
+      for (const value of Object.values(data.inputs)) {
+        if (typeof value !== "string") {
+          errors.inputs = "all input values must be strings";
+          break;
+        }
+      }
+    }
+  }
+
+  // Validate chat (optional string array)
+  if (data.chat !== undefined) {
+    if (!Array.isArray(data.chat)) {
+      errors.chat = "chat must be an array";
+    } else if (!data.chat.every((item: any) => typeof item === "string")) {
+      errors.chat = "all chat items must be strings";
+    }
+  }
+
+  // Validate stream (optional boolean)
+  if (data.stream !== undefined && typeof data.stream !== "boolean") {
+    errors.stream = "stream must be a boolean";
+  }
+
+  // Validate properties (optional object)
+  if (data.properties !== undefined) {
+    if (
+      typeof data.properties !== "object" ||
+      data.properties === null ||
+      Array.isArray(data.properties)
+    ) {
+      errors.properties = "properties must be an object";
+    } else {
+      if (
+        data.properties.userId !== undefined &&
+        typeof data.properties.userId !== "string"
+      ) {
+        errors.properties = {
+          ...errors.properties,
+          userId: "userId must be a string",
+        };
+      }
+      if (
+        data.properties.sessionId !== undefined &&
+        typeof data.properties.sessionId !== "string"
+      ) {
+        errors.properties = {
+          ...errors.properties,
+          sessionId: "sessionId must be a string",
+        };
+      }
+      if (
+        data.properties.cache !== undefined &&
+        typeof data.properties.cache !== "boolean"
+      ) {
+        errors.properties = {
+          ...errors.properties,
+          cache: "cache must be a boolean",
+        };
+      }
+    }
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return { success: false, error: { format: () => errors } };
+  }
+
+  // Apply defaults
+  const result: GenerateParams = {
+    promptId: data.promptId,
+    version: data.version ?? "production",
+    inputs: data.inputs ?? {},
+    chat: data.chat,
+    stream: data.stream ?? false,
+    properties: data.properties,
+  };
+
+  return { success: true, data: result };
+}
 const generateHandler = async (
-  req: IRequest,
+  _req: IRequest,
   requestWrapper: RequestWrapper,
   env: Env,
   ctx: ExecutionContext
@@ -63,9 +167,10 @@ const generateHandler = async (
       );
     }
 
-    // 2. BUILD GENERATE PARAMETERS FROM REQUEST BODY AND VALIDATE WITH ZOD
-    const rawBody = await requestWrapper.getJson<Record<string, unknown>>();
-    const paramsResult = generateParamsSchema.safeParse(rawBody);
+    // 2. BUILD GENERATE PARAMETERS FROM REQUEST BODY AND VALIDATE
+    const rawBody =
+      await requestWrapper.unsafeGetJson<Record<string, unknown>>();
+    const paramsResult = validateGenerateParams(rawBody);
     if (!paramsResult.success) {
       return createErrorResponse(
         "Invalid parameters",
@@ -126,7 +231,9 @@ const generateHandler = async (
         `Missing ${provider}_API_KEY in headers`,
         "missing_api_key",
         400,
-        { provider }
+        {
+          provider,
+        }
       );
     }
     // b. Set basic headers
@@ -174,7 +281,7 @@ const generateHandler = async (
     // a. Autofill inputs
     const filledTemplate = autoFillInputs({
       template: promptResult.data.helicone_template,
-      inputs: parameters.inputs,
+      inputs: parameters.inputs || {},
       autoInputs: [], // Never used
     }) as LLMRequestBody;
     if (["o1", "o3-mini"].includes(filledTemplate.model ?? "")) {
@@ -216,7 +323,9 @@ const generateHandler = async (
       );
     }
     // Set prompt inputs (used for storing in prompt_input_record)
-    forwardRequestWrapper.setPromptInputs(parameters.inputs);
+    if (parameters.inputs) {
+      forwardRequestWrapper.setPromptInputs(parameters.inputs);
+    }
 
     // -> Await/Return response from Gateway
     return await gatewayForwarder(

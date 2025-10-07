@@ -76,6 +76,7 @@ type FilterOperator =
   | "like"
   | "ilike"
   | "contains"
+  | "not-contains"
   // Array operations
   | "in";
 
@@ -93,6 +94,7 @@ const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
   like: "contains (case sensitive)",
   ilike: "contains (case insensitive)",
   contains: "contains",
+  "not-contains": "not contains",
   in: "in",
 };
 
@@ -647,7 +649,8 @@ export const FilterAST = {
         lte: "gt",
         like: "neq", // Simplified
         ilike: "neq", // Simplified
-        contains: "neq", // Simplified
+        contains: "not-contains",
+        "not-contains": "contains",
         in: "neq", // Simplified
       };
 

@@ -15,7 +15,10 @@ import {
   ArrowUp,
   Trash2Icon,
   ChevronUpIcon,
+  Users,
+  CheckCircle,
 } from "lucide-react";
+import BouncingDotsLoader from "@/components/ui/bouncing-dots-loader";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +33,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useHeliconeAgent } from "./HeliconeAgentContext";
 
 interface ChatInterfaceProps {
   messageQueue: QueuedMessage[];
@@ -41,6 +45,10 @@ interface ChatInterfaceProps {
   messageQueueLength?: number;
   onForcePushMessage?: (messageId: string) => Promise<void>;
   onRemoveFromQueue?: (messageId: string) => void;
+  // Escalation props
+  isEscalated?: boolean;
+  onEscalate?: () => void;
+  isEscalating?: boolean;
 }
 
 const models = [
@@ -61,6 +69,9 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
       onModelChange,
       onForcePushMessage,
       onRemoveFromQueue,
+      isEscalated,
+      onEscalate,
+      isEscalating,
     },
     ref,
   ) => {
@@ -219,6 +230,22 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
 
     const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
+    const escalateButtonRef = useRef<HTMLButtonElement>(null);
+
+    const { setToolHandler } = useHeliconeAgent();
+
+    useEffect(() => {
+      setToolHandler("escalate", async () => {
+        if (escalateButtonRef.current) {
+          escalateButtonRef.current.click();
+        }
+        return {
+          success: true,
+          message: "Successfully escalated to a human",
+        };
+      });
+    }, []);
+
     return (
       <>
         <div className="mx-2 mb-2 flex flex-col items-center">
@@ -337,29 +364,64 @@ const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
             />
 
             <div className="mt-1 flex items-center justify-between">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 items-center gap-1 rounded-full bg-muted px-3 py-0 text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    <span>{currentModel.label}</span>
-                    <ChevronUpIcon size={12} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-40">
-                  {models.map((model) => (
-                    <DropdownMenuItem
-                      key={model.id}
-                      onClick={() => onModelChange(model.id)}
-                      className="flex flex-col items-start gap-0 px-2 py-1"
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 items-center gap-1 rounded-full bg-muted px-3 py-0 text-xs text-muted-foreground hover:text-foreground"
                     >
-                      <span className="text-xs">{model.label}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      <span>{currentModel.label}</span>
+                      <ChevronUpIcon size={12} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-40">
+                    {models.map((model) => (
+                      <DropdownMenuItem
+                        key={model.id}
+                        onClick={() => onModelChange(model.id)}
+                        className="flex flex-col items-start gap-0 px-2 py-1"
+                      >
+                        <span className="text-xs">{model.label}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Support button */}
+                {onEscalate && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        ref={escalateButtonRef}
+                        onClick={onEscalate}
+                        disabled={isEscalating || isEscalated}
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 items-center gap-1 rounded-full bg-muted px-3 py-0 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
+                      >
+                        {isEscalating ? (
+                          <>
+                            <BouncingDotsLoader size="xs" />
+                          </>
+                        ) : isEscalated ? (
+                          <>
+                            <CheckCircle size={10} />
+                            <span>Support</span>
+                          </>
+                        ) : (
+                          <>
+                            <Users size={10} />
+                            <span>Support</span>
+                          </>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Talk to a human</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
 
               <div className="flex items-center gap-1">
                 <input

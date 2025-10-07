@@ -1,78 +1,91 @@
-import { toOpenAI } from "../../providers/anthropic/streamedResponse/toOpenai";
-import { toAnthropic } from "../../providers/openai/request/toAnthropic";
-import { OpenAIRequestBody } from "../../providers/openai/request/types";
+import { AnthropicToOpenAIStreamConverter } from "@helicone-package/llm-mapper/transform/providers/anthropic/streamedResponse/toOpenai";
+import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
+import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 
-const ENDING_MESSAGE = `data: {"id":"chatcmpl-A4kEtQWA8g4OlOYtKaDdBKLWdhrBx","object":"chat.completion.chunk","created":1725694419,"model":"gpt-4o-2024-05-13","system_fingerprint":"fp_25624ae3a5","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}]}
-data: [DONE]
-`;
-
-export function oaiStream2antStream(
+// transform the readable stream from Anthropic SSE to OpenAI SSE format
+export function ant2oaiStream(
   stream: ReadableStream<Uint8Array>
 ): ReadableStream<Uint8Array> {
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
+  const converter = new AnthropicToOpenAIStreamConverter();
+  let buffer = "";
+
   return new ReadableStream({
-    start(controller) {
-      let currentMessage = "";
+    async start(controller) {
+      const reader = stream.getReader();
 
-      stream
-        .pipeThrough(new TextDecoderStream())
-        .pipeThrough(
-          new TransformStream({
-            transform(chunk) {
-              currentMessage += chunk;
-              const messages = currentMessage.split("\n\n");
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
 
-              if (messages.length > 1) {
-                const firstChunks = messages.slice(0, -1);
-                const lastChunk = messages[messages.length - 1];
-                for (const line of firstChunks.join("\n\n").split("\n")) {
-                  if (line.trim().startsWith("data: ")) {
-                    const jsonData = toOpenAI(JSON.parse(line.slice(6)));
-                    if (jsonData) {
-                      controller.enqueue(
-                        `data: ${JSON.stringify(jsonData).trim()}\n\n`
-                      );
-                    }
-                  }
-                }
-                currentMessage = lastChunk;
-              }
-            },
-            flush() {
-              for (const line of currentMessage.split("\n")) {
-                if (line.trim().startsWith("data: ")) {
-                  const jsonData = toOpenAI(JSON.parse(line.slice(6)));
-                  if (jsonData) {
-                    controller.enqueue(
-                      `data: ${JSON.stringify(jsonData).trim()}\n\n`
-                    );
-                  }
-                }
-              }
-              for (const line of ENDING_MESSAGE.split("\n")) {
-                controller.enqueue(line + "\n\n");
-              }
-            },
-          })
-        )
-        .getReader()
-        .read();
+          if (done) {
+            if (buffer.trim()) {
+              processBuffer(buffer, controller, encoder, converter);
+            }
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+            break;
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+
+          const messages = buffer.split("\n\n");
+
+          buffer = messages.pop() || "";
+
+          for (const message of messages) {
+            if (message.trim()) {
+              processBuffer(message + "\n\n", controller, encoder, converter);
+            }
+          }
+        }
+      } catch (error) {
+        controller.error(error);
+      } finally {
+        reader.releaseLock();
+      }
     },
-  })
-    .pipeThrough(
-      new TransformStream({
-        transform(chunk, controller) {
-          controller.enqueue(chunk);
-        },
-      })
-    )
-    .pipeThrough(new TextEncoderStream());
+  });
 }
 
-export async function oaiStream2antStreamResponse({
+function processBuffer(
+  buffer: string,
+  controller: ReadableStreamDefaultController<Uint8Array>,
+  encoder: TextEncoder,
+  converter: AnthropicToOpenAIStreamConverter
+) {
+  converter.processLines(buffer, (chunk) => {
+    const sseMessage = `data: ${JSON.stringify(chunk)}\n\n`;
+    controller.enqueue(encoder.encode(sseMessage));
+  });
+}
+
+// Anthro SSE Response to OpenAI SSE Response
+export function ant2oaiStreamResponse(response: Response): Response {
+  if (!response.body) {
+    return response;
+  }
+
+  const transformedStream = ant2oaiStream(response.body);
+
+  return new Response(transformedStream, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: {
+      "content-type": "text/event-stream; charset=utf-8",
+      "cache-control": "no-cache",
+      connection: "keep-alive",
+      ...Object.fromEntries(response.headers.entries()),
+    },
+  });
+}
+
+export async function antStream2oaiStream({
   body,
   headers,
 }: {
-  body: OpenAIRequestBody;
+  body: HeliconeChatCreateParams;
   headers: Headers;
 }): Promise<Response> {
   const anthropicBody = toAnthropic(body);
@@ -109,23 +122,14 @@ export async function oaiStream2antStreamResponse({
       return new Response("No response body", { status: 500 });
     }
 
-    const stream = oaiStream2antStream(response.body);
-
-    return new Response(stream, {
-      headers: {
-        // ...response.headers,
-        "Content-Type": "text/event-stream; charset=utf-8",
-        "Cache-Control": "no-cache",
-        connection: "keep-alive",
-        "Transfer-Encoding": "chunked",
-        "Content-Length": "",
-      },
-    });
+    return ant2oaiStreamResponse(response);
   } catch (error) {
-    console.error("Error in oaiStream2antStreamResponse:", error);
+    console.error("Error in oaiStream2antStream:", error);
     return new Response(
       `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }

@@ -1,4 +1,5 @@
 import { BaseProvider } from "./base";
+import type { RequestParams, Endpoint } from "../types";
 
 export class CohereProvider extends BaseProvider {
   readonly displayName = "Cohere";
@@ -7,7 +8,7 @@ export class CohereProvider extends BaseProvider {
   readonly pricingPages = ["https://cohere.com/pricing"];
   readonly modelPages = ["https://docs.cohere.com/docs/models"];
 
-  buildUrl(): string {
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     return "https://api.cohere.ai/v1/chat";
   }
 }

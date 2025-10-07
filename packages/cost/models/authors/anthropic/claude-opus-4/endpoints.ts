@@ -31,7 +31,8 @@ export const endpoints = {
       "tools",
       "tool_choice",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
     },
@@ -42,7 +43,8 @@ export const endpoints = {
     provider: "vertex",
     author: "anthropic",
     version: "vertex-2023-10-16",
-    ptbEnabled: false,
+    ptbEnabled: true,
+    crossRegion: true,
     pricing: [
       {
         threshold: 0,
@@ -65,6 +67,7 @@ export const endpoints = {
       "tools",
       "tool_choice",
     ],
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       global: {
         providerModelId: "claude-opus-4@20250514",
@@ -101,9 +104,38 @@ export const endpoints = {
       "top_p",
       "top_k",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "us-east-1": {},
+    },
+  },
+  "claude-opus-4:openrouter": {
+    provider: "openrouter",
+    author: "anthropic",
+    providerModelId: "anthropic/claude-opus-4",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00001583, // $15.83/1M - worst-case: $15.00/1M (Anthropic/Google) * 1.055
+        output: 0.00007913, // $79.13/1M - worst-case: $75.00/1M (Anthropic/Google) * 1.055
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 32000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "stop",
+      "tools",
+      "tool_choice",
+      "top_p",
+      "top_k",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
     },
   },
 } satisfies Partial<

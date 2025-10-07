@@ -151,7 +151,7 @@ class DataDogClient {
 }
 
 export const dataDogClient = new DataDogClient({
-  enabled: true,
+  enabled: false,
   apiKey: SecretManager.getSecret("DATADOG_API_KEY") ?? "",
   endpoint: process.env.DATADOG_ENDPOINT ?? "",
 });

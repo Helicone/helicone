@@ -47,6 +47,12 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
 
       try {
         const data = JSON.parse(line.replace("data:", "").trim());
+        if ("error" in data) {
+          return ok({
+            processedBody: data,
+            statusOverride: 500,
+          });
+        }
 
         // Handle input_json_delta for tool_use
         if (

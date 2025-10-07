@@ -1,8 +1,8 @@
-import { OpenAIRequestBody } from "./providers/openai/request/types";
-import { oai2ant } from "./router/oai2ant/nonStream";
-import { oaiStream2antStreamResponse } from "./router/oai2ant/stream";
+import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
+import { ant2oai } from "./router/oai2ant/nonStream";
+import { antStream2oaiStream } from "./router/oai2ant/stream";
 
-export function tryJSONParse(body: string): OpenAIRequestBody | null {
+export function tryJSONParse(body: string): HeliconeChatCreateParams | null {
   try {
     return JSON.parse(body);
   } catch (e) {
@@ -23,12 +23,12 @@ export async function llmmapper(
       return new Response("Invalid body", { status: 400 });
     }
     if (body?.stream) {
-      return oaiStream2antStreamResponse({
+      return antStream2oaiStream({
         body: body,
         headers: new Headers(init.headers),
       });
     } else {
-      return oai2ant({ body: body, headers: new Headers(init.headers) });
+      return ant2oai({ body: body, headers: new Headers(init.headers) });
     }
   }
 

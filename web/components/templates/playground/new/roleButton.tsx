@@ -10,12 +10,15 @@ export const ROLE_COLORS = {
   user: "blue",
   assistant: "purple",
   function: "yellow",
+  tool: "orange",
 };
 
 interface RoleButtonProps {
   // message: MessageInputItem;
-  role: "system" | "user" | "assistant" | "function";
-  onRoleChange: (role: "system" | "user" | "assistant" | "function") => void;
+  role: "system" | "user" | "assistant" | "function" | "tool";
+  onRoleChange: (
+    role: "system" | "user" | "assistant" | "function" | "tool",
+  ) => void;
   // setMessage: (message: MessageInputItem) => void;
   // deleteMessage?: (messageInputId: string) => void;
   size?: "small" | "medium";
@@ -101,6 +104,36 @@ const RoleButton = (props: RoleButtonProps) => {
                 >
                   <div className="flex w-full items-center">System</div>
                   {role === "system" && <CheckIcon className="h-5 w-5" />}
+                </button>
+              )}
+            </Menu.Item>
+            <Menu.Item>
+              {({ active }) => (
+                <button
+                  className={`${
+                    active ? "bg-sky-100 dark:bg-sky-900" : ""
+                  } group flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-900 dark:text-gray-100`}
+                  onClick={() => {
+                    onRoleChange("function");
+                  }}
+                >
+                  <div className="flex w-full items-center">Function</div>
+                  {role === "function" && <CheckIcon className="h-5 w-5" />}
+                </button>
+              )}
+            </Menu.Item>
+            <Menu.Item>
+              {({ active }) => (
+                <button
+                  className={`${
+                    active ? "bg-sky-100 dark:bg-sky-900" : ""
+                  } group flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-900 dark:text-gray-100`}
+                  onClick={() => {
+                    onRoleChange("tool");
+                  }}
+                >
+                  <div className="flex w-full items-center">Tool</div>
+                  {role === "tool" && <CheckIcon className="h-5 w-5" />}
                 </button>
               )}
             </Menu.Item>

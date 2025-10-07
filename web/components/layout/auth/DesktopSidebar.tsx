@@ -1,5 +1,6 @@
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
@@ -8,10 +9,10 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { MessageCircle, Rocket, Settings } from "lucide-react";
+import { MessageCircle, Rocket, Settings, Coins } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ChangelogModal from "../ChangelogModal";
 import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
@@ -20,6 +21,11 @@ import NavItem from "./NavItem";
 import { ChangelogItem } from "./types";
 import SidebarQuickstepCard from "../SidebarQuickstartCard";
 import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
+import { useCredits } from "@/services/hooks/useCredits";
+
+// Sidebar width constants
+const SIDEBAR_WIDTH_COLLAPSED = "w-12"; // 48px
+const SIDEBAR_WIDTH_EXPANDED = "w-52"; // 208px
 
 export interface NavigationItem {
   name: string;
@@ -48,6 +54,9 @@ const DesktopSidebar = ({
   const onboardingStatus = orgContext?.currentOrg
     ?.onboarding_status as unknown as OnboardingState;
 
+  // Fetch credit balance - defaults to 0 if it fails
+  const { data: creditData } = useCredits();
+
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
     false,
@@ -67,7 +76,7 @@ const DesktopSidebar = ({
     );
   };
   const largeWith = useMemo(
-    () => cn(isCollapsed ? "w-16" : "w-52"),
+    () => cn(isCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED),
     [isCollapsed],
   );
 
@@ -135,7 +144,7 @@ const DesktopSidebar = ({
       }
     };
 
-    const sidebarWidth = isCollapsed ? 64 : 208;
+    const sidebarWidth = isCollapsed ? 48 : 208;
     document.documentElement.style.setProperty(
       "--sidebar-width",
       `${sidebarWidth}px`,
@@ -246,7 +255,7 @@ const DesktopSidebar = ({
               variant="ghost"
               size="icon"
               onClick={handleCollapseToggle}
-              className="flex shrink-0 items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800"
+              className="flex h-8 w-8 shrink-0 items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800"
             >
               {isCollapsed ? (
                 <ChevronRightIcon className="h-4 w-4" />
@@ -258,7 +267,11 @@ const DesktopSidebar = ({
 
           {/* Main content area */}
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="mb-2 flex h-full flex-1 flex-col justify-between overflow-y-auto">
+            <ScrollArea
+              className="flex h-full flex-1 flex-col justify-between"
+              width="thin"
+              type="scroll"
+            >
               {/* Navigation items */}
               <div className="flex flex-col">
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
@@ -355,30 +368,31 @@ const DesktopSidebar = ({
                     </div>
                   </div>
                 ))}
-            </div>
+            </ScrollArea>
 
-            <div className="flex flex-col gap-2 p-3">
+            <div
+              className={cn(
+                "flex flex-col border-t border-slate-200 bg-slate-50 px-2 pb-2 pt-2 dark:border-slate-800 dark:bg-slate-900/50",
+                isCollapsed && "items-center",
+              )}
+            >
               <Button
                 variant="ghost"
                 size="none"
-                onClick={() => setAgentChatOpen(true)}
+                onClick={() => setAgentChatOpen(!agentChatOpen)}
                 className={cn(
-                  "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                  "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
                   isCollapsed
-                    ? "h-9 w-9 justify-center"
-                    : "h-9 w-full justify-start gap-2 px-3",
-                  agentChatOpen
-                    ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
-                    : "text-muted-foreground",
+                    ? "h-8 w-8 justify-center"
+                    : "h-8 w-full justify-start gap-2 px-3",
                 )}
               >
-                <MessageCircle
-                  size={16}
-                  className={cn(
-                    "text-muted-foreground",
-                    agentChatOpen && "text-blue-700 dark:text-blue-300",
+                <div className="relative">
+                  <MessageCircle size={16} className="text-muted-foreground" />
+                  {agentChatOpen && (
+                    <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
                   )}
-                />
+                </div>
                 {!isCollapsed && <span>Support</span>}
               </Button>
 
@@ -387,12 +401,56 @@ const DesktopSidebar = ({
                   <Button
                     variant="ghost"
                     size="none"
+                    onClick={() => router.push("/credits")}
+                    className={cn(
+                      "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                      isCollapsed
+                        ? "h-8 w-8 justify-center"
+                        : "h-8 w-full justify-start gap-2 px-3",
+                      router.pathname.includes("/credits")
+                        ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    <Coins
+                      size={16}
+                      className={cn(
+                        router.pathname.includes("/credits")
+                          ? "text-blue-700 dark:text-blue-300"
+                          : "text-muted-foreground",
+                      )}
+                    />
+                    {!isCollapsed && (
+                      <span className="flex flex-1 items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          Credits
+                          <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                            Early Access
+                          </span>
+                        </span>
+                        <span
+                          className={cn(
+                            "text-xs",
+                            router.pathname.includes("/credits")
+                              ? "text-blue-700 dark:text-blue-300"
+                              : "text-muted-foreground",
+                          )}
+                        >
+                          ${((creditData?.balance ?? 0) / 100).toFixed(0)}
+                        </span>
+                      </span>
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="none"
                     onClick={() => router.push("/settings")}
                     className={cn(
                       "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
                       isCollapsed
-                        ? "h-9 w-9 justify-center"
-                        : "h-9 w-full justify-start gap-2 px-3",
+                        ? "h-8 w-8 justify-center"
+                        : "h-8 w-full justify-start gap-2 px-3",
                       router.pathname.startsWith("/settings")
                         ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
                         : "text-muted-foreground",

@@ -26,6 +26,9 @@ import { mapOpenAIResponse } from "../mappers/openai/responses";
 const MAX_PREVIEW_LENGTH = 1_000;
 
 export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
+  // the request-response will be converted to openai format if necessary
+  // thus uses the same mapper.
+  "ai-gateway": mapOpenAIRequest,
   "openai-chat": mapOpenAIRequest,
   "openai-response": mapOpenAIResponse,
   "anthropic-chat": mapAnthropicRequest,
@@ -95,6 +98,8 @@ const metaDataFromHeliconeRequest = (
     scores: heliconeRequest.scores,
     promptId: heliconeRequest.prompt_id ?? null,
     promptVersion: heliconeRequest.prompt_version ?? null,
+    targetUrl: heliconeRequest.target_url ?? null,
+    requestReferrer: heliconeRequest.request_referrer ?? null,
   };
 };
 
@@ -105,15 +110,19 @@ const getUnsanitizedMappedContent = ({
   mapperType: MapperType;
   heliconeRequest: HeliconeRequest;
 }): MappedLLMRequest => {
-  const mapper = MAPPERS[mapperType];
+  let mapper = MAPPERS[mapperType];
   if (!mapper) {
     throw new Error(`Mapper not found: ${JSON.stringify(mapperType)}`);
   }
   let result: ReturnType<MapperFn<any, any>>;
+
+  let requestBody = heliconeRequest.request_body;
+  let responseBody = heliconeRequest.response_body;
+
   try {
     result = mapper({
-      request: heliconeRequest.request_body,
-      response: heliconeRequest.response_body,
+      request: requestBody,
+      response: responseBody,
       statusCode: heliconeRequest.response_status,
       model: heliconeRequest.model,
     });
@@ -121,13 +130,13 @@ const getUnsanitizedMappedContent = ({
     result = {
       preview: {
         concatenatedMessages: [],
-        request: JSON.stringify(heliconeRequest.request_body),
-        response: JSON.stringify(heliconeRequest.response_body),
+        request: JSON.stringify(requestBody),
+        response: JSON.stringify(responseBody),
         fullRequestText: () => {
-          return JSON.stringify(heliconeRequest.request_body);
+          return JSON.stringify(requestBody);
         },
         fullResponseText: () => {
-          return JSON.stringify(heliconeRequest.response_body);
+          return JSON.stringify(responseBody);
         },
       },
       schema: {
@@ -145,8 +154,8 @@ const getUnsanitizedMappedContent = ({
     model: heliconeRequest.model,
     id: heliconeRequest.request_id,
     raw: {
-      request: heliconeRequest.request_body,
-      response: heliconeRequest.response_body,
+      request: requestBody,
+      response: responseBody,
     },
     heliconeMetadata: metaDataFromHeliconeRequest(
       heliconeRequest,

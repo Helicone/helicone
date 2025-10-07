@@ -40,8 +40,24 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(gh run watch:*)",
-      "mcp__linear-server__list_comments"
+      "Bash(curl:*)",
+      "Bash(yarn lint:*)",
+      "mcp__linear-server__list_comments",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_evaluate",
+      "Bash(yarn build)",
+      "Bash(gh api:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(~/.cache/ms-playwright/chromium-1193/chrome-linux/chrome --version)",
+      "Bash(~/.cache/ms-playwright/chromium-1193/chrome-linux/chrome:*)",
+      "Bash(timeout:*)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "playwright"
+  ],
+  "enableAllProjectMcpServers": true
 }

@@ -13,7 +13,7 @@ describe("OpenAI Responses API Mapper", () => {
         input: "Tell me about quantum computing",
       };
 
-      const result = getRequestText(request);
+      const result = getRequestText(request as any);
       expect(result).toBe("Tell me about quantum computing");
     });
 
@@ -33,7 +33,7 @@ describe("OpenAI Responses API Mapper", () => {
         ],
       };
 
-      const result = getRequestText(request);
+      const result = getRequestText(request as any);
       expect(result).toBe("[REDACTED QUESTION]");
     });
 
@@ -42,10 +42,10 @@ describe("OpenAI Responses API Mapper", () => {
         model: "gpt-4",
         input: [
           {
-            role: "user",
+            role: "user" as const,
             content: [
               {
-                type: "input_image",
+                type: "input_image" as const,
                 image_url: "https://redacted.example.com/image.jpg",
                 detail: "high" as const,
               },
@@ -54,7 +54,7 @@ describe("OpenAI Responses API Mapper", () => {
         ],
       };
 
-      const result = getRequestText(request);
+      const result = getRequestText(request as any);
       expect(result).toBe("[Image]");
     });
 
@@ -63,10 +63,10 @@ describe("OpenAI Responses API Mapper", () => {
         model: "gpt-4",
         input: [
           {
-            role: "user",
+            role: "user" as const,
             content: [
               {
-                type: "input_file",
+                type: "input_file" as const,
                 filename: "[REDACTED_FILENAME].pdf",
                 file_data: "[REDACTED_BASE64_DATA]",
               },
@@ -75,7 +75,7 @@ describe("OpenAI Responses API Mapper", () => {
         ],
       };
 
-      const result = getRequestText(request);
+      const result = getRequestText(request as any);
       expect(result).toBe("[File]");
     });
 
@@ -84,15 +84,15 @@ describe("OpenAI Responses API Mapper", () => {
         model: "gpt-4",
         input: [
           {
-            role: "user",
+            role: "user" as const,
             content: [
               {
-                type: "input_image",
+                type: "input_image" as const,
                 image_url: "https://redacted.example.com/image.jpg",
                 detail: "high" as const,
               },
               {
-                type: "input_text",
+                type: "input_text" as const,
                 text: "[REDACTED ANALYSIS QUESTION]",
               },
             ],
@@ -100,7 +100,7 @@ describe("OpenAI Responses API Mapper", () => {
         ],
       };
 
-      const result = getRequestText(request);
+      const result = getRequestText(request as any);
       expect(result).toBe("[REDACTED ANALYSIS QUESTION]");
     });
 
@@ -130,7 +130,7 @@ describe("OpenAI Responses API Mapper", () => {
       const response = {
         item: {
           id: "resp-[REDACTED]",
-          role: "assistant",
+          role: "assistant" as const,
           content: [
             {
               type: "output_text",
@@ -150,7 +150,7 @@ describe("OpenAI Responses API Mapper", () => {
           {
             type: "message",
             id: "msg-[REDACTED]",
-            role: "assistant",
+            role: "assistant" as const,
             content: [
               {
                 type: "output_text",
@@ -220,7 +220,7 @@ describe("OpenAI Responses API Mapper", () => {
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response: {},
         model: "gpt-4",
       });
@@ -228,8 +228,8 @@ describe("OpenAI Responses API Mapper", () => {
       expect(result.schema.request?.messages).toHaveLength(1);
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "user",
-        type: "input_text",
+        role: "user" as const,
+        type: "input_text" as const,
         content: "[REDACTED USER QUERY]",
         id: "req-msg-0",
       });
@@ -241,14 +241,14 @@ describe("OpenAI Responses API Mapper", () => {
         input: [
           {
             type: "message",
-            role: "user",
+            role: "user" as const,
             content: "[{'type': 'text', 'text': '[REDACTED QUESTION]'}]",
           },
         ],
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response: {},
         model: "gpt-4",
       });
@@ -256,8 +256,8 @@ describe("OpenAI Responses API Mapper", () => {
       expect(result.schema.request?.messages).toHaveLength(1);
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "user",
-        type: "input_text",
+        role: "user" as const,
+        type: "input_text" as const,
         content: "[REDACTED QUESTION]",
         id: "req-msg-0",
       });
@@ -269,12 +269,12 @@ describe("OpenAI Responses API Mapper", () => {
         input: [
           {
             type: "message",
-            role: "system",
+            role: "system" as const,
             content: "[REDACTED SYSTEM PROMPT]",
           },
           {
             type: "message",
-            role: "user",
+            role: "user" as const,
             content: "[REDACTED USER QUESTION]",
           },
           {
@@ -287,7 +287,7 @@ describe("OpenAI Responses API Mapper", () => {
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response: {},
         model: "gpt-4",
       });
@@ -297,21 +297,21 @@ describe("OpenAI Responses API Mapper", () => {
       // Check system message
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "system",
+        role: "system" as const,
         content: "[REDACTED SYSTEM PROMPT]",
       });
 
       // Check user message
       expect(result.schema.request?.messages?.[1]).toMatchObject({
         _type: "message",
-        role: "user",
+        role: "user" as const,
         content: "[REDACTED USER QUESTION]",
       });
 
       // Check assistant message with tool calls
       expect(result.schema.request?.messages?.[2]).toMatchObject({
         _type: "message",
-        role: "assistant",
+        role: "assistant" as const,
         content: "",
         tool_calls: [
           {
@@ -344,7 +344,7 @@ describe("OpenAI Responses API Mapper", () => {
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response: {},
         model: "gpt-4",
       });
@@ -352,7 +352,7 @@ describe("OpenAI Responses API Mapper", () => {
       expect(result.schema.request?.messages).toHaveLength(1);
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "assistant",
+        role: "assistant" as const,
         content: "",
         tool_calls: [
           {
@@ -390,7 +390,7 @@ describe("OpenAI Responses API Mapper", () => {
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response: {},
         model: "gpt-4",
       });
@@ -400,7 +400,7 @@ describe("OpenAI Responses API Mapper", () => {
       // Check assistant message with tool call
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "assistant",
+        role: "assistant" as const,
         content: "",
         tool_calls: [
           {
@@ -426,19 +426,19 @@ describe("OpenAI Responses API Mapper", () => {
         model: "gpt-4",
         input: [
           {
-            role: "user",
+            role: "user" as const,
             content: [
               {
-                type: "input_text",
+                type: "input_text" as const,
                 text: "[REDACTED TEXT]",
               },
               {
-                type: "input_image",
+                type: "input_image" as const,
                 image_url: "https://redacted.example.com/image.jpg",
                 detail: "high" as const,
               },
               {
-                type: "input_file",
+                type: "input_file" as const,
                 filename: "[REDACTED].pdf",
                 file_data: "[REDACTED_BASE64]",
               },
@@ -448,7 +448,7 @@ describe("OpenAI Responses API Mapper", () => {
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response: {},
         model: "gpt-4",
       });
@@ -456,25 +456,25 @@ describe("OpenAI Responses API Mapper", () => {
       expect(result.schema.request?.messages).toHaveLength(1);
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "contentArray",
-        role: "user",
+        role: "user" as const,
         contentArray: [
           {
             _type: "message",
-            role: "user",
-            type: "input_text",
+            role: "user" as const,
+            type: "input_text" as const,
             content: "[REDACTED TEXT]",
           },
           {
             _type: "image",
-            role: "user",
+            role: "user" as const,
             type: "input_image",
             detail: "high",
             image_url: "https://redacted.example.com/image.jpg",
           },
           {
             _type: "file",
-            role: "user",
-            type: "input_file",
+            role: "user" as const,
+            type: "input_file" as const,
             file_data: "[REDACTED_BASE64]",
             filename: "[REDACTED].pdf",
           },
@@ -493,7 +493,7 @@ describe("OpenAI Responses API Mapper", () => {
       const response = {
         item: {
           id: "resp-[REDACTED]",
-          role: "assistant",
+          role: "assistant" as const,
           content: [
             {
               type: "output_text",
@@ -504,7 +504,7 @@ describe("OpenAI Responses API Mapper", () => {
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response,
         model: "gpt-4",
       });
@@ -512,7 +512,7 @@ describe("OpenAI Responses API Mapper", () => {
       expect(result.schema.response?.messages).toHaveLength(1);
       expect(result.schema.response?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "assistant",
+        role: "assistant" as const,
         content: "[REDACTED DETAILED RESPONSE]",
         id: "resp-[REDACTED]",
       });
@@ -529,7 +529,7 @@ describe("OpenAI Responses API Mapper", () => {
           {
             type: "message",
             id: "msg-[REDACTED]",
-            role: "assistant",
+            role: "assistant" as const,
             content: [
               {
                 type: "output_text",
@@ -541,7 +541,7 @@ describe("OpenAI Responses API Mapper", () => {
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response,
         model: "gpt-4",
       });
@@ -549,7 +549,7 @@ describe("OpenAI Responses API Mapper", () => {
       expect(result.schema.response?.messages).toHaveLength(1);
       expect(result.schema.response?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "assistant",
+        role: "assistant" as const,
         content: "[REDACTED RESPONSE TEXT]",
         id: "msg-[REDACTED]",
       });
@@ -564,13 +564,13 @@ describe("OpenAI Responses API Mapper", () => {
       const response = {
         item: {
           id: "resp-[REDACTED]",
-          role: "assistant",
+          role: "assistant" as const,
           content: [],
         },
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response,
         model: "gpt-4",
       });
@@ -578,7 +578,7 @@ describe("OpenAI Responses API Mapper", () => {
       expect(result.schema.response?.messages).toHaveLength(1);
       expect(result.schema.response?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "assistant",
+        role: "assistant" as const,
         content: "",
         id: "resp-[REDACTED]",
       });
@@ -593,7 +593,7 @@ describe("OpenAI Responses API Mapper", () => {
       const response = {};
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response,
         model: "gpt-4",
       });
@@ -609,12 +609,12 @@ describe("OpenAI Responses API Mapper", () => {
         input: [
           {
             type: "message",
-            role: "system",
+            role: "system" as const,
             content: "[REDACTED SYSTEM INSTRUCTIONS]",
           },
           {
             type: "message",
-            role: "user",
+            role: "user" as const,
             content: "[REDACTED USER QUESTION]",
           },
           {
@@ -650,7 +650,7 @@ describe("OpenAI Responses API Mapper", () => {
       const response = {
         item: {
           id: "resp-[REDACTED]",
-          role: "assistant",
+          role: "assistant" as const,
           content: [
             {
               type: "output_text",
@@ -661,7 +661,7 @@ describe("OpenAI Responses API Mapper", () => {
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response,
         model: "gpt-4",
       });
@@ -672,21 +672,21 @@ describe("OpenAI Responses API Mapper", () => {
       // System message
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "system",
+        role: "system" as const,
         content: "[REDACTED SYSTEM INSTRUCTIONS]",
       });
 
       // User message
       expect(result.schema.request?.messages?.[1]).toMatchObject({
         _type: "message",
-        role: "user",
+        role: "user" as const,
         content: "[REDACTED USER QUESTION]",
       });
 
       // Assistant message with tool call
       expect(result.schema.request?.messages?.[2]).toMatchObject({
         _type: "message",
-        role: "assistant",
+        role: "assistant" as const,
         content: "",
         tool_calls: [
           {
@@ -710,7 +710,7 @@ describe("OpenAI Responses API Mapper", () => {
       expect(result.schema.response?.messages).toHaveLength(1);
       expect(result.schema.response?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "assistant",
+        role: "assistant" as const,
         content: "[REDACTED FINAL ANSWER BASED ON SEARCH]",
       });
 
@@ -742,14 +742,14 @@ describe("OpenAI Responses API Mapper", () => {
         input: [
           {
             type: "message",
-            role: "user",
+            role: "user" as const,
             content: "[{'type': 'text' 'text': 'malformed json'}]", // Missing comma
           },
         ],
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response: {},
         model: "gpt-4",
       });
@@ -757,7 +757,7 @@ describe("OpenAI Responses API Mapper", () => {
       // Should keep original content when JSON parsing fails
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "message",
-        role: "user",
+        role: "user" as const,
         content: "[{'type': 'text' 'text': 'malformed json'}]",
       });
     });
@@ -775,7 +775,7 @@ describe("OpenAI Responses API Mapper", () => {
       };
 
       const result = mapOpenAIResponse({
-        request,
+        request: request as any,
         response,
         model: "gpt-4-turbo",
       });

@@ -31,9 +31,12 @@ export function parseVercelStream(result: string): Result<any, string> {
         if (chunk.usage) {
           // Handle both Vercel's native format and OpenAI-compatible format
           usage = {
-            prompt_tokens: chunk.usage.inputTokens || chunk.usage.prompt_tokens || 0,
-            completion_tokens: chunk.usage.outputTokens || chunk.usage.completion_tokens || 0,
-            total_tokens: chunk.usage.totalTokens || chunk.usage.total_tokens || 0,
+            prompt_tokens:
+              chunk.usage.inputTokens || chunk.usage.prompt_tokens || 0,
+            completion_tokens:
+              chunk.usage.outputTokens || chunk.usage.completion_tokens || 0,
+            total_tokens:
+              chunk.usage.totalTokens || chunk.usage.total_tokens || 0,
           };
         }
       }

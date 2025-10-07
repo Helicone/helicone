@@ -1,7 +1,8 @@
-scripts/ 
+scripts/
 !valhalla/jawn/scripts/
 dist/
 server.py
+.agent/
 
 .vercel
 .env
@@ -49,3 +50,8 @@ override.tf.json
 settings.local.json
 examples/**/*/package-lock.json
 examples/**/*/yarn.lock
+coverage/
+
+.playwright-mcp/
+prompt.md
+run-prompt.sh

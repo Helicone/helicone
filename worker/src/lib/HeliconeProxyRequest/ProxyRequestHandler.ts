@@ -118,7 +118,11 @@ export async function handleProxyRequest(
   );
 
   const interceptor = response.body
-    ? new ReadableInterceptor(response.body, proxyRequest.isStream)
+    ? new ReadableInterceptor(
+        response.body,
+        proxyRequest.isStream,
+        proxyRequest.requestWrapper.getDataDogClient()
+      )
     : null;
   let body = interceptor ? interceptor.stream : null;
 
@@ -150,6 +154,20 @@ export async function handleProxyRequest(
   const responseHeaders = new Headers(response.headers);
   responseHeaders.set("Helicone-Status", "success");
   responseHeaders.set("Helicone-Id", proxyRequest.requestId);
+
+  // Add AI Gateway specific headers if this is a gateway request
+  const gatewayAttempt = proxyRequest.requestWrapper.getGatewayAttempt();
+  if (gatewayAttempt) {
+    responseHeaders.set(
+      "Helicone-Gateway-Mode",
+      gatewayAttempt.authType.toUpperCase()
+    );
+    responseHeaders.set("Helicone-Provider", gatewayAttempt.endpoint.provider);
+    responseHeaders.set(
+      "Helicone-Model",
+      gatewayAttempt.endpoint.providerModelId
+    );
+  }
 
   let status = response.status;
   if (status < 200 || status >= 600) {

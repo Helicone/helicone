@@ -3,6 +3,9 @@ import {
   LLMUsage,
   UpgradeToProRequest,
   UpgradeToTeamBundleRequest,
+  StripePaymentIntentsResponse,
+  PaymentIntentSearchKind,
+  PaymentIntentRecord,
 } from "../../controllers/public/stripeController";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { Database } from "../../lib/db/database.types";
@@ -16,6 +19,8 @@ import { BaseManager } from "../BaseManager";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
 import { OrganizationManager } from "../organization/OrganizationManager";
 import { SettingsManager } from "../../utils/settings";
+import { subdivide } from "../../utils/subdivide";
+import { sendMeteredBatch } from "./sendBatchEvent";
 
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 
@@ -148,28 +153,7 @@ export class StripeManager extends BaseManager {
       // First create a meter event session to get an auth token
       const meterEventSession =
         await this.stripe.v2.billing.meterEventSession.create();
-
-      // Use a direct fetch to the meter events stream endpoint with the auth token
-      // The endpoint is different from the standard Stripe API endpoint
-      const response = await fetch(
-        "https://meter-events.stripe.com/v2/billing/meter_event_stream",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${meterEventSession.authentication_token}`,
-            "Content-Type": "application/json",
-            "Stripe-Version": "2025-03-31.preview",
-          },
-          body: JSON.stringify({ events }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Error response from Stripe: ${response.status} ${errorText}`
-        );
-      }
+      await sendMeteredBatch(events, meterEventSession.authentication_token);
 
       return ok("Success");
     } catch (error) {
@@ -1227,7 +1211,7 @@ WHERE (${builtFilter.filter})`,
 
   public async createCloudGatewayCheckoutSession(
     origin: string,
-    amount: number,
+    amount: number
   ): Promise<Result<string, string>> {
     try {
       const customerId = await this.getOrCreateStripeCustomer();
@@ -1236,48 +1220,81 @@ WHERE (${builtFilter.filter})`,
       }
 
       const settingsManager = new SettingsManager();
-      const stripeProductSettings = await settingsManager.getSetting("stripe:products");
-      if (!stripeProductSettings || !stripeProductSettings.cloudGatewayTokenUsageProduct) {
+      const stripeProductSettings =
+        await settingsManager.getSetting("stripe:products");
+      if (
+        !stripeProductSettings ||
+        !stripeProductSettings.cloudGatewayTokenUsageProduct
+      ) {
         return err("stripe:products setting is not configured");
       }
-      const tokenUsageProductId = stripeProductSettings.cloudGatewayTokenUsageProduct;
+      const tokenUsageProductId =
+        stripeProductSettings.cloudGatewayTokenUsageProduct;
 
       try {
-        const unitAmount = amount * 100;
+        const creditsAmountCents = Math.round(amount * 100);
+        const PERCENT_FEE_RATE = 0.03;
+        const FIXED_FEE_CENTS = 30;
+        const percentageFeeCents = Math.ceil(
+          creditsAmountCents * PERCENT_FEE_RATE
+        );
+        const stripeFeeCents = percentageFeeCents + FIXED_FEE_CENTS;
+        const totalAmountCents = creditsAmountCents + stripeFeeCents;
 
         const checkoutResult = await this.stripe.checkout.sessions.create({
           customer: customerId.data,
-          success_url: `${origin}/settings/credits`,
-          cancel_url: `${origin}/settings/credits`,
+          success_url: `${origin}/credits`,
+          cancel_url: `${origin}/credits`,
           mode: "payment",
-          line_items: [{
-            price_data: {
-                currency: "usd", 
-                unit_amount: unitAmount,
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                unit_amount: creditsAmountCents,
                 product: tokenUsageProductId,
+              },
+              quantity: 1,
             },
-            quantity: 1,
-          }],
+            {
+              price_data: {
+                currency: "usd",
+                unit_amount: stripeFeeCents,
+                product_data: {
+                  name: "Stripe fee",
+                },
+              },
+              quantity: 1,
+            },
+          ],
           payment_intent_data: {
             metadata: {
               orgId: this.authParams.organizationId,
               productId: tokenUsageProductId,
-            }
-          }
-        })
+              creditsAmountCents: creditsAmountCents.toString(),
+              stripeFeeCents: stripeFeeCents.toString(),
+              totalAmountCents: totalAmountCents.toString(),
+            },
+          },
+        });
 
         if (checkoutResult.lastResponse.statusCode !== 200) {
-          return err(`Got status code ${checkoutResult.lastResponse.statusCode} from Stripe`);
+          return err(
+            `Got status code ${checkoutResult.lastResponse.statusCode} from Stripe`
+          );
         } else if (!checkoutResult.url) {
           return err("Stripe did not return a session URL");
         }
 
         return ok(checkoutResult.url);
       } catch (error: any) {
-        return err(`Error creating cloud gateway checkout session: ${error.message}`);
+        return err(
+          `Error creating cloud gateway checkout session: ${error.message}`
+        );
       }
     } catch (error: any) {
-      return err(`Error creating cloud gateway checkout session: ${error.message}`);
+      return err(
+        `Error creating cloud gateway checkout session: ${error.message}`
+      );
     }
   }
 
@@ -1345,5 +1362,140 @@ WHERE (${builtFilter.filter})`,
       return err(`Error retrieving purchased seats: ${error.message}`);
     }
   }
-}
 
+  public async searchPaymentIntents(
+    searchKind: PaymentIntentSearchKind,
+    limit: number = 10,
+    page?: string
+  ): Promise<Result<StripePaymentIntentsResponse, string>> {
+    try {
+      let query: string;
+
+      // Build query based on search kind
+      switch (searchKind) {
+        case PaymentIntentSearchKind.CREDIT_PURCHASES:
+          const settingsManager = new SettingsManager();
+          const stripeProductSettings =
+            await settingsManager.getSetting("stripe:products");
+          const productId =
+            stripeProductSettings?.cloudGatewayTokenUsageProduct ??
+            process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT;
+          if (!productId) {
+            console.error(
+              "[Stripe API] STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT not configured"
+            );
+            return err("Stripe product ID not configured");
+          }
+
+          query = `metadata['productId']:'${productId}' AND metadata['orgId']:'${this.authParams.organizationId}'`;
+          break;
+
+        default:
+          return err(`Unsupported search kind: ${searchKind}`);
+      }
+
+      // Search payment intents using Stripe API
+      const searchParams: any = {
+        query,
+        limit,
+      };
+
+      // Add page parameter if provided (Stripe uses page token for search pagination)
+      if (page) {
+        searchParams.page = page;
+      }
+
+      const paymentIntents =
+        await this.stripe.paymentIntents.search(searchParams);
+
+      // Map Stripe PaymentIntent to our custom PaymentIntentRecord type
+      const mappedData: PaymentIntentRecord[] = [];
+
+      // Process each payment intent and fetch its refunds
+      for (const intent of paymentIntents.data) {
+        let totalRefunded = 0;
+        let isFullyRefunded = false;
+        let latestRefundDate = intent.created;
+        let refundIds: string[] = [];
+
+        // Fetch refunds for this payment intent
+        try {
+          const refunds = await this.stripe.refunds.list({
+            payment_intent: intent.id,
+            limit: 100, // Get all refunds for this payment intent
+          });
+
+          if (refunds.data.length > 0) {
+            totalRefunded = refunds.data.reduce(
+              (sum, refund) => sum + refund.amount,
+              0
+            );
+            isFullyRefunded = totalRefunded >= intent.amount;
+            refundIds = refunds.data.map((refund) => refund.id);
+
+            // Use the latest refund date for sorting if fully refunded
+            if (isFullyRefunded) {
+              latestRefundDate = Math.max(
+                ...refunds.data.map((r) => r.created),
+                intent.created
+              );
+            }
+          }
+        } catch (refundError) {
+          console.error(
+            `Error fetching refunds for payment intent ${intent.id}:`,
+            refundError
+          );
+          // Continue processing other payment intents even if one fails
+        }
+
+        // Add consolidated record
+        if (isFullyRefunded) {
+          // Show as fully refunded transaction
+          mappedData.push({
+            id: intent.id, // Always use payment intent ID
+            amount: intent.amount,
+            created: latestRefundDate,
+            status: "refunded",
+            isRefunded: true,
+            refundedAmount: totalRefunded,
+            refundIds: refundIds,
+          });
+        } else if (totalRefunded > 0) {
+          // Show as partially refunded transaction
+          mappedData.push({
+            id: intent.id, // Always use payment intent ID
+            amount: intent.amount,
+            created: intent.created,
+            status: intent.status,
+            isRefunded: true,
+            refundedAmount: totalRefunded,
+            refundIds: refundIds,
+          });
+        } else {
+          // Show as normal transaction
+          mappedData.push({
+            id: intent.id, // Always use payment intent ID
+            amount: intent.amount,
+            created: intent.created,
+            status: intent.status,
+            isRefunded: false,
+          });
+        }
+      }
+
+      // Sort all records by created date (newest first)
+      mappedData.sort((a, b) => b.created - a.created);
+
+      return ok({
+        data: mappedData,
+        has_more: paymentIntents.has_more,
+        next_page: paymentIntents.next_page || null,
+        count: mappedData.length,
+      });
+    } catch (error: any) {
+      console.error("Error searching payment intents:", error);
+      return err("Failed to search payment intents");
+    }
+  }
+}

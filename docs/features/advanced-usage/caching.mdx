@@ -6,11 +6,13 @@ sidebarTitle: "Caching"
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-When developing and testing LLM applications, you often make the same requests repeatedly during debugging and iteration. Caching stores responses on the edge using Cloudflare Workers, eliminating redundant API calls and reducing both latency and costs.
+When developing and testing LLM applications, you often make the same requests repeatedly during debugging and iteration. Helicone caching stores complete responses on Cloudflare's edge network, eliminating redundant API calls and reducing both latency and costs.
 
-With the AI Gateway, caching works seamlessly across all providers - cache a Claude response and save on Anthropic API calls, or cache GPT-4 responses while testing different models.
+<Note>
+**Looking for provider-level caching?** Learn about [Prompt Caching](/gateway/concepts/prompt-caching) to cache prompts directly on provider servers (OpenAI, Anthropic, etc.) for reduced token costs.
+</Note>
 
-## Why Caching
+## Why Helicone Caching
 
 <CardGroup cols={3}>
 <Card title="Save Money" icon="dollar-sign">
@@ -157,8 +159,12 @@ All header values must be strings. For example, `"Helicone-Cache-Bucket-Max-Size
 ## Examples
 
 <Tabs>
-<Tab title="OpenAI Prompt Caching">
-Combine Helicone caching with OpenAI's native prompt caching by ignoring the `prompt_cache_key` parameter:
+<Tab title="Combined with Provider Caching">
+Use both provider caching and Helicone caching together by ignoring provider-specific cache keys:
+
+<Note>
+Learn more about provider caching [here](/gateway/concepts/prompt-caching).
+</Note>
 
 ```typescript
 const response = await client.chat.completions.create(
@@ -238,57 +244,30 @@ response = client.chat.completions.create(
 </CodeGroup>
 </Tab>
 
-<Tab title="Code Explanation Bot">
-Cache explanations for commonly asked code snippets across your team:
+<Tab title="User-Specific Caching">
+Cache responses separately for different users or contexts:
 
 ```typescript
-// Use a consistent identifier for the code snippet
-const codeIdentifier = `code-${codeSnippet.length}-${codeSnippet.slice(0, 20)}`;
+const userId = "user-123";
 
 const response = await client.chat.completions.create(
   {
-    model: "claude-3.5-sonnet",  // Use any model through the gateway
+    model: "claude-3.5-sonnet",
     messages: [{ 
       role: "user", 
-      content: `Explain this code:\n\n${codeSnippet}` 
+      content: "What are my account settings?" 
     }]
   },
   {
     headers: {
       "Helicone-Cache-Enabled": "true",
-      "Helicone-Cache-Seed": codeIdentifier,    // Same code = same cache
-      "Cache-Control": "max-age=604800"         // Cache for 1 week
+      "Helicone-Cache-Seed": userId,           // User-specific cache
+      "Cache-Control": "max-age=3600"          // Cache for 1 hour
     }
   }
 );
 
-// Multiple developers asking about the same function get instant responses
-```
-</Tab>
-
-<Tab title="Documentation Q&A">
-Cache answers to frequently asked questions about your API or product:
-
-```typescript
-const response = await client.chat.completions.create(
-  {
-    model: "gemini-2.5-flash",  // Use fast, cost-effective models
-    messages: [{ 
-      role: "user", 
-      content: "How do I authenticate with the API?" 
-    }]
-  },
-  {
-    headers: {
-      "Helicone-Cache-Enabled": "true",
-      "Cache-Control": "max-age=86400",          // Cache for 24 hours
-      "Helicone-Cache-Bucket-Max-Size": "1"     // Consistent answers
-    }
-  }
-);
-
-// Common documentation questions get instant, consistent responses
-// Perfect for chatbots, help widgets, and FAQ systems
+// Each user gets their own cached responses
 ```
 </Tab>
 </Tabs>
@@ -448,7 +427,7 @@ const response2 = await openai.chat.completions.create(
 - Ignore tracking IDs that don't affect the response
 - Exclude timestamps for time-independent queries
 - Remove session or user metadata when caching shared content
-- Ignore `prompt_cache_key` when using OpenAI prompt caching alongside Helicone caching
+- Ignore `prompt_cache_key` when using provider caching alongside Helicone caching
 
 ### Cache Limitations
 
@@ -460,6 +439,10 @@ const response2 = await openai.chat.completions.create(
 ## Related Features
 
 <CardGroup cols={2}>
+<Card title="Prompt Caching" icon="server" href="/gateway/concepts/prompt-caching">
+Cache prompts on provider servers for reduced token costs and faster processing
+</Card>
+
 <Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
 Add metadata to cached requests for better filtering and analysis
 </Card>
@@ -470,10 +453,6 @@ Control request frequency and combine with caching for cost optimization
 
 <Card title="User Metrics" icon="chart-line" href="/features/advanced-usage/user-metrics">
 Track cache hit rates and savings per user or application
-</Card>
-
-<Card title="Webhooks" icon="webhook" href="/features/webhooks">
-Get notified about cache performance and optimization opportunities
 </Card>
 </CardGroup>
 

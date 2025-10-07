@@ -10,10 +10,24 @@ import { errorForwarder } from "../HeliconeProxyRequest/ErrorForwarder";
 import { gatewayForwarder } from "../../routers/gatewayRouter";
 import { AttemptBuilder } from "./AttemptBuilder";
 import { AttemptExecutor } from "./AttemptExecutor";
-import { DisallowListEntry, EscrowInfo } from "./types";
+import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
+import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
+import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
+import { validateOpenAIChatPayload } from "./validators/openaiRequestValidator";
+import { RequestParams } from "@helicone-package/cost/models/types";
+import { SecureCacheProvider } from "../util/cache/secureCache";
+import { GatewayMetrics } from "./GatewayMetrics";
+import {
+  toOpenAIResponse,
+  toOpenAIStreamResponse,
+} from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
 
 export interface AuthContext {
   orgId: string;
+  orgMeta: {
+    allowNegativeBalance: boolean;
+    creditLimit: number;
+  };
   apiKey: string;
   supabaseClient: any;
 }
@@ -24,24 +38,36 @@ export class SimpleAIGateway {
   private readonly orgId: string;
   private readonly apiKey: string;
   private readonly supabaseClient: any;
+  private readonly metrics: GatewayMetrics;
+  private readonly orgMeta: AuthContext["orgMeta"];
 
   constructor(
     private readonly requestWrapper: RequestWrapper,
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
-    authContext: AuthContext
+    authContext: AuthContext,
+    metrics: GatewayMetrics
   ) {
     this.orgId = authContext.orgId;
     this.apiKey = authContext.apiKey;
     this.supabaseClient = authContext.supabaseClient;
+    this.orgMeta = authContext.orgMeta;
+    this.metrics = metrics;
 
     const providerKeysManager = new ProviderKeysManager(
       new ProviderKeysStore(this.supabaseClient),
       env
     );
 
+    // Create SecureCacheProvider for distributed caching
+    const cacheProvider = new SecureCacheProvider({
+      SECURE_CACHE: env.SECURE_CACHE,
+      REQUEST_CACHE_KEY: env.REQUEST_CACHE_KEY,
+      REQUEST_CACHE_KEY_2: env.REQUEST_CACHE_KEY_2,
+    });
+
     this.attemptBuilder = new AttemptBuilder(providerKeysManager, env);
-    this.attemptExecutor = new AttemptExecutor(env, ctx);
+    this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider);
   }
 
   async handle(): Promise<Response> {
@@ -52,15 +78,22 @@ export class SimpleAIGateway {
     }
     const { modelStrings, body: parsedBody } = parseResult.data;
 
-    // Step 2: Handle prompt expansion if needed
+    const requestParams: RequestParams = {
+      isStreaming: parsedBody.stream === true,
+    };
+
     let finalBody = parsedBody;
     if (this.hasPromptFields(parsedBody)) {
+      this.metrics.markPromptRequestStart();
       const expandResult = await this.expandPrompt(parsedBody);
       if (isErr(expandResult)) {
         return expandResult.error;
       }
+      this.metrics.markPromptRequestEnd();
       finalBody = expandResult.data.body;
     }
+
+    const errors: Array<AttemptError> = [];
 
     // Step 3: Build all attempts
     const attempts = await this.attemptBuilder.buildAttempts(
@@ -69,10 +102,14 @@ export class SimpleAIGateway {
       this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping
     );
     if (attempts.length === 0) {
-      return new Response(
-        "No available providers for the requested models. Check provider names and see supported models at https://helicone.ai/models",
-        { status: 400 }
-      );
+      errors.push({
+        source: "No available providers",
+        type: "request_failed",
+        message:
+          "No available providers for the requested models. Check provider names and see supported models at https://helicone.ai/models",
+        statusCode: 400,
+      });
+      return this.createErrorResponse(errors);
     }
 
     // Step 4: Get disallow list
@@ -98,50 +135,70 @@ export class SimpleAIGateway {
     };
 
     // Step 6: Try each attempt in order
-    // TODO: Use Error type in types.ts
-    const errors: Array<{
-      attempt: string;
-      error: string;
-      type?: string;
-      statusCode?: number;
-    }> = [];
-
     for (const attempt of attempts) {
+      if (attempt.authType === "ptb") {
+        const validationResult = validateOpenAIChatPayload(finalBody);
+        if (isErr(validationResult)) {
+          errors.push({
+            type: "invalid_format",
+            statusCode: 400,
+            message: validationResult.error,
+          });
+          continue;
+        }
+      }
+
       // Check disallow list
       if (this.isDisallowed(attempt, disallowList)) {
         errors.push({
-          attempt: attempt.source,
-          error:
+          source: attempt.source,
+          message:
             "Cloud billing is disabled for this model and provider. Please contact support@helicone.ai for help",
           type: "disallowed",
           statusCode: 400,
         });
         continue;
       }
+      // Set gateway attempt to request wrapper
+      this.requestWrapper.setGatewayAttempt(attempt);
 
-      const result = await this.attemptExecutor.execute(
+      const result = await this.attemptExecutor.execute({
         attempt,
-        this.requestWrapper,
-        finalBody,
-        this.orgId,
-        forwarder
-      );
+        requestWrapper: this.requestWrapper,
+        parsedBody: finalBody,
+        requestParams,
+        orgId: this.orgId,
+        forwarder,
+        metrics: this.metrics,
+        orgMeta: this.orgMeta,
+      });
 
       if (isErr(result)) {
         errors.push({
-          attempt: attempt.source,
-          error: result.error.message,
-          type: result.error.type,
-          statusCode: result.error.statusCode,
+          ...result.error,
+          source: attempt.source,
         });
         // Continue to next attempt
       } else {
-        // Success!
-        return result.data;
+        const mappedResponse = await this.mapResponse(
+          attempt,
+          result.data,
+          this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping
+        );
+
+        if (isErr(mappedResponse)) {
+          console.error("Failed to map response:", mappedResponse.error);
+          return result.data;
+        }
+
+        this.metrics.markPostRequestEnd();
+
+        return mappedResponse.data;
       }
     }
 
     // All attempts failed
+    this.metrics.markPostRequestEnd();
     return this.createErrorResponse(errors);
   }
 
@@ -149,7 +206,8 @@ export class SimpleAIGateway {
     Result<{ modelStrings: string[]; body: any }, Response>
   > {
     // Get raw text body once
-    const rawBody = await this.requestWrapper.getText();
+    // TODO: change to use safelyGetBody
+    const rawBody = await this.requestWrapper.unsafeGetBodyText();
     const parsedBody: any = tryJSONParse(rawBody ?? "{}");
 
     if (!parsedBody || !parsedBody.model) {
@@ -264,7 +322,7 @@ export class SimpleAIGateway {
   }
 
   private isDisallowed(
-    attempt: any,
+    attempt: Attempt,
     disallowList: DisallowListEntry[]
   ): boolean {
     return disallowList.some(
@@ -275,13 +333,63 @@ export class SimpleAIGateway {
     );
   }
 
+  private async mapResponse(
+    attempt: Attempt,
+    response: Response,
+    bodyMapping?: "OPENAI" | "NO_MAPPING"
+  ): Promise<Result<Response, string>> {
+    if (bodyMapping === "NO_MAPPING") {
+      return ok(response); // do not map response
+    }
+
+    const mappingType = attempt.endpoint.modelConfig.responseFormat ?? "OPENAI";
+    const contentType = response.headers.get("content-type");
+    const isStream = contentType?.includes("text/event-stream");
+
+    try {
+      if (mappingType === "OPENAI") {
+        // Response is already in OpenAI format, just normalize usage
+        const provider = attempt.endpoint.provider;
+        const providerModelId = attempt.endpoint.providerModelId;
+
+        if (isStream) {
+          const normalizedResponse = toOpenAIStreamResponse(
+            response,
+            provider,
+            providerModelId
+          );
+          return ok(normalizedResponse);
+        } else {
+          const normalizedResponse = await toOpenAIResponse(
+            response,
+            provider,
+            providerModelId,
+            isStream
+          );
+          return ok(normalizedResponse);
+        }
+      } else if (mappingType === "ANTHROPIC") {
+        // Convert OpenAI format to Anthropic format
+        if (isStream) {
+          const mappedResponse = ant2oaiStreamResponse(response);
+          return ok(mappedResponse);
+        } else {
+          const mappedResponse = await ant2oaiResponse(response);
+          return ok(mappedResponse);
+        }
+      }
+
+      return ok(response);
+    } catch (error) {
+      console.error("Failed to map response:", error);
+      return err(
+        error instanceof Error ? error.message : "Failed to map response"
+      );
+    }
+  }
+
   private async createErrorResponse(
-    errors: Array<{
-      attempt: string;
-      error: string;
-      type?: string;
-      statusCode?: number;
-    }>
+    errors: Array<AttemptError>
   ): Promise<Response> {
     this.requestWrapper.setBaseURLOverride("https://ai-gateway.helicone.ai");
 
@@ -293,11 +401,16 @@ export class SimpleAIGateway {
     // Priority order for status codes:
     // 1. If ANY error is 429 (insufficient credits), return 429
     // 2. If ANY error is 401 (authentication), return 401
-    // 3. If ALL errors are disallowed (400), return 400
-    // 4. Otherwise return 500
+    // 3. If ANY error is 403 (wallet suspended, etc), return 403 with upstream message
+    // 4. If ALL errors are disallowed (400), return 400
+    // 5. Otherwise return 500
 
     const has429 = errors.some((e) => e.statusCode === 429);
     const has401 = errors.some((e) => e.statusCode === 401);
+    const first403 = errors.find((e) => e.statusCode === 403);
+    const firstInvalid = errors.find(
+      (e) => e.statusCode === 400 && e.type === "invalid_format"
+    );
     const allDisallowed =
       errors.length > 0 && errors.every((e) => e.type === "disallowed");
 
@@ -308,6 +421,14 @@ export class SimpleAIGateway {
     } else if (has401) {
       statusCode = 401;
       message = "Authentication failed";
+      code = "request_failed";
+    } else if (first403) {
+      statusCode = 403;
+      message = first403.message;
+      code = "request_failed";
+    } else if (firstInvalid) {
+      statusCode = 400;
+      message = firstInvalid.message;
       code = "request_failed";
     } else if (allDisallowed) {
       statusCode = 400;
@@ -324,7 +445,7 @@ export class SimpleAIGateway {
         code,
         message,
         statusCode,
-        details: JSON.stringify(errors),
+        details: errors,
       }
     );
 

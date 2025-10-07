@@ -29,5 +29,6 @@ export function mockRequiredServices() {
       return { statusCode: 200, data: { success: true } };
     })
     .persist();
+
   return { s3Mock, loggingMock, callTrackers };
 }

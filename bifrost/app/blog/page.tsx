@@ -221,6 +221,16 @@ export type BlogStructure =
 export const BLOG_CONTENT: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "ptb-gateway-launch",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "migration-openrouter",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "how-ai-gateways-enhance-app-reliability",
     },
   },

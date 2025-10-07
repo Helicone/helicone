@@ -18,10 +18,14 @@ import { ProviderKeysStore } from "./lib/db/ProviderKeysStore";
 import { APIKeysStore } from "./lib/db/APIKeysStore";
 import { APIKeysManager } from "./lib/managers/APIKeysManager";
 import { SecretManagerClass } from "@helicone-package/secrets/SecretManager";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
+
+// Needed for migrations
+export { RequestBodyBufferContainer } from "./RequestBodyBuffer/RequestBodyContainer";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = ProviderName | "CUSTOM";
+export type Provider = ProviderName | "CUSTOM" | ModelProviderName;
 
 export async function hash(key: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -89,7 +93,10 @@ async function modifyEnvBasedOnPath(
         env.EU_REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY,
       S3_REGION: "eu-west-1",
       AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
+      HELICONE_ORG_ID: env.EU_HELICONE_ORG_ID,
     };
+
+    request.requestBodyBuffer.resetS3Client(env);
   }
   if (env.WORKER_TYPE) {
     return env;

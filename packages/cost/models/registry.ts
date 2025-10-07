@@ -13,16 +13,25 @@ import {
   ModelIndexes,
   ModelProviderEntry,
 } from "./build-indexes";
-import { buildEndpointUrl, buildModelId } from "./provider-helpers";
+import { buildModelId } from "./provider-helpers";
 import { ModelProviderName } from "./providers";
 import { Result, ok, err } from "../../common/result";
-import { ModelName, ModelProviderConfigId, EndpointId } from "./registry-types";
+import { ModelName, ModelProviderConfigId } from "./registry-types";
 
 // Import all models and endpoints from authors
 import { anthropicModels, anthropicEndpointConfig } from "./authors/anthropic";
 import { openaiModels, openaiEndpointConfig } from "./authors/openai";
 import { googleModels, googleEndpointConfig } from "./authors/google";
 import { grokModels, grokEndpointConfig } from "./authors/xai";
+import { metaModels, metaEndpointConfig } from "./authors/meta";
+import {
+  moonshotaiModels,
+  moonshotaiEndpointConfig,
+} from "./authors/moonshotai";
+import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
+import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
+import { mistralModels, mistralEndpointConfig } from "./authors/mistralai";
+import { zaiModels, zaiEndpointConfig } from "./authors/zai";
 
 // Combine all models
 const allModels = {
@@ -30,6 +39,12 @@ const allModels = {
   ...openaiModels,
   ...googleModels,
   ...grokModels,
+  ...metaModels,
+  ...moonshotaiModels,
+  ...alibabaModels,
+  ...deepseekModels,
+  ...mistralModels,
+  ...zaiModels
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -38,9 +53,20 @@ const modelProviderConfigs = {
   ...openaiEndpointConfig,
   ...googleEndpointConfig,
   ...grokEndpointConfig,
+  ...metaEndpointConfig,
+  ...moonshotaiEndpointConfig,
+  ...alibabaEndpointConfig,
+  ...deepseekEndpointConfig,
+  ...mistralEndpointConfig,
+  ...zaiEndpointConfig
 } satisfies Record<string, ModelProviderConfig>;
 
-const indexes: ModelIndexes = buildIndexes(modelProviderConfigs);
+// Combine all archived endpoints
+const archivedModelProviderConfigs = {
+  // TODO: if any archived endpoints are added, make sure they are included here
+} satisfies Record<string, ModelProviderConfig>;
+
+const indexes: ModelIndexes = buildIndexes(modelProviderConfigs, archivedModelProviderConfigs);
 
 function getAllModelIds(): Result<ModelName[]> {
   return ok(Object.keys(allModels) as ModelName[]);
@@ -100,18 +126,14 @@ function buildEndpoint(
   endpointConfig: ModelProviderConfig,
   userEndpointConfig: UserEndpointConfig
 ): Result<Endpoint> {
-  const baseUrlResult = buildEndpointUrl(endpointConfig, userEndpointConfig);
-  if (baseUrlResult.error) {
-    return err(baseUrlResult.error);
-  }
-
   const modelIdResult = buildModelId(endpointConfig, userEndpointConfig);
   if (modelIdResult.error) {
     return err(modelIdResult.error);
   }
 
   return ok({
-    baseUrl: baseUrlResult.data ?? "",
+    modelConfig: endpointConfig,
+    userConfig: userEndpointConfig,
     provider: endpointConfig.provider,
     author: endpointConfig.author,
     providerModelId: modelIdResult.data ?? "",
@@ -121,6 +143,7 @@ function buildEndpoint(
     maxCompletionTokens: endpointConfig.maxCompletionTokens,
     ptbEnabled: false,
     version: endpointConfig.version,
+    priority: endpointConfig.priority,
   });
 }
 
@@ -131,6 +154,17 @@ function getModelProviderConfig(
   const configId = `${model}:${provider}` as ModelProviderConfigId;
   const config = indexes.endpointConfigIdToEndpointConfig.get(configId);
   return config ? ok(config) : err(`Config not found: ${configId}`);
+}
+
+function getModelProviderConfigByProviderModelId(
+  providerModelId: string,
+  provider: ModelProviderName
+): Result<ModelProviderConfig> {
+  const providerModelIdKey = `${providerModelId}:${provider}`;
+  const result = indexes.providerModelIdToConfig.get(providerModelIdKey);
+  return result
+    ? ok(result)
+    : err(`Config not found for providerModelId: ${providerModelId}`);
 }
 
 function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {
@@ -154,7 +188,7 @@ function getModelProviderEntriesByModel(
 
 function getModelProviderEntry(
   model: string,
-  provider: string
+  provider: ModelProviderName
 ): Result<ModelProviderEntry | null> {
   const configId = `${model}:${provider}` as ModelProviderConfigId;
   const providerData = indexes.modelProviderToData.get(configId) || null;
@@ -183,6 +217,26 @@ function getPtbEndpointsForProvider(
   return ok(topLevelEndpoints);
 }
 
+function getModelProviderConfigByVersion(
+  model: string,
+  provider: ModelProviderName,
+  version: string
+): Result<ModelProviderConfig | null> {
+  const currentEntry = getModelProviderEntry(model, provider);
+  // if the given version matches the active config version (or both are undefined/empty)
+  if (
+    (!currentEntry.data?.config.version && !version) ||
+    (currentEntry.data?.config.version === version)
+  ) {
+    return ok(currentEntry.data?.config ?? null);
+  }
+
+  const versionKey = `${model}:${provider}:${version}`;
+  const archivedConfig = indexes.modelToArchivedEndpointConfigs.get(versionKey);
+
+  return ok(archivedConfig || null);
+}
+
 export const registry = {
   getAllModelIds,
   getAllModelsWithIds,
@@ -192,10 +246,12 @@ export const registry = {
   getProviderModels,
   buildEndpoint,
   getModelProviderConfig,
+  getModelProviderConfigByProviderModelId,
   getPtbEndpointsForProvider,
   getModelProviderConfigs,
   getModelProviders,
   getEndpointsByModel,
   getModelProviderEntriesByModel,
   getModelProviderEntry,
+  getModelProviderConfigByVersion,
 };

@@ -291,7 +291,6 @@ export class InputsManager extends BaseManager {
       `,
       [this.authParams.organizationId, promptVersion, datasetId]
     );
-    console.log("result", result);
     const bodyStore = new RequestResponseBodyStore(
       this.authParams.organizationId
     );

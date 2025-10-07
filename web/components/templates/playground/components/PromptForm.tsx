@@ -14,7 +14,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
-import { InfoIcon, Check, ChevronsUpDown, Crown } from "lucide-react";
+import {
+  InfoIcon,
+  Check,
+  ChevronsUpDown,
+  Crown,
+  SquareArrowOutUpRight,
+} from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   useGetPromptTags,
@@ -39,6 +46,7 @@ interface PromptFormProps {
     environment: string | undefined,
     commitMessage: string,
   ) => void;
+  autoOpen?: boolean;
 }
 
 export default function PromptForm({
@@ -46,6 +54,7 @@ export default function PromptForm({
   saveAndVersion,
   onCreatePrompt,
   onSavePrompt,
+  autoOpen,
 }: PromptFormProps) {
   const [promptName, setPromptName] = useState("");
   const [commitMessage, setCommitMessage] = useState("Update.");
@@ -87,15 +96,29 @@ export default function PromptForm({
         <Button
           variant="outline"
           className={cn(
-            "border-none",
+            "relative border-none",
             isScrolled &&
               "bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-900",
           )}
         >
           Save Prompt
+          {autoOpen && (
+            <span className="absolute -right-1 -top-1 flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-sky-500"></span>
+            </span>
+          )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="mr-2 w-96">
+      <PopoverContent className="relative mr-2 w-96">
+        <Link
+          href="https://docs.helicone.ai/gateway/prompt-integration"
+          target="_blank"
+          className="absolute right-4 top-4 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          View docs
+          <SquareArrowOutUpRight className="h-3 w-3" />
+        </Link>
         <div className="flex w-full flex-col gap-4 py-4">
           {saveAndVersion && (
             <div className="flex justify-end">

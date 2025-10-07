@@ -1,7 +1,17 @@
 import { costOfPrompt } from "./index";
+import type { ModelUsage } from "./usage/types";
+import type { ModelProviderName } from "./models/providers";
+import { calculateModelCostBreakdown, CostBreakdown } from "./models/calculate-cost";
 
+// since costs in clickhouse are multiplied by the multiplier
+// divide to get real cost in USD in dollars
 export const COST_PRECISION_MULTIPLIER = 1_000_000_000;
 
+/**
+ * LEGACY: Calculate model cost using the old cost registry format
+ * This function uses the legacy cost registry in /providers/mappings
+ * @deprecated Use modelCostFromRegistry for new implementations
+ */
 export function modelCost(
   params: {
     provider: string;
@@ -36,4 +46,20 @@ export function modelCost(
       multiple: params.multiple,
     }) ?? 0
   );
+}
+
+export function modelCostBreakdownFromRegistry(params: {
+  modelUsage: ModelUsage;
+  provider: ModelProviderName;
+  providerModelId: string;
+  requestCount?: number;
+}): CostBreakdown | null {
+  const breakdown = calculateModelCostBreakdown({
+    modelUsage: params.modelUsage,
+    providerModelId: params.providerModelId,
+    provider: params.provider,
+    requestCount: params.requestCount,
+  });
+  
+  return breakdown;
 }

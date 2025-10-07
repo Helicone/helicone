@@ -19,14 +19,19 @@ export class TestClickhouseClientWrapper {
   private clickHouseHqlClient: ClickHouseClient;
 
   constructor(env: ClickhouseEnv) {
+    // Use url instead of deprecated host
+    const clickhouseUrl = env.CLICKHOUSE_HOST.startsWith('http') 
+      ? env.CLICKHOUSE_HOST 
+      : `http://${env.CLICKHOUSE_HOST}`;
+    
     this.clickHouseClient = createClient({
-      host: env.CLICKHOUSE_HOST,
+      url: clickhouseUrl,
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
     });
 
     this.clickHouseHqlClient = createClient({
-      host: env.CLICKHOUSE_HOST,
+      url: clickhouseUrl,
       username: env.CLICKHOUSE_HQL_USER,
       password: env.CLICKHOUSE_HQL_PASSWORD,
     });
@@ -191,6 +196,27 @@ export class TestClickhouseClientWrapper {
         error: JSON.stringify(err),
       };
     }
+  }
+
+  async hqlQueryWithContext<T>({
+    query,
+    organizationId,
+    parameters,
+    schema,
+  }: {
+    query: string;
+    organizationId: string;
+    parameters: (number | string | boolean | Date)[];
+    schema?: ZodType<T>;
+  }): Promise<Result<T[], string>> {
+    // For HQL queries, delegate to the regular queryWithContext
+    // since the test wrapper handles both regular and HQL queries the same way
+    return this.queryWithContext<T>({
+      query,
+      organizationId,
+      parameters,
+      schema,
+    });
   }
 
   async createTestDatabase(): Promise<Result<null, string>> {

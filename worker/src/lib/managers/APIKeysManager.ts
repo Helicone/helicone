@@ -14,7 +14,6 @@ export class APIKeysManager {
   async setAPIKeys() {
     const apiKeys = await this.store.getAPIKeys();
     if (apiKeys) {
-
       await Promise.all(
         apiKeys.map(async (key) => {
           if (key.soft_delete) {
@@ -50,26 +49,6 @@ export class APIKeysManager {
     const key = await getFromKVCacheOnly(`api_keys_${apiKeyHash}`, this.env);
     if (!key) {
       return null;
-    }
-    return key;
-  }
-
-  /**
-   * @returns the organization id or null if the api key is not found
-   */
-  async getOrgIdWithFetch(apiKeyHash: string): Promise<string | null> {
-    const key = await getFromKVCacheOnly(`api_keys_${apiKeyHash}`, this.env);
-    if (!key) {
-      const key = await this.store.getAPIKeyWithFetch(apiKeyHash);
-      if (!key) {
-        return null;
-      }
-      await storeInCache(
-        `api_keys_${apiKeyHash}`,
-        key.organization_id,
-        this.env
-      );
-      return key.organization_id;
     }
     return key;
   }

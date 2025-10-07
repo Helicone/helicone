@@ -193,7 +193,7 @@ export class HqlQueryManager {
     }
   }
 
-  async bulkDeleteSavedQueries(ids: string[]): Promise<Result<void, string>> {
+  async bulkDeleteSavedQueries(ids: string[]): Promise<Result<void, HqlError>> {
     try {
       if (ids.length === 0) {
         return ok(undefined);
@@ -207,13 +207,15 @@ export class HqlQueryManager {
         [this.authParams.organizationId, ...ids]
       );
       
-      if (result.error) {
-        return err(result.error);
+      if (isError(result)) {
+        const errorCode = parseDatabaseError(result.error);
+        return hqlError(errorCode, result.error);
       }
 
       return ok(undefined);
     } catch (e) {
-      return err(String(e));
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      return hqlError(HqlErrorCode.UNEXPECTED_ERROR, errorMessage);
     }
   }
 }

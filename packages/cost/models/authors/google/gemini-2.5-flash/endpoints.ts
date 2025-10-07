@@ -40,7 +40,7 @@ export const endpoints = {
       rpm: 10_000,
       tpm: 8_000_000,
     },
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -49,6 +49,7 @@ export const endpoints = {
     providerModelId: "gemini-2.5-flash",
     provider: "vertex",
     author: "google",
+    crossRegion: true,
     pricing: [
       {
         threshold: 0,
@@ -78,11 +79,40 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       global: {
         providerModelId: "gemini-2.5-flash",
       },
+    },
+  },
+  "gemini-2.5-flash:openrouter": {
+    provider: "openrouter",
+    author: "google",
+    providerModelId: "google/gemini-2.5-flash",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000032, // $0.32/1M - worst-case: $0.30/1M (Google) * 1.055
+        output: 0.00000264, // $2.64/1M - worst-case: $2.50/1M (Google) * 1.055
+      },
+    ],
+    contextLength: 1_048_576,
+    maxCompletionTokens: 65_535,
+    supportedParameters: [
+      "max_tokens",
+      "response_format",
+      "seed",
+      "stop",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
     },
   },
 } satisfies Partial<

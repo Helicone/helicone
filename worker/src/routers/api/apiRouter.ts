@@ -4,7 +4,7 @@ import { Job, isValidStatus, validateRun } from "../../lib/models/Runs";
 import { HeliconeNode, validateHeliconeNode } from "../../lib/models/Tasks";
 import { validateAlertCreate } from "../../lib/util/validators/alertValidators";
 
-import crypto, { timingSafeEqual } from "crypto";
+import crypto from "crypto";
 import { OpenAPIRouterType } from "@cloudflare/itty-router-openapi";
 import { Route } from "itty-router";
 import { logAsync } from "../../lib/managers/AsyncLogManager";
@@ -16,8 +16,7 @@ import { APIKeysStore } from "../../lib/db/APIKeysStore";
 import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
-import { StripeManager } from "../../lib/managers/StripeManager";
-import { InternalResponse } from "../../api/lib/internalResponse";
+import { getWalletRouter } from "./walletRouter";
 
 function getAPIRouterV1(
   router: OpenAPIRouterType<
@@ -37,7 +36,7 @@ function getAPIRouterV1(
         return new Response("not allowed", { status: 403 });
       }
 
-      const data = await requestWrapper.getJson<{
+      const data = await requestWrapper.unsafeGetJson<{
         apiKeyHash: string;
         orgId: string;
         softDelete?: boolean;
@@ -91,7 +90,7 @@ function getAPIRouterV1(
         return new Response("not allowed", { status: 403 });
       }
 
-      const data = await requestWrapper.getJson<
+      const data = await requestWrapper.unsafeGetJson<
         {
           provider: ModelProviderName;
           decryptedProviderKey: string;
@@ -150,7 +149,7 @@ function getAPIRouterV1(
       if (authParams.error !== null) {
         return client.response.unauthorized();
       }
-      const job = await requestWrapper.getJson<Job>();
+      const job = await requestWrapper.unsafeGetJson<Job>();
 
       if (!job) {
         return client.response.newError("Invalid run", 400);
@@ -208,7 +207,7 @@ function getAPIRouterV1(
       }
 
       const status =
-        (await requestWrapper.getJson<{ status: string }>()).status ?? "";
+        (await requestWrapper.unsafeGetJson<{ status: string }>()).status ?? "";
 
       if (!isValidStatus(status)) {
         return client.response.newError("Invalid status", 400);
@@ -237,7 +236,7 @@ function getAPIRouterV1(
         return client.response.unauthorized();
       }
 
-      const node = await requestWrapper.getJson<HeliconeNode>();
+      const node = await requestWrapper.unsafeGetJson<HeliconeNode>();
       if (!node) {
         return client.response.newError("Invalid task", 400);
       }
@@ -297,7 +296,7 @@ function getAPIRouterV1(
       }
 
       const status =
-        (await requestWrapper.getJson<{ status: string }>()).status ?? "";
+        (await requestWrapper.unsafeGetJson<{ status: string }>()).status ?? "";
 
       if (!isValidStatus(status)) {
         return client.response.newError("Invalid status", 400);
@@ -372,7 +371,7 @@ function getAPIRouterV1(
         value: string;
       }
 
-      const newProperty = await requestWrapper.getJson<Body>();
+      const newProperty = await requestWrapper.unsafeGetJson<Body>();
 
       const auth = await requestWrapper.auth();
 
@@ -433,7 +432,7 @@ function getAPIRouterV1(
       }
 
       const requestData =
-        await requestWrapper.getJson<
+        await requestWrapper.unsafeGetJson<
           Database["public"]["Tables"]["alert"]["Insert"]
         >();
 
@@ -487,202 +486,8 @@ function getAPIRouterV1(
     }
   );
 
-    // Get the current wallet state, useful for debugging.
-    router.get(
-      "/wallet/state",
-      async (
-        _,
-        requestWrapper: RequestWrapper,
-        env: Env,
-        _ctx: ExecutionContext
-      ) => {
-        const client = await createAPIClient(env, _ctx, requestWrapper);
-        const authParams = await client.db.getAuthParams();
-        if (authParams.error !== null) {
-          return client.response.unauthorized();
-        }
-  
-        const orgId = authParams.data.organizationId;
-        const walletId = env.WALLET.idFromName(orgId);
-        const walletStub = env.WALLET.get(walletId);
-  
-        try {
-          const state = await walletStub.getWalletState(orgId);
-          return client.response.successJSON(state);
-        } catch (e) {
-          return client.response.newError(
-            e instanceof Error ? e.message : "Failed to fetch credits",
-            500
-          );
-        }
-      }
-    );
-  
-    // paginated get credits purchases
-    router.get(
-      "/wallet/credits/purchases",
-      async (
-        { query: { page, pageSize, orgId } },
-        requestWrapper: RequestWrapper,
-        env: Env,
-        _ctx: ExecutionContext
-      ) => {
-        
-        const authHeader = requestWrapper.headers.get("Authorization");
-        if (!authHeader) {
-          return InternalResponse.unauthorized();
-        }
-        const providedToken = authHeader.replace("Bearer ", "");
-        const expectedToken = env.HELICONE_MANUAL_ACCESS_KEY;
-  
-        if (!expectedToken) {
-          console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
-          return InternalResponse.newError("Server configuration error", 500);
-        }
-        
-        const providedBuffer = Buffer.from(providedToken);
-        const expectedBuffer = Buffer.from(expectedToken);
-        
-        // Check length first to avoid timingSafeEqual error
-        if (providedBuffer.length !== expectedBuffer.length) {
-          return InternalResponse.unauthorized();
-        }
-        
-        if (!timingSafeEqual(providedBuffer, expectedBuffer)) {
-          return InternalResponse.unauthorized();
-        }
-  
-        // Get orgId from query param (when called with internal auth)
-        const organizationId = Array.isArray(orgId) ? orgId[0] : orgId;
-  
-        if (!organizationId) {
-          return InternalResponse.newError("orgId is required", 400);
-        }
-  
-        const walletId = env.WALLET.idFromName(organizationId);
-        const walletStub = env.WALLET.get(walletId);
-        const pageStr = Array.isArray(page) ? page[0] : page;
-        const pageSizeStr = Array.isArray(pageSize) ? pageSize[0] : pageSize;
-        const pageValue = pageStr ? parseInt(pageStr, 10) : 0;
-        const pageSizeValue = pageSizeStr ? parseInt(pageSizeStr, 10) : 10;
-  
-        if (pageSizeValue > 100) {
-          return InternalResponse.newError("Page size must be less than or equal to 100", 400);
-        }
-  
-        try {
-          const creditsPurchases = await walletStub.getCreditsPurchases(pageValue, pageSizeValue);
-          return InternalResponse.successJSON(creditsPurchases);
-        } catch (e) {
-          return InternalResponse.newError(
-            e instanceof Error ? e.message : "Failed to fetch total credits purchased",
-            500
-          );
-        }
-      }
-    );
-  
-      // get total credits purchased
-      router.get(
-        "/wallet/credits/total",
-        async (
-          { query: { orgId } },
-          requestWrapper: RequestWrapper,
-          env: Env,
-          _ctx: ExecutionContext
-        ) => {
-          if (!orgId || Array.isArray(orgId)) {
-            return InternalResponse.newError("orgId is required and must be a string", 400);
-          }
-          const authHeader = requestWrapper.headers.get("Authorization");
-          if (!authHeader) {
-            return InternalResponse.unauthorized();
-          }
-  
-          const providedToken = authHeader.replace("Bearer ", "");
-          const expectedToken = env.HELICONE_MANUAL_ACCESS_KEY;
-  
-          if (!expectedToken) {
-            console.error("HELICONE_MANUAL_ACCESS_KEY not configured");
-            return InternalResponse.newError("Server configuration error", 500);
-          }
-          
-          const providedBuffer = Buffer.from(providedToken);
-          const expectedBuffer = Buffer.from(expectedToken);
-          
-          // Check length first to avoid timingSafeEqual error
-          if (providedBuffer.length !== expectedBuffer.length) {
-            return InternalResponse.unauthorized();
-          }
-          
-          if (!timingSafeEqual(providedBuffer, expectedBuffer)) {
-            return InternalResponse.unauthorized();
-          }
-  
-          const walletId = env.WALLET.idFromName(orgId);
-          const walletStub = env.WALLET.get(walletId);
-  
-          try {
-            const creditsPurchases = await walletStub.getTotalCreditsPurchased();
-            return InternalResponse.successJSON(creditsPurchases);
-          } catch (e) {
-            return InternalResponse.newError(
-              e instanceof Error ? e.message : "Failed to fetch total credits purchased",
-              500
-            );
-          }
-        }
-      );
-  
-    // Stripe Webhook Handler
-    router.post(
-      "/stripe/webhook",
-      async (
-        _,
-        requestWrapper: RequestWrapper,
-        env: Env,
-        _ctx: ExecutionContext
-      ) => {
-        if (!env.STRIPE_WEBHOOK_SECRET) {
-          console.error("STRIPE_WEBHOOK_SECRET not configured");
-          return new Response("Webhook endpoint not configured", { status: 500 });
-        }
-  
-        const signature = requestWrapper.headers.get("stripe-signature");
-        if (!signature) {
-          return new Response("Missing stripe-signature header", { status: 400 });
-        }
-  
-        const body = await requestWrapper.getRawText();
-        if (!body) {
-          return new Response("Missing request body", { status: 400 });
-        }
-  
-        const webhookManager = new StripeManager(
-          env.STRIPE_WEBHOOK_SECRET,
-          env.STRIPE_SECRET_KEY,
-          env.WALLET,
-          env
-        );
-  
-        const { data, error: verifyError } =
-          await webhookManager.verifyAndConstructEvent(body, signature);
-  
-        if (verifyError || !data) {
-          console.error("Webhook verification failed:", verifyError);
-          return new Response(verifyError || "Invalid webhook", { status: 400 });
-        }
-  
-        const { error: handleError } = await webhookManager.handleEvent(data);
-  
-        if (handleError) {
-          console.error("Error handling webhook event:", handleError);
-          return new Response("", { status: 500 });
-        }
-  
-        return new Response("", { status: 200 });
-      }
-    );
+  // Register wallet endpoints
+  getWalletRouter(router);
 
   router.options(
     "*",

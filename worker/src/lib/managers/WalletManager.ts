@@ -27,7 +27,8 @@ export class WalletManager {
   async finalizeEscrowAndSyncSpend(
     organizationId: string,
     proxyRequest: HeliconeProxyRequest,
-    cost: number,
+    cost: number | undefined,
+    statusCode: number,
     cachedResponse?: Response
   ): Promise<Result<void, string>> {
     if (!proxyRequest.escrowInfo) {
@@ -38,19 +39,26 @@ export class WalletManager {
       const { clickhouseLastCheckedAt } = await this.walletStub.finalizeEscrow(
         organizationId,
         proxyRequest.escrowInfo.escrowId,
-        cost
+        cost ?? 0
       );
 
       if (
-        cost === 0 &&
+        cost === undefined &&
+        statusCode >= 200 &&
+        statusCode < 300 &&
+        // anthropic, and other providers, may return a 200 status code for streams
+        // even when an error occurs in the middle of the event stream. Therefore,
+        // we cannot use those events to add the (provider, model) to the disallow list.
+        !proxyRequest.isStream &&
         (cachedResponse === undefined || cachedResponse === null)
       ) {
         // if the cost is 0 and we're not using a cached response, we need to add the request to the disallow list
         // so that we guard against abuse
         await this.walletStub.addToDisallowList(
           proxyRequest.requestId,
-          proxyRequest.provider,
-          proxyRequest.escrowInfo.model ?? "*"
+          proxyRequest.escrowInfo.endpoint.provider,
+          proxyRequest.requestWrapper.getGatewayAttempt()?.endpoint
+            .providerModelId ?? "*"
         );
       }
 
@@ -66,7 +74,9 @@ export class WalletManager {
         `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}:`,
         error
       );
-      return err(`Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}: ${error}`);
+      return err(
+        `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}: ${error}`
+      );
     }
   }
 

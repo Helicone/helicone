@@ -1,71 +1,111 @@
 import {
   buildRequestBody,
   authenticateRequest,
+  buildErrorMessage,
+  buildEndpointUrl,
 } from "@helicone-package/cost/models/provider-helpers";
 import { RequestWrapper } from "../RequestWrapper";
-import { toAnthropic } from "../clients/llmmapper/providers/openai/request/toAnthropic";
+import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
 import { isErr, Result, ok, err } from "../util/results";
 import { Attempt, EscrowInfo, AttemptError } from "./types";
-import { Endpoint } from "@helicone-package/cost/models/types";
+import {
+  AuthContext,
+  Endpoint,
+  RequestParams,
+} from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
+import { CacheProvider } from "../../../../packages/common/cache/provider";
+import { GatewayMetrics } from "./GatewayMetrics";
+
+interface ExecutorProps {
+  attempt: Attempt;
+  requestWrapper: RequestWrapper;
+  parsedBody: any;
+  requestParams: RequestParams;
+  orgId: string;
+  forwarder: (
+    targetBaseUrl: string | null,
+    escrowInfo?: EscrowInfo
+  ) => Promise<Response>;
+  metrics: GatewayMetrics;
+  orgMeta: {
+    allowNegativeBalance: boolean;
+    creditLimit: number;
+  };
+}
 
 export class AttemptExecutor {
   constructor(
     private readonly env: Env,
-    private readonly ctx: ExecutionContext
+    private readonly ctx: ExecutionContext,
+    private readonly cacheProvider?: CacheProvider
   ) {}
 
-  async execute(
-    attempt: Attempt,
-    requestWrapper: RequestWrapper,
-    parsedBody: any,
-    orgId: string,
-    forwarder: (
-      targetBaseUrl: string | null,
-      escrowInfo?: EscrowInfo
-    ) => Promise<Response>
-  ): Promise<Result<Response, AttemptError>> {
-    const { endpoint, providerKey, source } = attempt;
+  async PTBPreCheck(props: {
+    attempt: Attempt;
+    requestWrapper: RequestWrapper;
+    orgId: string;
+    orgMeta: ExecutorProps["orgMeta"];
+  }): Promise<
+    Result<
+      {
+        reservedEscrowId: string;
+      },
+      AttemptError
+    >
+  > {
+    const escrowResult = await this.reserveEscrow(
+      props.attempt,
+      props.requestWrapper.heliconeHeaders.requestId,
+      props.orgId,
+      props.orgMeta
+    );
+
+    if (isErr(escrowResult)) {
+      return err({
+        type: "request_failed",
+        message: escrowResult.error.message,
+        statusCode: escrowResult.error.statusCode || 500,
+      });
+    }
+    return ok({ reservedEscrowId: escrowResult.data.escrowId });
+  }
+
+  async execute(props: ExecutorProps): Promise<Result<Response, AttemptError>> {
+    const { endpoint, providerKey } = props.attempt;
 
     let escrowInfo: EscrowInfo | undefined;
 
     // Reserve escrow if needed (PTB only)
-    if (attempt.authType === "ptb" && endpoint.ptbEnabled) {
-      const escrowResult = await this.reserveEscrow(
-        attempt,
-        requestWrapper.heliconeHeaders.requestId,
-        orgId
-      );
+    if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
+      const ptbCheck = await this.PTBPreCheck(props);
 
-      if (isErr(escrowResult)) {
-        return err({
-          type: "request_failed",
-          message: escrowResult.error.message,
-          statusCode: escrowResult.error.statusCode || 500,
-        });
+      if (isErr(ptbCheck)) {
+        return err(ptbCheck.error);
       }
 
-      // Build EscrowInfo once with all needed data
       escrowInfo = {
-        escrowId: escrowResult.data.escrowId,
+        escrowId: ptbCheck.data.reservedEscrowId,
         endpoint: endpoint,
-        model: endpoint.providerModelId,
       };
     }
 
     const result = await this.executeRequestWithProvider(
       endpoint,
       providerKey,
-      parsedBody,
-      requestWrapper,
-      forwarder,
-      escrowInfo
+      props.parsedBody,
+      props.requestParams,
+      props.requestWrapper,
+      props.orgId,
+      props.forwarder,
+      escrowInfo,
+      props.metrics
     );
 
     // If error, cancel escrow and return the error
     if (isErr(result)) {
       if (escrowInfo) {
-        this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, orgId));
+        this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, props.orgId));
       }
       return result;
     }
@@ -78,19 +118,21 @@ export class AttemptExecutor {
     endpoint: Endpoint,
     providerKey: ProviderKey,
     parsedBody: any,
+    requestParams: RequestParams,
     requestWrapper: RequestWrapper,
+    orgId: string,
     forwarder: (
       targetBaseUrl: string | null,
       escrowInfo?: EscrowInfo
     ) => Promise<Response>,
-    escrowInfo: EscrowInfo | undefined
+    escrowInfo: EscrowInfo | undefined,
+    metrics: GatewayMetrics
   ): Promise<Result<Response, AttemptError>> {
     try {
-      // Build request body using provider helpers
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: toAnthropic, // TODO: This is global, don't pass it in
+        toAnthropic: toAnthropic,
       });
 
       if (isErr(bodyResult) || !bodyResult.data) {
@@ -101,16 +143,31 @@ export class AttemptExecutor {
         });
       }
 
-      // Set up authentication headers using provider helpers
-      const authResult = await authenticateRequest(endpoint, {
-        config: (providerKey.config as any) || {},
+      const urlResult = buildEndpointUrl(endpoint, requestParams);
+
+      if (isErr(urlResult)) {
+        return err({
+          type: "request_failed",
+          message: urlResult.error,
+          statusCode: 400,
+        });
+      }
+
+      const authContext: AuthContext = {
         apiKey: providerKey.decrypted_provider_key,
         secretKey: providerKey.decrypted_provider_secret_key || undefined,
+        orgId: orgId,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
         requestMethod: requestWrapper.getMethod(),
-        requestUrl: endpoint.baseUrl ?? requestWrapper.url.toString(),
+        requestUrl: urlResult.data,
         requestBody: bodyResult.data,
-      });
+      };
+
+      const authResult = await authenticateRequest(
+        endpoint,
+        authContext,
+        this.cacheProvider
+      );
 
       if (authResult.error) {
         return err({
@@ -126,23 +183,44 @@ export class AttemptExecutor {
         requestWrapper.getAuthorization() ?? ""
       );
       requestWrapper.resetObject();
-      requestWrapper.setUrl(endpoint.baseUrl ?? requestWrapper.url.toString());
-      requestWrapper.setBody(bodyResult.data);
+      requestWrapper.setUrl(urlResult.data);
 
-      // Apply auth headers from provider
+      // For AI Gateway: store original OpenAI format before converting to provider format
+      // This allows the frontend to use OpenAI format without conversion
+      if (endpoint.modelConfig.responseFormat !== "OPENAI") {
+        requestWrapper.requestBodyBuffer.setOriginalOpenAIRequest(
+          JSON.stringify(parsedBody)
+        );
+      }
+
+      await requestWrapper.setBody(bodyResult.data);
+
       for (const [key, value] of Object.entries(
         authResult.data?.headers || {}
       )) {
         requestWrapper.setHeader(key, value);
       }
 
-      // Forward the request
-      const response = await forwarder(endpoint.baseUrl, escrowInfo);
+      metrics.markPreRequestEnd();
+      metrics.markProviderStart();
+
+      const response = await forwarder(urlResult.data, escrowInfo);
+
+      metrics.markProviderEnd(response.status);
 
       if (!response.ok) {
+        const errorMessageResult = await buildErrorMessage(endpoint, response);
+        if (isErr(errorMessageResult)) {
+          return err({
+            type: "request_failed",
+            message: errorMessageResult.error,
+            statusCode: response.status,
+          });
+        }
+
         return err({
           type: "request_failed",
-          message: `Request failed with status ${response.status}`,
+          message: errorMessageResult.data,
           statusCode: response.status,
         });
       }
@@ -160,7 +238,11 @@ export class AttemptExecutor {
   private async reserveEscrow(
     attempt: Attempt,
     requestId: string,
-    orgId: string
+    orgId: string,
+    orgMeta: {
+      allowNegativeBalance: boolean;
+      creditLimit: number;
+    }
   ): Promise<
     Result<{ escrowId: string }, { statusCode?: number; message: string }>
   > {
@@ -198,7 +280,11 @@ export class AttemptExecutor {
       const escrowResult = await walletStub.reserveCostInEscrow(
         orgId,
         requestId,
-        worstCaseCost
+        worstCaseCost,
+        {
+          enabled: orgMeta.allowNegativeBalance,
+          limit: orgMeta.creditLimit,
+        }
       );
 
       if (isErr(escrowResult)) {
@@ -224,6 +310,18 @@ export class AttemptExecutor {
       await walletStub.cancelEscrow(escrowId);
     } catch (error) {
       console.error(`Failed to cancel escrow ${escrowId}:`, error);
+    }
+  }
+
+  private async getTotalDebits(orgId: string): Promise<number> {
+    try {
+      const walletId = this.env.WALLET.idFromName(orgId);
+      const walletStub = this.env.WALLET.get(walletId);
+      const result = await walletStub.getTotalDebits(orgId);
+      return result.totalDebits;
+    } catch (error) {
+      console.error(`Failed to get total debits for org ${orgId}:`, error);
+      return 0;
     }
   }
 }

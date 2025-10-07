@@ -25,6 +25,8 @@ export const AUTHORS = [
   "xai",
   "moonshotai",
   "perplexity",
+  "alibaba",
+  "zai"
 ] as const;
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
@@ -37,6 +39,8 @@ export interface Modality {
   outputs: OutputModality[];
 }
 
+export type ResponseFormat = "ANTHROPIC" | "OPENAI";
+
 export type Tokenizer =
   | "Claude"
   | "GPT"
@@ -48,10 +52,13 @@ export type Tokenizer =
   | "Qwen"
   | "DeepSeek"
   | "Cohere"
-  | "Grok";
+  | "Grok"
+  | "Tekken"
+  | "Zai";
 
 export type StandardParameter =
   | "max_tokens"
+  | "max_completion_tokens"
   | "temperature"
   | "top_p"
   | "top_k"
@@ -80,6 +87,7 @@ export type StandardParameter =
 
 export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   max_tokens: "Max Tokens",
+  max_completion_tokens: "Max Completion Tokens",
   temperature: "Temperature",
   top_p: "Top-P",
   top_k: "Top-K",
@@ -158,6 +166,9 @@ export interface ModelProviderConfig extends BaseConfig {
   rateLimits?: RateLimits;
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;
+  priority?: number;
+  quantization?: "fp4" | "fp8" | "bf16";
+  responseFormat?: ResponseFormat;
 }
 
 export interface EndpointConfig extends UserEndpointConfig {
@@ -168,14 +179,21 @@ export interface EndpointConfig extends UserEndpointConfig {
   ptbEnabled?: boolean;
   version?: string;
   rateLimits?: RateLimits;
+  priority?: number;
+}
+
+export interface RequestParams {
+  isStreaming?: boolean;
 }
 
 export interface Endpoint extends BaseConfig {
-  baseUrl: string;
+  modelConfig: ModelProviderConfig;
+  userConfig: UserEndpointConfig;
   provider: ModelProviderName;
   author: AuthorName;
   providerModelId: string;
   supportedParameters: StandardParameter[];
+  priority?: number; // Lower number = higher priority
 }
 
 export interface UserEndpointConfig {
@@ -188,13 +206,13 @@ export interface UserEndpointConfig {
   apiVersion?: string; // Azure OpenAI
   crossRegion?: boolean;
   gatewayMapping?: "OPENAI" | "NO_MAPPING";
+  modelName?: string;
 }
 
 export interface AuthContext {
-  endpoint: Endpoint;
-  config: UserEndpointConfig;
   apiKey?: string;
   secretKey?: string;
+  orgId?: string;
   bodyMapping?: "OPENAI" | "NO_MAPPING";
   requestMethod?: string;
   requestUrl?: string;
@@ -208,5 +226,5 @@ export interface AuthResult {
 export interface RequestBodyContext {
   parsedBody: any;
   bodyMapping: "OPENAI" | "NO_MAPPING";
-  toAnthropic: (body: any) => any;
+  toAnthropic: (body: any, providerModelId?: string) => any;
 }

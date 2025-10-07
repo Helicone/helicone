@@ -16,6 +16,21 @@ export interface paths {
   "/v1/webhooks/{webhookId}": {
     delete: operations["DeleteWebhook"];
   };
+  "/v1/webhooks/{webhookId}/test": {
+    post: operations["TestWebhook"];
+  };
+  "/v1/public/waitlist/feature": {
+    post: operations["AddToWaitlist"];
+  };
+  "/v1/public/waitlist/feature/status": {
+    get: operations["IsOnWaitlist"];
+  };
+  "/v1/public/waitlist/feature/count": {
+    get: operations["GetWaitlistCount"];
+  };
+  "/v1/public/waitlist/feature/share": {
+    post: operations["TrackShare"];
+  };
   "/v1/vault/add": {
     post: operations["AddKey"];
   };
@@ -97,6 +112,9 @@ export interface paths {
   };
   "/v1/prompt-2025/id/{promptId}/rename": {
     post: operations["RenamePrompt2025"];
+  };
+  "/v1/prompt-2025/id/{promptId}/tags": {
+    patch: operations["UpdatePrompt2025Tags"];
   };
   "/v1/prompt-2025/{promptId}": {
     delete: operations["DeletePrompt2025"];
@@ -336,8 +354,31 @@ export interface paths {
   "/v1/stripe/subscription/migrate-to-pro": {
     post: operations["MigrateToPro"];
   };
+  "/v1/stripe/payment-intents/search": {
+    get: operations["SearchPaymentIntents"];
+  };
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
+  };
+  "/v1/integration": {
+    get: operations["GetIntegrations"];
+    post: operations["CreateIntegration"];
+  };
+  "/v1/integration/{integrationId}": {
+    get: operations["GetIntegration"];
+    post: operations["UpdateIntegration"];
+  };
+  "/v1/integration/type/{type}": {
+    get: operations["GetIntegrationByType"];
+  };
+  "/v1/integration/slack/settings": {
+    get: operations["GetSlackSettings"];
+  };
+  "/v1/integration/slack/channels": {
+    get: operations["GetSlackChannels"];
+  };
+  "/v1/integration/{integrationId}/stripe/test-meter-event": {
+    post: operations["TestStripeMeterEvent"];
   };
   "/v1/trace/custom/v1/log": {
     post: operations["LogCustomTraceLegacy"];
@@ -359,6 +400,9 @@ export interface paths {
   };
   "/v1/session/query": {
     post: operations["GetSessions"];
+  };
+  "/v1/session/count": {
+    post: operations["GetSessionsCount"];
   };
   "/v1/session/name/query": {
     post: operations["GetNames"];
@@ -417,6 +461,10 @@ export interface paths {
     post: operations["GetCostsOverTime"];
   };
   "/v1/public/model-registry/models": {
+    /**
+     * Returns a comprehensive list of all AI models with their configurations, pricing, and capabilities
+     * @description Get all available models from the registry
+     */
     get: operations["GetModelRegistry"];
   };
   "/v1/public/compare/models": {
@@ -428,45 +476,63 @@ export interface paths {
   "/v1/public/security": {
     post: operations["GetSecurity"];
   };
-  "/v1/integration": {
-    get: operations["GetIntegrations"];
-    post: operations["CreateIntegration"];
-  };
-  "/v1/integration/{integrationId}": {
-    get: operations["GetIntegration"];
-    post: operations["UpdateIntegration"];
-  };
-  "/v1/integration/type/{type}": {
-    get: operations["GetIntegrationByType"];
-  };
-  "/v1/integration/slack/settings": {
-    get: operations["GetSlackSettings"];
-  };
-  "/v1/integration/slack/channels": {
-    get: operations["GetSlackChannels"];
-  };
   "/v1/helicone-sql/schema": {
-    /** @description Get ClickHouse schema (tables and columns) */
+    /**
+     * Get database schema
+     * @description Get ClickHouse schema (tables and columns)
+     */
     get: operations["GetClickHouseSchema"];
   };
   "/v1/helicone-sql/execute": {
+    /**
+     * Execute SQL query
+     * @description Execute a SQL query against ClickHouse
+     */
     post: operations["ExecuteSql"];
   };
   "/v1/helicone-sql/download": {
+    /**
+     * Download query results as CSV
+     * @description Execute a SQL query and download results as CSV
+     */
     post: operations["DownloadCsv"];
   };
   "/v1/helicone-sql/saved-queries": {
+    /**
+     * List saved queries
+     * @description Get all saved queries for the organization
+     */
     get: operations["GetSavedQueries"];
   };
   "/v1/helicone-sql/saved-query/{queryId}": {
+    /**
+     * Get saved query
+     * @description Get a specific saved query by ID
+     */
     get: operations["GetSavedQuery"];
+    /**
+     * Update saved query
+     * @description Update an existing saved query
+     */
+    put: operations["UpdateSavedQuery"];
+    /**
+     * Delete saved query
+     * @description Delete a saved query by ID
+     */
     delete: operations["DeleteSavedQuery"];
   };
   "/v1/helicone-sql/saved-queries/bulk-delete": {
+    /**
+     * Bulk delete saved queries
+     * @description Delete multiple saved queries at once
+     */
     post: operations["BulkDeleteSavedQueries"];
   };
   "/v1/helicone-sql/saved-query": {
-    put: operations["UpdateSavedQuery"];
+    /**
+     * Create saved query
+     * @description Create a new saved query
+     */
     post: operations["CreateSavedQuery"];
   };
   "/v1/experiment/new-empty": {
@@ -641,6 +707,9 @@ export interface paths {
   "/v1/agent/thread/{sessionId}/escalate": {
     post: operations["EscalateThread"];
   };
+  "/v1/agent/thread/create-and-escalate": {
+    post: operations["CreateAndEscalateThread"];
+  };
   "/v1/agent/threads": {
     get: operations["GetAllThreads"];
   };
@@ -697,6 +766,55 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--message-string__": {
+      data: {
+        message: string;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
+      data: {
+        sharedPlatforms?: string[];
+        alreadyOnList?: boolean;
+        /** Format: double */
+        position?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__isOnWaitlist-boolean__": {
+      data: {
+        isOnWaitlist: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__count-number__": {
+      data: {
+        /** Format: double */
+        count: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
+      data: {
+        message: string;
+        /** Format: double */
+        newPosition?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--newPosition_63_-number--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--newPosition_63_-number--message-string__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-string__": {
       data: {
         id: string;
@@ -1183,6 +1301,12 @@ export interface components {
       error: null;
     };
     "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     Prompt2025Input: {
       request_id: string;
       version_id: string;
@@ -1194,12 +1318,6 @@ export interface components {
       error: null;
     };
     "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_string-Array_": {
-      data: string[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     PromptCreateResponse: {
       id: string;
       versionId: string;
@@ -1459,7 +1577,9 @@ export interface components {
     };
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
-    Provider: components["schemas"]["ProviderName"] | "CUSTOM";
+    /** @enum {string} */
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita";
+    Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
@@ -1685,6 +1805,7 @@ export interface components {
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
+      gateway_endpoint_version: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2091,6 +2212,66 @@ Json: JsonObject;
         completion_token: number;
       };
     };
+    PaymentIntentRecord: {
+      id: string;
+      /** Format: double */
+      amount: number;
+      /** Format: double */
+      created: number;
+      status: string;
+      isRefunded?: boolean;
+      /** Format: double */
+      refundedAmount?: number;
+      refundIds?: string[];
+    };
+    StripePaymentIntentsResponse: {
+      data: components["schemas"]["PaymentIntentRecord"][];
+      has_more: boolean;
+      next_page: string | null;
+      /** Format: double */
+      count: number;
+    };
+    IntegrationCreateParams: {
+      integration_name: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+    };
+    Integration: {
+      integration_name?: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+      id: string;
+    };
+    ResultSuccess_Array_Integration__: {
+      data: components["schemas"]["Integration"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
+    IntegrationUpdateParams: {
+      integration_name?: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+    };
+    ResultSuccess_Integration_: {
+      data: components["schemas"]["Integration"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Array__id-string--name-string___": {
+      data: {
+          name: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
+    TestStripeMeterEventRequest: {
+      event_name: string;
+      customer_id: string;
+    };
     ValidationError: {
       field: string;
       message: string;
@@ -2232,7 +2413,29 @@ Json: JsonObject;
       /** Format: double */
       timezoneDifference: number;
       filter: components["schemas"]["SessionFilterNode"];
+      /** Format: double */
+      offset?: number;
+      /** Format: double */
+      limit?: number;
     };
+    SessionsAggregateMetrics: {
+      /** Format: double */
+      count: number;
+      /** Format: double */
+      total_cost: number;
+      /** Format: double */
+      avg_cost: number;
+      /** Format: double */
+      avg_latency: number;
+      /** Format: double */
+      avg_requests: number;
+    };
+    ResultSuccess_SessionsAggregateMetrics_: {
+      data: components["schemas"]["SessionsAggregateMetrics"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SessionsAggregateMetrics.string_": components["schemas"]["ResultSuccess_SessionsAggregateMetrics_"] | components["schemas"]["ResultError_string_"];
     SessionNameResult: {
       name: string;
       created_at: string;
@@ -2761,11 +2964,17 @@ Json: JsonObject;
       timeZoneDifference: number;
     };
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio";
+    AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "passthrough";
     /** @enum {string} */
-    AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "passthrough";
-    /** @enum {string} */
-    StandardParameter: "max_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
+    StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
+    RateLimits: {
+      /** Format: double */
+      rpm?: number;
+      /** Format: double */
+      tpm?: number;
+      /** Format: double */
+      tpd?: number;
+    };
     ModelPricing: {
       /** Format: double */
       threshold: number;
@@ -2796,6 +3005,70 @@ Json: JsonObject;
       /** Format: double */
       web_search?: number;
     };
+    EndpointConfig: {
+      region?: string;
+      location?: string;
+      projectId?: string;
+      baseUri?: string;
+      deploymentName?: string;
+      resourceName?: string;
+      apiVersion?: string;
+      crossRegion?: boolean;
+      /** @enum {string} */
+      gatewayMapping?: "OPENAI" | "NO_MAPPING";
+      modelName?: string;
+      providerModelId?: string;
+      pricing?: components["schemas"]["ModelPricing"][];
+      /** Format: double */
+      contextLength?: number;
+      /** Format: double */
+      maxCompletionTokens?: number;
+      ptbEnabled?: boolean;
+      version?: string;
+      rateLimits?: components["schemas"]["RateLimits"];
+      /** Format: double */
+      priority?: number;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.EndpointConfig_": {
+      [key: string]: components["schemas"]["EndpointConfig"];
+    };
+    /** @enum {string} */
+    ResponseFormat: "ANTHROPIC" | "OPENAI";
+    ModelProviderConfig: {
+      pricing: components["schemas"]["ModelPricing"][];
+      /** Format: double */
+      contextLength: number;
+      /** Format: double */
+      maxCompletionTokens: number;
+      ptbEnabled: boolean;
+      version?: string;
+      providerModelId: string;
+      provider: components["schemas"]["ModelProviderName"];
+      author: components["schemas"]["AuthorName"];
+      supportedParameters: components["schemas"]["StandardParameter"][];
+      rateLimits?: components["schemas"]["RateLimits"];
+      endpointConfigs: components["schemas"]["Record_string.EndpointConfig_"];
+      crossRegion?: boolean;
+      /** Format: double */
+      priority?: number;
+      /** @enum {string} */
+      quantization?: "fp4" | "fp8" | "bf16";
+      responseFormat?: components["schemas"]["ResponseFormat"];
+    };
+    UserEndpointConfig: {
+      region?: string;
+      location?: string;
+      projectId?: string;
+      baseUri?: string;
+      deploymentName?: string;
+      resourceName?: string;
+      apiVersion?: string;
+      crossRegion?: boolean;
+      /** @enum {string} */
+      gatewayMapping?: "OPENAI" | "NO_MAPPING";
+      modelName?: string;
+    };
     Endpoint: {
       pricing: components["schemas"]["ModelPricing"][];
       /** Format: double */
@@ -2804,11 +3077,14 @@ Json: JsonObject;
       maxCompletionTokens: number;
       ptbEnabled: boolean;
       version?: string;
-      baseUrl: string;
+      modelConfig: components["schemas"]["ModelProviderConfig"];
+      userConfig: components["schemas"]["UserEndpointConfig"];
       provider: components["schemas"]["ModelProviderName"];
       author: components["schemas"]["AuthorName"];
       providerModelId: string;
       supportedParameters: components["schemas"]["StandardParameter"][];
+      /** Format: double */
+      priority?: number;
     };
     SimplifiedPricing: {
       /** Format: double */
@@ -2972,43 +3248,6 @@ Json: JsonObject;
       error: null;
     };
     "Result__unsafe-boolean_.string_": components["schemas"]["ResultSuccess__unsafe-boolean__"] | components["schemas"]["ResultError_string_"];
-    IntegrationCreateParams: {
-      integration_name: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-    };
-    Integration: {
-      integration_name?: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-      id: string;
-    };
-    ResultSuccess_Array_Integration__: {
-      data: components["schemas"]["Integration"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
-    IntegrationUpdateParams: {
-      integration_name?: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-    };
-    ResultSuccess_Integration_: {
-      data: components["schemas"]["Integration"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Array__id-string--name-string___": {
-      data: {
-          name: string;
-          id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
     ClickHouseTableColumn: {
       name: string;
       type: string;
@@ -3091,11 +3330,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_HqlSavedQuery.string_": components["schemas"]["ResultSuccess_HqlSavedQuery_"] | components["schemas"]["ResultError_string_"];
-    UpdateSavedQueryRequest: {
-      name: string;
-      sql: string;
-      id: string;
-    };
     "ResultSuccess__tableId-string--experimentId-string__": {
       data: {
         experimentId: string;
@@ -3701,227 +3935,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_InAppThread.string_": components["schemas"]["ResultSuccess_InAppThread_"] | components["schemas"]["ResultError_string_"];
-    /**
-     * @description Learn about
-     * [text inputs](https://platform.openai.com/docs/guides/text-generation).
-     */
-    ChatCompletionContentPartText: {
-      /** @description The text content. */
-      text: string;
-      /**
-       * @description The type of the content part.
-       * @enum {string}
-       */
-      type: "text";
-    };
-    /**
-     * @description Developer-provided instructions that the model should follow, regardless of
-     * messages sent by the user. With o1 models and newer, `developer` messages
-     * replace the previous `system` messages.
-     */
-    ChatCompletionDeveloperMessageParam: {
-      /** @description The contents of the developer message. */
-      content: string | components["schemas"]["ChatCompletionContentPartText"][];
-      /**
-       * @description The role of the messages author, in this case `developer`.
-       * @enum {string}
-       */
-      role: "developer";
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-    };
-    /**
-     * @description Developer-provided instructions that the model should follow, regardless of
-     * messages sent by the user. With o1 models and newer, use `developer` messages
-     * for this purpose instead.
-     */
-    ChatCompletionSystemMessageParam: {
-      /** @description The contents of the system message. */
-      content: string | components["schemas"]["ChatCompletionContentPartText"][];
-      /**
-       * @description The role of the messages author, in this case `system`.
-       * @enum {string}
-       */
-      role: "system";
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-    };
-    "ChatCompletionContentPartImage.ImageURL": {
-      /** @description Either a URL of the image or the base64 encoded image data. */
-      url: string;
-      /**
-       * @description Specifies the detail level of the image. Learn more in the
-       * [Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding).
-       * @enum {string}
-       */
-      detail?: "auto" | "low" | "high";
-    };
-    /** @description Learn about [image inputs](https://platform.openai.com/docs/guides/vision). */
-    ChatCompletionContentPartImage: {
-      image_url: components["schemas"]["ChatCompletionContentPartImage.ImageURL"];
-      /**
-       * @description The type of the content part.
-       * @enum {string}
-       */
-      type: "image_url";
-    };
-    "ChatCompletionContentPartInputAudio.InputAudio": {
-      /** @description Base64 encoded audio data. */
-      data: string;
-      /**
-       * @description The format of the encoded audio data. Currently supports "wav" and "mp3".
-       * @enum {string}
-       */
-      format: "wav" | "mp3";
-    };
-    /** @description Learn about [audio inputs](https://platform.openai.com/docs/guides/audio). */
-    ChatCompletionContentPartInputAudio: {
-      input_audio: components["schemas"]["ChatCompletionContentPartInputAudio.InputAudio"];
-      /**
-       * @description The type of the content part. Always `input_audio`.
-       * @enum {string}
-       */
-      type: "input_audio";
-    };
-    "ChatCompletionContentPart.File.File": {
-      /**
-       * @description The base64 encoded file data, used when passing the file to the model as a
-       * string.
-       */
-      file_data?: string;
-      /** @description The ID of an uploaded file to use as input. */
-      file_id?: string;
-      /** @description The name of the file, used when passing the file to the model as a string. */
-      filename?: string;
-    };
-    /**
-     * @description Learn about [file inputs](https://platform.openai.com/docs/guides/text) for text
-     * generation.
-     */
-    "ChatCompletionContentPart.File": {
-      file: components["schemas"]["ChatCompletionContentPart.File.File"];
-      /**
-       * @description The type of the content part. Always `file`.
-       * @enum {string}
-       */
-      type: "file";
-    };
-    /**
-     * @description Learn about
-     * [text inputs](https://platform.openai.com/docs/guides/text-generation).
-     */
-    ChatCompletionContentPart: components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartImage"] | components["schemas"]["ChatCompletionContentPartInputAudio"] | components["schemas"]["ChatCompletionContentPart.File"];
-    /**
-     * @description Messages sent by an end user, containing prompts or additional context
-     * information.
-     */
-    ChatCompletionUserMessageParam: {
-      /** @description The contents of the user message. */
-      content: string | components["schemas"]["ChatCompletionContentPart"][];
-      /**
-       * @description The role of the messages author, in this case `user`.
-       * @enum {string}
-       */
-      role: "user";
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-    };
-    /**
-     * @description Data about a previous audio response from the model.
-     * [Learn more](https://platform.openai.com/docs/guides/audio).
-     */
-    "ChatCompletionAssistantMessageParam.Audio": {
-      /** @description Unique identifier for a previous audio response from the model. */
-      id: string;
-    };
-    ChatCompletionContentPartRefusal: {
-      /** @description The refusal message generated by the model. */
-      refusal: string;
-      /**
-       * @description The type of the content part.
-       * @enum {string}
-       */
-      type: "refusal";
-    };
-    /** @deprecated */
-    "ChatCompletionAssistantMessageParam.FunctionCall": {
-      /**
-       * @description The arguments to call the function with, as generated by the model in JSON
-       * format. Note that the model does not always generate valid JSON, and may
-       * hallucinate parameters not defined by your function schema. Validate the
-       * arguments in your code before calling your function.
-       */
-      arguments: string;
-      /** @description The name of the function to call. */
-      name: string;
-    };
-    /** @description Messages sent by the model in response to user messages. */
-    ChatCompletionAssistantMessageParam: {
-      /**
-       * @description The role of the messages author, in this case `assistant`.
-       * @enum {string}
-       */
-      role: "assistant";
-      /**
-       * @description Data about a previous audio response from the model.
-       * [Learn more](https://platform.openai.com/docs/guides/audio).
-       */
-      audio?: components["schemas"]["ChatCompletionAssistantMessageParam.Audio"] | null;
-      /**
-       * @description The contents of the assistant message. Required unless `tool_calls` or
-       * `function_call` is specified.
-       */
-      content?: (string | ((components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartRefusal"])[])) | null;
-      /** @deprecated */
-      function_call?: components["schemas"]["ChatCompletionAssistantMessageParam.FunctionCall"] | null;
-      /**
-       * @description An optional name for the participant. Provides the model information to
-       * differentiate between participants of the same role.
-       */
-      name?: string;
-      /** @description The refusal message by the assistant. */
-      refusal?: string | null;
-      /** @description The tool calls generated by the model, such as function calls. */
-      tool_calls?: components["schemas"]["ChatCompletionMessageToolCall"][];
-    };
-    ChatCompletionToolMessageParam: {
-      /** @description The contents of the tool message. */
-      content: string | components["schemas"]["ChatCompletionContentPartText"][];
-      /**
-       * @description The role of the messages author, in this case `tool`.
-       * @enum {string}
-       */
-      role: "tool";
-      /** @description Tool call that this message is responding to. */
-      tool_call_id: string;
-    };
-    /** @deprecated */
-    ChatCompletionFunctionMessageParam: {
-      /** @description The contents of the function message. */
-      content: string | null;
-      /** @description The name of the function to call. */
-      name: string;
-      /**
-       * @description The role of the messages author, in this case `function`.
-       * @enum {string}
-       */
-      role: "function";
-    };
-    /**
-     * @description Developer-provided instructions that the model should follow, regardless of
-     * messages sent by the user. With o1 models and newer, `developer` messages
-     * replace the previous `system` messages.
-     */
-    ChatCompletionMessageParam: components["schemas"]["ChatCompletionDeveloperMessageParam"] | components["schemas"]["ChatCompletionSystemMessageParam"] | components["schemas"]["ChatCompletionUserMessageParam"] | components["schemas"]["ChatCompletionAssistantMessageParam"] | components["schemas"]["ChatCompletionToolMessageParam"] | components["schemas"]["ChatCompletionFunctionMessageParam"];
     "ResultSuccess__success-boolean__": {
       data: {
         success: boolean;
@@ -4003,6 +4016,90 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  TestWebhook: {
+    parameters: {
+      path: {
+        webhookId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
+        };
+      };
+    };
+  };
+  AddToWaitlist: {
+    requestBody: {
+      content: {
+        "application/json": {
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"];
+        };
+      };
+    };
+  };
+  IsOnWaitlist: {
+    parameters: {
+      query: {
+        email: string;
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetWaitlistCount: {
+    parameters: {
+      query: {
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number_.string_"];
+        };
+      };
+    };
+  };
+  TrackShare: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          platform: "twitter" | "linkedin";
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--newPosition_63_-number--message-string_.string_"];
         };
       };
     };
@@ -4149,7 +4246,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "google-ai-studio";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita";
           }) | {
             error: string;
           };
@@ -4560,6 +4657,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdatePrompt2025Tags: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          tags: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
         };
       };
     };
@@ -5933,6 +6052,23 @@ export interface operations {
       };
     };
   };
+  SearchPaymentIntents: {
+    parameters: {
+      query: {
+        search_kind: string;
+        limit?: number;
+        page?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StripePaymentIntentsResponse"];
+        };
+      };
+    };
+  };
   GetSubscription: {
     responses: {
       /** @description Ok */
@@ -5958,6 +6094,121 @@ export interface operations {
             cancel_at_period_end: boolean;
             status: string;
           }) | null;
+        };
+      };
+    };
+  };
+  GetIntegrations: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array_Integration_.string_"];
+        };
+      };
+    };
+  };
+  CreateIntegration: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IntegrationCreateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  GetIntegration: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  UpdateIntegration: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["IntegrationUpdateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetIntegrationByType: {
+    parameters: {
+      path: {
+        type: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  GetSlackSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Integration.string_"];
+        };
+      };
+    };
+  };
+  GetSlackChannels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
+        };
+      };
+    };
+  };
+  TestStripeMeterEvent: {
+    parameters: {
+      path: {
+        integrationId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TestStripeMeterEventRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };
@@ -6050,6 +6301,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_SessionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetSessionsCount: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SessionQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SessionsAggregateMetrics.string_"];
         };
       };
     };
@@ -6380,9 +6646,13 @@ export interface operations {
       };
     };
   };
+  /**
+   * Returns a comprehensive list of all AI models with their configurations, pricing, and capabilities
+   * @description Get all available models from the registry
+   */
   GetModelRegistry: {
     responses: {
-      /** @description Ok */
+      /** @description Complete model registry with models and filter options */
       200: {
         content: {
           "application/json": components["schemas"]["Result_ModelRegistryResponse.string_"];
@@ -6433,105 +6703,13 @@ export interface operations {
       };
     };
   };
-  GetIntegrations: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Array_Integration_.string_"];
-        };
-      };
-    };
-  };
-  CreateIntegration: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["IntegrationCreateParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string_.string_"];
-        };
-      };
-    };
-  };
-  GetIntegration: {
-    parameters: {
-      path: {
-        integrationId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Integration.string_"];
-        };
-      };
-    };
-  };
-  UpdateIntegration: {
-    parameters: {
-      path: {
-        integrationId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["IntegrationUpdateParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetIntegrationByType: {
-    parameters: {
-      path: {
-        type: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Integration.string_"];
-        };
-      };
-    };
-  };
-  GetSlackSettings: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Integration.string_"];
-        };
-      };
-    };
-  };
-  GetSlackChannels: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
-        };
-      };
-    };
-  };
-  /** @description Get ClickHouse schema (tables and columns) */
+  /**
+   * Get database schema
+   * @description Get ClickHouse schema (tables and columns)
+   */
   GetClickHouseSchema: {
     responses: {
-      /** @description Ok */
+      /** @description Array of table schemas with columns */
       200: {
         content: {
           "application/json": components["schemas"]["Result_ClickHouseTableSchema-Array.string_"];
@@ -6539,14 +6717,19 @@ export interface operations {
       };
     };
   };
+  /**
+   * Execute SQL query
+   * @description Execute a SQL query against ClickHouse
+   */
   ExecuteSql: {
+    /** @description The SQL query to execute */
     requestBody: {
       content: {
         "application/json": components["schemas"]["ExecuteSqlRequest"];
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description Query results with rows and metadata */
       200: {
         content: {
           "application/json": components["schemas"]["Result_ExecuteSqlResponse.string_"];
@@ -6554,14 +6737,19 @@ export interface operations {
       };
     };
   };
+  /**
+   * Download query results as CSV
+   * @description Execute a SQL query and download results as CSV
+   */
   DownloadCsv: {
+    /** @description The SQL query to execute */
     requestBody: {
       content: {
         "application/json": components["schemas"]["ExecuteSqlRequest"];
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description URL to download the CSV file */
       200: {
         content: {
           "application/json": components["schemas"]["Result_string.string_"];
@@ -6569,9 +6757,13 @@ export interface operations {
       };
     };
   };
+  /**
+   * List saved queries
+   * @description Get all saved queries for the organization
+   */
   GetSavedQueries: {
     responses: {
-      /** @description Ok */
+      /** @description Array of saved queries */
       200: {
         content: {
           "application/json": components["schemas"]["Result_Array_HqlSavedQuery_.string_"];
@@ -6579,14 +6771,19 @@ export interface operations {
       };
     };
   };
+  /**
+   * Get saved query
+   * @description Get a specific saved query by ID
+   */
   GetSavedQuery: {
     parameters: {
       path: {
+        /** @description The ID of the saved query */
         queryId: string;
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description The saved query details */
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery-or-null.string_"];
@@ -6594,9 +6791,40 @@ export interface operations {
       };
     };
   };
+  /**
+   * Update saved query
+   * @description Update an existing saved query
+   */
+  UpdateSavedQuery: {
+    parameters: {
+      path: {
+        /** @description The ID of the saved query to update */
+        queryId: string;
+      };
+    };
+    /** @description The updated query details */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description The updated saved query */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Delete saved query
+   * @description Delete a saved query by ID
+   */
   DeleteSavedQuery: {
     parameters: {
       path: {
+        /** @description The ID of the saved query to delete */
         queryId: string;
       };
     };
@@ -6609,7 +6837,12 @@ export interface operations {
       };
     };
   };
+  /**
+   * Bulk delete saved queries
+   * @description Delete multiple saved queries at once
+   */
   BulkDeleteSavedQueries: {
+    /** @description Array of query IDs to delete */
     requestBody: {
       content: {
         "application/json": components["schemas"]["BulkDeleteSavedQueriesRequest"];
@@ -6624,29 +6857,19 @@ export interface operations {
       };
     };
   };
-  UpdateSavedQuery: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateSavedQueryRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
-        };
-      };
-    };
-  };
+  /**
+   * Create saved query
+   * @description Create a new saved query
+   */
   CreateSavedQuery: {
+    /** @description The saved query details */
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateSavedQueryRequest"];
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description Array containing the created saved query */
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
@@ -7588,7 +7811,7 @@ export interface operations {
             posthogSession?: string;
             [key: string]: unknown;
           };
-          messages: components["schemas"]["ChatCompletionMessageParam"][];
+          messages: unknown[];
         };
       };
     };
@@ -7637,6 +7860,16 @@ export interface operations {
         sessionId: string;
       };
     };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  CreateAndEscalateThread: {
     responses: {
       /** @description Ok */
       200: {

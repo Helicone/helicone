@@ -33,6 +33,7 @@ const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
   like: "~",
   ilike: "≈",
   contains: "⊃",
+  "not-contains": "⊅",
   in: "∈",
 };
 
@@ -48,6 +49,7 @@ const FILTER_OPERATOR_DESCRIPTIVE_LABELS: Record<FilterOperator, string> = {
   like: "Like (~)",
   ilike: "Case Insensitive Like (≈)",
   contains: "Contains (⊃)",
+  "not-contains": "Not Contains (⊅)",
   in: "In (∈)",
 };
 

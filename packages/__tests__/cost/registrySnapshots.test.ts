@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from "@jest/globals";
 import { sync as globSync } from "glob";
 import * as path from "path";
 import { buildIndexes } from "../../cost/models/build-indexes";
+import { getUsageProcessor } from "@/cost/usage/getUsageProcessor";
 
 // Dynamically discover and import all endpoint files
 async function loadAllEndpoints() {
@@ -10,6 +11,7 @@ async function loadAllEndpoints() {
   });
 
   const endpoints: Record<string, any> = {};
+  const archivedEndpoints: Record<string, any> = {};
 
   for (const file of files) {
     try {
@@ -21,19 +23,25 @@ async function loadAllEndpoints() {
       if (module.endpoints) {
         endpoints[key] = module.endpoints;
       }
+      if (module.archivedEndpoints) {
+        archivedEndpoints[key] = module.archivedEndpoints;
+      }
     } catch (error) {
       console.warn(`Failed to import ${file}:`, error);
     }
   }
 
-  return endpoints;
+  return { endpoints, archivedEndpoints };
 }
 
 describe("Registry Snapshots", () => {
   let allEndpoints: Record<string, any>;
+  let allArchivedEndpoints: Record<string, any>;
 
   beforeAll(async () => {
-    allEndpoints = await loadAllEndpoints();
+    const loaded = await loadAllEndpoints();
+    allEndpoints = loaded.endpoints;
+    allArchivedEndpoints = loaded.archivedEndpoints;
   });
 
   it("pricing snapshot", () => {
@@ -85,14 +93,20 @@ describe("Registry Snapshots", () => {
     expect(configs).toMatchSnapshot();
   });
 
-  it("registry builds correctly", () => {
+  it("verify registry state", () => {
     // Flatten for buildIndexes
     const flat: Record<string, any> = {};
     Object.values(allEndpoints).forEach((endpoints) => {
       Object.assign(flat, endpoints);
     });
 
-    const indexes = buildIndexes(flat);
+    // Flatten archived endpoints
+    const flatArchived: Record<string, any> = {};
+    Object.values(allArchivedEndpoints).forEach((archivedEndpoints) => {
+      Object.assign(flatArchived, archivedEndpoints);
+    });
+
+    const indexes = buildIndexes(flat, flatArchived);
 
     // Verify all the important maps are built
     const snapshot = {
@@ -120,10 +134,53 @@ describe("Registry Snapshots", () => {
 
       // Sample endpoint IDs to ensure format is correct
       sampleEndpointIds: Array.from(indexes.endpointIdToEndpoint.keys())
-        .slice(0, 5)
-        .sort(),
+        .sort()
+        .slice(0, 5),
+
+      // Archived endpoints index
+      totalArchivedConfigs: indexes.modelToArchivedEndpointConfigs.size,
+
+      // Sample archived endpoint keys to ensure format is correct
+      sampleArchivedKeys: Array.from(indexes.modelToArchivedEndpointConfigs.keys())
+        .sort()
+        .slice(0, 5),
     };
 
+    // Verify all PTB endpoints have usage processors
+    const modelKeys = Array.from(indexes.modelToPtbEndpoints.keys());
+    modelKeys.forEach((key) => {
+      const endpoints = indexes.modelToPtbEndpoints.get(key);
+      if (!endpoints) {
+        throw new Error(`No endpoints found for model: ${key}`);
+      }
+      endpoints.forEach((endpoint) => {
+        const usageProcessor = getUsageProcessor(endpoint.provider);
+        if (!usageProcessor) {
+          throw new Error(`Usage processor not found for provider: "${endpoint.provider}" in model: "${key}"`);
+        }
+      });
+    });
+
     expect(snapshot).toMatchSnapshot();
+  });
+
+  it("archived endpoints snapshot", () => {
+    const archivedSnapshot: Record<string, any> = {};
+
+    Object.entries(allArchivedEndpoints).forEach(([model, archivedEndpoints]) => {
+      if (Object.keys(archivedEndpoints).length > 0) {
+        archivedSnapshot[model] = {};
+        Object.entries(archivedEndpoints).forEach(([key, config]: [string, any]) => {
+          archivedSnapshot[model][key] = {
+            provider: config.provider,
+            version: config.version,
+            modelId: config.providerModelId,
+            pricing: config.pricing,
+          };
+        });
+      }
+    });
+
+    expect(archivedSnapshot).toMatchSnapshot();
   });
 });

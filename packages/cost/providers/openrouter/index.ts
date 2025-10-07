@@ -244,6 +244,18 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 3e-6,
       completion_token: 1.5e-5,
+      prompt_cache_read_token: 7.5e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "x-ai/grok-4-fast",
+    },
+    cost: {
+      prompt_token: 2e-7,
+      completion_token: 5e-7,
+      prompt_cache_read_token: 5e-8,
     },
   },
   {
@@ -424,6 +436,7 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 3e-7,
       completion_token: 5e-7,
+      prompt_cache_read_token: 7.5e-8,
     },
   },
   {
@@ -434,6 +447,7 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 3e-6,
       completion_token: 1.5e-5,
+      prompt_cache_read_token: 7.5e-7,
     },
   },
   {

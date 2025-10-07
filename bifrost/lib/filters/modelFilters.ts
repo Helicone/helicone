@@ -7,7 +7,7 @@ import {
 import { getProviderDisplayName } from "../../../packages/cost/models/provider-helpers";
 
 // Define filtering-specific types
-export type ModelCapability = 
+export type ModelCapability =
   | "audio"
   | "video"
   | "image"
@@ -15,6 +15,7 @@ export type ModelCapability =
   | "web_search"
   | "caching"
   | "reasoning";
+
 
 export type SortOption = 
   | "name" 
@@ -64,6 +65,7 @@ export interface FilterOptions {
   inputModalities?: Set<InputModality>;
   outputModalities?: Set<OutputModality>;
   parameters?: Set<StandardParameter>;
+  showPtbOnly?: boolean;
 }
 
 // Search filter
@@ -162,24 +164,34 @@ export const filterByParameters = (models: Model[], parameters: Set<StandardPara
 // Capabilities filter
 export const filterByCapabilities = (models: Model[], capabilities: Set<string>): Model[] => {
   if (!capabilities.size) return models;
-  
+
   return models.filter(model => {
     const modelCapabilities = new Set<ModelCapability>();
-    
+
     model.endpoints.forEach(ep => {
       if (ep.pricing.audio && ep.pricing.audio > 0) modelCapabilities.add("audio");
       if (ep.pricing.video && ep.pricing.video > 0) modelCapabilities.add("video");
       if (ep.pricing.image && ep.pricing.image > 0) modelCapabilities.add("image");
       if (ep.pricing.thinking && ep.pricing.thinking > 0) modelCapabilities.add("thinking");
       if (ep.pricing.web_search && ep.pricing.web_search > 0) modelCapabilities.add("web_search");
-      if ((ep.pricing.cacheRead && ep.pricing.cacheRead > 0) || 
+      if ((ep.pricing.cacheRead && ep.pricing.cacheRead > 0) ||
           (ep.pricing.cacheWrite && ep.pricing.cacheWrite > 0)) {
         modelCapabilities.add("caching");
       }
     });
-    
+
     return Array.from(capabilities).some(c => modelCapabilities.has(c as ModelCapability));
   });
+};
+
+// PTB filter
+export const filterByPtb = (models: Model[], showPtbOnly: boolean): Model[] => {
+  if (!showPtbOnly) return models;
+
+  // Only models with at least one PTB-enabled endpoint
+  return models.filter(model =>
+    model.endpoints.some(ep => ep.supportsPtb)
+  );
 };
 
 // Sort models
@@ -220,44 +232,48 @@ export const sortModels = (models: Model[], sortBy: SortOption): Model[] => {
 // Composite filter function
 export const applyFilters = (models: Model[], options: FilterOptions): Model[] => {
   let filtered = models;
-  
+
   // Apply each filter in sequence
   if (options.search) {
     filtered = filterBySearch(filtered, options.search);
   }
-  
+
   if (options.providers && options.providers.size > 0) {
     filtered = filterByProviders(filtered, options.providers);
   }
-  
+
   if (options.authors && options.authors.size > 0) {
     filtered = filterByAuthors(filtered, options.authors);
   }
-  
+
   if (options.priceRange) {
     filtered = filterByPrice(filtered, options.priceRange);
   }
-  
+
   if (options.minContextSize && options.minContextSize > 0) {
     filtered = filterByContextSize(filtered, options.minContextSize);
   }
-  
+
   if (options.inputModalities && options.inputModalities.size > 0) {
     filtered = filterByInputModalities(filtered, options.inputModalities);
   }
-  
+
   if (options.outputModalities && options.outputModalities.size > 0) {
     filtered = filterByOutputModalities(filtered, options.outputModalities);
   }
-  
+
   if (options.parameters && options.parameters.size > 0) {
     filtered = filterByParameters(filtered, options.parameters);
   }
-  
+
   if (options.capabilities && options.capabilities.size > 0) {
     filtered = filterByCapabilities(filtered, options.capabilities);
   }
-  
+
+  if (options.showPtbOnly) {
+    filtered = filterByPtb(filtered, options.showPtbOnly);
+  }
+
   return filtered;
 };
 
@@ -272,22 +288,22 @@ export const extractAvailableFilters = (models: Model[]) => {
   const providersMap = new Map<string, string>();
   const authors = new Set<string>();
   const capabilities = new Set<ModelCapability>();
-  
+
   models.forEach(model => {
     authors.add(model.author);
-    
+
     model.endpoints.forEach(ep => {
       if (!providersMap.has(ep.provider)) {
         const displayName = getProviderDisplayName(ep.provider);
         providersMap.set(ep.provider, displayName);
       }
-      
+
       if (ep.pricing.audio && ep.pricing.audio > 0) capabilities.add("audio");
       if (ep.pricing.video && ep.pricing.video > 0) capabilities.add("video");
       if (ep.pricing.image && ep.pricing.image > 0) capabilities.add("image");
       if (ep.pricing.thinking && ep.pricing.thinking > 0) capabilities.add("thinking");
       if (ep.pricing.web_search && ep.pricing.web_search > 0) capabilities.add("web_search");
-      if ((ep.pricing.cacheRead && ep.pricing.cacheRead > 0) || 
+      if ((ep.pricing.cacheRead && ep.pricing.cacheRead > 0) ||
           (ep.pricing.cacheWrite && ep.pricing.cacheWrite > 0)) {
         capabilities.add("caching");
       }

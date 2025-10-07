@@ -8,7 +8,8 @@ export type IntegrationType =
 export interface Integration {
   title: string;
   type: IntegrationType;
-  enabled?: boolean;
+  configured: boolean;
+  enabled: boolean;
 }
 
 export interface IntegrationSection {

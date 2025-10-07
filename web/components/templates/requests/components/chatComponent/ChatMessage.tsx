@@ -1,4 +1,3 @@
-import MarkdownEditor from "@/components/shared/markdownEditor";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { logger } from "@/lib/telemetry/logger";
@@ -364,26 +363,13 @@ const renderContentByType = (
         onDelete: options.onDelete,
       });
     case "tool":
-      return mode === "raw" && chatMode !== "PLAYGROUND_INPUT" ? (
-        <MarkdownEditor
-          language="json"
-          setText={() => {}}
-          text={
-            typeof message === "string"
-              ? message
-              : JSON.stringify(message, null, 2)
-          }
-          disabled
-        />
-      ) : (
-        renderToolMessage(
-          displayContent,
-          message,
-          chatMode === "PLAYGROUND_INPUT",
-          mappedRequest,
-          messageIndex,
-          options.onChatChange,
-        )
+      return renderToolMessage(
+        displayContent,
+        message,
+        chatMode === "PLAYGROUND_INPUT",
+        mappedRequest,
+        messageIndex,
+        options.onChatChange,
       );
     case "text":
       return renderTextContent(

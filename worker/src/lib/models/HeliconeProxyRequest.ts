@@ -14,6 +14,7 @@ import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType"
 import { RateLimitOptions } from "../clients/DurableObjectRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
 import { EscrowInfo } from "../ai-gateway/types";
+import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -34,8 +35,8 @@ export interface HeliconeProxyRequest {
   retryOptions: IHeliconeHeaders["retryHeaders"];
   omitOptions: IHeliconeHeaders["omitHeaders"];
 
-  requestJson: { stream?: boolean; user?: string } | Record<string, never>;
-  bodyText: string | null;
+  body: ValidRequestBody;
+  unsafeGetBodyText: () => Promise<string | null>;
 
   heliconeErrors: string[];
   providerAuthHash?: string;
@@ -83,7 +84,9 @@ export class HeliconeProxyRequestMapper {
   private async getHeliconeTemplate() {
     if (this.request.heliconeHeaders.promptHeaders.promptId) {
       try {
-        const rawJson = JSON.parse(await this.request.getRawText());
+        const rawJson = JSON.parse(
+          await this.request.requestBodyBuffer.unsafeGetRawText()
+        );
 
         // Get the mapper type based on the request
         const mapperType = getMapperType({
@@ -139,8 +142,7 @@ export class HeliconeProxyRequestMapper {
 
     const targetUrl = buildTargetUrl(this.request.url, api_base);
 
-    const requestJson = await this.requestJson();
-    let isStream = requestJson.stream === true;
+    let isStream = await this.request.requestBodyBuffer.isStream();
 
     if (this.provider === "GOOGLE") {
       const queryParams = new URLSearchParams(targetUrl.search);
@@ -149,7 +151,15 @@ export class HeliconeProxyRequestMapper {
     }
 
     if (this.provider === "AWS" || this.provider === "BEDROCK") {
-      isStream = isStream || targetUrl.pathname.includes("invoke-with-response-stream");
+      isStream =
+        isStream || targetUrl.pathname.includes("invoke-with-response-stream");
+    }
+
+    let body: ValidRequestBody;
+    try {
+      body = await this.request.safelyGetBody();
+    } catch (e) {
+      body = await this.request.unsafeGetBodyText();
     }
 
     return {
@@ -159,7 +169,6 @@ export class HeliconeProxyRequestMapper {
         isRateLimitedKey:
           this.request.heliconeHeaders.heliconeAuthV2?.keyType ===
           "rate-limited",
-        requestJson: requestJson,
         retryOptions: this.request.heliconeHeaders.retryHeaders,
         provider: this.provider,
         tokenCalcUrl: this.tokenCalcUrl,
@@ -171,7 +180,9 @@ export class HeliconeProxyRequestMapper {
         heliconeErrors: this.heliconeErrors,
         api_base,
         isStream: isStream,
-        bodyText: await this.getBody(),
+        body: body,
+        unsafeGetBodyText: this.request.unsafeGetBodyText.bind(this.request),
+
         startTime,
         url: this.request.url,
         requestId:
@@ -184,24 +195,6 @@ export class HeliconeProxyRequestMapper {
       },
       error: null,
     };
-  }
-
-  private async getBody(): Promise<string | null> {
-    if (this.request.getMethod() === "GET") {
-      return null;
-    }
-
-    if (this.request.heliconeHeaders.featureFlags.streamUsage) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const jsonBody = (await this.request.getJson()) as any;
-      if (!jsonBody["stream_options"]) {
-        jsonBody["stream_options"] = {};
-      }
-      jsonBody["stream_options"]["include_usage"] = true;
-      return JSON.stringify(jsonBody);
-    }
-
-    return await this.request.getText();
   }
 
   private validateApiConfiguration(api_base: string | undefined): boolean {
@@ -257,11 +250,5 @@ export class HeliconeProxyRequestMapper {
       this.heliconeErrors.push(rateLimitOptions.error);
     }
     return rateLimitOptions.data ?? null;
-  }
-
-  async requestJson(): Promise<HeliconeProxyRequest["requestJson"]> {
-    return this.request.getMethod() === "POST"
-      ? await this.request.getJson()
-      : {};
   }
 }

@@ -72,7 +72,11 @@ describe("getMapperTypeFromHeliconeRequest", () => {
       prompt_cache_write_tokens: null,
       prompt_cache_read_tokens: null,
       completion_tokens: null,
+      prompt_audio_tokens: null,
+      completion_audio_tokens: null,
+      cost: null,
       prompt_id: null,
+      prompt_version: null,
       llmSchema: null,
       country_code: null,
       asset_ids: null,
@@ -81,6 +85,8 @@ describe("getMapperTypeFromHeliconeRequest", () => {
       properties: {},
       assets: [],
       target_url: "/v1/models/gemini-pro:generateContent",
+      cache_reference_id: null,
+      cache_enabled: false,
     };
 
     const result = getMapperTypeFromHeliconeRequest(heliconeRequest, "unknown");

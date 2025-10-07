@@ -1,657 +1,1253 @@
-import { SELF } from "cloudflare:test";
-import { fetchMock } from "cloudflare:test";
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, beforeEach, vi } from "vitest";
 import "../setup";
-import {
-  setupTestEnvironment,
-  cleanupTestEnvironment,
-  mockOpenAIEndpoint,
-  mockAzureOpenAIEndpoint,
-  mockGroqEndpoint,
-  createAIGatewayRequest,
-} from "../test-utils";
+import { runGatewayTest } from "./test-framework";
+import { createOpenAIMockResponse } from "../test-utils";
+
+// Define auth expectations for different providers
+const openaiAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
+const azureAuthExpectations = {
+  headers: {
+    "api-key": "test-azure-api-key",
+  },
+};
+
+const groqAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
+const deepinfraAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
 
 describe("OpenAI Registry Tests", () => {
   beforeEach(() => {
-    setupTestEnvironment();
-  });
-
-  afterEach(() => {
-    cleanupTestEnvironment();
+    // Clear all mocks between tests
+    vi.clearAllMocks();
   });
 
   describe("BYOK Tests - OpenAI Models", () => {
-    // Note: OpenAI models only have the 'openai' provider, no vertex/bedrock
-
-    // GPT-4o Tests
     describe("gpt-4o", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("gpt-4o");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "gpt-4o/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4o",
+                data: createOpenAIMockResponse("gpt-4o"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4o/openai")
-        );
+      it("should handle azure provider", () =>
+        runGatewayTest({
+          model: "gpt-4o/azure",
+          expected: {
+            providers: [
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4o",
+                data: createOpenAIMockResponse("gpt-4o"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-4o",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4o",
+                data: createOpenAIMockResponse("gpt-4o"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-      it("should handle azure provider", async () => {
-        mockAzureOpenAIEndpoint("gpt-4o");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4o/azure")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("gpt-4o");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4o")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should fallback from openai to azure when openai fails", async () => {
-        // Mock OpenAI failure
-        fetchMock
-          .get("https://api.openai.com")
-          .intercept({ path: "/v1/chat/completions", method: "POST" })
-          .reply(() => ({
-            statusCode: 500,
-            data: { error: "OpenAI provider failed" },
-          }))
-          .persist();
-
-        // Mock Azure success
-        mockAzureOpenAIEndpoint("gpt-4o");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4o") // No provider specified, should try openai -> azure
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should fallback from openai to azure when openai fails", () =>
+        runGatewayTest({
+          model: "gpt-4o",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4o",
+                data: createOpenAIMockResponse("gpt-4o"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // GPT-4o-mini Tests
     describe("gpt-4o-mini", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("gpt-4o-mini");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "gpt-4o-mini/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4o-mini",
+                data: createOpenAIMockResponse("gpt-4o-mini"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4o-mini/openai")
-        );
+      it("should handle azure provider", () =>
+        runGatewayTest({
+          model: "gpt-4o-mini/azure",
+          expected: {
+            providers: [
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4o-mini",
+                data: createOpenAIMockResponse("gpt-4o-mini"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-4o-mini",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4o-mini",
+                data: createOpenAIMockResponse("gpt-4o-mini"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-      it("should handle azure provider", async () => {
-        mockAzureOpenAIEndpoint("gpt-4o-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4o-mini/azure")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("gpt-4o-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4o-mini")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should fallback from openai to azure when openai fails", async () => {
-        // Mock OpenAI failure
-        fetchMock
-          .get("https://api.openai.com")
-          .intercept({ path: "/v1/chat/completions", method: "POST" })
-          .reply(() => ({
-            statusCode: 500,
-            data: { error: "OpenAI provider failed" },
-          }))
-          .persist();
-
-        // Mock Azure success
-        mockAzureOpenAIEndpoint("gpt-4o-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4o-mini") // No provider specified, should try openai -> azure
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should fallback from openai to azure when openai fails", () =>
+        runGatewayTest({
+          model: "gpt-4o-mini",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4o-mini",
+                data: createOpenAIMockResponse("gpt-4o-mini"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // ChatGPT-4o-latest Tests
     describe("chatgpt-4o-latest", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("chatgpt-4o-latest");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "chatgpt-4o-latest/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "chatgpt-4o-latest",
+                data: createOpenAIMockResponse("chatgpt-4o-latest"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("chatgpt-4o-latest/openai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("chatgpt-4o-latest");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("chatgpt-4o-latest")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "chatgpt-4o-latest",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "chatgpt-4o-latest",
+                data: createOpenAIMockResponse("chatgpt-4o-latest"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // GPT-4.1 Tests
     describe("gpt-4.1", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("gpt-4.1");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "gpt-4.1/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4.1",
+                data: createOpenAIMockResponse("gpt-4.1"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1/openai")
-        );
+      it("should handle azure provider", () =>
+        runGatewayTest({
+          model: "gpt-4.1/azure",
+          expected: {
+            providers: [
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4.1",
+                data: createOpenAIMockResponse("gpt-4.1"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-4.1",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4.1",
+                data: createOpenAIMockResponse("gpt-4.1"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-      it("should handle azure provider", async () => {
-        mockAzureOpenAIEndpoint("gpt-4.1");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1/azure")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("gpt-4.1");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should fallback from openai to azure when openai fails", async () => {
-        // Mock OpenAI failure
-        fetchMock
-          .get("https://api.openai.com")
-          .intercept({ path: "/v1/chat/completions", method: "POST" })
-          .reply(() => ({
-            statusCode: 500,
-            data: { error: "OpenAI provider failed" },
-          }))
-          .persist();
-
-        // Mock Azure success
-        mockAzureOpenAIEndpoint("gpt-4.1");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1") // No provider specified, should try openai -> azure
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should fallback from openai to azure when openai fails", () =>
+        runGatewayTest({
+          model: "gpt-4.1",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4.1",
+                data: createOpenAIMockResponse("gpt-4.1"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // GPT-4.1-mini Tests
     describe("gpt-4.1-mini", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("gpt-4.1-mini");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "gpt-4.1-mini/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4.1-mini",
+                data: createOpenAIMockResponse("gpt-4.1-mini"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1-mini/openai")
-        );
+      it("should handle azure provider", () =>
+        runGatewayTest({
+          model: "gpt-4.1-mini/azure",
+          expected: {
+            providers: [
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4.1-mini",
+                data: createOpenAIMockResponse("gpt-4.1-mini"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-4.1-mini",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4.1-mini",
+                data: createOpenAIMockResponse("gpt-4.1-mini"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-      it("should handle azure provider", async () => {
-        mockAzureOpenAIEndpoint("gpt-4.1-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1-mini/azure")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("gpt-4.1-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1-mini")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should fallback from openai to azure when openai fails", async () => {
-        // Mock OpenAI failure
-        fetchMock
-          .get("https://api.openai.com")
-          .intercept({ path: "/v1/chat/completions", method: "POST" })
-          .reply(() => ({
-            statusCode: 500,
-            data: { error: "OpenAI provider failed" },
-          }))
-          .persist();
-
-        // Mock Azure success
-        mockAzureOpenAIEndpoint("gpt-4.1-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1-mini") // No provider specified, should try openai -> azure
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should fallback from openai to azure when openai fails", () =>
+        runGatewayTest({
+          model: "gpt-4.1-mini",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4.1-mini",
+                data: createOpenAIMockResponse("gpt-4.1-mini"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // GPT-4.1-nano Tests
     describe("gpt-4.1-nano", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("gpt-4.1-nano");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "gpt-4.1-nano/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4.1-nano",
+                data: createOpenAIMockResponse("gpt-4.1-nano"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1-nano/openai")
-        );
+      it("should handle azure provider", () =>
+        runGatewayTest({
+          model: "gpt-4.1-nano/azure",
+          expected: {
+            providers: [
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4.1-nano",
+                data: createOpenAIMockResponse("gpt-4.1-nano"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-4.1-nano",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4.1-nano",
+                data: createOpenAIMockResponse("gpt-4.1-nano"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-      it("should handle azure provider", async () => {
-        mockAzureOpenAIEndpoint("gpt-4.1-nano");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1-nano/azure")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("gpt-4.1-nano");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1-nano")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should fallback from openai to azure when openai fails", async () => {
-        // Mock OpenAI failure
-        fetchMock
-          .get("https://api.openai.com")
-          .intercept({ path: "/v1/chat/completions", method: "POST" })
-          .reply(() => ({
-            statusCode: 500,
-            data: { error: "OpenAI provider failed" },
-          }))
-          .persist();
-
-        // Mock Azure success
-        mockAzureOpenAIEndpoint("gpt-4.1-nano");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-4.1-nano") // No provider specified, should try openai -> azure
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should fallback from openai to azure when openai fails", () =>
+        runGatewayTest({
+          model: "gpt-4.1-nano",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4.1-nano",
+                data: createOpenAIMockResponse("gpt-4.1-nano"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // GPT-5 Tests
     describe("gpt-5", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("gpt-5");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "gpt-5/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-5",
+                data: createOpenAIMockResponse("gpt-5"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-5/openai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("gpt-5");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-5")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-5",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-5",
+                data: createOpenAIMockResponse("gpt-5"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // GPT-5-mini Tests
     describe("gpt-5-mini", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("gpt-5-mini");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "gpt-5-mini/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-5-mini",
+                data: createOpenAIMockResponse("gpt-5-mini"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-5-mini/openai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("gpt-5-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-5-mini")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-5-mini",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-5-mini",
+                data: createOpenAIMockResponse("gpt-5-mini"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // GPT-5-nano Tests
     describe("gpt-5-nano", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("gpt-5-nano");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "gpt-5-nano/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-5-nano",
+                data: createOpenAIMockResponse("gpt-5-nano"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-5-nano/openai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("gpt-5-nano");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-5-nano")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-5-nano",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-5-nano",
+                data: createOpenAIMockResponse("gpt-5-nano"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // GPT-5-chat-latest Tests
     describe("gpt-5-chat-latest", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("gpt-5-chat-latest");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "gpt-5-chat-latest/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-5-chat-latest",
+                data: createOpenAIMockResponse("gpt-5-chat-latest"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-5-chat-latest/openai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("gpt-5-chat-latest");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-5-chat-latest")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-5-chat-latest",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-5-chat-latest",
+                data: createOpenAIMockResponse("gpt-5-chat-latest"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // O3 Tests
     describe("o3", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("o3");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "o3/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "o3-2025-04-16",
+                data: createOpenAIMockResponse("o3-2025-04-16"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o3/openai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("o3");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o3")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "o3",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "o3-2025-04-16",
+                data: createOpenAIMockResponse("o3-2025-04-16"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // O3-pro Tests
     describe("o3-pro", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("o3-pro");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "o3-pro/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "o3-pro-2025-06-10",
+                data: createOpenAIMockResponse("o3-pro-2025-06-10"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o3-pro/openai")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("o3-pro");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o3-pro")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "o3-pro",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "o3-pro-2025-06-10",
+                data: createOpenAIMockResponse("o3-pro-2025-06-10"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // O3-mini Tests
     describe("o3-mini", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("o3-mini");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "o3-mini/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "o3-mini",
+                data: createOpenAIMockResponse("o3-mini"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o3-mini/openai")
-        );
+      it("should handle azure provider", () =>
+        runGatewayTest({
+          model: "o3-mini/azure",
+          expected: {
+            providers: [
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "o3-mini",
+                data: createOpenAIMockResponse("o3-mini"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "o3-mini",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "o3-mini",
+                data: createOpenAIMockResponse("o3-mini"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-      it("should handle azure provider", async () => {
-        mockAzureOpenAIEndpoint("o3-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o3-mini/azure")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("o3-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o3-mini")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should fallback from openai to azure when openai fails", async () => {
-        // Mock OpenAI failure
-        fetchMock
-          .get("https://api.openai.com")
-          .intercept({ path: "/v1/chat/completions", method: "POST" })
-          .reply(() => ({
-            statusCode: 500,
-            data: { error: "OpenAI provider failed" },
-          }))
-          .persist();
-
-        // Mock Azure success
-        mockAzureOpenAIEndpoint("o3-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o3-mini") // No provider specified, should try openai -> azure
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should fallback from openai to azure when openai fails", () =>
+        runGatewayTest({
+          model: "o3-mini",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "o3-mini",
+                data: createOpenAIMockResponse("o3-mini"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // O4-mini Tests
     describe("o4-mini", () => {
-      it("should handle openai provider", async () => {
-        mockOpenAIEndpoint("o4-mini");
+      it("should handle openai provider", () =>
+        runGatewayTest({
+          model: "o4-mini/openai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "o4-mini",
+                data: createOpenAIMockResponse("o4-mini"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o4-mini/openai")
-        );
+      it("should handle azure provider", () =>
+        runGatewayTest({
+          model: "o4-mini/azure",
+          expected: {
+            providers: [
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "o4-mini",
+                data: createOpenAIMockResponse("o4-mini"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select openai provider when none specified", () =>
+        runGatewayTest({
+          model: "o4-mini",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "o4-mini",
+                data: createOpenAIMockResponse("o4-mini"),
+                expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-      it("should handle azure provider", async () => {
-        mockAzureOpenAIEndpoint("o4-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o4-mini/azure")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select openai provider when none specified", async () => {
-        mockOpenAIEndpoint("o4-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o4-mini")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should fallback from openai to azure when openai fails", async () => {
-        // Mock OpenAI failure
-        fetchMock
-          .get("https://api.openai.com")
-          .intercept({ path: "/v1/chat/completions", method: "POST" })
-          .reply(() => ({
-            statusCode: 500,
-            data: { error: "OpenAI provider failed" },
-          }))
-          .persist();
-
-        // Mock Azure success
-        mockAzureOpenAIEndpoint("o4-mini");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("o4-mini") // No provider specified, should try openai -> azure
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should fallback from openai to azure when openai fails", () =>
+        runGatewayTest({
+          model: "o4-mini",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "o4-mini",
+                data: createOpenAIMockResponse("o4-mini"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // GPT-OSS-120b Tests (OpenAI model via Groq)
+    // OpenAI OSS models via Groq
     describe("gpt-oss-120b", () => {
-      it("should handle groq provider", async () => {
-        mockGroqEndpoint("gpt-oss-120b");
+      it("should handle groq provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b/groq",
+          expected: {
+            providers: [
+              {
+                url: "https://api.groq.com/openai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-120b",
+                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                expects: groqAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-oss-120b/groq")
-        );
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-120b",
+                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select groq provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b",
+          expected: {
+            providers: [
+              {
+                url: "https://api.groq.com/openai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-120b",
+                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                expects: groqAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-      it("should auto-select groq provider when none specified", async () => {
-        mockGroqEndpoint("gpt-oss-120b");
+      // Test tool usage with DeepInfra
+      it("should handle tool calls with deepinfra provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b/deepinfra",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-120b",
+                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-oss-120b")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      // Test response format support with DeepInfra
+      it("should handle response format with deepinfra provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b/deepinfra",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Generate JSON data" }],
+              response_format: { type: "json_object" },
+              temperature: 0.1,
+              top_p: 0.9,
+              frequency_penalty: 0.5,
+              presence_penalty: 0.3,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-120b",
+                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_object",
+                    "temperature",
+                    "top_p",
+                    "frequency_penalty",
+                    "presence_penalty",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
 
-    // GPT-OSS-20b Tests (OpenAI model via Groq)
     describe("gpt-oss-20b", () => {
-      it("should handle groq provider", async () => {
-        mockGroqEndpoint("gpt-oss-20b");
+      it("should handle groq provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-20b/groq",
+          expected: {
+            providers: [
+              {
+                url: "https://api.groq.com/openai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-20b",
+                data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+                expects: groqAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
 
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-oss-20b/groq")
-        );
-
-        expect(response.status).toBe(200);
-      });
-
-      it("should auto-select groq provider when none specified", async () => {
-        mockGroqEndpoint("gpt-oss-20b");
-
-        const response = await SELF.fetch(
-          "https://ai-gateway.helicone.ai/v1/chat/completions",
-          createAIGatewayRequest("gpt-oss-20b")
-        );
-
-        expect(response.status).toBe(200);
-      });
+      it("should auto-select groq provider when none specified", () =>
+        runGatewayTest({
+          model: "gpt-oss-20b",
+          expected: {
+            providers: [
+              {
+                url: "https://api.groq.com/openai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-20b",
+                data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+                expects: groqAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
     });
+
+    // More complex test using the full framework
+    describe("Advanced scenarios", () => {
+      it("should handle custom error messages", () =>
+        runGatewayTest({
+          model: "gpt-4o",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-4o",
+                data: createOpenAIMockResponse("gpt-4o"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should fail when all providers fail", () =>
+        runGatewayTest({
+          model: "gpt-4o",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "Internal server error",
+              },
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "Azure endpoint unavailable",
+              },
+              {
+                url: "https://openrouter.ai/api/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "OpenRouter endpoint unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+  });
+
+  // Error scenarios and edge cases for gpt-oss with DeepInfra
+  describe("Error scenarios - gpt-oss-120b with DeepInfra Provider", () => {
+    it("should handle DeepInfra provider failure", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "DeepInfra service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from DeepInfra", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from DeepInfra", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+
+    it("should handle model not found error from DeepInfra", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 404,
+              errorMessage: "Model not found",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle timeout from DeepInfra", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 408,
+              errorMessage: "Request timeout",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+  });
+
+  // Provider URL validation and model mapping for gpt-oss with DeepInfra
+  describe("Provider validation - gpt-oss-120b with DeepInfra", () => {
+    it("should construct correct DeepInfra URL for gpt-oss-120b", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b",
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: deepinfraAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://api.deepinfra.com/
+                // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for DeepInfra", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: deepinfraAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for DeepInfra", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/deepinfra",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b",
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: {
+                ...deepinfraAuthExpectations,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    // Test all supported parameters
+    it("should handle all supported parameters with DeepInfra", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/deepinfra",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Test comprehensive parameters" },
+            ],
+            max_tokens: 1000,
+            temperature: 0.8,
+            top_p: 0.95,
+            stop: ["STOP"],
+            frequency_penalty: 0.2,
+            presence_penalty: 0.1,
+            repetition_penalty: 1.1,
+            top_k: 40,
+            seed: 12345,
+            min_p: 0.05,
+            response_format: { type: "text" },
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b",
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: {
+                ...deepinfraAuthExpectations,
+                bodyContains: [
+                  "max_tokens",
+                  "temperature",
+                  "top_p",
+                  "stop",
+                  "frequency_penalty",
+                  "presence_penalty",
+                  "repetition_penalty",
+                  "top_k",
+                  "seed",
+                  "min_p",
+                  "response_format",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
   });
 });

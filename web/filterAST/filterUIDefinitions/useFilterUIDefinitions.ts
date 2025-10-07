@@ -85,7 +85,7 @@ export const useFilterUIDefinitions = () => {
               ].label
             : property.property,
         type: "searchable",
-        operators: ["contains", "eq", "neq", "like", "ilike", "in"],
+        operators: ["contains", "not-contains", "eq", "neq", "like", "ilike", "in"],
         onSearch: (searchTerm) => {
           return searchProperties
             .mutateAsync({
@@ -108,7 +108,7 @@ export const useFilterUIDefinitions = () => {
       id: "model",
       label: "Model",
       type: "searchable",
-      operators: ["contains", "eq", "neq", "like", "ilike", "in"],
+      operators: ["contains", "not-contains", "eq", "neq", "like", "ilike", "in"],
 
       onSearch: async (searchTerm) => {
         return Promise.resolve(

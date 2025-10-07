@@ -30,7 +30,7 @@ import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
 import { Check, ChevronDown, PieChart, Table } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -38,7 +38,11 @@ import {
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { getRequestsByIdsWithBodies } from "../../../services/hooks/requests";
-import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
+import {
+  useSessionNames,
+  useSessions,
+  useSessionsAggregateMetrics,
+} from "../../../services/hooks/sessions";
 import {
   columnDefsToDragColumnItems,
   DragColumnItem,
@@ -50,6 +54,8 @@ import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { getColumns } from "./initialColumns";
 import { EMPTY_SESSION_NAME } from "./sessionId/SessionContent";
 import SessionMetrics from "./SessionMetrics";
+import TableFooter from "../requests/tableFooter";
+import { useRouter } from "next/router";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -101,6 +107,11 @@ const SessionsPage = (props: SessionsPageProps) => {
     columnDefsToDragColumnItems(getColumns()),
   );
 
+  const [currentPageSize, setCurrentPageSize] = useState<number>(
+    props.pageSize,
+  );
+  const [page, setPage] = useState<number>(props.currentPage);
+
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
     start: getTimeIntervalAgo("1m"),
     end: new Date(),
@@ -130,6 +141,7 @@ const SessionsPage = (props: SessionsPageProps) => {
   ];
   const allNames = useSessionNames("", timeFilter);
 
+  const router = useRouter();
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
   const [selectedName, setSelectedName] = useState<string | undefined>(
     props.selectedName,
@@ -139,7 +151,16 @@ const SessionsPage = (props: SessionsPageProps) => {
     timeFilter,
     sessionIdSearch: debouncedSessionIdSearch ?? "",
     selectedName,
+    page: page,
+    pageSize: currentPageSize,
   });
+
+  const { aggregateMetrics, isLoading: isCountLoading } =
+    useSessionsAggregateMetrics({
+      timeFilter,
+      sessionIdSearch: debouncedSessionIdSearch ?? "",
+      selectedName,
+    });
 
   const sessionsWithId = useMemo(() => {
     return sessions.map((session, index) => ({
@@ -171,7 +192,22 @@ const SessionsPage = (props: SessionsPageProps) => {
     }
   };
 
-  const isSessionsLoading = isLoading || allNames.isLoading || names.isLoading;
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: newPage.toString() },
+        },
+        undefined,
+        { shallow: true },
+      );
+    },
+    [router],
+  );
+
+  const isSessionsLoading =
+    isLoading || allNames.isLoading || names.isLoading || hasSessions.isLoading;
 
   // Helper function to get TimeFilter object
   const getTimeFilterObject = (start: Date, end: Date): TimeFilter => ({
@@ -224,46 +260,24 @@ const SessionsPage = (props: SessionsPageProps) => {
     [isShiftPressed, toggleSelection],
   );
 
-  // Calculate aggregated stats
   const aggregatedStats = useMemo(() => {
-    if (!sessions || sessions.length === 0) {
+    if (!aggregateMetrics) {
       return {
-        lastUsed: "-",
         avgCost: "-",
         avgLatency: "-",
         totalCost: "-",
         totalSessions: 0,
-        createdOn: "-",
       };
     }
 
-    const totalCost = sessions.reduce((sum, s) => sum + s.total_cost, 0);
-    const avgCost = totalCost / sessions.length;
-    const lastUsed = new Date(
-      Math.max(
-        ...sessions.map((s) => new Date(s.latest_request_created_at).getTime()),
-      ),
-    ).toLocaleString();
-    const createdOn = new Date(
-      Math.min(...sessions.map((s) => new Date(s.created_at).getTime())),
-    ).toLocaleDateString();
-
-    // Calculate simple average of session average latencies
-    const totalAvgLatency = sessions.reduce((sum, s) => sum + s.avg_latency, 0);
-    const avgLatency =
-      sessions.length > 0 ? totalAvgLatency / sessions.length : 0;
-
     return {
-      lastUsed,
-      avgCost: `$${avgCost.toFixed(4)}`,
-      avgLatency: `${(avgLatency * 1000).toFixed(0)}ms`,
-      totalCost: `$${totalCost.toFixed(4)}`,
-      totalSessions: sessions.length,
-      createdOn,
+      avgCost: `$${aggregateMetrics.avg_cost.toFixed(4)}`,
+      avgLatency: `${(aggregateMetrics.avg_latency * 1000).toFixed(0)}ms`,
+      totalCost: `$${aggregateMetrics.total_cost.toFixed(4)}`,
+      totalSessions: aggregateMetrics.count,
     };
-  }, [sessions]);
+  }, [aggregateMetrics]);
   const statsToDisplay = [
-    { label: "Last Used", value: aggregatedStats.lastUsed },
     { label: "Avg Cost", value: aggregatedStats.avgCost },
     { label: "Avg Latency", value: aggregatedStats.avgLatency },
     { label: "Total Cost", value: aggregatedStats.totalCost },
@@ -271,8 +285,17 @@ const SessionsPage = (props: SessionsPageProps) => {
       label: "Total Sessions",
       value: aggregatedStats.totalSessions.toString(),
     },
-    { label: "Created On", value: aggregatedStats.createdOn },
   ];
+
+  useEffect(() => {
+    const pageFromQuery = router.query.page;
+    if (pageFromQuery && !Array.isArray(pageFromQuery)) {
+      const parsedPage = parseInt(pageFromQuery, 10);
+      if (!isNaN(parsedPage) && parsedPage !== page) {
+        setPage(parsedPage);
+      }
+    }
+  }, [router.query.page]);
 
   return hasSessions || isSessionsLoading ? (
     <main className="flex h-screen w-full animate-fade-in flex-col">
@@ -428,27 +451,42 @@ const SessionsPage = (props: SessionsPageProps) => {
           />
         )}
 
-        <TabsContent value="sessions" className="h-full w-full">
-          <ThemedTable
-            id="sessions-table"
-            tableRef={tableRef}
-            defaultData={sessionsWithId}
-            defaultColumns={getColumns()}
-            skeletonLoading={isLoading}
-            dataLoading={isLoading}
-            activeColumns={activeColumns}
-            setActiveColumns={setActiveColumns}
-            rowLink={(row: TSessions) =>
-              `/sessions/${
-                row.metadata.session_name
-                  ? encodeURIComponent(row.metadata.session_name)
-                  : EMPTY_SESSION_NAME
-              }/${encodeURIComponent(row.metadata.session_id)}`
-            }
-            checkboxMode={"on_hover"}
-            onRowSelect={onRowSelectHandler}
-            onSelectAll={selectAll}
-            selectedIds={selectedIds}
+        <TabsContent
+          value="sessions"
+          className="flex min-h-0 w-full flex-1 flex-col"
+        >
+          <div className="min-h-0 flex-1">
+            <ThemedTable
+              id="sessions-table"
+              tableRef={tableRef}
+              defaultData={sessionsWithId}
+              defaultColumns={getColumns()}
+              skeletonLoading={isLoading}
+              dataLoading={isLoading}
+              activeColumns={activeColumns}
+              setActiveColumns={setActiveColumns}
+              rowLink={(row: TSessions) =>
+                `/sessions/${
+                  row.metadata.session_name
+                    ? encodeURIComponent(row.metadata.session_name)
+                    : EMPTY_SESSION_NAME
+                }/${encodeURIComponent(row.metadata.session_id)}`
+              }
+              checkboxMode={"on_hover"}
+              onRowSelect={onRowSelectHandler}
+              onSelectAll={selectAll}
+              selectedIds={selectedIds}
+            />
+          </div>
+
+          <TableFooter
+            currentPage={page}
+            pageSize={currentPageSize}
+            isCountLoading={isCountLoading}
+            count={aggregateMetrics?.count || 0}
+            onPageChange={(n) => handlePageChange(n)}
+            onPageSizeChange={(n) => setCurrentPageSize(n)}
+            pageSizeOptions={[25, 50, 100, 250, 500]}
           />
         </TabsContent>
         <TabsContent value="metrics">

@@ -50,8 +50,9 @@ export async function kvKeyFromRequest(
   const ignoreKeys =
     request.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys ?? [];
 
+  // TODO: change to use safelyGetBody
   const body = tryGetBodyAndRemoveKeys(
-    await request.requestWrapper.getText(),
+    await request.requestWrapper.unsafeGetBodyText(),
     ignoreKeys
   );
 

@@ -122,6 +122,7 @@ export function RenderMappedRequest({
       ) : (
         (() => {
           switch (mappedRequest._type) {
+            case "ai-gateway":
             case "openai-chat":
             case "gemini-chat":
             case "vercel-chat":

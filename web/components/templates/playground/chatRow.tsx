@@ -204,8 +204,15 @@ const ChatRow = (props: ChatRowProps) => {
   const [minimize, setMinimize] = useState(false);
 
   const [role, setRole] = useState<
-    "system" | "user" | "assistant" | "function"
-  >(currentMessage.role as "system" | "user" | "assistant" | "function");
+    "system" | "user" | "assistant" | "function" | "tool"
+  >(
+    currentMessage.role as
+      | "system"
+      | "user"
+      | "assistant"
+      | "function"
+      | "tool",
+  );
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -226,6 +233,24 @@ const ChatRow = (props: ChatRowProps) => {
   const { setNotification } = useNotification();
 
   const getContentAsString = (rawMessage: ExtendedMessage): string => {
+    // Handle tool_calls - serialize the entire message structure
+    if (rawMessage.tool_calls && rawMessage.tool_calls.length > 0) {
+      // Create a simplified structure for editing
+      const toolCallsData = rawMessage.tool_calls.map((tool) => ({
+        name: tool.name,
+        arguments: tool.arguments,
+        ...(tool.id && { id: tool.id }),
+      }));
+      return JSON.stringify(
+        {
+          ...(rawMessage.content && { content: rawMessage.content }),
+          tool_calls: toolCallsData,
+        },
+        null,
+        2,
+      );
+    }
+
     if (Array.isArray(rawMessage.content)) {
       const textMessage = rawMessage.content.find(
         (element) => element.type === "text",
@@ -503,22 +528,50 @@ const ChatRow = (props: ChatRowProps) => {
                       ...currentMessage,
                       _type: "message" as const,
                     };
-                    const messageContent = newMessages.content;
-                    if (Array.isArray(messageContent)) {
-                      const textMessage = messageContent.find(
-                        (element) => element.type === "text",
-                      );
-                      if (textMessage) {
-                        textMessage.text = text;
-                      } else {
-                        messageContent.push({
-                          type: "text",
-                          text,
-                          _type: "message",
-                        });
+
+                    // Check if this message originally had tool_calls
+                    if (
+                      currentMessage.tool_calls &&
+                      currentMessage.tool_calls.length > 0
+                    ) {
+                      try {
+                        // Try to parse as JSON to update tool_calls
+                        const parsed = JSON.parse(text);
+                        if (
+                          parsed.tool_calls &&
+                          Array.isArray(parsed.tool_calls)
+                        ) {
+                          newMessages.tool_calls = parsed.tool_calls;
+                          newMessages.content =
+                            parsed.content || currentMessage.content || null;
+                        } else {
+                          // If no tool_calls in parsed JSON, just update content
+                          newMessages.content = text;
+                        }
+                      } catch (e) {
+                        // If parsing fails, treat as plain text and clear tool_calls
+                        newMessages.content = text;
+                        delete newMessages.tool_calls;
                       }
                     } else {
-                      newMessages.content = text;
+                      // Normal message handling
+                      const messageContent = newMessages.content;
+                      if (Array.isArray(messageContent)) {
+                        const textMessage = messageContent.find(
+                          (element) => element.type === "text",
+                        );
+                        if (textMessage) {
+                          textMessage.text = text;
+                        } else {
+                          messageContent.push({
+                            type: "text",
+                            text,
+                            _type: "message",
+                          });
+                        }
+                      } else {
+                        newMessages.content = text;
+                      }
                     }
 
                     setCurrentMessage(newMessages);

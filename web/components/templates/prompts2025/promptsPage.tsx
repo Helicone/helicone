@@ -1,8 +1,8 @@
 import { Small } from "@/components/ui/typography";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Plus } from "lucide-react";
 import { logger } from "@/lib/telemetry/logger";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import {
@@ -18,6 +18,7 @@ import {
   useDeletePrompt,
   useDeletePromptVersion,
   useRenamePrompt,
+  useUpdatePromptTags,
 } from "@/services/hooks/prompts";
 import { useState, useEffect, useRef } from "react";
 import PromptDetails from "./PromptDetails";
@@ -36,7 +37,6 @@ import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentCont
 
 interface PromptsPageProps {
   defaultIndex: number;
-  showLegacyBanner?: boolean;
 }
 
 const PromptsPage = (props: PromptsPageProps) => {
@@ -100,6 +100,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const deletePrompt = useDeletePrompt();
   const deletePromptVersion = useDeletePromptVersion();
   const renamePrompt = useRenamePrompt();
+  const updatePromptTags = useUpdatePromptTags();
 
   const handleRenamePrompt = async (promptId: string, newName: string) => {
     logger.info({ promptId, newName }, "Renaming prompt");
@@ -122,6 +123,57 @@ const PromptsPage = (props: PromptsPageProps) => {
       );
     } else {
       setNotification("Prompt renamed successfully", "success");
+    }
+  };
+
+  const handleUpdatePromptTags = async (
+    promptId: string,
+    tags: string[],
+  ): Promise<boolean> => {
+    logger.info({ promptId, tags }, "Updating prompt tags");
+    try {
+      const result = await updatePromptTags.mutateAsync({
+        params: {
+          path: {
+            promptId,
+          },
+        },
+        body: {
+          tags,
+        },
+      });
+
+      if (result.error) {
+        setNotification("Error updating tags", "error");
+        logger.error(
+          { error: result.error, promptId, tags },
+          "Error updating tags",
+        );
+        return false;
+      }
+
+      const updatedTags = result.data ?? tags;
+
+      if (selectedPrompt?.prompt.id === promptId) {
+        setSelectedPrompt((prev) =>
+          prev
+            ? {
+                ...prev,
+                prompt: {
+                  ...prev.prompt,
+                  tags: updatedTags,
+                },
+              }
+            : prev,
+        );
+      }
+
+      setNotification("Tags updated", "success");
+      return true;
+    } catch (error) {
+      setNotification("Error updating tags", "error");
+      logger.error({ error, promptId, tags }, "Error updating tags");
+      return false;
     }
   };
 
@@ -327,6 +379,16 @@ const PromptsPage = (props: PromptsPageProps) => {
     });
   }, [prompts]);
 
+  // Check if we should show empty state
+  if (!isLoading && !isLoadingTags && prompts.length === 0) {
+    return (
+      <EmptyStateCard
+        feature="prompts"
+        onPrimaryClick={() => router.push("/playground?createPrompt=true")}
+      />
+    );
+  }
+
   return (
     <main className="flex h-screen w-full animate-fade-in flex-col">
       <FoldedHeader
@@ -354,24 +416,6 @@ const PromptsPage = (props: PromptsPageProps) => {
         }
       />
 
-      {props.showLegacyBanner && (
-        <section className="w-full p-4">
-          <div className="w-full rounded-lg border border-blue-300 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-200">
-            🎉 You are viewing our revamped Prompts experience, offering prompt
-            versioning and composability with the Playground and AI Gateway!{" "}
-            <br />
-            <span className="font-medium">
-              The legacy prompts will be deprecated on <i>August 20th, 2025</i>.
-            </span>{" "}
-            <Link
-              href="/prompts?legacy=true"
-              className="font-medium underline hover:no-underline"
-            >
-              See the old prompts here →
-            </Link>
-          </div>
-        </section>
-      )}
       <div className="flex h-full min-h-[80vh] w-full flex-col border-t border-border">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel>
@@ -460,6 +504,7 @@ const PromptsPage = (props: PromptsPageProps) => {
           >
             <PromptDetails
               onRenamePrompt={handleRenamePrompt}
+              onUpdatePromptTags={handleUpdatePromptTags}
               onSetEnvironment={handleSetPromptVersionEnvironment}
               onOpenPromptVersion={handleOpenPromptVersion}
               onDeletePrompt={handleDeletePrompt}

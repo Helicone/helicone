@@ -1,25 +1,30 @@
-import { buildEndpointUrl } from "./provider-helpers";
 import { ModelProviderName } from "./providers";
 import { ModelProviderConfigId, EndpointId, ModelName } from "./registry-types";
-import type { Endpoint, ModelProviderConfig, EndpointConfig } from "./types";
+import type {
+  Endpoint,
+  ModelProviderConfig,
+  EndpointConfig,
+  UserEndpointConfig,
+} from "./types";
 
 function mergeConfigs(
   modelProviderConfig: ModelProviderConfig,
   endpointConfig: EndpointConfig,
   deploymentId: string
 ): Endpoint {
-  const baseUrl = buildEndpointUrl(modelProviderConfig, {
+  const userConfig: UserEndpointConfig = {
     region: deploymentId,
     location: deploymentId,
     projectId: endpointConfig.projectId,
     deploymentName: endpointConfig.deploymentName,
     resourceName: endpointConfig.resourceName,
     crossRegion: endpointConfig.crossRegion,
-  });
+  };
 
   return {
     author: modelProviderConfig.author,
-    baseUrl: baseUrl.data ?? "",
+    modelConfig: modelProviderConfig,
+    userConfig: userConfig,
     provider: modelProviderConfig.provider,
     providerModelId:
       endpointConfig.providerModelId ?? modelProviderConfig.providerModelId,
@@ -32,6 +37,7 @@ function mergeConfigs(
     ptbEnabled: endpointConfig.ptbEnabled ?? modelProviderConfig.ptbEnabled,
     version: endpointConfig.version ?? modelProviderConfig.version,
     supportedParameters: modelProviderConfig.supportedParameters,
+    priority: endpointConfig.priority ?? modelProviderConfig.priority,
   };
 }
 
@@ -55,10 +61,13 @@ export interface ModelIndexes {
   modelToEndpoints: Map<ModelName, Endpoint[]>;
   modelToProviderData: Map<ModelName, ModelProviderEntry[]>;
   modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry>;
+  providerModelIdToConfig: Map<string, ModelProviderConfig>;
+  modelToArchivedEndpointConfigs: Map<string, ModelProviderConfig>;
 }
 
 export function buildIndexes(
-  modelProviderConfigs: Record<string, ModelProviderConfig>
+  modelProviderConfigs: Record<string, ModelProviderConfig>,
+  archivedModelProviderConfigs: Record<string, ModelProviderConfig> = {}
 ): ModelIndexes {
   const endpointIdToEndpoint: Map<EndpointId, Endpoint> = new Map();
   const endpointConfigIdToEndpointConfig: Map<
@@ -74,7 +83,11 @@ export function buildIndexes(
   const modelToProviders: Map<ModelName, Set<ModelProviderName>> = new Map();
   const modelToEndpoints: Map<ModelName, Endpoint[]> = new Map();
   const modelToProviderData: Map<ModelName, ModelProviderEntry[]> = new Map();
-  const modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry> = new Map();
+  const modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry> =
+    new Map();
+  const providerModelIdToConfig: Map<string, ModelProviderConfig> = new Map();
+  const modelToArchivedEndpointConfigs: Map<string, ModelProviderConfig> =
+    new Map();
 
   for (const [configKey, config] of Object.entries(modelProviderConfigs)) {
     const typedConfigKey = configKey as ModelProviderConfigId;
@@ -85,6 +98,10 @@ export function buildIndexes(
 
     // Store base config for BYOK
     endpointConfigIdToEndpointConfig.set(typedConfigKey, config);
+
+    // Store providerModelId -> config mapping
+    const providerModelIdKey = `${config.providerModelId}:${config.provider}`;
+    providerModelIdToConfig.set(providerModelIdKey, config);
 
     // Track provider to models mapping
     if (!providerToModels.has(provider)) {
@@ -116,7 +133,7 @@ export function buildIndexes(
       ptbEndpoints: [],
     };
     modelToProviderData.get(modelName)!.push(providerData);
-    
+
     // Also add to direct lookup map
     modelProviderToData.set(typedConfigKey, providerData);
 
@@ -153,6 +170,12 @@ export function buildIndexes(
     }
   }
 
+  for (const [versionKey, archivedConfig] of Object.entries(
+    archivedModelProviderConfigs
+  )) {
+    modelToArchivedEndpointConfigs.set(versionKey, archivedConfig);
+  }
+
   // Sort endpoints by cost (ascending)
   const sortByCost = (a: Endpoint, b: Endpoint) => {
     const aCost = (a.pricing[0]?.input ?? 0) + (a.pricing[0]?.output ?? 0);
@@ -181,5 +204,7 @@ export function buildIndexes(
     modelToEndpoints,
     modelToProviderData,
     modelProviderToData,
+    providerModelIdToConfig,
+    modelToArchivedEndpointConfigs,
   };
 }

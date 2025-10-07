@@ -28,7 +28,7 @@ export const endpoints = {
       "tools",
       "tool_choice",
       "seed",
-      "max_tokens",
+      "max_completion_tokens",
       "response_format",
       "temperature",
       "top_p",
@@ -37,7 +37,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -67,7 +67,7 @@ export const endpoints = {
       "tools",
       "tool_choice",
       "seed",
-      "max_tokens",
+      "max_completion_tokens",
       "response_format",
       "temperature",
       "top_p",
@@ -76,7 +76,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -106,7 +106,7 @@ export const endpoints = {
       "tools",
       "tool_choice",
       "seed",
-      "max_tokens",
+      "max_completion_tokens",
       "response_format",
       "temperature",
       "top_p",
@@ -145,7 +145,7 @@ export const endpoints = {
       "tools",
       "tool_choice",
       "seed",
-      "max_tokens",
+      "max_completion_tokens",
       "response_format",
       "temperature",
       "top_p",
@@ -154,7 +154,131 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/gpt-5",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000132, // $1.32/1M - worst-case: $1.25/1M (OpenAI) * 1.055
+        output: 0.00001055, // $10.55/1M - worst-case: $10.00/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 400_000,
+    maxCompletionTokens: 128_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5-mini:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/gpt-5-mini",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000026, // $0.26/1M - worst-case: $0.25/1M (OpenAI) * 1.055
+        output: 0.00000211, // $2.11/1M - worst-case: $2.00/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 400_000,
+    maxCompletionTokens: 128_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5-nano:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/gpt-5-nano",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000005, // $0.05/1M - worst-case: $0.05/1M (OpenAI) * 1.055
+        output: 0.00000042, // $0.42/1M - worst-case: $0.40/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 400_000,
+    maxCompletionTokens: 128_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5-chat-latest:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/gpt-5-chat",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000132, // $1.32/1M - worst-case: $1.25/1M (OpenAI) * 1.055
+        output: 0.00001055, // $10.55/1M - worst-case: $10.00/1M (OpenAI) * 1.055
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    priority: 3,
     endpointConfigs: {
       "*": {},
     },

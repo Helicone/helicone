@@ -1,4 +1,4 @@
-import { Controller, Get, Route, Tags } from "tsoa";
+import { Controller, Get, Route, Tags, Example } from "tsoa";
 import { err, ok, Result } from "../../packages/common/result";
 import { registry } from "../../../../../packages/cost/models/registry";
 import { getProviderDisplayName } from "../../../../../packages/cost/models/provider-helpers";
@@ -82,7 +82,69 @@ export class ModelRegistryController extends Controller {
     return slugMap[provider.toLowerCase()] || provider.toLowerCase();
   }
 
+  /**
+   * Get all available models from the registry
+   * @summary Returns a comprehensive list of all AI models with their configurations, pricing, and capabilities
+   * @description This endpoint provides detailed information about all available models including:
+   * - Model metadata (name, author, context length, training date)
+   * - Supported providers and endpoints
+   * - Pricing information (per million tokens for prompt/completion/special features)
+   * - Input/output modalities (text, image, audio, video)
+   * - Supported parameters (temperature, max_tokens, etc.)
+   * - Available capabilities (audio, video, image, thinking, web_search, caching)
+   * 
+   * No authentication required - this is a public endpoint.
+   * 
+   * @returns {ModelRegistryResponse} Complete model registry with models and filter options
+   */
   @Get("/models")
+  @Example<ModelRegistryResponse>({
+    models: [
+      {
+        id: "claude-opus-4-1",
+        name: "Anthropic: Claude Opus 4.1",
+        author: "anthropic",
+        contextLength: 200000,
+        endpoints: [
+          {
+            provider: "anthropic",
+            providerSlug: "anthropic",
+            supportsPtb: true,
+            pricing: {
+              prompt: 15,
+              completion: 75,
+              cacheRead: 1.5,
+              cacheWrite: 18.75,
+            },
+          },
+        ],
+        maxOutput: 32000,
+        trainingDate: "2025-08-05",
+        description: "Most capable Claude model with extended context",
+        inputModalities: ["text" as InputModality],
+        outputModalities: ["text" as OutputModality],
+        supportedParameters: [
+          "max_tokens" as StandardParameter,
+          "temperature" as StandardParameter,
+          "stop" as StandardParameter,
+          "reasoning" as StandardParameter,
+          "include_reasoning" as StandardParameter,
+          "tools" as StandardParameter,
+          "tool_choice" as StandardParameter,
+        ],
+      },
+    ],
+    total: 150,
+    filters: {
+      providers: [
+        { name: "anthropic", displayName: "Anthropic" },
+        { name: "openai", displayName: "OpenAI" },
+        { name: "google", displayName: "Google" },
+      ],
+      authors: ["anthropic", "openai", "google", "meta"],
+      capabilities: ["audio", "image", "thinking", "caching", "reasoning"],
+    },
+  })
   public async getModelRegistry(): Promise<
     Result<ModelRegistryResponse, string>
   > {

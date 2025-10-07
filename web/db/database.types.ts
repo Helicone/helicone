@@ -844,6 +844,42 @@ export type Database = {
           },
         ]
       }
+      feature_waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          feature: string
+          id: number
+          is_customer: boolean | null
+          metadata: Json | null
+          organization_id: string | null
+          original_position: number | null
+          priority_boost: number | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          feature: string
+          id?: number
+          is_customer?: boolean | null
+          metadata?: Json | null
+          organization_id?: string | null
+          original_position?: number | null
+          priority_boost?: number | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          feature?: string
+          id?: number
+          is_customer?: boolean | null
+          metadata?: Json | null
+          organization_id?: string | null
+          original_position?: number | null
+          priority_boost?: number | null
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           created_at: string
@@ -1587,39 +1623,6 @@ export type Database = {
           },
         ]
       }
-      ledger: {
-        Row: {
-          created_at: string
-          credit: number
-          debit: number
-          event_created_at: string
-          id: string
-          org_id: string
-          reference_id: string | null
-          reference_type: string | null
-        }
-        Insert: {
-          created_at?: string
-          credit: number
-          debit: number
-          event_created_at: string
-          id?: string
-          org_id: string
-          reference_id?: string | null
-          reference_type?: string | null
-        }
-        Update: {
-          created_at?: string
-          credit?: number
-          debit?: number
-          event_created_at?: string
-          id?: string
-          org_id?: string
-          reference_id?: string | null
-          reference_type?: string | null
-        }
-        Relationships: []
-      }
       online_evaluators: {
         Row: {
           config: Json | null
@@ -1658,30 +1661,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      org_balance: {
-        Row: {
-          ch_credit_sum: number
-          ch_last_req_created_at: number
-          organization_id: string
-          pg_debit_sum: number
-          updated_at: string
-        }
-        Insert: {
-          ch_credit_sum?: number
-          ch_last_req_created_at?: number
-          organization_id: string
-          pg_debit_sum?: number
-          updated_at?: string
-        }
-        Update: {
-          ch_credit_sum?: number
-          ch_last_req_created_at?: number
-          organization_id?: string
-          pg_debit_sum?: number
-          updated_at?: string
-        }
-        Relationships: []
       }
       org_rate_limit_tracker: {
         Row: {
@@ -1761,8 +1740,10 @@ export type Database = {
       }
       organization: {
         Row: {
+          allow_negative_balance: boolean
           color: string
           created_at: string | null
+          credit_limit: number
           domain: string | null
           governance_settings: Json | null
           has_integrated: boolean
@@ -1791,8 +1772,10 @@ export type Database = {
           tier: string | null
         }
         Insert: {
+          allow_negative_balance?: boolean
           color?: string
           created_at?: string | null
+          credit_limit?: number
           domain?: string | null
           governance_settings?: Json | null
           has_integrated?: boolean
@@ -1821,8 +1804,10 @@ export type Database = {
           tier?: string | null
         }
         Update: {
+          allow_negative_balance?: boolean
           color?: string
           created_at?: string | null
+          credit_limit?: number
           domain?: string | null
           governance_settings?: Json | null
           has_integrated?: boolean
@@ -2023,21 +2008,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      processed_webhook_events: {
-        Row: {
-          id: string
-          processed_at: string
-        }
-        Insert: {
-          id: string
-          processed_at?: string
-        }
-        Update: {
-          id?: string
-          processed_at?: string
-        }
-        Relationships: []
       }
       prompt_input_keys: {
         Row: {
@@ -2385,7 +2355,7 @@ export type Database = {
       provider_keys: {
         Row: {
           auth_type: string
-          byok_enabled: boolean | null
+          byok_enabled: boolean
           config: Json | null
           created_at: string | null
           cuid: string | null
@@ -2402,7 +2372,7 @@ export type Database = {
         }
         Insert: {
           auth_type?: string
-          byok_enabled?: boolean | null
+          byok_enabled?: boolean
           config?: Json | null
           created_at?: string | null
           cuid?: string | null
@@ -2419,7 +2389,7 @@ export type Database = {
         }
         Update: {
           auth_type?: string
-          byok_enabled?: boolean | null
+          byok_enabled?: boolean
           config?: Json | null
           created_at?: string | null
           cuid?: string | null
@@ -3118,44 +3088,6 @@ export type Database = {
           soft_delete: boolean | null
           vault_key_id: string | null
         }
-        Insert: {
-          auth_type?: string | null
-          byok_enabled?: boolean | null
-          config?: Json | null
-          created_at?: string | null
-          cuid?: string | null
-          decrypted_provider_key?: string | null
-          decrypted_provider_secret_key?: string | null
-          id?: string | null
-          key_id?: string | null
-          nonce?: string | null
-          org_id?: string | null
-          provider_key?: string | null
-          provider_key_name?: string | null
-          provider_name?: string | null
-          provider_secret_key?: string | null
-          soft_delete?: boolean | null
-          vault_key_id?: string | null
-        }
-        Update: {
-          auth_type?: string | null
-          byok_enabled?: boolean | null
-          config?: Json | null
-          created_at?: string | null
-          cuid?: string | null
-          decrypted_provider_key?: string | null
-          decrypted_provider_secret_key?: string | null
-          id?: string | null
-          key_id?: string | null
-          nonce?: string | null
-          org_id?: string | null
-          provider_key?: string | null
-          provider_key_name?: string | null
-          provider_name?: string | null
-          provider_secret_key?: string | null
-          soft_delete?: boolean | null
-          vault_key_id?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "provider_keys_org_id_fkey"
@@ -3227,12 +3159,10 @@ export type Database = {
         Args:
           | { content: string; content_type: string; uri: string }
           | { uri: string }
-          | { content: string; content_type: string; uri: string }
-          | { uri: string; content: string; content_type: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_get: {
-        Args: { data: Json; uri: string } | { uri: string } | { uri: string; data: Json }
+        Args: { data: Json; uri: string } | { uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_head: {
@@ -3251,19 +3181,17 @@ export type Database = {
         }[]
       }
       http_patch: {
-        Args: { content: string; content_type: string; uri: string } | { uri: string; content: string; content_type: string }
+        Args: { content: string; content_type: string; uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_post: {
         Args:
           | { content: string; content_type: string; uri: string }
           | { data: Json; uri: string }
-          | { uri: string; content: string; content_type: string }
-          | { uri: string; data: Json }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_put: {
-        Args: { content: string; content_type: string; uri: string } | { uri: string; content: string; content_type: string }
+        Args: { content: string; content_type: string; uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
       }
       http_reset_curlopt: {
@@ -3286,6 +3214,10 @@ export type Database = {
           string_value: string
         }
         Returns: number
+      }
+      try_det_decrypt_utf8: {
+        Args: { aad: string; ct: string; key_id: string; nonce: string }
+        Returns: string
       }
       urlencode: {
         Args: { data: Json } | { string: string } | { string: string }

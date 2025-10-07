@@ -6,9 +6,75 @@ import type {
   AuthContext,
   AuthResult,
   RequestBodyContext,
+  RequestParams,
+  ResponseFormat,
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
+import { Provider } from "@helicone-package/llm-mapper/types";
+import { CacheProvider } from "../../common/cache/provider";
+
+export function heliconeProviderToModelProviderName(
+  provider: Provider
+): ModelProviderName | null {
+  if (provider === "CUSTOM") {
+    return null;
+  }
+
+  switch (provider) {
+    case "OPENAI":
+      return "openai";
+    case "ANTHROPIC":
+      return "anthropic";
+    case "GOOGLE":
+      return "google-ai-studio";
+    case "GROQ":
+      return "groq";
+    case "X":
+      return "xai";
+    case "AZURE":
+      return "azure";
+    case "AWS":
+    case "BEDROCK":
+      return "bedrock";
+    case "PERPLEXITY":
+      return "perplexity";
+    case "DEEPSEEK":
+      return "deepseek";
+    case "COHERE":
+      return "cohere";
+    case "OPENROUTER":
+      return "openrouter";
+    case "DEEPINFRA":
+      return "deepinfra";
+    case "NOVITA":
+      return "novita";
+    // new registry does not have
+    case "LOCAL":
+    case "HELICONE":
+    case "AMDBARTEK":
+    case "ANYSCALE":
+    case "CLOUDFLARE":
+    case "2YFV":
+    case "TOGETHER":
+    case "LEMONFOX":
+    case "FIREWORKS":
+    case "WISDOMINANUTSHELL":
+    case "MISTRAL":
+    case "QSTASH":
+    case "FIRECRAWL":
+    case "AVIAN":
+    case "NEBIUS":
+    case "OPENPIPE":
+    case "CHUTES":
+    case "LLAMA":
+    case "NVIDIA":
+    case "VERCEL":
+      return null;
+    default:
+      return null;
+  }
+}
 
 // Helper function to get provider instance
 export function getProvider(providerName: string): Result<BaseProvider> {
@@ -35,7 +101,11 @@ export const dbProviderToProvider = (
   if (provider === "anthropic" || provider === "Anthropic") {
     return "anthropic";
   }
-  if (provider === "bedrock" || provider === "AWS Bedrock") {
+  if (
+    provider === "bedrock" ||
+    provider === "AWS Bedrock" ||
+    provider === "aws"
+  ) {
     return "bedrock";
   }
   if (provider === "vertex" || provider === "Vertex AI") {
@@ -50,25 +120,37 @@ export const dbProviderToProvider = (
   if (provider === "Azure OpenAI") {
     return "azure";
   }
+  if (provider === "deepseek" || provider === "DeepSeek") {
+    return "deepseek";
+  }
+  if (provider === "openrouter" || provider === "OpenRouter") {
+    return "openrouter";
+  }
+  if (provider === "novita" || provider === "Novita") {
+    return "novita";
+  }
+  if (provider === "deepinfra" || provider === "DeepInfra") {
+    return "deepinfra";
+  }
   return null;
 };
 
 export function buildEndpointUrl(
-  endpointConfig: ModelProviderConfig,
-  userConfig: UserEndpointConfig = {}
+  endpoint: Endpoint,
+  requestParams: RequestParams
 ): Result<string> {
-  const providerResult = getProvider(endpointConfig.provider);
+  const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
     return err(providerResult.error);
   }
 
   const provider = providerResult.data;
   if (!provider) {
-    return err(`Provider data is null for: ${endpointConfig.provider}`);
+    return err(`Provider data is null for: ${endpoint.provider}`);
   }
 
   try {
-    const url = provider.buildUrl(endpointConfig, userConfig);
+    const url = provider.buildUrl(endpoint, requestParams);
     return ok(url);
   } catch (error) {
     return err(error instanceof Error ? error.message : "Failed to build URL");
@@ -77,31 +159,25 @@ export function buildEndpointUrl(
 
 // Helper function to build model ID for an endpoint
 export function buildModelId(
-  endpointConfig: ModelProviderConfig,
+  modelProviderConfig: ModelProviderConfig,
   userConfig: UserEndpointConfig = {}
 ): Result<string> {
-  const providerResult = getProvider(endpointConfig.provider);
+  const providerResult = getProvider(modelProviderConfig.provider);
   if (providerResult.error) {
     return err(providerResult.error);
   }
 
   const provider = providerResult.data;
   if (!provider) {
-    return err(`Provider data is null for: ${endpointConfig.provider}`);
+    return err(`Provider data is null for: ${modelProviderConfig.provider}`);
   }
 
   if (!provider.buildModelId) {
-    return ok(endpointConfig.providerModelId);
+    return ok(modelProviderConfig.providerModelId);
   }
 
   try {
-    // Merge endpoint deployment/region with user config
-    const config: UserEndpointConfig = {
-      ...userConfig,
-      region: userConfig?.region || "",
-    };
-
-    const modelId = provider.buildModelId(endpointConfig, config);
+    const modelId = provider.buildModelId(modelProviderConfig, userConfig);
     return ok(modelId);
   } catch (error) {
     return err(
@@ -113,7 +189,8 @@ export function buildModelId(
 // Helper function to authenticate requests for an endpoint
 export async function authenticateRequest(
   endpoint: Endpoint,
-  context: Omit<AuthContext, "endpoint">
+  authContext: AuthContext,
+  cacheProvider?: CacheProvider
 ): Promise<Result<AuthResult>> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
@@ -129,17 +206,17 @@ export async function authenticateRequest(
     // Default authentication for providers without custom auth
     return ok({
       headers: {
-        Authorization: `Bearer ${context.apiKey || ""}`,
+        Authorization: `Bearer ${authContext.apiKey || ""}`,
       },
     });
   }
 
   try {
-    const authContext: AuthContext = {
-      ...context,
+    const result = await provider.authenticate(
+      authContext,
       endpoint,
-    };
-    const result = await provider.authenticate(authContext);
+      cacheProvider
+    );
     return ok(result);
   } catch (error) {
     return err(
@@ -179,4 +256,21 @@ export async function buildRequestBody(
       error instanceof Error ? error.message : "Failed to build request body"
     );
   }
+}
+
+export async function buildErrorMessage(
+  endpoint: Endpoint,
+  response: Response
+): Promise<Result<string>> {
+  const providerResult = getProvider(endpoint.provider);
+  if (providerResult.error) {
+    return err(providerResult.error);
+  }
+
+  const provider = providerResult.data;
+  if (!provider) {
+    return err(`Provider data is null for: ${endpoint.provider}`);
+  }
+
+  return ok(await provider.buildErrorMessage(response));
 }

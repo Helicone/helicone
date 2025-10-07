@@ -1,21 +1,23 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/org/organizationContext";
-import { useJawnClient } from "../../lib/clients/jawnHook";
-import { err, isError, ok } from "../../../packages/common/result";
+import { $JAWN_API } from "../../lib/clients/jawn";
+import { useQuery } from "@tanstack/react-query";
 
 // Types matching the backend
 export interface PurchasedCredits {
-  id: string;
+  id: string; // Always the payment intent ID
   createdAt: number;
   credits: number;
-  referenceId: string;
+  status?: string;
+  isRefunded?: boolean;
+  refundedAmount?: number;
+  refundIds?: string[];
 }
 
 export interface PaginatedPurchasedCredits {
   purchases: PurchasedCredits[];
   total: number;
-  page: number;
-  pageSize: number;
+  nextPage: string | null;
+  hasMore: boolean;
 }
 
 export interface CreditBalanceResponse {
@@ -26,85 +28,107 @@ export interface CreditBalanceResponse {
 // A hook for the user's credit balance in cents
 export const useCredits = () => {
   const org = useOrg();
-  const jawnClient = useJawnClient();
-  
-  return useQuery({
-    queryKey: ["creditBalance", org?.currentOrg?.id],
-    queryFn: async () => {
-      const orgId = org?.currentOrg?.id;
-      if (!orgId) {
-        return { balance: 0 };
-      }
 
-      const response = await jawnClient.GET("/v1/credits/balance");
-      if (response.error) {
-        throw new Error("Failed to fetch credit balance");
-      }
-      
-      return response.data?.data as CreditBalanceResponse;
+  const result = $JAWN_API.useQuery(
+    "get",
+    "/v1/credits/balance",
+    {},
+    {
+      enabled: !!org?.currentOrg?.id,
     },
-    enabled: !!org?.currentOrg?.id,
-  });
+  );
+
+  return {
+    ...result,
+    data: result.data?.data || { balance: 0 },
+  };
 };
+
+// Interface for the payment intent record from backend
+interface PaymentIntentRecord {
+  id: string; // Always the payment intent ID
+  amount: number;
+  created: number;
+  status: string;
+  isRefunded?: boolean;
+  refundedAmount?: number;
+  refundIds?: string[];
+}
+
+// Interface for the Stripe API response
+interface StripePaymentIntentsResponse {
+  data: PaymentIntentRecord[];
+  has_more: boolean;
+  next_page: string | null;
+  count: number;
+}
 
 // A hook for fetching credit balance transactions with pagination
 export const useCreditTransactions = (params?: {
-  page?: number;
-  pageSize?: number;
+  limit?: number;
+  page?: string | null;
 }) => {
   const org = useOrg();
-  const jawnClient = useJawnClient();
-  
-  return useQuery({
-    queryKey: ["creditTransactions", org?.currentOrg?.id, params?.page, params?.pageSize],
-    queryFn: async () => {
-      const orgId = org?.currentOrg?.id;
-      if (!orgId) {
-        return {
-          purchases: [],
-          total: 0,
-          page: 0,
-          pageSize: 10
-        };
-      }
 
-      const response = await jawnClient.GET("/v1/credits/payments", {
-        params: {
-          query: {
-            page: params?.page ?? 0,
-            pageSize: params?.pageSize ?? 10,
-          },
+  const result = $JAWN_API.useQuery(
+    "get",
+    "/v1/stripe/payment-intents/search",
+    {
+      params: {
+        query: {
+          search_kind: "credit_purchases",
+          limit: params?.limit ?? 10,
+          ...(params?.page && { page: params.page }),
         },
-      });
-      
-      if (!response.data || isError(response.data)) {
-        throw new Error(response.data?.error || "Failed to fetch credit transactions");
-      }
-      
-      return response.data?.data as PaginatedPurchasedCredits;
+      },
     },
-    enabled: !!org?.currentOrg?.id,
-  });
+    {
+      enabled: !!org?.currentOrg?.id,
+    },
+  );
+
+  // Transform the response data
+  const transformedData = result.data
+    ? (() => {
+        const data = result.data as StripePaymentIntentsResponse;
+        
+        // Transform Stripe payment intents to our format
+        const purchases: PurchasedCredits[] = (data.data || []).map((intent) => ({
+          id: intent.id, // Always the payment intent ID
+          createdAt: intent.created * 1000, // Convert from seconds to milliseconds
+          credits: intent.amount || 0, // Amount is in cents
+          status: intent.status,
+          isRefunded: intent.isRefunded,
+          refundedAmount: intent.refundedAmount,
+          refundIds: intent.refundIds,
+        }));
+
+        return {
+          purchases,
+          total: data.count || 0,
+          nextPage: data.next_page || null,
+          hasMore: data.has_more || false,
+        };
+      })()
+    : {
+        purchases: [],
+        total: 0,
+        nextPage: null,
+        hasMore: false,
+      };
+
+  return {
+    ...result,
+    data: transformedData,
+  };
 };
 
 // A hook for creating a Stripe checkout session for adding credits
 export const useCreateCheckoutSession = () => {
-  const jawnClient = useJawnClient();
-  
-  return useMutation({
-    mutationFn: async (amount: number) => {
-      const response = await jawnClient.POST("/v1/stripe/cloud/checkout-session", {
-        body: {
-          amount,
-        },
-      });
-      
-      if (response.error) {
-        throw new Error("Failed to create checkout session");
-      }
-      
-      if (response.data) {
-        window.location.href = response.data.checkoutUrl;
+  return $JAWN_API.useMutation("post", "/v1/stripe/cloud/checkout-session", {
+    onSuccess: (data) => {
+      if (data?.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
       }
     },
     onError: (error) => {
