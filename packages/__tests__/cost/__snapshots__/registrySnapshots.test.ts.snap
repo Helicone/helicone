@@ -158,7 +158,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -766,7 +766,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -2730,7 +2730,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -4698,6 +4698,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "qwen3-30b-a3b",
     "qwen3-32b",
     "qwen3-coder",
+    "qwen3-next-80b-a3b-instruct",
   ],
   "sampleArchivedKeys": [],
   "sampleEndpointIds": [
@@ -4710,7 +4711,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
   "totalArchivedConfigs": 0,
   "totalEndpoints": 131,
   "totalModelProviderConfigs": 131,
-  "totalModelsWithPtb": 56,
+  "totalModelsWithPtb": 57,
   "totalProviders": 12,
 }
 `;
