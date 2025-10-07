@@ -100,7 +100,7 @@ export const endpoints = {
       "repetition_penalty",
       "logit_bias",
       "functions",
-      "tools"
+      "tools",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -319,9 +319,44 @@ export const endpoints = {
       "repetition_penalty",
       "logit_bias",
       "functions",
-      "tools"
+      "tools",
     ],
     priority: 2,
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-4-scout:deepinfra": {
+    provider: "deepinfra",
+    author: "meta-llama",
+    providerModelId: "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000008, // $0.08/1M tokens
+        output: 0.0000003, // $0.30/1M tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 10_000_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+      "tools",
+      "functions",
+      "tool_choice",
+    ],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
