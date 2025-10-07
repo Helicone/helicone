@@ -102,6 +102,8 @@ const metaDataFromHeliconeRequest = (
     scores: heliconeRequest.scores,
     promptId: heliconeRequest.prompt_id ?? null,
     promptVersion: heliconeRequest.prompt_version ?? null,
+    targetUrl: heliconeRequest.target_url ?? null,
+    requestReferrer: heliconeRequest.request_referrer ?? null,
   };
 };
 
