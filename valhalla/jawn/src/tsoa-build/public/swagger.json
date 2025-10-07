@@ -8123,6 +8123,7 @@
 					"qwen",
 					"moonshotai",
 					"alibaba",
+					"helicone",
 					"passthrough"
 				]
 			},
@@ -11834,6 +11835,45 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_PaginatedPurchasedCredits_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__totalSpend-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"totalSpend": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"totalSpend"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__totalSpend-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__totalSpend-number__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -21668,6 +21708,32 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/credits/totalSpend": {
+			"get": {
+				"operationId": "GetTotalSpend",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__totalSpend-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Credits"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/public/alert-banner": {

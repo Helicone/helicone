@@ -52,12 +52,15 @@
       "Bash(gh pr diff:*)",
       "Bash(~/.cache/ms-playwright/chromium-1193/chrome-linux/chrome --version)",
       "Bash(~/.cache/ms-playwright/chromium-1193/chrome-linux/chrome:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(npx wrangler dev:*)"
     ],
     "deny": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "playwright"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

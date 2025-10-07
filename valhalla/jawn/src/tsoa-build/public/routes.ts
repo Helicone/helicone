@@ -2646,7 +2646,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AuthorName": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anthropic"]},{"dataType":"enum","enums":["openai"]},{"dataType":"enum","enums":["perplexity"]},{"dataType":"enum","enums":["deepseek"]},{"dataType":"enum","enums":["cohere"]},{"dataType":"enum","enums":["xai"]},{"dataType":"enum","enums":["google"]},{"dataType":"enum","enums":["meta-llama"]},{"dataType":"enum","enums":["mistralai"]},{"dataType":"enum","enums":["amazon"]},{"dataType":"enum","enums":["microsoft"]},{"dataType":"enum","enums":["nvidia"]},{"dataType":"enum","enums":["qwen"]},{"dataType":"enum","enums":["moonshotai"]},{"dataType":"enum","enums":["alibaba"]}]},{"dataType":"enum","enums":["passthrough"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anthropic"]},{"dataType":"enum","enums":["openai"]},{"dataType":"enum","enums":["perplexity"]},{"dataType":"enum","enums":["deepseek"]},{"dataType":"enum","enums":["cohere"]},{"dataType":"enum","enums":["xai"]},{"dataType":"enum","enums":["google"]},{"dataType":"enum","enums":["meta-llama"]},{"dataType":"enum","enums":["mistralai"]},{"dataType":"enum","enums":["amazon"]},{"dataType":"enum","enums":["microsoft"]},{"dataType":"enum","enums":["nvidia"]},{"dataType":"enum","enums":["qwen"]},{"dataType":"enum","enums":["moonshotai"]},{"dataType":"enum","enums":["alibaba"]},{"dataType":"enum","enums":["helicone"]}]},{"dataType":"enum","enums":["passthrough"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "StandardParameter": {
@@ -3898,6 +3898,20 @@ const models: TsoaRoute.Models = {
     "Result_PaginatedPurchasedCredits.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PaginatedPurchasedCredits_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__totalSpend-number__": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"totalSpend":{"dataType":"double","required":true}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__totalSpend-number_.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__totalSpend-number__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
@@ -11180,6 +11194,37 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'listTokenUsagePayments',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCreditsController_getTotalSpend: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/credits/totalSpend',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CreditsController)),
+            ...(fetchMiddlewares<RequestHandler>(CreditsController.prototype.getTotalSpend)),
+
+            async function CreditsController_getTotalSpend(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCreditsController_getTotalSpend, request, response });
+
+                const controller = new CreditsController();
+
+              await templateService.apiHandler({
+                methodName: 'getTotalSpend',
                 controller,
                 response,
                 next,

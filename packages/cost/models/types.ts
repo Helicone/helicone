@@ -26,6 +26,7 @@ export const AUTHORS = [
   "moonshotai",
   "perplexity",
   "alibaba",
+  "helicone",
 ] as const;
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
@@ -167,6 +168,7 @@ export interface ModelProviderConfig extends BaseConfig {
   priority?: number;
   quantization?: "fp4" | "fp8" | "bf16";
   responseFormat?: ResponseFormat;
+  hide?: boolean;
 }
 
 export interface EndpointConfig extends UserEndpointConfig {

@@ -14,6 +14,8 @@ import { openaiEndpointConfig, openaiModels } from "./authors/openai";
 import { mistralEndpointConfig, mistralModels } from "./authors/mistralai";
 import { alibabaEndpointConfig, alibabaModels } from "./authors/alibaba";
 import { metaEndpointConfig, metaModels } from "./authors/meta";
+import { moonshotaiEndpointConfig, moonshotaiModels } from "./authors/moonshotai";
+import { heliconeEndpointConfig, heliconeModels } from "./authors/helicone";
 
 // Combine all models for type derivation
 const allModels = {
@@ -24,7 +26,9 @@ const allModels = {
   ...mistralModels,
   ...deepseekModels,
   ...alibabaModels,
-  ...metaModels
+  ...metaModels,
+  ...moonshotaiModels,
+  ...heliconeModels,
 };
 
 export type ModelName = keyof typeof allModels;
@@ -38,7 +42,9 @@ const modelProviderConfigs = {
   ...mistralEndpointConfig,
   ...deepseekEndpointConfig,
   ...alibabaEndpointConfig,
-  ...metaEndpointConfig
+  ...metaEndpointConfig,
+  ...moonshotaiEndpointConfig,
+  ...heliconeEndpointConfig,
 };
 
 export type ModelProviderConfigId = keyof typeof modelProviderConfigs;
