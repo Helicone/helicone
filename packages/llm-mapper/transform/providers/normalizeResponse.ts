@@ -166,7 +166,7 @@ export async function normalizeOpenAIStreamText(
   return (
     normalizedChunks
       .map((chunk) => `data: ${JSON.stringify(chunk)}`)
-      .join("\n\n") + "\n\n"
+      .join("\n\n") + "\n\ndata: [DONE]\n\n"
   );
 }
 
@@ -271,7 +271,7 @@ export async function normalizeAIGatewayResponse(params: {
         return (
           openAIChunks
             .map((chunk) => `data: ${JSON.stringify(chunk)}`)
-            .join("\n\n") + "\n\n"
+            .join("\n\n") + "\n\ndata: [DONE]\n\n"
         );
       } else if (responseFormat === "OPENAI") {
         // Already in OpenAI format, just normalize usage
