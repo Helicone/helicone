@@ -7266,6 +7266,16 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Result_Property-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Property-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__value-string--cost-number_-Array_": {
 				"properties": {
 					"data": {
@@ -18535,6 +18545,107 @@
 		"/v1/property/hide": {
 			"post": {
 				"operationId": "HideProperty",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultError_string_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown-Array_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_string_"
+										},
+										{
+											"properties": {
+												"error": {},
+												"data": {
+													"properties": {
+														"ok": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"ok"
+													],
+													"type": "object"
+												}
+											},
+											"required": [
+												"error",
+												"data"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"key"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/property/hidden/query": {
+			"post": {
+				"operationId": "GetHiddenProperties",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Property-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/property/restore": {
+			"post": {
+				"operationId": "RestoreProperty",
 				"responses": {
 					"200": {
 						"description": "Ok",
