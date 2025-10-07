@@ -113,6 +113,9 @@ export interface paths {
   "/v1/prompt-2025/id/{promptId}/rename": {
     post: operations["RenamePrompt2025"];
   };
+  "/v1/prompt-2025/id/{promptId}/tags": {
+    patch: operations["UpdatePrompt2025Tags"];
+  };
   "/v1/prompt-2025/{promptId}": {
     delete: operations["DeletePrompt2025"];
   };
@@ -680,6 +683,9 @@ export interface paths {
   };
   "/v1/credits/payments": {
     get: operations["ListTokenUsagePayments"];
+  };
+  "/v1/credits/totalSpend": {
+    get: operations["GetTotalSpend"];
   };
   "/v1/public/alert-banner": {
     get: operations["GetAlertBanners"];
@@ -1292,6 +1298,12 @@ export interface components {
       error: null;
     };
     "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     Prompt2025Input: {
       request_id: string;
       version_id: string;
@@ -1303,12 +1315,6 @@ export interface components {
       error: null;
     };
     "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_string-Array_": {
-      data: string[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     PromptCreateResponse: {
       id: string;
       versionId: string;
@@ -3880,6 +3886,15 @@ Json: JsonObject;
       error: null;
     };
     "Result_PaginatedPurchasedCredits.string_": components["schemas"]["ResultSuccess_PaginatedPurchasedCredits_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__totalSpend-number__": {
+      data: {
+        /** Format: double */
+        totalSpend: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__totalSpend-number_.string_": components["schemas"]["ResultSuccess__totalSpend-number__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
       data: {
           updated_at: string;
@@ -4635,6 +4650,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdatePrompt2025Tags: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          tags: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
         };
       };
     };
@@ -7686,6 +7723,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PaginatedPurchasedCredits.string_"];
+        };
+      };
+    };
+  };
+  GetTotalSpend: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__totalSpend-number_.string_"];
         };
       };
     };

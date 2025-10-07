@@ -35,8 +35,9 @@ import {
   modelCost,
   modelCostBreakdownFromRegistry,
 } from "@helicone-package/cost/costCalc";
-import { getProvider, heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
-import { ResponseFormat } from "@helicone-package/cost/models/types";
+import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
+import { IUsageProcessor } from "@helicone-package/cost/usage/IUsageProcessor";
+import { OpenAIUsageProcessor } from "@helicone-package/cost/usage/openAIUsageProcessor";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -169,10 +170,24 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
       // Parse structured usage via the registry-aware processors when available
       const gatewayProvider = context.message.heliconeMeta.gatewayProvider;
-      const provider = gatewayProvider ?? heliconeProviderToModelProviderName(context.message.log.request.provider);
+      const provider =
+        gatewayProvider ??
+        heliconeProviderToModelProviderName(
+          context.message.log.request.provider
+        );
       const rawResponse = context.rawLog.rawResponseBody;
+      const isAIGateway =
+        context.message.log.request.requestReferrer === "ai-gateway";
+
       if (provider && rawResponse) {
-        const usageProcessor = getUsageProcessor(provider);
+        let usageProcessor: IUsageProcessor | null;
+        if (isAIGateway) {
+          // AI Gateway always uses OpenAI processor for now
+          usageProcessor = new OpenAIUsageProcessor();
+        } else {
+          usageProcessor = getUsageProcessor(provider);
+        }
+
         if (usageProcessor) {
           const parsedUsage = await usageProcessor.parse({
             responseBody: rawResponse,
@@ -294,14 +309,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       log.request.isStream || context.processedLog.request.body?.stream;
 
     const isAIGateway = log.request.requestReferrer === "ai-gateway";
-    // gatewayProvider and gatewayResponseFormat are always set for AI Gateway requests
-    // but tie all values to the isAIGateway flag to avoid edge cases
-    const provider = isAIGateway 
-      ? context.message.heliconeMeta.gatewayProvider ?? log.request.provider 
-      : log.request.provider;
-    const gatewayResponseFormat = isAIGateway
-      ? context.message.heliconeMeta.gatewayResponseFormat
-      : undefined;
 
     let responseBody = context.rawLog.rawResponseBody;
     const requestBody = context.rawLog.rawRequestBody;
@@ -332,11 +339,10 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       const model = context.processedLog.model;
       const parser = this.getBodyProcessor(
         isStream,
-        provider,
+        log.request.provider,
         responseBody,
         isAIGateway,
-        gatewayResponseFormat,
-        model,
+        model
       );
       return await parser.parse({
         responseBody: responseBody,
@@ -423,17 +429,11 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     provider: string,
     responseBody: any,
     isAIGateway: boolean,
-    gatewayResponseFormat: ResponseFormat | undefined,
-    model?: string,
+    model?: string
   ): IBodyProcessor {
     if (!isStream) {
-      if (isAIGateway && gatewayResponseFormat) {
-        switch (gatewayResponseFormat) {
-          case "ANTHROPIC":
-            return new AnthropicBodyProcessor();
-          default:
-            return new GenericBodyProcessor();
-        }
+      if (isAIGateway) {
+        return new GenericBodyProcessor();
       }
       if (provider === "ANTHROPIC" && responseBody) {
         return new AnthropicBodyProcessor();
@@ -458,13 +458,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     if (isStream) {
-      if (isAIGateway && gatewayResponseFormat) {
-        switch (gatewayResponseFormat) {
-          case "ANTHROPIC":
-            return new AnthropicStreamBodyProcessor();
-          default:
-            return new OpenAIStreamProcessor();
-        }
+      if (isAIGateway) {
+        return new OpenAIStreamProcessor();
       }
       if (provider === "ANTHROPIC" || model?.includes("claude")) {
         return new AnthropicStreamBodyProcessor();

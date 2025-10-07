@@ -18,6 +18,7 @@ import {
   useDeletePrompt,
   useDeletePromptVersion,
   useRenamePrompt,
+  useUpdatePromptTags,
 } from "@/services/hooks/prompts";
 import { useState, useEffect, useRef } from "react";
 import PromptDetails from "./PromptDetails";
@@ -99,6 +100,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const deletePrompt = useDeletePrompt();
   const deletePromptVersion = useDeletePromptVersion();
   const renamePrompt = useRenamePrompt();
+  const updatePromptTags = useUpdatePromptTags();
 
   const handleRenamePrompt = async (promptId: string, newName: string) => {
     logger.info({ promptId, newName }, "Renaming prompt");
@@ -121,6 +123,57 @@ const PromptsPage = (props: PromptsPageProps) => {
       );
     } else {
       setNotification("Prompt renamed successfully", "success");
+    }
+  };
+
+  const handleUpdatePromptTags = async (
+    promptId: string,
+    tags: string[],
+  ): Promise<boolean> => {
+    logger.info({ promptId, tags }, "Updating prompt tags");
+    try {
+      const result = await updatePromptTags.mutateAsync({
+        params: {
+          path: {
+            promptId,
+          },
+        },
+        body: {
+          tags,
+        },
+      });
+
+      if (result.error) {
+        setNotification("Error updating tags", "error");
+        logger.error(
+          { error: result.error, promptId, tags },
+          "Error updating tags",
+        );
+        return false;
+      }
+
+      const updatedTags = result.data ?? tags;
+
+      if (selectedPrompt?.prompt.id === promptId) {
+        setSelectedPrompt((prev) =>
+          prev
+            ? {
+                ...prev,
+                prompt: {
+                  ...prev.prompt,
+                  tags: updatedTags,
+                },
+              }
+            : prev,
+        );
+      }
+
+      setNotification("Tags updated", "success");
+      return true;
+    } catch (error) {
+      setNotification("Error updating tags", "error");
+      logger.error({ error, promptId, tags }, "Error updating tags");
+      return false;
     }
   };
 
@@ -451,6 +504,7 @@ const PromptsPage = (props: PromptsPageProps) => {
           >
             <PromptDetails
               onRenamePrompt={handleRenamePrompt}
+              onUpdatePromptTags={handleUpdatePromptTags}
               onSetEnvironment={handleSetPromptVersionEnvironment}
               onOpenPromptVersion={handleOpenPromptVersion}
               onDeletePrompt={handleDeletePrompt}

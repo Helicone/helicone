@@ -158,7 +158,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -200,7 +200,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -282,7 +282,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -364,7 +364,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -448,7 +448,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -532,7 +532,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -616,7 +616,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -700,7 +700,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -766,7 +766,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -2385,7 +2385,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2409,7 +2408,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2432,7 +2430,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2456,7 +2453,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2479,7 +2475,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2503,7 +2498,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2526,7 +2520,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2550,7 +2543,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2768,7 +2760,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -3102,6 +3094,38 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "zai/glm-4": {
+    "glm-4.6:novita": {
+      "context": 204800,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "zai-org/glm-4.6",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
 }
 `;
 
@@ -3291,6 +3315,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "xai",
     "xai",
     "xai",
+  ],
+  "zai/glm-4": [
+    "novita",
   ],
 }
 `;
@@ -4163,6 +4190,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "zai/glm-4": {
+    "novita": [
+      {
+        "input": 6e-7,
+        "output": 0.0000022,
+        "threshold": 0,
+      },
+    ],
+  },
 }
 `;
 
@@ -4310,6 +4346,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "groq",
         "openrouter",
+      ],
+    },
+    {
+      "model": "glm-4.6",
+      "providers": [
+        "novita",
       ],
     },
     {
@@ -4611,7 +4653,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 6,
+      "modelCount": 7,
       "provider": "novita",
     },
     {
@@ -4650,6 +4692,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gemini-2.5-pro",
     "gemma-3-12b-it",
     "gemma2-9b-it",
+    "glm-4.6",
     "gpt-4.1",
     "gpt-4.1-mini",
     "gpt-4.1-nano",
@@ -4687,6 +4730,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "qwen3-30b-a3b",
     "qwen3-32b",
     "qwen3-coder",
+    "qwen3-next-80b-a3b-instruct",
   ],
   "sampleArchivedKeys": [],
   "sampleEndpointIds": [
@@ -4697,9 +4741,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 131,
-  "totalModelProviderConfigs": 131,
-  "totalModelsWithPtb": 55,
+  "totalEndpoints": 132,
+  "totalModelProviderConfigs": 132,
+  "totalModelsWithPtb": 57,
   "totalProviders": 12,
 }
 `;
