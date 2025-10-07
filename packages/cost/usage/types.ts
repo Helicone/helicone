@@ -2,6 +2,7 @@ export interface ModelUsage {
   input: number;
   output: number;
   image?: number;
+  imageInput?: number;
   cacheDetails?: {
     cachedInput: number;
     write5m?: number;
