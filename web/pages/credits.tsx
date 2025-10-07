@@ -251,7 +251,7 @@ const Credits: NextPageWithLayout<void> = () => {
                       </span>
                     ) : (
                       `$${(() => {
-                        const balance = (creditData?.balance ?? 0) / 100;
+                        const balance = creditData?.balance ?? 0;
                         if (balance % 1 === 0) {
                           return balance.toFixed(2);
                         }
