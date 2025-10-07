@@ -37,6 +37,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -76,6 +77,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -115,6 +117,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -154,6 +157,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -184,6 +188,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     priority: 3,
     endpointConfigs: {
@@ -215,6 +220,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     priority: 3,
     endpointConfigs: {
@@ -246,6 +252,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     priority: 3,
     endpointConfigs: {
@@ -277,6 +284,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     priority: 3,
     endpointConfigs: {
