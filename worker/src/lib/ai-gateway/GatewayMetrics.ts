@@ -3,11 +3,26 @@ import { DataDogClient } from "../monitoring/DataDogClient";
 export class GatewayMetrics {
   private readonly startTime: number;
   private preRequestEndTime: number | null = null;
+  private promptRequestStartTime: number | null = null;
   private providerStartTime: number | null = null;
   private providerEndTime: number | null = null;
 
   constructor(private readonly dataDogClient: DataDogClient) {
     this.startTime = performance.now();
+  }
+
+  markPromptRequestStart(): void {
+    this.promptRequestStartTime = performance.now();
+  }
+
+  markPromptRequestEnd(): void {
+    if (this.promptRequestStartTime === null) {
+      console.error("Prompt request start time not marked");
+      return;
+    }
+    const promptRequestEndTime = performance.now();
+    const promptRequestLatency = promptRequestEndTime - this.promptRequestStartTime;
+    this.dataDogClient.trackLatency("prompt_request_ms", promptRequestLatency);
   }
 
   markPreRequestEnd(): void {

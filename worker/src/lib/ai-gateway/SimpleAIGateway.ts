@@ -84,10 +84,12 @@ export class SimpleAIGateway {
 
     let finalBody = parsedBody;
     if (this.hasPromptFields(parsedBody)) {
+      this.metrics.markPromptRequestStart();
       const expandResult = await this.expandPrompt(parsedBody);
       if (isErr(expandResult)) {
         return expandResult.error;
       }
+      this.metrics.markPromptRequestEnd();
       finalBody = expandResult.data.body;
     }
 
