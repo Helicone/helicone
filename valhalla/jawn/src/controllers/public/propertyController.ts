@@ -89,6 +89,7 @@ export class PropertyController extends Controller {
     return properties;
 
 
+  return properties;
   }
 
   @Post("hide")
