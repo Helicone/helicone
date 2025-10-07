@@ -5,6 +5,7 @@ import {
 import retry from "async-retry";
 import { llmmapper } from "./llmmapper/llmmapper";
 import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
+import { createOpenAIMockResponse } from "./mockOpenAIResponse";
 
 export interface CallProps {
   headers: Headers;
@@ -95,6 +96,14 @@ async function callWithMapper(
 export async function callProvider(props: CallProps): Promise<Response> {
   const { headers, method, apiBase, body, increaseTimeout, originalUrl } =
     props;
+
+  if (headers.get("__helicone-mock-response")) {
+    return createOpenAIMockResponse(
+      headers.get("__helicone-mock-response_usage")
+        ? JSON.parse(headers.get("__helicone-mock-response_usage")!)
+        : undefined
+    );
+  }
 
   const targetUrl = buildTargetUrl(originalUrl, apiBase);
   const removedHeaders = removeHeliconeHeaders(headers);
