@@ -1,7 +1,10 @@
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { mapModelUsageToOpenAI } from "@helicone-package/cost/usage/mapModelUsageToOpenAI";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import { ResponseFormat } from "@helicone-package/cost/models/types";
 import { OpenAIResponseBody, ChatCompletionChunk } from "../types/openai";
+import { toOpenAI } from "./anthropic/response/toOpenai";
+import { AnthropicToOpenAIStreamConverter } from "./anthropic/streamedResponse/toOpenai";
 
 export async function toOpenAIResponse(
   response: Response,
@@ -143,6 +146,31 @@ export class OpenAIStreamUsageNormalizer {
 }
 
 /**
+ * Normalizes usage in OpenAI-formatted SSE text.
+ *
+ * Takes raw SSE text, normalizes usage fields in chunks, and returns
+ * reconstructed SSE text with normalized usage.
+ */
+export async function normalizeOpenAIStreamText(
+  sseText: string,
+  provider: ModelProviderName,
+  providerModelId: string
+): Promise<string> {
+  const normalizer = new OpenAIStreamUsageNormalizer(provider, providerModelId);
+  const normalizedChunks: any[] = [];
+
+  await normalizer.processLines(sseText, (chunk) => {
+    normalizedChunks.push(chunk);
+  });
+
+  return (
+    normalizedChunks
+      .map((chunk) => `data: ${JSON.stringify(chunk)}`)
+      .join("\n\n") + "\n\n"
+  );
+}
+
+/**
  * Transforms an OpenAI SSE stream to normalize usage in chunks.
  */
 function normalizeOpenAIStream(
@@ -208,4 +236,82 @@ async function processBuffer(
     const sseMessage = `data: ${JSON.stringify(chunk)}\n\n`;
     controller.enqueue(encoder.encode(sseMessage));
   });
+}
+
+/**
+ * Normalizes AI Gateway responses to OpenAI format with correct usage.
+ *
+ * Handles both streaming and non-streaming responses, converting from
+ * provider-native format to OpenAI format when needed, and normalizing
+ * usage fields for all providers.
+ */
+export async function normalizeAIGatewayResponse(params: {
+  responseText: string;
+  isStream: boolean;
+  provider: ModelProviderName;
+  providerModelId: string;
+  responseFormat: ResponseFormat;
+}): Promise<string> {
+  const { responseText, isStream, provider, providerModelId, responseFormat } =
+    params;
+
+  try {
+    if (isStream) {
+      // Streaming responses
+      if (responseFormat === "ANTHROPIC") {
+        // Convert Anthropic SSE to OpenAI format
+        const converter = new AnthropicToOpenAIStreamConverter();
+        const openAIChunks: any[] = [];
+
+        converter.processLines(responseText, (chunk) => {
+          openAIChunks.push(chunk);
+        });
+
+        // Reconstruct SSE format from converted chunks
+        return (
+          openAIChunks
+            .map((chunk) => `data: ${JSON.stringify(chunk)}`)
+            .join("\n\n") + "\n\n"
+        );
+      } else if (responseFormat === "OPENAI") {
+        // Already in OpenAI format, just normalize usage
+        return await normalizeOpenAIStreamText(
+          responseText,
+          provider,
+          providerModelId
+        );
+      }
+    } else {
+      // Non-streaming responses
+      const providerBody = JSON.parse(responseText);
+
+      let openAIBody = providerBody;
+      if (responseFormat === "ANTHROPIC") {
+        // Convert Anthropic to OpenAI format
+        openAIBody = toOpenAI(providerBody);
+      }
+
+      // Normalize usage for all providers
+      const usageProcessor = getUsageProcessor(provider);
+      if (usageProcessor) {
+        const modelUsageResult = await usageProcessor.parse({
+          responseBody: responseText,
+          isStream: false,
+          model: providerModelId,
+        });
+
+        if (modelUsageResult.data) {
+          openAIBody.usage = mapModelUsageToOpenAI(modelUsageResult.data);
+        }
+      }
+
+      return JSON.stringify(openAIBody);
+    }
+  } catch (error) {
+    console.error("Failed to normalize AI Gateway response:", error);
+    throw error;
+  }
+
+  // Fallback: return original response
+  return responseText;
 }

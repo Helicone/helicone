@@ -27,9 +27,7 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { parseVercelStream } from "./streamParsers/vercelStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { costOfPrompt, getUsageProcessor } from "@helicone-package/cost";
-import { toOpenAI } from "@helicone-package/llm-mapper/transform/providers/anthropic/response/toOpenai";
-import { mapModelUsageToOpenAI } from "@helicone-package/cost/usage/mapModelUsageToOpenAI";
+import { normalizeAIGatewayResponse } from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
@@ -156,7 +154,7 @@ function getResponseBodyFromJSON(json: Record<string, Json>): {
   if (json.streamed_data) {
     const streamedData = json.streamed_data as Json[];
     return {
-      body: streamedData.map((d) => "data: " + JSON.stringify(d)),
+      body: streamedData.map((d) => "data: " + JSON.stringify(d) + "\n\n"),
       endTime: new Date(),
     };
   }
@@ -479,7 +477,9 @@ export class DBLoggable {
       ? await this.timing.timeToFirstToken()
       : null;
     const status = await this.response.status();
+    console.log(`About to parse response`);
     const parsedResponse = await this.parseResponse(rawResponse, status);
+    console.log(`Parsed response`);
     const isStream = this.request.isStream;
 
     const usage = this.getUsage(parsedResponse.data);
@@ -688,44 +688,25 @@ export class DBLoggable {
         const isAIGateway = this.request.attempt?.endpoint;
 
         if (isAIGateway) {
-          // Process AI Gateway response: convert to OpenAI format and normalize usage
           try {
-            const providerBody = JSON.parse(providerResponse);
-            const provider = this.request.attempt?.endpoint.provider;
-            const responseFormat =
-              this.request.attempt?.endpoint.modelConfig.responseFormat;
-
-            // Step 1: Convert to OpenAI format if needed (Anthropic only)
-            let openAIBody = providerBody;
-            if (responseFormat !== "OPENAI" && provider === "anthropic") {
-              openAIBody = toOpenAI(providerBody);
-            }
-
-            // Step 2: Normalize usage for ALL AI Gateway providers
-            if (provider) {
-              const usageProcessor = getUsageProcessor(provider);
-
-              if (usageProcessor) {
-                const modelUsageResult = await usageProcessor.parse({
-                  responseBody: providerResponse,
-                  isStream: this.request.isStream,
-                  model: this.request.attempt?.endpoint.providerModelId ?? "",
-                });
-
-                if (modelUsageResult.data) {
-                  // Map normalized ModelUsage to OpenAI format and replace in response
-                  openAIBody.usage = mapModelUsageToOpenAI(
-                    modelUsageResult.data
-                  );
-                }
-              }
-            }
-
-            openAIResponse = JSON.stringify(openAIBody);
+            openAIResponse = await normalizeAIGatewayResponse({
+              responseText: providerResponse,
+              isStream: this.request.isStream,
+              provider: this.request.attempt?.endpoint.provider ?? "openai",
+              providerModelId:
+                this.request.attempt?.endpoint.providerModelId ?? "",
+              responseFormat:
+                this.request.attempt?.endpoint.modelConfig.responseFormat ??
+                "OPENAI",
+            });
           } catch (e) {
-            console.error("Failed to process AI Gateway response:", e);
+            console.error("Failed to normalize AI Gateway response:", e);
           }
         }
+
+        console.log(
+          `[S3 Storage Debug] isAIGateway: ${!!isAIGateway}, openAIResponse set: ${!!openAIResponse}, originalOpenAIRequest set: ${!!this.request.requestBodyBuffer.getOriginalOpenAIRequest()}`
+        );
 
         const s3Result =
           await db.requestResponseManager.storeRequestResponseRaw({
