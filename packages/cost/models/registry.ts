@@ -31,6 +31,7 @@ import {
 import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
 import { mistralModels, mistralEndpointConfig } from "./authors/mistralai";
+import { zaiModels, zaiEndpointConfig } from "./authors/zai";
 
 // Combine all models
 const allModels = {
@@ -43,6 +44,7 @@ const allModels = {
   ...alibabaModels,
   ...deepseekModels,
   ...mistralModels,
+  ...zaiModels
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -56,6 +58,7 @@ const modelProviderConfigs = {
   ...alibabaEndpointConfig,
   ...deepseekEndpointConfig,
   ...mistralEndpointConfig,
+  ...zaiEndpointConfig
 } satisfies Record<string, ModelProviderConfig>;
 
 // Combine all archived endpoints
@@ -224,7 +227,7 @@ function getModelProviderConfigByVersion(
   if (
     (!currentEntry.data?.config.version && !version) ||
     (currentEntry.data?.config.version === version)
-  ) { 
+  ) {
     return ok(currentEntry.data?.config ?? null);
   }
 

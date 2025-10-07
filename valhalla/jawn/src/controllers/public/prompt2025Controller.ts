@@ -69,6 +69,31 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
+  @Patch("id/{promptId}/tags")
+  public async updatePrompt2025Tags(
+    @Path() promptId: string,
+    @Body() requestBody: {
+      tags: string[];
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string[], string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.updatePromptTags({
+      promptId,
+      tags: requestBody.tags ?? [],
+    });
+    if (result.error) {
+      if (result.error === "Prompt not found") {
+        this.setStatus(404);
+      } else {
+        this.setStatus(500);
+      }
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Delete("{promptId}")
   public async deletePrompt2025(
     @Path() promptId: string,
