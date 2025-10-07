@@ -11,12 +11,16 @@ import { gatewayForwarder } from "../../routers/gatewayRouter";
 import { AttemptBuilder } from "./AttemptBuilder";
 import { AttemptExecutor } from "./AttemptExecutor";
 import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
+import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
+import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { validateOpenAIChatPayload } from "./validators/openaiRequestValidator";
-import { oai2antResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
-import { oai2antStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { RequestParams } from "@helicone-package/cost/models/types";
 import { SecureCacheProvider } from "../util/cache/secureCache";
 import { GatewayMetrics } from "./GatewayMetrics";
+import {
+  toOpenAIResponse,
+  toOpenAIStreamResponse,
+} from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
 
 export interface AuthContext {
   orgId: string;
@@ -80,10 +84,12 @@ export class SimpleAIGateway {
 
     let finalBody = parsedBody;
     if (this.hasPromptFields(parsedBody)) {
+      this.metrics.markPromptRequestStart();
       const expandResult = await this.expandPrompt(parsedBody);
       if (isErr(expandResult)) {
         return expandResult.error;
       }
+      this.metrics.markPromptRequestEnd();
       finalBody = expandResult.data.body;
     }
 
@@ -337,20 +343,38 @@ export class SimpleAIGateway {
     }
 
     const mappingType = attempt.endpoint.modelConfig.responseFormat ?? "OPENAI";
-    if (mappingType === "OPENAI") {
-      return ok(response); // already in OPENAI format
-    }
+    const contentType = response.headers.get("content-type");
+    const isStream = contentType?.includes("text/event-stream");
 
     try {
-      if (mappingType === "ANTHROPIC") {
-        const contentType = response.headers.get("content-type");
-        const isStream = contentType?.includes("text/event-stream");
+      if (mappingType === "OPENAI") {
+        // Response is already in OpenAI format, just normalize usage
+        const provider = attempt.endpoint.provider;
+        const providerModelId = attempt.endpoint.providerModelId;
 
         if (isStream) {
-          const mappedResponse = oai2antStreamResponse(response);
+          const normalizedResponse = toOpenAIStreamResponse(
+            response,
+            provider,
+            providerModelId
+          );
+          return ok(normalizedResponse);
+        } else {
+          const normalizedResponse = await toOpenAIResponse(
+            response,
+            provider,
+            providerModelId,
+            isStream
+          );
+          return ok(normalizedResponse);
+        }
+      } else if (mappingType === "ANTHROPIC") {
+        // Convert OpenAI format to Anthropic format
+        if (isStream) {
+          const mappedResponse = ant2oaiStreamResponse(response);
           return ok(mappedResponse);
         } else {
-          const mappedResponse = await oai2antResponse(response);
+          const mappedResponse = await ant2oaiResponse(response);
           return ok(mappedResponse);
         }
       }
