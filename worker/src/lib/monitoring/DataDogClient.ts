@@ -17,6 +17,7 @@ const ALLOWED_METRICS = new Set([
   "worker.ai-gateway.latency.post_request_ms",
   "worker.ai-gateway.latency.provider_request_ms",
   "worker.ai-gateway.latency.total_ms",
+  "worker.ai-gateway.latency.prompt_request_ms",
   // Gateway error metrics
   "worker.ai-gateway.provider.rate_limit_429",
 ]);
