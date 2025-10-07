@@ -1,0 +1,17 @@
+{
+  "name": "openai-types",
+  "version": "1.0.0",
+  "main": "extract-chat-completion.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ts-morph": "^27.0.0",
+    "typescript": "^5.9.2",
+    "zod": "^4.1.11"
+  }
+}

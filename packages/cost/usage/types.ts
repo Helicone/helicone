@@ -1,5 +1,7 @@
 export interface ModelUsage {
+  // Excluding cached or audio tokens
   input: number;
+  // Excluding reasoning or audio tokens
   output: number;
   image?: number;
   cacheDetails?: {

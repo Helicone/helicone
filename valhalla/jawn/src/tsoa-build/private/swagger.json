@@ -2680,6 +2680,39 @@
 					}
 				]
 			},
+			"ResultSuccess_string-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_string-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_string-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"Prompt2025Input": {
 				"properties": {
 					"request_id": {
@@ -2724,39 +2757,6 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_Prompt2025Input_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess_string-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_string-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_string-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -50844,6 +50844,62 @@
 								},
 								"required": [
 									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/id/{promptId}/tags": {
+			"patch": {
+				"operationId": "UpdatePrompt2025Tags",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"tags": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									}
+								},
+								"required": [
+									"tags"
 								],
 								"type": "object"
 							}

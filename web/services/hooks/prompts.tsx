@@ -43,6 +43,19 @@ export const useRenamePrompt = () => {
   });
 };
 
+export const useUpdatePromptTags = () => {
+  const queryClient = useQueryClient();
+
+  return $JAWN_API.useMutation("patch", "/v1/prompt-2025/id/{promptId}/tags", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptTags"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+    },
+  });
+};
+
 export const usePushPromptVersion = () => {
   const queryClient = useQueryClient();
 
