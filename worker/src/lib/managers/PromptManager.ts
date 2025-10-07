@@ -104,7 +104,7 @@ export class PromptManager {
           return err(`Error retrieving prompt body: ${error}`);
         }
       },
-      undefined,
+      300,
       false
     );
   }
