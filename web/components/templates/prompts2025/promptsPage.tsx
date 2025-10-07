@@ -152,7 +152,7 @@ const PromptsPage = (props: PromptsPageProps) => {
         return false;
       }
 
-      const updatedTags = result.data?.data ?? tags;
+      const updatedTags = result.data ?? tags;
 
       if (selectedPrompt?.prompt.id === promptId) {
         setSelectedPrompt((prev) =>
