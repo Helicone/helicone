@@ -32,7 +32,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "qwen3-30b-a3b:deepinfra": {
       "context": 32768,
       "crossRegion": false,
-      "maxTokens": 32768,
+      "maxTokens": 16384,
       "modelId": "Qwen/Qwen3-30B-A3B",
       "parameters": [
         "frequency_penalty",
@@ -750,7 +750,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "deepseek-reasoner:deepinfra": {
       "context": 128000,
       "crossRegion": false,
-      "maxTokens": 32000,
+      "maxTokens": 16384,
       "modelId": "deepseek-ai/DeepSeek-R1-0528",
       "parameters": [
         "frequency_penalty",
@@ -987,7 +987,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "deepseek-r1-distill-llama-70b:deepinfra": {
       "context": 131072,
       "crossRegion": false,
-      "maxTokens": 128000,
+      "maxTokens": 16384,
       "modelId": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
       "parameters": [
         "frequency_penalty",
@@ -1332,7 +1332,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "gemma-3-12b-it:deepinfra": {
       "context": 131072,
       "crossRegion": false,
-      "maxTokens": 8192,
+      "maxTokens": 16384,
       "modelId": "google/gemma-3-12b-it",
       "parameters": [
         "frequency_penalty",
@@ -1409,7 +1409,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "llama-3.1-8b-instruct-turbo:deepinfra": {
       "context": 128000,
       "crossRegion": false,
-      "maxTokens": 128000,
+      "maxTokens": 16384,
       "modelId": "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
       "parameters": [
         "frequency_penalty",
@@ -1435,7 +1435,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "llama-3.1-8b-instruct:deepinfra": {
       "context": 131072,
       "crossRegion": false,
-      "maxTokens": 131072,
+      "maxTokens": 16384,
       "modelId": "meta-llama/Meta-Llama-3.1-8B-Instruct",
       "parameters": [
         "frequency_penalty",
