@@ -119,7 +119,7 @@ export const endpoints = {
       "top_p",
       "top_k",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "us-east-1": {},
@@ -132,7 +132,7 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000006330, // $6.33/1M - worst-case: $6.00/1M (Google >200K) * 1.055
+        input: 0.00000633, // $6.33/1M - worst-case: $6.00/1M (Google >200K) * 1.055
         output: 0.00002374, // $23.74/1M - worst-case: $22.50/1M (Google >200K) * 1.055
       },
     ],
