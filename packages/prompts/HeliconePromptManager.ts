@@ -23,27 +23,41 @@ export class HeliconePromptManager {
     this.baseUrl = options.baseUrl || "https://api.helicone.ai";
   }
 
+  private buildQueryUrl(
+    path: string,
+    useCacheOverride?: boolean
+  ): string {
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    const shouldUseCache = useCacheOverride === true;
+    const finalPath = shouldUseCache
+      ? `${normalizedPath}/cached`
+      : normalizedPath;
+    return `${this.baseUrl}${finalPath}`;
+  }
+
   /**
    * Finds the prompt version dynamically based on prompt params
    * @param params - The chat completion parameters containing prompt_id, optional version_id, inputs, and other OpenAI parameters
    * @returns Object containing the compiled prompt body and any validation/substitution errors
    */
   async pullPromptVersion(
-    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming
+    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming,
+    useCache?: boolean
   ): Promise<Prompt2025Version> {
     const { prompt_id, version_id, environment } = params;
+    const useCacheFlag = useCache;
     
     if (!prompt_id) {
       throw new Error("No prompt ID provided");
     }
     
     if (environment) {
-      return await this.getEnvironmentVersion(prompt_id, environment);
+      return await this.getEnvironmentVersion(prompt_id, environment, useCacheFlag);
     }
     if (version_id) {
-      return await this.getPromptVersion(version_id);
+      return await this.getPromptVersion(version_id, useCacheFlag);
     }
-    return await this.getProductionVersion(prompt_id);
+    return await this.getProductionVersion(prompt_id, useCacheFlag);
   }
 
   /**
@@ -53,10 +67,11 @@ export class HeliconePromptManager {
    * @returns The raw prompt body from storage
    */
   async pullPromptBody(
-    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming
+    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming,
+    useCache?: boolean
   ): Promise<ChatCompletionCreateParams> {
     try {
-      const promptVersion = await this.pullPromptVersion(params);
+      const promptVersion = await this.pullPromptVersion(params, useCache);
 
       const promptBody = await this.fetchPromptBodyFromS3(
         promptVersion?.s3_url
@@ -73,9 +88,12 @@ export class HeliconePromptManager {
    * @param versionId - The unique identifier of the prompt version
    * @returns The raw prompt body from storage
    */
-  async pullPromptBodyByVersionId(versionId: string): Promise<ChatCompletionCreateParams> {
+  async pullPromptBodyByVersionId(
+    versionId: string,
+    useCache?: boolean
+  ): Promise<ChatCompletionCreateParams> {
     try {
-      const promptVersion = await this.getPromptVersion(versionId);
+      const promptVersion = await this.getPromptVersion(versionId, useCache);
       const promptBody = await this.fetchPromptBodyFromS3(
         promptVersion?.s3_url
       );
@@ -169,7 +187,8 @@ export class HeliconePromptManager {
    * @returns Object containing the compiled prompt body and any validation/substitution errors
    */
   async getPromptBody(
-    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming
+    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming,
+    useCache?: boolean
   ): Promise<{ body: ChatCompletionCreateParams; errors: ValidationError[] }> {
     if (!params.prompt_id) {
       const { prompt_id, version_id, inputs, environment, ...openaiParams } = params;
@@ -177,7 +196,7 @@ export class HeliconePromptManager {
     }
 
     try {
-      const pulledPromptBody = await this.pullPromptBody(params); 
+      const pulledPromptBody = await this.pullPromptBody(params, useCache); 
       return await this.mergePromptBody(params, pulledPromptBody);
     } catch (error) {
       console.error("Error getting prompt body:", error);
@@ -186,10 +205,11 @@ export class HeliconePromptManager {
   }
 
   private async getPromptVersion(
-    versionId: string
+    versionId: string,
+    useCacheOverride?: boolean
   ): Promise<Prompt2025Version> {
     const response = await fetch(
-      `${this.baseUrl}/v1/prompt-2025/query/version`,
+      this.buildQueryUrl("/v1/prompt-2025/query/version", useCacheOverride),
       {
         method: "POST",
         headers: {
@@ -218,10 +238,14 @@ export class HeliconePromptManager {
   }
 
   private async getProductionVersion(
-    promptId: string
+    promptId: string,
+    useCacheOverride?: boolean
   ): Promise<Prompt2025Version> {
     const response = await fetch(
-      `${this.baseUrl}/v1/prompt-2025/query/production-version`,
+      this.buildQueryUrl(
+        "/v1/prompt-2025/query/production-version",
+        useCacheOverride
+      ),
       {
         method: "POST",
         headers: {
@@ -253,10 +277,14 @@ export class HeliconePromptManager {
 
   private async getEnvironmentVersion(
     promptId: string,
-    environment: string
+    environment: string,
+    useCacheOverride?: boolean
   ): Promise<Prompt2025Version> {
     const response = await fetch(
-      `${this.baseUrl}/v1/prompt-2025/query/environment-version`,
+      this.buildQueryUrl(
+        "/v1/prompt-2025/query/environment-version",
+        useCacheOverride
+      ),
       {
         method: "POST",
         headers: {

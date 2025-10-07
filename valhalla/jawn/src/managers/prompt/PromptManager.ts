@@ -28,13 +28,14 @@ import { RequestManager } from "../request/RequestManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { AuthParams } from "../../packages/common/auth/types";
-import { StringChain } from "lodash";
 import { Prompt2025Input } from "../../lib/db/ClickhouseWrapper";
-
+import { cacheResultCustom } from "../../utils/cacheResult";
+import { KVCache } from "../../lib/cache/kvCache";
 
 const PROMPT_ID_LENGTH = 6;
 const MAX_PROMPT_ID_GENERATION_ATTEMPTS = 3;
 const PRODUCTION_ENVIRONMENT = 'production';
+const PROMPT_VERSION_CACHE = new KVCache(5 * 60 * 1000);
 
 export class Prompt2025Manager extends BaseManager {
   private s3Client: S3Client;
@@ -309,6 +310,19 @@ export class Prompt2025Manager extends BaseManager {
     return ok(promptVersion);
   }
 
+  async getPromptProductionVersionCached(params: {
+    promptId: string;
+  }): Promise<Result<Prompt2025Version, string>> {
+    const orgId = this.authParams.organizationId ?? "unknown";
+    return cacheResultCustom(
+      `prompt_production_version_${orgId}`,
+      () => this.getPromptProductionVersion(params),
+      PROMPT_VERSION_CACHE,
+      orgId,
+      params.promptId
+    );
+  }
+
   async getPromptVersions(params: {
     promptId: string;
     majorVersion?: number;
@@ -381,6 +395,21 @@ export class Prompt2025Manager extends BaseManager {
     return ok(promptVersion);
   }
 
+  async getPromptVersionWithBodyByEnvironmentCached(params: {
+    promptId: string;
+    environment: string;
+  }): Promise<Result<Prompt2025Version, string>> {
+    const orgId = this.authParams.organizationId ?? "unknown";
+    return cacheResultCustom(
+      `prompt_version_env_${orgId}`,
+      () => this.getPromptVersionWithBodyByEnvironment(params),
+      PROMPT_VERSION_CACHE,
+      orgId,
+      params.promptId,
+      params.environment
+    );
+  }
+
   async getPromptVersionWithBody(params: {
     promptVersionId: string;
   }): Promise<Result<Prompt2025Version, string>> {
@@ -420,6 +449,19 @@ export class Prompt2025Manager extends BaseManager {
     promptVersion.s3_url = s3UrlResult.data ?? undefined;
 
     return ok(promptVersion);
+  }
+
+  async getPromptVersionWithBodyCached(params: {
+    promptVersionId: string;
+  }): Promise<Result<Prompt2025Version, string>> {
+    const orgId = this.authParams.organizationId ?? "unknown";
+    return cacheResultCustom(
+      `prompt_version_id_${orgId}`,
+      () => this.getPromptVersionWithBody(params),
+      PROMPT_VERSION_CACHE,
+      orgId,
+      params.promptVersionId
+    );
   }
 
   async createPrompt(params: {

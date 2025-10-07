@@ -238,14 +238,23 @@ export interface paths {
   "/v1/prompt-2025/query/version": {
     post: operations["GetPrompt2025Version"];
   };
+  "/v1/prompt-2025/query/version/cached": {
+    post: operations["GetPrompt2025VersionCached"];
+  };
   "/v1/prompt-2025/query/environment-version": {
     post: operations["GetPrompt2025EnvironmentVersion"];
+  };
+  "/v1/prompt-2025/query/environment-version/cached": {
+    post: operations["GetPrompt2025EnvironmentVersionCached"];
   };
   "/v1/prompt-2025/query/versions": {
     post: operations["GetPrompt2025Versions"];
   };
   "/v1/prompt-2025/query/production-version": {
     post: operations["GetPrompt2025ProductionVersion"];
+  };
+  "/v1/prompt-2025/query/production-version/cached": {
+    post: operations["GetPrompt2025ProductionVersionCached"];
   };
   "/v1/prompt-2025/query/total-versions": {
     post: operations["GetPrompt2025TotalVersions"];
@@ -17403,7 +17412,42 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025VersionCached: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
   GetPrompt2025EnvironmentVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          environment: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025EnvironmentVersionCached: {
     requestBody: {
       content: {
         "application/json": {
@@ -17441,6 +17485,23 @@ export interface operations {
     };
   };
   GetPrompt2025ProductionVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025ProductionVersionCached: {
     requestBody: {
       content: {
         "application/json": {

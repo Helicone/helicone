@@ -149,14 +149,23 @@ export interface paths {
   "/v1/prompt-2025/query/version": {
     post: operations["GetPrompt2025Version"];
   };
+  "/v1/prompt-2025/query/version/cached": {
+    post: operations["GetPrompt2025VersionCached"];
+  };
   "/v1/prompt-2025/query/environment-version": {
     post: operations["GetPrompt2025EnvironmentVersion"];
+  };
+  "/v1/prompt-2025/query/environment-version/cached": {
+    post: operations["GetPrompt2025EnvironmentVersionCached"];
   };
   "/v1/prompt-2025/query/versions": {
     post: operations["GetPrompt2025Versions"];
   };
   "/v1/prompt-2025/query/production-version": {
     post: operations["GetPrompt2025ProductionVersion"];
+  };
+  "/v1/prompt-2025/query/production-version/cached": {
+    post: operations["GetPrompt2025ProductionVersionCached"];
   };
   "/v1/prompt-2025/query/total-versions": {
     post: operations["GetPrompt2025TotalVersions"];
@@ -2957,7 +2966,7 @@ Json: JsonObject;
       timeZoneDifference: number;
     };
     /** @enum {string} */
-    AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "passthrough";
+    AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "zai" | "passthrough";
     /** @enum {string} */
     StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
     RateLimits: {
@@ -3036,6 +3045,7 @@ Json: JsonObject;
       maxCompletionTokens: number;
       ptbEnabled: boolean;
       version?: string;
+      unsupportedParameters?: components["schemas"]["StandardParameter"][];
       providerModelId: string;
       provider: components["schemas"]["ModelProviderName"];
       author: components["schemas"]["AuthorName"];
@@ -3070,6 +3080,7 @@ Json: JsonObject;
       maxCompletionTokens: number;
       ptbEnabled: boolean;
       version?: string;
+      unsupportedParameters?: components["schemas"]["StandardParameter"][];
       modelConfig: components["schemas"]["ModelProviderConfig"];
       userConfig: components["schemas"]["UserEndpointConfig"];
       provider: components["schemas"]["ModelProviderName"];
@@ -4855,7 +4866,42 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025VersionCached: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
   GetPrompt2025EnvironmentVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          environment: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025EnvironmentVersionCached: {
     requestBody: {
       content: {
         "application/json": {
@@ -4893,6 +4939,23 @@ export interface operations {
     };
   };
   GetPrompt2025ProductionVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025ProductionVersionCached: {
     requestBody: {
       content: {
         "application/json": {
