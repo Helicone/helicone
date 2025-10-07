@@ -47,7 +47,7 @@ if (IS_RATE_LIMIT_ENABLED) {
         return 5 * 60 * 2; // 2 per second
       }
 
-      if (authParams?.tier && authParams?.tier !== "free") {
+      if (authParams?.tier) {
         if (authParams.tier === "free") {
           return 1_000;
         } else if (authParams.tier === "enterprise") {
