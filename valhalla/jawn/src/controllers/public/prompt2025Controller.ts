@@ -296,6 +296,24 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
+  @Post("query/version/cached")
+  public async getPrompt2025VersionCached(
+    @Body()
+    requestBody: {
+      promptVersionId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025Version, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptVersionWithBodyCached(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("query/environment-version")
   public async getPrompt2025EnvironmentVersion(
     @Body()
@@ -307,6 +325,25 @@ export class Prompt2025Controller extends Controller {
   ): Promise<Result<Prompt2025Version, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptVersionWithBodyByEnvironment(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("query/environment-version/cached")
+  public async getPrompt2025EnvironmentVersionCached(
+    @Body()
+    requestBody: {
+      promptId: string;
+      environment: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025Version, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptVersionWithBodyByEnvironmentCached(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {
@@ -345,6 +382,24 @@ export class Prompt2025Controller extends Controller {
   ): Promise<Result<Prompt2025Version, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptProductionVersion(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("query/production-version/cached")
+  public async getPrompt2025ProductionVersionCached(
+    @Body()
+    requestBody: {
+      promptId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025Version, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptProductionVersionCached(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {

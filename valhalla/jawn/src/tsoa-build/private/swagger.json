@@ -51390,9 +51390,101 @@
 				}
 			}
 		},
+		"/v1/prompt-2025/query/version/cached": {
+			"post": {
+				"operationId": "GetPrompt2025VersionCached",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptVersionId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptVersionId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt-2025/query/environment-version": {
 			"post": {
 				"operationId": "GetPrompt2025EnvironmentVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"environment": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"environment",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/query/environment-version/cached": {
+			"post": {
+				"operationId": "GetPrompt2025EnvironmentVersionCached",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -51489,6 +51581,50 @@
 		"/v1/prompt-2025/query/production-version": {
 			"post": {
 				"operationId": "GetPrompt2025ProductionVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/query/production-version/cached": {
+			"post": {
+				"operationId": "GetPrompt2025ProductionVersionCached",
 				"responses": {
 					"200": {
 						"description": "Ok",

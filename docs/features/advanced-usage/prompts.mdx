@@ -548,6 +548,8 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
 | `mergePromptBody()` | Merge prompt with inputs and validation | Compilation result |
 | `getPromptBody()` | Complete compile process with inputs | Compiled body + validation errors |
 
+Every helper accepts an optional `useCache` boolean as the final argument. Pass `true` when you're calling prompts repeatedly from a trusted backend and can tolerate up to ~5 minutes of staleness; omit it for always-fresh UI requests.
+
 ### Usage Examples
 
 <Tabs>
@@ -568,14 +570,17 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
 
       async function generateWithPrompt() {
         // Get compiled prompt with variable substitution
-        const { body, errors } = await promptManager.getPromptBody({
-          prompt_id: "abc123",
-          model: "gpt-4o-mini",
-          inputs: {
-            customer_name: "Alice Johnson",
-            product: "AI Gateway"
-          }
-        });
+        const { body, errors } = await promptManager.getPromptBody(
+          {
+            prompt_id: "abc123",
+            model: "gpt-4o-mini",
+            inputs: {
+              customer_name: "Alice Johnson",
+              product: "AI Gateway"
+            }
+          },
+          true // optional: use Helicone's cached endpoint for repeat lookups
+        );
 
         // Check for validation errors
         if (errors.length > 0) {
