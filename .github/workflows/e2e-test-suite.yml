@@ -1,0 +1,69 @@
+name: E2E Test Suite
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: "yarn.lock"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Clickhouse and Minio
+        run: cd docker && docker compose up minio minio-setup clickhouse -d
+
+      - name: Start Supabase
+        run: |
+          echo 'y' | npx supabase start -x realtime,storage-api,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor
+          echo 'y' | npx supabase db reset
+
+      - name: Start Gateway Workers
+        run: |
+          cd worker
+          npx wrangler dev --var WORKER_TYPE:HELICONE_API --port 8788 &
+          npx wrangler dev --var WORKER_TYPE:AI_GATEWAY_API --var HELICONE_ORG_ID="a75d76e3-02e7-4d02-8a2b-c65ed27c69b2" --port 8793 &
+
+      - name: Start Jawn
+        run: |
+          cd valhalla/jawn
+          cp .env.hosted.example .env
+          yarn install
+          yarn dev &
+          sleep 10
+
+      - name: Run E2E Tests
+        run: |
+          cd e2e
+          yarn install
+          yarn test tests/wallet/credit-exhaustion.test.ts
+
+      - name: Cleanup
+        if: always()
+        run: |
+          pkill -f wrangler || true
+          pkill -f "yarn dev" || true
+          supabase stop || true
+          cd docker && docker compose down || true
