@@ -3,6 +3,7 @@ FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 
 COPY package.json yarn.lock ./
+COPY packages/common/package.json ./packages/common/
 COPY packages/cost/package.json ./packages/cost/
 COPY packages/filters/package.json ./packages/filters/
 COPY packages/llm-mapper/package.json ./packages/llm-mapper/
