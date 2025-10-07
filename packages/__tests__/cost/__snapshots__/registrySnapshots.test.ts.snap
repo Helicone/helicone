@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 
@@ -2355,7 +2355,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2379,7 +2378,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2402,7 +2400,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2426,7 +2423,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2449,7 +2445,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2473,7 +2468,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2496,7 +2490,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",
@@ -2520,7 +2513,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "response_format",
         "seed",
         "stop",
-        "temperature",
         "tool_choice",
         "tools",
         "top_p",

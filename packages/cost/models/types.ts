@@ -150,6 +150,7 @@ interface BaseConfig {
   maxCompletionTokens: number;
   ptbEnabled: boolean;
   version?: string;
+  unsupportedParameters?: StandardParameter[];
 }
 
 export interface RateLimits {
