@@ -3,7 +3,7 @@ import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/op
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 
 // transform the readable stream from Anthropic SSE to OpenAI SSE format
-export function oai2antStream(
+export function ant2oaiStream(
   stream: ReadableStream<Uint8Array>
 ): ReadableStream<Uint8Array> {
   const decoder = new TextDecoder();
@@ -62,12 +62,12 @@ function processBuffer(
 }
 
 // Anthro SSE Response to OpenAI SSE Response
-export function oai2antStreamResponse(response: Response): Response {
+export function ant2oaiStreamResponse(response: Response): Response {
   if (!response.body) {
     return response;
   }
 
-  const transformedStream = oai2antStream(response.body);
+  const transformedStream = ant2oaiStream(response.body);
 
   return new Response(transformedStream, {
     status: response.status,
@@ -76,11 +76,12 @@ export function oai2antStreamResponse(response: Response): Response {
       "content-type": "text/event-stream; charset=utf-8",
       "cache-control": "no-cache",
       connection: "keep-alive",
+      ...Object.fromEntries(response.headers.entries()),
     },
   });
 }
 
-export async function oaiStream2antStream({
+export async function antStream2oaiStream({
   body,
   headers,
 }: {
@@ -121,7 +122,7 @@ export async function oaiStream2antStream({
       return new Response("No response body", { status: 500 });
     }
 
-    return oai2antStreamResponse(response);
+    return ant2oaiStreamResponse(response);
   } catch (error) {
     console.error("Error in oaiStream2antStream:", error);
     return new Response(

@@ -1,6 +1,6 @@
 import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
-import { MistralNemoModelName } from "./models";
+import { ZaiModelName } from "./models";
 
 export const endpoints = {
   "glm-4.6:novita": {
@@ -43,7 +43,7 @@ export const endpoints = {
   },
 } satisfies Partial<
   Record<
-    `${MistralNemoModelName}:${ModelProviderName}` | MistralNemoModelName,
+    `${ZaiModelName}:${ModelProviderName}` | ZaiModelName,
     ModelProviderConfig
   >
 >;

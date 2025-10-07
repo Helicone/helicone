@@ -248,6 +248,8 @@ type HeliconeMetadata = {
   gatewayDeploymentTarget?: string | null;
   promptId?: string | null;
   promptVersion?: string | null;
+  targetUrl?: string | null;
+  requestReferrer?: string | null;
 };
 
 // UNORGANZIED

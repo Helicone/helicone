@@ -12,12 +12,7 @@ const ProviderPill = (props: ProviderPillProps) => {
   const colorKey = getProviderColor(provider);
   const colorClass = colourPillStyles[colorKey];
 
-  const displayName =
-    provider === "CUSTOM"
-      ? "unknown"
-      : provider
-        ? provider.toLowerCase()
-        : "unknown";
+  const displayName = provider === "CUSTOM" ? "unknown" : provider || "unknown";
   return (
     <span
       className={clsx(

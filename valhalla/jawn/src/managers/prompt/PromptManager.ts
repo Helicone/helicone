@@ -137,6 +137,37 @@ export class Prompt2025Manager extends BaseManager {
     return ok(null);
   }
 
+  async updatePromptTags(params: {
+    promptId: string;
+    tags: string[];
+  }): Promise<Result<string[], string>> {
+    const sanitizedTags = Array.from(
+      new Set(
+        (params.tags ?? [])
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0)
+      )
+    );
+
+    const result = await dbExecute<{ tags: string[] }>(
+      `UPDATE prompts_2025 
+       SET tags = $1 
+       WHERE id = $2 AND organization = $3 AND soft_delete is false
+       RETURNING tags`,
+      [sanitizedTags, params.promptId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    if (!result.data?.[0]) {
+      return err("Prompt not found");
+    }
+
+    return ok(result.data[0].tags ?? []);
+  }
+
   async getPrompts(params: {
     search: string;
     tagsFilter: string[];
