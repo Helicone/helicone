@@ -38,6 +38,24 @@ if (IS_RATE_LIMIT_ENABLED) {
         }
         return 1_000;
       }
+
+      // match on /v1/request/{uuid}
+      if (
+        req.path.match(/^\/v1\/request\/[0-9a-fA-F-]{36}$/) &&
+        req.method === "GET"
+      ) {
+        return 5 * 60 * 2; // 2 per second
+      }
+
+      if (authParams?.tier && authParams?.tier !== "free") {
+        if (authParams.tier === "free") {
+          return 1_000;
+        } else if (authParams.tier === "enterprise") {
+          return 100_000;
+        } else {
+          return 10_000;
+        }
+      }
       return 500;
     },
 
