@@ -507,6 +507,17 @@ function getAPIRouterV1(
       });
     }
   );
+  router.all(
+    "*",
+    async (
+      _,
+      _requestWrapper: RequestWrapper,
+      _env: Env,
+      _ctx: ExecutionContext
+    ) => {
+      return new Response("invalid path", { status: 404 });
+    }
+  );
 }
 
 export const getAPIRouter = (router: BaseOpenAPIRouter) => {

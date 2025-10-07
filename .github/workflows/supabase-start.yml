@@ -1,0 +1,46 @@
+name: Supabase Start
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  supabase-start:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: "yarn.lock"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Clickhouse and Minio
+        run: cd docker && docker compose up minio minio-setup clickhouse -d
+
+      - name: Start Supabase
+        run: echo 'y' | supabase start -x realtime,storage-api,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor
+
+      - name: start gateway workers
+        run: |
+          cd worker
+          yarn install
+          npx wrangler dev --var WORKER_TYPE:HELICONE_API --port 8788 &
+          npx wrangler dev --var WORKER_TYPE:AI_GATEWAY_API --port 8793 --test-scheduled &
+          sleep 10
+
+      - name: start jawn

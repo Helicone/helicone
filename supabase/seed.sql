@@ -11,7 +11,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.organization (id, name, owner, has_onboarded, organization_type, tier)
 VALUES
     ('83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'Organization for Test', 'f76629c5-a070-4bbc-9918-64beaea48848', true, 'reseller', 'enterprise'),
-    ('a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', 'Organization for Demo', 'd9064bb5-1501-4ec9-bfee-21ab74d645b8', true, 'reseller', 'enterprise');
+    ('a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', 'Admin', 'd9064bb5-1501-4ec9-bfee-21ab74d645b8', true, 'reseller', 'enterprise');
 
 
 INSERT INTO public.organization_member (member, organization, org_role) VALUES
@@ -27,8 +27,14 @@ VALUES
 -- sk-helicone-zk6xu4a-kluegtq-sbljk7q-drnixzi
 INSERT INTO public.helicone_api_keys (api_key_hash, api_key_name, user_id, organization_id, soft_delete, key_permissions)
 VALUES
-('4a6ced8c61492670cfd56f31e6e4c40e7cf8c6b88b7ab0a70efc5f86c136b9c3', 'Demo', 'd9064bb5-1501-4ec9-bfee-21ab74d645b8', 'a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', FALSE, 'rw');
+('4a6ced8c61492670cfd56f31e6e4c40e7cf8c6b88b7ab0a70efc5f86c136b9c3', 'Admin', 'd9064bb5-1501-4ec9-bfee-21ab74d645b8', 'a75d76e3-02e7-4d02-8a2b-c65ed27c69b2', FALSE, 'rw');
 
 INSERT INTO public.admins (user_id, user_email) VALUES
 ('f76629c5-a070-4bbc-9918-64beaea48848', 'test@helicone.ai'),
-('d9064bb5-1501-4ec9-bfee-21ab74d645b8', 'demo@helicone.ai');
+('d9064bb5-1501-4ec9-bfee-21ab74d645b8', 'admin@helicone.ai');
+
+-- Enable credits feature flag for test organization
+INSERT INTO public.feature_flags (org_id, feature)
+VALUES
+('83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'credits')
+ON CONFLICT DO NOTHING;
