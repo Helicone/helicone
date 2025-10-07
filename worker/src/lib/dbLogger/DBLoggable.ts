@@ -154,7 +154,7 @@ function getResponseBodyFromJSON(json: Record<string, Json>): {
   if (json.streamed_data) {
     const streamedData = json.streamed_data as Json[];
     return {
-      body: streamedData.map((d) => "data: " + JSON.stringify(d) + "\n\n"),
+      body: streamedData.map((d) => "data: " + JSON.stringify(d)),
       endTime: new Date(),
     };
   }
@@ -477,9 +477,7 @@ export class DBLoggable {
       ? await this.timing.timeToFirstToken()
       : null;
     const status = await this.response.status();
-    console.log(`About to parse response`);
     const parsedResponse = await this.parseResponse(rawResponse, status);
-    console.log(`Parsed response`);
     const isStream = this.request.isStream;
 
     const usage = this.getUsage(parsedResponse.data);
@@ -703,10 +701,6 @@ export class DBLoggable {
             console.error("Failed to normalize AI Gateway response:", e);
           }
         }
-
-        console.log(
-          `[S3 Storage Debug] isAIGateway: ${!!isAIGateway}, openAIResponse set: ${!!openAIResponse}, originalOpenAIRequest set: ${!!this.request.requestBodyBuffer.getOriginalOpenAIRequest()}`
-        );
 
         const s3Result =
           await db.requestResponseManager.storeRequestResponseRaw({
