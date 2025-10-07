@@ -92,7 +92,10 @@ export const getMapperType = ({
     return "openai-chat";
   }
 
-  if (targetUrl?.includes("/v1/response") && provider === "OPENAI") {
+  if (
+    (targetUrl?.includes("/v1/responses") || path?.includes("/v1/responses")) &&
+    provider === "OPENAI"
+  ) {
     return "openai-response";
   }
 
