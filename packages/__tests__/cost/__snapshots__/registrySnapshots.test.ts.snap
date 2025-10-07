@@ -1789,7 +1789,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "mistral-nemo:deepinfra": {
       "context": 128000,
       "crossRegion": false,
-      "maxTokens": 16400,
+      "maxTokens": 16384,
       "modelId": "mistralai/Mistral-Nemo-Instruct-2407",
       "parameters": [
         "frequency_penalty",
@@ -1815,7 +1815,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "mistral-small:deepinfra": {
       "context": 128000,
       "crossRegion": false,
-      "maxTokens": 128000,
+      "maxTokens": 16384,
       "modelId": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
       "parameters": [
         "frequency_penalty",
