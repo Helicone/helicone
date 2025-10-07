@@ -27,8 +27,7 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { parseVercelStream } from "./streamParsers/vercelStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { costOfPrompt } from "@helicone-package/cost";
-import { toOpenAI } from "@helicone-package/llm-mapper/transform/providers/anthropic/response/toOpenai";
+import { normalizeAIGatewayResponse } from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
@@ -683,17 +682,23 @@ export class DBLoggable {
         const providerResponse = rawResponseBody.join("");
         let openAIResponse: string | undefined;
 
-        // For AI Gateway non-OpenAI: map response to OpenAI format
-        const isAIGatewayNonOpenAI =
-          this.request.attempt?.endpoint.modelConfig.responseFormat &&
-          this.request.attempt.endpoint.modelConfig.responseFormat !== "OPENAI";
+        // Check if this is an AI Gateway request
+        const isAIGateway = this.request.attempt?.endpoint;
 
-        if (isAIGatewayNonOpenAI) {
+        if (isAIGateway) {
           try {
-            const anthropicBody = JSON.parse(providerResponse);
-            openAIResponse = JSON.stringify(toOpenAI(anthropicBody));
+            openAIResponse = await normalizeAIGatewayResponse({
+              responseText: providerResponse,
+              isStream: this.request.isStream,
+              provider: this.request.attempt?.endpoint.provider ?? "openai",
+              providerModelId:
+                this.request.attempt?.endpoint.providerModelId ?? "",
+              responseFormat:
+                this.request.attempt?.endpoint.modelConfig.responseFormat ??
+                "OPENAI",
+            });
           } catch (e) {
-            console.error("Failed to map response to OpenAI:", e);
+            console.error("Failed to normalize AI Gateway response:", e);
           }
         }
 

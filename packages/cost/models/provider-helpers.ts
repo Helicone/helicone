@@ -225,6 +225,26 @@ export async function authenticateRequest(
   }
 }
 
+export function filterUnsupportedParameters(
+  parsedBody: any,
+  endpoint: Endpoint
+): any {
+  // If no unsupported parameters defined, return original
+  if (!endpoint.modelConfig.unsupportedParameters?.length) {
+    return parsedBody;
+  }
+
+  // Create a shallow copy to avoid mutating the original
+  const filtered = { ...parsedBody };
+
+  // Remove each unsupported parameter
+  for (const param of endpoint.modelConfig.unsupportedParameters) {
+    delete filtered[param];
+  }
+
+  return filtered;
+}
+
 export async function buildRequestBody(
   endpoint: Endpoint,
   context: RequestBodyContext
@@ -239,17 +259,25 @@ export async function buildRequestBody(
     return err(`Provider data is null for: ${endpoint.provider}`);
   }
 
+  // Filter out unsupported parameters before provider builds the body
+  const filteredBody = filterUnsupportedParameters(
+    context.parsedBody,
+    endpoint
+  );
+
+  const filteredContext = { ...context, parsedBody: filteredBody };
+
   if (!provider.buildRequestBody) {
     return ok(
       JSON.stringify({
-        ...context.parsedBody,
+        ...filteredContext.parsedBody,
         model: endpoint.providerModelId,
       })
     );
   }
 
   try {
-    const result = await provider.buildRequestBody(endpoint, context);
+    const result = await provider.buildRequestBody(endpoint, filteredContext);
     return ok(result);
   } catch (error) {
     return err(

@@ -236,6 +236,13 @@ export default function RequestDrawer(props: RequestDivProps) {
       { label: "User", value: request.heliconeMetadata.user || "Unknown" },
     ];
 
+    if (request.heliconeMetadata.targetUrl) {
+      requestInfo.push({
+        label: "Target URL",
+        value: request.heliconeMetadata.targetUrl,
+      });
+    }
+
     // Token Information
     const tokenInfo = [
       {
@@ -594,6 +601,26 @@ export default function RequestDrawer(props: RequestDivProps) {
                 errorCode={request.heliconeMetadata.status.code}
               />
 
+              {/* AI Gateway Badge */}
+              {request.heliconeMetadata.requestReferrer === "ai-gateway" && (
+                <TooltipProvider>
+                  <Tooltip delayDuration={100}>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant={"secondary"}
+                        asPill={false}
+                        className="border border-border"
+                      >
+                        <ShuffleIcon className="h-3 w-3" />
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      AI Gateway Request
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+
               {/* Show more Parameters Button */}
               <TooltipProvider>
                 <Tooltip delayDuration={100}>
@@ -649,7 +676,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                   copyText={specialProperties.sessionId}
                   href={`/sessions/${encodeURIComponent(
                     specialProperties.sessionName ?? EMPTY_SESSION_NAME,
-                  )}/${specialProperties.sessionId}`}
+                  )}/${encodeURIComponent(specialProperties.sessionId)}`}
                   truncateLength={dynamicTruncateLength}
                 />
               )}
@@ -709,7 +736,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                                 onClick={() => {
                                   navigator.clipboard.writeText(item.value);
                                   setNotification(
-                                    "Request ID copied",
+                                    `${item.label} copied`,
                                     "success",
                                   );
                                 }}
@@ -717,8 +744,11 @@ export default function RequestDrawer(props: RequestDivProps) {
                                 {item.value}
                               </p>
                             </TooltipTrigger>
-                            <TooltipContent side="bottom" className="text-xs">
-                              Copy
+                            <TooltipContent
+                              side="bottom"
+                              className="max-w-md break-all text-xs"
+                            >
+                              Copy: {item.value}
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>

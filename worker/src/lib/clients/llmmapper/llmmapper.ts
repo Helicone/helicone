@@ -1,6 +1,6 @@
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
-import { oai2ant } from "./router/oai2ant/nonStream";
-import { oaiStream2antStream } from "./router/oai2ant/stream";
+import { ant2oai } from "./router/oai2ant/nonStream";
+import { antStream2oaiStream } from "./router/oai2ant/stream";
 
 export function tryJSONParse(body: string): HeliconeChatCreateParams | null {
   try {
@@ -23,12 +23,12 @@ export async function llmmapper(
       return new Response("Invalid body", { status: 400 });
     }
     if (body?.stream) {
-      return oaiStream2antStream({
+      return antStream2oaiStream({
         body: body,
         headers: new Headers(init.headers),
       });
     } else {
-      return oai2ant({ body: body, headers: new Headers(init.headers) });
+      return ant2oai({ body: body, headers: new Headers(init.headers) });
     }
   }
 

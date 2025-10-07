@@ -4,6 +4,8 @@ import { Result, err, ok } from "../../packages/common/result";
 import { IntegrationManager } from "../IntegrationManager";
 import { VaultManager } from "../VaultManager";
 import Stripe from "stripe";
+import { subdivide } from "../../utils/subdivide";
+import { sendMeteredBatch } from "./sendBatchEvent";
 
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 
@@ -174,24 +176,7 @@ export class StripeIntegrationManager extends BaseManager {
 
       for (const batch of batches) {
         try {
-          const response = await fetch(
-            "https://meter-events.stripe.com/v2/billing/meter_event_stream",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${meterEventSession.authentication_token}`,
-                "Content-Type": "application/json",
-                "Stripe-Version": "2025-03-31.preview",
-              },
-              body: JSON.stringify({ events: batch }),
-            }
-          );
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(
-              `Error response from Stripe: ${response.status} ${errorText}`
-            );
-          }
+          await sendMeteredBatch(batch, meterEventSession.authentication_token);
 
           totalProcessed += batch.length;
         } catch (stripeError) {

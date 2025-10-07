@@ -22,10 +22,6 @@ import { MapperFn } from "../mappers/types";
 import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
 import { mapOpenAIResponse } from "../mappers/openai/responses";
-import { registry } from "@helicone-package/cost/models/registry";
-import { ModelProviderName } from "@helicone-package/cost/models/providers";
-import { isValidAnthropicLog, toOpenAILog } from "@helicone-package/llm-mapper/transform/providers/anthropic/log/toOpenAILog";
-import { AnthropicLog } from "@helicone-package/llm-mapper/transform/types/logs";
 
 const MAX_PREVIEW_LENGTH = 1_000;
 
@@ -102,6 +98,8 @@ const metaDataFromHeliconeRequest = (
     scores: heliconeRequest.scores,
     promptId: heliconeRequest.prompt_id ?? null,
     promptVersion: heliconeRequest.prompt_version ?? null,
+    targetUrl: heliconeRequest.target_url ?? null,
+    requestReferrer: heliconeRequest.request_referrer ?? null,
   };
 };
 
@@ -120,43 +118,6 @@ const getUnsanitizedMappedContent = ({
 
   let requestBody = heliconeRequest.request_body;
   let responseBody = heliconeRequest.response_body;
-
-  if (
-    heliconeRequest.signed_body_url &&
-    heliconeRequest.response_status >= 200 &&
-    heliconeRequest.response_status < 300 &&
-    (mapperType === "ai-gateway" ||
-      heliconeRequest.request_referrer === "ai-gateway")
-  ) {
-    const modelProviderConfig = registry.getModelProviderConfigByVersion(
-      heliconeRequest.model,
-      heliconeRequest.provider as ModelProviderName,
-      heliconeRequest.gateway_endpoint_version ?? ""
-    );
-    if (modelProviderConfig.data) {
-      const responseFormat =
-        modelProviderConfig.data.responseFormat ?? "OPENAI";
-      
-      if (responseFormat === "ANTHROPIC" && isValidAnthropicLog(responseBody)) {
-        try {
-          responseBody = toOpenAILog(responseBody as AnthropicLog);
-        } catch (e) {
-          console.error("Failed to convert Anthropic log to OpenAI log", e);
-        }
-      }
-    } else {
-      // fallback to legacy mapper types
-      const legacyMapperType = getMapperTypeFromHeliconeRequest(
-        heliconeRequest,
-        heliconeRequest.model,
-        true
-      );
-      mapper = MAPPERS[legacyMapperType];
-      if (!mapper) {
-        throw new Error(`Mapper not found: ${JSON.stringify(legacyMapperType)}`);
-      }
-    }
-  }
 
   try {
     result = mapper({
