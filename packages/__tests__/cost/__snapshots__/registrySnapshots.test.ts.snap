@@ -845,6 +845,35 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-v3.1-terminus:novita": {
+      "context": 98304,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "deepseek/deepseek-v3.1-terminus",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3.2:novita": {
       "context": 128000,
       "crossRegion": false,
@@ -3161,6 +3190,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "deepseek",
     "novita",
+    "novita",
     "openrouter",
   ],
   "deepseek/r1-distill": [
@@ -4272,6 +4302,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "deepseek-v3.1-terminus",
       "providers": [
         "deepinfra",
+        "novita",
       ],
     },
     {
@@ -4621,7 +4652,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 7,
+      "modelCount": 8,
       "provider": "novita",
     },
     {
@@ -4709,8 +4740,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 131,
-  "totalModelProviderConfigs": 131,
+  "totalEndpoints": 132,
+  "totalModelProviderConfigs": 132,
   "totalModelsWithPtb": 57,
   "totalProviders": 12,
 }
