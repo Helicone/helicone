@@ -200,7 +200,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -282,7 +282,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -364,7 +364,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -448,7 +448,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -532,7 +532,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -616,7 +616,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],
@@ -700,7 +700,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "bedrock",
-      "ptbEnabled": false,
+      "ptbEnabled": true,
       "regions": [
         "us-east-1",
       ],

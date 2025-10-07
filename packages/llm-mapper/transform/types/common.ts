@@ -39,8 +39,11 @@ export interface AnthropicUsage {
 
 // OpenAI usage types
 export interface OpenAIUsage {
+  // Including cached and audio tokens
   prompt_tokens: number;
+  // Including reasoning and audio tokens
   completion_tokens: number;
+  // prompt_tokens + completion_tokens
   total_tokens: number;
   prompt_tokens_details?: {
     cached_tokens?: number;

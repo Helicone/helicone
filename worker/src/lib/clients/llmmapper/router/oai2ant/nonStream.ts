@@ -3,7 +3,7 @@ import { AnthropicResponseBody } from "@helicone-package/llm-mapper/transform/ty
 import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
 import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
 
-export async function oai2ant({
+export async function ant2oai({
   body,
   headers,
 }: {
@@ -35,7 +35,7 @@ export async function oai2ant({
   });
 
   try {
-    return await oai2antResponse(response);
+    return await ant2oaiResponse(response);
   } catch (e) {
     const responseBody = await response.json<AnthropicResponseBody>();
     return new Response(JSON.stringify(responseBody), {
@@ -47,7 +47,7 @@ export async function oai2ant({
   }
 }
 
-export async function oai2antResponse(response: Response): Promise<Response> {
+export async function ant2oaiResponse(response: Response): Promise<Response> {
   try {
     const anthropicBody = await response.json<AnthropicResponseBody>();
     const openAIBody = toOpenAI(anthropicBody);
@@ -57,6 +57,7 @@ export async function oai2antResponse(response: Response): Promise<Response> {
       statusText: response.statusText,
       headers: {
         "content-type": "application/json",
+        ...Object.fromEntries(response.headers.entries()),
       },
     });
   } catch (error) {
