@@ -30,7 +30,6 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-        working-directory: packages
 
       - name: Run packages tests
         run: npx jest __tests__/
