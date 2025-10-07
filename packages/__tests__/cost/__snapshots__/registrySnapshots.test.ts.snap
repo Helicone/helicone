@@ -1605,7 +1605,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     "llama-4-scout:deepinfra": {
       "context": 10000000,
       "crossRegion": false,
-      "maxTokens": 8192,
+      "maxTokens": 16384,
       "modelId": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
       "parameters": [
         "frequency_penalty",

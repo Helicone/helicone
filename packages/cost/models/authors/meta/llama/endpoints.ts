@@ -100,7 +100,7 @@ export const endpoints = {
       "repetition_penalty",
       "logit_bias",
       "functions",
-      "tools"
+      "tools",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -340,7 +340,7 @@ export const endpoints = {
     ],
     quantization: "fp8",
     contextLength: 10_000_000,
-    maxCompletionTokens: 8_192,
+    maxCompletionTokens: 16_384,
     supportedParameters: [
       "max_tokens",
       "temperature",
@@ -355,7 +355,7 @@ export const endpoints = {
       "response_format",
       "tools",
       "functions",
-      "tool_choice"
+      "tool_choice",
     ],
     ptbEnabled: true,
     endpointConfigs: {
