@@ -2957,7 +2957,7 @@ Json: JsonObject;
       timeZoneDifference: number;
     };
     /** @enum {string} */
-    AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "passthrough";
+    AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "zai" | "passthrough";
     /** @enum {string} */
     StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
     RateLimits: {
@@ -3036,6 +3036,7 @@ Json: JsonObject;
       maxCompletionTokens: number;
       ptbEnabled: boolean;
       version?: string;
+      unsupportedParameters?: components["schemas"]["StandardParameter"][];
       providerModelId: string;
       provider: components["schemas"]["ModelProviderName"];
       author: components["schemas"]["AuthorName"];
@@ -3070,6 +3071,7 @@ Json: JsonObject;
       maxCompletionTokens: number;
       ptbEnabled: boolean;
       version?: string;
+      unsupportedParameters?: components["schemas"]["StandardParameter"][];
       modelConfig: components["schemas"]["ModelProviderConfig"];
       userConfig: components["schemas"]["UserEndpointConfig"];
       provider: components["schemas"]["ModelProviderName"];
