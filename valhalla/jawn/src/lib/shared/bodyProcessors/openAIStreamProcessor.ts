@@ -1,5 +1,4 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
-import { getTokenCountGPT3 } from "../../tokens/tokenCounter";
 import { PromiseGenericResult, err, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
