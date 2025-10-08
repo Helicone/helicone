@@ -105,12 +105,12 @@ export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
 
     if (Array.isArray(input) && input.length > 0) {
       const lastItem = input[input.length - 1];
-      
+
       // Handle function_call_output items - they don't have extractable text
       if ((lastItem as any)?.type === "function_call_output") {
         return "";
       }
-      
+
       const content = (lastItem as any)?.content;
 
       // Content can be a string or an array of typed items
@@ -161,14 +161,17 @@ export const getResponseText = (
     if (statusCode === 0 || statusCode === null) {
       return "";
     }
-    
+
     // Handle null/undefined inputs
     if (responseBody === null || responseBody === undefined) {
       return "";
     }
-    
+
     // Handle empty objects
-    if (typeof responseBody === "object" && Object.keys(responseBody).length === 0) {
+    if (
+      typeof responseBody === "object" &&
+      Object.keys(responseBody).length === 0
+    ) {
       return "";
     }
 
@@ -210,6 +213,28 @@ export const getResponseText = (
       }
     }
 
+    // streaming
+    if (
+      responseBody?.type === "response.completed" &&
+      Array.isArray(responseBody?.response?.output) &&
+      responseBody?.response?.output.length &&
+      responseBody?.response?.output[0]?.content &&
+      Array.isArray(responseBody?.response?.output[0]?.content) &&
+      responseBody?.response?.output[0]?.content.length
+    ) {
+      const contentArray = responseBody?.response?.output[0]?.content;
+      const textContent = contentArray.find(
+        (c: any) => c?.type === "output_text"
+      );
+      if (textContent?.text) {
+        return textContent.text;
+      }
+      const firstItemType = contentArray[0]?.type;
+      if (typeof firstItemType === "string" && firstItemType) {
+        return `[${firstItemType}]`;
+      }
+    }
+
     // Fallbacks
     if (typeof responseBody?.text === "string") {
       return responseBody.text;
@@ -219,7 +244,10 @@ export const getResponseText = (
     try {
       return JSON.stringify(responseBody);
     } catch (stringifyError) {
-      if (stringifyError instanceof Error && stringifyError.message.includes('circular')) {
+      if (
+        stringifyError instanceof Error &&
+        stringifyError.message.includes("circular")
+      ) {
         return "error_circular_reference";
       }
       throw stringifyError;
@@ -663,31 +691,39 @@ const convertResponse = (responseBody: any): Message[] => {
   }
 
   // Check for the 'output' array specific to the Responses API
-  if (!responseBody || !Array.isArray(responseBody.output)) return [];
+  if (
+    !responseBody ||
+    !Array.isArray(responseBody.output ?? responseBody.response?.output)
+  )
+    return [];
+
+  console.log("responseBody", responseBody);
 
   // Iterate through the output array
-  responseBody.output.forEach((outputItem: any, index: number) => {
-    // Look for items of type 'message'
-    if (outputItem.type === "message" && outputItem.content) {
-      let messageText = "";
-      // The content is an array, find the 'output_text' item
-      if (Array.isArray(outputItem.content)) {
-        const textContent = outputItem.content.find(
-          (c: any) => c.type === "output_text"
-        );
-        if (textContent && textContent.text) {
-          messageText = textContent.text;
+  (responseBody.output ?? responseBody.response?.output).forEach(
+    (outputItem: any, index: number) => {
+      // Look for items of type 'message'
+      if (outputItem.type === "message" && outputItem.content) {
+        let messageText = "";
+        // The content is an array, find the 'output_text' item
+        if (Array.isArray(outputItem.content)) {
+          const textContent = outputItem.content.find(
+            (c: any) => c.type === "output_text"
+          );
+          if (textContent && textContent.text) {
+            messageText = textContent.text;
+          }
         }
-      }
 
-      messages.push({
-        _type: "message",
-        role: outputItem.role || "assistant", // Get role from the message item
-        content: messageText,
-        id: outputItem.id || `resp-msg-${index}`, // Use ID from the output item if available
-      });
+        messages.push({
+          _type: "message",
+          role: outputItem.role || "assistant", // Get role from the message item
+          content: messageText,
+          id: outputItem.id || `resp-msg-${index}`, // Use ID from the output item if available
+        });
+      }
     }
-  });
+  );
 
   return messages;
 };
@@ -729,15 +765,19 @@ export const mapOpenAIResponse = ({
     if (!requestMessages || requestMessages.length === 0) {
       return getRequestText(request); // Fallback to original method
     }
-    
+
     // Look for the last user message or any message with content
     for (let i = requestMessages.length - 1; i >= 0; i--) {
       const message = requestMessages[i];
-      if (message?.content && typeof message.content === "string" && message.content.trim().length > 0) {
+      if (
+        message?.content &&
+        typeof message.content === "string" &&
+        message.content.trim().length > 0
+      ) {
         return message.content;
       }
     }
-    
+
     return "";
   };
 
