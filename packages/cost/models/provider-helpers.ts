@@ -312,16 +312,15 @@ function validateProvider(provider: string): provider is ModelProviderName {
 export function parseModelString(
   modelString: string
 ): Result<ModelSpec, string> {
-  let cleanModelString = modelString;
+  const parts = modelString.split("/");
+  let modelName = parts[0];
   let isOnline = false;
 
-  if (modelString.endsWith(":online")) {
+  // Check if model name has :online suffix
+  if (modelName.endsWith(":online")) {
     isOnline = true;
-    cleanModelString = modelString.slice(0, -7);
+    modelName = modelName.slice(0, -7);
   }
-
-  const parts = cleanModelString.split("/");
-  const modelName = parts[0];
 
   // Just model name: "gpt-4"
   if (parts.length === 1) {

@@ -3,11 +3,11 @@ import { parseModelString } from "../../cost/models/provider-helpers";
 describe("parseModelString", () => {
   describe(":online suffix handling", () => {
     it("should strip :online suffix and set isOnline flag", () => {
-      const result = parseModelString("claude-3-5-sonnet-20241022:online");
+      const result = parseModelString("gpt-4o:online");
 
       expect(result).toEqual({
         data: {
-          modelName: "claude-3-5-sonnet-20241022",
+          modelName: "gpt-4o",
           isOnline: true,
         },
         error: null,
@@ -46,10 +46,10 @@ describe("parseModelString", () => {
     });
 
     it("should parse model without :online suffix", () => {
-      const result = parseModelString("claude-3-5-sonnet-20241022");
+      const result = parseModelString("gpt-4o");
 
       expect(result.data).toEqual({
-        modelName: "claude-3-5-sonnet-20241022",
+        modelName: "gpt-4o",
         isOnline: false,
       });
     });

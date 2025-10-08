@@ -2,8 +2,8 @@ import {
   ModelProviderConfig,
   Plugin,
   PluginId,
+  ModelSpec,
 } from "@helicone-package/cost/models/types";
-import { ModelSpec } from "./types";
 
 export class PluginHandler {
   /**

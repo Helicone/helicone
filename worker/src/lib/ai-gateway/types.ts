@@ -11,13 +11,6 @@ export interface Attempt {
   plugins?: Plugin[];
 }
 
-export interface ModelSpec {
-  modelName: string;
-  provider?: ModelProviderName;
-  customUid?: string;
-  isOnline?: boolean;
-}
-
 export interface DisallowListEntry {
   provider: string;
   model: string;
