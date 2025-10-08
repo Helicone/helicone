@@ -27,6 +27,7 @@ interface TextMessageProps {
   onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
   mode: Mode;
   annotations?: Message["annotations"];
+  showAnnotations?: boolean;
 }
 export default function TextMessage({
   isPartOfContentArray,
@@ -39,6 +40,7 @@ export default function TextMessage({
   onChatChange,
   mode,
   annotations,
+  showAnnotations,
 }: TextMessageProps) {
   if (isJson(displayContent) && chatMode !== "PLAYGROUND_INPUT") {
     return (
@@ -143,7 +145,7 @@ export default function TextMessage({
             {displayContent}
           </ReactMarkdown>
           {annotations && annotations.length > 0 && (
-            <CitationAnnotations annotations={annotations} />
+            <CitationAnnotations annotations={annotations} showAnnotations={showAnnotations} />
           )}
         </>
       ) : !displayReasoning ? (
