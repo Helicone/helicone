@@ -95,7 +95,7 @@ export const endpoints = {
       "*": {},
     },
   },
-  "grok-4-fast:xai": {
+  "grok-4-fast-reasoning:xai": {
     providerModelId: "grok-4-fast",
     provider: "xai",
     author: "xai",

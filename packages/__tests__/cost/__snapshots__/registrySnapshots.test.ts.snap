@@ -2967,7 +2967,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "grok-4-fast:xai": {
+    "grok-4-fast-reasoning:xai": {
       "context": 2000000,
       "crossRegion": false,
       "maxTokens": 30000,
@@ -4410,7 +4410,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
-      "model": "grok-4-fast",
+      "model": "grok-4-fast-reasoning",
       "providers": [
         "xai",
       ],
@@ -4662,7 +4662,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "grok-3",
     "grok-3-mini",
     "grok-4",
-    "grok-4-fast",
+    "grok-4-fast-reasoning",
     "grok-code-fast-1",
     "kimi-k2",
     "kimi-k2-0905",
