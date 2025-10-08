@@ -1558,6 +1558,35 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-4-maverick:deepinfra": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-4-maverick:groq": {
       "context": 131072,
       "crossRegion": false,
@@ -1598,6 +1627,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "seed",
         "stop",
         "temperature",
+        "tool_choice",
         "tools",
         "top_k",
         "top_p",
@@ -3223,6 +3253,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "meta/llama": [
     "deepinfra",
     "deepinfra",
+    "deepinfra",
     "groq",
     "groq",
     "groq",
@@ -4540,6 +4571,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-4-maverick",
       "providers": [
+        "deepinfra",
         "groq",
         "novita",
         "openrouter",
@@ -4660,7 +4692,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 14,
+      "modelCount": 15,
       "provider": "deepinfra",
     },
     {
