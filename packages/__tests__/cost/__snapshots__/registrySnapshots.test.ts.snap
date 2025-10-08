@@ -2940,6 +2940,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-oss-20b:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-oss-20b",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-oss-20b:openrouter": {
       "context": 131000,
       "crossRegion": false,
@@ -3390,6 +3416,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "groq",
     "groq",
+    "novita",
     "openrouter",
     "openrouter",
   ],
@@ -4277,6 +4304,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0,
       },
     ],
+    "novita": [
+      {
+        "input": 5e-8,
+        "output": 2e-7,
+        "threshold": 0,
+      },
+    ],
     "openrouter": [
       {
         "input": 3.7e-7,
@@ -4553,6 +4587,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-oss-20b",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
@@ -4774,7 +4809,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 10,
+      "modelCount": 11,
       "provider": "novita",
     },
     {
@@ -4862,8 +4897,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 135,
-  "totalModelProviderConfigs": 135,
+  "totalEndpoints": 136,
+  "totalModelProviderConfigs": 136,
   "totalModelsWithPtb": 57,
   "totalProviders": 12,
 }
