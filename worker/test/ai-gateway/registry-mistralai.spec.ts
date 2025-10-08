@@ -18,6 +18,13 @@ const deepinfraAuthExpectations = {
   },
 };
 
+// Define auth expectations for Novita
+const novitaAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Mistral Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -1186,6 +1193,684 @@ describe("Mistral Registry Tests", () => {
             ],
             finalStatus: 200,
           },
+        }));
+    });
+  });
+
+  describe("DeepSeek v3.1 Terminus Tests - Novita Provider", () => {
+    describe("Function calling capabilities", () => {
+      it("should handle function calling with tools parameter", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "What's the weather like in San Francisco?" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get the current weather for a location",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string", description: "The city and state" },
+                        unit: { type: "string", enum: ["celsius", "fahrenheit"] }
+                      },
+                      required: ["location"]
+                    }
+                  }
+                }
+              ],
+              tool_choice: "auto"
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "San Francisco"
+                  ]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle multiple functions in tools array", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Calculate 5 + 3 and tell me the weather in Tokyo" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "calculate",
+                    description: "Perform mathematical calculations",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        operation: { type: "string", enum: ["add", "subtract", "multiply", "divide"] },
+                        a: { type: "number" },
+                        b: { type: "number" }
+                      },
+                      required: ["operation", "a", "b"]
+                    }
+                  }
+                },
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get weather information",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" }
+                      },
+                      required: ["location"]
+                    }
+                  }
+                }
+              ],
+              tool_choice: "auto"
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "calculate",
+                    "get_weather",
+                    "tool_choice"
+                  ]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle forced tool choice", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Get me the weather data" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get weather information",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" }
+                      },
+                      required: ["location"]
+                    }
+                  }
+                }
+              ],
+              tool_choice: {
+                type: "function",
+                function: { name: "get_weather" }
+              }
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather"
+                  ]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle legacy functions parameter", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Search for information" }
+              ],
+              functions: [
+                {
+                  name: "search",
+                  description: "Search for information",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      query: { type: "string" }
+                    },
+                    required: ["query"]
+                  }
+                }
+              ],
+              function_call: "auto"
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "functions",
+                    "search",
+                    "function_call"
+                  ]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle structured outputs with tools", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Extract structured data" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "extract_data",
+                    description: "Extract structured data",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        age: { type: "number" },
+                        email: { type: "string", format: "email" }
+                      },
+                      required: ["name", "email"]
+                    },
+                    strict: true
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "extract_data",
+                    "strict"
+                  ]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle complex nested function parameters", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Create a complex data structure" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "create_user_profile",
+                    description: "Create a user profile with nested data",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        user: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string" },
+                            contacts: {
+                              type: "array",
+                              items: {
+                                type: "object",
+                                properties: {
+                                  type: { type: "string" },
+                                  value: { type: "string" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "create_user_profile",
+                    "contacts"
+                  ]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+    });
+
+    describe("Function calling with other parameters", () => {
+      it("should handle tools with temperature and max_tokens", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Calculate and format the result" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "calculate",
+                    description: "Perform calculations",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        expression: { type: "string" }
+                      }
+                    }
+                  }
+                }
+              ],
+              temperature: 0.3,
+              max_tokens: 2000
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "calculate",
+                    "temperature",
+                    "max_tokens"
+                  ]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle tools with reasoning parameter", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Solve this problem step by step" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "solve_problem",
+                    description: "Solve mathematical problems",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        problem: { type: "string" }
+                      }
+                    }
+                  }
+                }
+              ],
+              reasoning: true
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "solve_problem",
+                    "reasoning"
+                  ]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle tools with all supported parameters", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Comprehensive test with all parameters" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "test_function",
+                    description: "Test function",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        input: { type: "string" }
+                      }
+                    }
+                  }
+                }
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              top_p: 0.9,
+              frequency_penalty: 0.5,
+              presence_penalty: 0.3,
+              max_tokens: 4000,
+              stop: ["END"],
+              seed: 42
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "test_function",
+                    "temperature",
+                    "top_p",
+                    "frequency_penalty",
+                    "presence_penalty",
+                    "max_tokens",
+                    "stop",
+                    "seed"
+                  ]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+    });
+
+    describe("Error scenarios for function calling", () => {
+      it("should handle Novita provider failure with tools", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test error handling" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "test_tool",
+                    description: "Test tool",
+                    parameters: { type: "object", properties: {} }
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "Novita service unavailable"
+              }
+            ],
+            finalStatus: 500
+          }
+        }));
+
+      it("should handle authentication failure with tools", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test auth failure" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "test_tool",
+                    description: "Test tool",
+                    parameters: { type: "object" }
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key"
+              }
+            ],
+            finalStatus: 401
+          }
+        }));
+
+      it("should handle rate limiting with tools", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test rate limit" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "test_tool",
+                    description: "Test tool",
+                    parameters: { type: "object" }
+                  }
+                }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded"
+              }
+            ],
+            finalStatus: 429
+          }
+        }));
+    });
+
+    describe("Basic model functionality", () => {
+      it("should handle simple request without tools", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Hello, how are you?" }
+              ]
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: novitaAuthExpectations
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle streaming with tools", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Stream with tools" }
+              ],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "stream_tool",
+                    description: "Test streaming",
+                    parameters: { type: "object" }
+                  }
+                }
+              ],
+              stream: true
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "stream_tool",
+                    '"stream":true'
+                  ]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
+        }));
+
+      it("should verify context length is within limits", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test context length" }
+              ],
+              max_tokens: 65536
+            }
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-v3.1-terminus",
+                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                expects: novitaAuthExpectations
+              }
+            ],
+            finalStatus: 200
+          }
         }));
     });
   });

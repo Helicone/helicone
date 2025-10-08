@@ -14,7 +14,7 @@ import {
   ModelProviderEntry,
 } from "./build-indexes";
 import { buildModelId } from "./provider-helpers";
-import { ModelProviderName } from "./providers";
+import { ModelProviderName, providers } from "./providers";
 import { Result, ok, err } from "../../common/result";
 import { ModelName, ModelProviderConfigId } from "./registry-types";
 
@@ -31,6 +31,7 @@ import {
 import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
 import { mistralModels, mistralEndpointConfig } from "./authors/mistralai";
+import { zaiModels, zaiEndpointConfig } from "./authors/zai";
 
 // Combine all models
 const allModels = {
@@ -43,6 +44,7 @@ const allModels = {
   ...alibabaModels,
   ...deepseekModels,
   ...mistralModels,
+  ...zaiModels
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -56,6 +58,7 @@ const modelProviderConfigs = {
   ...alibabaEndpointConfig,
   ...deepseekEndpointConfig,
   ...mistralEndpointConfig,
+  ...zaiEndpointConfig
 } satisfies Record<string, ModelProviderConfig>;
 
 // Combine all archived endpoints
@@ -83,6 +86,10 @@ function createPassthroughEndpoint(
   provider: ModelProviderName,
   userEndpointConfig: UserEndpointConfig
 ): Result<Endpoint> {
+  // Get the provider's supported plugins
+  const providerInstance = providers[provider];
+  const supportedPlugins = providerInstance?.supportedPlugins;
+
   const endpointConfig: ModelProviderConfig = {
     providerModelId: modelName,
     ptbEnabled: false,
@@ -98,6 +105,8 @@ function createPassthroughEndpoint(
     contextLength: 0,
     maxCompletionTokens: 0,
     supportedParameters: [],
+    // Use the provider's supportedPlugins if available
+    supportedPlugins: supportedPlugins && supportedPlugins.length > 0 ? supportedPlugins : undefined,
     endpointConfigs: {},
   };
 
@@ -224,7 +233,7 @@ function getModelProviderConfigByVersion(
   if (
     (!currentEntry.data?.config.version && !version) ||
     (currentEntry.data?.config.version === version)
-  ) { 
+  ) {
     return ok(currentEntry.data?.config ?? null);
   }
 
