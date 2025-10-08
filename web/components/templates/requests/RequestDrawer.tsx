@@ -727,7 +727,20 @@ export default function RequestDrawer(props: RequestDivProps) {
                         {item.label}
                       </XSmall>
 
-                      {item.label === "Request ID" || item.label === "User" ? (
+                      {item.label === "Created At" ? (
+                        <TooltipProvider>
+                          <Tooltip delayDuration={100}>
+                            <TooltipTrigger asChild>
+                              <p className="min-w-0 cursor-pointer truncate text-right text-xs">
+                                {item.value}
+                              </p>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="text-xs">
+                              {item.fullValue}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
                         <TooltipProvider>
                           <Tooltip delayDuration={100}>
                             <TooltipTrigger asChild>
@@ -752,23 +765,6 @@ export default function RequestDrawer(props: RequestDivProps) {
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                      ) : item.label === "Created At" ? (
-                        <TooltipProvider>
-                          <Tooltip delayDuration={100}>
-                            <TooltipTrigger asChild>
-                              <p className="min-w-0 cursor-pointer truncate text-right text-xs">
-                                {item.value}
-                              </p>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom" className="text-xs">
-                              {item.fullValue}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ) : (
-                        <p className="min-w-0 truncate text-right text-xs">
-                          {item.value}
-                        </p>
                       )}
                     </div>
                   ))}

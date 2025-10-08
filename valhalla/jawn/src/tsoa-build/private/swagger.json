@@ -4052,6 +4052,35 @@
 					"start_timestamp": {
 						"type": "string"
 					},
+					"annotations": {
+						"items": {
+							"properties": {
+								"content": {
+									"type": "string"
+								},
+								"title": {
+									"type": "string"
+								},
+								"url": {
+									"type": "string"
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"url_citation"
+									],
+									"nullable": false
+								}
+							},
+							"required": [
+								"title",
+								"url",
+								"type"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
 					"reasoning": {
 						"type": "string"
 					},
