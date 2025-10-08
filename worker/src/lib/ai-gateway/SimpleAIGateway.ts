@@ -243,7 +243,7 @@ export class SimpleAIGateway {
       );
     }
 
-    let plugins = parsedBody.plugins || [];
+    const plugins = parsedBody.plugins || [];
 
     const modelStrings = parsedBody.model
       .split(",")

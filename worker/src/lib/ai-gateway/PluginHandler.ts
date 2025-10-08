@@ -1,4 +1,8 @@
-import { ModelProviderConfig, Plugin, PluginId } from "@helicone-package/cost/models/types";
+import {
+  ModelProviderConfig,
+  Plugin,
+  PluginId,
+} from "@helicone-package/cost/models/types";
 import { ModelSpec } from "./types";
 
 export class PluginHandler {
@@ -11,7 +15,7 @@ export class PluginHandler {
     providerConfig: ModelProviderConfig,
     requestPlugins?: Plugin[]
   ): Plugin[] {
-    let plugins: Plugin[] = requestPlugins ? [...requestPlugins] : [];
+    const plugins: Plugin[] = requestPlugins ? [...requestPlugins] : [];
 
     // If :online suffix, add web search plugin if not already present
     if (modelSpec.isOnline) {

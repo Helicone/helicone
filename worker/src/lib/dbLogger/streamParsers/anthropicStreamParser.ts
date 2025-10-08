@@ -53,7 +53,10 @@ export function recursivelyConsolidateAnthropicListForClaude(
 
     if (item.type === "content_block_start") {
       // Store content block metadata for server_tool_use and tool_use blocks
-      if (item.content_block?.type === "server_tool_use" || item.content_block?.type === "tool_use") {
+      if (
+        item.content_block?.type === "server_tool_use" ||
+        item.content_block?.type === "tool_use"
+      ) {
         recursivelyConsolidateAnthropic(acc, {
           content: [
             {
