@@ -111,6 +111,13 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
             usageData?.prompt_tokens_details?.cached_tokens,
           heliconeCalculated: usageData?.helicone_calculated ?? false,
         };
+      } else if (consolidatedData.response?.usage) {
+        usage = {
+          totalTokens: consolidatedData.response?.usage?.total_tokens,
+          completionTokens: consolidatedData.response?.usage?.output_tokens,
+          promptTokens: consolidatedData.response?.usage?.input_tokens,
+          heliconeCalculated: true,
+        };
       } else {
         usage = {
           totalTokens: -1,

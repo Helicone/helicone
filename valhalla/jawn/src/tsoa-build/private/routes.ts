@@ -770,6 +770,20 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Prompt2025_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_string-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_string-Array.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_string-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Prompt2025Input": {
         "dataType": "refObject",
         "properties": {
@@ -792,20 +806,6 @@ const models: TsoaRoute.Models = {
     "Result_Prompt2025Input.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Prompt2025Input_"},{"ref":"ResultError_string_"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess_string-Array_": {
-        "dataType": "refObject",
-        "properties": {
-            "data": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result_string-Array.string_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_string-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "PromptCreateResponse": {
@@ -1133,7 +1133,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Message": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"ending_event_id":{"dataType":"string"},"trigger_event_id":{"dataType":"string"},"start_timestamp":{"dataType":"string"},"reasoning":{"dataType":"string"},"deleted":{"dataType":"boolean"},"contentArray":{"dataType":"array","array":{"dataType":"refAlias","ref":"Message"}},"idx":{"dataType":"double"},"detail":{"dataType":"string"},"filename":{"dataType":"string"},"file_id":{"dataType":"string"},"file_data":{"dataType":"string"},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["input_image"]},{"dataType":"enum","enums":["input_text"]},{"dataType":"enum","enums":["input_file"]}]},"audio_data":{"dataType":"string"},"image_url":{"dataType":"string"},"timestamp":{"dataType":"string"},"tool_call_id":{"dataType":"string"},"tool_calls":{"dataType":"array","array":{"dataType":"refObject","ref":"FunctionCall"}},"mime_type":{"dataType":"string"},"content":{"dataType":"string"},"name":{"dataType":"string"},"instruction":{"dataType":"string"},"role":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":["user"]},{"dataType":"enum","enums":["assistant"]},{"dataType":"enum","enums":["system"]},{"dataType":"enum","enums":["developer"]}]},"id":{"dataType":"string"},"_type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["functionCall"]},{"dataType":"enum","enums":["function"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["file"]},{"dataType":"enum","enums":["message"]},{"dataType":"enum","enums":["autoInput"]},{"dataType":"enum","enums":["contentArray"]},{"dataType":"enum","enums":["audio"]}],"required":true}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"ending_event_id":{"dataType":"string"},"trigger_event_id":{"dataType":"string"},"start_timestamp":{"dataType":"string"},"annotations":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"content":{"dataType":"string"},"title":{"dataType":"string","required":true},"url":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["url_citation"],"required":true}}}},"reasoning":{"dataType":"string"},"deleted":{"dataType":"boolean"},"contentArray":{"dataType":"array","array":{"dataType":"refAlias","ref":"Message"}},"idx":{"dataType":"double"},"detail":{"dataType":"string"},"filename":{"dataType":"string"},"file_id":{"dataType":"string"},"file_data":{"dataType":"string"},"type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["input_image"]},{"dataType":"enum","enums":["input_text"]},{"dataType":"enum","enums":["input_file"]}]},"audio_data":{"dataType":"string"},"image_url":{"dataType":"string"},"timestamp":{"dataType":"string"},"tool_call_id":{"dataType":"string"},"tool_calls":{"dataType":"array","array":{"dataType":"refObject","ref":"FunctionCall"}},"mime_type":{"dataType":"string"},"content":{"dataType":"string"},"name":{"dataType":"string"},"instruction":{"dataType":"string"},"role":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":["user"]},{"dataType":"enum","enums":["assistant"]},{"dataType":"enum","enums":["system"]},{"dataType":"enum","enums":["developer"]}]},"id":{"dataType":"string"},"_type":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["functionCall"]},{"dataType":"enum","enums":["function"]},{"dataType":"enum","enums":["image"]},{"dataType":"enum","enums":["file"]},{"dataType":"enum","enums":["message"]},{"dataType":"enum","enums":["autoInput"]},{"dataType":"enum","enums":["contentArray"]},{"dataType":"enum","enums":["audio"]}],"required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Tool": {
@@ -14393,7 +14393,7 @@ const models: TsoaRoute.Models = {
     "DashboardData": {
         "dataType": "refObject",
         "properties": {
-            "organizations": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"creditLimit":{"dataType":"double","required":true},"allowNegativeBalance":{"dataType":"boolean","required":true},"ownerEmail":{"dataType":"string","required":true},"tier":{"dataType":"string","required":true},"lastPaymentDate":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},"clickhouseTotalSpend":{"dataType":"double","required":true},"paymentsCount":{"dataType":"double","required":true},"totalPayments":{"dataType":"double","required":true},"stripeCustomerId":{"dataType":"string","required":true},"orgName":{"dataType":"string","required":true},"orgId":{"dataType":"string","required":true}}},"required":true},
+            "organizations": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"walletProcessedEventsCount":{"dataType":"double"},"walletDisallowedModelCount":{"dataType":"double"},"walletTotalDebits":{"dataType":"double"},"walletTotalCredits":{"dataType":"double"},"walletEffectiveBalance":{"dataType":"double"},"walletBalance":{"dataType":"double"},"creditLimit":{"dataType":"double","required":true},"allowNegativeBalance":{"dataType":"boolean","required":true},"ownerEmail":{"dataType":"string","required":true},"tier":{"dataType":"string","required":true},"lastPaymentDate":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},"clickhouseTotalSpend":{"dataType":"double","required":true},"paymentsCount":{"dataType":"double","required":true},"totalPayments":{"dataType":"double","required":true},"stripeCustomerId":{"dataType":"string","required":true},"orgName":{"dataType":"string","required":true},"orgId":{"dataType":"string","required":true}}},"required":true},
             "summary": {"dataType":"nestedObjectLiteral","nestedProperties":{"totalCreditsSpent":{"dataType":"double","required":true},"totalCreditsIssued":{"dataType":"double","required":true},"totalOrgsWithCredits":{"dataType":"double","required":true}},"required":true},
             "isProduction": {"dataType":"boolean","required":true},
         },
@@ -16787,6 +16787,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'renamePrompt2025',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPrompt2025Controller_updatePrompt2025Tags: Record<string, TsoaRoute.ParameterSchema> = {
+                promptId: {"in":"path","name":"promptId","required":true,"dataType":"string"},
+                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"tags":{"dataType":"array","array":{"dataType":"string"},"required":true}}},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.patch('/v1/prompt-2025/id/:promptId/tags',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller)),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller.prototype.updatePrompt2025Tags)),
+
+            async function Prompt2025Controller_updatePrompt2025Tags(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPrompt2025Controller_updatePrompt2025Tags, request, response });
+
+                const controller = new Prompt2025Controller();
+
+              await templateService.apiHandler({
+                methodName: 'updatePrompt2025Tags',
                 controller,
                 response,
                 next,
@@ -20592,6 +20625,40 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'updateWalletSettings',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminWalletController_removeFromDisallowList: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
+                provider: {"in":"query","name":"provider","required":true,"dataType":"string"},
+                model: {"in":"query","name":"model","required":true,"dataType":"string"},
+        };
+        app.delete('/v1/admin/wallet/:orgId/disallow-list',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController.prototype.removeFromDisallowList)),
+
+            async function AdminWalletController_removeFromDisallowList(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminWalletController_removeFromDisallowList, request, response });
+
+                const controller = new AdminWalletController();
+
+              await templateService.apiHandler({
+                methodName: 'removeFromDisallowList',
                 controller,
                 response,
                 next,

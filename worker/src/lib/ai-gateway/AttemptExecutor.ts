@@ -7,6 +7,7 @@ import {
 import { RequestWrapper } from "../RequestWrapper";
 import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
 import { isErr, Result, ok, err } from "../util/results";
+import { Plugin } from "@helicone-package/cost/models/types";
 import { Attempt, EscrowInfo, AttemptError } from "./types";
 import {
   AuthContext,
@@ -99,7 +100,8 @@ export class AttemptExecutor {
       props.orgId,
       props.forwarder,
       escrowInfo,
-      props.metrics
+      props.metrics,
+      props.attempt.plugins
     );
 
     // If error, cancel escrow and return the error
@@ -126,13 +128,14 @@ export class AttemptExecutor {
       escrowInfo?: EscrowInfo
     ) => Promise<Response>,
     escrowInfo: EscrowInfo | undefined,
-    metrics: GatewayMetrics
+    metrics: GatewayMetrics,
+    plugins?: Plugin[]
   ): Promise<Result<Response, AttemptError>> {
     try {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: toAnthropic,
+        toAnthropic: (body, modelId) => toAnthropic(body, modelId, plugins),
       });
 
       if (isErr(bodyResult) || !bodyResult.data) {
@@ -184,6 +187,15 @@ export class AttemptExecutor {
       );
       requestWrapper.resetObject();
       requestWrapper.setUrl(urlResult.data);
+
+      // For AI Gateway: store original OpenAI format before converting to provider format
+      // This allows the frontend to use OpenAI format without conversion
+      if (endpoint.modelConfig.responseFormat !== "OPENAI") {
+        requestWrapper.requestBodyBuffer.setOriginalOpenAIRequest(
+          JSON.stringify(parsedBody)
+        );
+      }
+
       await requestWrapper.setBody(bodyResult.data);
 
       for (const [key, value] of Object.entries(

@@ -167,6 +167,12 @@ export type Message = {
   contentArray?: Message[];
   deleted?: boolean; // For realtime API (conversation.item.delete)
   reasoning?: string; // For reasoning models
+  annotations?: Array<{
+    type: "url_citation";
+    url: string;
+    title: string;
+    content?: string;
+  }>; // For web search citations
 
   // For realtime API
   start_timestamp?: string; // For realtime API (creation)
@@ -248,6 +254,8 @@ type HeliconeMetadata = {
   gatewayDeploymentTarget?: string | null;
   promptId?: string | null;
   promptVersion?: string | null;
+  targetUrl?: string | null;
+  requestReferrer?: string | null;
 };
 
 // UNORGANZIED

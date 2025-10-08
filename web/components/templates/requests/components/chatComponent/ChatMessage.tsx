@@ -1,4 +1,3 @@
-import MarkdownEditor from "@/components/shared/markdownEditor";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { logger } from "@/lib/telemetry/logger";
@@ -274,6 +273,7 @@ const renderTextContent = (
     onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
     showDeleteButton?: boolean;
     onDelete?: () => void;
+    showAnnotations?: boolean;
   } = {},
 ) => {
   const textElement = (
@@ -287,6 +287,8 @@ const renderTextContent = (
       messageIndex={messageIndex}
       onChatChange={options.onChatChange}
       mode={mode}
+      annotations={message.annotations}
+      showAnnotations={options.showAnnotations}
     />
   );
 
@@ -350,6 +352,7 @@ const renderContentByType = (
     onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
     showDeleteButton?: boolean;
     onDelete?: () => void;
+    showAnnotations?: boolean;
   } = {},
 ) => {
   switch (messageType) {
@@ -860,6 +863,7 @@ export default function ChatMessage({
               onChatChange,
               showDeleteButton: false,
               onDelete: () => deleteMessage(messageIndex),
+              showAnnotations: !(isLongMessage && !isExpanded),
             },
           )
         )}

@@ -12,6 +12,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000003,
         output: 0.000015,
+        web_search: 0.00001, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -30,6 +31,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
+    supportedPlugins: ["web"],
     ptbEnabled: true,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
@@ -47,6 +49,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000003,
         output: 0.000015,
+        web_search: 0.00001, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -83,6 +86,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000003,
         output: 0.000015,
+        web_search: 0.00001, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -100,7 +104,7 @@ export const endpoints = {
       "top_k",
       "stop",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "us-east-1": {},
@@ -114,7 +118,7 @@ export const endpoints = {
       {
         threshold: 0,
         input: 0.000003165, // $3.17/1M - worst-case: $3.00/1M (Anthropic/Amazon Bedrock) * 1.055
-        output: 0.00001583, // $15.83/1M - worst-case: $15.00/1M (Anthropic/Amazon Bedrock) * 1.055
+        output: 0.00001583, // $15.83/1M - worst-case: $15.00/1M (Anthropic/Amazon Bedrock) * 1.055,
       },
     ],
     contextLength: 200000,

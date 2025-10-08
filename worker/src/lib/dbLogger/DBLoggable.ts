@@ -27,7 +27,7 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { parseVercelStream } from "./streamParsers/vercelStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { costOfPrompt } from "@helicone-package/cost";
+import { normalizeAIGatewayResponse } from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
@@ -679,12 +679,36 @@ export class DBLoggable {
 
     if (S3_ENABLED === "true") {
       try {
+        const providerResponse = rawResponseBody.join("");
+        let openAIResponse: string | undefined;
+
+        // Check if this is an AI Gateway request
+        const isAIGateway = this.request.attempt?.endpoint;
+
+        if (isAIGateway) {
+          try {
+            openAIResponse = await normalizeAIGatewayResponse({
+              responseText: providerResponse,
+              isStream: this.request.isStream,
+              provider: this.request.attempt?.endpoint.provider ?? "openai",
+              providerModelId:
+                this.request.attempt?.endpoint.providerModelId ?? "",
+              responseFormat:
+                this.request.attempt?.endpoint.modelConfig.responseFormat ??
+                "OPENAI",
+            });
+          } catch (e) {
+            console.error("Failed to normalize AI Gateway response:", e);
+          }
+        }
+
         const s3Result =
           await db.requestResponseManager.storeRequestResponseRaw({
             organizationId: authParams.organizationId,
             requestId: this.request.requestId,
             requestBodyBuffer: this.request.requestBodyBuffer,
-            responseBody: rawResponseBody.join(""),
+            providerResponse,
+            openAIResponse,
           });
 
         if (s3Result.error) {

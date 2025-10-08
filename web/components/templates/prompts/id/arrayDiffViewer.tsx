@@ -67,7 +67,12 @@ const ArrayDiffViewer = (props: ArrayDiffViewerProps) => {
                     <RoleButton
                       role={originItem.role}
                       onRoleChange={function (
-                        role: "function" | "assistant" | "user" | "system" | "tool",
+                        role:
+                          | "function"
+                          | "assistant"
+                          | "user"
+                          | "system"
+                          | "tool",
                       ): void {}}
                       disabled={true}
                     />

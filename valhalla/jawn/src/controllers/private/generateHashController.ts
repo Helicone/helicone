@@ -31,7 +31,7 @@ export class GenerateHashController extends Controller {
   }> {
     const { apiKey, keyName, governance } = requestBody;
     const { data, error } = await dbExecute<{ count: number }>(
-      `select count(*) from helicone_api_keys where soft_delete = false and organization_id = $1`,
+      `select count(*) from helicone_api_keys where soft_delete = false and organization_id = $1 and temp_key = false`,
       [request.authParams.organizationId]
     );
     if (error) {

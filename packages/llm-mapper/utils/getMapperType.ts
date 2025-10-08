@@ -23,19 +23,18 @@ const isRealtimeRequest = (request: HeliconeRequest) => {
 
 export const getMapperTypeFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
-  model: string,
-  ignoreAIGateway: boolean = false // optional override to ignore ai-gateway option
+  model: string
 ) => {
-  if (!ignoreAIGateway && heliconeRequest.request_referrer === "ai-gateway") {
-    return "ai-gateway";
-  }
-
   if (heliconeRequest.request_body?._type === "vector_db") {
     return "vector-db";
   }
 
   if (heliconeRequest.request_body?._type === "tool") {
     return "tool";
+  }
+
+  if (heliconeRequest.gateway_endpoint_version) {
+    return "ai-gateway";
   }
 
   // Check for OpenAI Assistant responses

@@ -202,6 +202,9 @@ export interface paths {
   "/v1/prompt-2025/id/{promptId}/rename": {
     post: operations["RenamePrompt2025"];
   };
+  "/v1/prompt-2025/id/{promptId}/tags": {
+    patch: operations["UpdatePrompt2025Tags"];
+  };
   "/v1/prompt-2025/{promptId}": {
     delete: operations["DeletePrompt2025"];
   };
@@ -536,6 +539,9 @@ export interface paths {
   };
   "/v1/admin/wallet/{orgId}/update-settings": {
     post: operations["UpdateWalletSettings"];
+  };
+  "/v1/admin/wallet/{orgId}/disallow-list": {
+    delete: operations["RemoveFromDisallowList"];
   };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
@@ -1206,6 +1212,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     Prompt2025Input: {
       request_id: string;
       version_id: string;
@@ -1217,12 +1229,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_string-Array_": {
-      data: string[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     PromptCreateResponse: {
       id: string;
       versionId: string;
@@ -1596,6 +1602,13 @@ Json: JsonObject;
       ending_event_id?: string;
       trigger_event_id?: string;
       start_timestamp?: string;
+      annotations?: {
+          content?: string;
+          title: string;
+          url: string;
+          /** @enum {string} */
+          type: "url_citation";
+        }[];
       reasoning?: string;
       deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
@@ -15887,6 +15900,18 @@ Json: JsonObject;
     DashboardData: {
       organizations: ({
           /** Format: double */
+          walletProcessedEventsCount?: number;
+          /** Format: double */
+          walletDisallowedModelCount?: number;
+          /** Format: double */
+          walletTotalDebits?: number;
+          /** Format: double */
+          walletTotalCredits?: number;
+          /** Format: double */
+          walletEffectiveBalance?: number;
+          /** Format: double */
+          walletBalance?: number;
+          /** Format: double */
           creditLimit: number;
           allowNegativeBalance: boolean;
           ownerEmail: string;
@@ -17180,6 +17205,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdatePrompt2025Tags: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          tags: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
         };
       };
     };
@@ -19305,6 +19352,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__allowNegativeBalance-boolean--creditLimit-number_.string_"];
+        };
+      };
+    };
+  };
+  RemoveFromDisallowList: {
+    parameters: {
+      query: {
+        provider: string;
+        model: string;
+      };
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_WalletState.string_"];
         };
       };
     };

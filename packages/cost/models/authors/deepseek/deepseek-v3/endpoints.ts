@@ -125,6 +125,7 @@ export const endpoints = {
         },
       },
     ],
+    quantization: "fp4",
     contextLength: 128_000,
     maxCompletionTokens: 16_384,
     supportedParameters: [
@@ -145,6 +146,43 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-v3.1-terminus:novita": {
+    provider: "novita",
+    author: "deepseek",
+    providerModelId: "deepseek/deepseek-v3.1-terminus",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000027,
+        output: 0.000001,
+      }
+    ],
+    quantization: "fp8",
+    contextLength: 98_304,
+    maxCompletionTokens: 65_536,
+    supportedParameters: [
+      "functions",
+      "structured_outputs",
+      "reasoning",
+      "tool_choice",
+      "tools",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "deepseek-v3.2:novita": {
     provider: "novita",
     author: "deepseek",
@@ -156,6 +194,7 @@ export const endpoints = {
         output: 0.00000041, // $0.41 per 1M tokens
       },
     ],
+    quantization: "fp8",
     contextLength: 128_000,
     maxCompletionTokens: 16_384,
     supportedParameters: [

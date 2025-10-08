@@ -88,7 +88,7 @@ const Credits: NextPageWithLayout<void> = () => {
         rightActions={
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
-              Beta
+              Early Access
             </Badge>
             {hasAccess && (
               <Button
@@ -251,7 +251,7 @@ const Credits: NextPageWithLayout<void> = () => {
                       </span>
                     ) : (
                       `$${(() => {
-                        const balance = (creditData?.balance ?? 0) / 100;
+                        const balance = creditData?.balance ?? 0;
                         if (balance % 1 === 0) {
                           return balance.toFixed(2);
                         }

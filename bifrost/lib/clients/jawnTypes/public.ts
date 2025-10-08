@@ -113,6 +113,9 @@ export interface paths {
   "/v1/prompt-2025/id/{promptId}/rename": {
     post: operations["RenamePrompt2025"];
   };
+  "/v1/prompt-2025/id/{promptId}/tags": {
+    patch: operations["UpdatePrompt2025Tags"];
+  };
   "/v1/prompt-2025/{promptId}": {
     delete: operations["DeletePrompt2025"];
   };
@@ -1295,6 +1298,12 @@ export interface components {
       error: null;
     };
     "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     Prompt2025Input: {
       request_id: string;
       version_id: string;
@@ -1306,12 +1315,6 @@ export interface components {
       error: null;
     };
     "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_string-Array_": {
-      data: string[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     PromptCreateResponse: {
       id: string;
       versionId: string;
@@ -1585,6 +1588,13 @@ export interface components {
       ending_event_id?: string;
       trigger_event_id?: string;
       start_timestamp?: string;
+      annotations?: {
+          content?: string;
+          title: string;
+          url: string;
+          /** @enum {string} */
+          type: "url_citation";
+        }[];
       reasoning?: string;
       deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
@@ -2957,6 +2967,8 @@ Json: JsonObject;
     AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "passthrough";
     /** @enum {string} */
     StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
+    /** @enum {string} */
+    PluginId: "web";
     RateLimits: {
       /** Format: double */
       rpm?: number;
@@ -3037,6 +3049,7 @@ Json: JsonObject;
       provider: components["schemas"]["ModelProviderName"];
       author: components["schemas"]["AuthorName"];
       supportedParameters: components["schemas"]["StandardParameter"][];
+      supportedPlugins?: components["schemas"]["PluginId"][];
       rateLimits?: components["schemas"]["RateLimits"];
       endpointConfigs: components["schemas"]["Record_string.EndpointConfig_"];
       crossRegion?: boolean;
@@ -4647,6 +4660,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdatePrompt2025Tags: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          tags: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
         };
       };
     };

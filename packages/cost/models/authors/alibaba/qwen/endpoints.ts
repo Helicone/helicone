@@ -173,6 +173,7 @@ export const endpoints = {
       tpm: 60000000,
       tpd: 6000000000,
     },
+    quantization: "bf16",
     contextLength: 262_000,
     maxCompletionTokens: 16_384,
     supportedParameters: [
@@ -190,7 +191,7 @@ export const endpoints = {
       "min_p",
       "response_format",
     ],
-    ptbEnabled: false,
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
@@ -211,6 +212,7 @@ export const endpoints = {
       tpm: 60000000,
       tpd: 6000000000,
     },
+    quantization: "fp8",
     contextLength: 262_000,
     maxCompletionTokens: 16_384,
     supportedParameters: [

@@ -98,7 +98,9 @@ export const endpoints = {
       "top_k",
       "min_p",
       "repetition_penalty",
-      "logit_bias"
+      "logit_bias",
+      "functions",
+      "tools"
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -301,6 +303,7 @@ export const endpoints = {
         output: 0.0000005, // $0.5/1M tokens
       },
     ],
+    quantization: "bf16",
     contextLength: 131_072,
     maxCompletionTokens: 131_072,
     supportedParameters: [
@@ -465,6 +468,7 @@ export const endpoints = {
         output: 0.00000003, // $0.03/1M tokens
       },
     ],
+    quantization: "fp8",
     contextLength: 128_000,
     maxCompletionTokens: 128_000,
     supportedParameters: [
@@ -530,6 +534,7 @@ export const endpoints = {
         output: 0.00000005, // $0.06 per 1M tokens - DeepInfra pricing from https://deepinfra.com/meta-llama/Meta-Llama-3-8B-Instruct
       },
     ],
+    quantization: "bf16",
     contextLength: 131_072,
     maxCompletionTokens: 131_072,
     supportedParameters: [

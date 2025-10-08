@@ -17,6 +17,7 @@ export const endpoints = {
         },
       },
     ],
+    quantization: "fp4",
     contextLength: 128_000,
     maxCompletionTokens: 64_000,
     supportedParameters: [
@@ -65,6 +66,45 @@ export const endpoints = {
     ],
     ptbEnabled: true,
     priority: 3, // Fallback priority
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "deepseek-reasoner:deepinfra": {
+    provider: "deepinfra",
+    author: "deepseek",
+    providerModelId: "deepseek-ai/DeepSeek-R1-0528",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000005, // $0.50 per 1M tokens
+        output: 0.00000215, // $2.15 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.8, // $0.40 per 1M tokens (cached)
+        },
+      },
+    ],
+    rateLimits: {
+      rpm: 12000,
+      tpm: 60000000,
+      tpd: 6000000000,
+    },
+    contextLength: 128_000,
+    maxCompletionTokens: 32_000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+    ],
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
