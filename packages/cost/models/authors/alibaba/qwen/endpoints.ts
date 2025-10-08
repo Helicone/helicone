@@ -233,6 +233,41 @@ export const endpoints = {
       "*": {},
     },
   },
+  "qwen3-235b-a22b-thinking:novita": {
+    providerModelId: "qwen/qwen3-235b-a22b-thinking-2507",
+    provider: "novita",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003, // $0.30 per million tokens
+        output: 0.000003, // $3.00 per million tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 131_072,
+    maxCompletionTokens: 32_768,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+      "functions",
+      "structured_outputs",
+      "reasoning"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${QwenModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

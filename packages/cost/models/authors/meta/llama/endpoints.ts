@@ -101,6 +101,47 @@ export const endpoints = {
       "logit_bias",
       "functions",
       "tools",
+<<<<<<< HEAD
+=======
+      "tool_choice"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-4-maverick:deepinfra": {
+    providerModelId: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+    provider: "deepinfra",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000015,
+        output: 0.0000006,
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 1_000_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "logit_bias",
+      "tools",
+      "tool_choice",
+      "functions",
+>>>>>>> origin/main
     ],
     ptbEnabled: true,
     endpointConfigs: {

@@ -335,13 +335,15 @@ export class RequestWrapper {
 
   async safelyGetBody(): Promise<ValidRequestBody> {
     if (this.shouldFormatPrompt()) {
-      throw new Error("Cannot safely get body for request using legacy prompts");
+      throw new Error(
+        "Cannot safely get body for request using legacy prompts"
+      );
     }
 
     await this.applyBodyOverrides();
     return await this.requestBodyBuffer.getReadableStreamToBody();
   }
-  
+
   async unsafeGetBodyText(): Promise<string> {
     await this.applyBodyOverrides();
 
@@ -362,7 +364,11 @@ export class RequestWrapper {
     try {
       return JSON.parse(await this.unsafeGetBodyText());
     } catch (e) {
-      console.error("RequestWrapper.getJson", e, await this.unsafeGetBodyText());
+      console.error(
+        "RequestWrapper.getJson",
+        e,
+        await this.unsafeGetBodyText()
+      );
       return {} as T;
     }
   }
