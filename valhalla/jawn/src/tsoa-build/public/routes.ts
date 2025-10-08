@@ -2646,7 +2646,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AuthorName": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anthropic"]},{"dataType":"enum","enums":["openai"]},{"dataType":"enum","enums":["perplexity"]},{"dataType":"enum","enums":["deepseek"]},{"dataType":"enum","enums":["cohere"]},{"dataType":"enum","enums":["xai"]},{"dataType":"enum","enums":["google"]},{"dataType":"enum","enums":["meta-llama"]},{"dataType":"enum","enums":["mistralai"]},{"dataType":"enum","enums":["amazon"]},{"dataType":"enum","enums":["microsoft"]},{"dataType":"enum","enums":["nvidia"]},{"dataType":"enum","enums":["qwen"]},{"dataType":"enum","enums":["moonshotai"]},{"dataType":"enum","enums":["alibaba"]}]},{"dataType":"enum","enums":["passthrough"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anthropic"]},{"dataType":"enum","enums":["openai"]},{"dataType":"enum","enums":["perplexity"]},{"dataType":"enum","enums":["deepseek"]},{"dataType":"enum","enums":["cohere"]},{"dataType":"enum","enums":["xai"]},{"dataType":"enum","enums":["google"]},{"dataType":"enum","enums":["meta-llama"]},{"dataType":"enum","enums":["mistralai"]},{"dataType":"enum","enums":["amazon"]},{"dataType":"enum","enums":["microsoft"]},{"dataType":"enum","enums":["nvidia"]},{"dataType":"enum","enums":["qwen"]},{"dataType":"enum","enums":["moonshotai"]},{"dataType":"enum","enums":["alibaba"]},{"dataType":"enum","enums":["zai"]}]},{"dataType":"enum","enums":["passthrough"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "StandardParameter": {
@@ -2730,6 +2730,7 @@ const models: TsoaRoute.Models = {
             "maxCompletionTokens": {"dataType":"double","required":true},
             "ptbEnabled": {"dataType":"boolean","required":true},
             "version": {"dataType":"string"},
+            "unsupportedParameters": {"dataType":"array","array":{"dataType":"refAlias","ref":"StandardParameter"}},
             "providerModelId": {"dataType":"string","required":true},
             "provider": {"ref":"ModelProviderName","required":true},
             "author": {"ref":"AuthorName","required":true},
@@ -2770,6 +2771,7 @@ const models: TsoaRoute.Models = {
             "maxCompletionTokens": {"dataType":"double","required":true},
             "ptbEnabled": {"dataType":"boolean","required":true},
             "version": {"dataType":"string"},
+            "unsupportedParameters": {"dataType":"array","array":{"dataType":"refAlias","ref":"StandardParameter"}},
             "modelConfig": {"ref":"ModelProviderConfig","required":true},
             "userConfig": {"ref":"UserEndpointConfig","required":true},
             "provider": {"ref":"ModelProviderName","required":true},
