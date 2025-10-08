@@ -101,7 +101,7 @@ export const endpoints = {
       "logit_bias",
       "functions",
       "tools",
-      "tool_choice"
+      "tool_choice",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -521,6 +521,43 @@ export const endpoints = {
       "seed",
       "min_p",
       "response_format",
+      "tool_choice",
+      "tools",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-3.1-8b-instruct-turbo:nebius": {
+    providerModelId: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
+    provider: "nebius",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000003, // $0.03/1M tokens
+        output: 0.00000009, // $0.09/1M tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 128_000,
+    maxCompletionTokens: 8_192,
+    supportedParameters: [
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "functions",
       "tool_choice",
       "tools",
     ],

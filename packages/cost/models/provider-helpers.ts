@@ -51,6 +51,8 @@ export function heliconeProviderToModelProviderName(
       return "deepinfra";
     case "NOVITA":
       return "novita";
+    case "NEBIUS":
+      return "nebius";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -66,7 +68,6 @@ export function heliconeProviderToModelProviderName(
     case "QSTASH":
     case "FIRECRAWL":
     case "AVIAN":
-    case "NEBIUS":
     case "OPENPIPE":
     case "CHUTES":
     case "LLAMA":
