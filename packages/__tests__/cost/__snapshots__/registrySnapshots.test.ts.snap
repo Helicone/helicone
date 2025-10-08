@@ -1459,6 +1459,35 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-3.1-8b-instruct-turbo:nebius": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "nebius",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-3.1-8b-instruct:deepinfra": {
       "context": 131072,
       "crossRegion": false,
@@ -3390,6 +3419,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "nebius",
     "novita",
     "novita",
     "novita",
@@ -4132,6 +4162,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0,
       },
     ],
+    "nebius": [
+      {
+        "input": 3e-8,
+        "output": 9e-8,
+        "threshold": 0,
+      },
+    ],
     "novita": [
       {
         "input": 1.3e-7,
@@ -4719,6 +4756,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "llama-3.1-8b-instruct-turbo",
       "providers": [
         "deepinfra",
+        "nebius",
       ],
     },
     {
@@ -4870,6 +4908,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
+      "modelCount": 1,
+      "provider": "nebius",
+    },
+    {
       "modelCount": 11,
       "provider": "novita",
     },
@@ -4960,9 +5002,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 138,
-  "totalModelProviderConfigs": 138,
+  "totalEndpoints": 139,
+  "totalModelProviderConfigs": 139,
   "totalModelsWithPtb": 59,
-  "totalProviders": 12,
+  "totalProviders": 13,
 }
 `;
