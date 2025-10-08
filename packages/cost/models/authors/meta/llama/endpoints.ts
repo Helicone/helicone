@@ -101,8 +101,6 @@ export const endpoints = {
       "logit_bias",
       "functions",
       "tools",
-<<<<<<< HEAD
-=======
       "tool_choice"
     ],
     ptbEnabled: true,
@@ -141,7 +139,6 @@ export const endpoints = {
       "tools",
       "tool_choice",
       "functions",
->>>>>>> origin/main
     ],
     ptbEnabled: true,
     endpointConfigs: {
