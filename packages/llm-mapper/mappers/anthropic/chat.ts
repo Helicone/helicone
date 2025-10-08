@@ -33,15 +33,12 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
 
     // Handle new format
     if (responseBody?.content && Array.isArray(responseBody.content)) {
-      // Concatenate all text blocks (excluding server_tool_use and web_search_tool_result)
-      const textContents = responseBody.content
-        .filter((item: any) => item.type === "text")
-        .map((item: any) => (item.text || "").replace(/undefined/g, "").trim())
-        .filter((text: string) => text.length > 0)
-        .join("");
-
-      if (textContents.length > 0) {
-        return textContents;
+      const textContent = responseBody.content.find(
+        (item: any) => item.type === "text"
+      );
+      if (textContent) {
+        // Remove any undefined values and clean up the text
+        return (textContent.text || "").replace(/undefined/g, "").trim();
       }
     }
 
@@ -77,15 +74,12 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
         return `${toolUse.name}(${JSON.stringify(toolUse.input)})`;
       }
 
-      // Concatenate all text blocks (excluding server_tool_use and web_search_tool_result)
-      const textContents = responseBody.content
-        .filter((item: any) => item.type === "text")
-        .map((item: any) => (item.text || "").replace(/undefined/g, "").trim())
-        .filter((text: string) => text.length > 0)
-        .join("");
-
-      if (textContents.length > 0) {
-        return textContents;
+      const textContent = responseBody.content?.find(
+        (item: any) => item.type === "text"
+      );
+      if (textContent) {
+        // Remove any undefined values and clean up the text
+        return (textContent.text || "").replace(/undefined/g, "").trim();
       }
     }
 

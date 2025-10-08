@@ -120,38 +120,6 @@ type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCre
 };
 
 /**
- * Plugin configuration for extending model capabilities.
- * Currently supports web search plugin similar to OpenRouter's implementation.
- *
- * @example
- * ```typescript
- * const plugins = [{
- *   id: "web",
- *   max_uses: 5,
- *   allowed_domains: ["arxiv.org", "nature.com"]
- * }];
- * ```
- */
-export interface HeliconePlugin {
-  /** Plugin identifier. Currently only "web" is supported */
-  id: "web";
-  /** Maximum number of uses for this plugin in a single request */
-  max_uses?: number;
-  /** Restrict plugin to specific domains */
-  allowed_domains?: string[];
-  /** Block specific domains from search results */
-  blocked_domains?: string[];
-  /** User location for context (web search) */
-  user_location?: {
-    type?: "approximate";
-    city?: string;
-    region?: string; // state/region
-    country?: string; // country code
-    timezone?: string; // IANA timezone ID
-  };
-}
-
-/**
  * Parameters for using Helicone prompt templates.
  *
  * @example
@@ -182,8 +150,8 @@ export type HeliconePromptParams = {
 };
 
 /**
- * OpenAI ChatCompletion parameters extended with Helicone features.
- * Includes support for prompt templates and plugins.
+ * OpenAI ChatCompletion parameters extended with Helicone prompt template support.
+ * Use this type when creating non-streaming chat completions with Helicone prompts.
  *
  * @example
  * ```typescript
@@ -221,10 +189,7 @@ export type HeliconePromptParams = {
  * ```
  */
 export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreamingPartialMessages &
-  HeliconePromptParams & {
-    /** Plugins to extend model capabilities */
-    plugins?: HeliconePlugin[];
-  };
+  HeliconePromptParams;
 
 /**
  * OpenAI ChatCompletion parameters extended with Helicone prompt template support for streaming responses.
@@ -261,7 +226,4 @@ export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreamingPar
  * ```
  */
 export type HeliconeChatCreateParamsStreaming =
-  ChatCompletionCreateParamsStreamingPartialMessages & HeliconePromptParams & {
-    /** Plugins to extend model capabilities */
-    plugins?: HeliconePlugin[];
-  };
+  ChatCompletionCreateParamsStreamingPartialMessages & HeliconePromptParams;

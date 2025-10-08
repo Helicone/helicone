@@ -29,13 +29,10 @@ export class AnthropicToOpenAIStreamConverter {
     this.created = Math.floor(Date.now() / 1000);
   }
 
-  processLines(
-    raw: string,
-    onChunk: (chunk: ChatCompletionChunk) => void
-  ) {
+  processLines(raw: string, onChunk: (chunk: ChatCompletionChunk) => void) {
     const chunks: ChatCompletionChunk[] = [];
     const lines = raw.split("\n");
-    
+
     for (const line of lines) {
       if (line.startsWith("data: ")) {
         try {
@@ -94,7 +91,10 @@ export class AnthropicToOpenAIStreamConverter {
       case "content_block_start":
         if (event.content_block.type === "text") {
           // Check if this text block has citations
-          if (event.content_block.citations && event.content_block.citations.length > 0) {
+          if (
+            event.content_block.citations &&
+            event.content_block.citations.length > 0
+          ) {
             // Calculate start position for this text block
             const blockStartIndex = this.currentContentLength;
             const blockText = event.content_block.text || "";
@@ -231,6 +231,8 @@ export class AnthropicToOpenAIStreamConverter {
 
         const cachedTokens = event.usage.cache_read_input_tokens ?? 0;
         const cacheWriteTokens = event.usage.cache_creation_input_tokens ?? 0;
+        const webSearchRequests =
+          event.usage.server_tool_use?.web_search_requests ?? 0;
 
         this.finalUsage = {
           prompt_tokens: event.usage.input_tokens,
@@ -245,8 +247,7 @@ export class AnthropicToOpenAIStreamConverter {
                 cache_write_tokens: cacheWriteTokens,
                 cache_write_details: {
                   write_5m_tokens:
-                    event.usage.cache_creation?.ephemeral_5m_input_tokens ??
-                    0,
+                    event.usage.cache_creation?.ephemeral_5m_input_tokens ?? 0,
                   write_1h_tokens:
                     event.usage.cache_creation?.ephemeral_1h_input_tokens ?? 0,
                 },
@@ -259,22 +260,22 @@ export class AnthropicToOpenAIStreamConverter {
             accepted_prediction_tokens: 0,
             rejected_prediction_tokens: 0,
           },
+          // AI Gateway extension - only present when converting from Anthropic
+          ...(webSearchRequests > 0 && {
+            server_tool_use: {
+              web_search_requests: webSearchRequests,
+            },
+          }),
         };
 
         const finishReason = this.mapStopReason(event.delta.stop_reason);
-
-        // Emit annotations with the finish reason if we have any
-        const delta: any = {};
-        if (this.annotations.length > 0) {
-          delta.annotations = this.annotations;
-        }
 
         chunks.push(
           this.createChunk({
             choices: [
               {
                 index: 0,
-                delta,
+                delta: {},
                 logprobs: null,
                 finish_reason: finishReason,
               },
