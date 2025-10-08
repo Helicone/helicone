@@ -233,6 +233,13 @@ export interface UserEndpointConfig {
   modelName?: string;
 }
 
+export interface ModelSpec {
+  modelName: string;
+  provider?: ModelProviderName;
+  customUid?: string;
+  isOnline?: boolean;
+}
+
 export interface AuthContext {
   apiKey?: string;
   secretKey?: string;

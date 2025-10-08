@@ -1,18 +1,17 @@
 import { registry } from "@helicone-package/cost/models/registry";
 import { ModelProviderEntry } from "@helicone-package/cost/models/build-indexes";
-import {
-  ModelProviderName,
-  providers,
-} from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import {
   UserEndpointConfig,
   Endpoint,
   Plugin,
+  ModelSpec,
 } from "@helicone-package/cost/models/types";
+import { parseModelString } from "@helicone-package/cost/models/provider-helpers";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
 import { FeatureFlagManager } from "../managers/FeatureFlagManager";
-import { isErr, Result, ok, err } from "../util/results";
-import { Attempt, ModelSpec } from "./types";
+import { isErr } from "../util/results";
+import { Attempt } from "./types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { PluginHandler } from "./PluginHandler";
 
@@ -43,7 +42,7 @@ export class AttemptBuilder {
     );
 
     for (const modelString of modelStrings) {
-      const modelSpec = this.parseModelString(modelString);
+      const modelSpec = parseModelString(modelString);
 
       // Skip invalid model specs
       // TODO: Return error
@@ -353,55 +352,4 @@ export class AttemptBuilder {
     );
   }
 
-  private validateProvider(provider: string): provider is ModelProviderName {
-    return provider in providers;
-  }
-
-  parseModelString(modelString: string): Result<ModelSpec, string> {
-    let cleanModelString = modelString;
-    let isOnline = false;
-
-    if (modelString.endsWith(":online")) {
-      isOnline = true;
-      cleanModelString = modelString.slice(0, -7);
-    }
-
-    const parts = cleanModelString.split("/");
-    const modelName = parts[0];
-
-    // Just model name: "gpt-4"
-    if (parts.length === 1) {
-      // Check if model is known
-      const validModels = registry.getAllModelIds();
-      const isKnownModel =
-        validModels.data && validModels.data.includes(modelName as any);
-
-      // Fail fast: unknown model with no provider
-      if (!isKnownModel) {
-        return err(
-          `Unknown model: ${modelName}. Please specify a provider (e.g., ${modelName}/openai) or use a supported model. See https://helicone.ai/models`
-        );
-      }
-      return ok({
-        modelName,
-        isOnline,
-      });
-    }
-
-    // Has provider - validate it once
-    const provider = parts[1];
-    if (!this.validateProvider(provider)) {
-      const validProviders = Object.keys(providers);
-      return err(
-        `Invalid provider: ${provider}. Valid providers: ${validProviders.join(", ")}`
-      );
-    }
-
-    return ok({
-      modelName,
-      provider,
-      customUid: parts.length === 3 ? parts[2] : undefined,
-      isOnline,
-    });
-  }
 }

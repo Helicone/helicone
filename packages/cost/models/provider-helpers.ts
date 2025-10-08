@@ -8,11 +8,13 @@ import type {
   RequestBodyContext,
   RequestParams,
   ResponseFormat,
+  ModelSpec,
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
 import { Provider } from "@helicone-package/llm-mapper/types";
 import { CacheProvider } from "../../common/cache/provider";
+import { registry } from "./registry";
 
 export function heliconeProviderToModelProviderName(
   provider: Provider
@@ -301,4 +303,58 @@ export async function buildErrorMessage(
   }
 
   return ok(await provider.buildErrorMessage(response));
+}
+
+function validateProvider(provider: string): provider is ModelProviderName {
+  return provider in providers;
+}
+
+export function parseModelString(
+  modelString: string
+): Result<ModelSpec, string> {
+  let cleanModelString = modelString;
+  let isOnline = false;
+
+  if (modelString.endsWith(":online")) {
+    isOnline = true;
+    cleanModelString = modelString.slice(0, -7);
+  }
+
+  const parts = cleanModelString.split("/");
+  const modelName = parts[0];
+
+  // Just model name: "gpt-4"
+  if (parts.length === 1) {
+    // Check if model is known
+    const validModels = registry.getAllModelIds();
+    const isKnownModel =
+      validModels.data && validModels.data.includes(modelName as any);
+
+    // Fail fast: unknown model with no provider
+    if (!isKnownModel) {
+      return err(
+        `Unknown model: ${modelName}. Please specify a provider (e.g., ${modelName}/openai) or use a supported model. See https://helicone.ai/models`
+      );
+    }
+    return ok({
+      modelName,
+      isOnline,
+    });
+  }
+
+  // Has provider - validate it once
+  const provider = parts[1];
+  if (!validateProvider(provider)) {
+    const validProviders = Object.keys(providers);
+    return err(
+      `Invalid provider: ${provider}. Valid providers: ${validProviders.join(", ")}`
+    );
+  }
+
+  return ok({
+    modelName,
+    provider,
+    customUid: parts.length === 3 ? parts[2] : undefined,
+    isOnline,
+  });
 }
