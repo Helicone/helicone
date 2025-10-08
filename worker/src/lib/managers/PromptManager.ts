@@ -23,10 +23,10 @@ export class PromptManager {
       return null;
     }
 
-    const scope = params.version_id
-      ? `version:${params.version_id}`
-      : params.environment
+    const scope = params.environment
       ? `env:${params.environment}`
+      : params.version_id
+      ? `version:${params.version_id}`
       : "prod";
 
     return `prompt_version_${params.prompt_id}_${scope}_${orgId}`;

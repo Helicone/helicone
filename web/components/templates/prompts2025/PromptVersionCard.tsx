@@ -205,14 +205,6 @@ const PromptVersionCard = ({
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="flex items-start gap-3 rounded-lg border border-muted-foreground/20 bg-muted/40 p-3 text-sm text-muted-foreground">
-                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                <span>
-                  Environment changes may take up to five minutes to serve the
-                  updated prompt while the cache refreshes.
-                </span>
-              </div>
-
               {version.environment === "production" && (
                 <div className="flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-950/20">
                   <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-orange-600 dark:text-orange-400" />

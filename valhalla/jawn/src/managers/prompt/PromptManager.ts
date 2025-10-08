@@ -50,6 +50,33 @@ export class Prompt2025Manager extends BaseManager {
     );
   }
 
+  private async resetPromptCache(params: {
+    promptId: string;
+    versionId?: string;
+    environment?: string;
+  }): Promise<void> {
+    
+    // reset cache on Cloudflare Workers
+    try {
+      const res = await fetch(
+        `${process.env.HELICONE_WORKER_API}/reset-prompt-cache/${this.authParams.organizationId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        }
+      );
+      
+      if (!res.ok) {
+        throw new Error(`Failed to reset prompt cache: ${res.status} ${await res.text()}`);
+      }
+    } catch (error) {
+      console.error("Error resetting prompt cache:", error);
+    }
+  }
+
   private generateRandomPromptId() : string {
     const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let result = '';
@@ -612,6 +639,14 @@ export class Prompt2025Manager extends BaseManager {
       return err(s3Result.error);
     }
 
+    if (params.environment) {
+      await this.resetPromptCache({
+        promptId: params.promptId,
+        versionId: promptVersionId,
+        environment: params.environment,
+      });
+    }
+
     return ok({ id: promptVersionId });
   }
 
@@ -666,6 +701,12 @@ export class Prompt2025Manager extends BaseManager {
     if (updateEnvResult.error) {
       return err(updateEnvResult.error);
     }
+
+    await this.resetPromptCache({
+      promptId: params.promptId,
+      environment: params.environment,
+    });
+
     return ok(null);
   }
 
@@ -709,6 +750,11 @@ export class Prompt2025Manager extends BaseManager {
       return err(result.error);
     }
 
+    // remove prod cache
+    await this.resetPromptCache({
+      promptId: params.promptId,
+    });
+
     return ok(null);
   }
 
@@ -729,6 +775,11 @@ export class Prompt2025Manager extends BaseManager {
     if (s3Result.error) {
       return err(s3Result.error);
     }
+
+    await this.resetPromptCache({
+      promptId: params.promptId,
+      versionId: params.promptVersionId
+    });
 
     return ok(null);
   }

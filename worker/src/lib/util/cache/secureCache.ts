@@ -303,6 +303,7 @@ export async function getAndStoreInCache<T, K>(
   });
   if (cached !== null) {
     try {
+      console.log("cached with key", key, cached);
       const cachedResult = JSON.parse(cached);
       if (cachedResult._helicone_cached_string) {
         return ok(cachedResult._helicone_cached_string);
@@ -312,6 +313,7 @@ export async function getAndStoreInCache<T, K>(
       console.error("Error parsing cached result", e);
     }
   }
+  console.log("not cached with key", key);
   const value = await fn();
   if (value.error !== null) {
     return value;
