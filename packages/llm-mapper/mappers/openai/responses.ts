@@ -697,8 +697,6 @@ const convertResponse = (responseBody: any): Message[] => {
   )
     return [];
 
-  console.log("responseBody", responseBody);
-
   // Iterate through the output array
   (responseBody.output ?? responseBody.response?.output).forEach(
     (outputItem: any, index: number) => {
