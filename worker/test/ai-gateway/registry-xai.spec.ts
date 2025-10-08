@@ -83,10 +83,10 @@ describe("xAI Registry Tests", () => {
         }));
     });
 
-    describe("grok-4-fast", () => {
+    describe("grok-4-fast-reasoning", () => {
       it("should handle xai provider", () =>
         runGatewayTest({
-          model: "grok-4-fast/xai",
+          model: "grok-4-fast-reasoning/xai",
           expected: {
             providers: [
               {
@@ -102,7 +102,7 @@ describe("xAI Registry Tests", () => {
 
       it("should auto-select xai provider when none specified", () =>
         runGatewayTest({
-          model: "grok-4-fast",
+          model: "grok-4-fast-reasoning",
           expected: {
             providers: [
               {
@@ -118,7 +118,7 @@ describe("xAI Registry Tests", () => {
 
       it("should handle tool calls with xai provider", () =>
         runGatewayTest({
-          model: "grok-4-fast/xai",
+          model: "grok-4-fast-reasoning/xai",
           request: {
             body: {
               messages: [{ role: "user", content: "What's the weather?" }],
@@ -167,7 +167,7 @@ describe("xAI Registry Tests", () => {
 
       it("should handle response format with xai provider", () =>
         runGatewayTest({
-          model: "grok-4-fast/xai",
+          model: "grok-4-fast-reasoning/xai",
           request: {
             body: {
               messages: [{ role: "user", content: "Generate JSON data" }],
@@ -199,7 +199,7 @@ describe("xAI Registry Tests", () => {
 
       it("should handle all supported parameters", () =>
         runGatewayTest({
-          model: "grok-4-fast/xai",
+          model: "grok-4-fast-reasoning/xai",
           request: {
             body: {
               messages: [
@@ -238,7 +238,7 @@ describe("xAI Registry Tests", () => {
 
       it("should handle structured outputs", () =>
         runGatewayTest({
-          model: "grok-4-fast/xai",
+          model: "grok-4-fast-reasoning/xai",
           request: {
             body: {
               messages: [
@@ -400,10 +400,10 @@ describe("xAI Registry Tests", () => {
     });
   });
 
-  describe("Error scenarios - grok-4-fast", () => {
-    it("should handle xAI provider failure for grok-4-fast", () =>
+  describe("Error scenarios - grok-4-fast-reasoning", () => {
+    it("should handle xAI provider failure for grok-4-fast-reasoning", () =>
       runGatewayTest({
-        model: "grok-4-fast/xai",
+        model: "grok-4-fast-reasoning/xai",
         expected: {
           providers: [
             {
@@ -417,9 +417,9 @@ describe("xAI Registry Tests", () => {
         }
       }));
 
-    it("should handle rate limiting from xAI for grok-4-fast", () =>
+    it("should handle rate limiting from xAI for grok-4-fast-reasoning", () =>
       runGatewayTest({
-        model: "grok-4-fast/xai",
+        model: "grok-4-fast-reasoning/xai",
         expected: {
           providers: [
             {
@@ -433,9 +433,9 @@ describe("xAI Registry Tests", () => {
         }
       }));
 
-    it("should handle authentication failure for grok-4-fast", () =>
+    it("should handle authentication failure for grok-4-fast-reasoning", () =>
       runGatewayTest({
-        model: "grok-4-fast/xai",
+        model: "grok-4-fast-reasoning/xai",
         expected: {
           providers: [
             {
@@ -449,9 +449,9 @@ describe("xAI Registry Tests", () => {
         }
       }));
 
-    it("should handle model not found error for grok-4-fast", () =>
+    it("should handle model not found error for grok-4-fast-reasoning", () =>
       runGatewayTest({
-        model: "grok-4-fast/xai",
+        model: "grok-4-fast-reasoning/xai",
         expected: {
           providers: [
             {
@@ -465,9 +465,9 @@ describe("xAI Registry Tests", () => {
         }
       }));
 
-    it("should handle timeout for grok-4-fast", () =>
+    it("should handle timeout for grok-4-fast-reasoning", () =>
       runGatewayTest({
-        model: "grok-4-fast/xai",
+        model: "grok-4-fast-reasoning/xai",
         expected: {
           providers: [
             {
@@ -481,9 +481,9 @@ describe("xAI Registry Tests", () => {
         }
       }));
 
-    it("should handle bad request error for grok-4-fast", () =>
+    it("should handle bad request error for grok-4-fast-reasoning", () =>
       runGatewayTest({
-        model: "grok-4-fast/xai",
+        model: "grok-4-fast-reasoning/xai",
         expected: {
           providers: [
             {
