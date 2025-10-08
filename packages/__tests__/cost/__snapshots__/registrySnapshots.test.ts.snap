@@ -29,6 +29,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-235b-a22b-thinking:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "qwen/qwen3-235b-a22b-thinking-2507",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "qwen3-30b-a3b:deepinfra": {
       "context": 32768,
       "crossRegion": false,
@@ -1898,6 +1925,34 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "kimi-k2-0905:novita": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-0905",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2-0905:openrouter": {
       "context": 262144,
       "crossRegion": false,
@@ -3192,6 +3247,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "deepinfra",
     "groq",
+    "novita",
     "openrouter",
   ],
   "anthropic/claude-3.5-haiku": [
@@ -3307,6 +3363,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "novita",
+    "novita",
     "openrouter",
     "openrouter",
   ],
@@ -3398,6 +3455,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "request": 0,
         "threshold": 0,
         "web_search": 0,
+      },
+    ],
+    "novita": [
+      {
+        "input": 3e-7,
+        "output": 0.000003,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -4566,6 +4630,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "kimi-k2-0905",
       "providers": [
         "groq",
+        "novita",
         "openrouter",
       ],
     },
@@ -4685,6 +4750,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "qwen3-235b-a22b-thinking",
       "providers": [
         "deepinfra",
+        "novita",
       ],
     },
     {
@@ -4743,7 +4809,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 9,
+      "modelCount": 11,
       "provider": "novita",
     },
     {
@@ -4831,8 +4897,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 134,
-  "totalModelProviderConfigs": 134,
+  "totalEndpoints": 136,
+  "totalModelProviderConfigs": 136,
   "totalModelsWithPtb": 57,
   "totalProviders": 12,
 }
