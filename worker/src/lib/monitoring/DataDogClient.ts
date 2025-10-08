@@ -99,7 +99,12 @@ export class DataDogClient {
    * Track gateway latency
    */
   trackLatency(
-    phase: "pre_request_ms" | "post_request_ms" | "provider_request_ms" | "total_ms" | "prompt_request_ms",
+    phase:
+      | "pre_request_ms"
+      | "post_request_ms"
+      | "provider_request_ms"
+      | "total_ms"
+      | "prompt_request_ms",
     durationMs: number
   ): void {
     if (durationMs < 0) return;

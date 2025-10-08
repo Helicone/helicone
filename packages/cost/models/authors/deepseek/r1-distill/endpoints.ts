@@ -88,7 +88,7 @@ export const endpoints = {
       },
     ],
     contextLength: 131_072,
-    maxCompletionTokens: 128_000,
+    maxCompletionTokens: 16_384,
     quantization: "fp8",
     supportedParameters: [
       "max_tokens",

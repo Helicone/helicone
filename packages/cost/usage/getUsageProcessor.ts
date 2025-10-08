@@ -17,6 +17,7 @@ export function getUsageProcessor(
     case "openai":
     case "azure":
     case "deepinfra":
+    case "nebius":
     case "novita":
       return new OpenAIUsageProcessor();
     case "anthropic":

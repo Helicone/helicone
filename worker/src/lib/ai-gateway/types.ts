@@ -1,4 +1,4 @@
-import { Endpoint } from "@helicone-package/cost/models/types";
+import { Endpoint, Plugin } from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
@@ -8,12 +8,7 @@ export interface Attempt {
   authType: "byok" | "ptb";
   priority: number;
   source: string;
-}
-
-export interface ModelSpec {
-  modelName: string;
-  provider?: ModelProviderName;
-  customUid?: string;
+  plugins?: Plugin[];
 }
 
 export interface DisallowListEntry {
