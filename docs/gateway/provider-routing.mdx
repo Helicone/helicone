@@ -6,9 +6,9 @@ description: "Automatic model routing across 100+ providers for reliability and 
 
 Never worry about provider outages again. The AI Gateway automatically routes your requests to the best available provider, with instant failover when things go wrong.
 
-<Warning>
-Currently, only BYOK (Bring Your Own Keys) and passthrough routing are supported. Pass-through billing (PTB) is coming soon.
-</Warning>
+<Note>
+Supports BYOK (Bring Your Own Keys), passthrough routing, and pass-through billing (PTB). To enable PTB with Helicone's API keys, request access in Settings → Credits.
+</Note>
 
 ## The Problem
 
@@ -134,20 +134,20 @@ The [Model Registry](https://helicone.ai/models) is our source of truth for whic
 
 ### Two Ways to Access Models
 
-#### Option 1: Passthrough Billing (PTB) - Coming Soon
-Use Helicone's API keys in supported regions. Zero configuration required.
+#### Option 1: Passthrough Billing (PTB)
+Use Helicone's API keys in supported regions. Zero configuration required - just request access in Settings → Credits.
 
 ```typescript
 model: "gpt-4o-mini"  // Will automatically use Helicone's keys
 ```
 
-**Available in:** Major US/EU regions for popular providers (coming soon)
+**Available in:** Major US/EU regions for popular providers
 
 #### Option 2: Your Own Keys (BYOK)
 Add your provider keys in [Provider Settings](https://us.helicone.ai/providers). The gateway uses YOUR keys for all requests.
 
 <Note>
-When you add a provider deployment, **ALL models and regions** that provider supports become available through your deployment. PTB fallback for reliability is coming soon.
+When you add a provider deployment, **ALL models and regions** that provider supports become available through your deployment.
 </Note>
 
 **Example:**
@@ -183,7 +183,7 @@ When multiple deployments are available, the gateway intelligently selects which
 
 ### Routing Priority
 1. **Your deployments (BYOK)** - Always tried first
-2. **PTB endpoints** - Automatic fallback for reliability (coming soon)
+2. **PTB endpoints** - Automatic fallback for reliability
 
 ### Selection Logic
 Within each priority level, we:
@@ -196,8 +196,8 @@ You have Azure Brazil + Azure US deployments.
 
 **Routing order:**
 1. Your cheapest deployment (e.g., Brazil if cheaper)
-2. Your other deployments (e.g., US)  
-3. Helicone PTB endpoints (coming soon)
+2. Your other deployments (e.g., US)
+3. Helicone PTB endpoints
 
 This ensures optimal cost while maintaining reliability.
 
@@ -214,7 +214,7 @@ The gateway automatically tries the next provider when encountering these errors
 | 500+ | Server errors |
 
 <Note>
-The gateway only attempts providers where you have configured API keys (BYOK). When Pass-through Billing (PTB) launches, the gateway will automatically try Helicone's API keys as a fallback.
+The gateway attempts providers where you have configured API keys (BYOK) first, then falls back to Helicone's API keys via Pass-through Billing (PTB) if enabled.
 </Note>
 
 ## Real World Examples

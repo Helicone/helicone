@@ -96,7 +96,7 @@ export const endpoints = {
       tpd: 6000000000,
     },
     contextLength: 32_768,
-    maxCompletionTokens: 32_768,
+    maxCompletionTokens: 16_384,
     supportedParameters: [
       "tools",
       "tool_choice",

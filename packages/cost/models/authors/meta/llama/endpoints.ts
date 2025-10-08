@@ -508,7 +508,7 @@ export const endpoints = {
     ],
     quantization: "fp8",
     contextLength: 128_000,
-    maxCompletionTokens: 128_000,
+    maxCompletionTokens: 16_384,
     supportedParameters: [
       "max_tokens",
       "temperature",
@@ -611,7 +611,7 @@ export const endpoints = {
     ],
     quantization: "bf16",
     contextLength: 131_072,
-    maxCompletionTokens: 131_072,
+    maxCompletionTokens: 16_384,
     supportedParameters: [
       "max_tokens",
       "temperature",
