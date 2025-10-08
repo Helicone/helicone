@@ -31,6 +31,18 @@ export interface OpenAIResponseMessage {
   content: string | null;
   function_call?: OpenAIFunctionCall;
   tool_calls?: OpenAIToolCall[];
+  annotations?: OpenAIAnnotation[];
+}
+
+export interface OpenAIAnnotation {
+  type: "url_citation";
+  url_citation: {
+    url: string;
+    title: string;
+    content?: string;
+    start_index: number;
+    end_index: number;
+  };
 }
 
 // === STREAMING TYPES ===
@@ -58,6 +70,7 @@ export interface OpenAIDelta {
     arguments?: string;
   };
   tool_calls?: OpenAIStreamingToolCall[];
+  annotations?: OpenAIAnnotation[];
 }
 
 // === LOGPROBS TYPES ===

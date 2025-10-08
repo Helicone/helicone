@@ -6,55 +6,38 @@ import { createOpenAIMockResponse } from "../test-utils";
 // Define auth expectations for Novita provider
 const novitaAuthExpectations = {
   headers: {
-    Authorization: /^Bearer /,
-  },
+    Authorization: /^Bearer /
+  }
 };
 
-describe("Moonshot AI Registry Tests", () => {
+describe("Zai Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
     vi.clearAllMocks();
   });
 
-  describe("BYOK Tests - Kimi K2 Models", () => {
-    describe("kimi-k2-instruct", () => {
+  describe("BYOK Tests - glm-4.6", () => {
+    describe("glm-4.6", () => {
       it("should handle novita provider", () =>
         runGatewayTest({
-          model: "kimi-k2-instruct/novita",
+          model: "glm-4.6/novita",
           expected: {
             providers: [
               {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
-                model: "moonshotai/kimi-k2-instruct",
-                data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
-                expects: novitaAuthExpectations,
-              },
+                model: "zai-org/glm-4.6",
+                data: createOpenAIMockResponse("zai-org/glm-4.6"),
+                expects: novitaAuthExpectations
+              }
             ],
-            finalStatus: 200,
-          },
-        }));
-
-      it("should auto-select novita provider when none specified", () =>
-        runGatewayTest({
-          model: "kimi-k2-instruct",
-          expected: {
-            providers: [
-              {
-                url: "https://api.novita.ai/openai/v1/chat/completions",
-                response: "success",
-                model: "moonshotai/kimi-k2-instruct",
-                data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
-                expects: novitaAuthExpectations,
-              },
-            ],
-            finalStatus: 200,
-          },
+            finalStatus: 200
+          }
         }));
 
       it("should handle tool calls with novita provider", () =>
         runGatewayTest({
-          model: "kimi-k2-instruct/novita",
+          model: "glm-4.6/novita",
           request: {
             body: {
               messages: [{ role: "user", content: "What's the weather?" }],
@@ -67,25 +50,25 @@ describe("Moonshot AI Registry Tests", () => {
                     parameters: {
                       type: "object",
                       properties: {
-                        location: { type: "string" },
+                        location: { type: "string" }
                       },
-                      required: ["location"],
-                    },
-                  },
-                },
+                      required: ["location"]
+                    }
+                  }
+                }
               ],
               tool_choice: "auto",
               temperature: 0.7,
-              max_tokens: 1000,
-            },
+              max_tokens: 1000
+            }
           },
           expected: {
             providers: [
               {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
-                model: "moonshotai/kimi-k2-instruct",
-                data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
+                model: "zai-org/glm-4.6",
+                data: createOpenAIMockResponse("zai-org/glm-4.6"),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -93,55 +76,53 @@ describe("Moonshot AI Registry Tests", () => {
                     "tool_choice",
                     "get_weather",
                     "temperature",
-                    "max_tokens",
-                  ],
-                },
-              },
+                    "max_tokens"
+                  ]
+                }
+              }
             ],
-            finalStatus: 200,
-          },
+            finalStatus: 200
+          }
         }));
 
       it("should handle response format with novita provider", () =>
         runGatewayTest({
-          model: "kimi-k2-instruct/novita",
+          model: "glm-4.6/novita",
           request: {
             body: {
               messages: [{ role: "user", content: "Generate JSON data" }],
               response_format: { type: "json_object" },
               temperature: 0.1,
-              top_p: 0.9,
               frequency_penalty: 0.5,
-              presence_penalty: 0.3,
-            },
+              presence_penalty: 0.3
+            }
           },
           expected: {
             providers: [
               {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
-                model: "moonshotai/kimi-k2-instruct",
-                data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
+                model: "zai-org/glm-4.6",
+                data: createOpenAIMockResponse("zai-org/glm-4.6"),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
                     "response_format",
                     "json_object",
                     "temperature",
-                    "top_p",
                     "frequency_penalty",
-                    "presence_penalty",
-                  ],
-                },
-              },
+                    "presence_penalty"
+                  ]
+                }
+              }
             ],
-            finalStatus: 200,
-          },
+            finalStatus: 200
+          }
         }));
 
       it("should handle structured outputs with novita provider", () =>
         runGatewayTest({
-          model: "kimi-k2-instruct/novita",
+          model: "glm-4.6/novita",
           request: {
             body: {
               messages: [{ role: "user", content: "Extract data" }],
@@ -153,38 +134,38 @@ describe("Moonshot AI Registry Tests", () => {
                     type: "object",
                     properties: {
                       name: { type: "string" },
-                      age: { type: "number" },
+                      age: { type: "number" }
                     },
-                    required: ["name", "age"],
-                  },
-                },
-              },
-            },
+                    required: ["name", "age"]
+                  }
+                }
+              }
+            }
           },
           expected: {
             providers: [
               {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
-                model: "moonshotai/kimi-k2-instruct",
-                data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
+                model: "zai-org/glm-4.6",
+                data: createOpenAIMockResponse("zai-org/glm-4.6"),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
                     "response_format",
                     "json_schema",
-                    "data_extraction",
-                  ],
-                },
-              },
+                    "data_extraction"
+                  ]
+                }
+              }
             ],
-            finalStatus: 200,
-          },
+            finalStatus: 200
+          }
         }));
 
       it("should handle functions parameter with novita provider", () =>
         runGatewayTest({
-          model: "kimi-k2-instruct/novita",
+          model: "glm-4.6/novita",
           request: {
             body: {
               messages: [{ role: "user", content: "Call a function" }],
@@ -196,39 +177,66 @@ describe("Moonshot AI Registry Tests", () => {
                     type: "object",
                     properties: {
                       a: { type: "number" },
-                      b: { type: "number" },
+                      b: { type: "number" }
                     },
-                    required: ["a", "b"],
-                  },
-                },
+                    required: ["a", "b"]
+                  }
+                }
               ],
-              function_call: "auto",
-            },
+              function_call: "auto"
+            }
           },
           expected: {
             providers: [
               {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
-                model: "moonshotai/kimi-k2-instruct",
-                data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
+                model: "zai-org/glm-4.6",
+                data: createOpenAIMockResponse("zai-org/glm-4.6"),
                 expects: {
                   ...novitaAuthExpectations,
-                  bodyContains: ["functions", "function_call", "calculate_sum"],
-                },
-              },
+                  bodyContains: ["functions", "function_call", "calculate_sum"]
+                }
+              }
             ],
-            finalStatus: 200,
+            finalStatus: 200
+          }
+        }));
+
+      it("should handle reasoning parameter with novita provider", () =>
+        runGatewayTest({
+          model: "glm-4.6/novita",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Solve this problem" }],
+              reasoning: { type: "step_by_step" },
+              temperature: 0.7
+            }
           },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "zai-org/glm-4.6",
+                data: createOpenAIMockResponse("zai-org/glm-4.6"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: ["reasoning", "step_by_step", "temperature"]
+                }
+              }
+            ],
+            finalStatus: 200
+          }
         }));
 
       it("should handle all supported parameters with novita provider", () =>
         runGatewayTest({
-          model: "kimi-k2-instruct/novita",
+          model: "glm-4.6/novita",
           request: {
             body: {
               messages: [
-                { role: "user", content: "Test comprehensive parameters" },
+                { role: "user", content: "Test comprehensive parameters" }
               ],
               max_tokens: 1000,
               temperature: 0.8,
@@ -237,18 +245,20 @@ describe("Moonshot AI Registry Tests", () => {
               frequency_penalty: 0.2,
               presence_penalty: 0.1,
               seed: 12345,
-              logprobs: true,
-              top_logprobs: 5,
-              response_format: { type: "text" },
-            },
+              top_k: 50,
+              min_p: 0.05,
+              repetition_penalty: 1.1,
+              logit_bias: { "50256": -100 },
+              response_format: { type: "text" }
+            }
           },
           expected: {
             providers: [
               {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
-                model: "moonshotai/kimi-k2-instruct",
-                data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
+                model: "zai-org/glm-4.6",
+                data: createOpenAIMockResponse("zai-org/glm-4.6"),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -259,161 +269,164 @@ describe("Moonshot AI Registry Tests", () => {
                     "frequency_penalty",
                     "presence_penalty",
                     "seed",
-                    "logprobs",
-                    "top_logprobs",
-                    "response_format",
-                  ],
-                },
-              },
+                    "top_k",
+                    "min_p",
+                    "repetition_penalty",
+                    "logit_bias",
+                    "response_format"
+                  ]
+                }
+              }
             ],
-            finalStatus: 200,
-          },
+            finalStatus: 200
+          }
         }));
     });
   });
 
-  describe("Error scenarios - kimi-k2-instruct with Novita Provider", () => {
+  describe("Error scenarios - glm-4.6 with Novita Provider", () => {
     it("should handle Novita provider failure", () =>
       runGatewayTest({
-        model: "kimi-k2-instruct/novita",
+        model: "glm-4.6/novita",
         expected: {
           providers: [
             {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "failure",
               statusCode: 500,
-              errorMessage: "Novita service unavailable",
-            },
+              errorMessage: "Novita service unavailable"
+            }
           ],
-          finalStatus: 500,
-        },
+          finalStatus: 500
+        }
       }));
 
     it("should handle rate limiting from Novita", () =>
       runGatewayTest({
-        model: "kimi-k2-instruct/novita",
+        model: "glm-4.6/novita",
         expected: {
           providers: [
             {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "failure",
               statusCode: 429,
-              errorMessage: "Rate limit exceeded",
-            },
+              errorMessage: "Rate limit exceeded"
+            }
           ],
-          finalStatus: 429,
-        },
+          finalStatus: 429
+        }
       }));
 
     it("should handle authentication failure from Novita", () =>
       runGatewayTest({
-        model: "kimi-k2-instruct/novita",
+        model: "glm-4.6/novita",
         expected: {
           providers: [
             {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "failure",
               statusCode: 401,
-              errorMessage: "Invalid API key",
-            },
+              errorMessage: "Invalid API key"
+            }
           ],
-          finalStatus: 401,
-        },
+          finalStatus: 401
+        }
       }));
 
     it("should handle model not found error from Novita", () =>
       runGatewayTest({
-        model: "kimi-k2-instruct/novita",
+        model: "glm-4.6/novita",
         expected: {
           providers: [
             {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "failure",
               statusCode: 404,
-              errorMessage: "Model not found",
-            },
+              errorMessage: "Model not found"
+            }
           ],
-          finalStatus: 500,
-        },
+          finalStatus: 500
+        }
       }));
 
     it("should handle timeout from Novita", () =>
       runGatewayTest({
-        model: "kimi-k2-instruct/novita",
+        model: "glm-4.6/novita",
         expected: {
           providers: [
             {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "failure",
               statusCode: 408,
-              errorMessage: "Request timeout",
-            },
+              errorMessage: "Request timeout"
+            }
           ],
-          finalStatus: 500,
-        },
+          finalStatus: 500
+        }
       }));
   });
 
-  describe("Provider validation - kimi-k2-instruct with Novita", () => {
-    it("should construct correct Novita URL for kimi-k2-instruct", () =>
+  describe("Provider validation - glm-4.6 with Novita", () => {
+    it("should construct correct Novita URL for glm-4.6", () =>
       runGatewayTest({
-        model: "kimi-k2-instruct/novita",
+        model: "glm-4.6/novita",
         expected: {
           providers: [
             {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
-              model: "moonshotai/kimi-k2-instruct",
-              data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
+              model: "zai-org/glm-4.6",
+              data: createOpenAIMockResponse("zai-org/glm-4.6"),
               expects: novitaAuthExpectations,
               customVerify: (call) => {
                 // Verify that the URL is correctly constructed
                 // Base URL: https://api.novita.ai/openai/v1
                 // Built URL: https://api.novita.ai/openai/v1/chat/completions
-              },
-            },
+              }
+            }
           ],
-          finalStatus: 200,
-        },
+          finalStatus: 200
+        }
       }));
 
     it("should handle provider model ID mapping correctly for Novita", () =>
       runGatewayTest({
-        model: "kimi-k2-instruct/novita",
+        model: "glm-4.6/novita",
         expected: {
           providers: [
             {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
-              model: "moonshotai/kimi-k2-instruct", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
-              expects: novitaAuthExpectations,
-            },
+              model: "zai-org/glm-4.6", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("zai-org/glm-4.6"),
+              expects: novitaAuthExpectations
+            }
           ],
-          finalStatus: 200,
-        },
+          finalStatus: 200
+        }
       }));
 
     it("should handle request body mapping for Novita", () =>
       runGatewayTest({
-        model: "kimi-k2-instruct/novita",
+        model: "glm-4.6/novita",
         request: {
-          bodyMapping: "NO_MAPPING",
+          bodyMapping: "NO_MAPPING"
         },
         expected: {
           providers: [
             {
               url: "https://api.novita.ai/openai/v1/chat/completions",
               response: "success",
-              model: "moonshotai/kimi-k2-instruct",
-              data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
+              model: "zai-org/glm-4.6",
+              data: createOpenAIMockResponse("zai-org/glm-4.6"),
               expects: {
-                ...novitaAuthExpectations,
-              },
-            },
+                ...novitaAuthExpectations
+              }
+            }
           ],
-          finalStatus: 200,
-        },
+          finalStatus: 200
+        }
       }));
   });
 });
+

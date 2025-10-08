@@ -1588,6 +1588,13 @@ export interface components {
       ending_event_id?: string;
       trigger_event_id?: string;
       start_timestamp?: string;
+      annotations?: {
+          content?: string;
+          title: string;
+          url: string;
+          /** @enum {string} */
+          type: "url_citation";
+        }[];
       reasoning?: string;
       deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
@@ -2960,6 +2967,8 @@ Json: JsonObject;
     AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "passthrough";
     /** @enum {string} */
     StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
+    /** @enum {string} */
+    PluginId: "web";
     RateLimits: {
       /** Format: double */
       rpm?: number;
@@ -3040,6 +3049,7 @@ Json: JsonObject;
       provider: components["schemas"]["ModelProviderName"];
       author: components["schemas"]["AuthorName"];
       supportedParameters: components["schemas"]["StandardParameter"][];
+      supportedPlugins?: components["schemas"]["PluginId"][];
       rateLimits?: components["schemas"]["RateLimits"];
       endpointConfigs: components["schemas"]["Record_string.EndpointConfig_"];
       crossRegion?: boolean;
