@@ -3361,6 +3361,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 8e-7,
         "output": 0.000004,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "bedrock": [
@@ -3372,6 +3373,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 8e-7,
         "output": 0.000004,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "openrouter": [
@@ -3390,6 +3392,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 8e-7,
         "output": 0.000004,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
   },
@@ -3404,6 +3407,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "bedrock": [
@@ -3415,6 +3419,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "openrouter": [
@@ -3433,6 +3438,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
   },
@@ -3447,6 +3453,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "bedrock": [
@@ -3458,6 +3465,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "openrouter": [
@@ -3476,6 +3484,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
   },
@@ -3548,6 +3557,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "bedrock": [
@@ -3559,6 +3569,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "openrouter": [
@@ -3566,6 +3577,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00001583,
         "output": 0.00007913,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "vertex": [
@@ -3577,6 +3589,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
   },
@@ -3591,6 +3604,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "bedrock": [
@@ -3602,6 +3616,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "openrouter": [
@@ -3609,6 +3624,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00001583,
         "output": 0.00007913,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "vertex": [
@@ -3620,6 +3636,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
   },
@@ -3634,11 +3651,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
+        "web_search": 0.00001,
       },
       {
         "input": 0.000006,
         "output": 0.0000225,
         "threshold": 200000,
+        "web_search": 0.00001,
       },
     ],
     "bedrock": [
@@ -3650,11 +3669,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
+        "web_search": 0.00001,
       },
       {
         "input": 0.000006,
         "output": 0.0000225,
         "threshold": 200000,
+        "web_search": 0.00001,
       },
     ],
     "openrouter": [
@@ -3662,6 +3683,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000633,
         "output": 0.00002374,
         "threshold": 0,
+        "web_search": 0.00001,
       },
     ],
     "vertex": [
@@ -3673,11 +3695,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
+        "web_search": 0.00001,
       },
       {
         "input": 0.000006,
         "output": 0.0000225,
         "threshold": 200000,
+        "web_search": 0.00001,
       },
     ],
   },
