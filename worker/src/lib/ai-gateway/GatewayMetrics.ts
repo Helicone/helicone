@@ -21,7 +21,8 @@ export class GatewayMetrics {
       return;
     }
     const promptRequestEndTime = performance.now();
-    const promptRequestLatency = promptRequestEndTime - this.promptRequestStartTime;
+    const promptRequestLatency =
+      promptRequestEndTime - this.promptRequestStartTime;
     this.dataDogClient.trackLatency("prompt_request_ms", promptRequestLatency);
   }
 
