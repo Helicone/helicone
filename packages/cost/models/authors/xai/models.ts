@@ -28,10 +28,21 @@ export const models = {
     author: "xai",
     description:
       "Grok 4 Fast is xAI's latest advancement in cost-efficient reasoning models. Built on xAI’s learnings from Grok 4, Grok 4 Fast delivers frontier-level performance across Enterprise and Consumer domains—with exceptional token efficiency. This model pushes the boundaries for smaller and faster AI, making high-quality reasoning accessible to more users and developers. Grok 4 Fast features state-of-the-art (SOTA) cost-efficiency, cutting-edge web and X search capabilities, a 2M token context window, and a unified architecture that blends reasoning and non-reasoning modes in one model.",
-    contextLength: 2_000_000,
-    maxOutputTokens: 30_000,
+    contextLength: 2000000,
+    maxOutputTokens: 2000000,
     created: "2025-09-01T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
+    tokenizer: "Grok",
+  },
+  "grok-4-fast-non-reasoning": {
+    name: "xAI Grok 4 Fast Non-Reasoning",
+    author: "xai",
+    description:
+      "Grok 4 Fast is xAI's latest advancement in cost-efficient reasoning models. Built on xAI’s learnings from Grok 4, Grok 4 Fast delivers frontier-level performance across Enterprise and Consumer domains—with exceptional token efficiency. This model pushes the boundaries for smaller and faster AI, making high-quality reasoning accessible to more users and developers. Grok 4 Fast features state-of-the-art (SOTA) cost-efficiency, cutting-edge web and X search capabilities, a 2M token context window. This non-reasoning model specifically ex",
+    contextLength: 2000000,
+    maxOutputTokens: 2000000,
+    created: "2025-09-19T00:00:00.000Z",
+    modality: { inputs: ["text", "image", "audio"], outputs: ["text"] },
     tokenizer: "Grok",
   },
   "grok-3": {
