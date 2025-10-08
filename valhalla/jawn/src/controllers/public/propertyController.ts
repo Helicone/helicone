@@ -125,6 +125,57 @@ export class PropertyController extends Controller {
 		return { data: { ok: true }, error: null };
 	}
 
+	@Post("hidden/query")
+	public async getHiddenProperties(
+		@Request() request: JawnAuthenticatedRequest
+	) {
+		const orgId = request.authParams.organizationId;
+
+		const query = `
+    SELECT key AS property
+    FROM default.hidden_property_keys
+    WHERE organization_id = {val_0: UUID}
+      AND is_hidden = 1
+    ORDER BY key
+  `;
+
+		return dbQueryClickhouse<Property>(query, [orgId]);
+	}
+
+	@Post("restore")
+	public async restoreProperty(
+		@Body()
+		requestBody: { key: string },
+		@Request() request: JawnAuthenticatedRequest
+	) {
+		const orgId = request.authParams.organizationId;
+		const key = requestBody.key;
+
+		if (!key || typeof key !== "string") {
+			throw new Error("Property key is required");
+		}
+
+		const deleteQuery = `
+      ALTER TABLE default.hidden_property_keys
+      DELETE WHERE organization_id = {val_0: UUID} AND key = {val_1: String}
+    `;
+		const delRes = await dbQueryClickhouse(deleteQuery, [orgId, key]);
+		if (delRes.error) {
+			return delRes;
+		}
+
+		const insRes = await clickhouseDb.dbInsertClickhouse("hidden_property_keys", [
+			{ organization_id: orgId, key, is_hidden: 0 },
+		]);
+		if (insRes.error) {
+			return insRes;
+		}
+
+		await clearCache("v1/property/query" + orgId);
+
+		return { data: { ok: true }, error: null };
+	}
+
 	// Gets all possible values for a property
 	@Post("{propertyKey}/search")
 	public async searchProperties(
