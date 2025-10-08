@@ -1,33 +1,37 @@
 import { registry } from "@helicone-package/cost/models/registry";
 import { ModelProviderEntry } from "@helicone-package/cost/models/build-indexes";
-import {
-  ModelProviderName,
-  providers,
-} from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import {
   UserEndpointConfig,
   Endpoint,
+  Plugin,
+  ModelSpec,
 } from "@helicone-package/cost/models/types";
+import { parseModelString } from "@helicone-package/cost/models/provider-helpers";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
 import { FeatureFlagManager } from "../managers/FeatureFlagManager";
-import { isErr, Result, ok, err } from "../util/results";
-import { Attempt, ModelSpec } from "./types";
+import { isErr } from "../util/results";
+import { Attempt } from "./types";
 import { ProviderKey } from "../db/ProviderKeysStore";
+import { PluginHandler } from "./PluginHandler";
 
 export class AttemptBuilder {
   private readonly featureFlagManager: FeatureFlagManager;
+  private readonly pluginHandler: PluginHandler;
 
   constructor(
     private readonly providerKeysManager: ProviderKeysManager,
     private readonly env: Env
   ) {
     this.featureFlagManager = new FeatureFlagManager(env);
+    this.pluginHandler = new PluginHandler();
   }
 
   async buildAttempts(
     modelStrings: string[],
     orgId: string,
-    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI"
+    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
+    plugins?: Plugin[]
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
 
@@ -38,7 +42,7 @@ export class AttemptBuilder {
     );
 
     for (const modelString of modelStrings) {
-      const modelSpec = this.parseModelString(modelString);
+      const modelSpec = parseModelString(modelString);
 
       // Skip invalid model specs
       // TODO: Return error
@@ -50,21 +54,21 @@ export class AttemptBuilder {
       if (modelSpec.data.provider) {
         // Explicit provider specified - only try this provider
         const providerAttempts = await this.getProviderAttempts(
-          modelSpec.data.modelName,
-          modelSpec.data.provider,
+          modelSpec.data,
           orgId,
           bodyMapping,
           hasCreditsFeature,
-          modelSpec.data.customUid
+          plugins
         );
         allAttempts.push(...providerAttempts);
       } else {
         // No provider specified - try all providers
         const attempts = await this.buildAttemptsForAllProviders(
-          modelSpec.data.modelName,
+          modelSpec.data,
           orgId,
           bodyMapping,
-          hasCreditsFeature
+          hasCreditsFeature,
+          plugins
         );
         allAttempts.push(...attempts);
       }
@@ -76,29 +80,36 @@ export class AttemptBuilder {
   }
 
   private async buildAttemptsForAllProviders(
-    modelName: string,
+    modelSpec: ModelSpec,
     orgId: string,
     bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
-    hasCreditsFeature: boolean
+    hasCreditsFeature: boolean,
+    plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get all provider data in one query
-    const providerDataResult =
-      registry.getModelProviderEntriesByModel(modelName);
+    const providerDataResult = registry.getModelProviderEntriesByModel(
+      modelSpec.modelName
+    );
     const providerData = providerDataResult.data || [];
 
     // Process all providers in parallel (we know model exists because parseModelString validated it)
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
         const byokAttempts = await this.buildByokAttempts(
-          modelName,
+          modelSpec,
           data,
           orgId,
-          bodyMapping
+          bodyMapping,
+          plugins
         );
 
         // Only build PTB attempts if credits feature is enabled
         if (hasCreditsFeature) {
-          const ptbAttempts = await this.buildPtbAttempts(modelName, data);
+          const ptbAttempts = await this.buildPtbAttempts(
+            modelSpec,
+            data,
+            plugins
+          );
           return [...byokAttempts, ...ptbAttempts];
         }
 
@@ -110,27 +121,25 @@ export class AttemptBuilder {
   }
 
   private async getProviderAttempts(
-    modelName: string,
-    provider: ModelProviderName,
+    modelSpec: ModelSpec,
     orgId: string,
     bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
     hasCreditsFeature: boolean,
-    customUid?: string
+    plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get provider data once
     const providerDataResult = registry.getModelProviderEntry(
-      modelName,
-      provider
+      modelSpec.modelName,
+      modelSpec.provider as ModelProviderName
     );
 
     if (!providerDataResult.data) {
       // No registry data - try passthrough for unknown models
       return this.buildPassthroughAttempt(
-        modelName,
-        provider,
+        modelSpec,
         orgId,
         bodyMapping,
-        customUid
+        plugins
       );
     }
 
@@ -138,16 +147,20 @@ export class AttemptBuilder {
 
     // Get BYOK attempts
     const byokAttempts = await this.buildByokAttempts(
-      modelName,
+      modelSpec,
       providerData,
       orgId,
       bodyMapping,
-      customUid
+      plugins
     );
 
     // Only build PTB attempts if credits feature is enabled
     if (hasCreditsFeature) {
-      const ptbAttempts = await this.buildPtbAttempts(modelName, providerData);
+      const ptbAttempts = await this.buildPtbAttempts(
+        modelSpec,
+        providerData,
+        plugins
+      );
       return [...byokAttempts, ...ptbAttempts];
     }
 
@@ -155,17 +168,17 @@ export class AttemptBuilder {
   }
 
   private async buildByokAttempts(
-    modelName: string,
+    modelSpec: ModelSpec,
     providerData: ModelProviderEntry,
     orgId: string,
     bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
-    customUid?: string
+    plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get user's provider key
     const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
       orgId,
-      customUid
+      modelSpec.customUid
     );
 
     if (!userKey || !this.isByokEnabled(userKey)) {
@@ -175,7 +188,7 @@ export class AttemptBuilder {
     const userConfig = {
       ...((userKey.config as UserEndpointConfig) || {}),
       gatewayMapping: bodyMapping,
-      modelName: modelName,
+      modelName: modelSpec.modelName,
     };
 
     // Build endpoint from provider data's config
@@ -188,29 +201,35 @@ export class AttemptBuilder {
       return [];
     }
 
+    const processedPlugins = this.pluginHandler.processPlugins(
+      modelSpec,
+      providerData.config,
+      plugins
+    );
+
     return [
       {
         endpoint: endpointResult.data,
         providerKey: userKey,
         authType: "byok",
         priority: endpointResult.data.priority ?? 1,
-        source: `${modelName}/${providerData.provider}/byok${customUid ? `/${customUid}` : ""}`,
+        source: `${modelSpec.modelName}/${providerData.provider}/byok${modelSpec.customUid ? `/${modelSpec.customUid}` : ""}`,
+        plugins: processedPlugins.length > 0 ? processedPlugins : undefined,
       },
     ];
   }
 
   private async buildPassthroughAttempt(
-    modelName: string,
-    provider: ModelProviderName,
+    modelSpec: ModelSpec,
     orgId: string,
     bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
-    customUid?: string
+    plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get user's provider key for passthrough
     const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
-      provider,
+      modelSpec.provider as ModelProviderName,
       orgId,
-      customUid
+      modelSpec.customUid
     );
 
     if (!userKey || !this.isByokEnabled(userKey)) {
@@ -220,24 +239,32 @@ export class AttemptBuilder {
     const userConfig = {
       ...((userKey.config as UserEndpointConfig) || {}),
       gatewayMapping: bodyMapping,
-      modelName: modelName,
+      modelName: modelSpec.modelName,
     };
 
     // Create a dynamic passthrough endpoint for unknown models
     const passthroughResult = registry.createPassthroughEndpoint(
-      modelName,
-      provider,
+      modelSpec.modelName,
+      modelSpec.provider as ModelProviderName,
       userConfig
     );
 
     if (!isErr(passthroughResult) && passthroughResult.data) {
+      // Process plugins using PluginHandler
+      const processedPlugins = this.pluginHandler.processPlugins(
+        modelSpec,
+        passthroughResult.data.modelConfig,
+        plugins
+      );
+
       return [
         {
           endpoint: passthroughResult.data,
           providerKey: userKey,
           authType: "byok",
           priority: passthroughResult.data.priority ?? 1,
-          source: `${modelName}/${provider}/byok${customUid ? `/${customUid}` : ""}`,
+          source: `${modelSpec.modelName}/${modelSpec.provider}/byok${modelSpec.customUid ? `/${modelSpec.customUid}` : ""}`,
+          plugins: processedPlugins.length > 0 ? processedPlugins : undefined,
         },
       ];
     }
@@ -246,8 +273,9 @@ export class AttemptBuilder {
   }
 
   private async buildPtbAttempts(
-    modelName: string,
-    providerData: ModelProviderEntry
+    modelSpec: ModelSpec,
+    providerData: ModelProviderEntry,
+    plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Check if we have PTB endpoints
     if (providerData.ptbEndpoints.length === 0) {
@@ -265,12 +293,20 @@ export class AttemptBuilder {
       return []; // Can't do PTB without Helicone's key
     }
 
+    // Process plugins using PluginHandler
+    const processedPlugins = this.pluginHandler.processPlugins(
+      modelSpec,
+      providerData.config,
+      plugins
+    );
+
     // Use the helper method to build PTB attempts
     return this.buildPtbAttemptsFromEndpoints(
-      modelName,
+      modelSpec.modelName,
       providerData.provider,
       providerData.ptbEndpoints,
-      heliconeKey
+      heliconeKey,
+      processedPlugins
     );
   }
 
@@ -278,7 +314,8 @@ export class AttemptBuilder {
     modelName: string,
     provider: ModelProviderName,
     endpoints: Endpoint[],
-    providerKey: ProviderKey
+    providerKey: ProviderKey,
+    plugins?: Plugin[]
   ): Attempt[] {
     // This is where dynamically injected config is applied
     const updatedEndpoints = endpoints.map((endpoint) => {
@@ -301,6 +338,7 @@ export class AttemptBuilder {
           authType: "ptb",
           priority: endpoint.priority ?? 2,
           source: `${modelName}/${provider}/ptb`,
+          plugins: plugins && plugins.length > 0 ? plugins : undefined,
         }) as Attempt
     );
   }
@@ -314,43 +352,4 @@ export class AttemptBuilder {
     );
   }
 
-  private validateProvider(provider: string): provider is ModelProviderName {
-    return provider in providers;
-  }
-
-  parseModelString(modelString: string): Result<ModelSpec, string> {
-    const parts = modelString.split("/");
-    const modelName = parts[0];
-
-    // Just model name: "gpt-4"
-    if (parts.length === 1) {
-      // Check if model is known
-      const validModels = registry.getAllModelIds();
-      const isKnownModel =
-        validModels.data && validModels.data.includes(modelName as any);
-
-      // Fail fast: unknown model with no provider
-      if (!isKnownModel) {
-        return err(
-          `Unknown model: ${modelName}. Please specify a provider (e.g., ${modelName}/openai) or use a supported model. See https://helicone.ai/models`
-        );
-      }
-      return ok({ modelName });
-    }
-
-    // Has provider - validate it once
-    const provider = parts[1];
-    if (!this.validateProvider(provider)) {
-      const validProviders = Object.keys(providers);
-      return err(
-        `Invalid provider: ${provider}. Valid providers: ${validProviders.join(", ")}`
-      );
-    }
-
-    return ok({
-      modelName,
-      provider,
-      customUid: parts.length === 3 ? parts[2] : undefined,
-    });
-  }
 }

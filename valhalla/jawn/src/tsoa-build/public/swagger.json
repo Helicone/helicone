@@ -3311,6 +3311,35 @@
 					"start_timestamp": {
 						"type": "string"
 					},
+					"annotations": {
+						"items": {
+							"properties": {
+								"content": {
+									"type": "string"
+								},
+								"title": {
+									"type": "string"
+								},
+								"url": {
+									"type": "string"
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"url_citation"
+									],
+									"nullable": false
+								}
+							},
+							"required": [
+								"title",
+								"url",
+								"type"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
 					"reasoning": {
 						"type": "string"
 					},
@@ -8158,6 +8187,13 @@
 					"verbosity"
 				]
 			},
+			"PluginId": {
+				"type": "string",
+				"enum": [
+					"web"
+				],
+				"nullable": false
+			},
 			"RateLimits": {
 				"properties": {
 					"rpm": {
@@ -8366,6 +8402,12 @@
 					"supportedParameters": {
 						"items": {
 							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					},
+					"supportedPlugins": {
+						"items": {
+							"$ref": "#/components/schemas/PluginId"
 						},
 						"type": "array"
 					},
