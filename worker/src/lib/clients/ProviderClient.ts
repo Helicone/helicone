@@ -5,7 +5,6 @@ import {
 import retry from "async-retry";
 import { llmmapper } from "./llmmapper/llmmapper";
 import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
-import { createOpenAIMockResponse } from "./mockOpenAIResponse";
 
 export interface CallProps {
   headers: Headers;
@@ -15,6 +14,7 @@ export interface CallProps {
   increaseTimeout: boolean;
   originalUrl: URL;
   extraHeaders: Headers | null;
+  env: Env;
 }
 
 export function callPropsFromProxyRequest(
@@ -29,6 +29,7 @@ export function callPropsFromProxyRequest(
       proxyRequest.requestWrapper.heliconeHeaders.featureFlags.increaseTimeout,
     originalUrl: proxyRequest.requestWrapper.url,
     extraHeaders: proxyRequest.requestWrapper.extraHeaders,
+    env: proxyRequest.env,
   };
 }
 
@@ -94,15 +95,40 @@ async function callWithMapper(
 }
 
 export async function callProvider(props: CallProps): Promise<Response> {
-  const { headers, method, apiBase, body, increaseTimeout, originalUrl } =
+  const { headers, method, apiBase, body, increaseTimeout, originalUrl, env } =
     props;
 
-  if (headers.get("__helicone-mock-response")) {
-    return createOpenAIMockResponse(
-      headers.get("__helicone-mock-response_usage")
-        ? JSON.parse(headers.get("__helicone-mock-response_usage")!)
-        : undefined
-    );
+  const mockResponseHeader = headers.get("__helicone-mock-response");
+  if (mockResponseHeader) {
+    if (env.ENVIRONMENT !== "development") {
+      return new Response("Mock responses not allowed in production", {
+        status: 403,
+      });
+    }
+    try {
+      const mockResponseBody = JSON.parse(mockResponseHeader);
+      return new Response(JSON.stringify(mockResponseBody), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (e) {
+      return new Response(
+        JSON.stringify({
+          error: "Invalid mock response format",
+          message:
+            "The __helicone-mock-response header must contain valid JSON",
+          details: e instanceof Error ? e.message : String(e),
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
   }
 
   const targetUrl = buildTargetUrl(originalUrl, apiBase);

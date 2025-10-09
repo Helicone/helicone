@@ -29,10 +29,44 @@ export const TEST_ORG_ID = "83635a30-5ba6-41a8-8cc6-fb7df941b24a";
 
 export const TEST_ORG_API_KEY = "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa";
 
+// Mock OpenAI response for testing
+export const MOCK_OPENAI_RESPONSE = {
+  id: "chatcmpl-1234567890",
+  object: "chat.completion",
+  created: 1759861728,
+  model: "gpt-5-2025-08-07",
+  choices: [
+    {
+      index: 0,
+      message: {
+        role: "assistant",
+        content:
+          "This is a mock response from the OpenAI API for testing purposes. - Helicone ooga booga",
+        refusal: null,
+        annotations: [],
+      },
+      finish_reason: "stop",
+    },
+  ],
+  usage: {
+    prompt_tokens: 10,
+    completion_tokens: 1870,
+    total_tokens: 1880,
+    completion_tokens_details: {
+      reasoning_tokens: 1792,
+      audio_tokens: 0,
+      accepted_prediction_tokens: 0,
+      rejected_prediction_tokens: 0,
+    },
+  },
+  service_tier: "default",
+  system_fingerprint: null,
+};
+
 export const TEST_HEADERS = {
   "Content-Type": "application/json",
   Authorization: `Bearer ${TEST_ORG_API_KEY}`,
-  "__helicone-mock-response": "true",
+  "__helicone-mock-response": JSON.stringify(MOCK_OPENAI_RESPONSE),
 } as const;
 
 export const DEFAULT_TIMEOUT = 30000; // 30 seconds
