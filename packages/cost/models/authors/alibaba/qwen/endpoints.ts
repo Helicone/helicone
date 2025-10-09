@@ -261,7 +261,41 @@ export const endpoints = {
       "response_format",
       "functions",
       "structured_outputs",
-      "reasoning"
+      "reasoning",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3-coder-30b-a3b-instruct:nebius": {
+    providerModelId: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+    provider: "nebius",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000001, // $0.10 per million tokens
+        output: 0.0000003, // $0.30 per million tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs"
     ],
     ptbEnabled: true,
     endpointConfigs: {

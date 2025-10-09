@@ -57,7 +57,18 @@ export const models = {
     maxOutputTokens: 81_920,
     created: "2025-07-25T00:00:00.000Z",
     modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
-    tokenizer: "Qwen"
+    tokenizer: "Qwen",
+  },
+  "qwen3-coder-30b-a3b-instruct": {
+    name: "Qwen3 Coder 30B A3B Instruct",
+    author: "qwen",
+    description:
+      "This streamlined model maintains impressive performance and efficiency, featuring the following key enhancements: (a) Significant Performance among open models on Agentic Coding, Agentic Browser-Use, and other foundational coding tasks. (b) Long-context Capabilities with native support for 256K tokens, extendable up to 1M tokens using Yarn, optimized for repository-scale understanding. (c) Agentic Coding supporting for most platform such as Qwen Code, CLINE, featuring a specially designed function call format.",
+    contextLength: 262_144,
+    maxOutputTokens: 262_144,
+    created: "2025-07-31T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "Qwen",
   },
 } satisfies Record<string, ModelConfig>;
 
