@@ -17,11 +17,6 @@ import {
 import { resultMap } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
-import {
-  getFromCache,
-  storeInCache,
-  clearCache,
-} from "../../lib/cache/staticMemCache";
 
 export interface Property {
   property: string;
@@ -104,8 +99,6 @@ export class PropertyController extends Controller {
       return insRes;
     }
 
-    await clearCache("v1/property/query" + orgId);
-
     return { data: { ok: true }, error: null };
   }
 
@@ -155,8 +148,6 @@ export class PropertyController extends Controller {
     if (insRes.error) {
       return insRes;
     }
-
-    await clearCache("v1/property/query" + orgId);
 
     return { data: { ok: true }, error: null };
   }

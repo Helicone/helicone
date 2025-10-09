@@ -6,7 +6,7 @@ import { SecretManager } from "@helicone-package/secrets/SecretManager";
 export class CacheItem<T> {
   constructor(
     public value: T,
-    public expiry: number
+    public expiry: number,
   ) {}
 }
 
@@ -84,7 +84,7 @@ class ProviderKeyCache extends InMemoryCache {
 export async function storeInCache(
   key: string,
   value: string,
-  ttlSeconds: number = 600
+  ttlSeconds: number = 600,
 ): Promise<void> {
   const encrypted = await encrypt(value);
   const hashedKey = await hashAuth(key);
@@ -94,7 +94,7 @@ export async function storeInCache(
       hashedKey,
       JSON.stringify(encrypted),
       "EX",
-      ttlSeconds
+      ttlSeconds,
     );
   } catch (e) {
     console.error("Error storing in cache", e);
@@ -103,7 +103,7 @@ export async function storeInCache(
   ProviderKeyCache.getInstance().set<string>(
     hashedKey,
     JSON.stringify(encrypted),
-    ttlSeconds * 1000
+    ttlSeconds * 1000,
   );
 }
 
@@ -126,20 +126,10 @@ export async function getFromCache(key: string): Promise<string | null> {
   }
 }
 
-export async function clearCache(key: string): Promise<void> {
-  const hashedKey = await hashAuth(key);
-  try {
-    await redisClient?.del(hashedKey);
-  } catch (e) {
-    console.error("Error clearing cache in redis", e);
-  }
-  ProviderKeyCache.getInstance().delete(hashedKey);
-}
-
 export async function getAndStoreInCache<T, K>(
   key: string,
   fn: () => Promise<Result<T, K>>,
-  ttl: number = 600
+  ttl: number = 600,
 ): Promise<Result<T, K>> {
   const cached = await getFromCache(key);
   if (cached !== null) {
@@ -161,7 +151,7 @@ export async function getAndStoreInCache<T, K>(
     await storeInCache(
       key,
       JSON.stringify({ _helicone_cached_string: value.data }),
-      ttl
+      ttl,
     );
     return value;
   } else {
@@ -171,7 +161,7 @@ export async function getAndStoreInCache<T, K>(
 }
 
 export async function encrypt(
-  text: string
+  text: string,
 ): Promise<{ iv: string; content: string }> {
   const key = getCacheKey();
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -183,7 +173,7 @@ export async function encrypt(
       iv: iv,
     },
     await key,
-    encoded
+    encoded,
   );
 
   return {
@@ -206,7 +196,7 @@ export async function decrypt(encrypted: {
       iv: new Uint8Array(iv),
     },
     await key,
-    new Uint8Array(encryptedContent)
+    new Uint8Array(encryptedContent),
   );
 
   return new TextDecoder().decode(decryptedContent);
@@ -227,7 +217,7 @@ async function getCacheKey(): Promise<CryptoKey> {
       keyBytes,
       { name: "AES-GCM" },
       false,
-      ["encrypt", "decrypt"]
+      ["encrypt", "decrypt"],
     );
     return cryptoKey;
   } catch (error) {
