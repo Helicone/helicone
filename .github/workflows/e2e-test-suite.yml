@@ -49,7 +49,7 @@ jobs:
           npx wrangler dev --var WORKER_TYPE:HELICONE_API --port 8788 --inspector-port=9240 > logs/wrangler-helicone-api.log 2>&1 &
           echo $! > logs/wrangler-helicone-api.pid
           echo "Starting AI_GATEWAY_API worker on port 8793..."
-          npx wrangler dev --var WORKER_TYPE:AI_GATEWAY_API --var HELICONE_ORG_ID="a75d76e3-02e7-4d02-8a2b-c65ed27c69b2" --port 8793 --inspector-port=9240 > logs/wrangler-ai-gateway.log 2>&1 &
+          npx wrangler dev --var WORKER_TYPE:AI_GATEWAY_API --var HELICONE_ORG_ID="a75d76e3-02e7-4d02-8a2b-c65ed27c69b2" --port 8793 --inspector-port=9241 > logs/wrangler-ai-gateway.log 2>&1 &
           echo $! > logs/wrangler-ai-gateway.pid
           echo "Waiting for workers to start..."
           sleep 10
