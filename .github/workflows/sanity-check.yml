@@ -1,8 +1,10 @@
 name: Sanity Check - Background Process
 
 on:
-  workflow_dispatch:
-
+  push:
+    branches:
+      - main
+      - justin/get-full-testing-suite
 jobs:
   sanity-test:
     runs-on: ubuntu-latest
