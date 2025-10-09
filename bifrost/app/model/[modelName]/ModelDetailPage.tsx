@@ -315,6 +315,28 @@ completion = client.chat.completions.create(
               )}
             </div>
           )}
+
+          {/* Modalities */}
+          {(model.inputModalities?.length > 0 || model.outputModalities?.length > 0) && (
+            <div className="mt-4 flex flex-wrap gap-4 text-sm">
+              {model.inputModalities?.length > 0 && (
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Input: </span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    {model.inputModalities.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(", ")}
+                  </span>
+                </div>
+              )}
+              {model.outputModalities?.length > 0 && (
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Output: </span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    {model.outputModalities.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(", ")}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

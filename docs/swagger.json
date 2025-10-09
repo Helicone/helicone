@@ -3254,7 +3254,8 @@
 					"deepinfra",
 					"google-ai-studio",
 					"openrouter",
-					"novita"
+					"novita",
+					"nebius"
 				],
 				"nullable": false
 			},
@@ -8152,6 +8153,7 @@
 					"qwen",
 					"moonshotai",
 					"alibaba",
+					"zai",
 					"passthrough"
 				]
 			},
@@ -8390,6 +8392,12 @@
 					"version": {
 						"type": "string"
 					},
+					"unsupportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					},
 					"providerModelId": {
 						"type": "string"
 					},
@@ -8511,6 +8519,12 @@
 					},
 					"version": {
 						"type": "string"
+					},
+					"unsupportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
 					},
 					"modelConfig": {
 						"$ref": "#/components/schemas/ModelProviderConfig"
@@ -12793,7 +12807,8 @@
 														"deepinfra",
 														"google-ai-studio",
 														"openrouter",
-														"novita"
+														"novita",
+														"nebius"
 													]
 												}
 											},

@@ -3995,7 +3995,8 @@
 					"deepinfra",
 					"google-ai-studio",
 					"openrouter",
-					"novita"
+					"novita",
+					"nebius"
 				],
 				"nullable": false
 			},
@@ -48148,7 +48149,8 @@
 														"deepinfra",
 														"google-ai-studio",
 														"openrouter",
-														"novita"
+														"novita",
+														"nebius"
 													]
 												}
 											},

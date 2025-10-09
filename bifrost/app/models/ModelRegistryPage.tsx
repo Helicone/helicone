@@ -65,6 +65,12 @@ export function ModelRegistryPage() {
   const [selectedCapabilities, setSelectedCapabilities] = useState<Set<string>>(
     new Set(searchParams.get("capabilities")?.split(",").filter(Boolean) || [])
   );
+  const [selectedInputModalities, setSelectedInputModalities] = useState<Set<string>>(
+    new Set(searchParams.get("inputModalities")?.split(",").filter(Boolean) || [])
+  );
+  const [selectedOutputModalities, setSelectedOutputModalities] = useState<Set<string>>(
+    new Set(searchParams.get("outputModalities")?.split(",").filter(Boolean) || [])
+  );
   const [showPtbOnly, setShowPtbOnly] = useState<boolean>(
     searchParams.get("ptb") === "true"
   );
@@ -81,13 +87,15 @@ export function ModelRegistryPage() {
       priceRange,
       minContextSize,
       selectedCapabilities,
+      selectedInputModalities,
+      selectedOutputModalities,
       showPtbOnly,
       sortBy,
     });
 
   // Collapsible filter sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(["providers", "price", "context", "capabilities"])
+    new Set(["providers", "price", "context", "capabilities", "inputModalities", "outputModalities"])
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -142,6 +150,18 @@ export function ModelRegistryPage() {
         Array.from(selectedCapabilities).sort().join(",")
       );
     }
+    if (selectedInputModalities.size > 0) {
+      params.set(
+        "inputModalities",
+        Array.from(selectedInputModalities).sort().join(",")
+      );
+    }
+    if (selectedOutputModalities.size > 0) {
+      params.set(
+        "outputModalities",
+        Array.from(selectedOutputModalities).sort().join(",")
+      );
+    }
     if (showPtbOnly) params.set("ptb", "true");
     if (sortBy !== "newest") params.set("sort", sortBy);
 
@@ -156,6 +176,8 @@ export function ModelRegistryPage() {
     priceRange,
     minContextSize,
     selectedCapabilities,
+    selectedInputModalities,
+    selectedOutputModalities,
     showPtbOnly,
     sortBy,
     router,
@@ -318,6 +340,78 @@ export function ModelRegistryPage() {
                     })}
                   </div>
                 </FilterSection>
+
+                {/* Input Modalities Filter */}
+                <FilterSection
+                  title="Input Modalities"
+                  expanded={expandedSections.has("inputModalities")}
+                  onToggle={() => toggleSection("inputModalities")}
+                >
+                  <div className="space-y-1">
+                    {["text", "image", "audio", "video"].map((modality) => {
+                      const isSelected = selectedInputModalities.has(modality);
+                      const labelMap: Record<string, string> = {
+                        text: "Text",
+                        image: "Image",
+                        audio: "Audio",
+                        video: "Video",
+                      };
+
+                      return (
+                        <FilterOption
+                          key={modality}
+                          label={labelMap[modality] || modality}
+                          selected={isSelected}
+                          onToggle={() => {
+                            const newSet = new Set(selectedInputModalities);
+                            if (isSelected) {
+                              newSet.delete(modality);
+                            } else {
+                              newSet.add(modality);
+                            }
+                            setSelectedInputModalities(newSet);
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                </FilterSection>
+
+                {/* Output Modalities Filter */}
+                <FilterSection
+                  title="Output Modalities"
+                  expanded={expandedSections.has("outputModalities")}
+                  onToggle={() => toggleSection("outputModalities")}
+                >
+                  <div className="space-y-1">
+                    {["text", "image", "audio", "video"].map((modality) => {
+                      const isSelected = selectedOutputModalities.has(modality);
+                      const labelMap: Record<string, string> = {
+                        text: "Text",
+                        image: "Image",
+                        audio: "Audio",
+                        video: "Video",
+                      };
+
+                      return (
+                        <FilterOption
+                          key={modality}
+                          label={labelMap[modality] || modality}
+                          selected={isSelected}
+                          onToggle={() => {
+                            const newSet = new Set(selectedOutputModalities);
+                            if (isSelected) {
+                              newSet.delete(modality);
+                            } else {
+                              newSet.add(modality);
+                            }
+                            setSelectedOutputModalities(newSet);
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                </FilterSection>
                 </div>
             </div>
           </>
@@ -345,6 +439,8 @@ export function ModelRegistryPage() {
                         setPriceRange([0, 50]);
                         setMinContextSize(0);
                         setSelectedCapabilities(new Set());
+                        setSelectedInputModalities(new Set());
+                        setSelectedOutputModalities(new Set());
                         setShowPtbOnly(false);
                         setSearchQuery("");
                       }}
