@@ -1589,7 +1589,7 @@ Json: JsonObject;
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita";
+    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita" | "nebius";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -16205,7 +16205,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita";
+            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita" | "nebius";
           }) | {
             error: string;
           };
