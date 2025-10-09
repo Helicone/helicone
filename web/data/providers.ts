@@ -224,6 +224,16 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "...",
     relevanceScore: 10,
   },
+  {
+    id: "nebius",
+    name: "Nebius",
+    logoUrl: "/assets/home/providers/nebius.webp",
+    description: "Configure your Nebius API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Nebius API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 5,
+  },
 ];
 
 // Mock recently used providers - in a real app, this would come from user data
