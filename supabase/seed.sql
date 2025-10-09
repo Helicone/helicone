@@ -1,6 +1,6 @@
 INSERT INTO auth.users (instance_id,id,aud,"role",email,encrypted_password,email_confirmed_at,last_sign_in_at,raw_app_meta_data,raw_user_meta_data,is_super_admin,created_at,updated_at,phone,phone_confirmed_at,confirmation_token,email_change,email_change_token_new,recovery_token) VALUES
 	('00000000-0000-0000-0000-000000000000'::uuid,'f76629c5-a070-4bbc-9918-64beaea48848'::uuid,'authenticated','authenticated','test@helicone.ai','$2a$10$PznXR5VSgzjnAp7T/X7PCu6vtlgzdFt1zIr41IqP0CmVHQtShiXxS','2022-02-11 21:02:04.547','2022-02-11 22:53:12.520','{"provider": "email", "providers": ["email"]}','{}',FALSE,'2022-02-11 21:02:04.542','2022-02-11 21:02:04.542',NULL,NULL,'','','',''),
-	('00000000-0000-0000-0000-000000000000'::uuid,'d9064bb5-1501-4ec9-bfee-21ab74d645b8'::uuid,'authenticated','authenticated','demo@helicone.ai','$2a$10$mOJUAphJbZR4CdM38.bgOeyySurPeFHoH/T1s7HuGdpRb7JgatF7K','2022-02-12 07:40:23.616','2022-02-12 07:40:23.621','{"provider": "email", "providers": ["email"]}','{}',FALSE,'2022-02-12 07:40:23.612','2022-02-12 07:40:23.613',NULL,NULL,'','','','')
+	('00000000-0000-0000-0000-000000000000'::uuid,'d9064bb5-1501-4ec9-bfee-21ab74d645b8'::uuid,'authenticated','authenticated','admin@helicone.ai','$2a$10$mOJUAphJbZR4CdM38.bgOeyySurPeFHoH/T1s7HuGdpRb7JgatF7K','2022-02-12 07:40:23.616','2022-02-12 07:40:23.621','{"provider": "email", "providers": ["email"]}','{}',FALSE,'2022-02-12 07:40:23.612','2022-02-12 07:40:23.613',NULL,NULL,'','','','')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO auth.identities (provider_id,user_id,identity_data,provider,last_sign_in_at,created_at,updated_at) VALUES
@@ -38,3 +38,39 @@ INSERT INTO public.feature_flags (org_id, feature)
 VALUES
 ('83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'credits')
 ON CONFLICT DO NOTHING;
+
+-- Provider key for Admin organization
+INSERT INTO public.provider_keys (
+  id,
+  org_id,
+  provider_name,
+  provider_key_name,
+  vault_key_id,
+  soft_delete,
+  created_at,
+  provider_key,
+  config,
+  key_id,
+  nonce,
+  auth_type,
+  provider_secret_key,
+  cuid,
+  byok_enabled
+) VALUES (
+  '697e2a38-dacf-4073-b96b-de7a8fbf20f5',
+  'a75d76e3-02e7-4d02-8a2b-c65ed27c69b2',
+  'openai',
+  'OpenAI API Key',
+  NULL,
+  FALSE,
+  '2025-10-09 07:42:31.208352+00',
+  '2GlXNCyLATazozWa/ohqecUV0ClspAx0kuKaxJeamsWmmQDlAp/axA==',
+  '{}',
+  'b70fd734-cd57-4ca5-bdc4-be5078c3b227',
+  '\xB2358976BBF00CB06EBC923D72AB7725',
+  'key',
+  'CGFFvDANGLu1iSpow9q9ugIQAn/sJRSOTznKcsCMUk8=',
+  'h8lgbai6ubdv',
+  TRUE
+)
+ON CONFLICT (id) DO NOTHING;
