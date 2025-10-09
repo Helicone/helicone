@@ -100,7 +100,7 @@ export async function callProvider(props: CallProps): Promise<Response> {
 
   const mockResponseHeader = headers.get("__helicone-mock-response");
   if (mockResponseHeader) {
-    if (env.ENVIRONMENT !== "development") {
+    if (env.ENVIRONMENT === "production") {
       return new Response("Mock responses not allowed in production", {
         status: 403,
       });
