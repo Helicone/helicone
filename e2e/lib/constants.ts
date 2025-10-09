@@ -25,6 +25,8 @@ export const JAWN_ENDPOINTS = {
   HEALTHCHECK: "/healthcheck",
 } as const;
 
+// Test credentials from supabase/seed.sql (local development only)
+// See seed.sql line 13 for org ID and line 22 for API key
 export const TEST_ORG_ID = "83635a30-5ba6-41a8-8cc6-fb7df941b24a";
 
 export const TEST_ORG_API_KEY = "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa";

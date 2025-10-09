@@ -43,14 +43,13 @@ describe("Wallet Credit Exhaustion", () => {
     expect(addCreditsResponse.status).toBe(200);
     expect(addCreditsResponse.data.effectiveBalance).toBe(100);
     // sleep for 2 seconds to ensure wallet state is updated
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await sleep(2000);
     const requestBody = createChatCompletionRequest({
       model: "gpt-5",
       messages: TEST_MESSAGES.SIMPLE,
       max_tokens: 10,
     });
 
-    // await sleep(100000);
     const response = await gatewayClient.post<ChatCompletionResponse>(
       GATEWAY_ENDPOINTS.CHAT_COMPLETIONS,
       requestBody

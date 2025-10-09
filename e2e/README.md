@@ -2,6 +2,8 @@
 
 End-to-end integration tests for the Helicone AI Gateway.
 
+**Note:** This directory is intentionally **not** part of the root monorepo workspaces. E2E tests are standalone test infrastructure with their own dependencies, separate from production code.
+
 ## Getting Started (running locally)
 
 ### 1. Install Dependencies

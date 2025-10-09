@@ -5,6 +5,8 @@
 import axios, { AxiosResponse } from "axios";
 import { WORKER_API_URL } from "./constants";
 
+// Admin access key from worker/wrangler.toml (local development only)
+// This matches HELICONE_MANUAL_ACCESS_KEY in the worker config
 const HELICONE_MANUAL_ACCESS_KEY =
   "sk-helicone-rrrrrrr-xxxxxxx-vvvvvvv-wwwwwww";
 

@@ -49,10 +49,7 @@ export class GatewayClient {
    * Reset headers to default
    */
   resetHeaders(): void {
-    this.client.defaults.headers = {
-      ...this.client.defaults.headers,
-      ...TEST_HEADERS,
-    } as any;
+    this.client.defaults.headers = { ...TEST_HEADERS } as any;
   }
 }
 
