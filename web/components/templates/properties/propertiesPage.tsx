@@ -3,7 +3,6 @@ import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -23,14 +23,14 @@ import {
 } from "@/components/ui/select";
 import { XSmall } from "@/components/ui/typography";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { ClientType, getJawnClient } from "@/lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, LockIcon, Search, Tag, Trash2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";
+import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import PropertyPanel from "./propertyPanel";
-import { ClientType, getJawnClient } from "@/lib/clients/jawn";
 
 type HiddenProperty = { property: string };
 
@@ -48,6 +48,9 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
     new Set(),
   );
   const [hidingKey, setHidingKey] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+
   const [restoreModalOpen, setRestoreModalOpen] = useState(false);
   const [selectedHiddenProperty, setSelectedHiddenProperty] =
     useState<string>("");
@@ -124,9 +127,15 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
       await (jawn as ClientType).POST("/v1/property/hide", {
         body: { key: property },
       });
-      setHiddenKeysLocal((prev) => new Set([...Array.from(prev), property]));
-      // Fire and forget refetch; cache may update asynchronously
+      setHiddenKeysLocal((prev) => {
+        const updated = new Set(prev);
+        updated.add(property);
+        return updated;
+      });
       refetch();
+      if (restoreModalOpen) {
+        void refetchHiddenProperties();
+      }
       if (initialPropertyKey === property) {
         router.replace("/properties");
       }
@@ -170,6 +179,16 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
       setRestoreError("Unable to restore property. Please try again.");
     } finally {
       setRestoringKey(null);
+    }
+  };
+
+  const handleRestoreModalOpenChange = (open: boolean) => {
+    if (restoringKey) {
+      return;
+    }
+    setRestoreModalOpen(open);
+    if (!open) {
+      setRestoreError(null);
     }
   };
 
@@ -313,11 +332,12 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
                           <XSmall className="truncate">{property}</XSmall>
                         </button>
                         <button
-                          className={`ml-2 text-red-500 opacity-0 transition-opacity hover:text-red-600 disabled:opacity-50 group-hover:opacity-100`}
-                          title="Hide property"
+                          className={`ml-2 text-destructive opacity-0 transition-opacity hover:text-destructive/90 disabled:opacity-50 group-hover:opacity-100`}
+                          title="Delete property"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleHideProperty(property);
+                            setPendingDelete(property);
+                            setConfirmOpen(true);
                           }}
                           disabled={hidingKey === property}
                         >
@@ -329,11 +349,11 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
                 );
               })}
             </div>
-            <div className="flex flex-col">
+            <div className="border-t border-border p-2">
               <Button
                 variant="default"
                 size="sm"
-                className="m-2"
+                className="w-full"
                 onClick={handleOpenRestoreModal}
               >
                 Restore Deleted Properties
@@ -347,99 +367,189 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
         </div>
       </div>
 
-      <Dialog
-        open={restoreModalOpen}
+      <HidePropertyConfirmDialog
+        open={confirmOpen}
         onOpenChange={(open) => {
-          if (restoringKey) {
-            return;
-          }
-          setRestoreModalOpen(open);
-          if (!open) {
-            setRestoreError(null);
-          }
+          setConfirmOpen(open);
+          if (!open) setPendingDelete(null);
         }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Restore Deleted Properties</DialogTitle>
-            <DialogDescription>
-              Select a property to restore. Restored properties will reappear in
-              your list.
-            </DialogDescription>
-          </DialogHeader>
+        property={pendingDelete}
+        isLoading={hidingKey === pendingDelete && hidingKey !== null}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleHideProperty(pendingDelete);
+          setConfirmOpen(false);
+          setPendingDelete(null);
+        }}
+      />
 
-          {hiddenPropertiesErrorMessage ? (
-            <p className="text-sm text-destructive">
-              {hiddenPropertiesErrorMessage}
-            </p>
-          ) : isHiddenPropertiesLoadingState ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : hiddenPropertyKeys.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              You do not have any deleted properties to restore.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="restore-hidden-property">
-                  Deleted property
-                </Label>
-                <Select
-                  value={effectiveSelectedHiddenProperty || undefined}
-                  onValueChange={(value) => setSelectedHiddenProperty(value)}
-                >
-                  <SelectTrigger id="restore-hidden-property">
-                    <SelectValue placeholder="Select a property" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {hiddenPropertyKeys.map((property: string) => (
-                      <SelectItem key={property} value={property}>
-                        {property}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {restoreError && (
-                <p className="text-sm text-destructive">{restoreError}</p>
-              )}
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (!restoringKey) {
-                  setRestoreModalOpen(false);
-                  setRestoreError(null);
-                }
-              }}
-              disabled={!!restoringKey}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleRestoreProperty}
-              disabled={isRestoreDisabled}
-              variant="action"
-            >
-              {restoringKey ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Restoring
-                </>
-              ) : (
-                "Restore"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <RestoreHiddenPropertiesDialog
+        open={restoreModalOpen}
+        onOpenChange={handleRestoreModalOpenChange}
+        hiddenPropertyKeys={hiddenPropertyKeys}
+        isLoading={isHiddenPropertiesLoadingState}
+        errorMessage={hiddenPropertiesErrorMessage}
+        selectedProperty={effectiveSelectedHiddenProperty}
+        onSelect={setSelectedHiddenProperty}
+        onRestore={handleRestoreProperty}
+        isRestoreDisabled={isRestoreDisabled}
+        restoreError={restoreError}
+        restoringKey={restoringKey}
+      />
     </div>
   );
 };
 
 export default PropertiesPage;
+
+// Confirmation dialog for hiding a property
+const HidePropertyConfirmDialog = ({
+  open,
+  onOpenChange,
+  property,
+  onConfirm,
+  isLoading,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  property: string | null;
+  onConfirm: () => void;
+  isLoading: boolean;
+}) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader className="space-y-4">
+          <DialogTitle>Delete property?</DialogTitle>
+          <DialogDescription>
+            {property
+              ? `This will delete the property "${property}" from your Properties list.`
+              : "This will delete the selected property from your Properties list."}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={isLoading || !property}
+          >
+            {isLoading ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+type RestoreHiddenPropertiesDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  hiddenPropertyKeys: string[];
+  isLoading: boolean;
+  errorMessage: string | null;
+  selectedProperty: string;
+  onSelect: (value: string) => void;
+  onRestore: () => void;
+  isRestoreDisabled: boolean;
+  restoreError: string | null;
+  restoringKey: string | null;
+};
+
+const RestoreHiddenPropertiesDialog = ({
+  open,
+  onOpenChange,
+  hiddenPropertyKeys,
+  isLoading,
+  errorMessage,
+  selectedProperty,
+  onSelect,
+  onRestore,
+  isRestoreDisabled,
+  restoreError,
+  restoringKey,
+}: RestoreHiddenPropertiesDialogProps) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Restore Deleted Properties</DialogTitle>
+          <DialogDescription>
+            Select a property to restore. Restored properties will reappear in
+            your list.
+          </DialogDescription>
+        </DialogHeader>
+
+        {errorMessage ? (
+          <p className="text-sm text-destructive">{errorMessage}</p>
+        ) : isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : hiddenPropertyKeys.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            You do not have any deleted properties to restore.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="restore-hidden-property">Deleted property</Label>
+              <Select
+                value={selectedProperty || undefined}
+                onValueChange={(value) => onSelect(value)}
+              >
+                <SelectTrigger id="restore-hidden-property">
+                  <SelectValue placeholder="Select a property" />
+                </SelectTrigger>
+                <SelectContent>
+                  {hiddenPropertyKeys.map((property) => (
+                    <SelectItem key={property} value={property}>
+                      {property}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {restoreError && (
+              <p className="text-sm text-destructive">{restoreError}</p>
+            )}
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (!restoringKey) {
+                onOpenChange(false);
+              }
+            }}
+            disabled={!!restoringKey}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={onRestore}
+            disabled={isRestoreDisabled}
+            variant="action"
+          >
+            {restoringKey ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Restoring
+              </>
+            ) : (
+              "Restore"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
