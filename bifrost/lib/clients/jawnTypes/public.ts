@@ -2576,12 +2576,12 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
+    "Result_Property-Array.string_": components["schemas"]["ResultSuccess_Property-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_unknown-Array_": {
       data: unknown[];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_Property-Array.string_": components["schemas"]["ResultSuccess_Property-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__value-string--cost-number_-Array_": {
       data: {
           /** Format: double */
@@ -6454,10 +6454,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_Property-Array_"] | {
-            error: unknown;
-            data: components["schemas"]["Property"][];
-          };
+          "application/json": components["schemas"]["Result_Property-Array.string_"];
         };
       };
     };

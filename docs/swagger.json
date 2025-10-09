@@ -7245,6 +7245,16 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Result_Property-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Property-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess_unknown-Array_": {
 				"properties": {
 					"data": {
@@ -7265,16 +7275,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"Result_Property-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_Property-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
 			},
 			"ResultSuccess__value-string--cost-number_-Array_": {
 				"properties": {
@@ -18491,30 +18491,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultError_string_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_Property-Array_"
-										},
-										{
-											"properties": {
-												"error": {},
-												"data": {
-													"items": {
-														"$ref": "#/components/schemas/Property"
-													},
-													"type": "array"
-												}
-											},
-											"required": [
-												"error",
-												"data"
-											],
-											"type": "object"
-										}
-									]
+									"$ref": "#/components/schemas/Result_Property-Array.string_"
 								}
 							}
 						}
