@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - justin/get-full-testing-suite
 
 jobs:
   e2e-tests:
