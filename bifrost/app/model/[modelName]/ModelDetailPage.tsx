@@ -21,6 +21,7 @@ import { CopyButton } from "@/components/ui/CopyButton";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { StandardParameter } from "@helicone-package/cost/models/types";
+import { capitalizeModality } from "@/lib/constants/modalities";
 
 type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
 
@@ -323,7 +324,7 @@ completion = client.chat.completions.create(
                 <div>
                   <span className="text-gray-500 dark:text-gray-400">Input: </span>
                   <span className="font-semibold text-gray-900 dark:text-gray-100">
-                    {model.inputModalities.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(", ")}
+                    {model.inputModalities.map(capitalizeModality).join(", ")}
                   </span>
                 </div>
               )}
@@ -331,7 +332,7 @@ completion = client.chat.completions.create(
                 <div>
                   <span className="text-gray-500 dark:text-gray-400">Output: </span>
                   <span className="font-semibold text-gray-900 dark:text-gray-100">
-                    {model.outputModalities.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(", ")}
+                    {model.outputModalities.map(capitalizeModality).join(", ")}
                   </span>
                 </div>
               )}

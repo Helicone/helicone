@@ -34,6 +34,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { INPUT_MODALITIES, OUTPUT_MODALITIES, MODALITY_LABELS } from "@/lib/constants/modalities";
 
 type ModelRegistryResponse = components["schemas"]["ModelRegistryResponse"];
 
@@ -348,19 +349,13 @@ export function ModelRegistryPage() {
                   onToggle={() => toggleSection("inputModalities")}
                 >
                   <div className="space-y-1">
-                    {["text", "image", "audio", "video"].map((modality) => {
+                    {INPUT_MODALITIES.map((modality) => {
                       const isSelected = selectedInputModalities.has(modality);
-                      const labelMap: Record<string, string> = {
-                        text: "Text",
-                        image: "Image",
-                        audio: "Audio",
-                        video: "Video",
-                      };
 
                       return (
                         <FilterOption
                           key={modality}
-                          label={labelMap[modality] || modality}
+                          label={MODALITY_LABELS[modality]}
                           selected={isSelected}
                           onToggle={() => {
                             const newSet = new Set(selectedInputModalities);
@@ -384,19 +379,13 @@ export function ModelRegistryPage() {
                   onToggle={() => toggleSection("outputModalities")}
                 >
                   <div className="space-y-1">
-                    {["text", "image", "audio", "video"].map((modality) => {
+                    {OUTPUT_MODALITIES.map((modality) => {
                       const isSelected = selectedOutputModalities.has(modality);
-                      const labelMap: Record<string, string> = {
-                        text: "Text",
-                        image: "Image",
-                        audio: "Audio",
-                        video: "Video",
-                      };
 
                       return (
                         <FilterOption
                           key={modality}
-                          label={labelMap[modality] || modality}
+                          label={MODALITY_LABELS[modality]}
                           selected={isSelected}
                           onToggle={() => {
                             const newSet = new Set(selectedOutputModalities);
