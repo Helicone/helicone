@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - justin/get-full-testing-suite
 
 jobs:
   e2e-tests:
@@ -44,9 +43,55 @@ jobs:
         run: |
           cd worker
           yarn install
-          npx wrangler dev --var WORKER_TYPE:HELICONE_API --port 8788 &
-          npx wrangler dev --var WORKER_TYPE:AI_GATEWAY_API --var HELICONE_ORG_ID="a75d76e3-02e7-4d02-8a2b-c65ed27c69b2" --port 8793 &
+          mkdir -p logs
+          echo "Starting HELICONE_API worker on port 8788..."
+          npx wrangler dev --var WORKER_TYPE:HELICONE_API --port 8788 --inspector-port=9240 > logs/wrangler-helicone-api.log 2>&1 &
+          echo $! > logs/wrangler-helicone-api.pid
+          echo "Starting AI_GATEWAY_API worker on port 8793..."
+          npx wrangler dev --var WORKER_TYPE:AI_GATEWAY_API --var HELICONE_ORG_ID="a75d76e3-02e7-4d02-8a2b-c65ed27c69b2" --port 8793 --inspector-port=9240 > logs/wrangler-ai-gateway.log 2>&1 &
+          echo $! > logs/wrangler-ai-gateway.pid
+          echo "Waiting for workers to start..."
           sleep 10
+
+      - name: Health Check Workers
+        run: |
+          echo "Checking if workers are running..."
+          MAX_RETRIES=30
+          RETRY_DELAY=2
+
+          # Check HELICONE_API worker (port 8788)
+          for i in $(seq 1 $MAX_RETRIES); do
+            if curl -f http://localhost:8788/healthcheck 2>/dev/null; then
+              echo "✓ HELICONE_API worker is running on port 8788"
+              break
+            fi
+            if [ $i -eq $MAX_RETRIES ]; then
+              echo "✗ HELICONE_API worker failed to start on port 8788"
+              echo "Last 50 lines of wrangler-helicone-api.log:"
+              tail -50 worker/logs/wrangler-helicone-api.log || true
+              exit 1
+            fi
+            echo "Waiting for HELICONE_API worker... (attempt $i/$MAX_RETRIES)"
+            sleep $RETRY_DELAY
+          done
+
+          # Check AI_GATEWAY_API worker (port 8793)
+          for i in $(seq 1 $MAX_RETRIES); do
+            if curl -f http://localhost:8793/healthcheck 2>/dev/null; then
+              echo "✓ AI_GATEWAY_API worker is running on port 8793"
+              break
+            fi
+            if [ $i -eq $MAX_RETRIES ]; then
+              echo "✗ AI_GATEWAY_API worker failed to start on port 8793"
+              echo "Last 50 lines of wrangler-ai-gateway.log:"
+              tail -50 worker/logs/wrangler-ai-gateway.log || true
+              exit 1
+            fi
+            echo "Waiting for AI_GATEWAY_API worker... (attempt $i/$MAX_RETRIES)"
+            sleep $RETRY_DELAY
+          done
+
+          echo "All workers are running!"
 
       - name: Start Jawn
         run: |
@@ -61,6 +106,24 @@ jobs:
           cd e2e
           yarn install
           yarn test tests/wallet/credit-exhaustion.test.ts
+
+      - name: Display Logs on Failure
+        if: failure()
+        run: |
+          echo "========================================="
+          echo "HELICONE_API Worker Logs (last 100 lines)"
+          echo "========================================="
+          tail -100 worker/logs/wrangler-helicone-api.log || echo "No logs found for HELICONE_API worker"
+          echo ""
+          echo "========================================="
+          echo "AI_GATEWAY_API Worker Logs (last 100 lines)"
+          echo "========================================="
+          tail -100 worker/logs/wrangler-ai-gateway.log || echo "No logs found for AI_GATEWAY_API worker"
+          echo ""
+          echo "========================================="
+          echo "Worker Process Status"
+          echo "========================================="
+          ps aux | grep wrangler || echo "No wrangler processes found"
 
       - name: Cleanup
         if: always()
