@@ -57,35 +57,10 @@ export class PropertyController extends Controller {
     )
   `;
 
-		// Cache the properties per org; if absent, fetch and store. Fail open on cache errors.
-		const key = "v1/property/query" + request.authParams.organizationId;
-		try {
-			const cached = await getFromCache(key);
-			if (cached) {
-				try {
-					const parsed: Property[] = JSON.parse(cached);
-					return { data: parsed, error: null };
-				} catch (_) {
-					// fall through to fetch
-				}
-			}
-		} catch (_) {
-			// ignore cache read errors
-		}
-
 		const properties = await dbQueryClickhouse<Property>(
 			query,
 			builtFilter.argsAcc
 		);
-
-		if (properties.error === null) {
-			try {
-				const ttl = Number(process.env.PROPERTIES_CACHE_TTL_SECONDS ?? "15");
-				await storeInCache(key, JSON.stringify(properties.data), ttl);
-			} catch (_) {
-				// ignore cache write errors
-			}
-		}
 
 		return properties;
 	}
