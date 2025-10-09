@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - justin/get-full-testing-suite
+      - ci/*
 
 jobs:
   e2e-tests:

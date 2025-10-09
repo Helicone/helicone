@@ -24,6 +24,7 @@ describe("Wallet Credit Exhaustion", () => {
   beforeAll(async () => {
     // Reset wallet to 0 before tests
     await resetWalletCredits(TEST_ORG_ID);
+    await sleep(500);
   });
 
   afterAll(async () => {
@@ -59,10 +60,11 @@ describe("Wallet Credit Exhaustion", () => {
       console.log("Response data:", response.data);
     }
     expect(response.status).toBe(200);
-
+    await sleep(500);
     // Check wallet balance
     const walletState = await getWalletState(TEST_ORG_ID);
     console.log("Wallet state after mock request:", walletState.data);
+
     // With the mock response, we expect the cost to be exactly $0.01871250
     // So the remaining balance should be 100 - 1.87125 = 98.12875 cents
     expect(walletState.data.effectiveBalance).toBeCloseTo(100 - 1.87125, 5);
