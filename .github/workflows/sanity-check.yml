@@ -1,0 +1,114 @@
+name: Sanity Check - Background Process
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sanity-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Create Simple Echo Server
+        run: |
+          mkdir -p /tmp/sanity-test
+          cat > /tmp/sanity-test/server.js << 'EOF'
+          const http = require('http');
+
+          const server = http.createServer((req, res) => {
+            console.log(`Received request: ${req.method} ${req.url}`);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              message: 'Echo server works!',
+              path: req.url,
+              method: req.method
+            }));
+          });
+
+          const PORT = 8888;
+          server.listen(PORT, '0.0.0.0', () => {
+            console.log(`Echo server listening on port ${PORT}`);
+          });
+
+          // Keep alive
+          process.on('SIGTERM', () => {
+            console.log('Received SIGTERM, shutting down...');
+            server.close();
+            process.exit(0);
+          });
+          EOF
+
+          echo "Starting echo server in background..."
+          nohup node /tmp/sanity-test/server.js > /tmp/sanity-test/server.log 2>&1 &
+          SERVER_PID=$!
+          echo "Started server with PID: $SERVER_PID"
+
+          echo "Waiting 3 seconds for server to start..."
+          sleep 3
+
+          echo ""
+          echo "========================================="
+          echo "Process status:"
+          ps aux | grep node || echo "No node processes found"
+
+          echo ""
+          echo "Port bindings (all):"
+          netstat -tlnp 2>/dev/null || ss -tlnp 2>/dev/null || echo "Cannot list ports"
+
+          echo ""
+          echo "Checking specific port 8888:"
+          netstat -tlnp 2>/dev/null | grep 8888 || ss -tlnp 2>/dev/null | grep 8888 || echo "Port 8888 not in netstat/ss"
+
+          echo ""
+          echo "Checking with lsof:"
+          lsof -i :8888 || echo "lsof shows nothing on 8888"
+
+          echo ""
+          echo "Server logs:"
+          cat /tmp/sanity-test/server.log || echo "No logs found"
+
+          echo ""
+          echo "========================================="
+          echo "Testing connection to localhost:8888..."
+
+          # Test with nc first
+          if nc -z localhost 8888 2>/dev/null; then
+            echo "✓ Port 8888 is listening!"
+          else
+            echo "✗ Port 8888 is NOT listening"
+            exit 1
+          fi
+
+          # Test with curl
+          echo ""
+          echo "Making HTTP request..."
+          RESPONSE=$(curl -s http://localhost:8888/test)
+          echo "Response: $RESPONSE"
+
+          if echo "$RESPONSE" | grep -q "Echo server works"; then
+            echo "✓ Echo server is working!"
+          else
+            echo "✗ Echo server response is invalid"
+            exit 1
+          fi
+
+          echo ""
+          echo "========================================="
+          echo "✓ SANITY CHECK PASSED!"
+          echo "Background processes work in this environment."
+
+          # Cleanup
+          kill $SERVER_PID 2>/dev/null || true
+
+      - name: Cleanup
+        if: always()
+        run: |
+          pkill -f "node /tmp/sanity-test/server.js" || true
