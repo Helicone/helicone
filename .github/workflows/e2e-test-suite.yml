@@ -107,7 +107,7 @@ jobs:
         run: |
           cd e2e
           yarn install
-          yarn test tests/wallet/credit-exhaustion.test.ts
+          yarn test
 
       - name: Display Logs on Failure
         if: failure()
