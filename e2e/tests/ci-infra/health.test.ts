@@ -19,9 +19,10 @@ describe("System Health Checks", () => {
   describe("AI Gateway (Port 8793)", () => {
     it("should be running and respond to healthcheck", async () => {
       const response = await retry(
-        () => axios.get(`${AI_GATEWAY_URL}${GATEWAY_ENDPOINTS.HEALTHCHECK}`, {
-          validateStatus: () => true,
-        }),
+        () =>
+          axios.get(`${AI_GATEWAY_URL}${GATEWAY_ENDPOINTS.HEALTHCHECK}`, {
+            validateStatus: () => true,
+          }),
         { maxAttempts: 3, delayMs: 2000 }
       );
 
@@ -32,9 +33,10 @@ describe("System Health Checks", () => {
   describe("Worker API (Port 8788)", () => {
     it("should be running and respond to healthcheck", async () => {
       const response = await retry(
-        () => axios.get(`${WORKER_API_URL}${GATEWAY_ENDPOINTS.HEALTHCHECK}`, {
-          validateStatus: () => true,
-        }),
+        () =>
+          axios.get(`${WORKER_API_URL}${GATEWAY_ENDPOINTS.HEALTHCHECK}`, {
+            validateStatus: () => true,
+          }),
         { maxAttempts: 3, delayMs: 2000 }
       );
 
@@ -45,9 +47,10 @@ describe("System Health Checks", () => {
   describe("Jawn API (Port 8585)", () => {
     it("should be running and respond to healthcheck", async () => {
       const response = await retry(
-        () => axios.get(`${JAWN_URL}${JAWN_ENDPOINTS.HEALTHCHECK}`, {
-          validateStatus: () => true,
-        }),
+        () =>
+          axios.get(`${JAWN_URL}${JAWN_ENDPOINTS.HEALTHCHECK}`, {
+            validateStatus: () => true,
+          }),
         { maxAttempts: 3, delayMs: 2000 }
       );
 
@@ -60,9 +63,12 @@ describe("System Health Checks", () => {
     it("should be accessible via Jawn", async () => {
       // We verify Postgres is working by checking if Jawn can connect
       // Jawn healthcheck implicitly verifies database connectivity
-      const response = await axios.get(`${JAWN_URL}${JAWN_ENDPOINTS.HEALTHCHECK}`, {
-        validateStatus: () => true,
-      });
+      const response = await axios.get(
+        `${JAWN_URL}${JAWN_ENDPOINTS.HEALTHCHECK}`,
+        {
+          validateStatus: () => true,
+        }
+      );
 
       expect(response.status).toBe(200);
     });
@@ -71,9 +77,10 @@ describe("System Health Checks", () => {
   describe("ClickHouse Database", () => {
     it("should be accessible and responding", async () => {
       const response = await retry(
-        () => axios.get(`${CLICKHOUSE_URL}/ping`, {
-          validateStatus: () => true,
-        }),
+        () =>
+          axios.get(`${CLICKHOUSE_URL}/ping`, {
+            validateStatus: () => true,
+          }),
         { maxAttempts: 3, delayMs: 2000 }
       );
 
@@ -105,15 +112,18 @@ describe("System Health Checks", () => {
         return {
           service: services[index],
           status: result.status,
-          healthy: result.status === "fulfilled" &&
-                   (result.value as any).status === 200,
+          healthy:
+            result.status === "fulfilled" &&
+            (result.value as any).status === 200,
         };
       });
 
       // Log all service statuses
       console.log("\nService Health Status:");
       results.forEach((r) => {
-        console.log(`  ${r.service}: ${r.healthy ? "✓ Healthy" : "✗ Unhealthy"}`);
+        console.log(
+          `  ${r.service}: ${r.healthy ? "✓ Healthy" : "✗ Unhealthy"}`
+        );
       });
 
       // All services should be healthy
