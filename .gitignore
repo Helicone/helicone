@@ -54,4 +54,4 @@ coverage/
 
 .playwright-mcp/
 prompt.md
-run-prompt.sh
+run-prompt.shsupabase/seed.private.sql
