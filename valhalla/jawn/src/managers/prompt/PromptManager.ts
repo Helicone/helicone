@@ -28,8 +28,8 @@ import { RequestManager } from "../request/RequestManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { AuthParams } from "../../packages/common/auth/types";
-import { StringChain } from "lodash";
 import { Prompt2025Input } from "../../lib/db/ClickhouseWrapper";
+import { resetPromptCache as invalidatePromptCache } from "../../lib/resetPromptCache";
 
 
 const PROMPT_ID_LENGTH = 6;
@@ -55,23 +55,11 @@ export class Prompt2025Manager extends BaseManager {
     versionId?: string;
     environment?: string;
   }): Promise<void> {
-    
-    // reset cache on Cloudflare Workers
     try {
-      const res = await fetch(
-        `${process.env.HELICONE_WORKER_API}/reset-prompt-cache/${this.authParams.organizationId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(params),
-        }
-      );
-      
-      if (!res.ok) {
-        throw new Error(`Failed to reset prompt cache: ${res.status} ${await res.text()}`);
-      }
+      await invalidatePromptCache({
+        orgId: this.authParams.organizationId,
+        ...params,
+      });
     } catch (error) {
       console.error("Error resetting prompt cache:", error);
     }
