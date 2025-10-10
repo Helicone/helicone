@@ -72,4 +72,4 @@ export const models = {
   },
 } satisfies Record<string, ModelConfig>;
 
-export type QwenModelName = keyof typeof models;
+export type Qwen3ModelName = keyof typeof models;

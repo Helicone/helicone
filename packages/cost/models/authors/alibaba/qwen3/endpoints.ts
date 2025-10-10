@@ -1,6 +1,6 @@
 import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
-import { QwenModelName } from "./models";
+import { Qwen3ModelName } from "./models";
 
 export const endpoints = {
   "qwen3-32b:groq": {
@@ -303,5 +303,5 @@ export const endpoints = {
     },
   },
 } satisfies Partial<
-  Record<`${QwenModelName}:${ModelProviderName}`, ModelProviderConfig>
+  Record<`${Qwen3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
