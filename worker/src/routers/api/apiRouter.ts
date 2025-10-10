@@ -507,6 +507,7 @@ function getAPIRouterV1(
       });
     }
   );
+  // Note: catch-all route is handled at the router level in getAPIRouter()
 }
 
 export const getAPIRouter = (router: BaseOpenAPIRouter) => {
@@ -521,7 +522,7 @@ export const getAPIRouter = (router: BaseOpenAPIRouter) => {
       _env: Env,
       _ctx: ExecutionContext
     ) => {
-      return new Response("invalid path", { status: 400 });
+      return new Response("invalid path", { status: 404 });
     }
   );
 

@@ -14,7 +14,7 @@ export const models = {
   },
   "qwen3-30b-a3b": {
     name: "Qwen3-30B-A3B",
-    author: "qwen",
+    author: "alibaba",
     description:
       "Qwen3 is the latest generation of large language models in Qwen series, offering a comprehensive suite of dense and mixture-of-experts (MoE) models. Built upon extensive training, Qwen3 delivers groundbreaking advancements in reasoning, instruction-following, agent capabilities, and multilingual support.",
     contextLength: 41_000,
@@ -25,7 +25,7 @@ export const models = {
   },
   "qwen3-coder": {
     name: "Qwen3-Coder-480B-A35B-Instruct-Turbo",
-    author: "qwen",
+    author: "alibaba",
     description:
       "Qwen3-Coder-480B-A35B-Instruct is the Qwen3's most agentic code model, featuring significant performance on agentic coding, agentic browser-use and other foundational coding tasks, achieving results comparable to Claude Sonnet. This model supports multimodal capabilities including text, images, audio, video, and audio-visual reasoning.",
     contextLength: 262_144,
@@ -39,7 +39,7 @@ export const models = {
   },
   "qwen3-next-80b-a3b-instruct": {
     name: "Qwen3-Next-80B-A3B-Instruct",
-    author: "qwen",
+    author: "alibaba",
     description:
       "Qwen3-Next-80B-A3B-Instruct is a causal language model that is instruction-optimized for chat and agent applications. It features a Mixture-of-Experts (MoE) architecture that achieves an extremely low activation ratio, drastically reducing FLOPs per token while preserving model capacity. The model supports ultra-long contexts and has a Multi-Token Prediction (MTP) mechanism to boost performance and accelerate inference.",
     contextLength: 262_000,
@@ -50,15 +50,26 @@ export const models = {
   },
   "qwen3-235b-a22b-thinking": {
     name: "Qwen3-235B-A22B-Thinking",
-    author: "qwen",
+    author: "alibaba",
     description:
       "Qwen3-235B-A22B-Thinking-2507 is the Qwen3's new model with scaling the thinking capability of Qwen3-235B-A22B, improving both the quality and depth of reasoning.",
     contextLength: 262_144,
     maxOutputTokens: 81_920,
     created: "2025-07-25T00:00:00.000Z",
     modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
-    tokenizer: "Qwen"
+    tokenizer: "Qwen",
+  },
+  "qwen3-coder-30b-a3b-instruct": {
+    name: "Qwen3 Coder 30B A3B Instruct",
+    author: "alibaba",
+    description:
+      "This streamlined model maintains impressive performance and efficiency, featuring the following key enhancements: (a) Significant Performance among open models on Agentic Coding, Agentic Browser-Use, and other foundational coding tasks. (b) Long-context Capabilities with native support for 256K tokens, extendable up to 1M tokens using Yarn, optimized for repository-scale understanding. (c) Agentic Coding supporting for most platform such as Qwen Code, CLINE, featuring a specially designed function call format.",
+    contextLength: 262_144,
+    maxOutputTokens: 262_144,
+    created: "2025-07-31T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "Qwen",
   },
 } satisfies Record<string, ModelConfig>;
 
-export type QwenModelName = keyof typeof models;
+export type Qwen3ModelName = keyof typeof models;
