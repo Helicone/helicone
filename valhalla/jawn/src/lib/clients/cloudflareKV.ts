@@ -132,6 +132,37 @@ export async function removeFromCache(key: string): Promise<void> {
   );
 }
 
+export async function removeSecureCacheEntries(
+  keys: string[]
+): Promise<void> {
+  const namespaceId = process.env.CLOUDFLARE_KV_NAMESPACE_ID ?? "";
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID ?? "";
+
+  // since on worker, we have secure cache (both HMAC key1 and HMAC key2)
+  await Promise.all(
+    keys
+      .filter((key) => Boolean(key))
+      .map(async (key) => {
+        const hashedKeys = await Promise.all([
+          hashWithHmac(key, 1),
+          hashWithHmac(key, 2),
+        ]);
+
+        await Promise.all(
+          hashedKeys.map((hashedKey) =>
+            cloudflare.kv.namespaces.values.delete(
+              namespaceId,
+              hashedKey,
+              {
+                account_id: accountId,
+              }
+            )
+          )
+        );
+      })
+  );
+}
+
 export async function storeInCache(
   key: string,
   value: string,
