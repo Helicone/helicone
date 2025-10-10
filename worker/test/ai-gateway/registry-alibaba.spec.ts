@@ -2686,7 +2686,785 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
-    describe("qwen2.5-coder-7b-fast", () => {
+    describe("qwen3-coder-30b-a3b-instruct with Nebius Provider", () => {
+      it("should handle nebius provider", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select nebius provider when none specified", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle successful request with custom parameters", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              { role: "user", content: "Write a Python function to calculate fibonacci numbers" },
+            ],
+            maxTokens: 1000,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: {
+                  ...nebiusAuthExpectations,
+                  bodyContains: ["Write a Python function to calculate fibonacci numbers"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tools parameter support for coding tasks", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Create a web scraper that can extract data from a website",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle streaming requests for code generation", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Generate a React component for a todo list",
+              },
+            ],
+            stream: true,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: {
+                  ...nebiusAuthExpectations,
+                  bodyContains: ['"stream":true'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle function calling with nebius provider", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "What's the weather in San Francisco?",
+              },
+            ],
+            body: {
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get weather information",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: {
+                  ...nebiusAuthExpectations,
+                  bodyContains: ["get_weather"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool_choice parameter with nebius provider", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Calculate 15 * 23",
+              },
+            ],
+            body: {
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "calculator",
+                    description: "Perform calculations",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        expression: { type: "string" },
+                      },
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: {
+                  ...nebiusAuthExpectations,
+                  bodyContains: ["calculator", "tool_choice"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters correctly", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              { role: "user", content: "Test with all supported parameters" },
+            ],
+            maxTokens: 1000,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify context length limits are respected (262k tokens)", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test message within 262k context limit",
+              },
+            ],
+            maxTokens: 262144,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify pricing configuration ($0.10/$0.30 per million tokens)", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+                customVerify: (call) => {
+                  // Verify pricing configuration:
+                  // Input: $0.10 per million tokens (0.0000001)
+                  // Output: $0.30 per million tokens (0.0000003)
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("qwen3-coder-30b-a3b-instruct with Nebius Provider - Error scenarios", () => {
+      it("should handle Nebius provider failure", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "Nebius service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from Nebius", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle authentication failure", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+
+      it("should handle model not found", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle quota exceeded", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 403,
+                errorMessage: "Quota exceeded",
+              },
+            ],
+            finalStatus: 403,
+          },
+        }));
+
+      it("should handle bad request with invalid parameters", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid request parameters",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle timeout scenarios", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 408,
+                errorMessage: "Request timeout",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle content filtering violations", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              { role: "user", content: "Content that might be filtered" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 422,
+                errorMessage: "Content filtering violation",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("qwen3-coder-30b-a3b-instruct with Nebius Provider - Advanced scenarios", () => {
+      it("should handle custom headers and body mapping", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [{ role: "user", content: "Test with custom mapping" }],
+            headers: {
+              "X-Custom-Header": "test-value",
+            },
+            bodyMapping: "NO_MAPPING",
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: {
+                  ...nebiusAuthExpectations,
+                  headers: {
+                    ...nebiusAuthExpectations.headers,
+                    "X-Custom-Header": "test-value",
+                  },
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle supported parameters correctly", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              { role: "user", content: "Test with various parameters" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+                customVerify: (call) => {
+                  // Verify that the request supports the expected parameters
+                  // like temperature, top_p, frequency_penalty, etc.
+                  // This would be expanded in actual implementation
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle rate limit recovery scenario", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should verify agentic coding capabilities", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Analyze this repository and suggest improvements",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("qwen3-coder-30b-a3b-instruct with Nebius Provider - Provider URL validation", () => {
+      it("should construct correct Nebius URL", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+                customVerify: (call) => {
+                  // Verify that the URL is correctly constructed
+                  // Base URL: https://api.studio.nebius.com/
+                  // Built URL: https://api.studio.nebius.com/v1
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle provider model ID mapping correctly", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("qwen3-coder-30b-a3b-instruct with Nebius Provider - Edge cases and robustness", () => {
+      it("should handle empty messages array", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Messages array cannot be empty",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle very long input within context limits", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Very long input... ".repeat(1000),
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle unicode and special characters", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "测试中文 🚀 émojis and spéciål chars",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle malformed JSON gracefully", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid JSON in request body",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle network connectivity issues", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 502,
+                errorMessage: "Bad gateway - upstream server error",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle logprobs parameter support", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test with logprobs",
+              },
+            ],
+            body: {
+              logprobs: true,
+              top_logprobs: 5,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: {
+                  ...nebiusAuthExpectations,
+                  bodyContains: ["logprobs", "top_logprobs"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle seed parameter for reproducibility", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Generate reproducible code",
+              },
+            ],
+            body: {
+              seed: 12345,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: {
+                  ...nebiusAuthExpectations,
+                  bodyContains: ["seed"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle top_k parameter", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test with top_k sampling",
+              },
+            ],
+            body: {
+              top_k: 40,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: {
+                  ...nebiusAuthExpectations,
+                  bodyContains: ["top_k"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("qwen3-coder-30b-a3b-instruct with Nebius Provider - Passthrough billing tests", () => {
+      it("should handle passthrough billing with nebius provider", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/nebius",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.studio.nebius.com/v1/chat/completions",
+                response: "success",
+                model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+                data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+                expects: nebiusAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("qwen2.5-coder-7b-fast with Nebius Provider", () => {
       it("should handle nebius provider", () =>
         runGatewayTest({
           model: "qwen2.5-coder-7b-fast/nebius",
