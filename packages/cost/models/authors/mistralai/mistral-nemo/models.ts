@@ -2,7 +2,7 @@ import type { ModelConfig } from "../../../types";
 
 export const models = {
   "mistral-nemo": {
-    name: "Mistral: Mistral-Nemo",
+    name: "Mistral Nemo",
     author: "mistralai",
     description:
       "The Mistral-Nemo-Instruct-2407 Large Language Model (LLM) is an instruct fine-tuned version of the Mistral-Nemo-Base-2407. Trained jointly by Mistral AI and NVIDIA, it significantly outperforms existing models smaller or similar in size.",

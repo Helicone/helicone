@@ -2,7 +2,7 @@ import type { ModelConfig } from "../../../types";
 
 export const models = {
   "deepseek-reasoner": {
-    name: "DeepSeek-Reasoner",
+    name: "DeepSeek Reasoner",
     author: "deepseek",
     description:
       "DeepSeek-Reasoner (DeepSeek-V3.1 Thinking Mode) is designed for advanced reasoning, mathematical problem-solving, and complex coding tasks. It uses chain-of-thought reasoning to break down complex problems and achieve superior performance on reasoning benchmarks. Supports 128K context with a default output of 32K tokens (max 64K) for extensive reasoning chains.",
