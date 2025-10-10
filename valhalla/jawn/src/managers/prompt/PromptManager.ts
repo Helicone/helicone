@@ -639,14 +639,6 @@ export class Prompt2025Manager extends BaseManager {
       return err(s3Result.error);
     }
 
-    if (params.environment) {
-      await this.resetPromptCache({
-        promptId: params.promptId,
-        versionId: promptVersionId,
-        environment: params.environment,
-      });
-    }
-
     return ok({ id: promptVersionId });
   }
 
