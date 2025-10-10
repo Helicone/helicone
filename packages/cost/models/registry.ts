@@ -32,6 +32,7 @@ import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
 import { mistralModels, mistralEndpointConfig } from "./authors/mistralai";
 import { zaiModels, zaiEndpointConfig } from "./authors/zai";
+import { baiduModels, baiduEndpointConfig } from "./authors/baidu";
 
 // Combine all models
 const allModels = {
@@ -44,7 +45,8 @@ const allModels = {
   ...alibabaModels,
   ...deepseekModels,
   ...mistralModels,
-  ...zaiModels
+  ...zaiModels,
+  ...baiduModels
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -58,7 +60,8 @@ const modelProviderConfigs = {
   ...alibabaEndpointConfig,
   ...deepseekEndpointConfig,
   ...mistralEndpointConfig,
-  ...zaiEndpointConfig
+  ...zaiEndpointConfig,
+  ...baiduEndpointConfig
 } satisfies Record<string, ModelProviderConfig>;
 
 // Combine all archived endpoints
