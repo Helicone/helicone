@@ -218,6 +218,34 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-vl-235b-a22b-instruct:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "qwen/qwen3-vl-235b-a22b-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "anthropic/claude-3.5-haiku": {
     "claude-3.5-haiku:anthropic": {
@@ -3355,6 +3383,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "groq",
     "novita",
+    "novita",
     "openrouter",
   ],
   "anthropic/claude-3.5-haiku": [
@@ -3579,7 +3608,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "novita": [
       {
         "input": 3e-7,
-        "output": 0.000003,
+        "output": 0.0000015,
         "threshold": 0,
       },
     ],
@@ -4923,6 +4952,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "deepinfra",
       ],
     },
+    {
+      "model": "qwen3-vl-235b-a22b-instruct",
+      "providers": [
+        "novita",
+      ],
+    },
   ],
   "providerBreakdown": [
     {
@@ -4958,7 +4993,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 11,
+      "modelCount": 12,
       "provider": "novita",
     },
     {
@@ -5039,6 +5074,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "qwen3-32b",
     "qwen3-coder",
     "qwen3-next-80b-a3b-instruct",
+    "qwen3-vl-235b-a22b-instruct",
   ],
   "sampleArchivedKeys": [],
   "sampleEndpointIds": [
@@ -5049,9 +5085,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 140,
-  "totalModelProviderConfigs": 140,
-  "totalModelsWithPtb": 60,
+  "totalEndpoints": 141,
+  "totalModelProviderConfigs": 141,
+  "totalModelsWithPtb": 61,
   "totalProviders": 13,
 }
 `;

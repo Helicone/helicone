@@ -57,7 +57,18 @@ export const models = {
     maxOutputTokens: 81_920,
     created: "2025-07-25T00:00:00.000Z",
     modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
-    tokenizer: "Qwen"
+    tokenizer: "Qwen",
+  },
+  "qwen3-vl-235b-a22b-instruct": {
+    name: "Qwen3 VL 235B A22B Instruct",
+    author: "alibaba",
+    description:
+      "Qwen3 VL 235B A22B Instruct is a powerful, open-weight multimodal model from Alibaba Cloud that excels at both language and vision tasks. It integrates strong text generation with advanced visual understanding of images and video, enabling applications like visual question answering, document parsing, chart extraction, and multilingual OCR. Key features include robust perception, spatial and long-form video comprehension, and the ability to follow complex instructions in multi-turn dialogues. This model also supports agentic interactions and tool use, including visual coding and GUI automation. ",
+    contextLength: 256_000,
+    maxOutputTokens: 16_384,
+    created: "2025-09-23T00:00:00.000Z",
+    modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
+    tokenizer: "Qwen",
   },
 } satisfies Record<string, ModelConfig>;
 
