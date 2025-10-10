@@ -2,6 +2,7 @@ import type { ModelUsage } from "../usage/types";
 import type { ModelProviderConfig, ModelPricing } from "./types";
 import type { ModelProviderName } from "./providers";
 import { registry } from "./registry";
+import { COST_PRECISION_MULTIPLIER } from "../costCalc";
 
 export interface CostBreakdown {
   inputCost: number;
@@ -112,8 +113,8 @@ export function calculateModelCostBreakdown(
     breakdown.requestCost = requestCount * pricing.request;
   }
 
-  breakdown.totalCost = 
-    breakdown.inputCost +
+  breakdown.totalCost = Math.round(
+    (breakdown.inputCost +
     breakdown.outputCost +
     breakdown.cachedInputCost +
     breakdown.cacheWrite5mCost +
@@ -123,7 +124,8 @@ export function calculateModelCostBreakdown(
     breakdown.videoCost +
     breakdown.webSearchCost +
     breakdown.imageCost +
-    breakdown.requestCost;
+    breakdown.requestCost) * COST_PRECISION_MULTIPLIER
+  ) / COST_PRECISION_MULTIPLIER;
 
   return breakdown;
 }
