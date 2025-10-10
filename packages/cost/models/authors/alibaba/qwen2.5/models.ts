@@ -3,7 +3,7 @@ import { ModelConfig } from "../../../types";
 export const models = {
   "qwen2.5-coder-7b-fast": {
     name: "Qwen2.5 Coder 7B fast",
-    author: "qwen",
+    author: "alibaba",
     description:
       "Qwen2.5 is the latest series of Qwen large language models. For Qwen2.5, we release a number of base language models and instruction-tuned language models ranging from 0.5 to 72 billion parameters.",
     contextLength: 32_000,
