@@ -14,6 +14,7 @@ export interface CostBreakdown {
   videoCost: number;
   webSearchCost: number;
   imageCost: number;
+  imageInputCost: number;
   requestCost: number;
   totalCost: number;
 }
@@ -60,6 +61,7 @@ export function calculateModelCostBreakdown(
     videoCost: 0,
     webSearchCost: 0,
     imageCost: 0,
+    imageInputCost: 0,
     requestCost: 0,
     totalCost: 0,
   };
@@ -108,11 +110,15 @@ export function calculateModelCostBreakdown(
     breakdown.imageCost = modelUsage.image * pricing.image;
   }
 
+  if (modelUsage.imageInput && pricing.image) {
+    breakdown.imageInputCost = modelUsage.imageInput * pricing.image;
+  }
+
   if (requestCount > 0 && pricing.request) {
     breakdown.requestCost = requestCount * pricing.request;
   }
 
-  breakdown.totalCost = 
+  breakdown.totalCost =
     breakdown.inputCost +
     breakdown.outputCost +
     breakdown.cachedInputCost +
@@ -123,6 +129,7 @@ export function calculateModelCostBreakdown(
     breakdown.videoCost +
     breakdown.webSearchCost +
     breakdown.imageCost +
+    breakdown.imageInputCost +
     breakdown.requestCost;
 
   return breakdown;

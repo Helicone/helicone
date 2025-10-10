@@ -4,6 +4,7 @@ export interface ModelUsage {
   // Excluding reasoning or audio tokens
   output: number;
   image?: number;
+  imageInput?: number;
   cacheDetails?: {
     cachedInput: number;
     write5m?: number;

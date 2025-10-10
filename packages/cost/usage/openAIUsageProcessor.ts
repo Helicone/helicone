@@ -100,21 +100,30 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
 
     const usage = parsedResponse.usage || {};
-    
+
     const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
     const completionTokens = usage.completion_tokens ?? usage.output_tokens ?? 0;
-    
+
     const promptDetails = usage.prompt_tokens_details || {};
+    const inputTokensDetails = usage.input_tokens_details || {};
     const completionDetails = usage.completion_tokens_details || {};
-    
+
     const cachedTokens = promptDetails.cached_tokens ?? 0;
     const promptAudioTokens = promptDetails.audio_tokens ?? 0;
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
-    
-    const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
+
+    // Handle gpt-image-1 special token structure
+    const textTokens = inputTokensDetails.text_tokens ?? 0;
+    const imageInputTokens = inputTokensDetails.image_tokens ?? 0;
+
+    // If we have the detailed breakdown (gpt-image-1), use text_tokens
+    // Otherwise, fall back to the normal calculation
+    const effectivePromptTokens = textTokens > 0
+      ? textTokens
+      : Math.max(0, promptTokens - cachedTokens - promptAudioTokens - imageInputTokens);
     const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
-    
+
     const modelUsage: ModelUsage = {
       input: effectivePromptTokens,
       output: effectiveCompletionTokens,
@@ -131,9 +140,14 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
 
     if (promptAudioTokens > 0 || completionAudioTokens > 0) {
-      // TODO: add audio output support since some models support it in the 
+      // TODO: add audio output support since some models support it in the
       // chat completions endpoint
       modelUsage.audio = promptAudioTokens + completionAudioTokens;
+    }
+
+    // Handle gpt-image-1 image input tokens
+    if (imageInputTokens > 0) {
+      modelUsage.imageInput = imageInputTokens;
     }
 
     const rejectedTokens = completionDetails.rejected_prediction_tokens ?? 0;

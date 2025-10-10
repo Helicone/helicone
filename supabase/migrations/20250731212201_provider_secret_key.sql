@@ -18,7 +18,7 @@ DROP FUNCTION IF EXISTS provider_keys_encrypt_secret_provider_key();
 -- 				new.nonce
 -- 			  ),
 -- 				'base64') END END;
-				
+
 -- 			new.provider_secret_key = CASE WHEN new.provider_secret_key IS NULL THEN NULL ELSE
 -- 			CASE WHEN new.key_id IS NULL THEN NULL ELSE pg_catalog.encode(
 -- 			  pgsodium.crypto_aead_det_encrypt(
@@ -30,12 +30,16 @@ DROP FUNCTION IF EXISTS provider_keys_encrypt_secret_provider_key();
 -- 				'base64') END END;
 -- 		RETURN new;
 -- 		END;
-		
+
 -- $$ LANGUAGE plpgsql;
 
 -- CREATE OR REPLACE TRIGGER provider_keys_encrypt_secret_trigger_provider_key
 -- BEFORE INSERT OR UPDATE ON provider_keys
 -- FOR EACH ROW EXECUTE FUNCTION provider_keys_encrypt_secret_provider_key();
+
+-- Add missing columns that should have been added earlier
+ALTER TABLE provider_keys ADD COLUMN IF NOT EXISTS key_id UUID DEFAULT NULL;
+ALTER TABLE provider_keys ADD COLUMN IF NOT EXISTS nonce BYTEA DEFAULT NULL;
 
 create view public.decrypted_provider_keys_v2 as
  SELECT provider_keys.id,

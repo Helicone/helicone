@@ -81,11 +81,6 @@ RUN find packages -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx"
 RUN --mount=type=cache,target=/root/.yarn \
     yarn install --frozen-lockfile
 
-# Install jawn dependencies
-WORKDIR /app/valhalla/jawn
-RUN --mount=type=cache,target=/root/.yarn \
-    yarn install --frozen-lockfile
-
 # Now copy source code after dependencies are cached
 WORKDIR /app
 COPY packages ./packages
@@ -93,7 +88,13 @@ COPY shared ./shared
 COPY valhalla ./valhalla
 RUN find /app -name ".env.*" -exec rm {} \;
 
+# Install jawn dependencies again after copying source (to ensure tsup is available)
+WORKDIR /app/valhalla/jawn
+RUN --mount=type=cache,target=/root/.yarn \
+    yarn install --frozen-lockfile
+
 # Build jawn (dependencies already installed)
+WORKDIR /app
 RUN cd valhalla/jawn && yarn build
 
 
