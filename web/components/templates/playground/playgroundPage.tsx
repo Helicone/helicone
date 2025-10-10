@@ -348,8 +348,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       );
 
       const model = promptVersionData.promptBody.model;
-      if (model && model in OPENROUTER_MODEL_MAP) {
-        setSelectedModel(OPENROUTER_MODEL_MAP[model.split("/")[1]]);
+      if (model && Object.values(OPENROUTER_MODEL_MAP).includes(model)) {
+        setSelectedModel(model);
       } else if (model) {
         const similarities = Object.keys(OPENROUTER_MODEL_MAP).map((m) => ({
           target: m,
@@ -475,12 +475,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       return;
     }
     if (requestData?.data && !isRequestLoading && !requestPromptVersionId) {
-      if (requestData.data.model in OPENROUTER_MODEL_MAP) {
-        setSelectedModel(OPENROUTER_MODEL_MAP[requestData.data.model]);
-      } else {
+      const model = requestData.data.model;
+      if (model && Object.values(OPENROUTER_MODEL_MAP).includes(model)) {
+        setSelectedModel(model);
+      } else if (model) {
         const similarities = Object.keys(OPENROUTER_MODEL_MAP).map((m) => ({
           target: m,
-          similarity: findBestMatch(requestData.data.model, m),
+          similarity: findBestMatch(model, m),
         }));
 
         const closestMatch = similarities.reduce((best, current) =>
