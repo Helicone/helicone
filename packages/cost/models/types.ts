@@ -26,7 +26,8 @@ export const AUTHORS = [
   "moonshotai",
   "perplexity",
   "alibaba",
-  "zai"
+  "zai",
+  "baidu"
 ] as const;
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
@@ -54,7 +55,8 @@ export type Tokenizer =
   | "Cohere"
   | "Grok"
   | "Tekken"
-  | "Zai";
+  | "Zai"
+  | "Baidu";
 
 export type StandardParameter =
   | "max_tokens"
