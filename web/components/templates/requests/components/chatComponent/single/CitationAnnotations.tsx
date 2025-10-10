@@ -19,9 +19,7 @@ export default function CitationAnnotations({
 
   return (
     <div className="mt-3 flex flex-col gap-1.5 border-t border-border pt-2">
-      <div className="text-xs font-medium text-muted-foreground">
-        Sources:
-      </div>
+      <div className="text-xs font-medium text-muted-foreground">Sources:</div>
       {displayedAnnotations.map((annotation, index) => (
         <a
           key={index}

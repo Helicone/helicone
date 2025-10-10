@@ -145,7 +145,10 @@ export default function TextMessage({
             {displayContent}
           </ReactMarkdown>
           {annotations && annotations.length > 0 && (
-            <CitationAnnotations annotations={annotations} showAnnotations={showAnnotations} />
+            <CitationAnnotations
+              annotations={annotations}
+              showAnnotations={showAnnotations}
+            />
           )}
         </>
       ) : !displayReasoning ? (
