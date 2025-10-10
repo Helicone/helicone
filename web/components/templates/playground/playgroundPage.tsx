@@ -25,7 +25,7 @@ import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import PlaygroundVariablesPanel from "./components/PlaygroundVariablesPanel";
-import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
+import { playgroundModels } from "@helicone-package/cost/providers/mappings";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
@@ -348,10 +348,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       );
 
       const model = promptVersionData.promptBody.model;
-      if (model && Object.values(OPENROUTER_MODEL_MAP).includes(model)) {
+      console.log("model", model);
+      if (model && playgroundModels.includes(model)) {
         setSelectedModel(model);
+        console.log("selected model", model);
       } else if (model) {
-        const similarities = Object.keys(OPENROUTER_MODEL_MAP).map((m) => ({
+        const similarities = playgroundModels.map((m) => ({
           target: m,
           similarity: findBestMatch(model, m),
         }));
@@ -359,7 +361,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         const closestMatch = similarities.reduce((best, current) =>
           current.similarity > best.similarity ? current : best,
         );
-        setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
+        setSelectedModel(closestMatch.target);
       }
 
       setMappedContent(convertedContent);
@@ -476,10 +478,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
     if (requestData?.data && !isRequestLoading && !requestPromptVersionId) {
       const model = requestData.data.model;
-      if (model && Object.values(OPENROUTER_MODEL_MAP).includes(model)) {
+      if (model && playgroundModels.includes(model)) {
         setSelectedModel(model);
       } else if (model) {
-        const similarities = Object.keys(OPENROUTER_MODEL_MAP).map((m) => ({
+        const similarities = playgroundModels.map((m) => ({
           target: m,
           similarity: findBestMatch(model, m),
         }));
@@ -487,7 +489,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         const closestMatch = similarities.reduce((best, current) =>
           current.similarity > best.similarity ? current : best,
         );
-        setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
+        setSelectedModel(closestMatch.target);
       }
 
       const content = heliconeRequestToMappedContent(requestData.data);

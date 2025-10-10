@@ -13,7 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { OPENROUTER_MODEL_MAP } from "../new/openRouterModelMap";
+import { playgroundModels } from "@helicone-package/cost/providers/mappings";
 import { MappedLLMRequest, Tool } from "@helicone-package/llm-mapper/types";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { useState } from "react";
@@ -116,7 +116,7 @@ const PlaygroundHeader = ({
                 <CommandList>
                   <CommandEmpty>No framework found.</CommandEmpty>
                   <CommandGroup>
-                    {Object.values(OPENROUTER_MODEL_MAP).map((model) => (
+                    {playgroundModels.map((model) => (
                       <CommandItem
                         key={model}
                         value={model}
