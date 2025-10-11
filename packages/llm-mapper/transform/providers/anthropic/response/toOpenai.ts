@@ -36,7 +36,8 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
   const anthropicUsage = response.usage;
   const cachedTokens = anthropicUsage.cache_read_input_tokens ?? 0;
   const cacheWriteTokens = anthropicUsage.cache_creation_input_tokens ?? 0;
-  const webSearchRequests = anthropicUsage.server_tool_use?.web_search_requests ?? 0;
+  const webSearchRequests =
+    anthropicUsage.server_tool_use?.web_search_requests ?? 0;
 
   return {
     id: response.id,
