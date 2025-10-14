@@ -93,6 +93,26 @@ describe("OpenAIUsageProcessor", () => {
     });
   });
 
+  it("should parse gpt-image-1 response with image input tokens", async () => {
+    const responseData = fs.readFileSync(
+      path.join(__dirname, "testData", "gpt-image-1-response.snapshot"),
+      "utf-8"
+    );
+
+    const result = await processor.parse({
+      responseBody: responseData,
+      isStream: false,
+      model: "gpt-image-1",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 50,
+      output: 4200,
+      imageInput: 100,
+    });
+  });
+
   it("usage processing snapshot", async () => {
     const testCases = [
       {

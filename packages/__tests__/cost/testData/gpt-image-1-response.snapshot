@@ -1,0 +1,42 @@
+{
+  "id": "chatcmpl-test123",
+  "object": "chat.completion",
+  "created": 1757346297,
+  "model": "gpt-image-1",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "image",
+            "image": {
+              "url": "https://example.com/image.png"
+            }
+          }
+        ],
+        "refusal": null
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 4200,
+    "total_tokens": 4350,
+    "input_tokens_details": {
+      "text_tokens": 50,
+      "image_tokens": 100
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": "fp_gpt_image_1"
+}
