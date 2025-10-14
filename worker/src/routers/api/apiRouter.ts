@@ -86,7 +86,6 @@ function getAPIRouterV1(
       env: Env,
       ctx: ExecutionContext
     ) => {
-      console.log("reset-prompt-cache", orgId);
       if (env.ENVIRONMENT !== "development") {
         return new Response("not allowed", { status: 403 });
       }
@@ -117,8 +116,6 @@ function getAPIRouterV1(
           const promptVersionCacheKey = `prompt_version_${data.promptId}_env:${data.environment}_${orgId}`;
           cacheKeysToDelete.push(promptVersionCacheKey);
         }
-
-        console.log("deleting cache keys", cacheKeysToDelete);
 
         await Promise.all(
           cacheKeysToDelete.map(key => 
