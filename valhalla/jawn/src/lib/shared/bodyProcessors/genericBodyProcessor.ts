@@ -78,7 +78,6 @@ export class GenericBodyProcessor implements IBodyProcessor {
     const effectivePromptTokens = usage?.prompt_tokens !== undefined
         ? Math.max(0, (usage.prompt_tokens ?? 0) - (usage.prompt_tokens_details?.cached_tokens ?? 0) - (usage.prompt_tokens_details?.audio_tokens ?? 0))
         : Math.max(0, (usage.input_tokens ?? 0) - (usage.input_tokens_details?.cached_tokens ?? 0));
-    console.log(effectivePromptTokens);
     const effectiveCompletionTokens = usage?.completion_tokens !== undefined
         ? Math.max(0, (usage.completion_tokens ?? 0) - (usage.completion_tokens_details?.reasoning_tokens ?? 0) - (usage.completion_tokens_details?.audio_tokens ?? 0))
         : Math.max(0, (usage.output_tokens ?? 0) - (usage.output_tokens_details?.reasoning_tokens ?? 0));
