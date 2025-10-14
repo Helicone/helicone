@@ -166,6 +166,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-coder-30b-a3b-instruct:nebius": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "nebius",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "qwen3-coder:deepinfra": {
       "context": 262144,
       "crossRegion": false,
@@ -3381,6 +3407,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "deepinfra",
     "groq",
+    "nebius",
     "novita",
     "openrouter",
   ],
@@ -3604,6 +3631,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "request": 0,
         "threshold": 0,
         "web_search": 0,
+      },
+    ],
+    "nebius": [
+      {
+        "input": 1e-7,
+        "output": 3e-7,
+        "threshold": 0,
       },
     ],
     "novita": [
@@ -4963,6 +4997,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "qwen3-coder-30b-a3b-instruct",
+      "providers": [
+        "nebius",
+      ],
+    },
+    {
       "model": "qwen3-next-80b-a3b-instruct",
       "providers": [
         "deepinfra",
@@ -4999,7 +5039,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 2,
+      "modelCount": 3,
       "provider": "nebius",
     },
     {
@@ -5084,6 +5124,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "qwen3-30b-a3b",
     "qwen3-32b",
     "qwen3-coder",
+    "qwen3-coder-30b-a3b-instruct",
     "qwen3-next-80b-a3b-instruct",
   ],
   "sampleArchivedKeys": [],
