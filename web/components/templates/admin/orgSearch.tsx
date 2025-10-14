@@ -1,11 +1,22 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { BarChart } from "@tremor/react";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { BarChart as TremorBarChart } from "@tremor/react";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { formatLargeNumber } from "@/components/shared/utils/numberFormat";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-import { Search, Loader2, Trash2, UserPlus } from "lucide-react";
+import { Search, Loader2, Trash2, UserPlus, X, Copy } from "lucide-react";
 import { H1, P, H3, Small, Muted } from "@/components/ui/typography";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,32 +57,29 @@ const OrgSearch = () => {
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Infinite scroll with useInfiniteQuery
-  const {
-    data,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["orgSearchFast", debouncedSearchQuery],
-    queryFn: async ({ pageParam = 0 }) => {
-      const jawn = getJawnClient();
-      const { data, error } = await jawn.POST("/v1/admin/org-search-fast", {
-        body: { query: debouncedSearchQuery, limit, offset: pageParam },
-      });
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    useInfiniteQuery({
+      queryKey: ["orgSearchFast", debouncedSearchQuery],
+      queryFn: async ({ pageParam = 0 }) => {
+        const jawn = getJawnClient();
+        const { data, error } = await jawn.POST("/v1/admin/org-search-fast", {
+          body: { query: debouncedSearchQuery, limit, offset: pageParam as number },
+        });
 
-      if (error) throw error;
-      return data;
-    },
-    getNextPageParam: (lastPage, allPages) => {
-      if (!lastPage?.hasMore) return undefined;
-      return allPages.length * limit;
-    },
-    enabled: debouncedSearchQuery.trim().length > 0,
-  });
+        if (error) throw error;
+        return data;
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) => {
+        if (!(lastPage as any)?.hasMore) return undefined;
+        return allPages.length * limit;
+      },
+      enabled: debouncedSearchQuery.trim().length > 0,
+    });
 
   // Flatten all organizations from all pages
-  const allOrganizations = data?.pages.flatMap((page) => page.organizations) ?? [];
+  const allOrganizations =
+    data?.pages.flatMap((page: any) => page.organizations) ?? [];
 
   // Auto-expand first org when loaded from URL parameter
   // Only auto-expand if:
@@ -85,7 +93,10 @@ const OrgSearch = () => {
       !hasAutoExpanded.current
     ) {
       const query = router.query.q.toString();
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(query);
+      const isUUID =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          query,
+        );
 
       // Auto-expand if it's a UUID search or if there's only 1 result
       if (isUUID || allOrganizations.length === 1) {
@@ -105,7 +116,7 @@ const OrgSearch = () => {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const currentTarget = observerTarget.current;
@@ -145,9 +156,12 @@ const OrgSearch = () => {
       queryKey: ["orgUsageLight", orgId],
       queryFn: async () => {
         const jawn = getJawnClient();
-        const { data, error } = await jawn.GET("/v1/admin/org-usage-light/{orgId}", {
-          params: { path: { orgId } },
-        });
+        const { data, error } = await jawn.GET(
+          "/v1/admin/org-usage-light/{orgId}",
+          {
+            params: { path: { orgId } },
+          },
+        );
 
         if (error) throw error;
         return data;
@@ -156,21 +170,56 @@ const OrgSearch = () => {
     });
   };
 
+  // Fetch feature flags for table rows (async, non-blocking)
+  const useOrgFeatureFlags = (orgId: string) => {
+    return useQuery({
+      queryKey: ["org-feature-flags", orgId],
+      queryFn: async () => {
+        const jawn = getJawnClient();
+        const { data, error } = await jawn.POST(
+          "/v1/admin/feature-flags/query",
+          {},
+        );
+        if (error) throw error;
+        return data?.data?.find((org: any) => org.organization_id === orgId);
+      },
+      staleTime: 5 * 60 * 1000,
+    });
+  };
+
   const handleExpand = (orgId: string) => {
     setExpandedOrg(expandedOrg === orgId ? null : orgId);
   };
 
   const sortAndFormatMonthlyUsage = (monthlyUsage: any[]) => {
-    return monthlyUsage
-      .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime())
-      .map((item) => ({
-        ...item,
-        month: new Date(item.month).toLocaleDateString("en-US", {
+    // Generate last 12 months
+    const last12Months = [];
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      last12Months.push({
+        date,
+        monthKey: date.toISOString().slice(0, 7), // YYYY-MM format
+        month: date.toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
         }),
-        requestCount: item.requestCount,
-      }));
+      });
+    }
+
+    // Create a map of existing usage data
+    const usageMap = new Map(
+      monthlyUsage.map((item) => [
+        new Date(item.month).toISOString().slice(0, 7),
+        item.requestCount || 0,
+      ]),
+    );
+
+    // Fill in all 12 months with data or 0
+    return last12Months.map(({ monthKey, month }) => ({
+      month,
+      requestCount: usageMap.get(monthKey) || 0,
+    }));
   };
 
   const getOwnerFromMembers = (
@@ -180,7 +229,7 @@ const OrgSearch = () => {
       name: string;
       role: string;
       last_sign_in_at: string | null;
-    }[]
+    }[],
   ): { name: string; email: string } => {
     return (
       members.find((member) => member?.role?.toLowerCase() === "owner") || {
@@ -203,15 +252,8 @@ const OrgSearch = () => {
   };
 
   return (
-    <div className="flex h-full w-full flex-col gap-6 p-6 overflow-hidden">
-      <header className="flex flex-col gap-2 flex-shrink-0">
-        <H1>Organization Search</H1>
-        <Muted>
-          Search by organization name, email, domain, or ID
-        </Muted>
-      </header>
-
-      <div className="flex w-full max-w-2xl gap-2 flex-shrink-0">
+    <div className="flex h-full w-full flex-col gap-4 overflow-hidden">
+      <div className="flex w-full max-w-2xl flex-shrink-0 gap-2">
         <div className="relative flex-1">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -221,7 +263,7 @@ const OrgSearch = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Try: acme.com, user@email.com, org name, or org ID..."
+            placeholder="Search organizations..."
             className="pl-10"
           />
         </div>
@@ -272,7 +314,7 @@ const OrgSearch = () => {
           <>
             <div className="overflow-hidden rounded-lg border border-border">
               <table className="w-full">
-                <thead className="bg-muted sticky top-0 z-10">
+                <thead className="sticky top-0 z-10 bg-muted">
                   <tr>
                     <th className="px-4 py-3 text-left text-sm font-semibold">
                       Organization
@@ -291,6 +333,9 @@ const OrgSearch = () => {
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-semibold">
                       Requests (30d)
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">
+                      Feature Flags
                     </th>
                     <th className="px-4 py-3 text-right text-sm font-semibold">
                       Actions
@@ -311,6 +356,7 @@ const OrgSearch = () => {
                         onToggleExpand={() => handleExpand(org.id)}
                         useOrgUsage={useOrgUsage}
                         useOrgUsageLight={useOrgUsageLight}
+                        useOrgFeatureFlags={useOrgFeatureFlags}
                         getTierBadgeVariant={getTierBadgeVariant}
                         sortAndFormatMonthlyUsage={sortAndFormatMonthlyUsage}
                       />
@@ -340,7 +386,13 @@ const OrgSearch = () => {
 };
 
 // Add Admin Dialog Component
-const AddAdminDialog = ({ orgId, orgName }: { orgId: string; orgName: string }) => {
+const AddAdminDialog = ({
+  orgId,
+  orgName,
+}: {
+  orgId: string;
+  orgName: string;
+}) => {
   const queryClient = useQueryClient();
   const { setNotification } = useNotification();
   const [open, setOpen] = useState(false);
@@ -376,7 +428,10 @@ const AddAdminDialog = ({ orgId, orgName }: { orgId: string; orgName: string }) 
       setSelectedAdminIds([]);
     },
     onError: (error: any) => {
-      setNotification(error.message || "Failed to add admins to organization", "error");
+      setNotification(
+        error.message || "Failed to add admins to organization",
+        "error",
+      );
     },
   });
 
@@ -384,7 +439,7 @@ const AddAdminDialog = ({ orgId, orgName }: { orgId: string; orgName: string }) 
     setSelectedAdminIds((prev) =>
       prev.includes(adminId)
         ? prev.filter((id) => id !== adminId)
-        : [...prev, adminId]
+        : [...prev, adminId],
     );
   };
 
@@ -407,9 +462,7 @@ const AddAdminDialog = ({ orgId, orgName }: { orgId: string; orgName: string }) 
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Add Admin to Organization</DialogTitle>
-          <DialogDescription>
-            Add admin users to {orgName}
-          </DialogDescription>
+          <DialogDescription>Add admin users to {orgName}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
@@ -420,12 +473,12 @@ const AddAdminDialog = ({ orgId, orgName }: { orgId: string; orgName: string }) 
             </div>
           ) : (
             <>
-              <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
+              <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
                 <Small className="font-medium">Select Admins</Small>
                 {adminsData?.data?.map((admin) => (
                   <label
                     key={admin.user_id}
-                    className="flex items-center gap-2 p-2 rounded hover:bg-muted cursor-pointer"
+                    className="flex cursor-pointer items-center gap-2 rounded p-2 hover:bg-muted"
                   >
                     <input
                       type="checkbox"
@@ -438,7 +491,7 @@ const AddAdminDialog = ({ orgId, orgName }: { orgId: string; orgName: string }) 
                 ))}
               </div>
 
-              <div className="flex gap-2 justify-end pt-4 border-t border-border">
+              <div className="flex justify-end gap-2 border-t border-border pt-4">
                 <Button
                   variant="outline"
                   size="sm"
@@ -450,7 +503,10 @@ const AddAdminDialog = ({ orgId, orgName }: { orgId: string; orgName: string }) 
                 <Button
                   size="sm"
                   onClick={handleAddAdmins}
-                  disabled={addAdminToOrgMutation.isPending || selectedAdminIds.length === 0}
+                  disabled={
+                    addAdminToOrgMutation.isPending ||
+                    selectedAdminIds.length === 0
+                  }
                 >
                   {addAdminToOrgMutation.isPending ? (
                     <>
@@ -478,6 +534,7 @@ const OrgTableRow = ({
   onToggleExpand,
   useOrgUsage,
   useOrgUsageLight,
+  useOrgFeatureFlags,
   getTierBadgeVariant,
   sortAndFormatMonthlyUsage,
 }: {
@@ -487,31 +544,49 @@ const OrgTableRow = ({
   onToggleExpand: () => void;
   useOrgUsage: (orgId: string | null) => any;
   useOrgUsageLight: (orgId: string) => any;
+  useOrgFeatureFlags: (orgId: string) => any;
   getTierBadgeVariant: (tier: string) => any;
   sortAndFormatMonthlyUsage: (monthlyUsage: any[]) => any[];
 }) => {
   const queryClient = useQueryClient();
   const { setNotification } = useNotification();
+  const [deleteMemberDialogOpen, setDeleteMemberDialogOpen] = useState(false);
+  const [changeRoleDialogOpen, setChangeRoleDialogOpen] = useState(false);
+  const [deleteOrgDialogOpen, setDeleteOrgDialogOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<{
+    id: string;
+    email: string;
+  } | null>(null);
+  const [roleChange, setRoleChange] = useState<{
+    memberId: string;
+    memberEmail: string;
+    oldRole: string;
+    newRole: string;
+  } | null>(null);
 
   // Fetch lightweight usage stats immediately (non-blocking)
-  const {
-    data: lightUsageData,
-    isLoading: lightUsageLoading,
-  } = useOrgUsageLight(org.id);
+  const { data: lightUsageData, isLoading: lightUsageLoading } =
+    useOrgUsageLight(org.id);
+
+  // Fetch feature flags immediately (non-blocking)
+  const { data: featureFlagsData, isLoading: featureFlagsLoading } =
+    useOrgFeatureFlags(org.id);
 
   // Only fetch full usage data when expanded
-  const {
-    data: usageData,
-    isLoading: usageLoading,
-  } = useOrgUsage(isExpanded ? org.id : null);
+  const { data: usageData, isLoading: usageLoading } = useOrgUsage(
+    isExpanded ? org.id : null,
+  );
 
   // Remove member mutation
   const removeMemberMutation = useMutation({
     mutationFn: async (memberId: string) => {
       const jawn = getJawnClient();
-      const { error } = await jawn.DELETE("/v1/admin/org/{orgId}/member/{memberId}", {
-        params: { path: { orgId: org.id, memberId } },
-      });
+      const { error } = await jawn.DELETE(
+        "/v1/admin/org/{orgId}/member/{memberId}",
+        {
+          params: { path: { orgId: org.id, memberId } },
+        },
+      );
       if (error) throw new Error(error);
     },
     onSuccess: () => {
@@ -525,22 +600,73 @@ const OrgTableRow = ({
 
   // Update role mutation
   const updateRoleMutation = useMutation({
-    mutationFn: async ({ memberId, role }: { memberId: string; role: string }) => {
+    mutationFn: async ({
+      memberId,
+      role,
+    }: {
+      memberId: string;
+      role: string;
+    }) => {
       const jawn = getJawnClient();
-      const { error } = await jawn.PATCH("/v1/admin/org/{orgId}/member/{memberId}", {
-        params: { path: { orgId: org.id, memberId } },
-        body: { role },
-      });
+      const { error } = await jawn.PATCH(
+        "/v1/admin/org/{orgId}/member/{memberId}",
+        {
+          params: { path: { orgId: org.id, memberId } },
+          body: { role },
+        },
+      );
       if (error) throw new Error(error);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orgSearchFast"] });
       setNotification("Member role updated successfully", "success");
+      setChangeRoleDialogOpen(false);
+      setRoleChange(null);
     },
     onError: (error: any) => {
       setNotification(error.message || "Failed to update member role", "error");
     },
   });
+
+  // Delete org mutation
+  const deleteOrgMutation = useMutation({
+    mutationFn: async () => {
+      const jawn = getJawnClient();
+      const { error } = await jawn.POST("/v1/admin/org/{orgId}/delete", {
+        params: { path: { orgId: org.id } },
+      });
+      if (error) throw new Error(error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orgSearchFast"] });
+      setNotification("Organization cleaned up successfully", "success");
+      setDeleteOrgDialogOpen(false);
+    },
+    onError: (error: any) => {
+      setNotification(error.message || "Failed to delete organization", "error");
+    },
+  });
+
+  const confirmDeleteMember = () => {
+    if (memberToDelete) {
+      removeMemberMutation.mutate(memberToDelete.id);
+      setDeleteMemberDialogOpen(false);
+      setMemberToDelete(null);
+    }
+  };
+
+  const confirmRoleChange = () => {
+    if (roleChange) {
+      updateRoleMutation.mutate({
+        memberId: roleChange.memberId,
+        role: roleChange.newRole,
+      });
+    }
+  };
+
+  const confirmDeleteOrg = () => {
+    deleteOrgMutation.mutate();
+  };
 
   return (
     <>
@@ -575,13 +701,16 @@ const OrgTableRow = ({
             </div>
           ) : lightUsageData?.last_request_at ? (
             <Muted className="text-xs">
-              {new Date(lightUsageData.last_request_at).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {new Date(lightUsageData.last_request_at).toLocaleDateString(
+                "en-US",
+                {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                },
+              )}
             </Muted>
           ) : (
             <Muted className="text-xs">No requests</Muted>
@@ -597,6 +726,34 @@ const OrgTableRow = ({
             <Muted className="text-xs">
               {formatLargeNumber(lightUsageData?.requests_last_30_days || 0)}
             </Muted>
+          )}
+        </td>
+        <td className="px-4 py-3">
+          {featureFlagsLoading ? (
+            <div className="flex items-center gap-1">
+              <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="relative max-w-[200px]">
+              <div className="flex gap-1 overflow-hidden">
+                {featureFlagsData?.flags && featureFlagsData.flags.length > 0 ? (
+                  featureFlagsData.flags.map((flag: string) => (
+                    <Badge
+                      key={flag}
+                      variant="secondary"
+                      className="shrink-0 text-xs px-1.5 py-0"
+                    >
+                      {flag}
+                    </Badge>
+                  ))
+                ) : (
+                  <Muted className="text-xs">-</Muted>
+                )}
+              </div>
+              {featureFlagsData?.flags && featureFlagsData.flags.length > 0 && (
+                <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-background to-transparent" />
+              )}
+            </div>
           )}
         </td>
         <td className="px-4 py-3 text-right">
@@ -625,117 +782,229 @@ const OrgTableRow = ({
       {/* Expanded Details Row */}
       {isExpanded && (
         <tr>
-          <td colSpan={7} className="bg-muted/30 px-4 py-6">
-            {usageLoading ? (
-              <div className="flex items-center justify-center gap-2 py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                <Muted>Loading usage data...</Muted>
-              </div>
-            ) : usageData ? (
-              <div className="flex flex-col gap-6">
-                {/* Quick Stats Grid */}
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                  <div className="flex flex-col gap-1">
-                    <Small className="font-medium text-muted-foreground">
-                      Organization ID
-                    </Small>
-                    <Muted className="font-mono text-xs">{org.id}</Muted>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <Small className="font-medium text-muted-foreground">
-                      Created
-                    </Small>
-                    <Muted>
-                      {new Date(org.created_at).toLocaleDateString()}
-                    </Muted>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <Small className="font-medium text-muted-foreground">
-                      Subscription
-                    </Small>
-                    <Muted>{org.subscription_status || "N/A"}</Muted>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <Small className="font-medium text-muted-foreground">
-                      Owner Email
-                    </Small>
-                    {owner.email && owner.email !== "N/A" ? (
-                      <a
-                        href={`/admin/org-search?q=${encodeURIComponent(owner.email)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cursor-pointer font-mono text-xs text-blue-600 hover:underline dark:text-blue-400 break-all"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          window.open(`/admin/org-search?q=${encodeURIComponent(owner.email)}`, '_blank');
-                        }}
-                      >
-                        {owner.email}
-                      </a>
-                    ) : (
-                      <Muted className="font-mono text-xs">N/A</Muted>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <Small className="font-medium text-muted-foreground">
-                      Stripe Customer ID
-                    </Small>
-                    {org.stripe_customer_id ? (
-                      <a
-                        href={`https://dashboard.stripe.com/customers/${org.stripe_customer_id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cursor-pointer font-mono text-xs text-blue-600 hover:underline dark:text-blue-400 break-all"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          window.open(`https://dashboard.stripe.com/customers/${org.stripe_customer_id}`, '_blank');
-                        }}
-                      >
-                        {org.stripe_customer_id}
-                      </a>
-                    ) : (
-                      <Muted className="font-mono text-xs">N/A</Muted>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <Small className="font-medium text-muted-foreground">
-                      Total Requests
-                    </Small>
-                    <Muted className="font-semibold">
-                      {formatLargeNumber(usageData.total_requests)}
-                    </Muted>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <Small className="font-medium text-muted-foreground">
-                      Last 30 Days
-                    </Small>
-                    <Muted className="font-semibold">
-                      {formatLargeNumber(usageData.requests_last_30_days)}
-                    </Muted>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <Small className="font-medium text-muted-foreground">
-                      All-Time Count
-                    </Small>
-                    <Muted className="font-semibold">
-                      {formatLargeNumber(usageData.all_time_count)}
-                    </Muted>
-                  </div>
-                </div>
+          <td colSpan={8} className="bg-muted/30 px-4 py-6">
+            <div className="flex flex-col gap-6">
+                {/* Quick Stats + Chart - Side by Side */}
+                <div className="grid grid-cols-1 gap-4 rounded-lg border border-border bg-background p-4 lg:grid-cols-[350px_1fr]">
+                  {/* Left: Stats */}
+                  <div className="flex flex-col gap-4">
+                    {/* Org Info Section */}
+                    <div className="flex flex-col gap-2">
+                      <Small className="font-semibold text-foreground">
+                        Organization
+                      </Small>
+                      <div className="flex flex-col gap-2 pl-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <Small className="min-w-[70px] text-muted-foreground">
+                            ID
+                          </Small>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="font-mono h-6 flex-1 justify-between px-2 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(org.id);
+                              setNotification(
+                                "Organization ID copied",
+                                "success",
+                              );
+                            }}
+                          >
+                            {org.id.slice(0, 8)}...
+                            <Copy size={12} />
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <Small className="min-w-[70px] text-muted-foreground">
+                            Created
+                          </Small>
+                          <Muted className="text-xs">
+                            {new Date(org.created_at).toLocaleDateString()}
+                          </Muted>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <Small className="min-w-[70px] text-muted-foreground">
+                            Tier
+                          </Small>
+                          <Muted className="text-xs">
+                            {org.subscription_status || "N/A"}
+                          </Muted>
+                        </div>
+                      </div>
+                    </div>
 
-                {/* Monthly Usage Chart */}
-                <div className="flex flex-col gap-2">
-                  <Small className="font-medium">Monthly Usage (Last 12 Months)</Small>
-                  <div className="rounded-lg border border-border bg-background p-4">
-                    <BarChart
-                      data={sortAndFormatMonthlyUsage(usageData.monthly_usage)}
-                      categories={["requestCount"]}
-                      index="month"
-                      showYAxis={true}
-                      className="h-60"
-                    />
+                    {/* Contact Section */}
+                    <div className="flex flex-col gap-2 border-t border-border pt-2">
+                      <Small className="font-semibold text-foreground">
+                        Contact
+                      </Small>
+                      <div className="flex flex-col gap-2 pl-2">
+                        <div className="flex items-start justify-between gap-3">
+                          <Small className="min-w-[70px] pt-0.5 text-muted-foreground">
+                            Owner
+                          </Small>
+                          {owner.email && owner.email !== "N/A" ? (
+                            <a
+                              href={`/admin/org-search?q=${encodeURIComponent(owner.email)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 break-all text-right text-xs text-blue-600 hover:underline dark:text-blue-400"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                window.open(
+                                  `/admin/org-search?q=${encodeURIComponent(owner.email)}`,
+                                  "_blank",
+                                );
+                              }}
+                            >
+                              {owner.email}
+                            </a>
+                          ) : (
+                            <Muted className="text-xs">N/A</Muted>
+                          )}
+                        </div>
+                        {org.stripe_customer_id && (
+                          <div className="flex items-center justify-between gap-3">
+                            <Small className="min-w-[70px] text-muted-foreground">
+                              Stripe
+                            </Small>
+                            <a
+                              href={`https://dashboard.stripe.com/customers/${org.stripe_customer_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 truncate text-right text-xs text-blue-600 hover:underline dark:text-blue-400"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                window.open(
+                                  `https://dashboard.stripe.com/customers/${org.stripe_customer_id}`,
+                                  "_blank",
+                                );
+                              }}
+                            >
+                              {org.stripe_customer_id}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Usage Stats Section */}
+                    <div className="flex flex-col gap-2 border-t border-border pt-2">
+                      <Small className="font-semibold text-foreground">
+                        Usage
+                      </Small>
+                      {usageLoading ? (
+                        <div className="flex items-center gap-2 py-4 pl-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          <Muted className="text-xs">Loading detailed usage...</Muted>
+                        </div>
+                      ) : usageData ? (
+                        <div className="flex flex-col gap-2 pl-2">
+                          <div className="flex items-center justify-between gap-3">
+                            <Small className="min-w-[70px] text-muted-foreground">
+                              Total
+                            </Small>
+                            <Muted className="text-xs font-semibold">
+                              {formatLargeNumber(usageData.total_requests)}
+                            </Muted>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <Small className="min-w-[70px] text-muted-foreground">
+                              Last 30d
+                            </Small>
+                            <Muted className="text-xs font-semibold">
+                              {formatLargeNumber(usageData.requests_last_30_days)}
+                            </Muted>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <Small className="min-w-[70px] text-muted-foreground">
+                              All-Time
+                            </Small>
+                            <Muted className="text-xs font-semibold">
+                              {formatLargeNumber(usageData.all_time_count)}
+                            </Muted>
+                          </div>
+                        </div>
+                      ) : (
+                        <Muted className="pl-2 text-xs">Unable to load usage data</Muted>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: Compact Monthly Usage Chart + Feature Flags */}
+                  <div className="flex flex-col gap-4">
+                    {/* Chart */}
+                    <div className="flex h-[180px] flex-col gap-2">
+                      <Small className="font-medium">
+                        Monthly Usage (Last 12 Months)
+                      </Small>
+                      {usageLoading ? (
+                        <div className="flex h-full w-full items-center justify-center rounded-lg border border-border bg-muted/10">
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            <Muted className="text-xs">Loading chart data...</Muted>
+                          </div>
+                        </div>
+                      ) : usageData?.monthly_usage ? (
+                        <div className="w-full flex-1">
+                          <ChartContainer
+                            config={{
+                              requestCount: {
+                                label: "Requests",
+                                color: "hsl(200 90% 50%)",
+                              },
+                            }}
+                            className="aspect-auto h-full w-full"
+                          >
+                            <BarChart
+                              data={sortAndFormatMonthlyUsage(
+                                usageData.monthly_usage,
+                              )}
+                              margin={{ top: 5, right: 5, left: 5, bottom: 0 }}
+                            >
+                              <CartesianGrid
+                                vertical={false}
+                                strokeDasharray="3 3"
+                                opacity={0.2}
+                              />
+                              <XAxis
+                                dataKey="month"
+                                tickLine={false}
+                                tickMargin={8}
+                                axisLine={false}
+                                tickFormatter={(value) => value.slice(0, 3)}
+                                fontSize={11}
+                              />
+                              <ChartTooltip
+                                content={
+                                  <ChartTooltipContent
+                                    valueFormatter={(value) =>
+                                      formatLargeNumber(value as number)
+                                    }
+                                  />
+                                }
+                              />
+                              <Bar
+                                dataKey="requestCount"
+                                fill="var(--color-requestCount)"
+                                radius={[3, 3, 0, 0]}
+                                maxBarSize={35}
+                              />
+                            </BarChart>
+                          </ChartContainer>
+                        </div>
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center rounded-lg border border-border bg-muted/10">
+                          <Muted className="text-xs">Unable to load chart data</Muted>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Feature Flags */}
+                    <FeatureFlagsSection orgId={org.id} orgName={org.name} />
                   </div>
                 </div>
 
@@ -745,7 +1014,20 @@ const OrgTableRow = ({
                     <Small className="font-medium">
                       Organization Members ({org.members.length})
                     </Small>
-                    <AddAdminDialog orgId={org.id} orgName={org.name} />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteOrgDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 size={16} className="mr-2" />
+                        Delete Org
+                      </Button>
+                      <AddAdminDialog orgId={org.id} orgName={org.name} />
+                    </div>
                   </div>
                   <div className="overflow-hidden rounded-lg border border-border">
                     <table className="w-full">
@@ -778,13 +1060,16 @@ const OrgTableRow = ({
                               <Select
                                 value={member.role}
                                 onValueChange={(newRole) => {
-                                  updateRoleMutation.mutate({
+                                  setRoleChange({
                                     memberId: member.id,
-                                    role: newRole,
+                                    memberEmail: member.email,
+                                    oldRole: member.role,
+                                    newRole,
                                   });
+                                  setChangeRoleDialogOpen(true);
                                 }}
                               >
-                                <SelectTrigger className="w-32 h-7 text-xs">
+                                <SelectTrigger className="h-7 w-32 text-xs">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -794,23 +1079,24 @@ const OrgTableRow = ({
                                 </SelectContent>
                               </Select>
                             </td>
-                            <td className="whitespace-nowrap px-4 py-2 text-sm text-right">
+                            <td className="whitespace-nowrap px-4 py-2 text-right text-sm">
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  if (
-                                    confirm(
-                                      `Remove ${member.email} from ${org.name}?`
-                                    )
-                                  ) {
-                                    removeMemberMutation.mutate(member.id);
-                                  }
+                                  setMemberToDelete({
+                                    id: member.id,
+                                    email: member.email,
+                                  });
+                                  setDeleteMemberDialogOpen(true);
                                 }}
                                 disabled={removeMemberMutation.isPending}
                               >
-                                <Trash2 size={14} className="text-destructive" />
+                                <Trash2
+                                  size={14}
+                                  className="text-destructive"
+                                />
                               </Button>
                             </td>
                           </tr>
@@ -820,11 +1106,368 @@ const OrgTableRow = ({
                   </div>
                 </div>
               </div>
-            ) : null}
           </td>
         </tr>
       )}
+
+      {/* Delete Member Confirmation Dialog */}
+      <Dialog open={deleteMemberDialogOpen} onOpenChange={setDeleteMemberDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove Member</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove{" "}
+              <span className="font-medium">{memberToDelete?.email}</span> from{" "}
+              {org.name}?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteMemberDialogOpen(false);
+                setMemberToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteMember}
+              disabled={removeMemberMutation.isPending}
+            >
+              {removeMemberMutation.isPending ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  Removing...
+                </>
+              ) : (
+                "Remove"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Role Confirmation Dialog */}
+      <Dialog open={changeRoleDialogOpen} onOpenChange={setChangeRoleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Member Role</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to change{" "}
+              <span className="font-medium">{roleChange?.memberEmail}</span>'s role
+              from <span className="font-medium">{roleChange?.oldRole}</span> to{" "}
+              <span className="font-medium">{roleChange?.newRole}</span>?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setChangeRoleDialogOpen(false);
+                setRoleChange(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmRoleChange}
+              disabled={updateRoleMutation.isPending}
+            >
+              {updateRoleMutation.isPending ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Change Role"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Organization Confirmation Dialog */}
+      <Dialog open={deleteOrgDialogOpen} onOpenChange={setDeleteOrgDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Organization</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to clean up{" "}
+              <span className="font-medium">{org.name}</span>? This will:
+              <ul className="mt-2 list-inside list-disc space-y-1">
+                <li>Reassign ownership to cole+10@helicone.ai</li>
+                <li>Remove all current members from the organization</li>
+              </ul>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOrgDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteOrg}
+              disabled={deleteOrgMutation.isPending}
+            >
+              {deleteOrgMutation.isPending ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Organization"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
+  );
+};
+
+// Feature Flags Section Component
+const FeatureFlagsSection = ({
+  orgId,
+  orgName,
+}: {
+  orgId: string;
+  orgName: string;
+}) => {
+  const queryClient = useQueryClient();
+  const { setNotification } = useNotification();
+  const [newFlag, setNewFlag] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [flagToDelete, setFlagToDelete] = useState<string | null>(null);
+
+  // Fetch feature flags for this org
+  const { data: featureFlagsData, isLoading: isLoadingFlags } = useQuery({
+    queryKey: ["org-feature-flags", orgId],
+    queryFn: async () => {
+      const jawn = getJawnClient();
+      const { data, error } = await jawn.POST(
+        "/v1/admin/feature-flags/query",
+        {},
+      );
+      if (error) throw error;
+      // Find flags for this specific org
+      return data?.data?.find((org: any) => org.organization_id === orgId);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Add feature flag mutation
+  const addFeatureFlagMutation = useMutation({
+    mutationFn: async (flag: string) => {
+      const jawn = getJawnClient();
+      const { error } = await jawn.POST("/v1/admin/feature-flags", {
+        body: { flag, orgId },
+      });
+      if (error) throw new Error(error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["org-feature-flags", orgId] });
+      setNotification("Feature flag added successfully", "success");
+      setNewFlag("");
+    },
+    onError: (error: any) => {
+      setNotification(error.message || "Failed to add feature flag", "error");
+    },
+  });
+
+  // Delete feature flag mutation
+  const deleteFeatureFlagMutation = useMutation({
+    mutationFn: async (flag: string) => {
+      const jawn = getJawnClient();
+      const { error } = await jawn.DELETE("/v1/admin/feature-flags", {
+        body: { flag, orgId },
+      });
+      if (error) throw new Error(error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["org-feature-flags", orgId] });
+      setNotification("Feature flag removed successfully", "success");
+    },
+    onError: (error: any) => {
+      setNotification(
+        error.message || "Failed to remove feature flag",
+        "error",
+      );
+    },
+  });
+
+  const handleAddFlag = () => {
+    if (!newFlag.trim()) {
+      setNotification("Please enter a feature flag name", "error");
+      return;
+    }
+    setAddDialogOpen(true);
+  };
+
+  const confirmAddFlag = () => {
+    addFeatureFlagMutation.mutate(newFlag.trim());
+    setAddDialogOpen(false);
+  };
+
+  const confirmDeleteFlag = () => {
+    if (flagToDelete) {
+      deleteFeatureFlagMutation.mutate(flagToDelete);
+      setDeleteDialogOpen(false);
+      setFlagToDelete(null);
+    }
+  };
+
+  const flags = featureFlagsData?.flags || [];
+
+  return (
+    <div className="flex w-full flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <Small className="font-medium">Feature Flags</Small>
+        {!isLoadingFlags && (
+          <div className="flex items-center gap-2">
+            <Input
+              type="text"
+              placeholder="Add flag..."
+              value={newFlag}
+              onChange={(e) => setNewFlag(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAddFlag();
+                }
+              }}
+              className="h-7 w-40 text-xs"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAddFlag}
+              disabled={addFeatureFlagMutation.isPending || !newFlag.trim()}
+              className="h-7 px-2"
+            >
+              {addFeatureFlagMutation.isPending ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                "Add"
+              )}
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {isLoadingFlags ? (
+        <div className="flex items-center gap-2 py-2">
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          <Muted className="text-xs">Loading...</Muted>
+        </div>
+      ) : (
+        <div className="flex min-h-[2rem] flex-wrap gap-2 rounded-lg border border-border bg-background p-2">
+          {flags.length > 0 ? (
+            flags.map((flag: string) => (
+              <Badge
+                key={flag}
+                variant="secondary"
+                className="flex items-center gap-1 px-2 py-0.5"
+              >
+                <span className="text-xs">{flag}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-3 w-3 p-0 hover:bg-transparent"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFlagToDelete(flag);
+                    setDeleteDialogOpen(true);
+                  }}
+                  disabled={deleteFeatureFlagMutation.isPending}
+                >
+                  <X className="h-2.5 w-2.5" />
+                </Button>
+              </Badge>
+            ))
+          ) : (
+            <Muted className="py-1 text-xs">No feature flags</Muted>
+          )}
+        </div>
+      )}
+
+      {/* Delete Feature Flag Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Feature Flag</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove the feature flag{" "}
+              <span className="font-medium">"{flagToDelete}"</span> from{" "}
+              {orgName}?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setFlagToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteFlag}
+              disabled={deleteFeatureFlagMutation.isPending}
+            >
+              {deleteFeatureFlagMutation.isPending ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Feature Flag Confirmation Dialog */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Feature Flag</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to add the feature flag{" "}
+              <span className="font-medium">"{newFlag}"</span> to {orgName}?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setAddDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmAddFlag}
+              disabled={addFeatureFlagMutation.isPending}
+            >
+              {addFeatureFlagMutation.isPending ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                "Add"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

@@ -1215,6 +1215,61 @@ export class AdminController extends Controller {
     return ok(null);
   }
 
+  @Post("/org/{orgId}/delete")
+  public async deleteOrg(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<null, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Hardcoded target owner email for security - never trust frontend input
+    const TARGET_OWNER_EMAIL = "cole+10@helicone.ai";
+
+    // Get the target owner user ID from email
+    const targetUserResult = await dbExecute<{ id: string }>(
+      `SELECT id FROM auth.users WHERE email = $1`,
+      [TARGET_OWNER_EMAIL]
+    );
+
+    if (targetUserResult.error || !targetUserResult.data?.[0]) {
+      return err(`Target owner email not found: ${TARGET_OWNER_EMAIL}`);
+    }
+
+    const targetUserId = targetUserResult.data[0].id;
+
+    // 1. Remove all existing members
+    const deleteMembersResult = await dbExecute(
+      `DELETE FROM organization_member WHERE organization = $1`,
+      [orgId]
+    );
+
+    if (deleteMembersResult.error) {
+      return err(`Failed to remove members: ${deleteMembersResult.error}`);
+    }
+
+    // 2. Update organization owner to target user
+    const updateOwnerResult = await dbExecute(
+      `UPDATE organization SET owner = $1 WHERE id = $2`,
+      [targetUserId, orgId]
+    );
+
+    if (updateOwnerResult.error) {
+      return err(`Failed to update owner: ${updateOwnerResult.error}`);
+    }
+
+    // 3. Add target user as the only member with owner role
+    const addOwnerResult = await dbExecute(
+      `INSERT INTO organization_member (organization, member, org_role) VALUES ($1, $2, $3)`,
+      [orgId, targetUserId, "owner"]
+    );
+
+    if (addOwnerResult.error) {
+      return err(`Failed to add new owner: ${addOwnerResult.error}`);
+    }
+
+    return ok(null);
+  }
+
   @Get("/org-usage-light/{orgId}")
   public async getOrgUsageLight(
     @Request() request: JawnAuthenticatedRequest,

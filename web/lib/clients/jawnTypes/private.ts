@@ -548,6 +548,9 @@ export interface paths {
     delete: operations["RemoveOrgMember"];
     patch: operations["UpdateOrgMemberRole"];
   };
+  "/v1/admin/org/{orgId}/delete": {
+    post: operations["DeleteOrg"];
+  };
   "/v1/admin/org-usage-light/{orgId}": {
     get: operations["GetOrgUsageLight"];
   };
@@ -19447,6 +19450,21 @@ export interface operations {
         "application/json": {
           role: string;
         };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeleteOrg: {
+    parameters: {
+      path: {
+        orgId: string;
       };
     };
     responses: {
