@@ -252,7 +252,10 @@ const OrgSearch = () => {
   };
 
   return (
-    <div className="flex h-full w-full flex-col gap-4 overflow-hidden">
+    <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-6">
+      <div className="flex items-center gap-2">
+        <Small className="font-medium text-muted-foreground">Organizations</Small>
+      </div>
       <div className="flex w-full max-w-2xl flex-shrink-0 gap-2">
         <div className="relative flex-1">
           <Search
@@ -264,7 +267,7 @@ const OrgSearch = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search organizations..."
-            className="pl-10"
+            className="rounded-none pl-10"
           />
         </div>
       </div>
@@ -272,22 +275,73 @@ const OrgSearch = () => {
       <div className="flex-1 overflow-y-auto">
         {/* Loading State */}
         {isLoading && (
-          <div className="flex flex-col gap-4">
-            {[...Array(3)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="flex flex-col gap-2 p-6">
-                  <div className="h-6 w-48 rounded bg-muted" />
-                  <div className="h-4 w-64 rounded bg-muted" />
-                  <div className="h-4 w-32 rounded bg-muted" />
-                </CardContent>
-              </Card>
-            ))}
+          <div className="overflow-hidden border border-border">
+            <table className="w-full">
+              <thead className="sticky top-0 z-10 bg-muted">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Organization
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Tier
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Owner Email
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Members
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Last Request
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Requests (30d)
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">
+                    Feature Flags
+                  </th>
+                  <th className="px-4 py-3 text-right text-sm font-semibold">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {[...Array(5)].map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-32 bg-muted" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-16 bg-muted" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-40 bg-muted" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-8 bg-muted" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-24 bg-muted" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-16 bg-muted" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-20 bg-muted" />
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="ml-auto h-4 w-16 bg-muted" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
         {/* Empty State - Before Search */}
         {!debouncedSearchQuery && !isLoading && (
-          <Card className="border-dashed">
+          <Card className="rounded-none border-dashed">
             <CardContent className="flex flex-col items-center justify-center gap-4 py-12">
               <div className="text-6xl">🔍</div>
               <H3>Enter search criteria</H3>
@@ -300,7 +354,7 @@ const OrgSearch = () => {
         {debouncedSearchQuery &&
           !isLoading &&
           allOrganizations.length === 0 && (
-            <Card className="border-dashed">
+            <Card className="rounded-none border-dashed">
               <CardContent className="flex flex-col items-center justify-center gap-4 py-12">
                 <div className="text-6xl">🕵️</div>
                 <H3>No organizations found</H3>
@@ -312,7 +366,7 @@ const OrgSearch = () => {
         {/* Results Table */}
         {!isLoading && allOrganizations.length > 0 && (
           <>
-            <div className="overflow-hidden rounded-lg border border-border">
+            <div className="overflow-hidden border border-border">
               <table className="w-full">
                 <thead className="sticky top-0 z-10 bg-muted">
                   <tr>
@@ -343,7 +397,7 @@ const OrgSearch = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {allOrganizations.map((org) => {
+                  {allOrganizations.map((org, index) => {
                     const owner = getOwnerFromMembers(org.members);
                     const isExpanded = expandedOrg === org.id;
 
@@ -359,6 +413,7 @@ const OrgSearch = () => {
                         useOrgFeatureFlags={useOrgFeatureFlags}
                         getTierBadgeVariant={getTierBadgeVariant}
                         sortAndFormatMonthlyUsage={sortAndFormatMonthlyUsage}
+                        rowIndex={index}
                       />
                     );
                   })}
@@ -537,6 +592,7 @@ const OrgTableRow = ({
   useOrgFeatureFlags,
   getTierBadgeVariant,
   sortAndFormatMonthlyUsage,
+  rowIndex,
 }: {
   org: any;
   owner: { name: string; email: string };
@@ -547,6 +603,7 @@ const OrgTableRow = ({
   useOrgFeatureFlags: (orgId: string) => any;
   getTierBadgeVariant: (tier: string) => any;
   sortAndFormatMonthlyUsage: (monthlyUsage: any[]) => any[];
+  rowIndex: number;
 }) => {
   const queryClient = useQueryClient();
   const { setNotification } = useNotification();
@@ -564,13 +621,79 @@ const OrgTableRow = ({
     newRole: string;
   } | null>(null);
 
-  // Fetch lightweight usage stats immediately (non-blocking)
-  const { data: lightUsageData, isLoading: lightUsageLoading } =
-    useOrgUsageLight(org.id);
+  // Track if row is visible using Intersection Observer
+  const rowRef = useRef<HTMLTableRowElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [shouldFetch, setShouldFetch] = useState(false);
 
-  // Fetch feature flags immediately (non-blocking)
-  const { data: featureFlagsData, isLoading: featureFlagsLoading } =
-    useOrgFeatureFlags(org.id);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRow = rowRef.current;
+    if (currentRow) {
+      observer.observe(currentRow);
+    }
+
+    return () => {
+      if (currentRow) {
+        observer.unobserve(currentRow);
+      }
+    };
+  }, []);
+
+  // Add staggered delay before fetching (100ms per row)
+  useEffect(() => {
+    if (isVisible) {
+      const delay = rowIndex * 100; // Stagger by 100ms per row
+      const timer = setTimeout(() => {
+        setShouldFetch(true);
+      }, delay);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, rowIndex]);
+
+  // Fetch lightweight usage stats only when visible and after delay
+  const { data: lightUsageData, isLoading: lightUsageLoading } = useQuery({
+    queryKey: ["orgUsageLight", org.id],
+    queryFn: async () => {
+      const jawn = getJawnClient();
+      const { data, error } = await jawn.GET(
+        "/v1/admin/org-usage-light/{orgId}",
+        {
+          params: { path: { orgId: org.id } },
+        }
+      );
+
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+    enabled: shouldFetch, // Only fetch when visible and after delay
+  });
+
+  // Fetch feature flags only when visible and after delay
+  const { data: featureFlagsData, isLoading: featureFlagsLoading } = useQuery({
+    queryKey: ["org-feature-flags", org.id],
+    queryFn: async () => {
+      const jawn = getJawnClient();
+      const { data, error } = await jawn.POST(
+        "/v1/admin/feature-flags/query",
+        {},
+      );
+      if (error) throw error;
+      return data?.data?.find((org: any) => org.organization_id === org.id);
+    },
+    staleTime: 5 * 60 * 1000,
+    enabled: shouldFetch, // Only fetch when visible and after delay
+  });
 
   // Only fetch full usage data when expanded
   const { data: usageData, isLoading: usageLoading } = useOrgUsage(
@@ -672,6 +795,7 @@ const OrgTableRow = ({
     <>
       {/* Main Row */}
       <tr
+        ref={rowRef}
         className="cursor-pointer transition-colors hover:bg-muted/50"
         onClick={onToggleExpand}
       >
@@ -785,7 +909,7 @@ const OrgTableRow = ({
           <td colSpan={8} className="bg-muted/30 px-4 py-6">
             <div className="flex flex-col gap-6">
                 {/* Quick Stats + Chart - Side by Side */}
-                <div className="grid grid-cols-1 gap-4 rounded-lg border border-border bg-background p-4 lg:grid-cols-[350px_1fr]">
+                <div className="grid grid-cols-1 gap-4 border border-border bg-background p-4 lg:grid-cols-[350px_1fr]">
                   {/* Left: Stats */}
                   <div className="flex flex-col gap-4">
                     {/* Org Info Section */}
@@ -942,7 +1066,7 @@ const OrgTableRow = ({
                         Monthly Usage (Last 12 Months)
                       </Small>
                       {usageLoading ? (
-                        <div className="flex h-full w-full items-center justify-center rounded-lg border border-border bg-muted/10">
+                        <div className="flex h-full w-full items-center justify-center border border-border bg-muted/10">
                           <div className="flex items-center gap-2">
                             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                             <Muted className="text-xs">Loading chart data...</Muted>
@@ -997,7 +1121,7 @@ const OrgTableRow = ({
                           </ChartContainer>
                         </div>
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center rounded-lg border border-border bg-muted/10">
+                        <div className="flex h-full w-full items-center justify-center border border-border bg-muted/10">
                           <Muted className="text-xs">Unable to load chart data</Muted>
                         </div>
                       )}
@@ -1029,7 +1153,7 @@ const OrgTableRow = ({
                       <AddAdminDialog orgId={org.id} orgName={org.name} />
                     </div>
                   </div>
-                  <div className="overflow-hidden rounded-lg border border-border">
+                  <div className="overflow-hidden border border-border">
                     <table className="w-full">
                       <thead className="bg-muted">
                         <tr>
@@ -1365,7 +1489,7 @@ const FeatureFlagsSection = ({
           <Muted className="text-xs">Loading...</Muted>
         </div>
       ) : (
-        <div className="flex min-h-[2rem] flex-wrap gap-2 rounded-lg border border-border bg-background p-2">
+        <div className="flex min-h-[2rem] flex-wrap gap-2 border border-border bg-background p-2">
           {flags.length > 0 ? (
             flags.map((flag: string) => (
               <Badge
