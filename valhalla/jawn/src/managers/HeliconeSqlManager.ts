@@ -299,6 +299,109 @@ export class HeliconeSqlManager {
     }
   }
 
+  // Admin version that bypasses org-level row filtering
+  // Only to be used by admin endpoints with proper authentication
+  @Traced(
+    "hql.executeAdminSql",
+    ({ thisArg, args }) => ({
+      organizationId: thisArg.authParams.organizationId,
+      service: "helicone-sql",
+      operation: "executeAdminSql",
+      "sql.length": (args[0] as string)?.length || 0,
+      "sql.limit": (args[1] as number) ?? 100,
+    })
+  )
+  async executeAdminSql(
+    sql: string,
+    limit: number = 100
+  ): Promise<Result<ExecuteSqlResponse, HqlError>> {
+    withActiveSpan()?.setTag("sql.query", sql.substring(0, 200));
+    withActiveSpan()?.setTag("admin_query", true);
+    try {
+      // Parse SQL to validate and add limit
+      let ast;
+      try {
+        ast = parser.astify(sql, { database: "Postgresql" });
+      } catch (parseError) {
+        withActiveSpan()?.setTag("error.type", "SYNTAX_ERROR");
+        withActiveSpan()?.setTag("error.phase", "parsing");
+        const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
+        withActiveSpan()?.setTag("error.message", errorMessage);
+        return hqlError(HqlErrorCode.SYNTAX_ERROR, errorMessage);
+      }
+
+      // Always get first statement to prevent SQL injection
+      const normalizedAst = normalizeAst(ast)[0];
+
+      // Add limit to prevent excessive data retrieval
+      let limitedAst;
+      try {
+        limitedAst = addLimit(normalizedAst, limit);
+      } catch (limitError) {
+        withActiveSpan()?.setTag("error.type", "SYNTAX_ERROR");
+        withActiveSpan()?.setTag("error.phase", "limit_application");
+        const errorMessage = `Failed to apply limit: ${limitError instanceof Error ? limitError.message : String(limitError)}`;
+        withActiveSpan()?.setTag("error.message", errorMessage);
+        return hqlError(HqlErrorCode.SYNTAX_ERROR, errorMessage);
+      }
+
+      const firstSql = parser.sqlify(limitedAst, { database: "Postgresql" });
+      withActiveSpan()?.setTag("sql.processed", firstSql.substring(0, 200));
+
+      // Validate SQL for security
+      const validatedSql = validateSql(firstSql);
+      if (isError(validatedSql)) {
+        withActiveSpan()?.setTag("error.type", validatedSql.error.code);
+        withActiveSpan()?.setTag("error.phase", "validation");
+        withActiveSpan()?.setTag("error.message", validatedSql.error.message);
+        return validatedSql;
+      }
+
+      const start = Date.now();
+
+      // Execute query WITHOUT organization context to bypass row-level security
+      // Uses prod_user instead of hql_user to access all data
+      const result = await clickhouseDb.dbQuery<Record<string, any>>(
+        firstSql,
+        []
+      );
+
+      const elapsedMilliseconds = Date.now() - start;
+      withActiveSpan()?.setTag("execution.elapsed_ms", elapsedMilliseconds);
+
+      if (isError(result)) {
+        const errorString = String(result.error);
+        const errorCode = parseClickhouseError(errorString);
+        withActiveSpan()?.setTag("error.type", errorCode);
+        withActiveSpan()?.setTag("error.phase", "clickhouse_execution");
+        withActiveSpan()?.setTag("error.message", errorString);
+        return hqlError(errorCode, errorString);
+      }
+
+      // For admin queries, skip S3 enrichment to avoid cross-org access issues
+      // Admin queries shouldn't need request/response bodies
+      const rows = result.data ?? [];
+
+      const responseSize = Buffer.byteLength(JSON.stringify(rows), "utf8");
+
+      withActiveSpan()?.setTag("result.row_count", rows.length);
+      withActiveSpan()?.setTag("result.size_bytes", responseSize);
+      withActiveSpan()?.setTag("result.elapsed_ms", elapsedMilliseconds);
+
+      return ok({
+        rows,
+        elapsedMilliseconds,
+        size: responseSize,
+        rowCount: rows.length,
+      });
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      withActiveSpan()?.setTag("error.phase", "general");
+      withActiveSpan()?.setTag("error.message", errorMessage);
+      return hqlError(HqlErrorCode.UNEXPECTED_ERROR, errorMessage);
+    }
+  }
+
   private async enrichResultsWithS3Bodies(
     rows: Record<string, any>[]
   ): Promise<Record<string, any>[]> {
