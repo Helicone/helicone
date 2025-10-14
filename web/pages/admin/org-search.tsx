@@ -1,10 +1,10 @@
 import { ReactElement } from "react";
 import AdminLayout from "../../components/layout/admin/adminLayout";
-import AdminStats from "../../components/templates/admin/adminStats";
+import OrgSearch from "../../components/templates/admin/orgSearch";
 import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
 const Admin = () => {
-  return <AdminStats />;
+  return <OrgSearch />;
 };
 
 Admin.getLayout = function getLayout(page: ReactElement) {

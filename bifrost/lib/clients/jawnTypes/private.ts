@@ -538,6 +538,22 @@ export interface paths {
   "/v1/admin/whodis": {
     post: operations["Whodis"];
   };
+  "/v1/admin/org-search": {
+    post: operations["OrgSearch"];
+  };
+  "/v1/admin/org-search-fast": {
+    post: operations["OrgSearchFast"];
+  };
+  "/v1/admin/org/{orgId}/member/{memberId}": {
+    delete: operations["RemoveOrgMember"];
+    patch: operations["UpdateOrgMemberRole"];
+  };
+  "/v1/admin/org-usage-light/{orgId}": {
+    get: operations["GetOrgUsageLight"];
+  };
+  "/v1/admin/org-usage/{orgId}": {
+    get: operations["GetOrgUsage"];
+  };
   "/v1/admin/settings/{name}": {
     get: operations["GetSetting"];
   };
@@ -19306,6 +19322,183 @@ export interface operations {
                   id: string;
                 };
               })[];
+          };
+        };
+      };
+    };
+  };
+  OrgSearch: {
+    requestBody: {
+      content: {
+        "application/json": {
+          query: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: ({
+                usage: {
+                  /** Format: double */
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
+                  name: string;
+                  id: string;
+                };
+              })[];
+          };
+        };
+      };
+    };
+  };
+  OrgSearchFast: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          offset?: number;
+          /** Format: double */
+          limit?: number;
+          query: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            hasMore: boolean;
+            /** Format: double */
+            total: number;
+            organizations: ({
+                members: ({
+                    last_sign_in_at: string | null;
+                    role: string;
+                    name: string;
+                    email: string;
+                    id: string;
+                  })[];
+                subscription_status: string | null;
+                stripe_subscription_id: string | null;
+                stripe_customer_id: string | null;
+                tier: string;
+                owner: string;
+                created_at: string;
+                name: string;
+                id: string;
+              })[];
+          };
+        };
+      };
+    };
+  };
+  RemoveOrgMember: {
+    parameters: {
+      path: {
+        orgId: string;
+        memberId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrgMemberRole: {
+    parameters: {
+      path: {
+        orgId: string;
+        memberId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          role: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetOrgUsageLight: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            /** Format: double */
+            requests_last_30_days: number;
+            last_request_at: string | null;
+          };
+        };
+      };
+    };
+  };
+  GetOrgUsage: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            /** Format: double */
+            all_time_count: number;
+            monthly_usage: {
+                /** Format: double */
+                requestCount: number;
+                month: string;
+              }[];
+            /** Format: double */
+            requests_last_30_days: number;
+            /** Format: double */
+            total_requests: number;
           };
         };
       };

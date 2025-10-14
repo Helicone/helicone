@@ -96,7 +96,7 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
               <H4>{getPageName()}</H4>
             </div>
 
-            <main className="w-full flex-1 overflow-auto bg-background p-6">
+            <main className={`w-full flex-1 overflow-auto bg-background ${pathname === '/admin/hql' ? '' : 'p-6'}`}>
               {children}
             </main>
           </div>

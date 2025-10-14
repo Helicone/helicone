@@ -75,6 +75,68 @@ function QueryResult({
         accessorKey: col,
         cell: (info: CellContext<Record<string, any>, unknown>) => {
           const value = info.getValue();
+          const rowData = info.row.original;
+
+          // Make org_name clickable if organization_id exists
+          if (col === "org_name" && rowData.organization_id) {
+            return (
+              <Link
+                href={`/admin/org-search?q=${encodeURIComponent(rowData.organization_id)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline dark:text-blue-400"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {String(value)}
+              </Link>
+            );
+          }
+
+          // Make organization_id clickable
+          if (col === "organization_id" && value) {
+            return (
+              <Link
+                href={`/admin/org-search?q=${encodeURIComponent(String(value))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline dark:text-blue-400 font-mono text-xs"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {String(value)}
+              </Link>
+            );
+          }
+
+          // Make owner_email clickable
+          if (col === "owner_email" && value) {
+            return (
+              <Link
+                href={`/admin/org-search?q=${encodeURIComponent(String(value))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline dark:text-blue-400 font-mono text-xs"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {String(value)}
+              </Link>
+            );
+          }
+
+          // Make stripe_customer_id clickable (opens Stripe dashboard)
+          if (col === "stripe_customer_id" && value) {
+            return (
+              <Link
+                href={`https://dashboard.stripe.com/customers/${String(value)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline dark:text-blue-400 font-mono text-xs"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {String(value)}
+              </Link>
+            );
+          }
+
           if (typeof value === "object" && value !== null) {
             try {
               return JSON.stringify(value);

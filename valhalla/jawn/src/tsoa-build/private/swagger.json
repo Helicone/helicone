@@ -56251,6 +56251,551 @@
 				}
 			}
 		},
+		"/v1/admin/org-search": {
+			"post": {
+				"operationId": "OrgSearch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"organizations": {
+											"items": {
+												"properties": {
+													"usage": {
+														"properties": {
+															"all_time_count": {
+																"type": "number",
+																"format": "double"
+															},
+															"monthly_usage": {
+																"items": {
+																	"properties": {
+																		"requestCount": {
+																			"type": "number",
+																			"format": "double"
+																		},
+																		"month": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"requestCount",
+																		"month"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"requests_last_30_days": {
+																"type": "number",
+																"format": "double"
+															},
+															"total_requests": {
+																"type": "number",
+																"format": "double"
+															}
+														},
+														"required": [
+															"all_time_count",
+															"monthly_usage",
+															"requests_last_30_days",
+															"total_requests"
+														],
+														"type": "object"
+													},
+													"organization": {
+														"properties": {
+															"members": {
+																"items": {
+																	"properties": {
+																		"last_sign_in_at": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"role": {
+																			"type": "string"
+																		},
+																		"name": {
+																			"type": "string"
+																		},
+																		"email": {
+																			"type": "string"
+																		},
+																		"id": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"last_sign_in_at",
+																		"role",
+																		"name",
+																		"email",
+																		"id"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"subscription_status": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_subscription_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_customer_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"tier": {
+																"type": "string"
+															},
+															"owner": {
+																"type": "string"
+															},
+															"created_at": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"id": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"members",
+															"subscription_status",
+															"stripe_subscription_id",
+															"stripe_customer_id",
+															"tier",
+															"owner",
+															"created_at",
+															"name",
+															"id"
+														],
+														"type": "object"
+													}
+												},
+												"required": [
+													"usage",
+													"organization"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"query": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"query"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/org-search-fast": {
+			"post": {
+				"operationId": "OrgSearchFast",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"hasMore": {
+											"type": "boolean"
+										},
+										"total": {
+											"type": "number",
+											"format": "double"
+										},
+										"organizations": {
+											"items": {
+												"properties": {
+													"members": {
+														"items": {
+															"properties": {
+																"last_sign_in_at": {
+																	"type": "string",
+																	"nullable": true
+																},
+																"role": {
+																	"type": "string"
+																},
+																"name": {
+																	"type": "string"
+																},
+																"email": {
+																	"type": "string"
+																},
+																"id": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"last_sign_in_at",
+																"role",
+																"name",
+																"email",
+																"id"
+															],
+															"type": "object"
+														},
+														"type": "array"
+													},
+													"subscription_status": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_subscription_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_customer_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"tier": {
+														"type": "string"
+													},
+													"owner": {
+														"type": "string"
+													},
+													"created_at": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"members",
+													"subscription_status",
+													"stripe_subscription_id",
+													"stripe_customer_id",
+													"tier",
+													"owner",
+													"created_at",
+													"name",
+													"id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"hasMore",
+										"total",
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"offset": {
+										"type": "number",
+										"format": "double"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									},
+									"query": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"query"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/org/{orgId}/member/{memberId}": {
+			"delete": {
+				"operationId": "RemoveOrgMember",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "memberId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateOrgMemberRole",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "memberId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"role": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"role"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/org-usage-light/{orgId}": {
+			"get": {
+				"operationId": "GetOrgUsageLight",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"requests_last_30_days": {
+											"type": "number",
+											"format": "double"
+										},
+										"last_request_at": {
+											"type": "string",
+											"nullable": true
+										}
+									},
+									"required": [
+										"requests_last_30_days",
+										"last_request_at"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/org-usage/{orgId}": {
+			"get": {
+				"operationId": "GetOrgUsage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"all_time_count": {
+											"type": "number",
+											"format": "double"
+										},
+										"monthly_usage": {
+											"items": {
+												"properties": {
+													"requestCount": {
+														"type": "number",
+														"format": "double"
+													},
+													"month": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"requestCount",
+													"month"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"requests_last_30_days": {
+											"type": "number",
+											"format": "double"
+										},
+										"total_requests": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"all_time_count",
+										"monthly_usage",
+										"requests_last_30_days",
+										"total_requests"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/admin/settings/{name}": {
 			"get": {
 				"operationId": "GetSetting",

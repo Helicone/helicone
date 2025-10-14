@@ -1,16 +1,14 @@
-import AdminPage from "@/components/templates/admin/adminPage";
-import { ReactElement } from "react";
-import AdminLayout from "../../components/layout/admin/adminLayout";
-import { withAdminSSR } from "../../lib/api/handlerWrappers";
+import { GetServerSideProps } from "next";
 
-const Admin = () => {
-  return <AdminPage />;
+export default function Admin() {
+  return null;
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  return {
+    redirect: {
+      destination: "/admin/hql",
+      permanent: false,
+    },
+  };
 };
-
-Admin.getLayout = function getLayout(page: ReactElement) {
-  return <AdminLayout>{page}</AdminLayout>;
-};
-
-export default Admin;
-
-export const getServerSideProps = withAdminSSR;

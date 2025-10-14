@@ -1,17 +1,16 @@
 import { useCallback } from "react";
 import {
-  Home,
   BarChart,
   Ticket,
   Box,
-  Building2,
   Flag,
   Users,
   Settings,
-  DollarSign,
   MessageCircle,
   Zap,
   Wallet,
+  Bell,
+  Database,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import {
@@ -28,21 +27,31 @@ import {
 
 const navigation = [
   {
-    group: "Navigation",
+    group: "Analytics",
     items: [
-      { name: "Dashboard", href: "/admin", icon: Home },
-      { name: "Models", href: "/admin/models", icon: DollarSign },
-      { name: "On Prem", href: "/admin/on-prem", icon: Ticket },
-      { name: "Settings", href: "/admin/settings", icon: Settings },
-      { name: "All Orgs", href: "/admin/stats", icon: Building2 },
-      { name: "Governance", href: "/admin/governance-orgs", icon: Users },
-      { name: "Metrics", href: "/admin/metrics", icon: BarChart },
-      { name: "Org Analytics", href: "/admin/org-analytics", icon: Box },
-      { name: "Top Orgs", href: "/admin/top-orgs", icon: BarChart },
       { name: "HQL", href: "/admin/hql", icon: Zap },
+      { name: "Org Search", href: "/admin/org-search", icon: Users },
+      { name: "Top Orgs", href: "/admin/top-orgs", icon: BarChart },
+      { name: "Org Analytics", href: "/admin/org-analytics", icon: Box },
+      { name: "Metrics", href: "/admin/metrics", icon: BarChart },
+    ],
+  },
+  {
+    group: "Configuration",
+    items: [
+      { name: "Feature Flags", href: "/admin/feature-flags", icon: Flag },
+      { name: "Banners", href: "/admin/banners", icon: Bell },
+      { name: "Backfill", href: "/admin/backfill", icon: Database },
+      { name: "Admin Settings", href: "/admin/settings", icon: Settings },
+      { name: "On Prem", href: "/admin/on-prem", icon: Ticket },
+    ],
+  },
+  {
+    group: "Business",
+    items: [
       { name: "Wallet", href: "/admin/wallet", icon: Wallet },
       { name: "Projections", href: "/admin/projections", icon: BarChart },
-      { name: "Feature Flags", href: "/admin/feature-flags", icon: Flag },
+      { name: "Governance", href: "/admin/governance-orgs", icon: Users },
       {
         name: "Helix Threads",
         href: "/admin/helix-threads",
