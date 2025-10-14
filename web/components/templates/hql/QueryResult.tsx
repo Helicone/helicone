@@ -47,6 +47,7 @@ interface QueryResultProps {
   loading: boolean;
   error: string | null;
   queryStats: components["schemas"]["ExecuteSqlResponse"];
+  enableAdminLinks?: boolean;
 }
 function QueryResult({
   sql,
@@ -54,6 +55,7 @@ function QueryResult({
   loading,
   error,
   queryStats,
+  enableAdminLinks = false,
 }: QueryResultProps) {
   const columnKeys = useMemo(() => {
     if (!result || result.length === 0) {
@@ -77,8 +79,8 @@ function QueryResult({
           const value = info.getValue();
           const rowData = info.row.original;
 
-          // Make org_name clickable if organization_id exists
-          if (col === "org_name" && rowData.organization_id) {
+          // Make org_name clickable if organization_id exists (admin only)
+          if (enableAdminLinks && col === "org_name" && rowData.organization_id) {
             return (
               <Link
                 href={`/admin/org-search?q=${encodeURIComponent(rowData.organization_id)}`}
@@ -92,8 +94,8 @@ function QueryResult({
             );
           }
 
-          // Make organization_id clickable
-          if (col === "organization_id" && value) {
+          // Make organization_id clickable (admin only)
+          if (enableAdminLinks && col === "organization_id" && value) {
             return (
               <Link
                 href={`/admin/org-search?q=${encodeURIComponent(String(value))}`}
@@ -107,8 +109,8 @@ function QueryResult({
             );
           }
 
-          // Make owner_email clickable
-          if (col === "owner_email" && value) {
+          // Make owner_email clickable (admin only)
+          if (enableAdminLinks && col === "owner_email" && value) {
             return (
               <Link
                 href={`/admin/org-search?q=${encodeURIComponent(String(value))}`}
@@ -122,8 +124,8 @@ function QueryResult({
             );
           }
 
-          // Make stripe_customer_id clickable (opens Stripe dashboard)
-          if (col === "stripe_customer_id" && value) {
+          // Make stripe_customer_id clickable - opens Stripe dashboard (admin only)
+          if (enableAdminLinks && col === "stripe_customer_id" && value) {
             return (
               <Link
                 href={`https://dashboard.stripe.com/customers/${String(value)}`}

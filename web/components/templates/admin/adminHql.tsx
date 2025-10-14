@@ -540,6 +540,7 @@ function AdminHql() {
                 }}
                 loading={queryLoading}
                 error={queryError}
+                enableAdminLinks={true}
               />
             </ResizablePanel>
           </ResizablePanelGroup>
