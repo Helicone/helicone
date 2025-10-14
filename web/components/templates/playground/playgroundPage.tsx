@@ -348,10 +348,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       );
 
       const model = promptVersionData.promptBody.model;
-      console.log("model", model);
       if (model && playgroundModels.includes(model)) {
         setSelectedModel(model);
-        console.log("selected model", model);
       } else if (model) {
         const similarities = playgroundModels.map((m) => ({
           target: m,
