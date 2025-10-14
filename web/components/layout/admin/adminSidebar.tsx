@@ -39,7 +39,7 @@ const navigation = [
       { name: "Metrics", href: "/admin/metrics", icon: BarChart },
       { name: "Org Analytics", href: "/admin/org-analytics", icon: Box },
       { name: "Top Orgs", href: "/admin/top-orgs", icon: BarChart },
-      { name: "AI Gateway Candidates", href: "/admin/ai-gateway-candidates", icon: Zap },
+      { name: "HQL", href: "/admin/hql", icon: Zap },
       { name: "Wallet", href: "/admin/wallet", icon: Wallet },
       { name: "Projections", href: "/admin/projections", icon: BarChart },
       { name: "Feature Flags", href: "/admin/feature-flags", icon: Flag },

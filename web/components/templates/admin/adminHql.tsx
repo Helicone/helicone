@@ -40,7 +40,7 @@ HAVING total_requests >= 100000
 ORDER BY total_cost_usd DESC
 LIMIT 50`;
 
-function AdminHqlEnriched() {
+function AdminHql() {
   const org = useOrg();
   const { setNotification } = useNotification();
   const { theme: currentTheme } = useTheme();
@@ -523,4 +523,4 @@ function AdminHqlEnriched() {
   );
 }
 
-export default AdminHqlEnriched;
+export default AdminHql;
