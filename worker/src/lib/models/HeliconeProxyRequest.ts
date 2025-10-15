@@ -239,13 +239,6 @@ export class HeliconeProxyRequestMapper {
     );
     const estimatedTokens = estimateTokenCount(parsedBody, primaryModel);
 
-    if (estimatedTokens !== null) {
-      this.request.injectCustomProperty(
-        "Helicone-Estimated-Tokens",
-        String(estimatedTokens)
-      );
-    }
-
     if (!primaryModel) {
       return;
     }
@@ -275,14 +268,14 @@ export class HeliconeProxyRequestMapper {
       }
       return 0;
     })();
-    const tokenLimit = 100;
-    // modelContextLimit === null
-    //   ? null
-    //   : Math.max(
-    //       0,
-    //       modelContextLimit -
-    //         (requestedCompletionTokens || modelContextLimit * 0.1)
-    //     );
+    const tokenLimit =
+      modelContextLimit === null
+        ? null
+        : Math.max(
+            0,
+            modelContextLimit -
+              (requestedCompletionTokens || modelContextLimit * 0.1)
+          );
 
     if (
       estimatedTokens === null ||
@@ -292,26 +285,18 @@ export class HeliconeProxyRequestMapper {
       return;
     }
 
-    console.log("primaryModel", primaryModel);
-    console.log("estimatedTokens", estimatedTokens);
-    console.log("tokenLimit", tokenLimit);
-    console.log("requestedCompletionTokens", requestedCompletionTokens ?? 0);
-
+    // TODO: Add some indicator as to what was applied so users understand why their request looks different
     switch (handler) {
       case HeliconeTokenLimitExceptionHandler.Truncate:
-        console.log("[Helicone] token limit exception handler: Truncate");
         return applyTruncateStrategy(parsedBody);
       case HeliconeTokenLimitExceptionHandler.MiddleOut:
-        console.log("[Helicone] token limit exception handler: MiddleOut");
         return applyMiddleOutStrategy(parsedBody, primaryModel, tokenLimit);
       case HeliconeTokenLimitExceptionHandler.Fallback:
-        console.log("[Helicone] token limit exception handler: Fallback");
         return applyFallbackStrategy(
           parsedBody,
           primaryModel,
           estimatedTokens,
-          tokenLimit,
-          (key, value) => this.request.injectCustomProperty(key, value)
+          tokenLimit
         );
       default:
         return;

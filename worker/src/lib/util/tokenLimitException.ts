@@ -105,7 +105,8 @@ export function middleOutMessagesToFitLimit<T extends LLMMessage>(
     if (text.length <= chunkSize) return [text];
 
     let chosenSep = separators.find((s) => s !== "" && text.includes(s));
-    if (chosenSep === undefined) chosenSep = separators[separators.length - 1] ?? " ";
+    if (chosenSep === undefined)
+      chosenSep = separators[separators.length - 1] ?? " ";
 
     const splits = text.split(chosenSep);
     const chunks: string[] = [];
@@ -287,117 +288,42 @@ export function middleOutMessagesToFitLimit<T extends LLMMessage>(
     return finalNone as T[];
   }
 
-  // Prefix and suffix sums
+  // Simple contiguous middle removal: remove a centered window until we've
+  // removed at least the number of tokens we need to cut. Keep the rest.
   const n = weights.length;
-  const prefix: number[] = new Array(n + 1).fill(0);
-  for (let i = 0; i < n; i++) prefix[i + 1] = prefix[i] + weights[i];
-  const suffix: number[] = new Array(n + 1).fill(0);
-  for (let i = n - 1; i >= 0; i--) suffix[i] = suffix[i + 1] + weights[i];
-
-  // Identify last string message and its chunk span
-  let lastStringMessageIndex: number | null = null;
-  for (let mi = original.length - 1; mi >= 0; mi--) {
-    const m = original[mi];
-    if (typeof m?.content === "string" && m.content.length > 0) {
-      lastStringMessageIndex = mi;
-      break;
-    }
-  }
-  let lastStart = n;
-  let lastEnd = n;
-  if (lastStringMessageIndex !== null) {
-    for (let idx = 0; idx < n; idx++) {
-      if (chunks[idx].messageIndex === lastStringMessageIndex) {
-        lastStart = idx;
-        break;
-      }
-    }
-    for (let idx = n - 1; idx >= 0; idx--) {
-      if (chunks[idx].messageIndex === lastStringMessageIndex) {
-        lastEnd = idx + 1;
-        break;
-      }
-    }
-  }
-
   const kept = new Set<number>();
-
-  // If we can, reserve the entire last message to avoid dropping it.
-  const lastWeight = lastStart < lastEnd ? suffix[lastStart] - suffix[lastEnd] : 0;
-  if (lastWeight > 0 && budgetForChunks >= lastWeight) {
-    for (let k = lastStart; k < lastEnd; k++) kept.add(k);
-    const remainingBudget = budgetForChunks - lastWeight;
-
-    // Choose best prefix + suffix from the region before lastStart
-    const preN = lastStart;
-    const prePrefix: number[] = new Array(preN + 1).fill(0);
-    for (let i = 0; i < preN; i++) prePrefix[i + 1] = prePrefix[i] + weights[i];
-    const preSuffix: number[] = new Array(preN + 1).fill(0);
-    for (let i = preN - 1; i >= 0; i--) preSuffix[i] = preSuffix[i + 1] + weights[i];
-
-    let bestI = 0;
-    let bestJ = preN;
-    let bestKept = 0;
-    let j = 0;
-    for (let i = 0; i <= preN; i++) {
-      if (j < i) j = i;
-      while (j <= preN && prePrefix[i] + preSuffix[j] > remainingBudget) j += 1;
-      if (j > preN) break;
-      const keptTokens = prePrefix[i] + preSuffix[j];
-      if (keptTokens > bestKept) {
-        bestKept = keptTokens;
-        bestI = i;
-        bestJ = j;
-      }
-    }
-    for (let k = 0; k < bestI; k++) kept.add(k);
-    for (let k = bestJ; k < preN; k++) kept.add(k);
+  const cutTokens = Math.max(0, contentTokens - budgetForChunks);
+  if (n === 0 || cutTokens <= 0) {
+    // Nothing to remove
+    for (let i = 0; i < n; i++) kept.add(i);
   } else {
-    // Otherwise, keep the largest possible tail of the last message within budget
-    if (lastStart < lastEnd) {
-      let bestJ = lastEnd;
-      let bestTail = 0;
-      for (let j = lastStart; j <= lastEnd; j++) {
-        const tail = suffix[j] - suffix[lastEnd];
-        if (tail <= budgetForChunks && tail >= bestTail) {
-          bestTail = tail;
-          bestJ = j;
-        }
+    // Centered window [L, R) to remove
+    let L = Math.floor((n - 1) / 2);
+    let R = L + 1;
+    let removed = 0;
+
+    // Optionally include the very center chunk for odd lengths
+    removed += weights[L];
+    L -= 1;
+
+    let takeRight = true;
+    while (removed < cutTokens && (L >= 0 || R < n)) {
+      if (takeRight && R < n) {
+        removed += weights[R];
+        R += 1;
+      } else if (L >= 0) {
+        removed += weights[L];
+        L -= 1;
+      } else if (R < n) {
+        removed += weights[R];
+        R += 1;
       }
-      for (let k = bestJ; k < lastEnd; k++) kept.add(k);
-      // Try to add from the very start with any remaining budget, greedily.
-      const remaining = Math.max(0, budgetForChunks - bestTail);
-      if (remaining > 0) {
-        let used = 0;
-        for (let k = 0; k < lastStart; k++) {
-          if (used + weights[k] <= remaining) {
-            kept.add(k);
-            used += weights[k];
-          } else {
-            break;
-          }
-        }
-      }
-    } else {
-      // No identifiable last message; fallback to generic two-pointer on all chunks
-      let bestI = 0;
-      let bestJ = n;
-      let bestKept = 0;
-      let j = 0;
-      for (let i = 0; i <= n; i++) {
-        if (j < i) j = i;
-        while (j <= n && prefix[i] + suffix[j] > budgetForChunks) j += 1;
-        if (j > n) break;
-        const keptTokens = prefix[i] + suffix[j];
-        if (keptTokens > bestKept) {
-          bestKept = keptTokens;
-          bestI = i;
-          bestJ = j;
-        }
-      }
-      for (let k = 0; k < bestI; k++) kept.add(k);
-      for (let k = bestJ; k < n; k++) kept.add(k);
+      takeRight = !takeRight;
     }
+
+    // Keep everything outside the removal window
+    for (let i = 0; i < Math.max(0, L + 1); i++) kept.add(i);
+    for (let i = Math.min(n, R); i < n; i++) kept.add(i);
   }
 
   const finalMessages = buildMessagesFromKept(kept).filter((m) => {
@@ -785,8 +711,7 @@ export function applyFallbackStrategy(
   parsedBody: ParsedRequestPayload,
   primaryModel: string,
   estimatedTokens: number,
-  tokenLimit: number,
-  injectCustomProperty: (key: string, value: string) => void
+  tokenLimit: number
 ): ValidRequestBody | undefined {
   const fallbackModel = selectFallbackModel(parsedBody.model);
   if (!fallbackModel) {
@@ -795,9 +720,6 @@ export function applyFallbackStrategy(
 
   if (estimatedTokens >= tokenLimit) {
     parsedBody.model = fallbackModel;
-
-    injectCustomProperty("Helicone-Token-Fallback-Model", fallbackModel);
-    injectCustomProperty("Helicone-Token-Primary-Model", primaryModel);
 
     return JSON.stringify(parsedBody);
   }
