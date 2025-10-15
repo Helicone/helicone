@@ -689,7 +689,7 @@ const OrgTableRow = ({
         {},
       );
       if (error) throw error;
-      return data?.data?.find((org: any) => org.organization_id === org.id);
+      return data?.data?.find((orgData: any) => orgData.organization_id === org.id);
     },
     staleTime: 5 * 60 * 1000,
     enabled: shouldFetch, // Only fetch when visible and after delay
