@@ -62,10 +62,12 @@ function AdminHql() {
     id: string | undefined;
     name: string;
     sql: string;
+    visualization_config?: any;
   }>({
     id: undefined,
     name: "AI Gateway Candidates",
     sql: DEFAULT_QUERY,
+    visualization_config: undefined,
   });
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
@@ -125,6 +127,7 @@ function AdminHql() {
       id?: string;
       name: string;
       sql: string;
+      visualization_config?: any;
     }) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
 
@@ -135,6 +138,7 @@ function AdminHql() {
           body: {
             name: savedQuery.name,
             sql: savedQuery.sql,
+            visualization_config: savedQuery.visualization_config,
           },
         });
         return response;
@@ -144,6 +148,7 @@ function AdminHql() {
           body: {
             name: savedQuery.name,
             sql: savedQuery.sql,
+            visualization_config: savedQuery.visualization_config,
           },
         });
 
@@ -152,6 +157,7 @@ function AdminHql() {
             id: response.data.data[0].id,
             name: response.data.data[0].name,
             sql: response.data.data[0].sql,
+            visualization_config: response.data.data[0].visualization_config,
           });
         }
 
@@ -164,7 +170,7 @@ function AdminHql() {
       });
       setNotification("Successfully saved admin query", "success");
     },
-    onError: (error: any) => {
+    onError: (error: any) {
       setNotification(error.message, "error");
     },
   });
@@ -365,9 +371,8 @@ function AdminHql() {
                 handleSaveQuery={handleSaveQuery}
                 handleRenameQuery={(newName) => {
                   setCurrentQuery({
-                    id: currentQuery.id,
+                    ...currentQuery,
                     name: newName,
-                    sql: currentQuery.sql,
                   });
                 }}
               />
@@ -446,8 +451,7 @@ function AdminHql() {
                   }}
                   onChange={(value) => {
                     setCurrentQuery({
-                      id: currentQuery.id,
-                      name: currentQuery.name,
+                      ...currentQuery,
                       sql: value ?? "",
                     });
                     if (value) {
@@ -514,6 +518,13 @@ function AdminHql() {
                 }}
                 loading={queryLoading}
                 error={queryError}
+                visualizationConfig={currentQuery.visualization_config}
+                onVisualizationConfigChange={(config) => {
+                  setCurrentQuery({
+                    ...currentQuery,
+                    visualization_config: config,
+                  });
+                }}
               />
             </ResizablePanel>
           </ResizablePanelGroup>

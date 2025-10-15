@@ -8911,6 +8911,40 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"VisualizationConfig": {
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"line",
+							"bar",
+							"area"
+						]
+					},
+					"xAxis": {
+						"type": "string"
+					},
+					"yAxis": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"colors": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"type",
+					"xAxis",
+					"yAxis"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"HqlSavedQuery": {
 				"properties": {
 					"id": {
@@ -8924,6 +8958,9 @@
 					},
 					"sql": {
 						"type": "string"
+					},
+					"visualization_config": {
+						"$ref": "#/components/schemas/VisualizationConfig"
 					},
 					"created_at": {
 						"type": "string"
@@ -9094,6 +9131,9 @@
 					},
 					"sql": {
 						"type": "string"
+					},
+					"visualization_config": {
+						"$ref": "#/components/schemas/VisualizationConfig"
 					}
 				},
 				"required": [
@@ -57261,6 +57301,7 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"visualization_config": {},
 									"sql": {
 										"type": "string"
 									},
@@ -57319,6 +57360,7 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"visualization_config": {},
 									"sql": {
 										"type": "string"
 									},

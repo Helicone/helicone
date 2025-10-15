@@ -3001,6 +3001,17 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "VisualizationConfig": {
+        "dataType": "refObject",
+        "properties": {
+            "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["line"]},{"dataType":"enum","enums":["bar"]},{"dataType":"enum","enums":["area"]}],"required":true},
+            "xAxis": {"dataType":"string","required":true},
+            "yAxis": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "colors": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "HqlSavedQuery": {
         "dataType": "refObject",
         "properties": {
@@ -3008,6 +3019,7 @@ const models: TsoaRoute.Models = {
             "organization_id": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
             "sql": {"dataType":"string","required":true},
+            "visualization_config": {"ref":"VisualizationConfig"},
             "created_at": {"dataType":"string","required":true},
             "updated_at": {"dataType":"string","required":true},
         },
@@ -3083,6 +3095,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string","required":true},
             "sql": {"dataType":"string","required":true},
+            "visualization_config": {"ref":"VisualizationConfig"},
         },
         "additionalProperties": false,
     },

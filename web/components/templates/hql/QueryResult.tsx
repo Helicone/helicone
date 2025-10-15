@@ -31,8 +31,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { LuDownload } from "react-icons/lu";
+import { Table as TableIcon, LineChart as LineChartIcon } from "lucide-react";
 import { clsx } from "@/components/shared/clsx";
 import { useMutation } from "@tanstack/react-query";
 import { $JAWN_API } from "@/lib/clients/jawn";
@@ -40,6 +42,8 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import useNotification from "@/components/shared/notification/useNotification";
 import { CircleCheckBig, CircleDashed } from "lucide-react";
 import { HqlErrorDisplay } from "./HqlErrorDisplay";
+import { ChartView } from "./ChartView";
+import { ChartConfigModal, VisualizationConfig } from "./ChartConfigModal";
 
 interface QueryResultProps {
   sql: string;
@@ -47,6 +51,8 @@ interface QueryResultProps {
   loading: boolean;
   error: string | null;
   queryStats: components["schemas"]["ExecuteSqlResponse"];
+  visualizationConfig?: VisualizationConfig;
+  onVisualizationConfigChange?: (config: VisualizationConfig | undefined) => void;
 }
 function QueryResult({
   sql,
@@ -54,7 +60,12 @@ function QueryResult({
   loading,
   error,
   queryStats,
+  visualizationConfig,
+  onVisualizationConfigChange,
 }: QueryResultProps) {
+  const [viewMode, setViewMode] = useState<"table" | "chart">("table");
+  const [chartConfigOpen, setChartConfigOpen] = useState(false);
+
   const columnKeys = useMemo(() => {
     if (!result || result.length === 0) {
       return [];
@@ -113,7 +124,7 @@ function QueryResult({
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       <StatusBar
         elapsedMilliseconds={queryStats.elapsedMilliseconds}
         rowCount={queryStats.rowCount}
@@ -121,39 +132,67 @@ function QueryResult({
         rows={result}
         sql={sql}
         queryLoading={loading}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        onOpenChartConfig={() => setChartConfigOpen(true)}
       />
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                </TableHead>
+      <ChartConfigModal
+        open={chartConfigOpen}
+        onOpenChange={setChartConfigOpen}
+        columns={columnKeys}
+        data={result}
+        config={visualizationConfig}
+        onConfigChange={onVisualizationConfigChange || (() => {})}
+      />
+      {viewMode === "table" ? (
+        <div className="overflow-auto">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  ))}
+                </TableRow>
               ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              data-state={row.getIsSelected() && "selected"}
-            >
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
               ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+            </TableBody>
+          </Table>
+        </div>
+      ) : visualizationConfig ? (
+        <ChartView data={result} config={visualizationConfig} />
+      ) : (
+        <div className="flex h-full items-center justify-center p-8 text-center">
+          <div className="flex flex-col gap-2">
+            <p className="text-muted-foreground">
+              Click the ⋯ button above to configure your chart
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Select a chart type, X-axis, and Y-axis to visualize your data
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -162,29 +201,71 @@ const StatusBar = ({
   elapsedMilliseconds,
   rowCount,
   size,
+  rows,
   sql,
   queryLoading,
+  viewMode,
+  setViewMode,
+  onOpenChartConfig,
 }: components["schemas"]["ExecuteSqlResponse"] & {
   sql: string;
   queryLoading: boolean;
+  viewMode: "table" | "chart";
+  setViewMode: (mode: "table" | "chart") => void;
+  onOpenChartConfig: () => void;
 }) => {
   return (
-    <div className="flex items-center justify-between border-b border-tremor-brand-subtle bg-background px-4 py-1">
-      <div className="flex items-center gap-6 text-xs text-muted-foreground">
-        <span className="flex items-center">
-          {queryLoading ? (
-            <CircleDashed className="mr-2 h-5 w-5 animate-spin text-muted-foreground" />
-          ) : (
-            <CircleCheckBig className="mr-2 h-5 w-5 text-green-500" />
+    <div className="flex flex-col border-b border-tremor-brand-subtle bg-background">
+      <div className="flex items-center justify-between px-4 py-1">
+        <div className="flex items-center gap-6 text-xs text-muted-foreground">
+          <span className="flex items-center">
+            {queryLoading ? (
+              <CircleDashed className="mr-2 h-5 w-5 animate-spin text-muted-foreground" />
+            ) : (
+              <CircleCheckBig className="mr-2 h-5 w-5 text-green-500" />
+            )}
+            Elapsed: {queryLoading ? "?" : elapsedMilliseconds} ms
+          </span>
+          <span>
+            Read: {queryLoading ? "?" : rowCount} rows (
+            {queryLoading ? "?" : size} bytes)
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {!queryLoading && (
+            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "table" | "chart")}>
+              <TabsList className="h-8">
+                <TabsTrigger value="table" className="h-7 gap-1.5 text-xs">
+                  <TableIcon size={14} />
+                  Table
+                </TabsTrigger>
+                <TabsTrigger value="chart" className="h-7 gap-1.5 text-xs">
+                  <LineChartIcon size={14} />
+                  Chart
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           )}
-          Elapsed: {queryLoading ? "?" : elapsedMilliseconds} ms
-        </span>
-        <span>
-          Read: {queryLoading ? "?" : rowCount} rows (
-          {queryLoading ? "?" : size} bytes)
-        </span>
+          {!queryLoading && viewMode === "chart" && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="none"
+                    size="none"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center text-slate-700 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800"
+                    onClick={onOpenChartConfig}
+                  >
+                    <span className="text-lg font-bold">⋯</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Chart settings</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {!queryLoading && <ExportButton sql={sql} />}
+        </div>
       </div>
-      {!queryLoading && <ExportButton sql={sql} />}
     </div>
   );
 };

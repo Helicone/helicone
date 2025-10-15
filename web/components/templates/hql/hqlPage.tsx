@@ -54,10 +54,12 @@ function HQLPage() {
     id: string | undefined;
     name: string;
     sql: string;
+    visualization_config?: any;
   }>({
     id: undefined,
     name: "Untitled query",
     sql: "select * from request_response_rmt",
+    visualization_config: undefined,
   });
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
@@ -135,6 +137,7 @@ function HQLPage() {
         id: savedQueryDetails.data.id,
         name: savedQueryDetails.data.name,
         sql: savedQueryDetails.data.sql,
+        visualization_config: savedQueryDetails.data.visualization_config,
       });
 
       if (editorRef.current) {
@@ -356,9 +359,8 @@ function HQLPage() {
               handleSaveQuery={handleSaveQuery}
               handleRenameQuery={(newName) => {
                 setCurrentQuery({
-                  id: currentQuery.id,
+                  ...currentQuery,
                   name: newName,
-                  sql: currentQuery.sql,
                 });
               }}
             />
@@ -465,8 +467,7 @@ function HQLPage() {
                 }}
                 onChange={(value) => {
                   setCurrentQuery({
-                    id: currentQuery.id,
-                    name: currentQuery.name,
+                    ...currentQuery,
                     sql: value ?? "",
                   });
                   if (value) {
@@ -535,6 +536,13 @@ function HQLPage() {
               }}
               loading={queryLoading}
               error={queryError}
+              visualizationConfig={currentQuery.visualization_config}
+              onVisualizationConfigChange={(config) => {
+                setCurrentQuery({
+                  ...currentQuery,
+                  visualization_config: config,
+                });
+              }}
             />
           </ResizablePanel>
         </ResizablePanelGroup>

@@ -2700,6 +2700,17 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "VisualizationConfig": {
+        "dataType": "refObject",
+        "properties": {
+            "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["line"]},{"dataType":"enum","enums":["bar"]},{"dataType":"enum","enums":["area"]}],"required":true},
+            "xAxis": {"dataType":"string","required":true},
+            "yAxis": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "colors": {"dataType":"array","array":{"dataType":"string"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "HqlSavedQuery": {
         "dataType": "refObject",
         "properties": {
@@ -2707,6 +2718,7 @@ const models: TsoaRoute.Models = {
             "organization_id": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
             "sql": {"dataType":"string","required":true},
+            "visualization_config": {"ref":"VisualizationConfig"},
             "created_at": {"dataType":"string","required":true},
             "updated_at": {"dataType":"string","required":true},
         },
@@ -2782,6 +2794,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string","required":true},
             "sql": {"dataType":"string","required":true},
+            "visualization_config": {"ref":"VisualizationConfig"},
         },
         "additionalProperties": false,
     },
@@ -20998,7 +21011,7 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAdminController_createAdminSavedQuery: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"sql":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"visualization_config":{"dataType":"any"},"sql":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
         };
         app.post('/v1/admin/saved-query',
             authenticateMiddleware([{"api_key":[]}]),
@@ -21031,7 +21044,7 @@ export function RegisterRoutes(app: Router) {
         const argsAdminController_updateAdminSavedQuery: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 queryId: {"in":"path","name":"queryId","required":true,"dataType":"string"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"sql":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"visualization_config":{"dataType":"any"},"sql":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
         };
         app.patch('/v1/admin/saved-query/:queryId',
             authenticateMiddleware([{"api_key":[]}]),

@@ -46,15 +46,24 @@ export interface ExecuteSqlRequest {
   sql: string;
 }
 
+export interface VisualizationConfig {
+  type: "line" | "bar" | "area";
+  xAxis: string;
+  yAxis: string[];
+  colors?: string[];
+}
+
 export interface CreateSavedQueryRequest {
   name: string;
   sql: string;
+  visualization_config?: VisualizationConfig;
 }
 
 export interface UpdateSavedQueryRequest {
   id: string;
   name: string;
   sql: string;
+  visualization_config?: VisualizationConfig;
 }
 
 export interface BulkDeleteSavedQueriesRequest {
@@ -66,6 +75,7 @@ export interface HqlSavedQuery {
   organization_id: string;
   name: string;
   sql: string;
+  visualization_config?: VisualizationConfig;
   created_at: string;
   updated_at: string;
 }

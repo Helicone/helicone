@@ -3,18 +3,21 @@ import { Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import type { VisualizationConfig } from "@/lib/clients/jawnTypes/private";
 
 interface TopBarProps {
   currentQuery: {
     id?: string;
     name: string;
     sql: string;
+    visualization_config?: VisualizationConfig;
   };
   handleExecuteQuery: (sql: string) => void;
   handleSaveQuery: (savedQuery: {
     id?: string;
     name: string;
     sql: string;
+    visualization_config?: VisualizationConfig;
   }) => void;
   handleRenameQuery: (newName: string) => void;
 }
@@ -68,6 +71,7 @@ export default function TopBar({
                 id: currentQuery.id,
                 name: currentQuery.name,
                 sql: currentQuery.sql,
+                visualization_config: currentQuery.visualization_config,
               });
             }}
           >

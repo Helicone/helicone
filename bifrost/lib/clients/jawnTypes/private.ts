@@ -3293,11 +3293,19 @@ Json: JsonObject;
     ExecuteSqlRequest: {
       sql: string;
     };
+    VisualizationConfig: {
+      /** @enum {string} */
+      type: "line" | "bar" | "area";
+      xAxis: string;
+      yAxis: string[];
+      colors?: string[];
+    };
     HqlSavedQuery: {
       id: string;
       organization_id: string;
       name: string;
       sql: string;
+      visualization_config?: components["schemas"]["VisualizationConfig"];
       created_at: string;
       updated_at: string;
     };
@@ -3331,6 +3339,7 @@ Json: JsonObject;
     CreateSavedQueryRequest: {
       name: string;
       sql: string;
+      visualization_config?: components["schemas"]["VisualizationConfig"];
     };
     ResultSuccess_HqlSavedQuery_: {
       data: components["schemas"]["HqlSavedQuery"];
@@ -19646,6 +19655,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          visualization_config?: unknown;
           sql: string;
           name: string;
         };
@@ -19686,6 +19696,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          visualization_config?: unknown;
           sql: string;
           name: string;
         };

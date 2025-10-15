@@ -1675,7 +1675,7 @@ export class AdminController extends Controller {
   @Post("/saved-query")
   public async createAdminSavedQuery(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: { name: string; sql: string }
+    @Body() body: { name: string; sql: string; visualization_config?: any }
   ): Promise<Result<HqlSavedQuery[], string>> {
     await authCheckThrow(request.authParams.userId);
 
@@ -1698,7 +1698,7 @@ export class AdminController extends Controller {
   public async updateAdminSavedQuery(
     @Request() request: JawnAuthenticatedRequest,
     @Path() queryId: string,
-    @Body() body: { name: string; sql: string }
+    @Body() body: { name: string; sql: string; visualization_config?: any }
   ): Promise<Result<HqlSavedQuery, string>> {
     await authCheckThrow(request.authParams.userId);
 

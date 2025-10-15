@@ -14,10 +14,10 @@ export class HqlQueryManager {
   async getSavedQueries(): Promise<Result<Array<HqlSavedQuery>, HqlError>> {
     try {
       const result = await dbExecute<HqlSavedQuery>(
-        "SELECT * FROM saved_queries WHERE organization_id = $1",
+        "SELECT id, name, sql, organization_id, visualization_config, created_at, updated_at FROM saved_queries WHERE organization_id = $1",
         [this.authParams.organizationId]
       );
-      
+
       if (isError(result)) {
         return hqlError(
           HqlErrorCode.UNEXPECTED_ERROR,
@@ -41,13 +41,13 @@ export class HqlQueryManager {
     if (!id) {
       return hqlError(HqlErrorCode.MISSING_QUERY_ID);
     }
-    
+
     try {
       const result = await dbExecute<HqlSavedQuery>(
-        "SELECT * FROM saved_queries WHERE id = $1 AND organization_id = $2",
+        "SELECT id, name, sql, organization_id, visualization_config, created_at, updated_at FROM saved_queries WHERE id = $1 AND organization_id = $2",
         [id, this.authParams.organizationId]
       );
-      
+
       if (isError(result)) {
         return hqlError(
           HqlErrorCode.UNEXPECTED_ERROR,
@@ -62,7 +62,7 @@ export class HqlQueryManager {
           `Query ID: ${id}`
         );
       }
-      
+
       return ok(query);
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : String(e);
@@ -86,13 +86,18 @@ export class HqlQueryManager {
     if (requestBody.name.trim().length > 255) {
       return hqlError(HqlErrorCode.QUERY_NAME_TOO_LONG);
     }
-    
+
     try {
       const result = await dbExecute<HqlSavedQuery>(
-        "INSERT INTO saved_queries (name, sql, organization_id) VALUES ($1, $2, $3) RETURNING id, name, sql, organization_id, created_at, updated_at",
-        [requestBody.name.trim(), requestBody.sql.trim(), this.authParams.organizationId]
+        "INSERT INTO saved_queries (name, sql, organization_id, visualization_config) VALUES ($1, $2, $3, $4) RETURNING id, name, sql, organization_id, visualization_config, created_at, updated_at",
+        [
+          requestBody.name.trim(),
+          requestBody.sql.trim(),
+          this.authParams.organizationId,
+          requestBody.visualization_config ? JSON.stringify(requestBody.visualization_config) : null
+        ]
       );
-      
+
       if (isError(result)) {
         const errorCode = parseDatabaseError(result.error);
         return hqlError(errorCode, result.error);
@@ -124,23 +129,24 @@ export class HqlQueryManager {
     if (requestBody.name.trim().length > 255) {
       return hqlError(HqlErrorCode.QUERY_NAME_TOO_LONG);
     }
-    
+
     try {
       const result = await dbExecute<HqlSavedQuery>(
-        "UPDATE saved_queries SET name = $1, sql = $2, updated_at = NOW() WHERE id = $3 and organization_id = $4 RETURNING id, name, sql, organization_id, created_at, updated_at",
+        "UPDATE saved_queries SET name = $1, sql = $2, visualization_config = $3, updated_at = NOW() WHERE id = $4 and organization_id = $5 RETURNING id, name, sql, organization_id, visualization_config, created_at, updated_at",
         [
           requestBody.name.trim(),
           requestBody.sql.trim(),
+          requestBody.visualization_config ? JSON.stringify(requestBody.visualization_config) : null,
           requestBody.id,
           this.authParams.organizationId,
         ]
       );
-      
+
       if (isError(result)) {
         const errorCode = parseDatabaseError(result.error);
         return hqlError(errorCode, result.error);
       }
-      
+
       if (!result.data || result.data.length === 0) {
         return hqlError(
           HqlErrorCode.QUERY_NOT_FOUND,
