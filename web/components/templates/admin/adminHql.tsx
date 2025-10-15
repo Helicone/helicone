@@ -50,6 +50,23 @@ function AdminHql() {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [activeTab, setActiveTab] = useState<"tables" | "queries">("tables");
 
+  // Load panel sizes from localStorage
+  const [sidebarSize, setSidebarSize] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("admin-hql-sidebar-size");
+      return saved ? parseFloat(saved) : 25;
+    }
+    return 25;
+  });
+
+  const [editorSize, setEditorSize] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("admin-hql-editor-size");
+      return saved ? parseFloat(saved) : 75;
+    }
+    return 75;
+  });
+
   const [result, setResult] = useState<
     components["schemas"]["ExecuteSqlResponse"]
   >({
@@ -64,7 +81,7 @@ function AdminHql() {
     sql: string;
   }>({
     id: undefined,
-    name: "AI Gateway Candidates",
+    name: "Untitled Query",
     sql: DEFAULT_QUERY,
   });
   const [queryLoading, setQueryLoading] = useState(false);
@@ -324,19 +341,18 @@ function AdminHql() {
 
   return (
     <div className="flex h-screen w-full flex-col">
-      <div className="border-b border-border bg-muted px-4 py-2">
-        <Alert variant="default" className="border-primary/50 bg-primary/5">
-          <AlertTitle className="text-sm font-medium">
-            💡 Auto-enriched with Organization Details
-          </AlertTitle>
-          <AlertDescription className="text-sm">
-            Query results automatically include <code className="rounded bg-muted px-1">org_name</code>, <code className="rounded bg-muted px-1">owner_email</code>, <code className="rounded bg-muted px-1">tier</code>, and <code className="rounded bg-muted px-1">stripe_customer_id</code> from your organization data.
-          </AlertDescription>
-        </Alert>
-      </div>
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="flex-1"
+        onLayout={(sizes) => {
+          if (sizes[0] !== undefined) {
+            setSidebarSize(sizes[0]);
+            localStorage.setItem("admin-hql-sidebar-size", sizes[0].toString());
+          }
+        }}
+      >
         <ResizablePanel
-          defaultSize={25}
+          defaultSize={sidebarSize}
           minSize={18}
           maxSize={40}
           collapsible={true}
@@ -351,10 +367,18 @@ function AdminHql() {
           />
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={80}>
-          <ResizablePanelGroup direction="vertical">
+        <ResizablePanel defaultSize={100 - sidebarSize}>
+          <ResizablePanelGroup
+            direction="vertical"
+            onLayout={(sizes) => {
+              if (sizes[0] !== undefined) {
+                setEditorSize(sizes[0]);
+                localStorage.setItem("admin-hql-editor-size", sizes[0].toString());
+              }
+            }}
+          >
             <ResizablePanel
-              defaultSize={75}
+              defaultSize={editorSize}
               minSize={20}
               collapsible={false}
               className="flex min-h-[64px] flex-col"
@@ -375,7 +399,9 @@ function AdminHql() {
                 <Editor
                   defaultLanguage="sql"
                   defaultValue={currentQuery.sql}
-                  theme={currentTheme === "dark" ? "custom-dark" : "custom-light"}
+                  theme={
+                    currentTheme === "dark" ? "custom-dark" : "custom-light"
+                  }
                   options={{
                     minimap: {
                       enabled: true,
@@ -492,7 +518,7 @@ function AdminHql() {
               className="max-h-full max-w-full overflow-x-scroll !overflow-y-scroll"
               collapsible={true}
               collapsedSize={10}
-              defaultSize={25}
+              defaultSize={100 - editorSize}
             >
               {result.rowCount >= 100 && (
                 <Alert variant="warning" className="mb-2">
@@ -514,6 +540,7 @@ function AdminHql() {
                 }}
                 loading={queryLoading}
                 error={queryError}
+                enableAdminLinks={true}
               />
             </ResizablePanel>
           </ResizablePanelGroup>
