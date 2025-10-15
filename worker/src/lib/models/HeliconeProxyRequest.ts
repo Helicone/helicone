@@ -246,7 +246,39 @@ export class HeliconeProxyRequestMapper {
       return;
     }
 
-    const tokenLimit = getModelTokenLimit(this.provider, primaryModel);
+    const modelContextLimit = getModelTokenLimit(this.provider, primaryModel);
+
+    // Extract requested completion/output limit directly here (provider-agnostic best-effort)
+    const anyBody = parsedBody as any;
+    const completionCandidates: Array<unknown> = [
+      anyBody?.max_completion_tokens,
+      anyBody?.max_tokens,
+      anyBody?.max_output_tokens,
+      anyBody?.maxOutputTokens,
+      anyBody?.response?.max_tokens,
+      anyBody?.response?.max_output_tokens,
+      anyBody?.response?.maxOutputTokens,
+      anyBody?.generation_config?.max_output_tokens,
+      anyBody?.generation_config?.maxOutputTokens,
+      anyBody?.generationConfig?.max_output_tokens,
+      anyBody?.generationConfig?.maxOutputTokens,
+    ];
+    const requestedCompletionTokens = (() => {
+      for (const val of completionCandidates) {
+        if (typeof val === "number" && Number.isFinite(val) && val > 0) {
+          return Math.floor(val);
+        }
+      }
+      return 0;
+    })();
+    const tokenLimit =
+      modelContextLimit === null
+        ? null
+        : Math.max(
+            0,
+            modelContextLimit -
+              (requestedCompletionTokens || modelContextLimit * 0.1)
+          );
 
     if (
       estimatedTokens === null ||
@@ -259,6 +291,7 @@ export class HeliconeProxyRequestMapper {
     console.log("primaryModel", primaryModel);
     console.log("estimatedTokens", estimatedTokens);
     console.log("tokenLimit", tokenLimit);
+    console.log("requestedCompletionTokens", requestedCompletionTokens ?? 0);
 
     switch (handler) {
       case HeliconeTokenLimitExceptionHandler.Truncate:

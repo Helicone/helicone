@@ -91,7 +91,9 @@ export function middleOutMessagesToFitLimit<T extends LLMMessage>(
 
   const DEFAULT_CHUNK_SIZE = 1000;
   const DEFAULT_CHUNK_OVERLAP = 0;
-  const DEFAULT_SEPARATORS = ["\n\n", "\n", ".", " ", ""];
+  // Important: avoid char-level splitting (""), which explodes chunk counts
+  // and severely hurts performance for large inputs. Keep word/line separators only.
+  const DEFAULT_SEPARATORS = ["\n\n", "\n", ".", " "];
 
   function splitTextRecursive(
     text: string,
@@ -103,9 +105,9 @@ export function middleOutMessagesToFitLimit<T extends LLMMessage>(
     if (text.length <= chunkSize) return [text];
 
     let chosenSep = separators.find((s) => s !== "" && text.includes(s));
-    if (chosenSep === undefined) chosenSep = "";
+    if (chosenSep === undefined) chosenSep = separators[separators.length - 1] ?? " ";
 
-    const splits = chosenSep === "" ? text.split("") : text.split(chosenSep);
+    const splits = text.split(chosenSep);
     const chunks: string[] = [];
     const joiner = chosenSep;
 
@@ -240,38 +242,161 @@ export function middleOutMessagesToFitLimit<T extends LLMMessage>(
     });
   }
 
+  // Compute a per-chunk weight once using a simple proportional heuristic
+  // derived from a single full estimate call.
   const baseTokens = estimateTokens([]) ?? 0;
-  const kept = new Set<number>(chunks.map((_, i) => i));
+  // Total content characters across all chunks
+  const totalChars = chunks.reduce((acc, c) => acc + c.content.length, 0);
+  // Approximate total tokens if we kept everything (one estimate call on full content)
+  const allKept = new Set<number>(chunks.map((_, i) => i));
+  const fullEstimate = estimateTokens(buildMessagesFromKept(allKept));
 
-  let currentEstimate = estimateTokens(buildMessagesFromKept(kept));
-  if (currentEstimate === null || currentEstimate <= maxTokens) {
-    return buildMessagesFromKept(kept);
+  // If estimation failed, fall back to current messages (no trimming)
+  if (fullEstimate === null) {
+    return buildMessagesFromKept(allKept);
   }
 
-  while (
-    kept.size > 0 &&
-    (currentEstimate ?? Number.MAX_SAFE_INTEGER) > maxTokens
-  ) {
-    const keptIndexes = Array.from(kept).sort((a, b) => a - b);
-    const mid = keptIndexes[Math.floor(keptIndexes.length / 2)];
+  // If already within budget, return original
+  if (fullEstimate <= maxTokens) {
+    return buildMessagesFromKept(allKept);
+  }
 
-    const onlyChunkTokens =
-      (estimateTokens(buildMessagesWithOnlyChunk(mid)) ?? baseTokens) -
-      baseTokens;
+  const budgetForChunks = Math.max(0, maxTokens - baseTokens);
+  const contentTokens = Math.max(0, fullEstimate - baseTokens);
+  const tokensPerChar = totalChars > 0 ? contentTokens / totalChars : 0;
 
-    kept.delete(mid);
-
-    if (currentEstimate !== null) {
-      currentEstimate = Math.max(
-        baseTokens,
-        currentEstimate - Math.max(0, onlyChunkTokens)
-      );
-    } else {
-      currentEstimate = estimateTokens(buildMessagesFromKept(kept));
+  // Build weights for each chunk once
+  const weights = chunks.map((c) => {
+    const raw = Math.floor(tokensPerChar * c.content.length);
+    // Ensure non-empty chunks have at least weight 1 when there is content budget
+    if (contentTokens > 0 && c.content.length > 0) {
+      return Math.max(1, raw);
     }
+    return Math.max(0, raw);
+  });
 
-    if (kept.size % 8 === 0) {
-      currentEstimate = estimateTokens(buildMessagesFromKept(kept));
+  // Early fallback: if budget can't even cover any content tokens, keep nothing from content
+  if (budgetForChunks <= 0 || contentTokens <= 0 || totalChars === 0) {
+    const keptNone = new Set<number>();
+    const finalNone = buildMessagesFromKept(keptNone).filter((m) => {
+      if (typeof (m as any)?.content === "string") {
+        return ((m as any).content as string).length > 0;
+      }
+      return true;
+    });
+    return finalNone as T[];
+  }
+
+  // Prefix and suffix sums
+  const n = weights.length;
+  const prefix: number[] = new Array(n + 1).fill(0);
+  for (let i = 0; i < n; i++) prefix[i + 1] = prefix[i] + weights[i];
+  const suffix: number[] = new Array(n + 1).fill(0);
+  for (let i = n - 1; i >= 0; i--) suffix[i] = suffix[i + 1] + weights[i];
+
+  // Identify last string message and its chunk span
+  let lastStringMessageIndex: number | null = null;
+  for (let mi = original.length - 1; mi >= 0; mi--) {
+    const m = original[mi];
+    if (typeof m?.content === "string" && m.content.length > 0) {
+      lastStringMessageIndex = mi;
+      break;
+    }
+  }
+  let lastStart = n;
+  let lastEnd = n;
+  if (lastStringMessageIndex !== null) {
+    for (let idx = 0; idx < n; idx++) {
+      if (chunks[idx].messageIndex === lastStringMessageIndex) {
+        lastStart = idx;
+        break;
+      }
+    }
+    for (let idx = n - 1; idx >= 0; idx--) {
+      if (chunks[idx].messageIndex === lastStringMessageIndex) {
+        lastEnd = idx + 1;
+        break;
+      }
+    }
+  }
+
+  const kept = new Set<number>();
+
+  // If we can, reserve the entire last message to avoid dropping it.
+  const lastWeight = lastStart < lastEnd ? suffix[lastStart] - suffix[lastEnd] : 0;
+  if (lastWeight > 0 && budgetForChunks >= lastWeight) {
+    for (let k = lastStart; k < lastEnd; k++) kept.add(k);
+    const remainingBudget = budgetForChunks - lastWeight;
+
+    // Choose best prefix + suffix from the region before lastStart
+    const preN = lastStart;
+    const prePrefix: number[] = new Array(preN + 1).fill(0);
+    for (let i = 0; i < preN; i++) prePrefix[i + 1] = prePrefix[i] + weights[i];
+    const preSuffix: number[] = new Array(preN + 1).fill(0);
+    for (let i = preN - 1; i >= 0; i--) preSuffix[i] = preSuffix[i + 1] + weights[i];
+
+    let bestI = 0;
+    let bestJ = preN;
+    let bestKept = 0;
+    let j = 0;
+    for (let i = 0; i <= preN; i++) {
+      if (j < i) j = i;
+      while (j <= preN && prePrefix[i] + preSuffix[j] > remainingBudget) j += 1;
+      if (j > preN) break;
+      const keptTokens = prePrefix[i] + preSuffix[j];
+      if (keptTokens > bestKept) {
+        bestKept = keptTokens;
+        bestI = i;
+        bestJ = j;
+      }
+    }
+    for (let k = 0; k < bestI; k++) kept.add(k);
+    for (let k = bestJ; k < preN; k++) kept.add(k);
+  } else {
+    // Otherwise, keep the largest possible tail of the last message within budget
+    if (lastStart < lastEnd) {
+      let bestJ = lastEnd;
+      let bestTail = 0;
+      for (let j = lastStart; j <= lastEnd; j++) {
+        const tail = suffix[j] - suffix[lastEnd];
+        if (tail <= budgetForChunks && tail >= bestTail) {
+          bestTail = tail;
+          bestJ = j;
+        }
+      }
+      for (let k = bestJ; k < lastEnd; k++) kept.add(k);
+      // Try to add from the very start with any remaining budget, greedily.
+      const remaining = Math.max(0, budgetForChunks - bestTail);
+      if (remaining > 0) {
+        let used = 0;
+        for (let k = 0; k < lastStart; k++) {
+          if (used + weights[k] <= remaining) {
+            kept.add(k);
+            used += weights[k];
+          } else {
+            break;
+          }
+        }
+      }
+    } else {
+      // No identifiable last message; fallback to generic two-pointer on all chunks
+      let bestI = 0;
+      let bestJ = n;
+      let bestKept = 0;
+      let j = 0;
+      for (let i = 0; i <= n; i++) {
+        if (j < i) j = i;
+        while (j <= n && prefix[i] + suffix[j] > budgetForChunks) j += 1;
+        if (j > n) break;
+        const keptTokens = prefix[i] + suffix[j];
+        if (keptTokens > bestKept) {
+          bestKept = keptTokens;
+          bestI = i;
+          bestJ = j;
+        }
+      }
+      for (let k = 0; k < bestI; k++) kept.add(k);
+      for (let k = bestJ; k < n; k++) kept.add(k);
     }
   }
 
@@ -397,6 +522,12 @@ export function estimateTokenCount(
     return null;
   }
 }
+
+/**
+ * Attempts to read the requested completion/output token limit from the parsed body.
+ * Supports multiple common field names used across providers. Falls back to 0.
+ */
+// Note: completion token extraction is done within HeliconeProxyRequest.applyTokenLimitExceptionHandler
 
 export function getModelTokenLimit(
   provider: Provider,
