@@ -45,6 +45,12 @@
                   "gateway/concepts/prompt-caching",
                   "gateway/web-search"
                 ]
+              },
+              {
+                "group": "Integrations",
+                "pages": [
+                  "gateway/integrations/semantic-kernel"
+                ]
               }
             ]
           },
