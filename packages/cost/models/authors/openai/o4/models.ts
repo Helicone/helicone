@@ -2,7 +2,7 @@ import type { ModelConfig } from "../../../types";
 
 export const models = {
   "o4-mini": {
-    name: "OpenAI: o4 Mini",
+    name: "OpenAI o4 Mini",
     author: "openai",
     description:
       "o4-mini is our latest small o-series model. It's optimized for fast, effective reasoning with exceptionally efficient performance in coding and visual tasks. It's succeeded by GPT-5 mini.",
