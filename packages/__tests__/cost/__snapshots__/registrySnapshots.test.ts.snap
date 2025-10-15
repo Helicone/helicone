@@ -827,6 +827,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "baidu/ernie": {
+    "ernie-4.5-21b-a3b-thinking:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "baidu/ernie-4.5-21B-A3B-Thinking",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "deepseek/deepseek-reasoner": {
     "deepseek-reasoner:deepinfra": {
       "context": 128000,
@@ -3453,6 +3480,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "baidu/ernie": [
+    "novita",
+  ],
   "deepseek/deepseek-reasoner": [
     "deepinfra",
     "deepseek",
@@ -4005,6 +4035,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 0.0000225,
         "threshold": 200000,
         "web_search": 0.00001,
+      },
+    ],
+  },
+  "baidu/ernie": {
+    "novita": [
+      {
+        "input": 7e-8,
+        "output": 2.8e-7,
+        "threshold": 0,
       },
     ],
   },
@@ -4653,6 +4692,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "ernie-4.5-21b-a3b-thinking",
+      "providers": [
+        "novita",
+      ],
+    },
+    {
       "model": "gemini-2.5-flash",
       "providers": [
         "google-ai-studio",
@@ -5027,7 +5072,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 11,
+      "modelCount": 12,
       "provider": "novita",
     },
     {
@@ -5061,6 +5106,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "deepseek-v3",
     "deepseek-v3.1-terminus",
     "deepseek-v3.2",
+    "ernie-4.5-21b-a3b-thinking",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
@@ -5119,9 +5165,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 142,
-  "totalModelProviderConfigs": 142,
-  "totalModelsWithPtb": 61,
+  "totalEndpoints": 143,
+  "totalModelProviderConfigs": 143,
+  "totalModelsWithPtb": 62,
   "totalProviders": 13,
 }
 `;
