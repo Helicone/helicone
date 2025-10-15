@@ -124,7 +124,97 @@ export function middleOutMessagesToFitLimit<T extends LLMMessage>(
   const original: T[] = messages.slice();
 
   // Build chunk list from all string contents, preserving message index and order.
-  const CHUNK_CHAR_SIZE = 512; // heuristic chunk size; balances precision and performance
+  // Use a recursive, separator-aware splitter akin to LangChain's RecursiveCharacterTextSplitter
+  // to prefer breaking on paragraphs/lines/words before characters.
+  const DEFAULT_CHUNK_SIZE = 1000;
+  const DEFAULT_CHUNK_OVERLAP = 0; // avoid overlap to prevent duplication when removing chunks
+  const DEFAULT_SEPARATORS = ["\n\n", "\n", ".", " ", ""]; // paragraph -> line -> sentence -> word -> char
+
+  function splitTextRecursive(
+    text: string,
+    chunkSize: number = DEFAULT_CHUNK_SIZE,
+    chunkOverlap: number = DEFAULT_CHUNK_OVERLAP,
+    separators: string[] = DEFAULT_SEPARATORS
+  ): string[] {
+    if (chunkSize <= 0) return [text];
+    if (text.length <= chunkSize) return [text];
+
+    // choose first separator found in text; fallback to char-level
+    let chosenSep = separators.find((s) => s !== "" && text.includes(s));
+    if (chosenSep === undefined) chosenSep = "";
+
+    const splits = chosenSep === "" ? text.split("") : text.split(chosenSep);
+    const chunks: string[] = [];
+    const joiner = chosenSep;
+
+    let current: string[] = [];
+    let currentLen = 0;
+
+    for (const piece of splits) {
+      const extra = current.length > 0 && joiner ? joiner.length : 0;
+      if (currentLen + extra + piece.length > chunkSize && current.length > 0) {
+        const chunk = current.join(joiner);
+        if (chunk.length > chunkSize) {
+          const nextSeps = separators.slice(
+            Math.max(0, separators.indexOf(chosenSep) + 1)
+          );
+          const subs = splitTextRecursive(
+            chunk,
+            chunkSize,
+            chunkOverlap,
+            nextSeps
+          );
+          chunks.push(...subs);
+        } else {
+          chunks.push(chunk);
+        }
+
+        if (chunkOverlap > 0) {
+          // rebuild current with overlap from the end
+          let remaining = chunkOverlap;
+          const overlapped: string[] = [];
+          for (let i = current.length - 1; i >= 0 && remaining > 0; i--) {
+            const token = current[i];
+            const tokenLen =
+              token.length + (i > 0 && joiner ? joiner.length : 0);
+            overlapped.unshift(token);
+            remaining -= tokenLen;
+          }
+          current = overlapped;
+          currentLen = overlapped.join(joiner).length;
+        } else {
+          current = [];
+          currentLen = 0;
+        }
+      }
+
+      if (piece.length > 0) {
+        if (current.length > 0 && joiner) currentLen += joiner.length;
+        current.push(piece);
+        currentLen += piece.length;
+      }
+    }
+
+    if (current.length > 0) {
+      const chunk = current.join(joiner);
+      if (chunk.length > chunkSize) {
+        const nextSeps = separators.slice(
+          Math.max(0, separators.indexOf(chosenSep) + 1)
+        );
+        const subs = splitTextRecursive(
+          chunk,
+          chunkSize,
+          chunkOverlap,
+          nextSeps
+        );
+        chunks.push(...subs);
+      } else {
+        chunks.push(chunk);
+      }
+    }
+
+    return chunks;
+  }
   const chunks: Chunk[] = [];
   const stringMessageIndexes = new Set<number>();
 
@@ -132,14 +222,9 @@ export function middleOutMessagesToFitLimit<T extends LLMMessage>(
     const m = original[i];
     if (typeof m?.content === "string" && m.content.length > 0) {
       stringMessageIndexes.add(i);
-      const text = m.content;
-      let order = 0;
-      for (let start = 0; start < text.length; start += CHUNK_CHAR_SIZE) {
-        const part = text.slice(
-          start,
-          Math.min(start + CHUNK_CHAR_SIZE, text.length)
-        );
-        chunks.push({ messageIndex: i, order: order++, content: part });
+      const parts = splitTextRecursive(m.content);
+      for (let order = 0; order < parts.length; order++) {
+        chunks.push({ messageIndex: i, order, content: parts[order] });
       }
     }
   }
@@ -760,7 +845,7 @@ export class HeliconeProxyRequestMapper {
       return;
     }
 
-    const tokenLimit = 200; //this.getModelTokenLimit(primaryModel);
+    const tokenLimit = this.getModelTokenLimit(primaryModel);
 
     if (
       estimatedTokens === null ||
@@ -780,13 +865,11 @@ export class HeliconeProxyRequestMapper {
         return this.applyTruncateStrategy(parsedBody);
       case HeliconeTokenLimitExceptionHandler.MiddleOut:
         console.log("[Helicone] token limit exception handler: MiddleOut");
-        const middleoutResponse = this.applyMiddleOutStrategy(
+        return this.applyMiddleOutStrategy(
           parsedBody,
           primaryModel,
           tokenLimit
         );
-        console.log("middleoutResponse", middleoutResponse);
-        return middleoutResponse;
       case HeliconeTokenLimitExceptionHandler.Fallback:
         console.log("[Helicone] token limit exception handler: Fallback");
         return this.applyFallbackStrategy(
