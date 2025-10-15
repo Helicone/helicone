@@ -214,6 +214,19 @@ export class AnthropicToOpenAIStreamConverter {
               );
             }
           }
+        } else if (event.delta.type === "citations_delta") {
+          // Collect citations - will be sent at the end in message_delta
+          const citation = event.delta.citation;
+          this.annotations.push({
+            type: "url_citation",
+            url_citation: {
+              url: citation.url,
+              title: citation.title,
+              content: citation.cited_text,
+              start_index: 0,
+              end_index: this.currentContentLength,
+            },
+          });
         }
         break;
 
@@ -275,7 +288,11 @@ export class AnthropicToOpenAIStreamConverter {
             choices: [
               {
                 index: 0,
-                delta: {},
+                delta: {
+                  ...(this.annotations.length > 0 && {
+                    annotations: this.annotations,
+                  }),
+                },
                 logprobs: null,
                 finish_reason: finishReason,
               },

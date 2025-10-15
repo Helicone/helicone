@@ -7,6 +7,7 @@ import {
   AnthropicWebSearchTool,
   AnthropicToolChoice,
   BaseStreamEvent,
+  WebSearchCitation,
 } from "./common";
 
 // === REQUEST TYPES ===
@@ -76,7 +77,8 @@ export interface ContentBlockDeltaEvent extends BaseStreamEvent {
     | { type: "text_delta"; text: string }
     | { type: "input_json_delta"; partial_json: string }
     | { type: "thinking_delta"; thinking: string }
-    | { type: "signature_delta"; signature: string };
+    | { type: "signature_delta"; signature: string }
+    | { type: "citations_delta"; citation: WebSearchCitation };
 }
 
 export interface ContentBlockStopEvent extends BaseStreamEvent {
