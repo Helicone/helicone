@@ -94,8 +94,6 @@ export class HeliconeProxyRequestMapper {
     this.tokenCalcUrl = env.VALHALLA_URL;
   }
 
-  // helper methods moved to util.ts
-
   private async getHeliconeTemplate() {
     if (this.request.heliconeHeaders.promptHeaders.promptId) {
       try {
@@ -282,8 +280,6 @@ export class HeliconeProxyRequestMapper {
         return;
     }
   }
-
-  // strategies and helpers moved to util.ts
 
   private validateApiConfiguration(api_base: string | undefined): boolean {
     return (
