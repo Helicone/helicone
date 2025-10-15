@@ -21,6 +21,7 @@ import { CopyButton } from "@/components/ui/CopyButton";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { StandardParameter } from "@helicone-package/cost/models/types";
+import { capitalizeModality } from "@/lib/constants/modalities";
 
 type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
 
@@ -312,6 +313,28 @@ completion = client.chat.completions.create(
                 >
                   {isDescriptionExpanded ? "Show less" : "Show more"}
                 </button>
+              )}
+            </div>
+          )}
+
+          {/* Modalities */}
+          {(model.inputModalities?.length > 0 || model.outputModalities?.length > 0) && (
+            <div className="mt-4 flex flex-wrap gap-4 text-sm">
+              {model.inputModalities?.length > 0 && (
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Input: </span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    {model.inputModalities.map(capitalizeModality).join(", ")}
+                  </span>
+                </div>
+              )}
+              {model.outputModalities?.length > 0 && (
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Output: </span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    {model.outputModalities.map(capitalizeModality).join(", ")}
+                  </span>
+                </div>
               )}
             </div>
           )}

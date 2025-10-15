@@ -97,11 +97,15 @@ const QuickstartPage = () => {
 
   const handleCreateKey = async () => {
     try {
+      let isEu = false;
+      if (typeof window !== "undefined") {
+        isEu = window.location.hostname.includes("eu.");
+      }
       setIsCreatingKey(true);
       const { apiKey } = await addKey.mutateAsync({
         permission: "rw",
         keyName: "Quickstart",
-        isEu: false,
+        isEu,
       });
       if (apiKey) {
         setQuickstartKey(apiKey);

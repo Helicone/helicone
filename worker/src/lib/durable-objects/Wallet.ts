@@ -534,6 +534,10 @@ export class Wallet extends DurableObject<Env> {
     actualCost: number
   ): { clickhouseLastCheckedAt: number } {
     const actualCostScaled = actualCost * SCALE_FACTOR;
+    if (actualCostScaled < 0) {
+      throw new Error("actualCost cannot be negative");
+    }
+
     return this.ctx.storage.transactionSync(() => {
       const now = Date.now();
 

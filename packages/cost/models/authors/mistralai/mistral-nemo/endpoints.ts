@@ -21,7 +21,7 @@ export const endpoints = {
     },
     quantization: "fp8",
     contextLength: 128_000,
-    maxCompletionTokens: 16_400,
+    maxCompletionTokens: 16_384,
     supportedParameters: [
       "max_tokens",
       "temperature",

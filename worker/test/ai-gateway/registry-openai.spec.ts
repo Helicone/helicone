@@ -28,6 +28,12 @@ const deepinfraAuthExpectations = {
   },
 };
 
+const novitaAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("OpenAI Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -980,6 +986,23 @@ describe("OpenAI Registry Tests", () => {
           },
         }));
 
+      it("should handle novita provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-20b/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-20b",
+                data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
       it("should auto-select groq provider when none specified", () =>
         runGatewayTest({
           model: "gpt-oss-20b",
@@ -991,6 +1014,143 @@ describe("OpenAI Registry Tests", () => {
                 model: "openai/gpt-oss-20b",
                 data: createOpenAIMockResponse("openai/gpt-oss-20b"),
                 expects: groqAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with novita provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-20b/novita",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-20b",
+                data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle response format with novita provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-20b/novita",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Generate JSON data" }],
+              response_format: { type: "json_object" },
+              temperature: 0.1,
+              top_p: 0.9,
+              frequency_penalty: 0.5,
+              presence_penalty: 0.3,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-20b",
+                data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_object",
+                    "temperature",
+                    "top_p",
+                    "frequency_penalty",
+                    "presence_penalty",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters with novita provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-20b/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test comprehensive parameters" },
+              ],
+              max_tokens: 1000,
+              temperature: 0.8,
+              top_p: 0.95,
+              stop: ["STOP"],
+              frequency_penalty: 0.2,
+              presence_penalty: 0.1,
+              repetition_penalty: 1.1,
+              top_k: 40,
+              seed: 12345,
+              min_p: 0.05,
+              logit_bias: { "100": -100 },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-20b",
+                data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "max_tokens",
+                    "temperature",
+                    "top_p",
+                    "stop",
+                    "frequency_penalty",
+                    "presence_penalty",
+                    "repetition_penalty",
+                    "top_k",
+                    "seed",
+                    "min_p",
+                    "logit_bias",
+                  ],
+                },
               },
             ],
             finalStatus: 200,
@@ -1136,6 +1296,89 @@ describe("OpenAI Registry Tests", () => {
       }));
   });
 
+  // Error scenarios and edge cases for gpt-oss-20b with Novita
+  describe("Error scenarios - gpt-oss-20b with Novita Provider", () => {
+    it("should handle Novita provider failure", () =>
+      runGatewayTest({
+        model: "gpt-oss-20b/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Novita service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Novita", () =>
+      runGatewayTest({
+        model: "gpt-oss-20b/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Novita", () =>
+      runGatewayTest({
+        model: "gpt-oss-20b/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+
+    it("should handle model not found error from Novita", () =>
+      runGatewayTest({
+        model: "gpt-oss-20b/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 404,
+              errorMessage: "Model not found",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle timeout from Novita", () =>
+      runGatewayTest({
+        model: "gpt-oss-20b/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "failure",
+              statusCode: 408,
+              errorMessage: "Request timeout",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+  });
+
   // Provider URL validation and model mapping for gpt-oss with DeepInfra
   describe("Provider validation - gpt-oss-120b with DeepInfra", () => {
     it("should construct correct DeepInfra URL for gpt-oss-120b", () =>
@@ -1242,6 +1485,147 @@ describe("OpenAI Registry Tests", () => {
                   "seed",
                   "min_p",
                   "response_format",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+  // Provider URL validation and model mapping for gpt-oss-20b with Novita
+  describe("Provider validation - gpt-oss-20b with Novita", () => {
+    it("should construct correct Novita URL for gpt-oss-20b", () =>
+      runGatewayTest({
+        model: "gpt-oss-20b/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-20b",
+              data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+              expects: novitaAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://api.novita.ai/
+                // Built URL: https://api.novita.ai/openai/v1/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for Novita", () =>
+      runGatewayTest({
+        model: "gpt-oss-20b/novita",
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-20b", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+              expects: novitaAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for Novita", () =>
+      runGatewayTest({
+        model: "gpt-oss-20b/novita",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-20b",
+              data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+              expects: {
+                ...novitaAuthExpectations,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle structured outputs with Novita", () =>
+      runGatewayTest({
+        model: "gpt-oss-20b/novita",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Generate structured data" },
+            ],
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "user_data",
+                schema: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    age: { type: "number" },
+                  },
+                  required: ["name", "age"],
+                },
+              },
+            },
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-20b",
+              data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+              expects: {
+                ...novitaAuthExpectations,
+                bodyContains: [
+                  "response_format",
+                  "json_schema",
+                  "user_data",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle reasoning parameters with Novita", () =>
+      runGatewayTest({
+        model: "gpt-oss-20b/novita",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Solve this problem step by step" },
+            ],
+            reasoning: { enabled: true },
+            max_tokens: 2000,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.novita.ai/openai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-20b",
+              data: createOpenAIMockResponse("openai/gpt-oss-20b"),
+              expects: {
+                ...novitaAuthExpectations,
+                bodyContains: [
+                  "reasoning",
+                  "max_tokens",
                 ],
               },
             },

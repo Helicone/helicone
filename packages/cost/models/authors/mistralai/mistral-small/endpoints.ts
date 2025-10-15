@@ -20,7 +20,7 @@ export const endpoints = {
       tpd: 6000000000,
     },
     contextLength: 128_000,
-    maxCompletionTokens: 128_000,
+    maxCompletionTokens: 16_384,
     supportedParameters: [
       "max_tokens",
       "temperature",

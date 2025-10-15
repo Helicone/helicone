@@ -7,6 +7,7 @@ import type {
   RequestParams,
   ModelProviderConfig,
   ResponseFormat,
+  PluginId,
 } from "../types";
 import { CacheProvider } from "../../../common/cache/provider";
 
@@ -23,6 +24,9 @@ export abstract class BaseProvider {
     | "service_account";
   abstract readonly pricingPages: string[];
   abstract readonly modelPages: string[];
+
+  // Plugins supported by this provider
+  readonly supportedPlugins: PluginId[] = [];
 
   readonly requiredConfig?: ReadonlyArray<keyof UserEndpointConfig>;
 

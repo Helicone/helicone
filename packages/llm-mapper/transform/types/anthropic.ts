@@ -4,8 +4,10 @@ import {
   AnthropicUsage,
   AnthropicContentBlock,
   AnthropicTool,
+  AnthropicWebSearchTool,
   AnthropicToolChoice,
   BaseStreamEvent,
+  WebSearchCitation,
 } from "./common";
 
 // === REQUEST TYPES ===
@@ -22,7 +24,7 @@ export interface AnthropicRequestBody {
   top_k?: number;
   stop_sequences?: string[];
   stream?: boolean;
-  tools?: AnthropicTool[];
+  tools?: (AnthropicTool | AnthropicWebSearchTool)[];
   tool_choice?: AnthropicToolChoice;
 }
 
@@ -64,7 +66,7 @@ export interface ContentBlockStartEvent extends BaseStreamEvent {
   index: number;
   content_block: Pick<
     AnthropicContentBlock,
-    "type" | "text" | "id" | "name" | "input" | "thinking"
+    "type" | "text" | "id" | "name" | "input" | "thinking" | "citations"
   >;
 }
 
@@ -75,7 +77,8 @@ export interface ContentBlockDeltaEvent extends BaseStreamEvent {
     | { type: "text_delta"; text: string }
     | { type: "input_json_delta"; partial_json: string }
     | { type: "thinking_delta"; thinking: string }
-    | { type: "signature_delta"; signature: string };
+    | { type: "signature_delta"; signature: string }
+    | { type: "citations_delta"; citation: WebSearchCitation };
 }
 
 export interface ContentBlockStopEvent extends BaseStreamEvent {
@@ -123,5 +126,6 @@ export type {
   AnthropicUsage,
   AnthropicContentBlock,
   AnthropicTool,
+  AnthropicWebSearchTool,
   AnthropicToolChoice,
 } from "./common";

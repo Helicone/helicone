@@ -10,6 +10,7 @@ import { errorForwarder } from "../HeliconeProxyRequest/ErrorForwarder";
 import { gatewayForwarder } from "../../routers/gatewayRouter";
 import { AttemptBuilder } from "./AttemptBuilder";
 import { AttemptExecutor } from "./AttemptExecutor";
+import { Plugin } from "@helicone-package/cost/models/types";
 import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
@@ -76,7 +77,7 @@ export class SimpleAIGateway {
     if (isErr(parseResult)) {
       return parseResult.error;
     }
-    const { modelStrings, body: parsedBody } = parseResult.data;
+    const { modelStrings, body: parsedBody, plugins } = parseResult.data;
 
     const requestParams: RequestParams = {
       isStreaming: parsedBody.stream === true,
@@ -99,7 +100,8 @@ export class SimpleAIGateway {
     const attempts = await this.attemptBuilder.buildAttempts(
       modelStrings,
       this.orgId,
-      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping
+      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+      plugins
     );
     if (attempts.length === 0) {
       errors.push({
@@ -203,7 +205,7 @@ export class SimpleAIGateway {
   }
 
   private async parseAndPrepareRequest(): Promise<
-    Result<{ modelStrings: string[]; body: any }, Response>
+    Result<{ modelStrings: string[]; body: any; plugins?: Plugin[] }, Response>
   > {
     // Get raw text body once
     // TODO: change to use safelyGetBody
@@ -241,11 +243,15 @@ export class SimpleAIGateway {
       );
     }
 
+    const plugins = parsedBody.plugins || [];
+
     const modelStrings = parsedBody.model
       .split(",")
       .map((m: string) => m.trim());
 
-    return ok({ modelStrings, body: parsedBody });
+    delete parsedBody.plugins;
+
+    return ok({ modelStrings, body: parsedBody, plugins });
   }
 
   private hasPromptFields(body: any): boolean {

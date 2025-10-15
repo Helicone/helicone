@@ -3254,7 +3254,8 @@
 					"deepinfra",
 					"google-ai-studio",
 					"openrouter",
-					"novita"
+					"novita",
+					"nebius"
 				],
 				"nullable": false
 			},
@@ -3310,6 +3311,35 @@
 					},
 					"start_timestamp": {
 						"type": "string"
+					},
+					"annotations": {
+						"items": {
+							"properties": {
+								"content": {
+									"type": "string"
+								},
+								"title": {
+									"type": "string"
+								},
+								"url": {
+									"type": "string"
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"url_citation"
+									],
+									"nullable": false
+								}
+							},
+							"required": [
+								"title",
+								"url",
+								"type"
+							],
+							"type": "object"
+						},
+						"type": "array"
 					},
 					"reasoning": {
 						"type": "string"
@@ -8123,6 +8153,7 @@
 					"qwen",
 					"moonshotai",
 					"alibaba",
+					"zai",
 					"passthrough"
 				]
 			},
@@ -8157,6 +8188,13 @@
 					"structured_outputs",
 					"verbosity"
 				]
+			},
+			"PluginId": {
+				"type": "string",
+				"enum": [
+					"web"
+				],
+				"nullable": false
 			},
 			"RateLimits": {
 				"properties": {
@@ -8354,6 +8392,12 @@
 					"version": {
 						"type": "string"
 					},
+					"unsupportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					},
 					"providerModelId": {
 						"type": "string"
 					},
@@ -8366,6 +8410,12 @@
 					"supportedParameters": {
 						"items": {
 							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					},
+					"supportedPlugins": {
+						"items": {
+							"$ref": "#/components/schemas/PluginId"
 						},
 						"type": "array"
 					},
@@ -8469,6 +8519,12 @@
 					},
 					"version": {
 						"type": "string"
+					},
+					"unsupportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
 					},
 					"modelConfig": {
 						"$ref": "#/components/schemas/ModelProviderConfig"
@@ -12751,7 +12807,8 @@
 														"deepinfra",
 														"google-ai-studio",
 														"openrouter",
-														"novita"
+														"novita",
+														"nebius"
 													]
 												}
 											},
