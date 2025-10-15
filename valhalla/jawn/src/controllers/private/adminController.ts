@@ -28,9 +28,13 @@ import {
 } from "@helicone-package/cost";
 
 import { err, ok, Result } from "../../packages/common/result";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
-import { ENVIRONMENT } from "../../lib/clients/constant";
 import { InAppThread } from "../../managers/InAppThreadsManager";
+import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
+import { HqlQueryManager } from "../../managers/HqlQueryManager";
+import { HqlSavedQuery } from "../public/heliconeSqlController";
+
+// Admin org ID for shared admin queries
+const ADMIN_ORG_ID = "aff94038-3369-4ce9-957e-562fe5a79862";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -1515,5 +1519,223 @@ export class AdminController extends Controller {
       return err("Thread not found");
     }
     return ok(thread.data?.[0]);
+  }
+
+  @Post("/hql-enriched")
+  public async executeEnrichedHql(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      sql: string;
+      limit?: number;
+    }
+  ): Promise<
+    Result<
+      {
+        rows: Record<string, any>[];
+        elapsedMilliseconds: number;
+        size: number;
+        rowCount: number;
+      },
+      string
+    >
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    const limit = body.limit ?? 100;
+
+    // Execute HQL query using HeliconeSqlManager
+    // Note: We use a dummy org ID since this is admin-only and bypasses org filtering
+    const heliconeSqlManager = new HeliconeSqlManager({
+      organizationId: ADMIN_ORG_ID,
+      userId: request.authParams.userId,
+    });
+
+    const hqlResult = await heliconeSqlManager.executeAdminSql(body.sql, limit);
+
+    if (hqlResult.error) {
+      return err(hqlResult.error.message || String(hqlResult.error));
+    }
+
+    if (!hqlResult.data) {
+      return err("No data returned from query");
+    }
+
+    const { rows, elapsedMilliseconds, size, rowCount } = hqlResult.data;
+
+    // Extract unique organization IDs from results
+    const orgIds = [
+      ...new Set(
+        rows
+          .map((row) => row.organization_id)
+          .filter((id): id is string => typeof id === "string" && id.length > 0)
+      ),
+    ];
+
+    // If no organization IDs found, return results as-is
+    if (orgIds.length === 0) {
+      return ok({
+        rows,
+        elapsedMilliseconds,
+        size,
+        rowCount,
+      });
+    }
+
+    // Fetch organization details from PostgreSQL
+    const orgQuery = `
+      SELECT
+        o.id,
+        o.name,
+        o.tier,
+        o.stripe_customer_id,
+        u.email as owner_email
+      FROM organization o
+      LEFT JOIN auth.users u ON o.owner = u.id
+      WHERE o.id = ANY($1::uuid[])
+    `;
+
+    const orgResult = await dbExecute<{
+      id: string;
+      name: string;
+      tier: string;
+      stripe_customer_id: string | null;
+      owner_email: string;
+    }>(orgQuery, [orgIds]);
+
+    if (orgResult.error) {
+      console.error("Error fetching org details:", orgResult.error);
+      // Return original results if enrichment fails
+      return ok({
+        rows,
+        elapsedMilliseconds,
+        size,
+        rowCount,
+      });
+    }
+
+    // Create a map for fast lookup
+    const orgDetailsMap = new Map(
+      orgResult.data?.map((org) => [org.id, org]) ?? []
+    );
+
+    // Enrich rows with organization details
+    const enrichedRows = rows.map((row) => {
+      const orgId = row.organization_id;
+      if (!orgId || typeof orgId !== "string") {
+        return row;
+      }
+
+      const orgDetails = orgDetailsMap.get(orgId);
+      if (!orgDetails) {
+        return row;
+      }
+
+      return {
+        ...row,
+        org_name: orgDetails.name,
+        owner_email: orgDetails.owner_email,
+        tier: orgDetails.tier,
+        stripe_customer_id: orgDetails.stripe_customer_id,
+      };
+    });
+
+    return ok({
+      rows: enrichedRows,
+      elapsedMilliseconds,
+      size,
+      rowCount,
+    });
+  }
+
+  /**
+   * Get all saved queries for admin (stored under admin org ID)
+   */
+  @Get("/saved-queries")
+  public async getAdminSavedQueries(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<HqlSavedQuery[], string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const hqlQueryManager = new HqlQueryManager({
+      ...request.authParams,
+      organizationId: ADMIN_ORG_ID,
+    });
+
+    const result = await hqlQueryManager.getSavedQueries();
+    if (result.error) {
+      return err(result.error.message || String(result.error));
+    }
+    return ok(result.data);
+  }
+
+  /**
+   * Create a new saved query for admin (stored under admin org ID)
+   */
+  @Post("/saved-query")
+  public async createAdminSavedQuery(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: { name: string; sql: string }
+  ): Promise<Result<HqlSavedQuery[], string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const hqlQueryManager = new HqlQueryManager({
+      ...request.authParams,
+      organizationId: ADMIN_ORG_ID,
+    });
+
+    const result = await hqlQueryManager.createSavedQuery(body);
+    if (result.error) {
+      return err(result.error.message || String(result.error));
+    }
+    return ok(result.data);
+  }
+
+  /**
+   * Update a saved query for admin (stored under admin org ID)
+   */
+  @Patch("/saved-query/{queryId}")
+  public async updateAdminSavedQuery(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() queryId: string,
+    @Body() body: { name: string; sql: string }
+  ): Promise<Result<HqlSavedQuery, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const hqlQueryManager = new HqlQueryManager({
+      ...request.authParams,
+      organizationId: ADMIN_ORG_ID,
+    });
+
+    const result = await hqlQueryManager.updateSavedQuery({
+      id: queryId,
+      ...body,
+    });
+    if (result.error) {
+      return err(result.error.message || String(result.error));
+    }
+    return ok(result.data);
+  }
+
+  /**
+   * Delete a saved query for admin (stored under admin org ID)
+   */
+  @Delete("/saved-query/{queryId}")
+  public async deleteAdminSavedQuery(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() queryId: string
+  ): Promise<Result<null, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const hqlQueryManager = new HqlQueryManager({
+      ...request.authParams,
+      organizationId: ADMIN_ORG_ID,
+    });
+
+    const result = await hqlQueryManager.deleteSavedQuery(queryId);
+    if (result.error) {
+      return err(result.error.message || String(result.error));
+    }
+    return ok(null);
   }
 }

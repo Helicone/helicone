@@ -1798,6 +1798,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-4-scout:deepinfra": {
+      "context": 10000000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-4-scout:groq": {
       "context": 131072,
       "crossRegion": false,
@@ -3500,6 +3527,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "deepinfra",
     "deepinfra",
+    "deepinfra",
     "groq",
     "groq",
     "groq",
@@ -4898,6 +4926,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-4-scout",
       "providers": [
+        "deepinfra",
         "groq",
         "novita",
         "openrouter",
@@ -5023,7 +5052,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 15,
+      "modelCount": 16,
       "provider": "deepinfra",
     },
     {
@@ -5136,8 +5165,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 142,
-  "totalModelProviderConfigs": 142,
+  "totalEndpoints": 143,
+  "totalModelProviderConfigs": 143,
   "totalModelsWithPtb": 62,
   "totalProviders": 13,
 }

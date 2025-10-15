@@ -13,7 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { playgroundModels as PLAYGROUND_MODELS } from "@helicone-package/cost/providers/mappings";
+import { playgroundModels } from "@helicone-package/cost/providers/mappings";
 import { MappedLLMRequest, Tool } from "@helicone-package/llm-mapper/types";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { useState } from "react";
@@ -116,7 +116,7 @@ const PlaygroundHeader = ({
                 <CommandList>
                   <CommandEmpty>No framework found.</CommandEmpty>
                   <CommandGroup>
-                    {PLAYGROUND_MODELS.map((model) => (
+                    {playgroundModels.map((model) => (
                       <CommandItem
                         key={model}
                         value={model}
