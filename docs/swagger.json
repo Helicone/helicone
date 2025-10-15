@@ -3242,20 +3242,21 @@
 				"type": "string",
 				"enum": [
 					"anthropic",
-					"openai",
-					"bedrock",
-					"vertex",
 					"azure",
-					"perplexity",
-					"groq",
-					"deepseek",
+					"bedrock",
+					"chutes",
 					"cohere",
-					"xai",
 					"deepinfra",
+					"deepseek",
 					"google-ai-studio",
-					"openrouter",
+					"groq",
+					"nebius",
 					"novita",
-					"nebius"
+					"openai",
+					"openrouter",
+					"perplexity",
+					"vertex",
+					"xai"
 				],
 				"nullable": false
 			},
@@ -8139,10 +8140,10 @@
 				"type": "string",
 				"enum": [
 					"anthropic",
+					"cohere",
+					"deepseek",
 					"openai",
 					"perplexity",
-					"deepseek",
-					"cohere",
 					"xai",
 					"google",
 					"meta-llama",
@@ -8154,6 +8155,7 @@
 					"moonshotai",
 					"alibaba",
 					"zai",
+					"baidu",
 					"passthrough"
 				]
 			},
@@ -8437,6 +8439,7 @@
 						"enum": [
 							"fp4",
 							"fp8",
+							"fp16",
 							"bf16"
 						]
 					},
@@ -12795,20 +12798,21 @@
 													"type": "string",
 													"enum": [
 														"anthropic",
-														"openai",
-														"bedrock",
-														"vertex",
 														"azure",
-														"perplexity",
-														"groq",
-														"deepseek",
+														"bedrock",
+														"chutes",
 														"cohere",
-														"xai",
 														"deepinfra",
+														"deepseek",
 														"google-ai-studio",
-														"openrouter",
+														"groq",
+														"nebius",
 														"novita",
-														"nebius"
+														"openai",
+														"openrouter",
+														"perplexity",
+														"vertex",
+														"xai"
 													]
 												}
 											},

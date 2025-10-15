@@ -211,7 +211,8 @@ export class AdminController extends Controller {
             'email', u.email,
             'name', u.raw_user_meta_data->>'name',
             'role', om.org_role,
-            'last_sign_in_at', u.last_sign_in_at
+            'last_sign_in_at', u.last_sign_in_at,
+            'created_at', u.created_at
           )
         ) AS members
       FROM organization o
@@ -630,7 +631,8 @@ export class AdminController extends Controller {
             'email', u.email,
             'name', u.raw_user_meta_data->>'name',
             'role', om.org_role,
-            'last_sign_in_at', u.last_sign_in_at
+            'last_sign_in_at', u.last_sign_in_at,
+            'created_at', u.created_at
           )
         ) AS members
       FROM organization o
@@ -823,7 +825,8 @@ export class AdminController extends Controller {
             'email', u.email,
             'name', u.raw_user_meta_data->>'name',
             'role', om.org_role,
-            'last_sign_in_at', u.last_sign_in_at
+            'last_sign_in_at', u.last_sign_in_at,
+            'created_at', u.created_at
           )
         ) AS members
       FROM organization o
@@ -1064,7 +1067,8 @@ export class AdminController extends Controller {
             'email', u.email,
             'name', u.raw_user_meta_data->>'name',
             'role', om.org_role,
-            'last_sign_in_at', u.last_sign_in_at
+            'last_sign_in_at', u.last_sign_in_at,
+            'created_at', u.created_at
           )
         ) AS members
       FROM organization o
