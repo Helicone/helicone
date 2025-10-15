@@ -3995,7 +3995,8 @@
 					"deepinfra",
 					"google-ai-studio",
 					"openrouter",
-					"novita"
+					"novita",
+					"nebius"
 				],
 				"nullable": false
 			},
@@ -4051,6 +4052,35 @@
 					},
 					"start_timestamp": {
 						"type": "string"
+					},
+					"annotations": {
+						"items": {
+							"properties": {
+								"content": {
+									"type": "string"
+								},
+								"title": {
+									"type": "string"
+								},
+								"url": {
+									"type": "string"
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"url_citation"
+									],
+									"nullable": false
+								}
+							},
+							"required": [
+								"title",
+								"url",
+								"type"
+							],
+							"type": "object"
+						},
+						"type": "array"
 					},
 					"reasoning": {
 						"type": "string"
@@ -8721,6 +8751,382 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ClickHouseTableColumn": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"default_type": {
+						"type": "string"
+					},
+					"default_expression": {
+						"type": "string"
+					},
+					"comment": {
+						"type": "string"
+					},
+					"codec_expression": {
+						"type": "string"
+					},
+					"ttl_expression": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ClickHouseTableSchema": {
+				"properties": {
+					"table_name": {
+						"type": "string"
+					},
+					"columns": {
+						"items": {
+							"$ref": "#/components/schemas/ClickHouseTableColumn"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"table_name",
+					"columns"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ClickHouseTableSchema-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ClickHouseTableSchema"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ClickHouseTableSchema-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ClickHouseTableSchema-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ExecuteSqlResponse": {
+				"properties": {
+					"rowCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"size": {
+						"type": "number",
+						"format": "double"
+					},
+					"elapsedMilliseconds": {
+						"type": "number",
+						"format": "double"
+					},
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/Record_string.any_"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"rowCount",
+					"size",
+					"elapsedMilliseconds",
+					"rows"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_ExecuteSqlResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ExecuteSqlResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ExecuteSqlResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ExecuteSqlResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ExecuteSqlRequest": {
+				"properties": {
+					"sql": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"sql"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"HqlSavedQuery": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"organization_id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"sql": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"updated_at": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"organization_id",
+					"name",
+					"sql",
+					"created_at",
+					"updated_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Array_HqlSavedQuery__": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/HqlSavedQuery"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array_HqlSavedQuery_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array_HqlSavedQuery__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_HqlSavedQuery-or-null_": {
+				"properties": {
+					"data": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/HqlSavedQuery"
+							}
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HqlSavedQuery-or-null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HqlSavedQuery-or-null_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_void_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_void.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_void_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"BulkDeleteSavedQueriesRequest": {
+				"properties": {
+					"ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"ids"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_HqlSavedQuery-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/HqlSavedQuery"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HqlSavedQuery-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HqlSavedQuery-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"CreateSavedQueryRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"sql": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"sql"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_HqlSavedQuery_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/HqlSavedQuery"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HqlSavedQuery.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HqlSavedQuery_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -47274,6 +47680,62 @@
 					}
 				]
 			},
+			"ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"rowCount": {
+								"type": "number",
+								"format": "double"
+							},
+							"size": {
+								"type": "number",
+								"format": "double"
+							},
+							"elapsedMilliseconds": {
+								"type": "number",
+								"format": "double"
+							},
+							"rows": {
+								"items": {
+									"$ref": "#/components/schemas/Record_string.any_"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"rowCount",
+							"size",
+							"elapsedMilliseconds",
+							"rows"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"DashboardData": {
 				"properties": {
 					"organizations": {
@@ -48119,7 +48581,8 @@
 														"deepinfra",
 														"google-ai-studio",
 														"openrouter",
-														"novita"
+														"novita",
+														"nebius"
 													]
 												}
 											},
@@ -54717,6 +55180,344 @@
 				"parameters": []
 			}
 		},
+		"/v1/helicone-sql/schema": {
+			"get": {
+				"operationId": "GetClickHouseSchema",
+				"responses": {
+					"200": {
+						"description": "Array of table schemas with columns",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ClickHouseTableSchema-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get ClickHouse schema (tables and columns)",
+				"summary": "Get database schema",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/helicone-sql/execute": {
+			"post": {
+				"operationId": "ExecuteSql",
+				"responses": {
+					"200": {
+						"description": "Query results with rows and metadata",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ExecuteSqlResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Execute a SQL query against ClickHouse",
+				"summary": "Execute SQL query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "The SQL query to execute",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExecuteSqlRequest",
+								"description": "The SQL query to execute"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/helicone-sql/download": {
+			"post": {
+				"operationId": "DownloadCsv",
+				"responses": {
+					"200": {
+						"description": "URL to download the CSV file",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Execute a SQL query and download results as CSV",
+				"summary": "Download query results as CSV",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "The SQL query to execute",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExecuteSqlRequest",
+								"description": "The SQL query to execute"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/helicone-sql/saved-queries": {
+			"get": {
+				"operationId": "GetSavedQueries",
+				"responses": {
+					"200": {
+						"description": "Array of saved queries",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array_HqlSavedQuery_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get all saved queries for the organization",
+				"summary": "List saved queries",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/helicone-sql/saved-query/{queryId}": {
+			"get": {
+				"operationId": "GetSavedQuery",
+				"responses": {
+					"200": {
+						"description": "The saved query details",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery-or-null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a specific saved query by ID",
+				"summary": "Get saved query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the saved query",
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_void.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a saved query by ID",
+				"summary": "Delete saved query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the saved query to delete",
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateSavedQuery",
+				"responses": {
+					"200": {
+						"description": "The updated saved query",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update an existing saved query",
+				"summary": "Update saved query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the saved query to update",
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The updated query details",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSavedQueryRequest",
+								"description": "The updated query details"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/helicone-sql/saved-queries/bulk-delete": {
+			"post": {
+				"operationId": "BulkDeleteSavedQueries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_void.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete multiple saved queries at once",
+				"summary": "Bulk delete saved queries",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Array of query IDs to delete",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BulkDeleteSavedQueriesRequest",
+								"description": "Array of query IDs to delete"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/helicone-sql/saved-query": {
+			"post": {
+				"operationId": "CreateSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Array containing the created saved query",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new saved query",
+				"summary": "Create saved query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "The saved query details",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSavedQueryRequest",
+								"description": "The saved query details"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/admin/has-feature-flag": {
 			"post": {
 				"operationId": "HasFeatureFlag",
@@ -56346,6 +57147,222 @@
 					{
 						"in": "path",
 						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/hql-enriched": {
+			"post": {
+				"operationId": "ExecuteEnrichedHql",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"limit": {
+										"type": "number",
+										"format": "double"
+									},
+									"sql": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"sql"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/saved-queries": {
+			"get": {
+				"operationId": "GetAdminSavedQueries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get all saved queries for admin (stored under admin org ID)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/admin/saved-query": {
+			"post": {
+				"operationId": "CreateAdminSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new saved query for admin (stored under admin org ID)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"sql": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"sql",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/saved-query/{queryId}": {
+			"patch": {
+				"operationId": "UpdateAdminSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update a saved query for admin (stored under admin org ID)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"sql": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"sql",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteAdminSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a saved query for admin (stored under admin org ID)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "queryId",
 						"required": true,
 						"schema": {
 							"type": "string"

@@ -2,16 +2,19 @@ import {
   AnthropicRequestBody,
   AnthropicContentBlock,
   AnthropicTool,
+  AnthropicWebSearchTool,
   AnthropicToolChoice,
 } from "../../../types/anthropic";
 import {
   HeliconeChatCompletionContentPart,
   HeliconeChatCreateParams,
 } from "@helicone-package/prompts/types";
+import { Plugin } from "@helicone-package/cost/models/types";
 
 export function toAnthropic(
   openAIBody: HeliconeChatCreateParams,
-  providerModelId?: string
+  providerModelId?: string,
+  plugins?: Plugin[]
 ): AnthropicRequestBody {
   const antBody: AnthropicRequestBody = {
     model: providerModelId || openAIBody.model,
@@ -49,6 +52,23 @@ export function toAnthropic(
   // Map tools from OpenAI format to Anthropic format
   if (openAIBody.tools) {
     antBody.tools = mapTools(openAIBody.tools);
+  }
+
+  // Map web search plugin to Anthropic format
+  const webSearchTool = mapWebSearch(plugins);
+  if (webSearchTool) {
+    antBody.tools = antBody.tools || [];
+
+    // Check if web search tool is not already present
+    const hasWebSearch = antBody.tools.some(
+      (tool) =>
+        ("type" in tool && tool.type === "web_search_20250305") ||
+        ("name" in tool && tool.name === "web_search")
+    );
+
+    if (!hasWebSearch) {
+      antBody.tools.push(webSearchTool);
+    }
   }
 
   // Map tool_choice from OpenAI format to Anthropic format
@@ -276,7 +296,9 @@ function mapMessages(
   });
 }
 
-function mapTools(tools: HeliconeChatCreateParams["tools"]): AnthropicTool[] {
+function mapTools(
+  tools: HeliconeChatCreateParams["tools"]
+): (AnthropicTool | AnthropicWebSearchTool)[] {
   if (!tools) return [];
 
   return tools.map((tool) => {
@@ -284,6 +306,29 @@ function mapTools(tools: HeliconeChatCreateParams["tools"]): AnthropicTool[] {
       throw new Error(`Unsupported tool type: ${tool.type}`);
     }
 
+    // Check if this is a web search tool
+    if (tool.function.name === "web_search") {
+      const params = (tool.function.parameters as any) || {};
+      const webSearchTool: AnthropicWebSearchTool = {
+        type: "web_search_20250305",
+        name: "web_search",
+      };
+
+      // Map optional parameters
+      if (params.max_uses !== undefined) {
+        webSearchTool.max_uses = params.max_uses;
+      }
+      if (params.allowed_domains !== undefined) {
+        webSearchTool.allowed_domains = params.allowed_domains;
+      }
+      if (params.user_location !== undefined) {
+        webSearchTool.user_location = params.user_location;
+      }
+
+      return webSearchTool;
+    }
+
+    // Regular tool mapping
     const inputSchema = (tool.function.parameters as any) || {
       type: "object",
       properties: {},
@@ -327,4 +372,41 @@ function mapToolChoice(
   }
 
   throw new Error("Unsupported tool_choice format");
+}
+
+function mapWebSearch(
+  plugins?: Plugin[]
+): AnthropicWebSearchTool | null {
+  if (!plugins || plugins.length === 0) {
+    return null;
+  }
+
+  const webPlugin = plugins.find((p) => p.id === "web");
+  if (!webPlugin) {
+    return null;
+  }
+
+  // Extract web search specific config
+  const { id, ...webConfig } = webPlugin as any;
+
+  const webSearchTool: AnthropicWebSearchTool = {
+    type: "web_search_20250305",
+    name: "web_search",
+  };
+
+  // Map optional parameters if they exist
+  if (webConfig.max_uses !== undefined) {
+    webSearchTool.max_uses = webConfig.max_uses;
+  }
+  if (webConfig.allowed_domains !== undefined) {
+    webSearchTool.allowed_domains = webConfig.allowed_domains;
+  }
+  if (webConfig.blocked_domains !== undefined) {
+    webSearchTool.blocked_domains = webConfig.blocked_domains;
+  }
+  if (webConfig.user_location !== undefined) {
+    webSearchTool.user_location = webConfig.user_location;
+  }
+
+  return webSearchTool;
 }

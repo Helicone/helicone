@@ -2,6 +2,7 @@ import {
   OpenAIResponseBody,
   OpenAIChoice,
   OpenAIToolCall,
+  OpenAIAnnotation,
 } from "../../../types/openai";
 import {
   AnthropicResponseBody,
@@ -10,23 +11,15 @@ import {
 
 // Anthropic Response Body -> OpenAI Response Body
 export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
+  // Filter out server_tool_use and web_search_tool_result blocks - they're internal to Anthropic
   const textBlocks = response.content.filter((block) => block.type === "text");
   const toolUseBlocks = response.content.filter(
     (block) => block.type === "tool_use"
   );
 
-  const content = textBlocks.map((block) => blockToString(block)).join("");
+  const { content, annotations } = buildContentAndAnnotations(textBlocks);
 
-  const tool_calls: OpenAIToolCall[] = toolUseBlocks
-    .filter((block) => block.type === "tool_use" && block.id && block.name)
-    .map((block) => ({
-      id: block.id!,
-      type: "function",
-      function: {
-        name: block.name!,
-        arguments: JSON.stringify(block.input || {}),
-      },
-    }));
+  const tool_calls = mapToolCalls(toolUseBlocks);
 
   const choice: OpenAIChoice = {
     index: 0,
@@ -34,6 +27,7 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
       role: "assistant",
       content: content || null,
       ...(tool_calls.length > 0 && { tool_calls }),
+      ...(annotations.length > 0 && { annotations }),
     },
     finish_reason: mapStopReason(response.stop_reason),
     logprobs: null,
@@ -42,6 +36,8 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
   const anthropicUsage = response.usage;
   const cachedTokens = anthropicUsage.cache_read_input_tokens ?? 0;
   const cacheWriteTokens = anthropicUsage.cache_creation_input_tokens ?? 0;
+  const webSearchRequests =
+    anthropicUsage.server_tool_use?.web_search_requests ?? 0;
 
   return {
     id: response.id,
@@ -77,8 +73,71 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
         accepted_prediction_tokens: 0,
         rejected_prediction_tokens: 0,
       },
+      // AI Gateway extension - only present when converting from Anthropic
+      ...(webSearchRequests > 0 && {
+        server_tool_use: {
+          web_search_requests: webSearchRequests,
+        },
+      }),
     },
   };
+}
+
+// Helper function to build content and annotations from text blocks
+function buildContentAndAnnotations(textBlocks: AnthropicContentBlock[]): {
+  content: string;
+  annotations: OpenAIAnnotation[];
+} {
+  let fullContent = "";
+  const annotations: OpenAIAnnotation[] = [];
+
+  for (const block of textBlocks) {
+    const text = blockToString(block);
+    const blockStartIndex = fullContent.length;
+
+    // Convert Anthropic citations to OpenAI annotations
+    if (block.citations && block.citations.length > 0) {
+      // For each citation, find where the cited text appears in this block
+      for (const citation of block.citations) {
+        // The cited_text is what was quoted from the source
+        // We need to find where in the block's text this citation applies
+        // Since Anthropic puts citations on blocks that reference the source,
+        // we'll use the entire block text as the cited portion
+        const blockEndIndex = blockStartIndex + text.length;
+
+        annotations.push({
+          type: "url_citation",
+          url_citation: {
+            url: citation.url,
+            title: citation.title,
+            content: citation.cited_text, // This is the source text from the webpage
+            start_index: blockStartIndex,
+            end_index: blockEndIndex,
+          },
+        });
+      }
+    }
+
+    fullContent += text;
+  }
+
+  return { content: fullContent, annotations };
+}
+
+// Helper function to map tool uses from content blocks
+function mapToolCalls(
+  toolUseBlocks: AnthropicContentBlock[]
+): OpenAIToolCall[] {
+  return toolUseBlocks
+    .filter((block) => block.type === "tool_use" && block.id && block.name)
+    .map((block) => ({
+      id: block.id!,
+      type: "function" as const,
+      function: {
+        name: block.name!,
+        arguments: JSON.stringify(block.input || {}),
+      },
+    }));
 }
 
 function blockToString(block: AnthropicContentBlock): string {

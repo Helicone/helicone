@@ -28,8 +28,8 @@ import { RequestManager } from "../request/RequestManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { AuthParams } from "../../packages/common/auth/types";
-import { StringChain } from "lodash";
 import { Prompt2025Input } from "../../lib/db/ClickhouseWrapper";
+import { resetPromptCache as invalidatePromptCache } from "../../lib/resetPromptCache";
 
 
 const PROMPT_ID_LENGTH = 6;
@@ -48,6 +48,21 @@ export class Prompt2025Manager extends BaseManager {
       process.env.S3_BUCKET_NAME ?? "",
       (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
     );
+  }
+
+  private async resetPromptCache(params: {
+    promptId: string;
+    versionId?: string;
+    environment?: string;
+  }): Promise<void> {
+    try {
+      await invalidatePromptCache({
+        orgId: this.authParams.organizationId,
+        ...params,
+      });
+    } catch (error) {
+      console.error("Error resetting prompt cache:", error);
+    }
   }
 
   private generateRandomPromptId() : string {
@@ -666,6 +681,12 @@ export class Prompt2025Manager extends BaseManager {
     if (updateEnvResult.error) {
       return err(updateEnvResult.error);
     }
+
+    await this.resetPromptCache({
+      promptId: params.promptId,
+      environment: params.environment,
+    });
+
     return ok(null);
   }
 
@@ -709,6 +730,11 @@ export class Prompt2025Manager extends BaseManager {
       return err(result.error);
     }
 
+    // remove prod cache
+    await this.resetPromptCache({
+      promptId: params.promptId,
+    });
+
     return ok(null);
   }
 
@@ -729,6 +755,11 @@ export class Prompt2025Manager extends BaseManager {
     if (s3Result.error) {
       return err(s3Result.error);
     }
+
+    await this.resetPromptCache({
+      promptId: params.promptId,
+      versionId: params.promptVersionId
+    });
 
     return ok(null);
   }

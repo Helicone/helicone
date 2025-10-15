@@ -52,6 +52,22 @@ export function recursivelyConsolidateAnthropicListForClaude(
     }
 
     if (item.type === "content_block_start") {
+      // Store content block metadata for server_tool_use and tool_use blocks
+      if (
+        item.content_block?.type === "server_tool_use" ||
+        item.content_block?.type === "tool_use"
+      ) {
+        recursivelyConsolidateAnthropic(acc, {
+          content: [
+            {
+              type: item.content_block.type,
+              id: item.content_block.id,
+              name: item.content_block.name,
+              input: item.content_block.input || {},
+            },
+          ],
+        });
+      }
       return acc;
     }
 
@@ -60,14 +76,27 @@ export function recursivelyConsolidateAnthropicListForClaude(
     }
 
     if (item.type === "content_block_delta") {
-      recursivelyConsolidateAnthropic(acc, {
-        content: [
-          {
-            type: "text",
-            text: item.delta.text,
-          },
-        ],
-      });
+      // Handle different types of content block deltas
+      if (item.delta?.text !== undefined) {
+        recursivelyConsolidateAnthropic(acc, {
+          content: [
+            {
+              type: "text",
+              text: item.delta.text,
+            },
+          ],
+        });
+      } else if (item.delta?.partial_json !== undefined) {
+        // Handle tool_use or server_tool_use input deltas
+        recursivelyConsolidateAnthropic(acc, {
+          content: [
+            {
+              type: item.content_block?.type || "tool_use",
+              input: item.delta.partial_json,
+            },
+          ],
+        });
+      }
     }
 
     if (item.type === "message_start") {

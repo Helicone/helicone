@@ -123,6 +123,40 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-oss-20b:novita": {
+    provider: "novita",
+    author: "openai",
+    providerModelId: "openai/gpt-oss-20b",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000005, // $0.05/1M
+        output: 0.0000002, // $0.2/1M
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 32_768,
+    quantization: "bf16",
+    supportedParameters: [
+      "structured_outputs",
+      "reasoning",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "gpt-oss-120b:openrouter": {
     provider: "openrouter",
     author: "openai",

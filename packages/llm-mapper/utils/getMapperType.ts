@@ -33,6 +33,10 @@ export const getMapperTypeFromHeliconeRequest = (
     return "tool";
   }
 
+  if (heliconeRequest.gateway_endpoint_version) {
+    return "ai-gateway";
+  }
+
   // Check for OpenAI Assistant responses
   if (
     heliconeRequest.response_body?.object === "thread.run" ||

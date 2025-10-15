@@ -24,11 +24,11 @@ export type HeliconeMeta = {
   promptInputs?: Record<string, any>;
   promptEnvironment?: string;
   stripeCustomerId?: string;
-  
+
   // AI Gateway metadata
   isPassthroughBilling?: boolean;
   gatewayProvider?: ModelProviderName;
-  
+
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
   gatewayResponseFormat?: ResponseFormat;

@@ -1,6 +1,6 @@
 import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
-import { QwenModelName } from "./models";
+import { Qwen3ModelName } from "./models";
 
 export const endpoints = {
   "qwen3-32b:groq": {
@@ -96,7 +96,7 @@ export const endpoints = {
       tpd: 6000000000,
     },
     contextLength: 32_768,
-    maxCompletionTokens: 32_768,
+    maxCompletionTokens: 16_384,
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -233,6 +233,111 @@ export const endpoints = {
       "*": {},
     },
   },
+  "qwen3-235b-a22b-thinking:novita": {
+    providerModelId: "qwen/qwen3-235b-a22b-thinking-2507",
+    provider: "novita",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003, // $0.30 per million tokens
+        output: 0.000003, // $3.00 per million tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 131_072,
+    maxCompletionTokens: 32_768,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+      "functions",
+      "structured_outputs",
+      "reasoning",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3-vl-235b-a22b-instruct:novita": {
+    providerModelId: "qwen/qwen3-vl-235b-a22b-instruct",
+    provider: "novita",
+    author: "alibaba",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003, // $0.30 per million tokens
+        output: 0.0000015, // $1.50 per million tokens
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 131_072,
+    maxCompletionTokens: 32_768,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3-coder-30b-a3b-instruct:nebius": {
+    providerModelId: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+    provider: "nebius",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000001, // $0.10 per million tokens
+        output: 0.0000003, // $0.30 per million tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
-  Record<`${QwenModelName}:${ModelProviderName}`, ModelProviderConfig>
+  Record<`${Qwen3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

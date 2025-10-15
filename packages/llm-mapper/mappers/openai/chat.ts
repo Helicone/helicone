@@ -202,6 +202,12 @@ const processTextMessage = (msg: any): Message => {
     reasoning: msg.reasoning || "",
     role: msg.role || "user",
     _type: getContentType(msg as any),
+    ...(msg.annotations && { annotations: msg.annotations.map((ann: any) => ({
+      type: ann.type,
+      url: ann.url_citation?.url || ann.url,
+      title: ann.url_citation?.title || ann.title,
+      content: ann.url_citation?.content || ann.content,
+    })) }),
   };
 };
 
