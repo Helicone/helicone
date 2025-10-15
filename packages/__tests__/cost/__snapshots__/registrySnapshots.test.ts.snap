@@ -519,6 +519,88 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "anthropic/claude-4.5-haiku": {
+    "claude-4.5-haiku:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "claude-haiku-4-5-20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-haiku:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 8192,
+      "modelId": "anthropic.claude-haiku-4-5-20251001-v1:0",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-4.5-haiku:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "anthropic/claude-4.5-haiku",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-haiku:vertex": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "claude-haiku-4-5@20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east5",
+      ],
+    },
+  },
   "anthropic/claude-4.5-sonnet": {
     "claude-4.5-sonnet:anthropic": {
       "context": 200000,
@@ -3512,6 +3594,12 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "anthropic/claude-4.5-haiku": [
+    "anthropic",
+    "bedrock",
+    "openrouter",
+    "vertex",
+  ],
   "anthropic/claude-4.5-sonnet": [
     "anthropic",
     "bedrock",
@@ -3875,6 +3963,52 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 0.000003,
         "output": 0.000015,
+        "threshold": 0,
+        "web_search": 0.00001,
+      },
+    ],
+  },
+  "anthropic/claude-4.5-haiku": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.00001,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.00001,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000105,
+        "output": 0.00000527,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
         "threshold": 0,
         "web_search": 0.00001,
       },
@@ -4687,6 +4821,15 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "claude-4.5-haiku",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "claude-4.5-sonnet",
       "providers": [
         "anthropic",
@@ -5120,7 +5263,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
   ],
   "providerBreakdown": [
     {
-      "modelCount": 7,
+      "modelCount": 8,
       "provider": "anthropic",
     },
     {
@@ -5128,7 +5271,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "azure",
     },
     {
-      "modelCount": 7,
+      "modelCount": 8,
       "provider": "bedrock",
     },
     {
@@ -5160,11 +5303,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 42,
+      "modelCount": 43,
       "provider": "openrouter",
     },
     {
-      "modelCount": 10,
+      "modelCount": 11,
       "provider": "vertex",
     },
     {
@@ -5177,6 +5320,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku",
     "claude-3.5-sonnet-v2",
     "claude-3.7-sonnet",
+    "claude-4.5-haiku",
     "claude-4.5-sonnet",
     "claude-opus-4",
     "claude-opus-4-1",
@@ -5247,9 +5391,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 145,
-  "totalModelProviderConfigs": 145,
-  "totalModelsWithPtb": 64,
+  "totalEndpoints": 149,
+  "totalModelProviderConfigs": 149,
+  "totalModelsWithPtb": 65,
   "totalProviders": 13,
 }
 `;
