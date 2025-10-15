@@ -10,7 +10,10 @@ import {
   checkLimits,
   checkLimitsSingle,
 } from "./managers/UsageLimitManager.ts";
-import { HeliconeHeaders } from "./models/HeliconeHeaders";
+import {
+  HeliconeHeaders,
+  HeliconeTokenLimitExceptionHandler,
+} from "./models/HeliconeHeaders";
 import { getAndStoreInCache } from "./util/cache/secureCache";
 import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
 import { parseJSXObject } from "@helicone/prompts";
@@ -18,11 +21,21 @@ import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
 import { RequestBodyBuffer_InMemory } from "../RequestBodyBuffer/RequestBodyBuffer_InMemory";
+import { Provider } from "@helicone-package/llm-mapper/types";
 import {
   IRequestBodyBuffer,
   ValidRequestBody,
 } from "../RequestBodyBuffer/IRequestBodyBuffer";
 import { RequestBodyBufferBuilder } from "../RequestBodyBuffer/RequestBodyBufferBuilder";
+import {
+  applyFallbackStrategy,
+  applyMiddleOutStrategy,
+  applyTruncateStrategy,
+  estimateTokenCount,
+  getModelTokenLimit,
+  parseRequestPayload,
+  resolvePrimaryModel,
+} from "./util/tokenLimitException";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -316,6 +329,112 @@ export class RequestWrapper {
 
   getDataDogClient(): DataDogClient | undefined {
     return this.dataDogClient;
+  }
+
+  public async applyTokenLimitExceptionHandler(
+    provider: Provider
+  ): Promise<void> {
+    const handler = this.heliconeHeaders.tokenLimitExceptionHandler;
+    if (!handler) {
+      return;
+    }
+
+    // Read current body text from buffer
+    let currentBodyText: string;
+    try {
+      currentBodyText = await this.requestBodyBuffer.unsafeGetRawText();
+    } catch {
+      return;
+    }
+
+    const parsedBody = parseRequestPayload(currentBodyText);
+    if (!parsedBody) {
+      return;
+    }
+
+    const primaryModel = resolvePrimaryModel(
+      parsedBody,
+      this.heliconeHeaders.modelOverride
+    );
+    const estimatedTokens = estimateTokenCount(parsedBody, primaryModel);
+
+    if (estimatedTokens !== null) {
+      this.injectCustomProperty(
+        "Helicone-Estimated-Tokens",
+        String(estimatedTokens)
+      );
+    }
+
+    if (!primaryModel) {
+      return;
+    }
+
+    const modelContextLimit = 150; //getModelTokenLimit(provider, primaryModel);
+
+    // Extract requested completion/output limit directly here (provider-agnostic best-effort)
+    const anyBody = parsedBody as any;
+    const completionCandidates: Array<unknown> = [
+      anyBody?.max_completion_tokens,
+      anyBody?.max_tokens,
+      anyBody?.max_output_tokens,
+      anyBody?.maxOutputTokens,
+      anyBody?.response?.max_tokens,
+      anyBody?.response?.max_output_tokens,
+      anyBody?.response?.maxOutputTokens,
+      anyBody?.generation_config?.max_output_tokens,
+      anyBody?.generation_config?.maxOutputTokens,
+      anyBody?.generationConfig?.max_output_tokens,
+      anyBody?.generationConfig?.maxOutputTokens,
+    ];
+    const requestedCompletionTokens = (() => {
+      for (const val of completionCandidates) {
+        if (typeof val === "number" && Number.isFinite(val) && val > 0) {
+          return Math.floor(val);
+        }
+      }
+      return 0;
+    })();
+    const tokenLimit =
+      modelContextLimit === null
+        ? null
+        : Math.max(
+            0,
+            modelContextLimit -
+              (requestedCompletionTokens || modelContextLimit * 0.1)
+          );
+
+    if (
+      estimatedTokens === null ||
+      tokenLimit === null ||
+      estimatedTokens <= tokenLimit
+    ) {
+      return;
+    }
+
+    let newBody: ValidRequestBody | undefined;
+    switch (handler) {
+      case HeliconeTokenLimitExceptionHandler.Truncate:
+        newBody = applyTruncateStrategy(parsedBody);
+        break;
+      case HeliconeTokenLimitExceptionHandler.MiddleOut:
+        newBody = applyMiddleOutStrategy(parsedBody, primaryModel, tokenLimit);
+        break;
+      case HeliconeTokenLimitExceptionHandler.Fallback:
+        newBody = applyFallbackStrategy(
+          parsedBody,
+          primaryModel,
+          estimatedTokens,
+          tokenLimit,
+          (key, value) => this.injectCustomProperty(key, value)
+        );
+        break;
+      default:
+        return;
+    }
+
+    if (typeof newBody === "string") {
+      await this.requestBodyBuffer.tempSetBody(newBody);
+    }
   }
 
   shouldFormatPrompt(): boolean {
