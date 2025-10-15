@@ -253,7 +253,7 @@ describe("Registry Tests", () => {
             );
             expect(walletState.totalEscrow).toBeGreaterThan(0);
           });
-        });
+        }, 10000); // 10s timeout for PTB tests with Durable Objects
       });
     });
 
@@ -291,7 +291,7 @@ describe("Registry Tests", () => {
           const body = (await response.json()) as any;
           expect(body).toHaveProperty("error");
           expect(body.success).toBe(false);
-        });
+        }, 10000); // 10s timeout for PTB tests with Durable Objects
       });
     });
   });
