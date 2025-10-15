@@ -246,7 +246,7 @@ export class AdminController extends Controller {
           count(*) as total_requests,
           countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
         FROM request_response_rmt
-        WHERE organization_id = '${orgId}'
+        WHERE organization_id = {val_0:String}
       `;
 
       const monthlyUsageQuery = `
@@ -257,7 +257,7 @@ export class AdminController extends Controller {
           request_response_rmt
         WHERE
           request_created_at > now() - INTERVAL 3 MONTH
-          AND organization_id = '${orgId}'
+          AND organization_id = {val_0:String}
         GROUP BY
           toStartOfMonth(request_created_at)
         ORDER BY
@@ -267,7 +267,7 @@ export class AdminController extends Controller {
       const allTimeCountQuery = `
         SELECT count(*) as all_time_count
         FROM request_response_rmt
-        WHERE organization_id = '${orgId}'
+        WHERE organization_id = {val_0:String}
       `;
 
       const [usageResult, monthlyUsageResult, allTimeCountResult] =
@@ -275,14 +275,14 @@ export class AdminController extends Controller {
           clickhouseDb.dbQuery<{
             total_requests: string;
             requests_last_30_days: string;
-          }>(usageQuery, []),
+          }>(usageQuery, [orgId]),
           clickhouseDb.dbQuery<{
             month: string;
             requestCount: string;
-          }>(monthlyUsageQuery, []),
+          }>(monthlyUsageQuery, [orgId]),
           clickhouseDb.dbQuery<{
             all_time_count: string;
-          }>(allTimeCountQuery, []),
+          }>(allTimeCountQuery, [orgId]),
         ]);
 
       const usage = usageResult.data?.[0] ?? {
@@ -384,7 +384,7 @@ export class AdminController extends Controller {
     LEFT JOIN users_view AS member_user ON organization_member.member = member_user.id
     WHERE (
       true
-      ${body.tier !== "all" ? `AND organization.tier = '${body.tier}'` : ""}
+      ${body.tier !== "all" ? `AND organization.tier = $1` : ""}
     )
     GROUP BY
       organization.id,
@@ -392,7 +392,7 @@ export class AdminController extends Controller {
       users_view.email,
       users_view.last_sign_in_at;
     `,
-      []
+      body.tier !== "all" ? [body.tier] : []
     );
 
     if (!orgData.data) {
@@ -400,6 +400,15 @@ export class AdminController extends Controller {
     }
 
     // Step 1: Fetch top organizations
+    const orgIds = orgData.data?.map((org) => org.id).slice(0, 30) ?? [];
+
+    if (orgIds.length === 0) {
+      return [];
+    }
+
+    // Build IN clause with individual parameters for safety
+    const orgIdParams = orgIds.map((_, index) => `{val_${index + 2}:String}`).join(", ");
+
     const orgs = await clickhouseDb.dbQuery<{
       organization_id: string;
       ct: number;
@@ -410,20 +419,13 @@ export class AdminController extends Controller {
       count(*) as ct
     FROM request_response_rmt
     WHERE
-      request_response_rmt.request_created_at > toDateTime('${body.startDate}')
-      and request_response_rmt.request_created_at < toDateTime('${
-        body.endDate
-      }')
-    AND organization_id in (
-      ${orgData.data
-        ?.map((org) => `'${org.id}'`)
-        .slice(0, 30)
-        .join(",")}
-    )
+      request_response_rmt.request_created_at > {val_0:DateTime}
+      and request_response_rmt.request_created_at < {val_1:DateTime}
+    AND organization_id in (${orgIdParams})
     GROUP BY organization_id
     ORDER BY ct DESC
     `,
-      []
+      [body.startDate, body.endDate, ...orgIds]
     );
 
     if (!orgs.data) {
@@ -484,6 +486,11 @@ export class AdminController extends Controller {
       return [];
     }
     // Step 3: Fetch organization data over time
+    const orgIdsForTimeSeries = orgs.data?.map((org) => org.organization_id).slice(0, 30) ?? [];
+
+    // Build IN clause with individual parameters
+    const timeSeriesOrgParams = orgIdsForTimeSeries.map((_, index) => `{val_${index + 2}:String}`).join(", ");
+
     const orgsOverTime = await clickhouseDb.dbQuery<{
       count: number;
       dt: string;
@@ -495,25 +502,14 @@ export class AdminController extends Controller {
         date_trunc('${timeGrain}', request_created_at) AS dt,
         request_response_rmt.organization_id as organization_id
       from request_response_rmt
-      where request_response_rmt.organization_id in (
-        ${orgs.data
-          ?.map((org) => `'${org.organization_id}'`)
-          .slice(0, 30)
-          .join(",")}
-      )
-      and request_response_rmt.request_created_at > toDateTime('${
-        body.startDate
-      }')
-      and request_response_rmt.request_created_at < toDateTime('${
-        body.endDate
-      }')
+      where request_response_rmt.organization_id in (${timeSeriesOrgParams})
+      and request_response_rmt.request_created_at > {val_0:DateTime}
+      and request_response_rmt.request_created_at < {val_1:DateTime}
       group by dt, organization_id
       order by organization_id, dt ASC
-      WITH FILL FROM toDateTime64('${body.startDate}') TO toDateTime64('${
-        body.endDate
-      }') STEP INTERVAL 1 ${timeGrain}
+      WITH FILL FROM toDateTime64('${body.startDate}') TO toDateTime64('${body.endDate}') STEP INTERVAL 1 ${timeGrain}
     `,
-      []
+      [body.startDate, body.endDate, ...orgIdsForTimeSeries]
     );
 
     // Step 4: Merge all data into one massive object
@@ -684,7 +680,7 @@ export class AdminController extends Controller {
           count(*) as total_requests,
           countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
         FROM request_response_rmt
-        WHERE organization_id = '${org.id}'
+        WHERE organization_id = {val_0:String}
       `;
 
         const monthlyUsageQuery = `
@@ -695,7 +691,7 @@ export class AdminController extends Controller {
           request_response_rmt
         WHERE
           request_created_at > now() - INTERVAL 12 MONTH
-          AND organization_id = '${org.id}'
+          AND organization_id = {val_0:String}
         GROUP BY
           toStartOfMonth(request_created_at)
         ORDER BY
@@ -705,7 +701,7 @@ export class AdminController extends Controller {
         const allTimeCountQuery = `
         SELECT count(*) as all_time_count
         FROM request_response_rmt
-        WHERE organization_id = '${org.id}'
+        WHERE organization_id = {val_0:String}
       `;
 
         const [usageResult, monthlyUsageResult, allTimeCountResult] =
@@ -713,14 +709,14 @@ export class AdminController extends Controller {
             clickhouseDb.dbQuery<{
               total_requests: string;
               requests_last_30_days: string;
-            }>(usageQuery, []),
+            }>(usageQuery, [org.id]),
             clickhouseDb.dbQuery<{
               month: string;
               requestCount: string;
-            }>(monthlyUsageQuery, []),
+            }>(monthlyUsageQuery, [org.id]),
             clickhouseDb.dbQuery<{
               all_time_count: string;
-            }>(allTimeCountQuery, []),
+            }>(allTimeCountQuery, [org.id]),
           ]);
 
         const usage = usageResult.data?.[0] ?? {
@@ -868,7 +864,7 @@ export class AdminController extends Controller {
           count(*) as total_requests,
           countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
         FROM request_response_rmt
-        WHERE organization_id = '${org.id}'
+        WHERE organization_id = {val_0:String}
       `;
 
         const monthlyUsageQuery = `
@@ -879,7 +875,7 @@ export class AdminController extends Controller {
           request_response_rmt
         WHERE
           request_created_at > now() - INTERVAL 12 MONTH
-          AND organization_id = '${org.id}'
+          AND organization_id = {val_0:String}
         GROUP BY
           toStartOfMonth(request_created_at)
         ORDER BY
@@ -889,7 +885,7 @@ export class AdminController extends Controller {
         const allTimeCountQuery = `
         SELECT count(*) as all_time_count
         FROM request_response_rmt
-        WHERE organization_id = '${org.id}'
+        WHERE organization_id = {val_0:String}
       `;
 
         const [usageResult, monthlyUsageResult, allTimeCountResult] =
@@ -897,14 +893,14 @@ export class AdminController extends Controller {
             clickhouseDb.dbQuery<{
               total_requests: string;
               requests_last_30_days: string;
-            }>(usageQuery, []),
+            }>(usageQuery, [org.id]),
             clickhouseDb.dbQuery<{
               month: string;
               requestCount: string;
-            }>(monthlyUsageQuery, []),
+            }>(monthlyUsageQuery, [org.id]),
             clickhouseDb.dbQuery<{
               all_time_count: string;
-            }>(allTimeCountQuery, []),
+            }>(allTimeCountQuery, [org.id]),
           ]);
 
         const usage = usageResult.data?.[0] ?? {
@@ -1286,13 +1282,13 @@ export class AdminController extends Controller {
         max(request_created_at) as last_request_at,
         countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
       FROM request_response_rmt
-      WHERE organization_id = '${orgId}'
+      WHERE organization_id = {val_0:String}
     `;
 
     const usageResult = await clickhouseDb.dbQuery<{
       last_request_at: string | null;
       requests_last_30_days: string;
-    }>(usageQuery, []);
+    }>(usageQuery, [orgId]);
 
     const usage = usageResult.data?.[0] ?? {
       last_request_at: null,
@@ -1326,7 +1322,7 @@ export class AdminController extends Controller {
         count(*) as total_requests,
         countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
       FROM request_response_rmt
-      WHERE organization_id = '${orgId}'
+      WHERE organization_id = {val_0:String}
     `;
 
     const monthlyUsageQuery = `
@@ -1337,7 +1333,7 @@ export class AdminController extends Controller {
         request_response_rmt
       WHERE
         request_created_at > now() - INTERVAL 12 MONTH
-        AND organization_id = '${orgId}'
+        AND organization_id = {val_0:String}
       GROUP BY
         toStartOfMonth(request_created_at)
       ORDER BY
@@ -1347,7 +1343,7 @@ export class AdminController extends Controller {
     const allTimeCountQuery = `
       SELECT count(*) as all_time_count
       FROM request_response_rmt
-      WHERE organization_id = '${orgId}'
+      WHERE organization_id = {val_0:String}
     `;
 
     const [usageResult, monthlyUsageResult, allTimeCountResult] =
@@ -1355,14 +1351,14 @@ export class AdminController extends Controller {
         clickhouseDb.dbQuery<{
           total_requests: string;
           requests_last_30_days: string;
-        }>(usageQuery, []),
+        }>(usageQuery, [orgId]),
         clickhouseDb.dbQuery<{
           month: string;
           requestCount: string;
-        }>(monthlyUsageQuery, []),
+        }>(monthlyUsageQuery, [orgId]),
         clickhouseDb.dbQuery<{
           all_time_count: string;
-        }>(allTimeCountQuery, []),
+        }>(allTimeCountQuery, [orgId]),
       ]);
 
     const usage = usageResult.data?.[0] ?? {
@@ -1835,25 +1831,25 @@ export class AdminController extends Controller {
 
     // Step 1: Get the top organizations by total request count
     const topOrgsQuery = `
-      SELECT 
+      SELECT
           organization_id,
           COUNT(request_id) as request_count
-      FROM 
+      FROM
           request_response_rmt
       WHERE
           request_created_at > now() - interval '${timeRangeInterval}'
           AND request_created_at < now()
-      GROUP BY 
+      GROUP BY
           organization_id
-      ORDER BY 
+      ORDER BY
           request_count DESC
-      LIMIT ${limit}
+      LIMIT {val_0:UInt32}
     `;
 
     const topOrgsResult = await clickhouseDb.dbQuery<{
       organization_id: string;
       request_count: string;
-    }>(topOrgsQuery, []);
+    }>(topOrgsQuery, [limit]);
 
     if (!topOrgsResult.data || topOrgsResult.data.length === 0) {
       return { organizations: [] };
@@ -1863,15 +1859,13 @@ export class AdminController extends Controller {
 
     // Step 2: Fetch organization names
     const orgNamesQuery = `
-      SELECT id, name FROM organization WHERE id IN (${orgIds
-        .map((id) => `'${id}'`)
-        .join(",")})
+      SELECT id, name FROM organization WHERE id = ANY($1::uuid[])
     `;
 
     const orgNamesResult = await dbExecute<{
       id: string;
       name: string;
-    }>(orgNamesQuery, []);
+    }>(orgNamesQuery, [orgIds]);
 
     const orgNameMap = new Map<string, string>();
     if (orgNamesResult.data) {
@@ -1881,37 +1875,40 @@ export class AdminController extends Controller {
     }
 
     // Step 3: Get time series data for each organization with the appropriate grouping
+    // Build IN clause with individual parameters
+    const orgIdsParams = orgIds.map((_, index) => `{val_${index}:String}`).join(", ");
+
     const timeSeriesQuery =
       groupBy === "10 minute" || groupBy === "6 hour"
         ? `
-        SELECT 
+        SELECT
             organization_id,
-            COUNT(request_id) as request_count, 
+            COUNT(request_id) as request_count,
             toString(${timeFunction}) as time
-        FROM 
+        FROM
             request_response_rmt
         WHERE
             request_created_at > now() - interval '${timeRangeInterval}'
-            AND organization_id IN (${orgIds.map((id) => `'${id}'`).join(",")})
-        GROUP BY 
-            organization_id, 
+            AND organization_id IN (${orgIdsParams})
+        GROUP BY
+            organization_id,
             time
         ORDER BY
             organization_id,
             time
       `
         : `
-        SELECT 
+        SELECT
             organization_id,
-            COUNT(request_id) as request_count, 
+            COUNT(request_id) as request_count,
             toString(${timeFunction}(request_created_at)) as time
-        FROM 
+        FROM
             request_response_rmt
         WHERE
             request_created_at > now() - interval '${timeRangeInterval}'
-            AND organization_id IN (${orgIds.map((id) => `'${id}'`).join(",")})
-        GROUP BY 
-            organization_id, 
+            AND organization_id IN (${orgIdsParams})
+        GROUP BY
+            organization_id,
             time
         ORDER BY
             organization_id,
@@ -1922,7 +1919,7 @@ export class AdminController extends Controller {
       organization_id: string;
       request_count: string;
       time: string;
-    }>(timeSeriesQuery, []);
+    }>(timeSeriesQuery, orgIds);
 
     if (!timeSeriesResult.data) {
       return { organizations: [] };
@@ -1995,11 +1992,29 @@ export class AdminController extends Controller {
     totalCount: number;
   }> {
     await authCheckThrow(request.authParams.userId);
+
+    const params: (string | number | boolean | Date)[] = [];
+    let paramIndex = 0;
+
+    let dateCondition = "";
+    if (body.toDate) {
+      dateCondition = `response_created_at <= {val_${paramIndex}:DateTime64(3)}`;
+      params.push(body.toDate);
+      paramIndex++;
+    } else {
+      dateCondition = "response_created_at <= now()";
+    }
+
+    if (body.fromDate) {
+      dateCondition += ` AND response_created_at >= {val_${paramIndex}:DateTime64(3)}`;
+      params.push(body.fromDate);
+      paramIndex++;
+    }
+
     const query = `
     SELECT model, provider, count(*) AS count from request_response_rmt
     WHERE (
-      response_created_at <= ${body.toDate ? `toDateTime64('${body.toDate}', 3)` : "now()"}
-      ${body.fromDate ? `AND response_created_at >= toDateTime64('${body.fromDate}', 3)` : ""}
+      ${dateCondition}
       AND ${clickhouseModelFilter(body.models)}
       AND ${body.hasCosts ? "cost > 0" : "cost = 0"} AND (prompt_tokens > 0 OR completion_tokens > 0)
     )
@@ -2010,7 +2025,7 @@ export class AdminController extends Controller {
       model: string;
       provider: string;
       count: string;
-    }>(query, []);
+    }>(query, params);
 
     if (result.error) {
       throw new Error(result.error);
@@ -2071,6 +2086,24 @@ export class AdminController extends Controller {
   }> {
     await authCheckThrow(request.authParams.userId);
 
+    const params: (string | number | boolean | Date)[] = [];
+    let paramIndex = 0;
+
+    let dateCondition = "";
+    if (body.toDate) {
+      dateCondition = `response_created_at <= {val_${paramIndex}:DateTime64(3)}`;
+      params.push(body.toDate);
+      paramIndex++;
+    } else {
+      dateCondition = "response_created_at <= now()";
+    }
+
+    if (body.fromDate) {
+      dateCondition += ` AND response_created_at >= {val_${paramIndex}:DateTime64(3)}`;
+      params.push(body.fromDate);
+      paramIndex++;
+    }
+
     const query = `
     INSERT INTO request_response_rmt
     SELECT
@@ -2108,8 +2141,7 @@ export class AdminController extends Controller {
       now() as updated_at
     FROM request_response_rmt
     WHERE (
-      response_created_at <= ${body.toDate ? `toDateTime64('${body.toDate}', 3)` : "now()"}
-      ${body.fromDate ? `AND response_created_at >= toDateTime64('${body.fromDate}', 3)` : ""}
+      ${dateCondition}
       AND ${clickhouseModelFilter(body.models)}
     )
     `;
@@ -2118,7 +2150,7 @@ export class AdminController extends Controller {
       return { query };
     }
 
-    const result = await clickhouseDb.dbQuery<{}>(query, []);
+    const result = await clickhouseDb.dbQuery<{}>(query, params);
     if (result.error) {
       throw new Error(result.error);
     }
