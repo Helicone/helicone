@@ -234,6 +234,16 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "...",
     relevanceScore: 5,
   },
+  {
+    id: "chutes",
+    name: "Chutes",
+    logoUrl: "/assets/home/providers/chutes.webp",
+    description: "Configure your Chutes API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Chutes API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 3,
+  },
 ];
 
 // Mock recently used providers - in a real app, this would come from user data

@@ -16,6 +16,7 @@ export function getUsageProcessor(
   switch (provider) {
     case "openai":
     case "azure":
+    case "chutes":
     case "deepinfra":
     case "nebius":
     case "novita":

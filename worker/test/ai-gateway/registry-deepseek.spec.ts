@@ -27,6 +27,12 @@ const novitaAuthExpectations = {
   },
 };
 
+const chutesAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("DeepSeek Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -200,6 +206,42 @@ describe("DeepSeek Registry Tests", () => {
                 model: "deepseek/deepseek-v3.2-exp",
                 data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
                 expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-tng-r1t2-chimera", () => {
+      it("should handle chutes provider", () =>
+        runGatewayTest({
+          model: "deepseek-tng-r1t2-chimera/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "tngtech/DeepSeek-TNG-R1T2-Chimera",
+                data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+                expects: chutesAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select chutes provider when none specified", () =>
+        runGatewayTest({
+          model: "deepseek-tng-r1t2-chimera",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "tngtech/DeepSeek-TNG-R1T2-Chimera",
+                data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+                expects: chutesAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -610,6 +652,56 @@ describe("DeepSeek Registry Tests", () => {
       }));
   });
 
+  describe("Error scenarios - Chutes Provider with DeepSeek TNG R1T2 Chimera", () => {
+    it("should handle Chutes provider failure", () =>
+      runGatewayTest({
+        model: "deepseek-tng-r1t2-chimera/chutes",
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Chutes service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Chutes", () =>
+      runGatewayTest({
+        model: "deepseek-tng-r1t2-chimera/chutes",
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Chutes", () =>
+      runGatewayTest({
+        model: "deepseek-tng-r1t2-chimera/chutes",
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+  });
+
   describe("Provider URL validation and model mapping", () => {
     it("should construct correct DeepInfra URL for DeepSeek V3", () =>
       runGatewayTest({
@@ -899,6 +991,68 @@ describe("DeepSeek Registry Tests", () => {
           finalStatus: 200,
         },
       }));
+
+    it("should construct correct Chutes URL for DeepSeek TNG R1T2 Chimera", () =>
+      runGatewayTest({
+        model: "deepseek-tng-r1t2-chimera/chutes",
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "success",
+              model: "tngtech/DeepSeek-TNG-R1T2-Chimera",
+              data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+              expects: chutesAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed for TNG R1T2 Chimera
+                // Base URL: https://api.chutes.ai/
+                // Built URL: https://llm.chutes.ai/v1/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for Chutes", () =>
+      runGatewayTest({
+        model: "deepseek-tng-r1t2-chimera/chutes",
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "success",
+              model: "tngtech/DeepSeek-TNG-R1T2-Chimera", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+              expects: chutesAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for Chutes", () =>
+      runGatewayTest({
+        model: "deepseek-tng-r1t2-chimera/chutes",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "success",
+              model: "tngtech/DeepSeek-TNG-R1T2-Chimera",
+              data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+              expects: {
+                ...chutesAuthExpectations,
+                bodyContains: ["user", "Test"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
   });
 
   describe("Passthrough billing tests", () => {
@@ -976,6 +1130,33 @@ describe("DeepSeek Registry Tests", () => {
                 model: "deepseek/deepseek-v3.2-exp",
                 data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
                 expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-tng-r1t2-chimera with Chutes", () => {
+      it("should handle passthrough billing with chutes provider", () =>
+        runGatewayTest({
+          model: "deepseek-tng-r1t2-chimera/chutes",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "tngtech/DeepSeek-TNG-R1T2-Chimera",
+                data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+                expects: chutesAuthExpectations,
               },
             ],
             finalStatus: 200,
