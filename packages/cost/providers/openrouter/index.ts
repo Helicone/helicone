@@ -2123,6 +2123,20 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "anthropic/claude-haiku-4.5",
+    },
+    cost: {
+      prompt_token: 1e-6,
+      completion_token: 5e-6,
+      prompt_cache_read_token: 1e-7,
+      prompt_cache_write_token: 1.25e-6,
+      prompt_cache_creation_5m: 1.25e-6,
+      prompt_cache_creation_1h: 2e-6,
+    }
+  },
+  {
+    model: {
+      operator: "equals",
       value: "anthropic/claude-3.5-haiku-20241022",
     },
     cost: {
