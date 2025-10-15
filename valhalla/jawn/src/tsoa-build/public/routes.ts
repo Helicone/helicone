@@ -1026,7 +1026,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelProviderName": {
         "dataType": "refAlias",
-        "type": {"dataType":"enum","enums":["anthropic","openai","bedrock","vertex","azure","perplexity","groq","deepseek","cohere","xai","deepinfra","google-ai-studio","openrouter","novita","nebius"],"validators":{}},
+        "type": {"dataType":"enum","enums":["anthropic","azure","bedrock","chutes","cohere","deepinfra","deepseek","google-ai-studio","groq","nebius","novita","openai","openrouter","perplexity","vertex","xai"],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Provider": {
@@ -2646,7 +2646,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AuthorName": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anthropic"]},{"dataType":"enum","enums":["openai"]},{"dataType":"enum","enums":["perplexity"]},{"dataType":"enum","enums":["deepseek"]},{"dataType":"enum","enums":["cohere"]},{"dataType":"enum","enums":["xai"]},{"dataType":"enum","enums":["google"]},{"dataType":"enum","enums":["meta-llama"]},{"dataType":"enum","enums":["mistralai"]},{"dataType":"enum","enums":["amazon"]},{"dataType":"enum","enums":["microsoft"]},{"dataType":"enum","enums":["nvidia"]},{"dataType":"enum","enums":["qwen"]},{"dataType":"enum","enums":["moonshotai"]},{"dataType":"enum","enums":["alibaba"]},{"dataType":"enum","enums":["zai"]}]},{"dataType":"enum","enums":["passthrough"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["anthropic"]},{"dataType":"enum","enums":["cohere"]},{"dataType":"enum","enums":["deepseek"]},{"dataType":"enum","enums":["openai"]},{"dataType":"enum","enums":["perplexity"]},{"dataType":"enum","enums":["xai"]},{"dataType":"enum","enums":["google"]},{"dataType":"enum","enums":["meta-llama"]},{"dataType":"enum","enums":["mistralai"]},{"dataType":"enum","enums":["amazon"]},{"dataType":"enum","enums":["microsoft"]},{"dataType":"enum","enums":["nvidia"]},{"dataType":"enum","enums":["qwen"]},{"dataType":"enum","enums":["moonshotai"]},{"dataType":"enum","enums":["alibaba"]},{"dataType":"enum","enums":["zai"]},{"dataType":"enum","enums":["baidu"]}]},{"dataType":"enum","enums":["passthrough"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "StandardParameter": {
@@ -2740,7 +2740,7 @@ const models: TsoaRoute.Models = {
             "endpointConfigs": {"ref":"Record_string.EndpointConfig_","required":true},
             "crossRegion": {"dataType":"boolean"},
             "priority": {"dataType":"double"},
-            "quantization": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["fp4"]},{"dataType":"enum","enums":["fp8"]},{"dataType":"enum","enums":["bf16"]}]},
+            "quantization": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["fp4"]},{"dataType":"enum","enums":["fp8"]},{"dataType":"enum","enums":["fp16"]},{"dataType":"enum","enums":["bf16"]}]},
             "responseFormat": {"ref":"ResponseFormat"},
         },
         "additionalProperties": false,

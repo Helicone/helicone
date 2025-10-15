@@ -229,6 +229,7 @@ const OrgSearch = () => {
       name: string;
       role: string;
       last_sign_in_at: string | null;
+      created_at: string | null;
     }[],
   ): { name: string; email: string } => {
     return (
@@ -1056,12 +1057,17 @@ const OrgTableRow = ({
                         <Muted className="pl-2 text-xs">Unable to load usage data</Muted>
                       )}
                     </div>
+
+                    {/* Feature Flags */}
+                    <div className="border-t border-border pt-2">
+                      <FeatureFlagsSection orgId={org.id} orgName={org.name} />
+                    </div>
                   </div>
 
-                  {/* Right: Compact Monthly Usage Chart + Feature Flags */}
+                  {/* Right: Compact Monthly Usage Chart */}
                   <div className="flex flex-col gap-4">
                     {/* Chart */}
-                    <div className="flex h-[180px] flex-col gap-2">
+                    <div className="flex h-full flex-col gap-2">
                       <Small className="font-medium">
                         Monthly Usage (Last 12 Months)
                       </Small>
@@ -1126,9 +1132,6 @@ const OrgTableRow = ({
                         </div>
                       )}
                     </div>
-
-                    {/* Feature Flags */}
-                    <FeatureFlagsSection orgId={org.id} orgName={org.name} />
                   </div>
                 </div>
 
@@ -1166,6 +1169,12 @@ const OrgTableRow = ({
                           <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                             Role
                           </th>
+                          <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                            Last Sign In
+                          </th>
+                          <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                            Created At
+                          </th>
                           <th className="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
                             Actions
                           </th>
@@ -1202,6 +1211,32 @@ const OrgTableRow = ({
                                   <SelectItem value="member">Member</SelectItem>
                                 </SelectContent>
                               </Select>
+                            </td>
+                            <td className="whitespace-nowrap px-4 py-2 text-xs text-muted-foreground">
+                              {member.last_sign_in_at
+                                ? new Date(member.last_sign_in_at).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    }
+                                  )
+                                : "Never"}
+                            </td>
+                            <td className="whitespace-nowrap px-4 py-2 text-xs text-muted-foreground">
+                              {member.created_at
+                                ? new Date(member.created_at).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    }
+                                  )
+                                : "N/A"}
                             </td>
                             <td className="whitespace-nowrap px-4 py-2 text-right text-sm">
                               <Button
