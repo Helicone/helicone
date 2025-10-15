@@ -1037,6 +1037,34 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-tng-r1t2-chimera:chutes": {
+      "context": 130000,
+      "crossRegion": false,
+      "maxTokens": 163840,
+      "modelId": "tngtech/DeepSeek-TNG-R1T2-Chimera",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "chutes",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "deepseek/deepseek-v3": {
     "deepseek-v3.1-terminus:deepinfra": {
@@ -3628,6 +3656,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "novita",
   ],
   "deepseek/deepseek-reasoner": [
+    "chutes",
     "deepinfra",
     "deepseek",
     "openrouter",
@@ -4241,6 +4270,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/deepseek-reasoner": {
+    "chutes": [
+      {
+        "input": 3e-7,
+        "output": 0.0000012,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "cacheMultipliers": {
@@ -4882,6 +4918,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "deepseek-tng-r1t2-chimera",
+      "providers": [
+        "chutes",
+      ],
+    },
+    {
       "model": "deepseek-v3",
       "providers": [
         "deepinfra",
@@ -5275,6 +5317,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
+      "modelCount": 1,
+      "provider": "chutes",
+    },
+    {
       "modelCount": 16,
       "provider": "deepinfra",
     },
@@ -5327,6 +5373,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-sonnet-4",
     "deepseek-r1-distill-llama-70b",
     "deepseek-reasoner",
+    "deepseek-tng-r1t2-chimera",
     "deepseek-v3",
     "deepseek-v3.1-terminus",
     "deepseek-v3.2",
@@ -5391,9 +5438,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 149,
-  "totalModelProviderConfigs": 149,
-  "totalModelsWithPtb": 65,
-  "totalProviders": 13,
+  "totalEndpoints": 150,
+  "totalModelProviderConfigs": 150,
+  "totalModelsWithPtb": 66,
+  "totalProviders": 14,
 }
 `;
