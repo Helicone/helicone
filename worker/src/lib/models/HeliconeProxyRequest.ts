@@ -2,10 +2,17 @@
 
 import { Provider } from "@helicone-package/llm-mapper/types";
 import { approvedDomains } from "@helicone-package/cost/providers/mappings";
+import { registry } from "@helicone-package/cost/models/registry";
+import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
+import type { ModelProviderName } from "@helicone-package/cost/models/providers";
+import type { ModelProviderConfig } from "@helicone-package/cost/models/types";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
 import { Result, ok } from "../util/results";
-import { IHeliconeHeaders } from "./HeliconeHeaders";
+import {
+  HeliconeTokenLimitExceptionHandler,
+  IHeliconeHeaders,
+} from "./HeliconeHeaders";
 
 import { parseJSXObject } from "@helicone/prompts";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
@@ -25,6 +32,226 @@ export type RetryOptions = {
 
 export type HeliconeProperties = Record<string, string>;
 type Nullable<T> = T | null;
+
+const DEFAULT_TOKEN_HEURISTIC = 0.25;
+
+const MODEL_TOKEN_HEURISTICS: Record<string, number> = {
+  "gpt-4o": 0.25,
+  "gpt-3.5-turbo": 0.2,
+  "gpt-4o-mini": 0.25,
+  "gpt-4o-nano": 0.15,
+  "gpt-o3": 0.25,
+};
+
+type ParsedRequestPayload = {
+  model?: string;
+  messages?: LLMMessage[];
+  tools?: unknown;
+};
+
+export type LLMMessage = {
+  role?: string;
+  content?: unknown;
+  [key: string]: unknown;
+};
+
+const NORMALIZATION_PATTERNS: Array<[RegExp, string]> = [
+  [/<!--[\s\S]*?-->/g, ""], // strip HTML comments
+  [/\b(id|uuid):[a-f0-9-]{36}\b/gi, ""], // remove UUID-like identifiers
+  [/\s*,\s*/g, ","],
+  [/\s*\.\s*/g, "."],
+  [/\s*:\s*/g, ":"],
+  [/\s*;\s*/g, ";"],
+  [/\s*\(\s*/g, "("],
+  [/\s*\)\s*/g, ")"],
+  [/\s*\{\s*/g, "{"],
+  [/\s*\}\s*/g, "}"],
+  [/\s*\[\s*/g, "["],
+  [/\s*\]\s*/g, "]"],
+  [/\s*=\s*/g, "="],
+  [/\s*>\s*/g, ">"],
+  [/\s*<\s*/g, "<"],
+];
+
+/**
+ * Produces a compact representation of a text body by collapsing whitespace,
+ * stripping superfluous formatting, and optionally trimming the result.
+ */
+export function truncateAndNormalizeText(
+  input: string | null | undefined
+): string {
+  console.log("input", input);
+  if (!input) {
+    return "";
+  }
+
+  let normalized = input;
+
+  console.log("original text", normalized);
+
+  for (const [pattern, replacement] of NORMALIZATION_PATTERNS) {
+    normalized = normalized.replace(pattern, replacement);
+  }
+
+  normalized = normalized.replace(/\s+/g, " ").trim();
+
+  console.log("truncated text", normalized);
+
+  return normalized;
+}
+
+export function middleOutMessagesToFitLimit<T extends LLMMessage>(
+  messages: T[],
+  maxTokens: number,
+  estimateTokens: (candidate: T[]) => number | null
+): T[] {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return [];
+  }
+
+  if (!Number.isFinite(maxTokens) || maxTokens <= 0) {
+    return messages.slice(0, Math.min(messages.length, 1));
+  }
+
+  // Helper to rebuild a candidate messages array from kept chunks
+  // while preserving roles and non-string contents.
+  type Chunk = {
+    messageIndex: number;
+    order: number; // original order within the message
+    content: string;
+  };
+
+  const original: T[] = messages.slice();
+
+  // Build chunk list from all string contents, preserving message index and order.
+  const CHUNK_CHAR_SIZE = 512; // heuristic chunk size; balances precision and performance
+  const chunks: Chunk[] = [];
+  const stringMessageIndexes = new Set<number>();
+
+  for (let i = 0; i < original.length; i++) {
+    const m = original[i];
+    if (typeof m?.content === "string" && m.content.length > 0) {
+      stringMessageIndexes.add(i);
+      const text = m.content;
+      let order = 0;
+      for (let start = 0; start < text.length; start += CHUNK_CHAR_SIZE) {
+        const part = text.slice(
+          start,
+          Math.min(start + CHUNK_CHAR_SIZE, text.length)
+        );
+        chunks.push({ messageIndex: i, order: order++, content: part });
+      }
+    }
+  }
+
+  // If there are no string chunks, fall back to removing entire messages
+  // (previous behavior). This handles non-string content gracefully.
+  if (chunks.length === 0) {
+    const working = original.slice();
+    let currentEstimate = estimateTokens(working);
+    if (currentEstimate === null || currentEstimate <= maxTokens) {
+      return working;
+    }
+
+    while (working.length > 2) {
+      const middleIndex = Math.floor(working.length / 2);
+      working.splice(middleIndex, 1);
+      currentEstimate = estimateTokens(working);
+      if (currentEstimate === null || currentEstimate <= maxTokens) {
+        break;
+      }
+    }
+    return working;
+  }
+
+  // Helper: rebuild messages from a set of kept chunks.
+  function buildMessagesFromKept(kept: Set<number>): T[] {
+    // Map messageIndex -> concatenated content from kept chunks (in order)
+    const byMessage = new Map<number, string[]>();
+    for (let idx = 0; idx < chunks.length; idx++) {
+      if (!kept.has(idx)) continue;
+      const c = chunks[idx];
+      if (!byMessage.has(c.messageIndex)) byMessage.set(c.messageIndex, []);
+      byMessage.get(c.messageIndex)!.push(c.content);
+    }
+
+    return original.map((m, i) => {
+      const clone = { ...(m as any) } as T;
+      if (typeof clone?.content === "string") {
+        const parts = byMessage.get(i) ?? [];
+        (clone as any).content = parts.join("");
+      }
+      return clone;
+    });
+  }
+
+  // Helper: candidate with only one specific chunk, for per-chunk token estimate.
+  function buildMessagesWithOnlyChunk(chunkIndex: number): T[] {
+    const target = chunks[chunkIndex];
+    return original.map((m, i) => {
+      const clone = { ...(m as any) } as T;
+      if (typeof clone?.content === "string") {
+        (clone as any).content =
+          i === target.messageIndex ? target.content : "";
+      }
+      return clone;
+    });
+  }
+
+  // Compute baseline (tokens with tools etc., but no message text).
+  const baseTokens = estimateTokens([]) ?? 0;
+
+  // Start with all chunks kept.
+  const kept = new Set<number>(chunks.map((_, i) => i));
+
+  // Current estimate with everything kept.
+  let currentEstimate = estimateTokens(buildMessagesFromKept(kept));
+  if (currentEstimate === null || currentEstimate <= maxTokens) {
+    return buildMessagesFromKept(kept);
+  }
+
+  // Remove middle chunks iteratively until under limit or nothing left.
+  // Always target the current middle of the remaining kept chunk indexes.
+  while (
+    kept.size > 0 &&
+    (currentEstimate ?? Number.MAX_SAFE_INTEGER) > maxTokens
+  ) {
+    const keptIndexes = Array.from(kept).sort((a, b) => a - b);
+    const mid = keptIndexes[Math.floor(keptIndexes.length / 2)];
+
+    // Estimate how many tokens this middle chunk contributes.
+    const onlyChunkTokens =
+      (estimateTokens(buildMessagesWithOnlyChunk(mid)) ?? baseTokens) -
+      baseTokens;
+
+    kept.delete(mid);
+
+    // Update currentEstimate by subtracting the chunk’s contribution; fallback to recompute if null.
+    if (currentEstimate !== null) {
+      currentEstimate = Math.max(
+        baseTokens,
+        currentEstimate - Math.max(0, onlyChunkTokens)
+      );
+    } else {
+      currentEstimate = estimateTokens(buildMessagesFromKept(kept));
+    }
+
+    // Safety: if estimate behaves oddly, recompute occasionally.
+    if (kept.size % 8 === 0) {
+      currentEstimate = estimateTokens(buildMessagesFromKept(kept));
+    }
+  }
+
+  // Build final messages and filter out any emptied string-content messages for cleanliness.
+  const finalMessages = buildMessagesFromKept(kept).filter((m) => {
+    if (typeof (m as any)?.content === "string") {
+      return ((m as any).content as string).length > 0;
+    }
+    return true; // keep non-string content messages
+  });
+
+  return finalMessages as T[];
+}
 
 // This neatly formats and holds all of the state that a request can come into Helicone
 export interface HeliconeProxyRequest {
@@ -79,6 +306,316 @@ export class HeliconeProxyRequestMapper {
     private escrowInfo?: EscrowInfo
   ) {
     this.tokenCalcUrl = env.VALHALLA_URL;
+  }
+
+  private getTokenHeuristic(model: string | null | undefined): number {
+    if (!model) {
+      return DEFAULT_TOKEN_HEURISTIC;
+    }
+
+    const normalizedModel = model.toLowerCase();
+    if (normalizedModel in MODEL_TOKEN_HEURISTICS) {
+      return MODEL_TOKEN_HEURISTICS[normalizedModel];
+    }
+
+    for (const [prefix, heuristic] of Object.entries(MODEL_TOKEN_HEURISTICS)) {
+      if (normalizedModel.startsWith(prefix)) {
+        return heuristic;
+      }
+    }
+
+    return DEFAULT_TOKEN_HEURISTIC;
+  }
+
+  private extractModelCandidates(modelField: unknown): string[] {
+    if (typeof modelField !== "string") {
+      return [];
+    }
+
+    return modelField
+      .split(",")
+      .map((candidate) => candidate.trim())
+      .filter((candidate) => candidate.length > 0);
+  }
+
+  private getPrimaryModel(modelField: unknown): string | null {
+    const candidates = this.extractModelCandidates(modelField);
+    return candidates[0] ?? null;
+  }
+
+  private selectFallbackModel(modelField: unknown): string | null {
+    const candidates = this.extractModelCandidates(modelField);
+    if (candidates.length === 0) {
+      return null;
+    }
+
+    // Prefer the second candidate if present, otherwise fall back to the first.
+    return candidates[1] ?? candidates[0];
+  }
+
+  private serializeTools(tools: unknown): string {
+    if (!tools) {
+      return "";
+    }
+
+    if (typeof tools === "string") {
+      return tools;
+    }
+
+    try {
+      return JSON.stringify(tools);
+    } catch (error) {
+      console.error("[Helicone] Failed to serialize tools for token estimate");
+      return "";
+    }
+  }
+
+  private parseRequestPayload(
+    body: ValidRequestBody
+  ): ParsedRequestPayload | null {
+    if (!body || typeof body !== "string") {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(body);
+      if (!parsed || typeof parsed !== "object") {
+        return null;
+      }
+      return parsed as ParsedRequestPayload;
+    } catch (error) {
+      console.error("[Helicone] Failed to parse request body", error);
+      return null;
+    }
+  }
+
+  private estimateTokenCount(
+    parsedBody: ParsedRequestPayload | null,
+    primaryModel: string | null
+  ): number | null {
+    if (!parsedBody) {
+      return null;
+    }
+
+    try {
+      let contentText = "";
+      if (parsedBody.messages) {
+        for (const message of parsedBody.messages) {
+          if (typeof message?.content === "string") {
+            contentText += message.content;
+          }
+        }
+      }
+      const toolsText = this.serializeTools(parsedBody.tools);
+
+      const combinedText = [toolsText, contentText]
+        .filter((segment) => segment.length > 0)
+        .join(" ");
+
+      const heuristic = this.getTokenHeuristic(primaryModel ?? undefined);
+      const estimated = Math.ceil(
+        (combinedText.length + toolsText.length) * heuristic
+      );
+
+      console.log("estimatedToken count", estimated);
+
+      return Number.isFinite(estimated) ? estimated : null;
+    } catch (error) {
+      console.error("[Helicone] Failed to estimate request token usage", error);
+      return null;
+    }
+  }
+
+  private getModelTokenLimit(model: string | null | undefined): number | null {
+    if (!model) {
+      return null;
+    }
+
+    const providerName = heliconeProviderToModelProviderName(this.provider);
+    if (!providerName) {
+      return null;
+    }
+
+    const config = this.findModelProviderConfig(model, providerName);
+    if (!config || typeof config.contextLength !== "number") {
+      return null;
+    }
+
+    return config.contextLength;
+  }
+
+  private findModelProviderConfig(
+    model: string,
+    providerName: ModelProviderName
+  ): ModelProviderConfig | null {
+    const directConfig = this.lookupProviderConfig(model, providerName);
+    if (directConfig) {
+      return directConfig;
+    }
+
+    return this.searchProviderModels(model, providerName);
+  }
+
+  private lookupProviderConfig(
+    model: string,
+    providerName: ModelProviderName
+  ): ModelProviderConfig | null {
+    const candidates = this.buildLookupCandidates(model);
+    for (const candidate of candidates) {
+      const result = registry.getModelProviderConfigByProviderModelId(
+        candidate,
+        providerName
+      );
+      if (result.error === null && result.data) {
+        return result.data;
+      }
+    }
+    return null;
+  }
+
+  private searchProviderModels(
+    model: string,
+    providerName: ModelProviderName
+  ): ModelProviderConfig | null {
+    const providerModelsResult = registry.getProviderModels(providerName);
+    if (providerModelsResult.error !== null || !providerModelsResult.data) {
+      return null;
+    }
+
+    for (const canonicalModel of providerModelsResult.data.values()) {
+      const configsResult = registry.getModelProviderConfigs(canonicalModel);
+      if (configsResult.error !== null || !configsResult.data) {
+        continue;
+      }
+
+      for (const config of configsResult.data) {
+        if (config.provider !== providerName) {
+          continue;
+        }
+
+        if (this.modelIdentifierMatches(model, config.providerModelId)) {
+          return config;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private buildLookupCandidates(model: string): string[] {
+    const trimmed = model.trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    const candidates = new Set<string>();
+    candidates.add(trimmed);
+
+    const lower = trimmed.toLowerCase();
+    if (lower !== trimmed) {
+      candidates.add(lower);
+    }
+
+    const delimiters = [":", "-"];
+    for (const delimiter of delimiters) {
+      let current = trimmed;
+      while (current.includes(delimiter)) {
+        current = current.substring(0, current.lastIndexOf(delimiter));
+        const normalized = current.trim();
+        if (!normalized || candidates.has(normalized)) {
+          continue;
+        }
+        candidates.add(normalized);
+        candidates.add(normalized.toLowerCase());
+      }
+    }
+
+    return Array.from(candidates);
+  }
+
+  private modelIdentifierMatches(
+    requestModel: string,
+    providerModelId: string
+  ): boolean {
+    const requestVariants = this.buildModelIdentifierVariants(requestModel);
+    const providerVariants = this.buildModelIdentifierVariants(providerModelId);
+
+    for (const requestVariant of requestVariants) {
+      for (const providerVariant of providerVariants) {
+        if (requestVariant === providerVariant) {
+          return true;
+        }
+
+        if (
+          requestVariant.endsWith(`/${providerVariant}`) ||
+          requestVariant.endsWith(`:${providerVariant}`) ||
+          requestVariant.endsWith(`-${providerVariant}`)
+        ) {
+          return true;
+        }
+
+        if (
+          providerVariant.endsWith(`/${requestVariant}`) ||
+          providerVariant.endsWith(`:${requestVariant}`) ||
+          providerVariant.endsWith(`-${requestVariant}`)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    const sanitizedRequest = this.sanitizeModelIdentifier(requestModel);
+    const sanitizedProvider = this.sanitizeModelIdentifier(providerModelId);
+
+    if (sanitizedRequest.length === 0 || sanitizedProvider.length === 0) {
+      return false;
+    }
+
+    const index = sanitizedRequest.indexOf(sanitizedProvider);
+    if (index > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private buildModelIdentifierVariants(identifier: string): string[] {
+    const trimmed = identifier.trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    const lower = trimmed.toLowerCase();
+    const variants = new Set<string>([trimmed, lower]);
+
+    const delimiterParts = lower.split(/[:\/]/);
+    if (delimiterParts.length > 1) {
+      const lastPart = delimiterParts[delimiterParts.length - 1];
+      if (lastPart) {
+        variants.add(lastPart);
+      }
+    }
+
+    return Array.from(variants).filter((variant) => variant.length > 0);
+  }
+
+  private sanitizeModelIdentifier(identifier: string): string {
+    return identifier.toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  private resolvePrimaryModel(
+    parsedBody: ParsedRequestPayload | null
+  ): string | null {
+    const headerModel = this.getPrimaryModel(
+      this.request.heliconeHeaders.modelOverride
+    );
+
+    if (!parsedBody) {
+      return headerModel;
+    }
+
+    const bodyModel = this.getPrimaryModel(parsedBody.model);
+    return bodyModel ?? headerModel;
   }
 
   private async getHeliconeTemplate() {
@@ -162,6 +699,12 @@ export class HeliconeProxyRequestMapper {
       body = await this.request.unsafeGetBodyText();
     }
 
+    const bodyWithTokenLimitExceptionHandler =
+      this.applyTokenLimitExceptionHandler(body);
+    if (bodyWithTokenLimitExceptionHandler) {
+      body = bodyWithTokenLimitExceptionHandler;
+    }
+
     return {
       data: {
         heliconePromptTemplate: await this.getHeliconeTemplate(),
@@ -195,6 +738,151 @@ export class HeliconeProxyRequestMapper {
       },
       error: null,
     };
+  }
+
+  public applyTokenLimitExceptionHandler(
+    body: ValidRequestBody
+  ): ValidRequestBody | undefined {
+    const handler = this.request.heliconeHeaders.tokenLimitExceptionHandler;
+    if (!handler) {
+      return;
+    }
+
+    const parsedBody = this.parseRequestPayload(body);
+    if (!parsedBody) {
+      return;
+    }
+
+    const primaryModel = this.resolvePrimaryModel(parsedBody);
+    const estimatedTokens = this.estimateTokenCount(parsedBody, primaryModel);
+
+    if (!primaryModel) {
+      return;
+    }
+
+    const tokenLimit = 200; //this.getModelTokenLimit(primaryModel);
+
+    if (
+      estimatedTokens === null ||
+      tokenLimit === null ||
+      estimatedTokens <= tokenLimit
+    ) {
+      return;
+    }
+
+    console.log("primaryModel", primaryModel);
+    console.log("estimatedTokens", estimatedTokens);
+    console.log("tokenLimit", tokenLimit);
+
+    switch (handler) {
+      case HeliconeTokenLimitExceptionHandler.Truncate:
+        console.log("[Helicone] token limit exception handler: Truncate");
+        return this.applyTruncateStrategy(parsedBody);
+      case HeliconeTokenLimitExceptionHandler.MiddleOut:
+        console.log("[Helicone] token limit exception handler: MiddleOut");
+        const middleoutResponse = this.applyMiddleOutStrategy(
+          parsedBody,
+          primaryModel,
+          tokenLimit
+        );
+        console.log("middleoutResponse", middleoutResponse);
+        return middleoutResponse;
+      case HeliconeTokenLimitExceptionHandler.Fallback:
+        console.log("[Helicone] token limit exception handler: Fallback");
+        return this.applyFallbackStrategy(
+          parsedBody,
+          primaryModel,
+          estimatedTokens,
+          tokenLimit
+        );
+      default:
+        return;
+    }
+  }
+
+  private applyTruncateStrategy(
+    parsedBody: ParsedRequestPayload
+  ): ValidRequestBody | undefined {
+    console.log("applyTruncateStrategy", parsedBody.messages);
+    if (!parsedBody.messages) {
+      return;
+    }
+
+    for (const message of parsedBody.messages) {
+      if (typeof message?.content === "string") {
+        message.content = truncateAndNormalizeText(message.content);
+      }
+    }
+
+    return;
+  }
+
+  private applyMiddleOutStrategy(
+    parsedBody: ParsedRequestPayload,
+    primaryModel: string,
+    tokenLimit: number
+  ): ValidRequestBody | undefined {
+    if (!Array.isArray(parsedBody.messages)) {
+      console.log("parsedbody.messages not array, quitting");
+      return;
+    }
+
+    const originalMessages = (parsedBody.messages ?? []) as LLMMessage[];
+    console.log("originalMessages", originalMessages);
+
+    const trimmedMessages = middleOutMessagesToFitLimit(
+      originalMessages,
+      tokenLimit,
+      (candidate) =>
+        this.estimateTokenCount(
+          {
+            ...parsedBody,
+            messages: candidate,
+          },
+          primaryModel
+        )
+    );
+
+    console.log("trimmedMessages", trimmedMessages);
+
+    const changed =
+      JSON.stringify(trimmedMessages) !== JSON.stringify(originalMessages);
+    if (!changed) {
+      return;
+    }
+
+    const finalPayload: ParsedRequestPayload = {
+      ...parsedBody,
+      messages: trimmedMessages,
+    };
+
+    return JSON.stringify(finalPayload);
+  }
+
+  private applyFallbackStrategy(
+    parsedBody: ParsedRequestPayload,
+    primaryModel: string,
+    estimatedTokens: number,
+    tokenLimit: number
+  ): ValidRequestBody | undefined {
+    const fallbackModel = this.selectFallbackModel(parsedBody.model);
+    if (!fallbackModel) {
+      return;
+    }
+
+    if (estimatedTokens >= tokenLimit) {
+      parsedBody.model = fallbackModel;
+
+      this.request.injectCustomProperty(
+        "Helicone-Token-Fallback-Model",
+        fallbackModel
+      );
+
+      return JSON.stringify(parsedBody);
+    }
+
+    parsedBody.model = primaryModel;
+    return JSON.stringify(parsedBody);
   }
 
   private validateApiConfiguration(api_base: string | undefined): boolean {
