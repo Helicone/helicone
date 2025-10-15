@@ -1490,6 +1490,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "meta/hermes": {
+    "hermes-2-pro-llama-3-8b:novita": {
+      "context": 8192,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "nousresearch/hermes-2-pro-llama-3-8b",
+      "parameters": [
+        "functions",
+        "max_tokens",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "meta/llama": {
     "llama-3.1-8b-instant:groq": {
       "context": 131072,
@@ -3552,6 +3579,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "google/gemma-3": [
     "deepinfra",
   ],
+  "meta/hermes": [
+    "novita",
+  ],
   "meta/llama": [
     "deepinfra",
     "deepinfra",
@@ -4313,6 +4343,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "meta/hermes": {
+    "novita": [
+      {
+        "input": 1.4e-7,
+        "output": 1.4e-7,
+        "threshold": 0,
+      },
+    ],
+  },
   "meta/llama": {
     "deepinfra": [
       {
@@ -4894,6 +4933,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "hermes-2-pro-llama-3-8b",
+      "providers": [
+        "novita",
+      ],
+    },
+    {
       "model": "kimi-k2",
       "providers": [
         "groq",
@@ -5107,7 +5152,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 13,
+      "modelCount": 14,
       "provider": "novita",
     },
     {
@@ -5165,6 +5210,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "grok-4-fast-non-reasoning",
     "grok-4-fast-reasoning",
     "grok-code-fast-1",
+    "hermes-2-pro-llama-3-8b",
     "kimi-k2",
     "kimi-k2-0905",
     "kimi-k2-instruct",
@@ -5201,9 +5247,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 144,
-  "totalModelProviderConfigs": 144,
-  "totalModelsWithPtb": 63,
+  "totalEndpoints": 145,
+  "totalModelProviderConfigs": 145,
+  "totalModelsWithPtb": 64,
   "totalProviders": 13,
 }
 `;

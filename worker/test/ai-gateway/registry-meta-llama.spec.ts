@@ -5455,5 +5455,356 @@ describe("Meta Llama Registry Tests", () => {
           },
         }));
     });
+
+    describe("hermes-2-pro-llama-3-8b", () => {
+      it("should handle novita provider", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "nousresearch/hermes-2-pro-llama-3-8b",
+                data: createOpenAIMockResponse("nousresearch/hermes-2-pro-llama-3-8b"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select novita provider when none specified", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "nousresearch/hermes-2-pro-llama-3-8b",
+                data: createOpenAIMockResponse("nousresearch/hermes-2-pro-llama-3-8b"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with novita provider", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "nousresearch/hermes-2-pro-llama-3-8b",
+                data: createOpenAIMockResponse("nousresearch/hermes-2-pro-llama-3-8b"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle response format with novita provider", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Generate JSON data" }],
+              response_format: { type: "json_object" },
+              temperature: 0.1,
+              top_p: 0.9,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "nousresearch/hermes-2-pro-llama-3-8b",
+                data: createOpenAIMockResponse("nousresearch/hermes-2-pro-llama-3-8b"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_object",
+                    "temperature",
+                    "top_p",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters with novita provider", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test comprehensive parameters" },
+              ],
+              max_tokens: 1000,
+              temperature: 0.8,
+              top_p: 0.95,
+              stop: ["STOP"],
+              repetition_penalty: 1.1,
+              top_k: 40,
+              seed: 12345,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "nousresearch/hermes-2-pro-llama-3-8b",
+                data: createOpenAIMockResponse("nousresearch/hermes-2-pro-llama-3-8b"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "max_tokens",
+                    "temperature",
+                    "top_p",
+                    "stop",
+                    "repetition_penalty",
+                    "top_k",
+                    "seed",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle structured outputs with novita provider", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Generate structured data" },
+              ],
+              response_format: {
+                type: "json_schema",
+                json_schema: {
+                  name: "user_data",
+                  schema: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      age: { type: "number" },
+                    },
+                    required: ["name", "age"],
+                  },
+                },
+              },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "nousresearch/hermes-2-pro-llama-3-8b",
+                data: createOpenAIMockResponse("nousresearch/hermes-2-pro-llama-3-8b"),
+                expects: {
+                  ...novitaAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_schema",
+                    "user_data",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("Error scenarios - hermes-2-pro-llama-3-8b with Novita Provider", () => {
+      it("should handle Novita provider failure", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "Novita service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from Novita", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle authentication failure from Novita", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+
+      it("should handle model not found error from Novita", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle timeout from Novita", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 408,
+                errorMessage: "Request timeout",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("Provider validation - hermes-2-pro-llama-3-8b with Novita", () => {
+      it("should construct correct Novita URL for hermes-2-pro-llama-3-8b", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "nousresearch/hermes-2-pro-llama-3-8b",
+                data: createOpenAIMockResponse("nousresearch/hermes-2-pro-llama-3-8b"),
+                expects: novitaAuthExpectations,
+                customVerify: (call) => {
+                  // Verify that the URL is correctly constructed
+                  // Base URL: https://api.novita.ai/
+                  // Built URL: https://api.novita.ai/openai/v1/chat/completions
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle provider model ID mapping correctly for Novita", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "nousresearch/hermes-2-pro-llama-3-8b",
+                data: createOpenAIMockResponse("nousresearch/hermes-2-pro-llama-3-8b"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle request body mapping for Novita", () =>
+        runGatewayTest({
+          model: "hermes-2-pro-llama-3-8b/novita",
+          request: {
+            bodyMapping: "NO_MAPPING",
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "nousresearch/hermes-2-pro-llama-3-8b",
+                data: createOpenAIMockResponse("nousresearch/hermes-2-pro-llama-3-8b"),
+                expects: {
+                  ...novitaAuthExpectations,
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
   });
 });
