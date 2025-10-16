@@ -48,22 +48,17 @@ const NORMALIZATION_PATTERNS: Array<[RegExp, string]> = [
 export function truncateAndNormalizeText(
   input: string | null | undefined
 ): string {
-  console.log("input", input);
   if (!input) {
     return "";
   }
 
   let normalized = input;
 
-  console.log("original text", normalized);
-
   for (const [pattern, replacement] of NORMALIZATION_PATTERNS) {
     normalized = normalized.replace(pattern, replacement);
   }
 
   normalized = normalized.replace(/\s+/g, " ").trim();
-
-  console.log("truncated text", normalized);
 
   return normalized;
 }
@@ -662,7 +657,9 @@ export function applyTruncateStrategy(
     }
   }
 
-  return;
+  console.log("truncatedText", parsedBody.messages);
+
+  return JSON.stringify(parsedBody);
 }
 
 export function applyMiddleOutStrategy(
