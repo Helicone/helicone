@@ -1137,6 +1137,139 @@ export class AdminController extends Controller {
     return { organizations, total, hasMore };
   }
 
+  @Post("/user-search")
+  public async userSearch(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      query: string;
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<{
+    users: Array<{
+      id: string;
+      email: string;
+      name: string | null;
+      created_at: string;
+      last_sign_in_at: string | null;
+      is_admin: boolean;
+      organizations: {
+        id: string;
+        name: string | null;
+        role: string | null;
+      }[];
+    }>;
+    total: number;
+    hasMore: boolean;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { query, limit = 50, offset = 0 } = body;
+
+    if (!query || query.trim().length === 0) {
+      return { users: [], total: 0, hasMore: false };
+    }
+
+    const sanitizedQuery = query.trim();
+    const safeLimit = Math.min(Math.max(limit, 1), 100);
+    const safeOffset = Math.max(offset, 0);
+
+    const userQuery = `
+      WITH matching_users AS (
+        SELECT
+          u.id,
+          u.email,
+          u.created_at,
+          u.last_sign_in_at,
+          u.raw_user_meta_data->>'name' AS name,
+          CASE
+            WHEN LOWER(u.email) = LOWER($1) THEN 1
+            WHEN u.email ILIKE $1 || '%' THEN 2
+            WHEN u.email ILIKE '%' || $1 || '%' THEN 3
+            WHEN u.id::text = $1 THEN 4
+            ELSE 5
+          END AS match_score
+        FROM auth.users u
+        WHERE
+          u.email ILIKE '%' || $1 || '%'
+          OR u.id::text = $1
+        ORDER BY match_score, LOWER(u.email)
+        LIMIT $2 OFFSET $3
+      )
+      SELECT
+        mu.id,
+        mu.email,
+        mu.created_at,
+        mu.last_sign_in_at,
+        mu.name,
+        COALESCE(
+          jsonb_agg(
+            DISTINCT jsonb_build_object(
+              'id', om.organization,
+              'name', org.name,
+              'role', om.org_role
+            )
+          ) FILTER (WHERE om.organization IS NOT NULL),
+          '[]'::jsonb
+        ) AS organizations,
+        EXISTS(
+          SELECT 1 FROM admins a WHERE a.user_id = mu.id
+        ) AS is_admin,
+        mu.match_score
+      FROM matching_users mu
+      LEFT JOIN organization_member om ON om.member = mu.id
+      LEFT JOIN organization org ON org.id = om.organization
+      GROUP BY
+        mu.id,
+        mu.email,
+        mu.created_at,
+        mu.last_sign_in_at,
+        mu.name,
+        mu.match_score
+      ORDER BY mu.match_score, mu.email
+    `;
+
+    const countQuery = `
+      SELECT COUNT(*)::int as total
+      FROM auth.users u
+      WHERE
+        u.email ILIKE '%' || $1 || '%'
+        OR u.id::text = $1
+    `;
+
+    const [userResult, countResult] = await Promise.all([
+      dbExecute<{
+        id: string;
+        email: string;
+        created_at: string;
+        last_sign_in_at: string | null;
+        name: string | null;
+        organizations: {
+          id: string;
+          name: string | null;
+          role: string | null;
+        }[] | null;
+        is_admin: boolean;
+        match_score: number;
+      }>(userQuery, [sanitizedQuery, safeLimit, safeOffset]),
+      dbExecute<{ total: number }>(countQuery, [sanitizedQuery]),
+    ]);
+
+    const users =
+      userResult.data?.map(
+        ({ match_score: _match, organizations, ...user }) => ({
+          ...user,
+          organizations: Array.isArray(organizations) ? organizations : [],
+        })
+      ) ?? [];
+
+    const total = Number(countResult.data?.[0]?.total ?? 0);
+    const hasMore = safeOffset + users.length < total;
+
+    return { users, total, hasMore };
+  }
+
   @Delete("/org/{orgId}/member/{memberId}")
   public async removeOrgMember(
     @Request() request: JawnAuthenticatedRequest,

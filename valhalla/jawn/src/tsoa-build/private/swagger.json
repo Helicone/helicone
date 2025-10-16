@@ -56573,6 +56573,133 @@
 				}
 			}
 		},
+		"/v1/admin/user-search": {
+			"post": {
+				"operationId": "UserSearch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"hasMore": {
+											"type": "boolean"
+										},
+										"total": {
+											"type": "number",
+											"format": "double"
+										},
+										"users": {
+											"items": {
+												"properties": {
+													"organizations": {
+														"items": {
+															"properties": {
+																"role": {
+																	"type": "string",
+																	"nullable": true
+																},
+																"name": {
+																	"type": "string",
+																	"nullable": true
+																},
+																"id": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"role",
+																"name",
+																"id"
+															],
+															"type": "object"
+														},
+														"type": "array"
+													},
+													"is_admin": {
+														"type": "boolean"
+													},
+													"last_sign_in_at": {
+														"type": "string",
+														"nullable": true
+													},
+													"created_at": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string",
+														"nullable": true
+													},
+													"email": {
+														"type": "string"
+													},
+													"id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"organizations",
+													"is_admin",
+													"last_sign_in_at",
+													"created_at",
+													"name",
+													"email",
+													"id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"hasMore",
+										"total",
+										"users"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"offset": {
+										"type": "number",
+										"format": "double"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									},
+									"query": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"query"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/admin/org/{orgId}/member/{memberId}": {
 			"delete": {
 				"operationId": "RemoveOrgMember",
