@@ -91,6 +91,43 @@ export const endpoints = {
       "*": {},
     },
   },
+  "kimi-k2-0905:deepinfra": {
+    providerModelId: "moonshotai/Kimi-K2-Instruct-0905",
+    provider: "deepinfra",
+    author: "moonshotai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000005, // $0.50/1M tokens
+        output: 0.000002, // $2.00/1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.8, // $0.40/1M tokens (0.8x of input)
+        },
+      },
+    ],
+    quantization: "fp4",
+    contextLength: 256_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "kimi-k2:openrouter": {
     provider: "openrouter",
     author: "moonshotai",
@@ -185,7 +222,7 @@ export const endpoints = {
       "top_k",
       "min_p",
       "repetition_penalty",
-      "logit_bias"
+      "logit_bias",
     ],
     ptbEnabled: true,
     endpointConfigs: {
