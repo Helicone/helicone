@@ -41,7 +41,7 @@
     "cors": "^2.8.5",
     "csv-writer": "^1.6.0",
     "dateformat": "^5.0.3",
-    "dd-trace": "^5.56.0",
+    "dd-trace": "5.62.0",
     "dotenv": "^16.3.1",
     "express": "^5.1.0",
     "express-openapi-validator": "^5.5.8",
