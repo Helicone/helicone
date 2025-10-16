@@ -544,6 +544,9 @@ export interface paths {
   "/v1/admin/org-search-fast": {
     post: operations["OrgSearchFast"];
   };
+  "/v1/admin/user-search": {
+    post: operations["UserSearch"];
+  };
   "/v1/admin/org/{orgId}/member/{memberId}": {
     delete: operations["RemoveOrgMember"];
     patch: operations["UpdateOrgMemberRole"];
@@ -19415,6 +19418,44 @@ export interface operations {
                 owner: string;
                 created_at: string;
                 name: string;
+                id: string;
+              })[];
+          };
+        };
+      };
+    };
+  };
+  UserSearch: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          offset?: number;
+          /** Format: double */
+          limit?: number;
+          query: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            hasMore: boolean;
+            /** Format: double */
+            total: number;
+            users: ({
+                organizations: ({
+                    role: string | null;
+                    name: string | null;
+                    id: string;
+                  })[];
+                is_admin: boolean;
+                last_sign_in_at: string | null;
+                created_at: string;
+                name: string | null;
+                email: string;
                 id: string;
               })[];
           };

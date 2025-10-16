@@ -10,6 +10,7 @@ import {
   Bell,
   Database,
   ChevronLeft,
+  User,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import {
@@ -33,6 +34,7 @@ const navigation = [
     items: [
       { name: "HQL", href: "/admin/hql", icon: Zap },
       { name: "Org Search", href: "/admin/org-search", icon: Users },
+      { name: "User Search", href: "/admin/user-search", icon: User },
       { name: "Top Orgs", href: "/admin/top-orgs", icon: BarChart },
       { name: "Metrics", href: "/admin/metrics", icon: BarChart },
     ],
