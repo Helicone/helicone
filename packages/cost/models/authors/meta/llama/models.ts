@@ -2,7 +2,7 @@ import { ModelConfig } from "../../../types";
 
 export const models = {
   "llama-4-scout": {
-    name: "Llama-4-Scout-17B-16E",
+    name: "Meta Llama 4 Scout 17B 16E",
     author: "meta-llama",
     description:
       "Llama 4 instruction-tuned MoE (17B, 16 experts) for fast, high-quality chat, tool use, and multilingual reasoning with balanced latency and cost.",
@@ -13,7 +13,7 @@ export const models = {
     tokenizer: "GPT",
   },
   "llama-4-maverick": {
-    name: "Llama-4-Maverick-17B-128E",
+    name: "Meta Llama 4 Maverick 17B 128E",
     author: "meta-llama",
     description:
       "Llama 4 instruction-tuned MoE (17B, 128 experts) targeting tougher reasoning and long-form tasks, trading more compute for higher response diversity and robustness.",
@@ -24,7 +24,7 @@ export const models = {
     tokenizer: "GPT",
   },
   "llama-guard-4": {
-    name: "Llama-Guard-4-12B",
+    name: "Meta Llama Guard 4 12B",
     author: "meta-llama",
     description:
       "Meta’s latest safety/guardrail model for prompt and output moderation, aligning conversations to policy via classification and constrained generation.",
@@ -35,7 +35,7 @@ export const models = {
     tokenizer: "GPT",
   },
   "llama-3.3-70b-instruct": {
-    name: "Llama-3.3-70B-Versatile",
+    name: "Meta Llama 3.3 70B Versatile",
     author: "meta-llama",
     description:
       "Flagship 70B instruction-tuned model for high-quality chat, coding, and reasoning with strong instruction-following and multilingual support.",
@@ -46,7 +46,7 @@ export const models = {
     tokenizer: "GPT",
   },
   "llama-3.1-8b-instant": {
-    name: "Llama-3.1-8B-Instant",
+    name: "Meta Llama 3.1 8B Instant",
     author: "meta-llama",
     description:
       "Compact 8B general-purpose model offering efficient inference for chat, coding, and RAG workflows on limited compute.",
@@ -57,7 +57,7 @@ export const models = {
     tokenizer: "GPT",
   },
   "llama-prompt-guard-2-86m": {
-    name: "Llama-Prompt-Guard-2-86M",
+    name: "Meta Llama Prompt Guard 2 86M",
     author: "meta-llama",
     description:
       "86M parameter multilingual prompt safety classifier based on mDeBERTa-base, detecting prompt injections and jailbreaks across 8+ languages with adversarial-resistant tokenization.",
@@ -68,7 +68,7 @@ export const models = {
     tokenizer: "GPT",
   },
   "llama-prompt-guard-2-22m": {
-    name: "Llama-Prompt-Guard-2-22M",
+    name: "Meta Llama Prompt Guard 2 22M",
     author: "meta-llama",
     description:
       "22M parameter lightweight prompt safety classifier based on DeBERTa-xsmall, offering 75% reduced latency for detecting prompt injections and jailbreaks, primarily optimized for English.",

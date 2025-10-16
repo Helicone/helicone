@@ -457,6 +457,65 @@ export interface paths {
   "/v1/alert-banner": {
     get: operations["GetAlertBanners"];
   };
+  "/v1/helicone-sql/schema": {
+    /**
+     * Get database schema
+     * @description Get ClickHouse schema (tables and columns)
+     */
+    get: operations["GetClickHouseSchema"];
+  };
+  "/v1/helicone-sql/execute": {
+    /**
+     * Execute SQL query
+     * @description Execute a SQL query against ClickHouse
+     */
+    post: operations["ExecuteSql"];
+  };
+  "/v1/helicone-sql/download": {
+    /**
+     * Download query results as CSV
+     * @description Execute a SQL query and download results as CSV
+     */
+    post: operations["DownloadCsv"];
+  };
+  "/v1/helicone-sql/saved-queries": {
+    /**
+     * List saved queries
+     * @description Get all saved queries for the organization
+     */
+    get: operations["GetSavedQueries"];
+  };
+  "/v1/helicone-sql/saved-query/{queryId}": {
+    /**
+     * Get saved query
+     * @description Get a specific saved query by ID
+     */
+    get: operations["GetSavedQuery"];
+    /**
+     * Update saved query
+     * @description Update an existing saved query
+     */
+    put: operations["UpdateSavedQuery"];
+    /**
+     * Delete saved query
+     * @description Delete a saved query by ID
+     */
+    delete: operations["DeleteSavedQuery"];
+  };
+  "/v1/helicone-sql/saved-queries/bulk-delete": {
+    /**
+     * Bulk delete saved queries
+     * @description Delete multiple saved queries at once
+     */
+    post: operations["BulkDeleteSavedQueries"];
+  };
+  "/v1/helicone-sql/saved-query": {
+    /**
+     * Create saved query
+     * @description Create a new saved query
+     */
+    post: operations["CreateSavedQuery"];
+  };
   "/v1/admin/has-feature-flag": {
     post: operations["HasFeatureFlag"];
   };
@@ -478,6 +537,25 @@ export interface paths {
   };
   "/v1/admin/whodis": {
     post: operations["Whodis"];
+  };
+  "/v1/admin/org-search": {
+    post: operations["OrgSearch"];
+  };
+  "/v1/admin/org-search-fast": {
+    post: operations["OrgSearchFast"];
+  };
+  "/v1/admin/org/{orgId}/member/{memberId}": {
+    delete: operations["RemoveOrgMember"];
+    patch: operations["UpdateOrgMemberRole"];
+  };
+  "/v1/admin/org/{orgId}/delete": {
+    post: operations["DeleteOrg"];
+  };
+  "/v1/admin/org-usage-light/{orgId}": {
+    get: operations["GetOrgUsageLight"];
+  };
+  "/v1/admin/org-usage/{orgId}": {
+    get: operations["GetOrgUsage"];
   };
   "/v1/admin/settings/{name}": {
     get: operations["GetSetting"];
@@ -524,6 +602,23 @@ export interface paths {
   };
   "/v1/admin/helix-thread/{sessionId}": {
     get: operations["GetHelixThread"];
+  };
+  "/v1/admin/hql-enriched": {
+    post: operations["ExecuteEnrichedHql"];
+  };
+  "/v1/admin/saved-queries": {
+    /** @description Get all saved queries for admin (stored under admin org ID) */
+    get: operations["GetAdminSavedQueries"];
+  };
+  "/v1/admin/saved-query": {
+    /** @description Create a new saved query for admin (stored under admin org ID) */
+    post: operations["CreateAdminSavedQuery"];
+  };
+  "/v1/admin/saved-query/{queryId}": {
+    /** @description Delete a saved query for admin (stored under admin org ID) */
+    delete: operations["DeleteAdminSavedQuery"];
+    /** @description Update a saved query for admin (stored under admin org ID) */
+    patch: operations["UpdateAdminSavedQuery"];
   };
   "/v1/admin/wallet/gateway/dashboard_data": {
     post: operations["GetGatewayDashboardData"];
@@ -1589,7 +1684,7 @@ Json: JsonObject;
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita" | "nebius";
+    ModelProviderName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -3180,6 +3275,88 @@ Json: JsonObject;
       error: null;
     };
     "Result__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    ClickHouseTableColumn: {
+      name: string;
+      type: string;
+      default_type?: string;
+      default_expression?: string;
+      comment?: string;
+      codec_expression?: string;
+      ttl_expression?: string;
+    };
+    ClickHouseTableSchema: {
+      table_name: string;
+      columns: components["schemas"]["ClickHouseTableColumn"][];
+    };
+    "ResultSuccess_ClickHouseTableSchema-Array_": {
+      data: components["schemas"]["ClickHouseTableSchema"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ClickHouseTableSchema-Array.string_": components["schemas"]["ResultSuccess_ClickHouseTableSchema-Array_"] | components["schemas"]["ResultError_string_"];
+    ExecuteSqlResponse: {
+      /** Format: double */
+      rowCount: number;
+      /** Format: double */
+      size: number;
+      /** Format: double */
+      elapsedMilliseconds: number;
+      rows: components["schemas"]["Record_string.any_"][];
+    };
+    ResultSuccess_ExecuteSqlResponse_: {
+      data: components["schemas"]["ExecuteSqlResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExecuteSqlResponse.string_": components["schemas"]["ResultSuccess_ExecuteSqlResponse_"] | components["schemas"]["ResultError_string_"];
+    ExecuteSqlRequest: {
+      sql: string;
+    };
+    HqlSavedQuery: {
+      id: string;
+      organization_id: string;
+      name: string;
+      sql: string;
+      created_at: string;
+      updated_at: string;
+    };
+    ResultSuccess_Array_HqlSavedQuery__: {
+      data: components["schemas"]["HqlSavedQuery"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array_HqlSavedQuery_.string_": components["schemas"]["ResultSuccess_Array_HqlSavedQuery__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_HqlSavedQuery-or-null_": {
+      data: components["schemas"]["HqlSavedQuery"] | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery-or-null.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-or-null_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_void_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_void.string_": components["schemas"]["ResultSuccess_void_"] | components["schemas"]["ResultError_string_"];
+    BulkDeleteSavedQueriesRequest: {
+      ids: string[];
+    };
+    "ResultSuccess_HqlSavedQuery-Array_": {
+      data: components["schemas"]["HqlSavedQuery"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery-Array.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-Array_"] | components["schemas"]["ResultError_string_"];
+    CreateSavedQueryRequest: {
+      name: string;
+      sql: string;
+    };
+    ResultSuccess_HqlSavedQuery_: {
+      data: components["schemas"]["HqlSavedQuery"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery.string_": components["schemas"]["ResultSuccess_HqlSavedQuery_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
       data: {
           flags: string[];
@@ -15897,6 +16074,20 @@ Json: JsonObject;
       error: null;
     };
     "Result_InAppThread.string_": components["schemas"]["ResultSuccess_InAppThread_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__": {
+      data: {
+        /** Format: double */
+        rowCount: number;
+        /** Format: double */
+        size: number;
+        /** Format: double */
+        elapsedMilliseconds: number;
+        rows: components["schemas"]["Record_string.any_"][];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_": components["schemas"]["ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__"] | components["schemas"]["ResultError_string_"];
     DashboardData: {
       organizations: ({
           /** Format: double */
@@ -16205,7 +16396,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita" | "nebius";
+            providerName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
           }) | {
             error: string;
           };
@@ -18740,6 +18931,180 @@ export interface operations {
       };
     };
   };
+  /**
+   * Get database schema
+   * @description Get ClickHouse schema (tables and columns)
+   */
+  GetClickHouseSchema: {
+    responses: {
+      /** @description Array of table schemas with columns */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ClickHouseTableSchema-Array.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Execute SQL query
+   * @description Execute a SQL query against ClickHouse
+   */
+  ExecuteSql: {
+    /** @description The SQL query to execute */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExecuteSqlRequest"];
+      };
+    };
+    responses: {
+      /** @description Query results with rows and metadata */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExecuteSqlResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Download query results as CSV
+   * @description Execute a SQL query and download results as CSV
+   */
+  DownloadCsv: {
+    /** @description The SQL query to execute */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExecuteSqlRequest"];
+      };
+    };
+    responses: {
+      /** @description URL to download the CSV file */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * List saved queries
+   * @description Get all saved queries for the organization
+   */
+  GetSavedQueries: {
+    responses: {
+      /** @description Array of saved queries */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array_HqlSavedQuery_.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Get saved query
+   * @description Get a specific saved query by ID
+   */
+  GetSavedQuery: {
+    parameters: {
+      path: {
+        /** @description The ID of the saved query */
+        queryId: string;
+      };
+    };
+    responses: {
+      /** @description The saved query details */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-or-null.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Update saved query
+   * @description Update an existing saved query
+   */
+  UpdateSavedQuery: {
+    parameters: {
+      path: {
+        /** @description The ID of the saved query to update */
+        queryId: string;
+      };
+    };
+    /** @description The updated query details */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description The updated saved query */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Delete saved query
+   * @description Delete a saved query by ID
+   */
+  DeleteSavedQuery: {
+    parameters: {
+      path: {
+        /** @description The ID of the saved query to delete */
+        queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Bulk delete saved queries
+   * @description Delete multiple saved queries at once
+   */
+  BulkDeleteSavedQueries: {
+    /** @description Array of query IDs to delete */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkDeleteSavedQueriesRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Create saved query
+   * @description Create a new saved query
+   */
+  CreateSavedQuery: {
+    /** @description The saved query details */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description Array containing the created saved query */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
+        };
+      };
+    };
+  };
   HasFeatureFlag: {
     requestBody: {
       content: {
@@ -18960,6 +19325,200 @@ export interface operations {
                   id: string;
                 };
               })[];
+          };
+        };
+      };
+    };
+  };
+  OrgSearch: {
+    requestBody: {
+      content: {
+        "application/json": {
+          query: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: ({
+                usage: {
+                  /** Format: double */
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
+                  name: string;
+                  id: string;
+                };
+              })[];
+          };
+        };
+      };
+    };
+  };
+  OrgSearchFast: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          offset?: number;
+          /** Format: double */
+          limit?: number;
+          query: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            hasMore: boolean;
+            /** Format: double */
+            total: number;
+            organizations: ({
+                members: ({
+                    last_sign_in_at: string | null;
+                    role: string;
+                    name: string;
+                    email: string;
+                    id: string;
+                  })[];
+                subscription_status: string | null;
+                stripe_subscription_id: string | null;
+                stripe_customer_id: string | null;
+                tier: string;
+                owner: string;
+                created_at: string;
+                name: string;
+                id: string;
+              })[];
+          };
+        };
+      };
+    };
+  };
+  RemoveOrgMember: {
+    parameters: {
+      path: {
+        orgId: string;
+        memberId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrgMemberRole: {
+    parameters: {
+      path: {
+        orgId: string;
+        memberId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          role: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeleteOrg: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetOrgUsageLight: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            /** Format: double */
+            requests_last_30_days: number;
+            last_request_at: string | null;
+          };
+        };
+      };
+    };
+  };
+  GetOrgUsage: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            /** Format: double */
+            all_time_count: number;
+            monthly_usage: {
+                /** Format: double */
+                cost: number;
+                /** Format: double */
+                requestCount: number;
+                month: string;
+              }[];
+            /** Format: double */
+            requests_last_30_days: number;
+            /** Format: double */
+            total_requests: number;
           };
         };
       };
@@ -19261,6 +19820,95 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  ExecuteEnrichedHql: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          limit?: number;
+          sql: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get all saved queries for admin (stored under admin org ID) */
+  GetAdminSavedQueries: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Create a new saved query for admin (stored under admin org ID) */
+  CreateAdminSavedQuery: {
+    requestBody: {
+      content: {
+        "application/json": {
+          sql: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Delete a saved query for admin (stored under admin org ID) */
+  DeleteAdminSavedQuery: {
+    parameters: {
+      path: {
+        queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update a saved query for admin (stored under admin org ID) */
+  UpdateAdminSavedQuery: {
+    parameters: {
+      path: {
+        queryId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          sql: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
         };
       };
     };

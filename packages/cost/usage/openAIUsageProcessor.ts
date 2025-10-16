@@ -100,18 +100,18 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
 
     const usage = parsedResponse.usage || {};
-    
+
     const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
     const completionTokens = usage.completion_tokens ?? usage.output_tokens ?? 0;
-    
-    const promptDetails = usage.prompt_tokens_details || {};
-    const completionDetails = usage.completion_tokens_details || {};
-    
+
+    const promptDetails = usage.prompt_tokens_details || usage.input_tokens_details || {};
+    const completionDetails = usage.completion_tokens_details || usage.output_tokens_details || {};
+
     const cachedTokens = promptDetails.cached_tokens ?? 0;
     const promptAudioTokens = promptDetails.audio_tokens ?? 0;
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
-    
+
     const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
     const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
     
