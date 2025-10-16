@@ -23,6 +23,10 @@ tracer.init({
           span.setTag('http.response.size', parseInt(res.headers['content-length'] as string) || 0);
         }
       }
+    },
+    // Disable WebSocket plugin - it's causing crashes with undefined errors
+    ws: {
+      enabled: false
     }
   } as any
 }); // Enhanced for Universal Service Monitoring + size tracking
