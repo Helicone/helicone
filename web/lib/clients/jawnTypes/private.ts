@@ -19510,6 +19510,8 @@ export interface operations {
             all_time_count: number;
             monthly_usage: {
                 /** Format: double */
+                cost: number;
+                /** Format: double */
                 requestCount: number;
                 month: string;
               }[];
