@@ -350,7 +350,7 @@ export class SimpleAIGateway {
 
     const mappingType = attempt.endpoint.modelConfig.responseFormat ?? "OPENAI";
     const contentType = response.headers.get("content-type");
-    const isStream = contentType?.includes("text/event-stream");
+    const isStream = contentType?.includes("text/event-stream") || contentType?.includes("application/vnd.amazon.eventstream");
 
     try {
       if (mappingType === "OPENAI") {
