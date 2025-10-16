@@ -1185,11 +1185,9 @@ const OrgTableRow = ({
                               <ChartTooltip
                                 content={
                                   <ChartTooltipContent
-                                    valueFormatter={(value) => {
-                                      // Convert from nano cents to dollars
-                                      const dollars = (value as number) / 1_000_000_000;
-                                      return `$${dollars.toFixed(2)}`;
-                                    }}
+                                    valueFormatter={(value) =>
+                                      `$${(value as number).toFixed(2)}`
+                                    }
                                   />
                                 }
                               />

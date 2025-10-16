@@ -1334,7 +1334,7 @@ export class AdminController extends Controller {
       SELECT
         toStartOfMonth(request_created_at) AS month,
         COUNT(*) AS requestCount,
-        SUM(cost) AS cost
+        SUM(cost) / 1000000000 AS cost
       FROM
         request_response_rmt
       WHERE
