@@ -207,19 +207,26 @@ const OrgSearch = () => {
       });
     }
 
-    // Create a map of existing usage data
+    // Create maps for usage and cost data
     const usageMap = new Map(
       monthlyUsage.map((item) => [
         new Date(item.month).toISOString().slice(0, 7),
-        item.requestCount || 0,
+        {
+          requestCount: item.requestCount || 0,
+          cost: item.cost || 0,
+        },
       ]),
     );
 
     // Fill in all 12 months with data or 0
-    return last12Months.map(({ monthKey, month }) => ({
-      month,
-      requestCount: usageMap.get(monthKey) || 0,
-    }));
+    return last12Months.map(({ monthKey, month }) => {
+      const data = usageMap.get(monthKey) || { requestCount: 0, cost: 0 };
+      return {
+        month,
+        requestCount: data.requestCount,
+        cost: data.cost,
+      };
+    });
   };
 
   const getOwnerFromMembers = (
@@ -1066,20 +1073,20 @@ const OrgTableRow = ({
 
                   {/* Right: Compact Monthly Usage Chart */}
                   <div className="flex flex-col gap-4">
-                    {/* Chart */}
-                    <div className="flex h-full flex-col gap-2">
+                    {/* Usage Chart */}
+                    <div className="flex flex-col gap-2">
                       <Small className="font-medium">
                         Monthly Usage (Last 12 Months)
                       </Small>
                       {usageLoading ? (
-                        <div className="flex h-full w-full items-center justify-center border border-border bg-muted/10">
+                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
                           <div className="flex items-center gap-2">
                             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                             <Muted className="text-xs">Loading chart data...</Muted>
                           </div>
                         </div>
                       ) : usageData?.monthly_usage ? (
-                        <div className="w-full flex-1">
+                        <div className="w-full">
                           <ChartContainer
                             config={{
                               requestCount: {
@@ -1087,7 +1094,7 @@ const OrgTableRow = ({
                                 color: "hsl(200 90% 50%)",
                               },
                             }}
-                            className="aspect-auto h-full w-full"
+                            className="h-[200px] w-full"
                           >
                             <BarChart
                               data={sortAndFormatMonthlyUsage(
@@ -1127,7 +1134,76 @@ const OrgTableRow = ({
                           </ChartContainer>
                         </div>
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center border border-border bg-muted/10">
+                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
+                          <Muted className="text-xs">Unable to load chart data</Muted>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Cost Chart */}
+                    <div className="flex flex-col gap-2">
+                      <Small className="font-medium">
+                        Monthly Cost (Last 12 Months)
+                      </Small>
+                      {usageLoading ? (
+                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            <Muted className="text-xs">Loading chart data...</Muted>
+                          </div>
+                        </div>
+                      ) : usageData?.monthly_usage ? (
+                        <div className="w-full">
+                          <ChartContainer
+                            config={{
+                              cost: {
+                                label: "Cost",
+                                color: "hsl(142 76% 36%)",
+                              },
+                            }}
+                            className="h-[200px] w-full"
+                          >
+                            <BarChart
+                              data={sortAndFormatMonthlyUsage(
+                                usageData.monthly_usage,
+                              )}
+                              margin={{ top: 5, right: 5, left: 5, bottom: 0 }}
+                            >
+                              <CartesianGrid
+                                vertical={false}
+                                strokeDasharray="3 3"
+                                opacity={0.2}
+                              />
+                              <XAxis
+                                dataKey="month"
+                                tickLine={false}
+                                tickMargin={8}
+                                axisLine={false}
+                                tickFormatter={(value) => value.slice(0, 3)}
+                                fontSize={11}
+                              />
+                              <ChartTooltip
+                                content={
+                                  <ChartTooltipContent
+                                    valueFormatter={(value) => {
+                                      // Convert from nano cents to dollars
+                                      const dollars = (value as number) / 1_000_000_000;
+                                      return `$${dollars.toFixed(2)}`;
+                                    }}
+                                  />
+                                }
+                              />
+                              <Bar
+                                dataKey="cost"
+                                fill="var(--color-cost)"
+                                radius={[3, 3, 0, 0]}
+                                maxBarSize={35}
+                              />
+                            </BarChart>
+                          </ChartContainer>
+                        </div>
+                      ) : (
+                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
                           <Muted className="text-xs">Unable to load chart data</Muted>
                         </div>
                       )}

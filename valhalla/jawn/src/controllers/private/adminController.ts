@@ -1315,6 +1315,7 @@ export class AdminController extends Controller {
     monthly_usage: {
       month: string;
       requestCount: number;
+      cost: number;
     }[];
     all_time_count: number;
   }> {
@@ -1332,7 +1333,8 @@ export class AdminController extends Controller {
     const monthlyUsageQuery = `
       SELECT
         toStartOfMonth(request_created_at) AS month,
-        COUNT(*) AS requestCount
+        COUNT(*) AS requestCount,
+        SUM(cost) AS cost
       FROM
         request_response_rmt
       WHERE
@@ -1359,6 +1361,7 @@ export class AdminController extends Controller {
         clickhouseDb.dbQuery<{
           month: string;
           requestCount: string;
+          cost: string;
         }>(monthlyUsageQuery, [orgId]),
         clickhouseDb.dbQuery<{
           all_time_count: string;
@@ -1379,6 +1382,7 @@ export class AdminController extends Controller {
       monthly_usage: monthlyUsage.map((item) => ({
         month: item.month,
         requestCount: Number(item.requestCount),
+        cost: Number(item.cost),
       })),
       all_time_count: Number(allTimeCount),
     };

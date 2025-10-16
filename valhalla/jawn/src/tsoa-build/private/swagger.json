@@ -56776,6 +56776,10 @@
 										"monthly_usage": {
 											"items": {
 												"properties": {
+													"cost": {
+														"type": "number",
+														"format": "double"
+													},
 													"requestCount": {
 														"type": "number",
 														"format": "double"
@@ -56785,6 +56789,7 @@
 													}
 												},
 												"required": [
+													"cost",
 													"requestCount",
 													"month"
 												],
