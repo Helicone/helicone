@@ -157,6 +157,41 @@ export const endpoints = {
       "*": {},
     },
   },
+  "kimi-k2-0905:novita": {
+    provider: "novita",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2-0905",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.6/1M
+        output: 0.0000025, // $2.5/1M
+      },
+    ],
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "structured_outputs",
+      "functions",
+      "tool_choice",
+      "tools",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "kimi-k2-instruct:novita": {
     provider: "novita",
     author: "moonshotai",

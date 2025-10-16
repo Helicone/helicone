@@ -26,7 +26,8 @@ export const AUTHORS = [
   "moonshotai",
   "perplexity",
   "alibaba",
-  "zai"
+  "zai",
+  "baidu"
 ] as const;
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
@@ -54,7 +55,8 @@ export type Tokenizer =
   | "Cohere"
   | "Grok"
   | "Tekken"
-  | "Zai";
+  | "Zai"
+  | "Baidu";
 
 export type StandardParameter =
   | "max_tokens"
@@ -150,6 +152,7 @@ interface BaseConfig {
   maxCompletionTokens: number;
   ptbEnabled: boolean;
   version?: string;
+  unsupportedParameters?: StandardParameter[];
 }
 
 export interface RateLimits {
@@ -158,16 +161,39 @@ export interface RateLimits {
   tpd?: number;
 }
 
+// Plugin types
+export type PluginId = "web"; // Add more with | as we support more plugins
+
+interface BasePlugin<T extends PluginId = PluginId> {
+  id: T;
+}
+
+export interface WebSearchPlugin extends BasePlugin<"web"> {
+  max_uses?: number;
+  allowed_domains?: string[];
+  blocked_domains?: string[];
+  user_location?: {
+    type?: "approximate";
+    city?: string;
+    region?: string; // state/region
+    country?: string; // country code
+    timezone?: string; // IANA timezone ID
+  };
+}
+
+export type Plugin = WebSearchPlugin; // Add more with | as we add plugin types
+
 export interface ModelProviderConfig extends BaseConfig {
   providerModelId: string;
   provider: ModelProviderName;
   author: AuthorName;
   supportedParameters: StandardParameter[];
+  supportedPlugins?: PluginId[];
   rateLimits?: RateLimits;
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;
   priority?: number;
-  quantization?: "fp4" | "fp8" | "bf16";
+  quantization?: "fp4" | "fp8" | "fp16" | "bf16";
   responseFormat?: ResponseFormat;
 }
 
@@ -207,6 +233,13 @@ export interface UserEndpointConfig {
   crossRegion?: boolean;
   gatewayMapping?: "OPENAI" | "NO_MAPPING";
   modelName?: string;
+}
+
+export interface ModelSpec {
+  modelName: string;
+  provider?: ModelProviderName;
+  customUid?: string;
+  isOnline?: boolean;
 }
 
 export interface AuthContext {

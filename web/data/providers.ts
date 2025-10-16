@@ -120,6 +120,7 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "xai-...",
     relevanceScore: 68,
   },
+
   // {
   //   id: "perplexity",
   //   name: "Perplexity",
@@ -222,6 +223,26 @@ export const providers: Provider[] = [
     apiKeyLabel: "Novita API Key",
     apiKeyPlaceholder: "...",
     relevanceScore: 10,
+  },
+  {
+    id: "nebius",
+    name: "Nebius",
+    logoUrl: "/assets/home/providers/nebius.webp",
+    description: "Configure your Nebius API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Nebius API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 5,
+  },
+  {
+    id: "chutes",
+    name: "Chutes",
+    logoUrl: "/assets/home/providers/chutes.webp",
+    description: "Configure your Chutes API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Chutes API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 3,
   },
 ];
 

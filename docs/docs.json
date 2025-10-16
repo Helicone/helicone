@@ -27,6 +27,7 @@
             "pages": [
               "gateway/overview",
               "gateway/provider-routing",
+
               {
                 "group": "Features",
                 "pages": [
@@ -40,7 +41,16 @@
               },
               {
                 "group": "Concepts",
-                "pages": ["gateway/concepts/prompt-caching"]
+                "pages": [
+                  "gateway/concepts/prompt-caching",
+                  "gateway/web-search"
+                ]
+              },
+              {
+                "group": "Integrations",
+                "pages": [
+                  "gateway/integrations/semantic-kernel"
+                ]
               }
             ]
           },

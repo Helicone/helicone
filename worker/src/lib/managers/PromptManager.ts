@@ -15,6 +15,51 @@ export class PromptManager {
     private env: Env
   ) {}
 
+  private buildPromptVersionCacheKey(
+    params: HeliconeChatCreateParams,
+    orgId: string
+  ): string | null {
+    if (!params.prompt_id) {
+      return null;
+    }
+
+    const scope = params.environment
+      ? `env:${params.environment}`
+      : params.version_id
+      ? `version:${params.version_id}`
+      : "prod";
+
+    return `prompt_version_${params.prompt_id}_${scope}_${orgId}`;
+  }
+
+  private buildPromptBodyCacheKey(
+    promptId: string,
+    versionId: string,
+    orgId: string
+  ): string {
+    return `prompt_body_${promptId}_${versionId}_${orgId}`;
+  }
+
+  private async getPromptVersionIdWithCache(
+    params: HeliconeChatCreateParams,
+    orgId: string
+  ): Promise<Result<string, string>> {
+    const cacheKey = this.buildPromptVersionCacheKey(params, orgId);
+    if (!cacheKey) {
+      return this.promptStore.getPromptVersionId(params, orgId);
+    }
+
+    return await getAndStoreInCache(
+      cacheKey,
+      this.env,
+      async () => {
+        return this.promptStore.getPromptVersionId(params, orgId);
+      },
+      300,
+      false
+    );
+  }
+
   async getSourcePromptBodyWithFetch(
     params: HeliconeChatCreateParams,
     orgId: string
@@ -27,14 +72,23 @@ export class PromptManager {
       string
     >
   > {
-    const versionIdResult = await this.promptStore.getPromptVersionId(
+    const versionIdResult = await this.getPromptVersionIdWithCache(
       params,
       orgId
     );
     if (isErr(versionIdResult)) return err(versionIdResult.error);
 
+    const promptId = params.prompt_id;
+    if (!promptId) {
+      return err("No prompt ID provided");
+    }
+
     return await getAndStoreInCache(
-      `prompt_body_${versionIdResult.data}_${orgId}`,
+      this.buildPromptBodyCacheKey(
+        promptId,
+        versionIdResult.data,
+        orgId
+      ),
       this.env,
       async () => {
         try {
@@ -50,7 +104,7 @@ export class PromptManager {
           return err(`Error retrieving prompt body: ${error}`);
         }
       },
-      undefined,
+      300,
       false
     );
   }

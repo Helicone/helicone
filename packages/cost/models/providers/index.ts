@@ -1,34 +1,38 @@
 import { AnthropicProvider } from "./anthropic";
-import { OpenAIProvider } from "./openai";
-import { BedrockProvider } from "./bedrock";
-import { VertexProvider } from "./vertex";
 import { AzureOpenAIProvider } from "./azure";
-import { PerplexityProvider } from "./perplexity";
-import { GroqProvider } from "./groq";
-import { DeepSeekProvider } from "./deepseek";
+import { BedrockProvider } from "./bedrock";
+import { ChutesProvider } from "./chutes";
 import { CohereProvider } from "./cohere";
-import { XAIProvider } from "./xai";
-import { GoogleProvider } from "./google";
 import { DeepInfraProvider } from "./deepinfra";
-import { OpenRouterProvider } from "./openrouter";
+import { DeepSeekProvider } from "./deepseek";
+import { GoogleProvider } from "./google";
+import { GroqProvider } from "./groq";
+import { NebiusProvider } from "./nebius";
 import { NovitaProvider } from "./novita";
+import { OpenAIProvider } from "./openai";
+import { OpenRouterProvider } from "./openrouter";
+import { PerplexityProvider } from "./perplexity";
+import { VertexProvider } from "./vertex";
+import { XAIProvider } from "./xai";
 
 // Create singleton instances (stateless, so safe to share)
 export const providers = {
   anthropic: new AnthropicProvider(),
-  openai: new OpenAIProvider(),
-  bedrock: new BedrockProvider(),
-  vertex: new VertexProvider(),
   azure: new AzureOpenAIProvider(),
-  perplexity: new PerplexityProvider(),
-  groq: new GroqProvider(),
-  deepseek: new DeepSeekProvider(),
+  bedrock: new BedrockProvider(),
+  chutes: new ChutesProvider(),
   cohere: new CohereProvider(),
-  xai: new XAIProvider(),
   deepinfra: new DeepInfraProvider(),
+  deepseek: new DeepSeekProvider(),
   "google-ai-studio": new GoogleProvider(),
-  openrouter: new OpenRouterProvider(),
+  groq: new GroqProvider(),
+  nebius: new NebiusProvider(),
   novita: new NovitaProvider(),
+  openai: new OpenAIProvider(),
+  openrouter: new OpenRouterProvider(),
+  perplexity: new PerplexityProvider(),
+  vertex: new VertexProvider(),
+  xai: new XAIProvider()
 } as const;
 
 export type ModelProviderName = keyof typeof providers;

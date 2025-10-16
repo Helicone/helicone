@@ -3242,19 +3242,21 @@
 				"type": "string",
 				"enum": [
 					"anthropic",
-					"openai",
-					"bedrock",
-					"vertex",
 					"azure",
-					"perplexity",
-					"groq",
-					"deepseek",
+					"bedrock",
+					"chutes",
 					"cohere",
-					"xai",
 					"deepinfra",
+					"deepseek",
 					"google-ai-studio",
+					"groq",
+					"nebius",
+					"novita",
+					"openai",
 					"openrouter",
-					"novita"
+					"perplexity",
+					"vertex",
+					"xai"
 				],
 				"nullable": false
 			},
@@ -3310,6 +3312,35 @@
 					},
 					"start_timestamp": {
 						"type": "string"
+					},
+					"annotations": {
+						"items": {
+							"properties": {
+								"content": {
+									"type": "string"
+								},
+								"title": {
+									"type": "string"
+								},
+								"url": {
+									"type": "string"
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"url_citation"
+									],
+									"nullable": false
+								}
+							},
+							"required": [
+								"title",
+								"url",
+								"type"
+							],
+							"type": "object"
+						},
+						"type": "array"
 					},
 					"reasoning": {
 						"type": "string"
@@ -8130,10 +8161,10 @@
 				"type": "string",
 				"enum": [
 					"anthropic",
+					"cohere",
+					"deepseek",
 					"openai",
 					"perplexity",
-					"deepseek",
-					"cohere",
 					"xai",
 					"google",
 					"meta-llama",
@@ -8145,6 +8176,7 @@
 					"moonshotai",
 					"alibaba",
 					"zai",
+					"baidu",
 					"passthrough"
 				]
 			},
@@ -8179,6 +8211,13 @@
 					"structured_outputs",
 					"verbosity"
 				]
+			},
+			"PluginId": {
+				"type": "string",
+				"enum": [
+					"web"
+				],
+				"nullable": false
 			},
 			"RateLimits": {
 				"properties": {
@@ -8376,6 +8415,12 @@
 					"version": {
 						"type": "string"
 					},
+					"unsupportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					},
 					"providerModelId": {
 						"type": "string"
 					},
@@ -8388,6 +8433,12 @@
 					"supportedParameters": {
 						"items": {
 							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
+					},
+					"supportedPlugins": {
+						"items": {
+							"$ref": "#/components/schemas/PluginId"
 						},
 						"type": "array"
 					},
@@ -8409,6 +8460,7 @@
 						"enum": [
 							"fp4",
 							"fp8",
+							"fp16",
 							"bf16"
 						]
 					},
@@ -8491,6 +8543,12 @@
 					},
 					"version": {
 						"type": "string"
+					},
+					"unsupportedParameters": {
+						"items": {
+							"$ref": "#/components/schemas/StandardParameter"
+						},
+						"type": "array"
 					},
 					"modelConfig": {
 						"$ref": "#/components/schemas/ModelProviderConfig"
@@ -12761,19 +12819,21 @@
 													"type": "string",
 													"enum": [
 														"anthropic",
-														"openai",
-														"bedrock",
-														"vertex",
 														"azure",
-														"perplexity",
-														"groq",
-														"deepseek",
+														"bedrock",
+														"chutes",
 														"cohere",
-														"xai",
 														"deepinfra",
+														"deepseek",
 														"google-ai-studio",
+														"groq",
+														"nebius",
+														"novita",
+														"openai",
 														"openrouter",
-														"novita"
+														"perplexity",
+														"vertex",
+														"xai"
 													]
 												}
 											},

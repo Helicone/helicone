@@ -21,7 +21,8 @@ export class GatewayMetrics {
       return;
     }
     const promptRequestEndTime = performance.now();
-    const promptRequestLatency = promptRequestEndTime - this.promptRequestStartTime;
+    const promptRequestLatency =
+      promptRequestEndTime - this.promptRequestStartTime;
     this.dataDogClient.trackLatency("prompt_request_ms", promptRequestLatency);
   }
 
@@ -54,7 +55,6 @@ export class GatewayMetrics {
 
   markPostRequestEnd(): void {
     if (this.providerEndTime === null) {
-      console.error("Provider end time not marked");
       return;
     }
     const postRequestEndTime = performance.now();

@@ -90,25 +90,37 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
             ? Math.max(
                 0,
                 (usageData.prompt_tokens ?? 0) -
-                  (usageData.prompt_tokens_details?.cached_tokens ?? 0)
+                  (usageData.prompt_tokens_details?.cached_tokens ?? 0) -
+                  (usageData.prompt_tokens_details?.audio_tokens ?? 0)
               )
-            : usageData?.input_tokens;
+            : Math.max(
+                0,
+                (usageData.input_tokens ?? 0) -
+                  (usageData.input_tokens_details?.cached_tokens ?? 0)
+              );
 
         const effectiveCompletionTokens =
           usageData?.completion_tokens !== undefined
             ? Math.max(
                 0,
                 (usageData.completion_tokens ?? 0) -
+                  (usageData.completion_tokens_details?.reasoning_tokens ?? 0) -
                   (usageData.completion_tokens_details?.audio_tokens ?? 0)
               )
-            : usageData?.output_tokens;
+            : Math.max(
+                0,
+                (usageData.output_tokens ?? 0) -
+                  (usageData.output_tokens_details?.reasoning_tokens ?? 0)
+              );
 
         usage = {
           totalTokens: usageData?.total_tokens,
           completionTokens: effectiveCompletionTokens,
           promptTokens: effectivePromptTokens,
           promptCacheReadTokens:
-            usageData?.prompt_tokens_details?.cached_tokens,
+            usageData?.prompt_tokens_details?.cached_tokens ??
+            usageData?.input_tokens_details?.cached_tokens ??
+            0,
           heliconeCalculated: usageData?.helicone_calculated ?? false,
         };
       } else if (consolidatedData.response?.usage) {
