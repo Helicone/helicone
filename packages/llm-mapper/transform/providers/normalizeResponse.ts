@@ -8,7 +8,13 @@ import { AnthropicToOpenAIStreamConverter } from "./anthropic/streamedResponse/t
 
 function decodeBase64(base64: string): string {
   if (typeof atob === "function") {
-    return atob(base64);
+    const binary = atob(base64);
+    const length = binary.length;
+    const bytes = new Uint8Array(length);
+    for (let i = 0; i < length; i += 1) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new TextDecoder().decode(bytes);
   }
 
   const bufferCtor = (globalThis as { Buffer?: any }).Buffer;
