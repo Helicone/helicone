@@ -62,7 +62,8 @@ export class WalletManager {
         );
       }
 
-      if (clickhouseLastCheckedAt > SYNC_STALENESS_THRESHOLD) {
+      const timeSinceLastCheck = Date.now() - clickhouseLastCheckedAt;
+      if (timeSinceLastCheck > SYNC_STALENESS_THRESHOLD) {
         await this.syncClickhouseSpend(
           organizationId,
           proxyRequest.requestWrapper.getRawProviderAuthHeader() ?? ""
