@@ -36,7 +36,8 @@
                   "gateway/prompt-integration",
                   "features/advanced-usage/llm-security",
                   "features/advanced-usage/moderations",
-                  "features/advanced-usage/retries"
+                  "features/advanced-usage/retries",
+                  "features/advanced-usage/token-limit-exception-handlers"
                 ]
               },
               {

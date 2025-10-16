@@ -1,0 +1,122 @@
+---
+title: "Token Limit Exception Handlers"
+sidebarTitle: "Large Context"
+description: "Automatically handle requests that exceed a model's context window using truncate, middle-out, or fallback strategies."
+"twitter:title": "Large Context - Token Limit Exception Handlers"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+When prompts get large, requests can exceed the model's maximum context window. Helicone can automatically apply strategies to keep your request within limits or switch to a fallback model — without changing your app code.
+
+## What This Does
+
+- Estimates tokens for your request based on model and content
+- Accounts for reserved output tokens (e.g., `max_tokens`, `max_output_tokens`)
+- Applies a chosen strategy only when the estimated input exceeds the allowed context
+
+<Note>
+Helicone uses provider-aware heuristics to estimate tokens and a best-effort approach across different request shapes.
+</Note>
+
+## Strategies
+
+- Truncate (`truncate`): Normalize and trim message content to reduce token count.
+- Middle-out (`middle-out`): Preserve the beginning and end of messages while trimming middle content to fit the limit.
+- Fallback (`fallback`): Switch to an alternate model when the request is too large. Provide multiple candidates in the request body `model` field as a comma-separated list (first is primary, second is fallback).
+
+<Info>
+For `fallback`, Helicone picks the second candidate if needed. When under the limit, Helicone normalizes the `model` to the primary. If your body lacks `model`, set `Helicone-Model-Override`.
+</Info>
+
+## Quick Start
+
+Add the `Helicone-Token-Limit-Exception-Handler` header to enable a strategy.
+
+<CodeGroup>
+```typescript Node.js
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai/v1",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Middle-out strategy
+await client.chat.completions.create(
+  {
+    model: "gpt-4o", // or "gpt-4o, gpt-4o-mini" for fallback
+    messages: [
+      { role: "user", content: "A very long prompt ..." }
+    ],
+    max_tokens: 256
+  },
+  {
+    headers: {
+      "Helicone-Token-Limit-Exception-Handler": "middle-out"
+    }
+  }
+);
+```
+
+```python Python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    base_url="https://ai-gateway.helicone.ai/v1",
+    api_key=os.getenv("HELICONE_API_KEY"),
+)
+
+# Fallback strategy with model candidates
+resp = client.chat.completions.create(
+    model="gpt-4o, gpt-4o-mini",
+    messages=[{"role": "user", "content": "A very long prompt ..."}],
+    max_tokens=256,
+    extra_headers={
+        "Helicone-Token-Limit-Exception-Handler": "fallback",
+    }
+)
+```
+
+```bash cURL
+curl --request POST \
+     --url https://ai-gateway.helicone.ai/v1/chat/completions \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer $HELICONE_API_KEY" \
+     -H "Helicone-Token-Limit-Exception-Handler: truncate" \
+     --data '{
+       "model": "gpt-4o",
+       "messages": [{"role": "user", "content": "A very long prompt ..."}],
+       "max_tokens": 256
+     }'
+```
+
+</CodeGroup>
+
+## Configuration
+
+Enable and control via headers:
+
+<ParamField header="Helicone-Token-Limit-Exception-Handler" type="string" required>
+  One of: `truncate`, `middle-out`, `fallback`.
+</ParamField>
+
+<ParamField header="Helicone-Model-Override" type="string">
+  Optional. Used for token estimation and model selection when the request body doesn't include a `model` or you need to override it.
+</ParamField>
+
+### Fallback Model Selection
+
+- Provide candidates in the body: `model: "primary, fallback"`
+- Helicone chooses the fallback when input exceeds the allowed context
+- When under the limit, Helicone normalizes the `model` to the primary
+
+## Notes
+
+- Token estimation is heuristic and provider-aware; behavior is best-effort across request shapes.
+- Allowed context accounts for requested completion tokens (e.g., `max_tokens`).
+- Changes are applied before the provider call; your logged request reflects the applied strategy.
+
+<QuestionsSection />
+
