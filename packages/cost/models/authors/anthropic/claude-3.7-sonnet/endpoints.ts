@@ -21,8 +21,8 @@ export const endpoints = {
         },
       },
     ],
-    contextLength: 200000,
-    maxCompletionTokens: 64000,
+    contextLength: 200_000,
+    maxCompletionTokens: 64_000,
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -58,8 +58,8 @@ export const endpoints = {
         },
       },
     ],
-    contextLength: 200000,
-    maxCompletionTokens: 64000,
+    contextLength: 200_000,
+    maxCompletionTokens: 64_000,
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -93,8 +93,8 @@ export const endpoints = {
         },
       },
     ],
-    contextLength: 200000,
-    maxCompletionTokens: 64000,
+    contextLength: 200_000,
+    maxCompletionTokens: 64_000,
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -121,8 +121,8 @@ export const endpoints = {
         output: 0.00001583, // $15.83/1M - worst-case: $15.00/1M (Google) * 1.055,
       },
     ],
-    contextLength: 200000,
-    maxCompletionTokens: 64000,
+    contextLength: 200_000,
+    maxCompletionTokens: 64_000,
     supportedParameters: [
       "max_tokens",
       "temperature",
@@ -134,6 +134,36 @@ export const endpoints = {
     ],
     ptbEnabled: true,
     priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "claude-3.7-sonnet:deepinfra": {
+    provider: "deepinfra",
+    author: "anthropic",
+    providerModelId: "anthropic/claude-3-7-sonnet-latest",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000033, // $3.30/1M
+        output: 0.0000165, // $16.50/1M
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.33/1M
+        },
+      },
+    ],
+    contextLength: 200_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "stop",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
