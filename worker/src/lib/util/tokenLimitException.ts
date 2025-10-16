@@ -609,7 +609,7 @@ export function buildModelIdentifierVariants(identifier: string): string[] {
   const lower = trimmed.toLowerCase();
   const variants = new Set<string>([trimmed, lower]);
 
-  const delimiterParts = lower.split(/[:\/]/);
+  const delimiterParts = lower.split(/[:/]/);
   if (delimiterParts.length > 1) {
     const lastPart = delimiterParts[delimiterParts.length - 1];
     if (lastPart) {
