@@ -384,7 +384,6 @@ export function serializeTools(tools: unknown): string {
   try {
     return JSON.stringify(tools);
   } catch (error) {
-    console.error("[Helicone] Failed to serialize tools for token estimate");
     return "";
   }
 }
@@ -403,7 +402,6 @@ export function parseRequestPayload(
     }
     return parsed as ParsedRequestPayload;
   } catch (error) {
-    console.error("[Helicone] Failed to parse request body", error);
     return null;
   }
 }
@@ -435,11 +433,8 @@ export function estimateTokenCount(
       (combinedText.length + toolsText.length) * heuristic
     );
 
-    console.log("estimatedToken count", estimated);
-
     return Number.isFinite(estimated) ? estimated : null;
   } catch (error) {
-    console.error("[Helicone] Failed to estimate request token usage", error);
     return null;
   }
 }
@@ -646,7 +641,6 @@ export function resolvePrimaryModel(
 export function applyTruncateStrategy(
   parsedBody: ParsedRequestPayload
 ): ValidRequestBody | undefined {
-  console.log("applyTruncateStrategy", parsedBody.messages);
   if (!parsedBody.messages) {
     return;
   }
@@ -657,8 +651,6 @@ export function applyTruncateStrategy(
     }
   }
 
-  console.log("truncatedText", parsedBody.messages);
-
   return JSON.stringify(parsedBody);
 }
 
@@ -668,12 +660,10 @@ export function applyMiddleOutStrategy(
   tokenLimit: number
 ): ValidRequestBody | undefined {
   if (!Array.isArray(parsedBody.messages)) {
-    console.log("parsedbody.messages not array, quitting");
     return;
   }
 
   const originalMessages = (parsedBody.messages ?? []) as LLMMessage[];
-  console.log("originalMessages", originalMessages);
 
   const trimmedMessages = middleOutMessagesToFitLimit(
     originalMessages,
@@ -687,8 +677,6 @@ export function applyMiddleOutStrategy(
         primaryModel
       )
   );
-
-  console.log("trimmedMessages", trimmedMessages);
 
   const changed =
     JSON.stringify(trimmedMessages) !== JSON.stringify(originalMessages);
