@@ -280,7 +280,8 @@ export class HeliconeProxyRequestMapper {
     if (
       estimatedTokens === null ||
       tokenLimit === null ||
-      estimatedTokens <= tokenLimit
+      (estimatedTokens <= tokenLimit &&
+        handler != HeliconeTokenLimitExceptionHandler.Fallback) //needed to sort the extra model passed in request
     ) {
       return;
     }
