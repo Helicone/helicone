@@ -1071,22 +1071,22 @@ const OrgTableRow = ({
                     </div>
                   </div>
 
-                  {/* Right: Compact Monthly Usage Chart */}
-                  <div className="flex flex-col gap-4">
+                  {/* Right: Charts - Split evenly */}
+                  <div className="flex h-full flex-col gap-4">
                     {/* Usage Chart */}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex min-h-0 flex-1 flex-col gap-2">
                       <Small className="font-medium">
                         Monthly Usage (Last 12 Months)
                       </Small>
                       {usageLoading ? (
-                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
+                        <div className="flex min-h-0 w-full flex-1 items-center justify-center border border-border bg-muted/10">
                           <div className="flex items-center gap-2">
                             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                             <Muted className="text-xs">Loading chart data...</Muted>
                           </div>
                         </div>
                       ) : usageData?.monthly_usage ? (
-                        <div className="w-full">
+                        <div className="min-h-0 w-full flex-1">
                           <ChartContainer
                             config={{
                               requestCount: {
@@ -1094,7 +1094,7 @@ const OrgTableRow = ({
                                 color: "hsl(200 90% 50%)",
                               },
                             }}
-                            className="h-[200px] w-full"
+                            className="h-full w-full"
                           >
                             <BarChart
                               data={sortAndFormatMonthlyUsage(
@@ -1134,26 +1134,26 @@ const OrgTableRow = ({
                           </ChartContainer>
                         </div>
                       ) : (
-                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
+                        <div className="flex min-h-0 w-full flex-1 items-center justify-center border border-border bg-muted/10">
                           <Muted className="text-xs">Unable to load chart data</Muted>
                         </div>
                       )}
                     </div>
 
                     {/* Cost Chart */}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex min-h-0 flex-1 flex-col gap-2">
                       <Small className="font-medium">
                         Monthly Cost (Last 12 Months)
                       </Small>
                       {usageLoading ? (
-                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
+                        <div className="flex min-h-0 w-full flex-1 items-center justify-center border border-border bg-muted/10">
                           <div className="flex items-center gap-2">
                             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                             <Muted className="text-xs">Loading chart data...</Muted>
                           </div>
                         </div>
                       ) : usageData?.monthly_usage ? (
-                        <div className="w-full">
+                        <div className="min-h-0 w-full flex-1">
                           <ChartContainer
                             config={{
                               cost: {
@@ -1161,7 +1161,7 @@ const OrgTableRow = ({
                                 color: "hsl(142 76% 36%)",
                               },
                             }}
-                            className="h-[200px] w-full"
+                            className="h-full w-full"
                           >
                             <BarChart
                               data={sortAndFormatMonthlyUsage(
@@ -1203,7 +1203,7 @@ const OrgTableRow = ({
                           </ChartContainer>
                         </div>
                       ) : (
-                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
+                        <div className="flex min-h-0 w-full flex-1 items-center justify-center border border-border bg-muted/10">
                           <Muted className="text-xs">Unable to load chart data</Muted>
                         </div>
                       )}
