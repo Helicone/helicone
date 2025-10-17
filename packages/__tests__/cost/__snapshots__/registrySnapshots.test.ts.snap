@@ -4624,8 +4624,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "mistralai/mistral-nemo": {
     "deepinfra": [
       {
-        "input": 0.02,
-        "output": 0.04,
+        "input": 0.00002,
+        "output": 0.00004,
         "threshold": 0,
       },
     ],
@@ -4633,8 +4633,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "mistralai/mistral-small": {
     "deepinfra": [
       {
-        "input": 0.05,
-        "output": 0.1,
+        "input": 0.000075,
+        "output": 0.0002,
         "threshold": 0,
       },
     ],
@@ -5391,7 +5391,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "chutes",
     },
     {
-      "modelCount": 17,
+      "modelCount": 18,
       "provider": "deepinfra",
     },
     {
@@ -5508,8 +5508,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 151,
-  "totalModelProviderConfigs": 151,
+  "totalEndpoints": 152,
+  "totalModelProviderConfigs": 152,
   "totalModelsWithPtb": 66,
   "totalProviders": 14,
 }
