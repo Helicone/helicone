@@ -478,6 +478,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-3.7-sonnet:deepinfra": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "anthropic/claude-3-7-sonnet-latest",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-3.7-sonnet:openrouter": {
       "context": 200000,
       "crossRegion": false,
@@ -3645,6 +3665,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "anthropic/claude-3.7-sonnet": [
     "anthropic",
     "bedrock",
+    "deepinfra",
     "openrouter",
     "vertex",
   ],
@@ -4002,6 +4023,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 0.000015,
         "threshold": 0,
         "web_search": 0.00001,
+      },
+    ],
+    "deepinfra": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.0000033,
+        "output": 0.0000165,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -4889,6 +4920,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "deepinfra",
         "openrouter",
         "vertex",
       ],
