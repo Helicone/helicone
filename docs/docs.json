@@ -242,7 +242,7 @@
                 ]
               },
               {
-                "group": "Data",
+                "group": "Custom Logs",
                 "pages": [
                   "integrations/data/curl",
                   "integrations/data/logger-sdk"
