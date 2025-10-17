@@ -1164,4 +1164,422 @@ describe("DeepSeek Registry Tests", () => {
         }));
     });
   });
+
+  describe("Caching tests - DeepInfra Provider", () => {
+    describe("deepseek-v3 with cache tokens", () => {
+      it("should handle response with cached input tokens", () =>
+        runGatewayTest({
+          model: "deepseek-v3/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1",
+                data: {
+                  id: "chatcmpl-test-cached",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "deepseek-ai/DeepSeek-V3.1",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Test response with caching",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 100,
+                    completion_tokens: 20,
+                    total_tokens: 120,
+                    prompt_tokens_details: {
+                      cached_tokens: 80,
+                    },
+                  },
+                },
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle request with cache control parameters", () =>
+        runGatewayTest({
+          model: "deepseek-v3/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test with cache control" },
+              ],
+              cache_control: { type: "ephemeral" },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: ["cache_control"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle high cache hit ratio response", () =>
+        runGatewayTest({
+          model: "deepseek-v3/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1",
+                data: {
+                  id: "chatcmpl-test-high-cache",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "deepseek-ai/DeepSeek-V3.1",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Response with high cache hit",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 1000,
+                    completion_tokens: 50,
+                    total_tokens: 1050,
+                    prompt_tokens_details: {
+                      cached_tokens: 950,
+                    },
+                  },
+                },
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle zero cached tokens", () =>
+        runGatewayTest({
+          model: "deepseek-v3/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1",
+                data: {
+                  id: "chatcmpl-test-no-cache",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "deepseek-ai/DeepSeek-V3.1",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Response without cache",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 100,
+                    completion_tokens: 20,
+                    total_tokens: 120,
+                    prompt_tokens_details: {
+                      cached_tokens: 0,
+                    },
+                  },
+                },
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-reasoner with cache tokens", () => {
+      it("should handle response with cached input tokens", () =>
+        runGatewayTest({
+          model: "deepseek-reasoner/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-0528",
+                data: {
+                  id: "chatcmpl-test-cached-r1",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "deepseek-ai/DeepSeek-R1-0528",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Reasoning response with caching",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 200,
+                    completion_tokens: 150,
+                    total_tokens: 350,
+                    prompt_tokens_details: {
+                      cached_tokens: 180,
+                    },
+                  },
+                },
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle request with cache control for reasoner model", () =>
+        runGatewayTest({
+          model: "deepseek-reasoner/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Complex reasoning task with cache" },
+              ],
+              cache_control: { type: "ephemeral" },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-0528",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-0528"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: ["cache_control", "Complex reasoning task"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-v3.1-terminus with cache tokens", () => {
+      it("should handle response with cached input tokens", () =>
+        runGatewayTest({
+          model: "deepseek-v3.1-terminus/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1-Terminus",
+                data: {
+                  id: "chatcmpl-test-cached-terminus",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "deepseek-ai/DeepSeek-V3.1-Terminus",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Terminus response with caching",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 500,
+                    completion_tokens: 100,
+                    total_tokens: 600,
+                    prompt_tokens_details: {
+                      cached_tokens: 400,
+                    },
+                  },
+                },
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-r1-distill-llama-70b with cache tokens", () => {
+      it("should handle response with cached input tokens", () =>
+        runGatewayTest({
+          model: "deepseek-r1-distill-llama-70b/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+                data: {
+                  id: "chatcmpl-test-cached-distill",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Distilled model response with caching",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 300,
+                    completion_tokens: 80,
+                    total_tokens: 380,
+                    prompt_tokens_details: {
+                      cached_tokens: 250,
+                    },
+                  },
+                },
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("Cache billing verification", () => {
+      it("should apply cache multiplier for deepseek-v3 cached tokens", () =>
+        runGatewayTest({
+          model: "deepseek-v3/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1",
+                data: {
+                  id: "chatcmpl-test-billing",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "deepseek-ai/DeepSeek-V3.1",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Test for cache billing",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 1000000,
+                    completion_tokens: 1000000,
+                    total_tokens: 2000000,
+                    prompt_tokens_details: {
+                      cached_tokens: 800000,
+                    },
+                  },
+                },
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle mixed cached and non-cached tokens", () =>
+        runGatewayTest({
+          model: "deepseek-v3/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1",
+                data: {
+                  id: "chatcmpl-test-mixed",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "deepseek-ai/DeepSeek-V3.1",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Mixed cache response",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 1000,
+                    completion_tokens: 200,
+                    total_tokens: 1200,
+                    prompt_tokens_details: {
+                      cached_tokens: 500,
+                    },
+                  },
+                },
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("Cache with streaming", () => {
+      it("should handle cached tokens in streaming mode", () =>
+        runGatewayTest({
+          model: "deepseek-v3/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test streaming with cache" },
+              ],
+              stream: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.1",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: ["stream", "true"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
 });
