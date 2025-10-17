@@ -1645,6 +1645,13 @@ export interface components {
       databaseName?: string;
       [key: string]: unknown;
     };
+    HeliconeEventData: {
+      /** @enum {string} */
+      _type: "data";
+      name: string;
+      meta?: components["schemas"]["Record_string.any_"];
+      [key: string]: unknown;
+    };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
       provider?: string;
@@ -1683,6 +1690,7 @@ export interface components {
       };
       toolDetails?: components["schemas"]["HeliconeEventTool"];
       vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      dataDetails?: components["schemas"]["HeliconeEventData"];
       input?: string | string[];
       /** Format: double */
       n?: number | null;
@@ -1713,6 +1721,18 @@ export interface components {
       _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
     };
     LLMResponseBody: {
+      dataDetailsResponse?: {
+        name: string;
+        /** @enum {string} */
+        _type: "data";
+        metadata: {
+          timestamp: string;
+          [key: string]: unknown;
+        };
+        message: string;
+        status: string;
+        [key: string]: unknown;
+      };
       vectorDBDetailsResponse?: {
         /** @enum {string} */
         _type: "vector_db";

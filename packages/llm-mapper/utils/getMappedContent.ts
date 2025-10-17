@@ -18,6 +18,7 @@ import { mapOpenAIAssistant } from "../mappers/openai/assistant";
 import { mapOpenAIModeration } from "../mappers/openai/moderation";
 import { mapRealtimeRequest } from "../mappers/openai/realtime";
 import { mapTool } from "../mappers/tool";
+import { mapData } from "../mappers/data";
 import { MapperFn } from "../mappers/types";
 import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
@@ -44,6 +45,7 @@ export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-realtime": mapRealtimeRequest,
   "vector-db": mapVectorDB,
   tool: mapTool,
+  data: mapData,
   unknown: mapOpenAIRequest,
 } satisfies Record<MapperType, MapperFn<any, any>>;
 

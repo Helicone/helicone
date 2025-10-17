@@ -240,6 +240,13 @@
                   "integrations/vectordb/curl",
                   "integrations/vectordb/logger-sdk"
                 ]
+              },
+              {
+                "group": "Data",
+                "pages": [
+                  "integrations/data/curl",
+                  "integrations/data/logger-sdk"
+                ]
               }
             ]
           },

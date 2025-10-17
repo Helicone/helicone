@@ -3534,6 +3534,29 @@
 				"type": "object",
 				"additionalProperties": {}
 			},
+			"HeliconeEventData": {
+				"properties": {
+					"_type": {
+						"type": "string",
+						"enum": [
+							"data"
+						],
+						"nullable": false
+					},
+					"name": {
+						"type": "string"
+					},
+					"meta": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"_type",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": {}
+			},
 			"LLMRequestBody": {
 				"properties": {
 					"llm_type": {
@@ -3677,6 +3700,9 @@
 					"vectorDBDetails": {
 						"$ref": "#/components/schemas/HeliconeEventVectorDB"
 					},
+					"dataDetails": {
+						"$ref": "#/components/schemas/HeliconeEventData"
+					},
 					"input": {
 						"anyOf": [
 							{
@@ -3794,6 +3820,47 @@
 			},
 			"LLMResponseBody": {
 				"properties": {
+					"dataDetailsResponse": {
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"data"
+								],
+								"nullable": false
+							},
+							"metadata": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": {},
+								"required": [
+									"timestamp"
+								],
+								"type": "object"
+							},
+							"message": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							}
+						},
+						"additionalProperties": {},
+						"required": [
+							"name",
+							"_type",
+							"metadata",
+							"message",
+							"status"
+						],
+						"type": "object"
+					},
 					"vectorDBDetailsResponse": {
 						"properties": {
 							"_type": {

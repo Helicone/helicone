@@ -1,0 +1,269 @@
+---
+title: "Trace Data Operations with cURL"
+sidebarTitle: "cURL"
+description: "Log any custom data operations to Helicone using cURL for complete observability across your application stack."
+---
+
+## Example
+
+```bash
+curl -X POST https://api.worker.helicone.ai/custom/v1/log \
+-H "Authorization: Bearer your_api_key" \
+-H "Content-Type: application/json" \
+-d '{
+  "providerRequest": {
+    "url": "custom-model-nopath",
+    "json": {
+      "_type": "data",
+      "name": "user_query",
+      "query": "SELECT * FROM users WHERE active = true",
+      "database": "production",
+      "table": "users",
+      "meta": {
+        "user_id": "user_123",
+        "session_id": "session_456",
+        "environment": "production"
+      }
+    },
+    "meta": {
+      "user_id": "user_123",
+      "session_id": "session_456"
+    }
+  },
+  "providerResponse": {
+    "json": {
+      "_type": "data",
+      "name": "user_query",
+      "status": "success",
+      "message": "Query executed successfully",
+      "data": [
+        {"id": 1, "name": "John", "active": true},
+        {"id": 2, "name": "Jane", "active": true}
+      ],
+      "count": 2,
+      "duration": "45ms",
+      "metadata": {
+        "query_id": "q_789",
+        "execution_plan": "index_scan"
+      }
+    },
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "timing": {
+    "startTime": {
+      "seconds": 1625686222,
+      "milliseconds": 500
+    },
+    "endTime": {
+      "seconds": 1625686223,
+      "milliseconds": 750
+    }
+  }
+}'
+```
+
+## More Examples
+
+### API Call Operation
+```bash
+curl -X POST https://api.worker.helicone.ai/custom/v1/log \
+-H "Authorization: Bearer your_api_key" \
+-H "Content-Type: application/json" \
+-d '{
+  "providerRequest": {
+    "url": "custom-model-nopath",
+    "json": {
+      "_type": "data",
+      "name": "external_api_call",
+      "endpoint": "https://api.example.com/users",
+      "method": "GET",
+      "params": {
+        "limit": 10,
+        "offset": 0
+      },
+      "meta": {
+        "service": "user_service",
+        "version": "v1.2.0"
+      }
+    },
+    "meta": {
+      "request_id": "req_123"
+    }
+  },
+  "providerResponse": {
+    "json": {
+      "_type": "data",
+      "name": "external_api_call",
+      "status": "success",
+      "result": {
+        "users": [...],
+        "total": 150,
+        "page": 1
+      },
+      "time": "120ms"
+    },
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "timing": {
+    "startTime": {
+      "seconds": 1625686222,
+      "milliseconds": 500
+    },
+    "endTime": {
+      "seconds": 1625686223,
+      "milliseconds": 750
+    }
+  }
+}'
+```
+
+### ML Model Inference
+```bash
+curl -X POST https://api.worker.helicone.ai/custom/v1/log \
+-H "Authorization: Bearer your_api_key" \
+-H "Content-Type: application/json" \
+-d '{
+  "providerRequest": {
+    "url": "custom-model-nopath",
+    "json": {
+      "_type": "data",
+      "name": "ml_inference",
+      "model": "custom-classifier-v2",
+      "input_features": {
+        "text": "This is a sample text",
+        "metadata": {"source": "web"}
+      },
+      "config": {
+        "threshold": 0.8,
+        "max_tokens": 100
+      }
+    },
+    "meta": {
+      "model_version": "2.1.0",
+      "environment": "staging"
+    }
+  },
+  "providerResponse": {
+    "json": {
+      "_type": "data",
+      "name": "ml_inference",
+      "status": "success",
+      "result": {
+        "classification": "positive",
+        "confidence": 0.92,
+        "probabilities": {
+          "positive": 0.92,
+          "negative": 0.08
+        }
+      },
+      "processing_time": "250ms",
+      "model_version": "2.1.0"
+    },
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "timing": {
+    "startTime": {
+      "seconds": 1625686222,
+      "milliseconds": 500
+    },
+    "endTime": {
+      "seconds": 1625686223,
+      "milliseconds": 750
+    }
+  }
+}'
+```
+
+## Request Structure
+
+### Endpoint
+
+```
+POST https://api.worker.helicone.ai/custom/v1/log
+```
+
+> **Note:** The endpoint may vary depending on your Helicone setup. If the above endpoint doesn't work, you can also try:
+>
+> - For US: `https://api.us.helicone.ai/custom/v1/log`
+> - Elsewhere: `https://api.helicone.ai/custom/v1/log`
+
+### Headers
+
+| Name          | Value              |
+| ------------- | ------------------ |
+| Authorization | Bearer `{API_KEY}` |
+
+Replace `{API_KEY}` with your actual API Key.
+
+### Body
+
+```typescript
+export type HeliconeAsyncLogRequest = {
+  providerRequest: ProviderRequest;
+  providerResponse: ProviderResponse;
+  timing: Timing;
+};
+
+export type ProviderRequest = {
+  url: "custom-model-nopath";
+  json: {
+    _type: "data";
+    name: string;
+    meta?: Record<string, any>;
+    [key: string]: any;
+  };
+  meta: Record<string, string>;
+};
+
+export type ProviderResponse = {
+  json: {
+    _type?: "data";
+    name?: string;
+    [key: string]: any;
+  };
+  status: number;
+  headers: Record<string, string>;
+};
+
+export type Timing = {
+  // From Unix epoch in Milliseconds
+  startTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+  endTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+};
+```
+
+## Key Features
+
+- **Complete Flexibility**: Unlike tool and vector-db logging, data logging accepts any custom fields
+- **Structured Logging**: Maintains consistent structure while allowing complete customization
+- **Rich Metadata**: Supports both request-level and response-level metadata
+- **Smart Summarization**: Automatically creates readable summaries from response data
+- **Error Handling**: Gracefully handles errors and different response formats
+
+## Use Cases
+
+The data logging feature is perfect for tracking:
+
+- **Database Operations**: SQL queries, NoSQL operations, cache hits/misses
+- **External API Calls**: Third-party service integrations, webhook calls
+- **ML Model Inference**: Custom model predictions, feature engineering
+- **File Processing**: Document parsing, image processing, data transformations
+- **Business Logic**: Custom algorithms, calculations, decision trees
+- **Performance Monitoring**: System metrics, resource usage, timing data
+
+This gives you complete observability across your entire application stack, not just LLM calls.

@@ -1,0 +1,347 @@
+---
+title: "Trace Data Operations with the Logger SDK"
+sidebarTitle: "Logger SDK"
+description: "Log any custom data operations using Helicone's Logger SDK for complete observability across your application stack."
+---
+
+import { strings } from "/snippets/strings.mdx";
+
+<Steps>
+  <Step title={strings.getStartedWithPackage}>
+    <CodeGroup>
+    ```bash npm
+    npm install @helicone/helpers
+    ```
+    ```bash pip
+    pip install helicone-helpers
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.setApiKey}>
+  <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+
+  ```bash
+  export HELICONE_API_KEY=<your-helicone-api-key>
+  ```
+
+  </Step>
+  <Step title={strings.createHeliconeManualLogger}>
+    <CodeGroup>
+      ```js js
+      import { HeliconeManualLogger } from "@helicone/helpers";
+
+      const heliconeLogger = new HeliconeManualLogger({
+        apiKey: process.env.HELICONE_API_KEY,
+        headers: {} // Additional headers sent with the request (optional)
+      });
+      ```
+      ```python python
+      from helicone_helpers import HeliconeManualLogger
+
+      helicone_logger = HeliconeManualLogger(
+        api_key=os.getenv("HELICONE_API_KEY"),
+        headers={} # Additional headers sent with the request (optional)
+      )
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.logYourRequest}>
+    <CodeGroup>
+      ```js js
+      // Database Query Example
+      const result = await heliconeLogger.logRequest(
+        {
+          _type: "data",
+          name: "user_query",
+          query: "SELECT * FROM users WHERE active = true",
+          database: "production",
+          table: "users",
+          meta: {
+            user_id: "user_123",
+            session_id: "session_456",
+            environment: "production"
+          }
+        },
+        async (resultRecorder) => {
+          // Your database operation here
+          const queryResult = await database.query(
+            "SELECT * FROM users WHERE active = true"
+          );
+
+          // Log the results to Helicone
+          resultRecorder.appendResults({
+            _type: "data",
+            name: "user_query",
+            status: "success",
+            message: "Query executed successfully",
+            data: queryResult.rows,
+            count: queryResult.rows.length,
+            duration: queryResult.duration + "ms",
+            metadata: {
+              query_id: queryResult.queryId,
+              execution_plan: queryResult.executionPlan
+            }
+          });
+
+          return queryResult;
+        },
+        {
+          "Helicone-Property-Session": "user-123", // Optional: Add session tracking
+          "Helicone-Property-Environment": "production"
+        }
+      );
+      ```
+
+      ```python python
+      import os
+      import time
+
+      def database_operation(result_recorder):
+        # Your database operation here
+        start_time = time.time()
+        query_result = database.execute(
+          "SELECT * FROM users WHERE active = true"
+        )
+        end_time = time.time()
+        
+        # Log the results to Helicone
+        result_recorder.append_results({
+          "_type": "data",
+          "name": "user_query",
+          "status": "success",
+          "message": "Query executed successfully",
+          "data": query_result.fetchall(),
+          "count": len(query_result.fetchall()),
+          "duration": f"{(end_time - start_time) * 1000:.2f}ms",
+          "metadata": {
+            "query_id": query_result.query_id,
+            "execution_plan": query_result.execution_plan
+          }
+        })
+        return query_result
+
+      result = helicone_logger.log_request(
+        request={
+          "_type": "data",
+          "name": "user_query",
+          "query": "SELECT * FROM users WHERE active = true",
+          "database": "production",
+          "table": "users",
+          "meta": {
+            "user_id": "user_123",
+            "session_id": "session_456",
+            "environment": "production"
+          }
+        },
+        operation=database_operation,
+        additional_headers={
+          "Helicone-Property-Session": "user-123", # Optional: Add session tracking
+          "Helicone-Property-Environment": "production"
+        }
+      )
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("any data operation") }} />
+  </Step>
+</Steps>
+
+## More Examples
+
+### External API Call
+<CodeGroup>
+```js js
+const apiResult = await heliconeLogger.logRequest(
+  {
+    _type: "data",
+    name: "external_api_call",
+    endpoint: "https://api.example.com/users",
+    method: "GET",
+    params: {
+      limit: 10,
+      offset: 0
+    },
+    meta: {
+      service: "user_service",
+      version: "v1.2.0"
+    }
+  },
+  async (resultRecorder) => {
+    const response = await fetch("https://api.example.com/users?limit=10&offset=0");
+    const data = await response.json();
+
+    resultRecorder.appendResults({
+      _type: "data",
+      name: "external_api_call",
+      status: "success",
+      result: {
+        users: data.users,
+        total: data.total,
+        page: data.page
+      },
+      time: response.headers.get('x-response-time') || "unknown"
+    });
+
+    return data;
+  }
+);
+```
+
+```python python
+def api_call_operation(result_recorder):
+  response = requests.get(
+    "https://api.example.com/users",
+    params={"limit": 10, "offset": 0}
+  )
+  data = response.json()
+  
+  result_recorder.append_results({
+    "_type": "data",
+    "name": "external_api_call",
+    "status": "success",
+    "result": {
+      "users": data["users"],
+      "total": data["total"],
+      "page": data["page"]
+    },
+    "time": response.headers.get('x-response-time', 'unknown')
+  })
+  return data
+
+api_result = helicone_logger.log_request(
+  request={
+    "_type": "data",
+    "name": "external_api_call",
+    "endpoint": "https://api.example.com/users",
+    "method": "GET",
+    "params": {
+      "limit": 10,
+      "offset": 0
+    },
+    "meta": {
+      "service": "user_service",
+      "version": "v1.2.0"
+    }
+  },
+  operation=api_call_operation
+)
+```
+</CodeGroup>
+
+### ML Model Inference
+<CodeGroup>
+```js js
+const prediction = await heliconeLogger.logRequest(
+  {
+    _type: "data",
+    name: "ml_inference",
+    model: "custom-classifier-v2",
+    input_features: {
+      text: "This is a sample text",
+      metadata: { source: "web" }
+    },
+    config: {
+      threshold: 0.8,
+      max_tokens: 100
+    }
+  },
+  async (resultRecorder) => {
+    const startTime = Date.now();
+    const prediction = await customModel.predict({
+      text: "This is a sample text",
+      threshold: 0.8
+    });
+    const endTime = Date.now();
+
+    resultRecorder.appendResults({
+      _type: "data",
+      name: "ml_inference",
+      status: "success",
+      result: {
+        classification: prediction.classification,
+        confidence: prediction.confidence,
+        probabilities: prediction.probabilities
+      },
+      processing_time: `${endTime - startTime}ms`,
+      model_version: "2.1.0"
+    });
+
+    return prediction;
+  }
+);
+```
+
+```python python
+def ml_inference_operation(result_recorder):
+  start_time = time.time()
+  prediction = custom_model.predict({
+    "text": "This is a sample text",
+    "threshold": 0.8
+  })
+  end_time = time.time()
+  
+  result_recorder.append_results({
+    "_type": "data",
+    "name": "ml_inference",
+    "status": "success",
+    "result": {
+      "classification": prediction["classification"],
+      "confidence": prediction["confidence"],
+      "probabilities": prediction["probabilities"]
+    },
+    "processing_time": f"{(end_time - start_time) * 1000:.2f}ms",
+    "model_version": "2.1.0"
+  })
+  return prediction
+
+prediction = helicone_logger.log_request(
+  request={
+    "_type": "data",
+    "name": "ml_inference",
+    "model": "custom-classifier-v2",
+    "input_features": {
+      "text": "This is a sample text",
+      "metadata": {"source": "web"}
+    },
+    "config": {
+      "threshold": 0.8,
+      "max_tokens": 100
+    }
+  },
+  operation=ml_inference_operation
+)
+```
+</CodeGroup>
+
+## Key Features
+
+- **Complete Flexibility**: Log any type of data operation with custom fields
+- **Structured Logging**: Maintains consistent structure while allowing complete customization
+- **Rich Metadata**: Supports both request-level and response-level metadata
+- **Automatic Timing**: SDK automatically tracks operation duration
+- **Error Handling**: Gracefully handles errors and different response formats
+- **Session Tracking**: Built-in support for session and user tracking
+
+## Use Cases
+
+The data logging feature is perfect for tracking:
+
+- **Database Operations**: SQL queries, NoSQL operations, cache hits/misses
+- **External API Calls**: Third-party service integrations, webhook calls
+- **ML Model Inference**: Custom model predictions, feature engineering
+- **File Processing**: Document parsing, image processing, data transformations
+- **Business Logic**: Custom algorithms, calculations, decision trees
+- **Performance Monitoring**: System metrics, resource usage, timing data
+
+For more complex examples including file processing and business logic operations, check out our [full examples on GitHub](https://github.com/Helicone/helicone/tree/main/examples/data).
+
+<div dangerouslySetInnerHTML={{ __html: strings.heliconeLoggerAPIReference }} />
+
+## Related Guides
+
+- [How to use Helicone Sessions](/guides/sessions)
+- [How to use Helicone Custom Properties](/guides/custom-properties)
