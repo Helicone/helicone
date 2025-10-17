@@ -2197,6 +2197,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "moonshotai/kimi-k2": {
+    "kimi-k2-0905:deepinfra": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "moonshotai/Kimi-K2-Instruct-0905",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2-0905:groq": {
       "context": 262144,
       "crossRegion": false,
@@ -3729,6 +3755,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
   ],
   "moonshotai/kimi-k2": [
+    "deepinfra",
     "groq",
     "groq",
     "novita",
@@ -4582,6 +4609,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "moonshotai/kimi-k2": {
+    "deepinfra": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.8,
+        },
+        "input": 5e-7,
+        "output": 0.000002,
+        "threshold": 0,
+      },
+    ],
     "groq": [
       {
         "audio": 0,
@@ -5133,6 +5170,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "kimi-k2-0905",
       "providers": [
+        "deepinfra",
         "groq",
         "novita",
         "openrouter",
@@ -5321,7 +5359,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "chutes",
     },
     {
-      "modelCount": 16,
+      "modelCount": 17,
       "provider": "deepinfra",
     },
     {
@@ -5438,8 +5476,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 150,
-  "totalModelProviderConfigs": 150,
+  "totalEndpoints": 151,
+  "totalModelProviderConfigs": 151,
   "totalModelsWithPtb": 66,
   "totalProviders": 14,
 }
