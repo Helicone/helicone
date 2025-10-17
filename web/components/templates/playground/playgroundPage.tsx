@@ -52,13 +52,15 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
   id: "",
   preview: {
-    request: "You are a helpful AI assistant.",
+    request:
+      "You are a helpful AI assistant.\n\nYou are speaking to {{ hc:name:string }}",
     response: "",
     concatenatedMessages: [
       {
         _type: "message",
         role: "system",
-        content: "You are a helpful AI assistant.",
+        content:
+          "You are a helpful AI assistant.\n\nYou are speaking to {{ hc:name:string }}",
       },
     ],
   },
@@ -100,7 +102,8 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
         {
           _type: "message",
           role: "system",
-          content: "You are a helpful AI assistant.",
+          content:
+            "You are a helpful AI assistant.\n\nYou are speaking to {{ hc:name:string }}",
         },
       ],
       tool_choice: undefined,
