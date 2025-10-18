@@ -16,9 +16,19 @@ const useProviders = (
   const jawn = useJawnClient();
 
   const { data: providers, isLoading } = useQuery({
-    queryKey: ["providerMetrics", timeFilter, userFilters],
+    queryKey: ["providerMetrics", timeFilter, userFilters, limit],
     queryFn: async () => {
-      return jawn.GET("/v1/providers");
+      return jawn.POST("/v1/providers", {
+        body: {
+          filter: userFilters ?? {},
+          offset: 0,
+          limit,
+          timeFilter: {
+            start: timeFilter.start.toISOString(),
+            end: timeFilter.end.toISOString(),
+          },
+        },
+      });
     },
     refetchOnWindowFocus: false,
   });

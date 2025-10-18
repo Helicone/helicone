@@ -30,6 +30,7 @@ function hashString(str: string): number {
 
 /**
  * Sorts data by value descending and assigns colors in specified order
+ * Items with name "n/a" are sorted to the end
  */
 export function sortAndColorData<T extends { name: string; value: number }>(
   data: T[] | undefined,
@@ -44,7 +45,13 @@ export function sortAndColorData<T extends { name: string; value: number }>(
       name: item.name || "n/a",
       value: item.value,
     }))
-    .sort((a, b) => b.value - a.value - (b.name === "n/a" ? 1 : 0))
+    .sort((a, b) => {
+      // Push "n/a" items to the end
+      if (a.name === "n/a" && b.name !== "n/a") return 1;
+      if (b.name === "n/a" && a.name !== "n/a") return -1;
+      // Otherwise sort by value descending
+      return b.value - a.value;
+    })
     .map((item, index) => ({
       ...item,
       color: colors[index % colors.length],
@@ -54,6 +61,7 @@ export function sortAndColorData<T extends { name: string; value: number }>(
 /**
  * Sorts data by value descending and assigns colors deterministically based on name
  * This ensures the same model gets the same color across different charts
+ * Items with name "n/a" are sorted to the end
  */
 export function sortAndColorDataByName<T extends { name: string; value: number }>(
   data: T[] | undefined,
@@ -65,7 +73,13 @@ export function sortAndColorDataByName<T extends { name: string; value: number }
       name: item.name || "n/a",
       value: item.value,
     }))
-    .sort((a, b) => b.value - a.value - (b.name === "n/a" ? 1 : 0))
+    .sort((a, b) => {
+      // Push "n/a" items to the end
+      if (a.name === "n/a" && b.name !== "n/a") return 1;
+      if (b.name === "n/a" && a.name !== "n/a") return -1;
+      // Otherwise sort by value descending
+      return b.value - a.value;
+    })
     .map((item) => ({
       ...item,
       color: LIST_COLORS[hashString(item.name) % LIST_COLORS.length],

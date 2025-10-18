@@ -424,7 +424,7 @@ export interface paths {
     get: operations["GetProviderStatus"];
   };
   "/v1/providers": {
-    get: operations["GetProviders"];
+    post: operations["GetProviders"];
   };
   "/v1/property/query": {
     post: operations["GetProperties"];
@@ -2580,6 +2580,180 @@ Json: JsonObject;
       error: null;
     };
     "Result_ProviderMetric-Array.string_": components["schemas"]["ResultSuccess_ProviderMetric-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_UserMetricsToOperators_: {
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      last_active?: components["schemas"]["Partial_TimestampOperators_"];
+      total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      active_for?: components["schemas"]["Partial_NumberOperators_"];
+      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      cost?: components["schemas"]["Partial_NumberOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_UserApiKeysTableToOperators_: {
+      api_key_hash?: components["schemas"]["Partial_TextOperators_"];
+      api_key_name?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PropertiesTableToOperators_: {
+      auth_hash?: components["schemas"]["Partial_TextOperators_"];
+      key?: components["schemas"]["Partial_TextOperators_"];
+      value?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_ExperimentToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_ExperimentHypothesisRunToOperator_: {
+      result_request_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_ScoreValueToOperator_: {
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseLogToOperators_: {
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      auth_hash?: components["schemas"]["Partial_TextOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PropertiesV3ToOperators_: {
+      key?: components["schemas"]["Partial_TextOperators_"];
+      value?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PropertyWithResponseV1ToOperators_: {
+      property_key?: components["schemas"]["Partial_TextOperators_"];
+      property_value?: components["schemas"]["Partial_TextOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_JobToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      name?: components["schemas"]["Partial_TextOperators_"];
+      description?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      updated_at?: components["schemas"]["Partial_TimestampOperators_"];
+      timeout_seconds?: components["schemas"]["Partial_NumberOperators_"];
+      custom_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      org_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_NodesToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      name?: components["schemas"]["Partial_TextOperators_"];
+      description?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      updated_at?: components["schemas"]["Partial_TimestampOperators_"];
+      timeout_seconds?: components["schemas"]["Partial_NumberOperators_"];
+      custom_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      org_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_CacheMetricsTableToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      date?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      hour?: components["schemas"]["Partial_NumberOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      cache_hit_count?: components["schemas"]["Partial_NumberOperators_"];
+      saved_latency_ms?: components["schemas"]["Partial_NumberOperators_"];
+      saved_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_completion_audio_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_audio_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      first_hit?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      last_hit?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      request_body?: components["schemas"]["Partial_TextOperators_"];
+      response_body?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_RateLimitTableToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_OrganizationPropertiesToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      property_key?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TablesAndViews_: {
+      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+      user_api_keys?: components["schemas"]["Partial_UserApiKeysTableToOperators_"];
+      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
+      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
+      properties_table?: components["schemas"]["Partial_PropertiesTableToOperators_"];
+      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
+      experiment_hypothesis_run?: components["schemas"]["Partial_ExperimentHypothesisRunToOperator_"];
+      score_value?: components["schemas"]["Partial_ScoreValueToOperator_"];
+      request_response_log?: components["schemas"]["Partial_RequestResponseLogToOperators_"];
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
+      users_view?: components["schemas"]["Partial_UserViewToOperators_"];
+      properties_v3?: components["schemas"]["Partial_PropertiesV3ToOperators_"];
+      property_with_response_v1?: components["schemas"]["Partial_PropertyWithResponseV1ToOperators_"];
+      job?: components["schemas"]["Partial_JobToOperators_"];
+      job_node?: components["schemas"]["Partial_NodesToOperators_"];
+      cache_metrics?: components["schemas"]["Partial_CacheMetricsTableToOperators_"];
+      rate_limit_log?: components["schemas"]["Partial_RateLimitTableToOperators_"];
+      organization_properties?: components["schemas"]["Partial_OrganizationPropertiesToOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      values?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+    };
+    SingleKey_TablesAndViews_: components["schemas"]["Partial_TablesAndViews_"];
+    FilterLeaf: components["schemas"]["SingleKey_TablesAndViews_"];
+    FilterNode: components["schemas"]["FilterLeaf"] | components["schemas"]["FilterBranch"] | Record<string, never>;
+    FilterBranch: {
+      left: components["schemas"]["FilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      right: components["schemas"]["FilterNode"];
+    };
+    ProviderQueryParams: {
+      filter: components["schemas"]["FilterNode"];
+      /** Format: double */
+      offset: number;
+      /** Format: double */
+      limit: number;
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+    };
     Property: {
       property: string;
     };
@@ -3537,11 +3711,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_ExperimentToOperators_: {
-      id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
-    };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.experiment_": {
       experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
@@ -6457,6 +6626,11 @@ export interface operations {
     };
   };
   GetProviders: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProviderQueryParams"];
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
