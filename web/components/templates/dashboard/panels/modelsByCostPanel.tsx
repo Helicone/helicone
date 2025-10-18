@@ -22,6 +22,7 @@ const ModelsByCostPanel = (props: ModelsByCostPanelProps) => {
       name: model.model,
       value: model.cost,
     })),
+    "alt2", // Use alt2 color order
   );
 
   const maxValue = modelData[0]?.value || 1;
@@ -43,11 +44,13 @@ const ModelsByCostPanel = (props: ModelsByCostPanelProps) => {
         withAnimation={true}
         headerAction={expandButton}
       >
-        <div className="flex flex-row items-center justify-between pb-2">
-          <p className="text-xs font-semibold text-slate-700">Name</p>
-          <p className="text-xs font-semibold text-slate-700">Cost</p>
+        <div className="flex h-full flex-col overflow-hidden">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <p className="text-xs font-semibold text-slate-700">Name</p>
+            <p className="text-xs font-semibold text-slate-700">Cost</p>
+          </div>
+          <div className="flex-grow overflow-y-auto">{barList}</div>
         </div>
-        {barList}
       </StyledAreaChart>
       {modal}
     </>

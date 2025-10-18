@@ -1,4 +1,3 @@
-import { Card } from "@tremor/react";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import clsx from "clsx";
 
@@ -35,12 +34,12 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
   };
 
   return (
-    <Card className="flex h-full flex-col rounded-lg border border-slate-200 bg-white text-slate-950 !shadow-sm ring-0 dark:border-slate-800 dark:bg-black dark:text-slate-50">
+    <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
       <div className="flex items-start justify-between">
         <div className="flex flex-col space-y-0.5">
-          <p className="text-sm text-slate-500">{title}</p>
+          <p className="text-sm text-muted-foreground">{title}</p>
           {value !== undefined && (
-            <p className="text-xl font-semibold text-black dark:text-white">
+            <p className="text-xl font-semibold text-foreground">
               {value}
             </p>
           )}
@@ -65,7 +64,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
           <>{children}</>
         )}
       </div>
-    </Card>
+    </div>
   );
 };
 

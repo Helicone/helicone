@@ -22,6 +22,7 @@ const ModelsPanel = (props: ModelsPanelProps) => {
       name: model.model,
       value: model.total_requests,
     })),
+    "alt1", // Use alt1 color order
   );
 
   const maxValue = modelData[0]?.value || 1;
@@ -43,11 +44,13 @@ const ModelsPanel = (props: ModelsPanelProps) => {
         withAnimation={true}
         headerAction={expandButton}
       >
-        <div className="flex flex-row items-center justify-between pb-2">
-          <p className="text-xs font-semibold text-slate-700">Name</p>
-          <p className="text-xs font-semibold text-slate-700">Requests</p>
+        <div className="flex h-full flex-col overflow-hidden">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <p className="text-xs font-semibold text-slate-700">Name</p>
+            <p className="text-xs font-semibold text-slate-700">Requests</p>
+          </div>
+          <div className="flex-grow overflow-y-auto">{barList}</div>
         </div>
-        {barList}
       </StyledAreaChart>
       {modal}
     </>

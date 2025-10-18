@@ -3,7 +3,11 @@ import { TimeIncrement } from "./fetchTimeData";
 const INC_TO_TIME: {
   [_key in TimeIncrement]: (_startDate: Date, _nextDate?: Date) => string;
 } = {
-  min: (date) => date.toLocaleTimeString(),
+  min: (date) =>
+    date.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    }),
   hour: (date) =>
     date.toLocaleTimeString(undefined, {
       hour: "2-digit",

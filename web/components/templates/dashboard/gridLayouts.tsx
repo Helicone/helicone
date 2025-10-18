@@ -32,7 +32,7 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     h: 1,
     static: true,
   },
-  // Row 1-3: Requests & Errors/Providers
+  // Row 1-3: Requests, All Errors, Top Providers
   {
     i: "requests",
     x: 0,
@@ -57,7 +57,7 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     h: 3,
     static: true,
   },
-  // Row 4-6: Costs, Models by Cost, Models by Requests
+  // Row 4-6: Costs, Users, Top Models by Requests
   {
     i: "costs",
     x: 0,
@@ -67,7 +67,7 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     static: true,
   },
   {
-    i: "models-by-cost",
+    i: "users",
     x: 4,
     y: 4,
     w: 4,
@@ -82,9 +82,9 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     h: 3,
     static: true,
   },
-  // Row 7-9: Users, Latency, TTFT
+  // Row 7-9: Latency, Time to First Token, Top Models by Cost
   {
-    i: "users",
+    i: "latency",
     x: 0,
     y: 7,
     w: 4,
@@ -92,7 +92,7 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     static: true,
   },
   {
-    i: "latency",
+    i: "time-to-first-token",
     x: 4,
     y: 7,
     w: 4,
@@ -100,7 +100,7 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     static: true,
   },
   {
-    i: "time-to-first-token",
+    i: "models-by-cost",
     x: 8,
     y: 7,
     w: 4,

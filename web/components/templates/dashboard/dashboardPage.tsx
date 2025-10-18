@@ -5,7 +5,9 @@ import {
   ChartBarIcon,
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
-import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
+import { AreaChart as TremorAreaChart, BarChart as TremorBarChart, BarList, Card } from "@tremor/react";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Responsive, ResponsiveProps, WidthProvider } from "react-grid-layout";
 import {
@@ -24,15 +26,16 @@ import { useOrg } from "../../layout/org/organizationContext";
 import { useFilterStore } from "@/filterAST/store/filterStore";
 import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 import { FilterLeaf } from "@helicone-package/filters/filterDefs";
-import AuthHeader from "../../shared/authHeader";
+import Header from "../../shared/Header";
+import LivePill from "../../shared/LivePill";
+import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
+import FilterASTButton from "@/filterAST/FilterASTButton";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import {
   MetricsPanel,
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
-import ThemedTableHeader from "../../shared/themed/themedHeader";
-import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -55,6 +58,7 @@ import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import DashboardChartTooltipContent from "./DashboardChartTooltipContent";
+import { CHART_COLORS, TREMOR_COLOR_PALETTE } from "../../../lib/chartColors";
 const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
   ResponsiveProps & { children?: React.ReactNode }
 >;
@@ -308,32 +312,62 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   return (
     <>
-      <div className="px-8">
+      <div className="flex h-screen w-full flex-col">
         {!shouldShowMockData && (
-          <AuthHeader
-            isWithinIsland={true}
-            title={"Dashboard"}
-            headerActions={
-              <button
-                onClick={() => {
-                  refetch();
-                }}
-                className="flex flex-row items-center text-sm font-semibold text-black hover:text-sky-700 dark:text-white"
-              >
-                <ArrowPathIcon
-                  className={clsx(
-                    isAnyLoading || isLive ? "animate-spin" : "",
-                    "inline h-5 w-5",
-                  )}
+          <Header
+            title="Dashboard"
+            leftActions={
+              <div className="flex flex-row items-center gap-2">
+                {/* Time Filter */}
+                <ThemedTimeFilter
+                  currentTimeFilter={timeFilter}
+                  timeFilterOptions={[]}
+                  onSelect={function (key: string, value: string): void {
+                    if (key === "custom") {
+                      const [start, end] = value.split("_");
+                      setInterval("custom" as TimeInterval);
+                      setTimeFilter({
+                        start: new Date(start),
+                        end: new Date(end),
+                      });
+                    } else {
+                      setInterval(key as TimeInterval);
+                      setTimeFilter({
+                        start: getTimeIntervalAgo(key as TimeInterval),
+                        end: new Date(),
+                      });
+                    }
+                  }}
+                  isFetching={isAnyLoading || isModelsLoading}
+                  defaultValue={interval}
+                  custom={true}
+                  isLive={isLive}
+                  hasCustomTimeFilter={
+                    searchParams.get("t")?.startsWith("custom_") || false
+                  }
+                  onClearTimeFilter={() => {
+                    searchParams.delete("t");
+                    setInterval("1m");
+                    setTimeFilter({
+                      start: getTimeIntervalAgo("1m"),
+                      end: new Date(),
+                    });
+                  }}
                 />
-              </button>
+
+                {/* Filter AST Button */}
+                <FilterASTButton />
+              </div>
             }
-            actions={
-              <div>
-                <ThemedSwitch
-                  checked={isLive}
-                  onChange={setIsLive}
-                  label="Live"
+            rightActions={
+              <div className="flex items-center gap-2">
+                {/* Live pill */}
+                <LivePill
+                  isLive={isLive}
+                  setIsLive={setIsLive}
+                  isDataLoading={isAnyLoading}
+                  isRefetching={isModelsLoading || isProvidersLoading}
+                  refetch={refetch}
                 />
               </div>
             }
@@ -342,54 +376,10 @@ const DashboardPage = (props: DashboardPageProps) => {
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />
         ) : (
-          <div className={`${shouldShowMockData ? "pt-6" : "mt-2 space-y-4"}`}>
-            <ThemedTableHeader
-              isFetching={isAnyLoading || isModelsLoading}
-              timeFilter={
-                shouldShowMockData
-                  ? undefined
-                  : {
-                      currentTimeFilter: timeFilter,
-                      customTimeFilter: true,
-                      timeFilterOptions: [],
-                      defaultTimeFilter: interval,
-                      onTimeSelectHandler: (
-                        key: TimeInterval,
-                        value: string,
-                      ) => {
-                        if ((key as string) === "custom") {
-                          value = value.replace("custom:", "");
-                          const start = new Date(value.split("_")[0]);
-                          const end = new Date(value.split("_")[1]);
-                          setInterval(key);
-                          setTimeFilter({
-                            start,
-                            end,
-                          });
-                        } else {
-                          setInterval(key);
-                          setTimeFilter({
-                            start: getTimeIntervalAgo(key),
-                            end: new Date(),
-                          });
-                        }
-                      },
-                      isLive: isLive,
-                      hasCustomTimeFilter:
-                        searchParams.get("t")?.startsWith("custom_") || false,
-                      onClearTimeFilter: () => {
-                        searchParams.delete("t");
-                        setInterval("1m");
-                        setTimeFilter({
-                          start: getTimeIntervalAgo("1m"),
-                          end: new Date(),
-                        });
-                      },
-                    }
-              }
-              savedFilters={undefined}
-            />
-            <section id="panels" className="-m-2">
+          <div
+            className={`${shouldShowMockData ? "pt-6" : ""}`}
+          >
+            <section id="panels">
               <ResponsiveGridLayout
                 className="layout"
                 layouts={{
@@ -408,6 +398,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
                 cols={gridCols}
                 rowHeight={96}
+                margin={[0, 0]}
               >
                 {metricsData.map((m) => (
                   <div key={m.id}>
@@ -415,11 +406,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 ))}
                 <div key="requests">
-                  <Card className="rounded-lg border border-slate-200 bg-white text-slate-950 !shadow-sm ring-0 dark:border-slate-800 dark:bg-black dark:text-slate-50">
+                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
-                        <p className="text-sm text-slate-500">Requests</p>
-                        <p className="text-xl font-semibold text-slate-950 dark:text-slate-50">
+                        <p className="text-sm text-muted-foreground">Requests</p>
+                        <p className="text-xl font-semibold text-foreground">
                           {metrics.totalRequests?.data?.data
                             ? `${formatNumberString(
                                 metrics.totalRequests?.data?.data.toFixed(2),
@@ -429,32 +420,82 @@ const DashboardPage = (props: DashboardPageProps) => {
                       </div>
                     </div>
 
-                    <div
-                      className={clsx("p-2", "w-full")}
-                      style={{
-                        height: "212px",
-                      }}
-                    >
+                    <div className="w-full pt-4">
                       {overTimeData.requests.isLoading ? (
-                        <div className="h-full w-full rounded-md bg-slate-200 pt-4 dark:bg-slate-800">
+                        <div className="flex h-[180px] w-full items-center justify-center bg-muted">
                           <LoadingAnimation height={175} width={175} />
                         </div>
                       ) : (
-                        <AreaChart
-                          customTooltip={DashboardChartTooltipContent}
-                          className="h-[14rem]"
-                          data={flattenedOverTime}
-                          index="date"
-                          categories={["success", "error"]}
-                          colors={["green", "red"]}
-                          showYAxis={false}
-                          curveType="monotone"
-                          animationDuration={1000}
-                          showAnimation={true}
-                        />
+                        <ChartContainer
+                          config={{
+                            success: {
+                              label: "Success",
+                              color: CHART_COLORS.success,
+                            },
+                            error: {
+                              label: "Error",
+                              color: CHART_COLORS.error,
+                            },
+                          }}
+                          className="h-[180px] w-full"
+                        >
+                          <AreaChart data={flattenedOverTime}>
+                            <defs>
+                              <linearGradient id="fillSuccess" x1="0" y1="0" x2="0" y2="1">
+                                <stop
+                                  offset="5%"
+                                  stopColor="var(--color-success)"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor="var(--color-success)"
+                                  stopOpacity={0.1}
+                                />
+                              </linearGradient>
+                              <linearGradient id="fillError" x1="0" y1="0" x2="0" y2="1">
+                                <stop
+                                  offset="5%"
+                                  stopColor="var(--color-error)"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor="var(--color-error)"
+                                  stopOpacity={0.1}
+                                />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              minTickGap={50}
+                            />
+                            <YAxis domain={[0, 'auto']} hide />
+                            <ChartTooltip
+                              cursor={false}
+                              content={<ChartTooltipContent indicator="dot" />}
+                            />
+                            <Area
+                              dataKey="success"
+                              type="natural"
+                              fill="url(#fillSuccess)"
+                              stroke="var(--color-success)"
+                            />
+                            <Area
+                              dataKey="error"
+                              type="natural"
+                              fill="url(#fillError)"
+                              stroke="var(--color-error)"
+                            />
+                          </AreaChart>
+                        </ChartContainer>
                       )}
                     </div>
-                  </Card>
+                  </div>
                 </div>
                 <div key="errors">
                   <ErrorsPanel
@@ -472,66 +513,143 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <TopProvidersPanel providers={providers} />
                 </div>
                 <div key="costs">
-                  <StyledAreaChart
-                    title={"Costs"}
-                    value={
-                      metrics.totalCost.data?.data
-                        ? `$${formatNumberString(
-                            metrics.totalCost.data?.data < 0.02
-                              ? metrics.totalCost.data?.data.toFixed(7)
-                              : metrics.totalCost.data?.data.toFixed(2),
-                            true,
-                          )}`
-                        : "$0.00"
-                    }
-                    isDataOverTimeLoading={overTimeData.costs.isLoading}
-                  >
-                    <BarChart
-                      customTooltip={DashboardChartTooltipContent}
-                      className="h-[14rem]"
-                      data={
-                        overTimeData.costs.data?.data?.map((r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          costs: r.cost,
-                        })) ?? []
-                      }
-                      index="date"
-                      categories={["costs"]}
-                      colors={["blue"]}
-                      showYAxis={false}
-                      valueFormatter={(number: number | bigint) =>
-                        `$ ${new Intl.NumberFormat("us")
-                          .format(number)
-                          .toString()}`
-                      }
-                    />
-                  </StyledAreaChart>
+                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="flex flex-col space-y-0.5">
+                        <p className="text-sm text-muted-foreground">Costs</p>
+                        <p className="text-xl font-semibold text-foreground">
+                          {metrics.totalCost.data?.data
+                            ? `$${formatNumberString(
+                                metrics.totalCost.data?.data < 0.02
+                                  ? metrics.totalCost.data?.data.toFixed(7)
+                                  : metrics.totalCost.data?.data.toFixed(2),
+                                true,
+                              )}`
+                            : "$0.00"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="w-full pt-4">
+                      {overTimeData.costs.isLoading ? (
+                        <div className="flex h-[180px] w-full items-center justify-center bg-muted">
+                          <LoadingAnimation height={175} width={175} />
+                        </div>
+                      ) : (
+                        <ChartContainer
+                          config={{
+                            costs: {
+                              label: "Costs",
+                              color: CHART_COLORS.blue,
+                            },
+                          }}
+                          className="h-[180px] w-full"
+                        >
+                          <BarChart
+                            data={
+                              overTimeData.costs.data?.data?.map((r) => ({
+                                date: getTimeMap(timeIncrement)(r.time),
+                                costs: r.cost,
+                              })) ?? []
+                            }
+                          >
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              minTickGap={50}
+                            />
+                            <YAxis domain={[0, 'auto']} hide />
+                            <ChartTooltip
+                              cursor={false}
+                              content={
+                                <ChartTooltipContent
+                                  indicator="dot"
+                                  valueFormatter={(value) =>
+                                    `$${new Intl.NumberFormat("us").format(Number(value))}`
+                                  }
+                                />
+                              }
+                            />
+                            <Bar
+                              dataKey="costs"
+                              fill="var(--color-costs)"
+                              radius={0}
+                            />
+                          </BarChart>
+                        </ChartContainer>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div key="users">
-                  <StyledAreaChart
-                    title={"Users"}
-                    value={
-                      metrics.activeUsers.data?.data
-                        ? formatLargeNumber(metrics.activeUsers.data?.data)
-                        : "0"
-                    }
-                    isDataOverTimeLoading={overTimeData.users.isLoading}
-                  >
-                    <BarChart
-                      customTooltip={DashboardChartTooltipContent}
-                      className="h-[14rem]"
-                      data={
-                        overTimeData.users.data?.data?.map((r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          users: r.count,
-                        })) ?? []
-                      }
-                      index="date"
-                      categories={["users"]}
-                      colors={["orange"]}
-                      showYAxis={false}
-                    />
-                  </StyledAreaChart>
+                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="flex flex-col space-y-0.5">
+                        <p className="text-sm text-muted-foreground">Users</p>
+                        <p className="text-xl font-semibold text-foreground">
+                          {metrics.activeUsers.data?.data
+                            ? formatLargeNumber(metrics.activeUsers.data?.data)
+                            : "0"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="w-full pt-4">
+                      {overTimeData.users.isLoading ? (
+                        <div className="flex h-[180px] w-full items-center justify-center bg-muted">
+                          <LoadingAnimation height={175} width={175} />
+                        </div>
+                      ) : (
+                        <ChartContainer
+                          config={{
+                            users: {
+                              label: "Users",
+                              color: CHART_COLORS.orange,
+                            },
+                          }}
+                          className="h-[180px] w-full"
+                        >
+                          <BarChart
+                            data={
+                              overTimeData.users.data?.data?.map((r) => ({
+                                date: getTimeMap(timeIncrement)(r.time),
+                                users: r.count,
+                              })) ?? []
+                            }
+                          >
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              minTickGap={50}
+                            />
+                            <YAxis domain={[0, 'auto']} hide />
+                            <ChartTooltip
+                              cursor={false}
+                              content={
+                                <ChartTooltipContent
+                                  indicator="dot"
+                                  valueFormatter={(value) =>
+                                    new Intl.NumberFormat("us").format(Number(value))
+                                  }
+                                />
+                              }
+                            />
+                            <Bar
+                              dataKey="users"
+                              fill="var(--color-users)"
+                              radius={0}
+                            />
+                          </BarChart>
+                        </ChartContainer>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div key="countries">
                   <CountryPanel timeFilter={timeFilter} userFilters={filters} />
@@ -552,34 +670,86 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </div>
                 <div key="latency">
-                  <StyledAreaChart
-                    title={"Latency"}
-                    value={`${new Intl.NumberFormat("us").format(
-                      (metrics.averageLatency.data?.data ?? 0) / 1000,
-                    )} s / req`}
-                    isDataOverTimeLoading={overTimeData.latency.isLoading}
-                  >
-                    <AreaChart
-                      customTooltip={DashboardChartTooltipContent}
-                      className="h-[14rem]"
-                      data={
-                        overTimeData.latency.data?.data?.map((r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          latency: r.duration,
-                        })) ?? []
-                      }
-                      index="date"
-                      categories={["latency"]}
-                      colors={["cyan"]}
-                      showYAxis={false}
-                      curveType="monotone"
-                      valueFormatter={(number: number | bigint) => {
-                        return `${new Intl.NumberFormat("us").format(
-                          Number(number) / 1000,
-                        )} s`;
-                      }}
-                    />
-                  </StyledAreaChart>
+                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="flex flex-col space-y-0.5">
+                        <p className="text-sm text-muted-foreground">Latency</p>
+                        <p className="text-xl font-semibold text-foreground">
+                          {`${new Intl.NumberFormat("us").format(
+                            (metrics.averageLatency.data?.data ?? 0) / 1000,
+                          )} s / req`}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="w-full pt-4">
+                      {overTimeData.latency.isLoading ? (
+                        <div className="flex h-[180px] w-full items-center justify-center bg-muted">
+                          <LoadingAnimation height={175} width={175} />
+                        </div>
+                      ) : (
+                        <ChartContainer
+                          config={{
+                            latency: {
+                              label: "Latency",
+                              color: CHART_COLORS.cyan,
+                            },
+                          }}
+                          className="h-[180px] w-full"
+                        >
+                          <AreaChart
+                            data={
+                              overTimeData.latency.data?.data?.map((r) => ({
+                                date: getTimeMap(timeIncrement)(r.time),
+                                latency: r.duration / 1000,
+                              })) ?? []
+                            }
+                          >
+                            <defs>
+                              <linearGradient id="fillLatency" x1="0" y1="0" x2="0" y2="1">
+                                <stop
+                                  offset="5%"
+                                  stopColor="var(--color-latency)"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor="var(--color-latency)"
+                                  stopOpacity={0.1}
+                                />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              minTickGap={50}
+                            />
+                            <YAxis domain={[0, 'auto']} hide />
+                            <ChartTooltip
+                              cursor={false}
+                              content={
+                                <ChartTooltipContent
+                                  indicator="dot"
+                                  valueFormatter={(value) =>
+                                    `${new Intl.NumberFormat("us").format(Number(value))} s`
+                                  }
+                                />
+                              }
+                            />
+                            <Area
+                              dataKey="latency"
+                              type="natural"
+                              fill="url(#fillLatency)"
+                              stroke="var(--color-latency)"
+                            />
+                          </AreaChart>
+                        </ChartContainer>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div key="quantiles">
                   <QuantilesGraph
@@ -589,65 +759,172 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </div>
                 <div key="time-to-first-token">
-                  <StyledAreaChart
-                    title={"Time to First Token"}
-                    value={`Average: ${new Intl.NumberFormat("us").format(
-                      metrics.averageTimeToFirstToken.data?.data ?? 0,
-                    )} ms`}
-                    isDataOverTimeLoading={
-                      overTimeData.timeToFirstToken.isLoading
-                    }
-                  >
-                    <AreaChart
-                      customTooltip={DashboardChartTooltipContent}
-                      className="h-[14rem]"
-                      data={
-                        overTimeData.timeToFirstToken.data?.data?.map((r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          time: r.ttft,
-                        })) ?? []
-                      }
-                      index="date"
-                      categories={["time"]}
-                      colors={["violet"]}
-                      showYAxis={false}
-                      curveType="monotone"
-                      valueFormatter={(number: number | bigint) => {
-                        return `${new Intl.NumberFormat("us").format(
-                          number,
-                        )} ms`;
-                      }}
-                    />
-                  </StyledAreaChart>
+                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="flex flex-col space-y-0.5">
+                        <p className="text-sm text-muted-foreground">Time to First Token</p>
+                        <p className="text-xl font-semibold text-foreground">
+                          {`Average: ${new Intl.NumberFormat("us").format(
+                            metrics.averageTimeToFirstToken.data?.data ?? 0,
+                          )} ms`}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="w-full pt-4">
+                      {overTimeData.timeToFirstToken.isLoading ? (
+                        <div className="flex h-[180px] w-full items-center justify-center bg-muted">
+                          <LoadingAnimation height={175} width={175} />
+                        </div>
+                      ) : (
+                        <ChartContainer
+                          config={{
+                            ttft: {
+                              label: "Time to First Token",
+                              color: CHART_COLORS.purple,
+                            },
+                          }}
+                          className="h-[180px] w-full"
+                        >
+                          <AreaChart
+                            data={
+                              overTimeData.timeToFirstToken.data?.data?.map((r) => ({
+                                date: getTimeMap(timeIncrement)(r.time),
+                                ttft: r.ttft,
+                              })) ?? []
+                            }
+                          >
+                            <defs>
+                              <linearGradient id="fillTTFT" x1="0" y1="0" x2="0" y2="1">
+                                <stop
+                                  offset="5%"
+                                  stopColor="var(--color-ttft)"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor="var(--color-ttft)"
+                                  stopOpacity={0.1}
+                                />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              minTickGap={50}
+                            />
+                            <YAxis domain={[0, 'auto']} hide />
+                            <ChartTooltip
+                              cursor={false}
+                              content={
+                                <ChartTooltipContent
+                                  indicator="dot"
+                                  valueFormatter={(value) =>
+                                    `${new Intl.NumberFormat("us").format(Number(value))} ms`
+                                  }
+                                />
+                              }
+                            />
+                            <Area
+                              dataKey="ttft"
+                              type="natural"
+                              fill="url(#fillTTFT)"
+                              stroke="var(--color-ttft)"
+                            />
+                          </AreaChart>
+                        </ChartContainer>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div key="threats">
-                  <StyledAreaChart
-                    title={"Threats"}
-                    value={`${formatLargeNumber(
-                      Number(metrics.totalThreats.data?.data?.toFixed(0) ?? 0),
-                    )}`}
-                    isDataOverTimeLoading={overTimeData.threats.isLoading}
-                  >
-                    <AreaChart
-                      customTooltip={DashboardChartTooltipContent}
-                      className="h-[14rem]"
-                      data={
-                        overTimeData.threats.data?.data?.map((r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          threats: r.count,
-                        })) ?? []
-                      }
-                      index="date"
-                      categories={["threats"]}
-                      colors={["amber"]}
-                      showYAxis={false}
-                      curveType="monotone"
-                    />
-                  </StyledAreaChart>
+                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="flex flex-col space-y-0.5">
+                        <p className="text-sm text-muted-foreground">Threats</p>
+                        <p className="text-xl font-semibold text-foreground">
+                          {formatLargeNumber(
+                            Number(metrics.totalThreats.data?.data?.toFixed(0) ?? 0),
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="w-full pt-4">
+                      {overTimeData.threats.isLoading ? (
+                        <div className="flex h-[180px] w-full items-center justify-center bg-muted">
+                          <LoadingAnimation height={175} width={175} />
+                        </div>
+                      ) : (
+                        <ChartContainer
+                          config={{
+                            threats: {
+                              label: "Threats",
+                              color: CHART_COLORS.yellow,
+                            },
+                          }}
+                          className="h-[180px] w-full"
+                        >
+                          <AreaChart
+                            data={
+                              overTimeData.threats.data?.data?.map((r) => ({
+                                date: getTimeMap(timeIncrement)(r.time),
+                                threats: r.count,
+                              })) ?? []
+                            }
+                          >
+                            <defs>
+                              <linearGradient id="fillThreats" x1="0" y1="0" x2="0" y2="1">
+                                <stop
+                                  offset="5%"
+                                  stopColor="var(--color-threats)"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor="var(--color-threats)"
+                                  stopOpacity={0.1}
+                                />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              minTickGap={50}
+                            />
+                            <YAxis domain={[0, 'auto']} hide />
+                            <ChartTooltip
+                              cursor={false}
+                              content={
+                                <ChartTooltipContent
+                                  indicator="dot"
+                                  valueFormatter={(value) =>
+                                    new Intl.NumberFormat("us").format(Number(value))
+                                  }
+                                />
+                              }
+                            />
+                            <Area
+                              dataKey="threats"
+                              type="natural"
+                              fill="url(#fillThreats)"
+                              stroke="var(--color-threats)"
+                            />
+                          </AreaChart>
+                        </ChartContainer>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div key="suggest-more-graphs">
-                  <div className="flex h-full w-full flex-col items-center justify-center space-y-2 rounded-lg border border-dashed border-slate-200 bg-white p-2 text-slate-950 shadow-sm dark:border-slate-900 dark:bg-black dark:text-slate-50">
-                    <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
+                  <div className="flex h-full w-full flex-col items-center justify-center space-y-2 border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                    <PresentationChartLineIcon className="h-12 w-12 text-foreground" />
                     <button
                       className="text-semibold p-4 text-lg"
                       onClick={() => {
@@ -656,7 +933,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     >
                       Request a new graph
                     </button>
-                    <div className="max-w-xs text-center text-sm text-slate-500">
+                    <div className="max-w-xs text-center text-sm text-muted-foreground">
                       Or use our{" "}
                       <a
                         href="https://docs.helicone.ai/getting-started/integration-method/posthog"
@@ -672,59 +949,145 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 </div>
                 <div key="tokens-per-min-over-time">
-                  <StyledAreaChart
-                    title={"Tokens / Minute"}
-                    value={`Max: ${formatLargeNumber(
-                      max(
-                        overTimeData.promptTokensOverTime.data?.data
-                          ?.map((d) => d.completion_tokens + d.prompt_tokens)
-                          .filter((d) => d !== 0) ?? [],
-                      ) /
-                        Number(getIncrementAsMinutes(timeIncrement).toFixed(2)),
-                    )} tokens`}
-                    isDataOverTimeLoading={overTimeData.users.isLoading}
-                  >
-                    <AreaChart
-                      customTooltip={DashboardChartTooltipContent}
-                      className="h-[14rem]"
-                      data={
-                        overTimeData.promptTokensOverTime.data?.data?.map(
-                          (r) => ({
-                            date: getTimeMap(timeIncrement)(r.time),
-                            "Prompt / min":
-                              (r.prompt_tokens + 0.0) /
-                              getIncrementAsMinutes(timeIncrement),
+                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="flex flex-col space-y-0.5">
+                        <p className="text-sm text-muted-foreground">Tokens / Minute</p>
+                        <p className="text-xl font-semibold text-foreground">
+                          {`Max: ${formatLargeNumber(
+                            max(
+                              overTimeData.promptTokensOverTime.data?.data
+                                ?.map((d) => d.completion_tokens + d.prompt_tokens)
+                                .filter((d) => d !== 0) ?? [],
+                            ) /
+                              Number(getIncrementAsMinutes(timeIncrement).toFixed(2)),
+                          )} tokens`}
+                        </p>
+                      </div>
+                    </div>
 
-                            "Completion / min":
-                              (r.completion_tokens + 0.0) /
-                              getIncrementAsMinutes(timeIncrement),
-                            "Total / min":
-                              (r.prompt_tokens + r.completion_tokens + 0.0) /
-                              getIncrementAsMinutes(timeIncrement),
-                          }),
-                        ) ?? []
-                      }
-                      index="date"
-                      categories={[
-                        "Prompt / min",
-                        "Completion / min",
-                        "Total / min",
-                      ]}
-                      colors={[
-                        "cyan",
-                        "blue",
-                        "green",
-                        "indigo",
-                        "orange",
-                        "pink",
-                      ]}
-                      showYAxis={false}
-                      curveType="monotone"
-                      valueFormatter={(number: number | bigint) =>
-                        `${new Intl.NumberFormat("us").format(number)} tokens`
-                      }
-                    />
-                  </StyledAreaChart>
+                    <div className="w-full pt-4">
+                      {overTimeData.users.isLoading ? (
+                        <div className="flex h-[180px] w-full items-center justify-center bg-muted">
+                          <LoadingAnimation height={175} width={175} />
+                        </div>
+                      ) : (
+                        <ChartContainer
+                          config={{
+                            promptPerMin: {
+                              label: "Prompt / min",
+                              color: CHART_COLORS.blue,
+                            },
+                            completionPerMin: {
+                              label: "Completion / min",
+                              color: CHART_COLORS.purple,
+                            },
+                            totalPerMin: {
+                              label: "Total / min",
+                              color: CHART_COLORS.orange,
+                            },
+                          }}
+                          className="h-[180px] w-full"
+                        >
+                          <AreaChart
+                            data={
+                              overTimeData.promptTokensOverTime.data?.data?.map(
+                                (r) => ({
+                                  date: getTimeMap(timeIncrement)(r.time),
+                                  promptPerMin:
+                                    (r.prompt_tokens + 0.0) /
+                                    getIncrementAsMinutes(timeIncrement),
+                                  completionPerMin:
+                                    (r.completion_tokens + 0.0) /
+                                    getIncrementAsMinutes(timeIncrement),
+                                  totalPerMin:
+                                    (r.prompt_tokens + r.completion_tokens + 0.0) /
+                                    getIncrementAsMinutes(timeIncrement),
+                                }),
+                              ) ?? []
+                            }
+                          >
+                            <defs>
+                              <linearGradient id="fillPromptPerMin" x1="0" y1="0" x2="0" y2="1">
+                                <stop
+                                  offset="5%"
+                                  stopColor="var(--color-promptPerMin)"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor="var(--color-promptPerMin)"
+                                  stopOpacity={0.1}
+                                />
+                              </linearGradient>
+                              <linearGradient id="fillCompletionPerMin" x1="0" y1="0" x2="0" y2="1">
+                                <stop
+                                  offset="5%"
+                                  stopColor="var(--color-completionPerMin)"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor="var(--color-completionPerMin)"
+                                  stopOpacity={0.1}
+                                />
+                              </linearGradient>
+                              <linearGradient id="fillTotalPerMin" x1="0" y1="0" x2="0" y2="1">
+                                <stop
+                                  offset="5%"
+                                  stopColor="var(--color-totalPerMin)"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor="var(--color-totalPerMin)"
+                                  stopOpacity={0.1}
+                                />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={8}
+                              minTickGap={50}
+                            />
+                            <YAxis domain={[0, 'auto']} hide />
+                            <ChartTooltip
+                              cursor={false}
+                              content={
+                                <ChartTooltipContent
+                                  indicator="dot"
+                                  valueFormatter={(value) =>
+                                    `${new Intl.NumberFormat("us").format(Number(value))} tokens`
+                                  }
+                                />
+                              }
+                            />
+                            <Area
+                              dataKey="promptPerMin"
+                              type="natural"
+                              fill="url(#fillPromptPerMin)"
+                              stroke="var(--color-promptPerMin)"
+                            />
+                            <Area
+                              dataKey="completionPerMin"
+                              type="natural"
+                              fill="url(#fillCompletionPerMin)"
+                              stroke="var(--color-completionPerMin)"
+                            />
+                            <Area
+                              dataKey="totalPerMin"
+                              type="natural"
+                              fill="url(#fillTotalPerMin)"
+                              stroke="var(--color-totalPerMin)"
+                            />
+                          </AreaChart>
+                        </ChartContainer>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </ResponsiveGridLayout>
               <div className="relative">

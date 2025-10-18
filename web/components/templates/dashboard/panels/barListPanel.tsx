@@ -39,18 +39,20 @@ export const BarListWithTooltips = ({
                 <div className="relative h-8 overflow-hidden rounded">
                   {/* Background bar */}
                   <div
-                    className={`absolute inset-0 ${
-                      item.color === "purple"
-                        ? "bg-purple-500/20"
-                        : item.color === "blue"
-                          ? "bg-blue-500/20"
-                          : item.color === "green"
-                            ? "bg-green-500/20"
-                            : item.color === "yellow"
-                              ? "bg-yellow-500/20"
-                              : "bg-orange-500/20"
-                    }`}
-                    style={{ width: `${percentage}%` }}
+                    className="absolute inset-0"
+                    style={{
+                      width: `${percentage}%`,
+                      backgroundColor:
+                        item.color === "blue" ? "hsl(217, 100%, 55%)" :
+                        item.color === "purple" ? "hsl(271, 100%, 60%)" :
+                        item.color === "cyan" ? "hsl(185, 100%, 40%)" :
+                        item.color === "green" ? "hsl(145, 80%, 42%)" :
+                        item.color === "pink" ? "hsl(330, 100%, 55%)" :
+                        item.color === "orange" ? "hsl(25, 100%, 50%)" :
+                        item.color === "yellow" ? "hsl(48, 100%, 50%)" :
+                        "hsl(217, 100%, 55%)",
+                      opacity: 0.35
+                    }}
                   />
                   {/* Content on top */}
                   <div className="relative flex h-full items-center justify-between px-3">
@@ -96,7 +98,7 @@ export const useExpandableBarList = ({
 
   const barList = (
     <BarListWithTooltips
-      data={data.slice(0, 5)}
+      data={data}
       maxValue={maxValue}
       formatValue={formatValue}
     />
