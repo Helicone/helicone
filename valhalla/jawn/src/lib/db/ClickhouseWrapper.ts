@@ -367,6 +367,12 @@ export interface JawnHttpLogs {
   properties: Record<string, string>;
 }
 
+export interface HiddenPropertyKeyRow {
+  organization_id: string;
+  key: string;
+  is_hidden: number; // UInt8 in ClickHouse
+}
+
 export interface Tags {
   organization_id: string;
   entity_type: string;
@@ -388,6 +394,7 @@ export interface ClickhouseDB {
     request_response_rmt: RequestResponseRMT;
     tags: Tags;
     jawn_http_logs: JawnHttpLogs;
+    hidden_property_keys: HiddenPropertyKeyRow;
   };
 }
 
