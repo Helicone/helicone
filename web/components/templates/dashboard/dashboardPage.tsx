@@ -46,6 +46,10 @@ import {
 } from "./mockDashboardData";
 import CountryPanel from "./panels/countryPanel";
 import { ScoresPanel } from "./panels/scores/scoresPanel";
+import ModelsPanel from "./panels/modelsPanel";
+import ModelsByCostPanel from "./panels/modelsByCostPanel";
+import TopProvidersPanel from "./panels/topProvidersPanel";
+import ErrorsPanel from "./panels/errorsPanel";
 import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
@@ -139,6 +143,8 @@ const DashboardPage = (props: DashboardPageProps) => {
     refetch,
     models: realModels,
     isModelsLoading,
+    providers: realProviders,
+    isProvidersLoading,
   } = useDashboardPage({
     timeFilter,
     timeZoneDifference: new Date().getTimezoneOffset(),
@@ -154,6 +160,9 @@ const DashboardPage = (props: DashboardPageProps) => {
   const models = shouldShowMockData
     ? { data: mockModels.data, isLoading: false }
     : realModels;
+  const providers = shouldShowMockData
+    ? { data: [], isLoading: false }
+    : realProviders;
 
   const metricsData: MetricsPanelProps["metric"][] = [
     {
@@ -393,6 +402,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                 autoSize={true}
                 isBounded={true}
                 isDraggable={false}
+                isResizable={false}
+                compactType={null}
+                preventCollision={true}
                 breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
                 cols={gridCols}
                 rowHeight={96}
@@ -445,103 +457,19 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </Card>
                 </div>
                 <div key="errors">
-                  <Card className="flex h-full w-full flex-col rounded-lg border border-slate-200 bg-white text-slate-950 !shadow-sm ring-0 dark:border-slate-800 dark:bg-black dark:text-slate-50">
-                    <div className="flex h-full flex-col">
-                      <h2 className="mb-2 text-sm text-slate-500">
-                        All Errors
-                      </h2>
-                      {(() => {
-                        const totalErrors = accumulatedStatusCounts.reduce(
-                          (sum, e) => sum + e.value,
-                          0,
-                        );
-                        const errorPercentage =
-                          (totalErrors /
-                            (metrics.totalRequests?.data?.data ?? 1)) *
-                            100 || 0;
-                        return (
-                          <div className="mb-2 text-sm">
-                            <span className="font-semibold">
-                              {formatLargeNumber(totalErrors)}
-                            </span>{" "}
-                            total errors (
-                            <span className="font-semibold">
-                              {errorPercentage.toFixed(2)}%
-                            </span>{" "}
-                            of all requests)
-                          </div>
-                        );
-                      })()}
-                      <div className="flex flex-grow flex-col overflow-hidden">
-                        <div className="flex flex-row items-center justify-between pb-2">
-                          <p className="text-xs font-semibold text-slate-700">
-                            Error Type
-                          </p>
-                          <p className="text-xs font-semibold text-slate-700">
-                            Percentage
-                          </p>
-                        </div>
-                        <div className="flex-grow overflow-y-auto">
-                          <BarList
-                            data={(() => {
-                              const totalErrors =
-                                accumulatedStatusCounts.reduce(
-                                  (sum, e) => sum + e.value,
-                                  0,
-                                );
-                              return accumulatedStatusCounts
-                                .sort((a, b) => b.value - a.value)
-                                .map((error, index) => ({
-                                  name: `${error.name} (${formatLargeNumber(
-                                    error.value,
-                                  )})`,
-                                  value: (error.value / totalErrors) * 100,
-                                  color: listColors[index % listColors.length],
-                                }));
-                            })()}
-                            className="h-full"
-                            showAnimation={true}
-                            valueFormatter={(value: number) =>
-                              `${value.toFixed(1)}%`
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
+                  <ErrorsPanel
+                    accumulatedStatusCounts={accumulatedStatusCounts}
+                    totalRequests={metrics.totalRequests?.data?.data ?? 1}
+                  />
                 </div>
                 <div key="models">
-                  <StyledAreaChart
-                    title={`Top Models`}
-                    value={undefined}
-                    isDataOverTimeLoading={isModelsLoading}
-                    withAnimation={true}
-                  >
-                    <div className="flex flex-row items-center justify-between pb-2">
-                      <p className="text-xs font-semibold text-slate-700">
-                        Name
-                      </p>
-                      <p className="text-xs font-semibold text-slate-700">
-                        Requests
-                      </p>
-                    </div>
-                    <BarList
-                      data={
-                        models?.data
-                          ?.map((model, index) => ({
-                            name: model.model || "n/a",
-                            value: model.total_requests,
-                            color: listColors[index % listColors.length],
-                          }))
-                          .sort(
-                            (a, b) =>
-                              b.value - a.value - (b.name === "n/a" ? 1 : 0),
-                          ) ?? []
-                      }
-                      className="h-full overflow-auto"
-                      showAnimation={true}
-                    />
-                  </StyledAreaChart>
+                  <ModelsPanel models={models} />
+                </div>
+                <div key="models-by-cost">
+                  <ModelsByCostPanel models={models} />
+                </div>
+                <div key="top-providers">
+                  <TopProvidersPanel providers={providers} />
                 </div>
                 <div key="costs">
                   <StyledAreaChart

@@ -1,10 +1,12 @@
 export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
+  // Row 0: Metric cards
   {
     i: "cost-req",
     x: 0,
     y: 0,
     w: 3,
     h: 1,
+    static: true,
   },
   {
     i: "prompt-tokens",
@@ -12,6 +14,7 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     y: 0,
     w: 3,
     h: 1,
+    static: true,
   },
   {
     i: "completion-tokens",
@@ -19,6 +22,7 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     y: 0,
     w: 3,
     h: 1,
+    static: true,
   },
   {
     i: "total-tokens",
@@ -26,13 +30,16 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     y: 0,
     w: 3,
     h: 1,
+    static: true,
   },
+  // Row 1-3: Requests & Errors/Providers
   {
     i: "requests",
     x: 0,
     y: 1,
     w: 6,
     h: 3,
+    static: true,
   },
   {
     i: "errors",
@@ -40,106 +47,133 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     y: 1,
     w: 3,
     h: 3,
+    static: true,
   },
   {
-    i: "models",
+    i: "top-providers",
     x: 9,
     y: 1,
     w: 3,
     h: 3,
+    static: true,
   },
+  // Row 4-6: Costs, Models by Cost, Models by Requests
   {
     i: "costs",
     x: 0,
     y: 4,
     w: 4,
     h: 3,
+    static: true,
   },
   {
-    i: "users",
+    i: "models-by-cost",
     x: 4,
     y: 4,
     w: 4,
-    h: 3,
-  },
-  {
-    i: "countries",
-    x: 8,
-    y: 4,
-    w: 4,
-    h: 3,
-  },
-  {
-    i: "latency",
-    x: 0,
-    y: 7,
-    w: 4,
-    h: 3,
-  },
-  {
-    i: "tokens-per-min-over-time",
-    x: 4,
-    y: 7,
-    w: 4,
-    h: 3,
-  },
-  {
-    i: "quantiles",
-    x: 8,
-    y: 7,
-    w: 4,
-    h: 3,
-  },
-  {
-    i: "scores",
-    x: 0,
-    y: 10,
-    w: 6,
-    h: 3,
-  },
-  {
-    i: "scores-bool",
-    x: 6,
-    y: 10,
-    w: 6,
-    h: 3,
-  },
-  {
-    i: "time-to-first-token",
-    x: 0,
-    y: 13,
-    w: 4,
-    h: 3,
-  },
-  {
-    i: "threats",
-    x: 4,
-    y: 13,
-    w: 4,
-    h: 3,
-  },
-  {
-    i: "suggest-more-graphs",
-    x: 8,
-    y: 13,
-    w: 4,
-    h: 3,
-  },
-];
-
-export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
-  {
-    i: "requests",
-    x: 0,
-    y: 0,
-    w: 12,
     h: 3,
     static: true,
   },
   {
+    i: "models",
+    x: 8,
+    y: 4,
+    w: 4,
+    h: 3,
+    static: true,
+  },
+  // Row 7-9: Users, Latency, TTFT
+  {
+    i: "users",
+    x: 0,
+    y: 7,
+    w: 4,
+    h: 3,
+    static: true,
+  },
+  {
+    i: "latency",
+    x: 4,
+    y: 7,
+    w: 4,
+    h: 3,
+    static: true,
+  },
+  {
+    i: "time-to-first-token",
+    x: 8,
+    y: 7,
+    w: 4,
+    h: 3,
+    static: true,
+  },
+  // Row 10-12: Quantiles, Tokens/Minute, Countries
+  {
+    i: "quantiles",
+    x: 0,
+    y: 10,
+    w: 4,
+    h: 3,
+    static: true,
+  },
+  {
+    i: "tokens-per-min-over-time",
+    x: 4,
+    y: 10,
+    w: 4,
+    h: 3,
+    static: true,
+  },
+  {
+    i: "countries",
+    x: 8,
+    y: 10,
+    w: 4,
+    h: 3,
+    static: true,
+  },
+  // Row 13-15: Scores
+  {
+    i: "scores",
+    x: 0,
+    y: 13,
+    w: 6,
+    h: 3,
+    static: true,
+  },
+  {
+    i: "scores-bool",
+    x: 6,
+    y: 13,
+    w: 6,
+    h: 3,
+    static: true,
+  },
+  // Row 16-18: Threats, Request New Graph
+  {
+    i: "threats",
+    x: 0,
+    y: 16,
+    w: 6,
+    h: 3,
+    static: true,
+  },
+  {
+    i: "suggest-more-graphs",
+    x: 6,
+    y: 16,
+    w: 6,
+    h: 3,
+    static: true,
+  },
+];
+
+export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
+  // Metric cards
+  {
     i: "cost-req",
     x: 0,
-    y: 3,
+    y: 0,
     w: 12,
     h: 3,
     static: true,
@@ -147,7 +181,7 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
   {
     i: "prompt-tokens",
     x: 0,
-    y: 6,
+    y: 3,
     w: 12,
     h: 3,
     static: true,
@@ -155,7 +189,7 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
   {
     i: "completion-tokens",
     x: 0,
-    y: 9,
+    y: 6,
     w: 12,
     h: 3,
     static: true,
@@ -163,21 +197,31 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
   {
     i: "total-tokens",
     x: 0,
+    y: 9,
+    w: 12,
+    h: 3,
+    static: true,
+  },
+  // Requests & Errors
+  {
+    i: "requests",
+    x: 0,
     y: 12,
     w: 12,
     h: 3,
     static: true,
   },
   {
-    i: "models",
+    i: "errors",
     x: 0,
     y: 15,
-    w: 15,
+    w: 12,
     h: 3,
     static: true,
   },
+  // Models panels
   {
-    i: "errors",
+    i: "models",
     x: 0,
     y: 18,
     w: 12,
@@ -185,7 +229,7 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
     static: true,
   },
   {
-    i: "costs",
+    i: "top-providers",
     x: 0,
     y: 21,
     w: 12,
@@ -193,16 +237,16 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
     static: true,
   },
   {
-    i: "users",
+    i: "models-by-cost",
     x: 0,
     y: 24,
     w: 12,
     h: 3,
-
     static: true,
   },
+  // Performance metrics
   {
-    i: "countries",
+    i: "latency",
     x: 0,
     y: 27,
     w: 12,
@@ -210,7 +254,7 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
     static: true,
   },
   {
-    i: "scores",
+    i: "time-to-first-token",
     x: 0,
     y: 30,
     w: 12,
@@ -218,20 +262,20 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
     static: true,
   },
   {
-    i: "scores-bool",
+    i: "users",
     x: 0,
     y: 33,
     w: 12,
     h: 3,
     static: true,
   },
+  // Secondary metrics
   {
-    i: "latency",
+    i: "costs",
     x: 0,
     y: 36,
     w: 12,
     h: 3,
-
     static: true,
   },
   {
@@ -240,33 +284,32 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
     y: 39,
     w: 12,
     h: 3,
-
-    static: true,
-  },
-  {
-    i: "time-to-first-token",
-    x: 0,
-    y: 42,
-    w: 12,
-    h: 3,
-
-    static: true,
-  },
-  {
-    i: "threats",
-    x: 0,
-    y: 45,
-    w: 12,
-    h: 3,
-
     static: true,
   },
   {
     i: "tokens-per-min-over-time",
     x: 0,
+    y: 42,
+    w: 12,
+    h: 3,
+    static: true,
+  },
+  // Lower priority
+  {
+    i: "countries",
+    x: 0,
+    y: 45,
+    w: 12,
+    h: 3,
+    static: true,
+  },
+  {
+    i: "threats",
+    x: 0,
     y: 48,
     w: 12,
     h: 3,
+    static: true,
   },
   {
     i: "suggest-more-graphs",
@@ -274,5 +317,23 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
     y: 51,
     w: 12,
     h: 3,
+    static: true,
+  },
+  // Scores
+  {
+    i: "scores",
+    x: 0,
+    y: 54,
+    w: 12,
+    h: 3,
+    static: true,
+  },
+  {
+    i: "scores-bool",
+    x: 0,
+    y: 57,
+    w: 12,
+    h: 3,
+    static: true,
   },
 ];

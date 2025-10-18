@@ -423,6 +423,9 @@ export interface paths {
   "/v1/public/status/provider/{provider}": {
     get: operations["GetProviderStatus"];
   };
+  "/v1/providers": {
+    get: operations["GetProviders"];
+  };
   "/v1/property/query": {
     post: operations["GetProperties"];
   };
@@ -2566,6 +2569,17 @@ Json: JsonObject;
     "Result_ProviderMetrics.string_": components["schemas"]["ResultSuccess_ProviderMetrics_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     TimeFrame: "24h" | "7d" | "30d";
+    ProviderMetric: {
+      provider: string;
+      /** Format: double */
+      total_requests: number;
+    };
+    "ResultSuccess_ProviderMetric-Array_": {
+      data: components["schemas"]["ProviderMetric"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderMetric-Array.string_": components["schemas"]["ResultSuccess_ProviderMetric-Array_"] | components["schemas"]["ResultError_string_"];
     Property: {
       property: string;
     };
@@ -6438,6 +6452,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ProviderMetrics.string_"];
+        };
+      };
+    };
+  };
+  GetProviders: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderMetric-Array.string_"];
         };
       };
     };

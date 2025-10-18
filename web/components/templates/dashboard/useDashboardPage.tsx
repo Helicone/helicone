@@ -17,6 +17,7 @@ import { TimeToFirstToken } from "../../../lib/api/metrics/getTimeToFirstToken";
 import { UsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
 import { UnPromise } from "../../../lib/tsxHelpers";
 import { useModels } from "../../../services/hooks/models";
+import { useProviders } from "../../../services/hooks/providers";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import {
   BackendMetricsCall,
@@ -81,6 +82,16 @@ export const useDashboardPage = ({
   );
   const topModels =
     models?.data?.sort((a, b) =>
+      a.total_requests > b.total_requests ? -1 : 1,
+    ) ?? [];
+
+  const { isLoading: isProvidersLoading, providers } = useProviders(
+    timeFilter,
+    1000,
+    filter,
+  );
+  const topProviders =
+    providers?.data?.sort((a, b) =>
       a.total_requests > b.total_requests ? -1 : 1,
     ) ?? [];
 
@@ -252,7 +263,8 @@ export const useDashboardPage = ({
     Object.values(metrics).some(
       ({ isLoading, isFetching }) => isLoading || isFetching,
     ) ||
-    isModelsLoading;
+    isModelsLoading ||
+    isProvidersLoading;
 
   return {
     metrics,
@@ -265,5 +277,7 @@ export const useDashboardPage = ({
     },
     models: ok(topModels),
     isModelsLoading,
+    providers: ok(topProviders),
+    isProvidersLoading,
   };
 };
