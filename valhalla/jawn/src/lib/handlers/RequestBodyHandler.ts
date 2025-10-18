@@ -51,6 +51,8 @@ export class RequestBodyHandler extends AbstractLogHandler {
         context.processedLog.request.model = "vector_db";
       } else if (this.isToolRequest(requestBodyFinal)) {
         context.processedLog.request.model = `tool:${requestBodyFinal.toolName}`;
+      } else if (this.isDataRequest(requestBodyFinal)) {
+        context.processedLog.request.model = `data:${requestBodyFinal.name}`;
       }
 
       try {
@@ -100,6 +102,13 @@ export class RequestBodyHandler extends AbstractLogHandler {
       return false;
     }
     return requestBody.hasOwnProperty("_type") && requestBody._type === "tool";
+  }
+
+  private isDataRequest(requestBody: any): boolean {
+    if (typeof requestBody !== "object" || requestBody === null) {
+      return false;
+    }
+    return requestBody.hasOwnProperty("_type") && requestBody._type === "data";
   }
 
   processRequestBody(context: HandlerContext): {

@@ -398,6 +398,15 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     );
   }
 
+  private isDataResponse(responseBody: any): boolean {
+    if (typeof responseBody !== "object" || responseBody === null) {
+      return false;
+    }
+    return (
+      responseBody.hasOwnProperty("_type") && responseBody._type === "data"
+    );
+  }
+
   private determineAssistantModel(
     responseBody: any,
     currentModel?: string
@@ -419,6 +428,11 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return {
         responseModel: "Tool",
         model: `tool:${responseBody.toolName}`,
+      };
+    } else if (this.isDataResponse(responseBody)) {
+      return {
+        responseModel: "Data",
+        model: `data:${responseBody.name}`,
       };
     }
     return { responseModel: currentModel || "", model: currentModel || "" };

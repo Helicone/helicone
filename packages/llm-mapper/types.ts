@@ -20,6 +20,7 @@ export type MapperType =
   | "openai-realtime"
   | "vector-db"
   | "tool"
+  | "data"
   | "unknown";
 // Legacy and AI Gateway type for Provider slugs
 export type Provider = ProviderName | "CUSTOM" | ModelProviderName;
@@ -89,6 +90,7 @@ export interface LLMRequestBody {
   // External Tools
   toolDetails?: HeliconeEventTool;
   vectorDBDetails?: HeliconeEventVectorDB;
+  dataDetails?: HeliconeEventData;
 
   // Embedding models
   input?: string | string[];
@@ -131,6 +133,17 @@ type LLMResponseBody = {
       timestamp: string;
     };
     _type: "vector_db";
+  };
+  dataDetailsResponse?: {
+    status: string;
+    message: string;
+    metadata: {
+      timestamp: string;
+      [key: string]: any;
+    };
+    _type: "data";
+    name: string;
+    [key: string]: any;
   };
 };
 
@@ -315,9 +328,16 @@ export interface HeliconeEventVectorDB {
   databaseName?: string;
   [key: string]: any;
 }
+export interface HeliconeEventData {
+  _type: "data";
+  name: string;
+  meta?: Record<string, any>;
+  [key: string]: any;
+}
 export type HeliconeCustomEventRequest =
   | HeliconeEventTool
-  | HeliconeEventVectorDB;
+  | HeliconeEventVectorDB
+  | HeliconeEventData;
 
 export type HeliconeLogRequest = ILogRequest | HeliconeCustomEventRequest;
 

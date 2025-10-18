@@ -545,6 +545,11 @@ const REQUEST_TYPE_CONFIG: Record<
       "bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-200",
     displayName: "Vector DB",
   },
+  Data: {
+    bgColor:
+      "bg-green-200 dark:bg-green-900 text-green-700 dark:text-green-200",
+    displayName: "Data",
+  },
 };
 
 function setDescendantError<T extends TableTreeNode>(
