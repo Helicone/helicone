@@ -163,10 +163,10 @@ const DashboardPage = (props: DashboardPageProps) => {
   const overTimeData = shouldShowMockData ? mockOverTimeData : realOverTimeData;
   const models = shouldShowMockData
     ? { data: mockModels.data, isLoading: false }
-    : realModels;
+    : { data: realModels.error === null ? realModels.data ?? undefined : undefined, isLoading: isModelsLoading };
   const providers = shouldShowMockData
     ? { data: [], isLoading: false }
-    : realProviders;
+    : { data: realProviders.error === null ? realProviders.data ?? undefined : undefined, isLoading: isProvidersLoading };
 
   const metricsData: MetricsPanelProps["metric"][] = [
     {

@@ -81,19 +81,29 @@ export const useDashboardPage = ({
     filter,
   );
   const topModels =
-    models?.data?.sort((a, b) =>
-      a.total_requests > b.total_requests ? -1 : 1,
-    ) ?? [];
+    models && models.error === null && Array.isArray(models.data)
+      ? [...models.data].sort((a, b) =>
+          a.total_requests > b.total_requests ? -1 : 1,
+        )
+      : [];
 
   const { isLoading: isProvidersLoading, providers } = useProviders(
     timeFilter,
     1000,
     filter,
   );
-  const topProviders =
-    providers?.data?.sort((a, b) =>
-      a.total_requests > b.total_requests ? -1 : 1,
-    ) ?? [];
+
+  // Extract providers data safely from the openapi-fetch response
+  const providersData =
+    providers && 'data' in providers && providers.data && typeof providers.data === 'object' && 'data' in providers.data && !providers.data.error
+      ? providers.data.data
+      : null;
+
+  const topProviders = Array.isArray(providersData)
+    ? [...providersData].sort((a, b) =>
+        a.total_requests > b.total_requests ? -1 : 1,
+      )
+    : [];
 
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
