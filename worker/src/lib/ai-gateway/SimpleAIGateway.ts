@@ -344,6 +344,10 @@ export class SimpleAIGateway {
     response: Response,
     bodyMapping?: "OPENAI" | "NO_MAPPING"
   ): Promise<Result<Response, string>> {
+    if (response.status >= 400) {
+      return ok(response);
+    }
+
     if (bodyMapping === "NO_MAPPING") {
       return ok(response); // do not map response
     }

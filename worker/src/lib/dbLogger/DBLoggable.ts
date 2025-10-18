@@ -686,19 +686,24 @@ export class DBLoggable {
         const isAIGateway = this.request.attempt?.endpoint;
 
         if (isAIGateway) {
-          try {
-            openAIResponse = await normalizeAIGatewayResponse({
-              responseText: providerResponse,
-              isStream: this.request.isStream,
-              provider: this.request.attempt?.endpoint.provider ?? "openai",
-              providerModelId:
-                this.request.attempt?.endpoint.providerModelId ?? "",
-              responseFormat:
-                this.request.attempt?.endpoint.modelConfig.responseFormat ??
-                "OPENAI",
-            });
-          } catch (e) {
-            console.error("Failed to normalize AI Gateway response:", e);
+          const responseStatus = await this.response.status();
+          if (responseStatus < 400) {
+            try {
+              openAIResponse = await normalizeAIGatewayResponse({
+                responseText: providerResponse,
+                isStream: this.request.isStream,
+                provider: this.request.attempt?.endpoint.provider ?? "openai",
+                providerModelId:
+                  this.request.attempt?.endpoint.providerModelId ?? "",
+                responseFormat:
+                  this.request.attempt?.endpoint.modelConfig.responseFormat ??
+                  "OPENAI",
+              });
+            } catch (e) {
+              console.error("Failed to normalize AI Gateway response:", e);
+            }
+          } else {
+            openAIResponse = providerResponse;
           }
         }
 
