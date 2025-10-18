@@ -1,5 +1,5 @@
 import StyledAreaChart from "../styledAreaChart";
-import { sortAndColorData } from "./utils";
+import { sortAndColorDataByName } from "./utils";
 import { useExpandableBarList } from "./barListPanel";
 
 interface ModelsByCostPanelProps {
@@ -17,12 +17,11 @@ interface ModelsByCostPanelProps {
 const ModelsByCostPanel = (props: ModelsByCostPanelProps) => {
   const { models } = props;
 
-  const modelData = sortAndColorData(
+  const modelData = sortAndColorDataByName(
     models?.data?.map((model) => ({
       name: model.model,
       value: model.cost,
     })),
-    "alt2", // Use alt2 color order
   );
 
   const maxValue = modelData[0]?.value || 1;

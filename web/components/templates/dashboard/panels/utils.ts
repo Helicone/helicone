@@ -16,6 +16,19 @@ const COLOR_ORDERS = {
 };
 
 /**
+ * Better hash function (DJB2) to deterministically assign colors based on model name
+ * This provides better distribution to avoid color collisions
+ */
+function hashString(str: string): number {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) + hash) + char; // hash * 33 + char
+  }
+  return Math.abs(hash);
+}
+
+/**
  * Sorts data by value descending and assigns colors in specified order
  */
 export function sortAndColorData<T extends { name: string; value: number }>(
@@ -35,5 +48,26 @@ export function sortAndColorData<T extends { name: string; value: number }>(
     .map((item, index) => ({
       ...item,
       color: colors[index % colors.length],
+    }));
+}
+
+/**
+ * Sorts data by value descending and assigns colors deterministically based on name
+ * This ensures the same model gets the same color across different charts
+ */
+export function sortAndColorDataByName<T extends { name: string; value: number }>(
+  data: T[] | undefined,
+): DataWithColor[] {
+  if (!data) return [];
+
+  return data
+    .map((item) => ({
+      name: item.name || "n/a",
+      value: item.value,
+    }))
+    .sort((a, b) => b.value - a.value - (b.name === "n/a" ? 1 : 0))
+    .map((item) => ({
+      ...item,
+      color: LIST_COLORS[hashString(item.name) % LIST_COLORS.length],
     }));
 }
