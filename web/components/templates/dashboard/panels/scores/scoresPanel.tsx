@@ -127,7 +127,7 @@ export const ScoresPanel = (props: ScoresPanelProps) => {
                 <Area
                   key={key}
                   dataKey={key}
-                  type="natural"
+                  type="monotone"
                   fill={`url(#fill${key})`}
                   stroke={`var(--color-${key})`}
                 />

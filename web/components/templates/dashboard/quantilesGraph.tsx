@@ -216,28 +216,28 @@ export const QuantilesGraph = ({
               />
               <Area
                 dataKey="P75"
-                type="natural"
+                type="monotone"
                 fill="url(#fillP75)"
                 stroke="var(--color-P75)"
                 stackId="a"
               />
               <Area
                 dataKey="P90"
-                type="natural"
+                type="monotone"
                 fill="url(#fillP90)"
                 stroke="var(--color-P90)"
                 stackId="a"
               />
               <Area
                 dataKey="P95"
-                type="natural"
+                type="monotone"
                 fill="url(#fillP95)"
                 stroke="var(--color-P95)"
                 stackId="a"
               />
               <Area
                 dataKey="P99"
-                type="natural"
+                type="monotone"
                 fill="url(#fillP99)"
                 stroke="var(--color-P99)"
                 stackId="a"

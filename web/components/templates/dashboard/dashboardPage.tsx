@@ -481,13 +481,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                             />
                             <Area
                               dataKey="success"
-                              type="natural"
+                              type="monotone"
                               fill="url(#fillSuccess)"
                               stroke="var(--color-success)"
                             />
                             <Area
                               dataKey="error"
-                              type="natural"
+                              type="monotone"
                               fill="url(#fillError)"
                               stroke="var(--color-error)"
                             />
@@ -741,7 +741,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                             />
                             <Area
                               dataKey="latency"
-                              type="natural"
+                              type="monotone"
                               fill="url(#fillLatency)"
                               stroke="var(--color-latency)"
                             />
@@ -830,7 +830,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                             />
                             <Area
                               dataKey="ttft"
-                              type="natural"
+                              type="monotone"
                               fill="url(#fillTTFT)"
                               stroke="var(--color-ttft)"
                             />
@@ -912,7 +912,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                             />
                             <Area
                               dataKey="threats"
-                              type="natural"
+                              type="monotone"
                               fill="url(#fillThreats)"
                               stroke="var(--color-threats)"
                             />
@@ -1067,19 +1067,19 @@ const DashboardPage = (props: DashboardPageProps) => {
                             />
                             <Area
                               dataKey="promptPerMin"
-                              type="natural"
+                              type="monotone"
                               fill="url(#fillPromptPerMin)"
                               stroke="var(--color-promptPerMin)"
                             />
                             <Area
                               dataKey="completionPerMin"
-                              type="natural"
+                              type="monotone"
                               fill="url(#fillCompletionPerMin)"
                               stroke="var(--color-completionPerMin)"
                             />
                             <Area
                               dataKey="totalPerMin"
-                              type="natural"
+                              type="monotone"
                               fill="url(#fillTotalPerMin)"
                               stroke="var(--color-totalPerMin)"
                             />
