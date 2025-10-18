@@ -17,6 +17,7 @@ import { TimeToFirstToken } from "../../../lib/api/metrics/getTimeToFirstToken";
 import { UsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
 import { UnPromise } from "../../../lib/tsxHelpers";
 import { useModels } from "../../../services/hooks/models";
+import { useProviders } from "../../../services/hooks/providers";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import {
   BackendMetricsCall,
@@ -80,9 +81,29 @@ export const useDashboardPage = ({
     filter,
   );
   const topModels =
-    models?.data?.sort((a, b) =>
-      a.total_requests > b.total_requests ? -1 : 1,
-    ) ?? [];
+    models && models.error === null && Array.isArray(models.data)
+      ? [...models.data].sort((a, b) =>
+          a.total_requests > b.total_requests ? -1 : 1,
+        )
+      : [];
+
+  const { isLoading: isProvidersLoading, providers } = useProviders(
+    timeFilter,
+    1000,
+    filter,
+  );
+
+  // Extract providers data safely from the openapi-fetch response
+  const providersData =
+    providers && 'data' in providers && providers.data && typeof providers.data === 'object' && 'data' in providers.data && !providers.data.error
+      ? providers.data.data
+      : null;
+
+  const topProviders = Array.isArray(providersData)
+    ? [...providersData].sort((a, b) =>
+        a.total_requests > b.total_requests ? -1 : 1,
+      )
+    : [];
 
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
@@ -252,7 +273,8 @@ export const useDashboardPage = ({
     Object.values(metrics).some(
       ({ isLoading, isFetching }) => isLoading || isFetching,
     ) ||
-    isModelsLoading;
+    isModelsLoading ||
+    isProvidersLoading;
 
   return {
     metrics,
@@ -265,5 +287,7 @@ export const useDashboardPage = ({
     },
     models: ok(topModels),
     isModelsLoading,
+    providers: ok(topProviders),
+    isProvidersLoading,
   };
 };

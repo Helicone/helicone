@@ -98,7 +98,7 @@ export const getTimeInterval = ({
 
   if (diff < 1000 * 60 * 60 * 2) {
     return "min";
-  } else if (diff < 1000 * 60 * 60 * 24 * 7) {
+  } else if (diff < 1000 * 60 * 60 * 24 * 2) {
     return "hour";
   } else {
     return "day";
