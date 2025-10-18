@@ -20,7 +20,7 @@ const useProviders = (
     queryFn: async () => {
       return jawn.POST("/v1/providers", {
         body: {
-          filter: userFilters ?? {},
+          filter: (userFilters ?? {}) as any,
           offset: 0,
           limit,
           timeFilter: {
