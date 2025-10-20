@@ -147,14 +147,14 @@ const QuickstartPage = () => {
 
   const steps = [
     {
+      title: "Set up billing",
+      description: "",
+      link: "",
+    },
+    {
       title: "Create Helicone API key",
       description: "Create key",
       link: "/settings/api-keys",
-    },
-    {
-      title: "Set up billing",
-      description: "Add credits or provider keys",
-      link: "",
     },
     {
       title: "Integrate",
@@ -172,11 +172,11 @@ const QuickstartPage = () => {
         </P>
       </div>
 
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         {steps.map((step, index) => {
           const isCompleted =
-            (index === 0 && hasKeys) ||
-            (index === 1 && hasBillingSetup) ||
+            (index === 0 && hasBillingSetup) ||
+            (index === 1 && hasKeys) ||
             (index === 2 && org?.currentOrg?.has_integrated);
 
           return (
@@ -187,43 +187,34 @@ const QuickstartPage = () => {
               isCompleted={isCompleted ?? false}
               link={step.link}
               rightContent={step.description}
+              rightComponent={
+                index === 0 ? (
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <a
+                      href="/credits"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span>Add credits</span>
+                      <MoveUpRight size={12} />
+                    </a>
+                    <a
+                      href="/settings/providers"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span>Configure keys</span>
+                      <MoveUpRight size={12} />
+                    </a>
+                  </div>
+                ) : undefined
+              }
             >
               {index === 0 && (
-                <div className="mt-4">
-                  {quickstartKey ? (
-                    <div className="rounded-sm border border-border bg-muted/30 p-2">
-                      <div className="flex items-center gap-2">
-                        <code className="font-mono flex-1 break-all rounded-sm px-2 py-1 text-sm">
-                          {quickstartKey}
-                        </code>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            navigator.clipboard.writeText(quickstartKey);
-                            setNotification("Copied to clipboard", "success");
-                          }}
-                          className="h-auto p-1"
-                        >
-                          <Copy size={14} />
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        onClick={handleCreateKey}
-                        disabled={isCreatingKey}
-                        className="w-fit"
-                        variant="outline"
-                      >
-                        {isCreatingKey ? "Creating..." : "Create API Key"}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-              {index === 1 && (
                 <div className="mt-4 flex flex-col gap-3">
                   {/* PTB Option */}
                   <div
@@ -270,15 +261,11 @@ const QuickstartPage = () => {
 
                   {/* BYOK Option */}
                   <div
-                    className={`flex items-start justify-between gap-3 rounded-lg border-2 p-4 ${
-                      hasProviderKeys
-                        ? "border-primary bg-primary/5"
-                        : "border-border bg-background"
-                    }`}
+                    className="flex items-start justify-between gap-3 rounded-lg border-2 border-muted-foreground/20 bg-muted p-4"
                   >
                     <div className="flex flex-1 items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        <Key size={20} className="text-primary" />
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background">
+                        <Key size={20} className="text-muted-foreground" />
                       </div>
                       <div className="flex-1">
                         <span className="text-sm font-semibold">
@@ -305,6 +292,41 @@ const QuickstartPage = () => {
                       {hasProviderKeys ? "Manage Keys" : "Configure Keys"}
                     </Button>
                   </div>
+                </div>
+              )}
+              {index === 1 && (
+                <div className="mt-4">
+                  {quickstartKey ? (
+                    <div className="rounded-sm border border-border bg-muted/30 p-2">
+                      <div className="flex items-center gap-2">
+                        <code className="font-mono flex-1 break-all rounded-sm px-2 py-1 text-sm">
+                          {quickstartKey}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(quickstartKey);
+                            setNotification("Copied to clipboard", "success");
+                          }}
+                          className="h-auto p-1"
+                        >
+                          <Copy size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={handleCreateKey}
+                        disabled={isCreatingKey}
+                        className="w-fit"
+                        variant="outline"
+                      >
+                        {isCreatingKey ? "Creating..." : "Create API Key"}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
               {index === 2 && (

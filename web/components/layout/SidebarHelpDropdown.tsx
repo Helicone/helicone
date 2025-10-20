@@ -120,6 +120,13 @@ const SidebarHelpDropdown = ({
               <ArrowUpRightIcon className="ml-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
             </DropdownMenuItem>
           </Link>
+          <Link href="https://helicone.ai/contact" target="_blank">
+            <DropdownMenuItem className="cursor-pointer">
+              <CalendarIcon className="mr-2 h-4 w-4 text-slate-500" />
+              Book call
+              <ArrowUpRightIcon className="ml-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuLabel className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-600">
             What&apos;s new?
           </DropdownMenuLabel>
