@@ -6,6 +6,8 @@ description: "Integrate Helicone AI Gateway with LangChain to access 100+ LLM pr
 iconType: "solid"
 ---
 
+import { strings } from "/snippets/strings.mdx";
+
 ## Introduction
 
 [LangChain](https://www.langchain.com/) is a popular open-source framework for building applications with large language models across Python, TypeScript, and other languages. By integrating Helicone AI Gateway with LangChain, you can:
@@ -67,9 +69,7 @@ iconType: "solid"
 
     // Initialize ChatOpenAI with Helicone AI Gateway
     const chat = new ChatOpenAI({
-        model: 'gpt-4.1-mini',  // Any model from Helicone registry
-        temperature: 0.8,
-        streaming: true,
+        model: 'gpt-4.1-mini',  // 100+ models supported
         apiKey: process.env.HELICONE_API_KEY,
         configuration: {
             baseURL: "https://ai-gateway.helicone.ai/v1",
@@ -93,9 +93,7 @@ iconType: "solid"
 
     # Initialize ChatOpenAI with Helicone AI Gateway
     chat = ChatOpenAI(
-        model='gpt-4.1-mini',  # Any model from Helicone registry
-        temperature=0.8,
-        streaming=True,
+        model='gpt-4.1-mini',  # 100+ models supported
         api_key=os.getenv('HELICONE_API_KEY'),
         base_url="https://ai-gateway.helicone.ai/v1",
         default_headers={
@@ -111,6 +109,8 @@ iconType: "solid"
     <Info>
       The **only changes** from a standard LangChain setup are the `apiKey`, `baseURL` (or `base_url` in Python), and optional tracking headers. Everything else stays the same!
     </Info>
+
+    <div dangerouslySetInnerHTML={{ __html: strings.modelRegistryDescription }} />
   </Step>
 
   <Step title="Use LangChain normally">
@@ -140,8 +140,8 @@ iconType: "solid"
     </CodeGroup>
   </Step>
 
-  <Step title="View requests in the Helicone dashboard">
-    All your LangChain requests are now visible in your [Helicone dashboard](https://us.helicone.ai/dashboard):
+  <Step title={strings.viewRequestsInDashboard}>
+    <div dangerouslySetInnerHTML={{ __html: strings.viewRequestsInDashboardDescription("LangChain") }} />
 
     - Request/response bodies
     - Latency metrics
@@ -185,7 +185,7 @@ chat = ChatOpenAI(
 import { ChatOpenAI } from "@langchain/openai";
 
 const chat = new ChatOpenAI({
-    model: 'gpt-4.1-mini',                      // Use Helicone model names
+    model: 'gpt-4.1-mini',                      // 100+ models supported
     apiKey: process.env.HELICONE_API_KEY,      // Your Helicone API key
     configuration: {
         baseURL: "https://ai-gateway.helicone.ai/v1"  // Add this!
@@ -197,7 +197,7 @@ const chat = new ChatOpenAI({
 from langchain_openai import ChatOpenAI
 
 chat = ChatOpenAI(
-    model='gpt-4.1-mini',                      # Use Helicone model names
+    model='gpt-4.1-mini',                      # 100+ models supported
     api_key=os.getenv('HELICONE_API_KEY'),    # Your Helicone API key
     base_url="https://ai-gateway.helicone.ai/v1"  # Add this!
 )
@@ -219,8 +219,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const chat = new ChatOpenAI({
-    model: 'gpt-4.1-mini',
-    temperature: 0.8,
+    model: 'gpt-4.1-mini',  // 100+ models supported
     apiKey: process.env.HELICONE_API_KEY,
     configuration: {
         baseURL: "https://ai-gateway.helicone.ai/v1",
@@ -256,8 +255,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 chat = ChatOpenAI(
-    model='gpt-4.1-mini',
-    temperature=0.8,
+    model='gpt-4.1-mini',  # 100+ models supported
     api_key=os.getenv('HELICONE_API_KEY'),
     base_url="https://ai-gateway.helicone.ai/v1",
     default_headers={
@@ -422,6 +420,46 @@ def batch_example():
 batch_example()
 ```
 
+## Helicone Prompts Integration
+
+You can use Helicone Prompts for centralized prompt management and versioning by passing parameters through `modelKwargs`:
+
+<CodeGroup>
+```typescript TypeScript
+const chat = new ChatOpenAI({
+    model: 'gpt-4.1-mini',
+    apiKey: process.env.HELICONE_API_KEY,
+    modelKwargs: {
+        prompt_id: 'customer-support-prompt',
+        version_id: 'version-uuid',
+        environment: 'production',
+        inputs: { customer_name: 'John', issue_type: 'billing' },
+    },
+    configuration: {
+        baseURL: "https://ai-gateway.helicone.ai/v1",
+    },
+});
+```
+
+```python Python
+chat = ChatOpenAI(
+    model='gpt-4.1-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    base_url="https://ai-gateway.helicone.ai/v1",
+    model_kwargs={
+        'prompt_id': 'customer-support-prompt',
+        'version_id': 'version-uuid',
+        'environment': 'production',
+        'inputs': {'customer_name': 'John', 'issue_type': 'billing'},
+    },
+)
+```
+</CodeGroup>
+
+<Note>
+  All prompt parameters (`prompt_id`, `version_id`, `environment`, `inputs`) are optional. Learn more in the [Helicone Prompts documentation](/gateway/concepts/prompt-caching).
+</Note>
+
 ## Custom Headers and Properties
 
 You can add custom properties to track and filter your requests:
@@ -491,6 +529,9 @@ chat = ChatOpenAI(
   </Card>
   <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
     Browse all available models and providers
+  </Card>
+  <Card title="Prompt Management" icon="code" href="/gateway/concepts/prompt-caching">
+    Version and manage prompts with Helicone Prompts
   </Card>
   <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
     Add metadata to track and filter your requests
