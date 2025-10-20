@@ -25,7 +25,6 @@ export const getMapperTypeFromHeliconeRequest = (
   heliconeRequest: HeliconeRequest,
   model: string
 ) => {
-  console.log(heliconeRequest.request_body?._type);
   if (heliconeRequest.request_body?._type === "vector_db") {
     return "vector-db";
   }
