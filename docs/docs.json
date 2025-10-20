@@ -49,6 +49,7 @@
               {
                 "group": "Integrations",
                 "pages": [
+                  "gateway/integrations/langchain",
                   "gateway/integrations/semantic-kernel"
                 ]
               }
