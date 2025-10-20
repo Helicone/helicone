@@ -5860,16 +5860,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-<<<<<<< HEAD
   "totalEndpoints": 168,
   "totalModelProviderConfigs": 168,
-  "totalModelsWithPtb": 70,
+  "totalModelsWithPtb": 71,
   "totalProviders": 15,
-=======
-  "totalEndpoints": 152,
-  "totalModelProviderConfigs": 152,
-  "totalModelsWithPtb": 67,
-  "totalProviders": 14,
->>>>>>> origin/main
 }
 `;
