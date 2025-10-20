@@ -1,5 +1,7 @@
 import { Provider, SortOption } from "@/types/provider";
 
+const HELICONE_ORG_ID = process.env.NEXT_PUBLIC_HELICONE_ORG_ID;
+
 /**
  * Get provider name by ID
  */
@@ -9,6 +11,20 @@ export const getProviderNameById = (
 ): string => {
   const provider = providers.find((p) => p.id === providerId);
   return provider?.name || providerId;
+};
+
+export const filterPubliclyVisibleProviders = (
+  providers: Provider[],
+  orgId?: string,
+): Provider[] => {
+  return providers.filter((provider) => {
+    // Helicone org can see all providers
+    if (orgId === HELICONE_ORG_ID) {
+      return true;
+    }
+    // Default to true if not specified (backward compatible)
+    return provider.publiclyVisible !== false;
+  });
 };
 
 /**

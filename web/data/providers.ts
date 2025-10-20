@@ -244,6 +244,17 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "...",
     relevanceScore: 3,
   },
+  {
+    id: "helicone",
+    name: "Helicone Inference",
+    logoUrl: "/assets/providers/openai.webp",
+    description: "Helicone-managed inference with discounted pricing",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Helicone Inference Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 1,
+    publiclyVisible: false,
+  },
 ];
 
 // Mock recently used providers - in a real app, this would come from user data
