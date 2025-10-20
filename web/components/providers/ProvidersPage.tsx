@@ -12,17 +12,26 @@ import {
 import { SortOption } from "@/types/provider";
 import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
-import { filterProviders, sortProviders } from "@/utils/providerUtils";
+import {
+  filterProviders,
+  filterProvidersByOrg,
+  sortProviders,
+} from "@/utils/providerUtils";
 import FoldedHeader from "../shared/FoldedHeader";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 export const ProvidersPage: React.FC = () => {
   // Local UI state
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("relevance");
+  const org = useOrg();
 
   // Filter and sort the providers based on user selections
   const filteredProviders = sortProviders(
-    filterProviders(providers, searchQuery),
+    filterProviders(
+      filterProvidersByOrg(providers, org?.currentOrg?.id),
+      searchQuery,
+    ),
     sortOption,
     recentlyUsedProviderIds,
   );

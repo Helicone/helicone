@@ -12,7 +12,12 @@ import {
 import { SortOption } from "@/types/provider";
 import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
-import { filterProviders, sortProviders } from "@/utils/providerUtils";
+import {
+  filterProviders,
+  filterProvidersByOrg,
+  sortProviders,
+} from "@/utils/providerUtils";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 interface ProviderKeySettingsProps {
   className?: string;
@@ -23,9 +28,13 @@ export const ProviderKeySettings: React.FC<ProviderKeySettingsProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("relevance");
+  const org = useOrg();
 
   const filteredProviders = sortProviders(
-    filterProviders(providers, searchQuery),
+    filterProviders(
+      filterProvidersByOrg(providers, org?.currentOrg?.id),
+      searchQuery,
+    ),
     sortOption,
     recentlyUsedProviderIds,
   );
