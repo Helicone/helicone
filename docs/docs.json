@@ -228,6 +228,13 @@
                 ]
               },
               {
+                "group": "Custom Logs",
+                "pages": [
+                  "integrations/data/logger-sdk",
+                  "integrations/data/curl"
+                ]
+              },
+              {
                 "group": "Tools",
                 "pages": [
                   "integrations/tools/curl",
@@ -239,13 +246,6 @@
                 "pages": [
                   "integrations/vectordb/curl",
                   "integrations/vectordb/logger-sdk"
-                ]
-              },
-              {
-                "group": "Custom Logs",
-                "pages": [
-                  "integrations/data/curl",
-                  "integrations/data/logger-sdk"
                 ]
               }
             ]
