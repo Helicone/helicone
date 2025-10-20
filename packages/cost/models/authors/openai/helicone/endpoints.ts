@@ -25,6 +25,7 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -49,6 +50,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -75,6 +77,7 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -101,6 +104,7 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -125,6 +129,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -151,6 +156,7 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -177,6 +183,7 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -201,6 +208,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -227,6 +235,7 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -253,6 +262,7 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -279,6 +289,7 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -300,6 +311,7 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -321,6 +333,7 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -342,6 +355,7 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -363,6 +377,7 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -384,6 +399,7 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
+    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
