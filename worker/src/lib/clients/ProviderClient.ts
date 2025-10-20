@@ -105,6 +105,7 @@ export async function callProvider(props: CallProps): Promise<Response> {
         status: 403,
       });
     }
+
     try {
       const mockResponseBody = JSON.parse(mockResponseHeader);
       return new Response(JSON.stringify(mockResponseBody), {

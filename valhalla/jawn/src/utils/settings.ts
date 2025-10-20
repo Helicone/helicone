@@ -52,6 +52,12 @@ export type SettingName = keyof SettingsType;
 
 export type Setting = KafkaSettings | AzureExperiment | ApiKey;
 
+const DEFAULTS: Record<SettingName, any> = {
+  "stripe:products": {
+    cloudGatewayTokenUsageProduct:
+      process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT,
+  },
+};
 class SettingsCache extends InMemoryCache {
   private static instance: SettingsCache;
   private API_KEY_CACHE_TTL = 60 * 1000; // 1 minute
@@ -108,7 +114,12 @@ export class SettingsManager {
 
       if (!setting) {
         await this.loadSettings();
-        return this.settingsCache.get(name) as SettingsType[T] | undefined;
+        const res = this.settingsCache.get(name) as SettingsType[T] | undefined;
+        if (res) {
+          return res;
+        } else {
+          return DEFAULTS[name];
+        }
       }
 
       return setting;

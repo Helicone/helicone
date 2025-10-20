@@ -93,8 +93,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const orgContext = useOrg();
 
   useEffect(() => {
-    // Allow access to certain pages during onboarding (like settings/providers for BYOK setup)
+    // Allow access to certain pages during onboarding (like quickstart and settings for setup)
     const allowedPagesDuringOnboarding = [
+      '/quickstart',
       '/settings/providers',
       '/settings/billing',
       '/credits',

@@ -54,7 +54,7 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
           </div>
         )}
         <div
-          className={clsx("h-full max-h-screen overflow-y-auto bg-background")}
+          className={clsx("min-h-screen max-h-screen overflow-y-auto bg-background")}
         >
           <div className="mr-auto w-full" key={`${pathname}`}>
             {children}

@@ -88,8 +88,8 @@ const Credits: NextPageWithLayout<void> = () => {
         <div className="flex w-full flex-col">
           <div className="flex-1 overflow-auto">
             <div>
-                {/* Current Balance Section */}
-                <div className="border-b border-border bg-slate-100 px-6 py-8 dark:bg-slate-900">
+              {/* Current Balance Section */}
+              <div className="border-b border-border bg-slate-100 px-6 py-8 dark:bg-slate-900">
                   <Small className="text-muted-foreground">
                     Current Balance
                   </Small>
@@ -117,11 +117,11 @@ const Credits: NextPageWithLayout<void> = () => {
                       })()}`
                     )}
                   </div>
-                </div>
+              </div>
 
-                {/* Buy Credits and Auto Top-Up Section */}
-                <div className="border-b border-border px-6 py-8">
-                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              {/* Buy Credits and Auto Top-Up Section */}
+              <div className="border-b border-border px-6 py-8">
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                     {/* Buy Credits */}
                     <div>
                       <Small className="mb-4 font-semibold text-slate-900 dark:text-slate-100">
@@ -172,11 +172,11 @@ const Credits: NextPageWithLayout<void> = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+              </div>
 
-                {/* Recent Transactions Section */}
-                <div className="px-6 py-8">
-                  <div className="mb-6 flex items-center justify-between">
+              {/* Recent Transactions Section */}
+              <div className="px-6 py-8">
+                <div className="mb-6 flex items-center justify-between">
                     <Small className="font-semibold text-slate-900 dark:text-slate-100">
                       Recent Transactions
                     </Small>
@@ -461,7 +461,6 @@ const Credits: NextPageWithLayout<void> = () => {
                         </Button>
                       </div>
                     )}
-                  </div>
                 </div>
               </div>
             </div>

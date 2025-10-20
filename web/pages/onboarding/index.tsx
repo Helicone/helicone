@@ -53,8 +53,8 @@ export default function OnboardingPage() {
       "success",
     );
 
-    updateCurrentStep("MEMBERS");
-    router.push("/onboarding/members");
+    // Skip old onboarding steps, go directly to quickstart
+    router.push("/quickstart");
   };
 
   if (subscription.isLoading || isLoading) {

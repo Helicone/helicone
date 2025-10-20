@@ -25,6 +25,10 @@ import {
   Check,
   Bot,
   MoveUpRight,
+  CreditCard,
+  DollarSign,
+  Zap,
+  Key,
 } from "lucide-react";
 import Link from "next/link";
 import { useKeys } from "@/components/templates/keys/useKeys";
@@ -38,8 +42,10 @@ import {
   SheetTitle,
 } from "../../ui/sheet";
 import { ProviderKeySettings } from "../settings/providerKeySettings";
+import PaymentModal from "../settings/PaymentModal";
 import HelixIntegrationDialog from "./HelixIntegrationDialog";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
+import { useCredits } from "@/services/hooks/useCredits";
 
 const QuickstartPage = () => {
   const router = useRouter();
@@ -52,11 +58,16 @@ const QuickstartPage = () => {
   );
   const [isCreatingKey, setIsCreatingKey] = useState(false);
   const [isProviderSheetOpen, setIsProviderSheetOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isHelixDialogOpen, setIsHelixDialogOpen] = useState(false);
 
   const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
   );
+
+  const { data: creditData, isLoading: creditsLoading } = useCredits();
+  const hasCredits = (creditData?.balance ?? 0) > 0;
+  const hasBillingSetup = hasCredits || hasProviderKeys;
 
   const {
     setAgentChatOpen,
@@ -141,9 +152,9 @@ const QuickstartPage = () => {
       link: "/settings/api-keys",
     },
     {
-      title: "Add provider key",
-      description: "Add key",
-      link: "/settings/providers",
+      title: "Set up billing",
+      description: "Add credits or provider keys",
+      link: "",
     },
     {
       title: "Integrate",
@@ -153,7 +164,7 @@ const QuickstartPage = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-8 p-6">
+    <div className="flex min-h-screen flex-col gap-8 p-6">
       <div className="mx-auto mt-4 w-full max-w-4xl items-start">
         <H2>Quickstart</H2>
         <P className="mt-2 text-sm text-muted-foreground">
@@ -165,7 +176,7 @@ const QuickstartPage = () => {
         {steps.map((step, index) => {
           const isCompleted =
             (index === 0 && hasKeys) ||
-            (index === 1 && hasProviderKeys) ||
+            (index === 1 && hasBillingSetup) ||
             (index === 2 && org?.currentOrg?.has_integrated);
 
           return (
@@ -213,14 +224,87 @@ const QuickstartPage = () => {
                 </div>
               )}
               {index === 1 && (
-                <div className="mt-4">
-                  <Button
-                    onClick={() => setIsProviderSheetOpen(true)}
-                    className="w-fit"
-                    variant="outline"
+                <div className="mt-4 flex flex-col gap-3">
+                  {/* PTB Option */}
+                  <div
+                    className={`flex items-start justify-between gap-3 rounded-lg border-2 p-4 ${
+                      hasCredits
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-background"
+                    }`}
                   >
-                    Add Provider Key
-                  </Button>
+                    <div className="flex flex-1 items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <CreditCard size={20} className="text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold">
+                            Pass-Through Billing
+                          </span>
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                            Recommended
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Simple pay-as-you-go pricing
+                        </p>
+                      </div>
+                      {hasCredits && (
+                        <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 dark:bg-green-900">
+                          <Zap size={12} className="text-green-600 dark:text-green-400" />
+                          <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                            ${(creditData?.balance ?? 0).toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="action"
+                      size="sm"
+                      onClick={() => setIsPaymentModalOpen(true)}
+                    >
+                      {hasCredits ? "Add More" : "Add Credits"}
+                    </Button>
+                  </div>
+
+                  {/* BYOK Option */}
+                  <div
+                    className={`flex items-start justify-between gap-3 rounded-lg border-2 p-4 ${
+                      hasProviderKeys
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-background"
+                    }`}
+                  >
+                    <div className="flex flex-1 items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <Key size={20} className="text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-sm font-semibold">
+                          Bring Your Own Keys (BYOK)
+                        </span>
+                        <p className="text-xs text-muted-foreground">
+                          Use your existing provider accounts
+                        </p>
+                      </div>
+                      {hasProviderKeys && (
+                        <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 dark:bg-green-900">
+                          <Zap size={12} className="text-green-600 dark:text-green-400" />
+                          <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                            Configured
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsProviderSheetOpen(true)}
+                    >
+                      {hasProviderKeys ? "Manage Keys" : "Configure Keys"}
+                    </Button>
+                  </div>
                 </div>
               )}
               {index === 2 && (
@@ -273,7 +357,10 @@ const QuickstartPage = () => {
         {org?.currentOrg?.has_integrated && (
           <div
             onClick={async () => {
-              await updateOnboardingStatus({ hasCompletedQuickstart: true });
+              await updateOnboardingStatus({
+                hasCompletedQuickstart: true,
+                hasOnboarded: true
+              });
               setQuickstartKey(undefined);
               router.push("/dashboard");
             }}
@@ -357,6 +444,11 @@ const QuickstartPage = () => {
           </div>
         </SheetContent>
       </Sheet>
+
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+      />
 
       <HelixIntegrationDialog
         isOpen={isHelixDialogOpen}
