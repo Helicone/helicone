@@ -14,7 +14,7 @@ import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import {
   filterProviders,
-  filterProvidersByOrg,
+  filterPubliclyVisibleProviders,
   sortProviders,
 } from "@/utils/providerUtils";
 import FoldedHeader from "../shared/FoldedHeader";
@@ -29,7 +29,7 @@ export const ProvidersPage: React.FC = () => {
   // Filter and sort the providers based on user selections
   const filteredProviders = sortProviders(
     filterProviders(
-      filterProvidersByOrg(providers, org?.currentOrg?.id),
+      filterPubliclyVisibleProviders(providers, org?.currentOrg?.id),
       searchQuery,
     ),
     sortOption,

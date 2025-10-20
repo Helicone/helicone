@@ -253,6 +253,7 @@ export const providers: Provider[] = [
     apiKeyLabel: "Helicone Inference Key",
     apiKeyPlaceholder: "...",
     relevanceScore: 1,
+    publiclyVisible: false,
   },
 ];
 

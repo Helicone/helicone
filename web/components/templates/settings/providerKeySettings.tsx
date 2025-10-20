@@ -14,7 +14,7 @@ import { providers, recentlyUsedProviderIds } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import {
   filterProviders,
-  filterProvidersByOrg,
+  filterPubliclyVisibleProviders,
   sortProviders,
 } from "@/utils/providerUtils";
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -32,7 +32,7 @@ export const ProviderKeySettings: React.FC<ProviderKeySettingsProps> = ({
 
   const filteredProviders = sortProviders(
     filterProviders(
-      filterProvidersByOrg(providers, org?.currentOrg?.id),
+      filterPubliclyVisibleProviders(providers, org?.currentOrg?.id),
       searchQuery,
     ),
     sortOption,
