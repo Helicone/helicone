@@ -55,8 +55,7 @@
       "Bash(timeout:*)",
       "Bash(npx supabase:*)",
       "Bash(docker exec:*)",
-      "WebFetch(domain:ui.shadcn.com)",
-      "Bash(az account list:*)"
+      "WebFetch(domain:ui.shadcn.com)"
     ],
     "deny": []
   },
