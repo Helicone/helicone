@@ -34,14 +34,25 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "llama-3.3-70b-instruct": {
+  "llama-3.3-70b-versatile": {
     name: "Meta Llama 3.3 70B Versatile",
     author: "meta-llama",
     description:
-      "Flagship 70B instruction-tuned model for high-quality chat, coding, and reasoning with strong instruction-following and multilingual support.",
+      "Llama-3.3-70B-Versatile is Meta's advanced multilingual large language model, optimized for a wide range of natural language processing tasks. With 70 billion parameters, it offers high performance across various benchmarks while maintaining efficiency suitable for diverse applications.",
     contextLength: 131_072,
     maxOutputTokens: 32_678,
-    created: "2024-12-01T00:00:00.000Z",
+    created: "2024-12-06T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
+  "llama-3.3-70b-instruct": {
+    name: "Meta Llama 3.3 70B Instruct",
+    author: "meta-llama",
+    description:
+      "The Meta Llama 3.3 multilingual large language model (LLM) is a pretrained and instruction tuned generative model in 70B (text in/text out). The Llama 3.3 instruction tuned text only model is optimized for multilingual dialogue use cases and outperforms many of the available open source and closed chat models on common industry benchmarks. Supported languages: English, German, French, Italian, Portuguese, Hindi, Spanish, and Thai.",
+    contextLength: 128_000,
+    maxOutputTokens: 16_400,
+    created: "2024-12-06T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
