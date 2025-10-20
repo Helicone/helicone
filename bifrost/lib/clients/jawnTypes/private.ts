@@ -1757,6 +1757,13 @@ Json: JsonObject;
       databaseName?: string;
       [key: string]: unknown;
     };
+    HeliconeEventData: {
+      /** @enum {string} */
+      _type: "data";
+      name: string;
+      meta?: components["schemas"]["Record_string.any_"];
+      [key: string]: unknown;
+    };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
       provider?: string;
@@ -1795,6 +1802,7 @@ Json: JsonObject;
       };
       toolDetails?: components["schemas"]["HeliconeEventTool"];
       vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      dataDetails?: components["schemas"]["HeliconeEventData"];
       input?: string | string[];
       /** Format: double */
       n?: number | null;
@@ -1825,6 +1833,18 @@ Json: JsonObject;
       _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
     };
     LLMResponseBody: {
+      dataDetailsResponse?: {
+        name: string;
+        /** @enum {string} */
+        _type: "data";
+        metadata: {
+          timestamp: string;
+          [key: string]: unknown;
+        };
+        message: string;
+        status: string;
+        [key: string]: unknown;
+      };
       vectorDBDetailsResponse?: {
         /** @enum {string} */
         _type: "vector_db";

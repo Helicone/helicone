@@ -1,0 +1,273 @@
+---
+title: "Custom Logs with the Logger SDK"
+sidebarTitle: "Logger SDK"
+description: "Log any custom operations using Helicone's Logger SDK for complete observability across your application stack."
+---
+
+import { strings } from "/snippets/strings.mdx";
+
+The Logger SDK allows you to log any custom operation to Helicone - database queries, API calls, ML inference, file processing, or any other operation you want to track.
+
+<Steps>
+  <Step title={strings.getStartedWithPackage}>
+    <CodeGroup>
+    ```bash npm
+    npm install @helicone/helpers
+    ```
+    ```bash pip
+    pip install helicone-helpers
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.setApiKey}>
+  <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+
+  ```bash
+  export HELICONE_API_KEY=<your-helicone-api-key>
+  ```
+
+  </Step>
+  <Step title={strings.createHeliconeManualLogger}>
+    <CodeGroup>
+      ```js js
+      import { HeliconeManualLogger } from "@helicone/helpers";
+
+      const heliconeLogger = new HeliconeManualLogger({
+        apiKey: process.env.HELICONE_API_KEY,
+        headers: {} // Additional headers sent with the request (optional)
+      });
+      ```
+      ```python python
+      from helicone_helpers import HeliconeManualLogger
+
+      helicone_logger = HeliconeManualLogger(
+        api_key=os.getenv("HELICONE_API_KEY"),
+        headers={} # Additional headers sent with the request (optional)
+      )
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.logYourRequest}>
+    The `logRequest` method takes three parameters:
+    1. **Request data**: What you're logging (query, operation name, etc.)
+    2. **Operation function**: The actual work being done
+    3. **Headers**: Optional custom properties or session tracking
+
+    <CodeGroup>
+      ```js js
+      const result = await heliconeLogger.logRequest(
+        // 1. What you're logging
+        {
+          _type: "data",
+          name: "user_query",
+          query: "SELECT * FROM users WHERE active = true",
+          database: "production"
+        },
+        // 2. The actual operation
+        async (resultRecorder) => {
+          const queryResult = await database.query(
+            "SELECT * FROM users WHERE active = true"
+          );
+
+          // Record the results
+          resultRecorder.appendResults({
+            _type: "data",
+            name: "user_query",
+            status: "success",
+            data: queryResult.rows,
+            count: queryResult.rows.length
+          });
+
+          return queryResult;
+        },
+        // 3. Optional: session tracking or custom properties
+        {
+          "Helicone-Property-Session": "user-123",
+          "Helicone-Property-Environment": "production"
+        }
+      );
+      ```
+
+      ```python python
+      def database_operation(result_recorder):
+        # The actual operation
+        query_result = database.execute(
+          "SELECT * FROM users WHERE active = true"
+        )
+
+        # Record the results
+        result_recorder.append_results({
+          "_type": "data",
+          "name": "user_query",
+          "status": "success",
+          "data": query_result.fetchall(),
+          "count": len(query_result.fetchall())
+        })
+        return query_result
+
+      result = helicone_logger.log_request(
+        # 1. What you're logging
+        request={
+          "_type": "data",
+          "name": "user_query",
+          "query": "SELECT * FROM users WHERE active = true",
+          "database": "production"
+        },
+        # 2. The actual operation
+        operation=database_operation,
+        # 3. Optional: session tracking or custom properties
+        additional_headers={
+          "Helicone-Property-Session": "user-123",
+          "Helicone-Property-Environment": "production"
+        }
+      )
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("any data operation") }} />
+  </Step>
+</Steps>
+
+## Understanding the Structure
+
+All custom logs follow the same pattern with two parts:
+
+### Request Data
+What you're about to do. Must include:
+- `_type: "data"` - Identifies this as a custom data log
+- `name` - A descriptive name for your operation
+- Any custom fields you want to track (query, endpoint, model, etc.)
+
+### Response Data
+What happened. Should include:
+- `_type: "data"` - Identifies this as a custom data response
+- `name` - Same name as the request
+- `status` - Success or error state
+- Any result data you want to track
+
+## More Examples
+
+### API Call
+<CodeGroup>
+```js js
+await heliconeLogger.logRequest(
+  {
+    _type: "data",
+    name: "external_api_call",
+    endpoint: "https://api.example.com/users",
+    method: "GET"
+  },
+  async (resultRecorder) => {
+    const response = await fetch("https://api.example.com/users?limit=10");
+    const data = await response.json();
+
+    resultRecorder.appendResults({
+      _type: "data",
+      name: "external_api_call",
+      status: "success",
+      result: data
+    });
+
+    return data;
+  }
+);
+```
+
+```python python
+def api_call_operation(result_recorder):
+  response = requests.get("https://api.example.com/users", params={"limit": 10})
+  data = response.json()
+
+  result_recorder.append_results({
+    "_type": "data",
+    "name": "external_api_call",
+    "status": "success",
+    "result": data
+  })
+  return data
+
+api_result = helicone_logger.log_request(
+  request={
+    "_type": "data",
+    "name": "external_api_call",
+    "endpoint": "https://api.example.com/users",
+    "method": "GET"
+  },
+  operation=api_call_operation
+)
+```
+</CodeGroup>
+
+### ML Model Inference
+<CodeGroup>
+```js js
+await heliconeLogger.logRequest(
+  {
+    _type: "data",
+    name: "ml_inference",
+    model: "custom-classifier-v2",
+    input_features: { text: "This is a sample text" }
+  },
+  async (resultRecorder) => {
+    const prediction = await customModel.predict({
+      text: "This is a sample text",
+      threshold: 0.8
+    });
+
+    resultRecorder.appendResults({
+      _type: "data",
+      name: "ml_inference",
+      status: "success",
+      result: {
+        classification: prediction.classification,
+        confidence: prediction.confidence
+      }
+    });
+
+    return prediction;
+  }
+);
+```
+
+```python python
+def ml_inference_operation(result_recorder):
+  prediction = custom_model.predict({
+    "text": "This is a sample text",
+    "threshold": 0.8
+  })
+
+  result_recorder.append_results({
+    "_type": "data",
+    "name": "ml_inference",
+    "status": "success",
+    "result": {
+      "classification": prediction["classification"],
+      "confidence": prediction["confidence"]
+    }
+  })
+  return prediction
+
+prediction = helicone_logger.log_request(
+  request={
+    "_type": "data",
+    "name": "ml_inference",
+    "model": "custom-classifier-v2",
+    "input_features": {"text": "This is a sample text"}
+  },
+  operation=ml_inference_operation
+)
+```
+</CodeGroup>
+
+For more examples, check out our [GitHub examples](https://github.com/Helicone/helicone/tree/main/examples/data).
+
+<div dangerouslySetInnerHTML={{ __html: strings.heliconeLoggerAPIReference }} />
+
+## Related Guides
+
+- [How to use Helicone Sessions](/guides/sessions)
+- [How to use Helicone Custom Properties](/guides/custom-properties)

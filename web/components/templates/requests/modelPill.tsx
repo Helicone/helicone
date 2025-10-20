@@ -36,6 +36,7 @@ const ModelPill = (props: ModelPillProps) => {
     "openai-realtime": "indigo",
     "vector-db": "green",
     tool: "pink",
+    data: "blue",
     "openai-response": "purple",
     unknown: "gray",
   };
