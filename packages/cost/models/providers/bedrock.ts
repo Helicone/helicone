@@ -37,7 +37,11 @@ export class BedrockProvider extends BaseProvider {
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     const region = endpoint.userConfig.region || "us-east-1";
     const modelId = this.getModelId(endpoint.modelConfig, endpoint.userConfig);
-    return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke`;
+    const isStreaming = requestParams.isStreaming === true;
+    const endpointMethod = isStreaming
+        ? "invoke-with-response-stream"
+        : "invoke";
+    return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/${endpointMethod}`;
   }
 
   buildModelId(

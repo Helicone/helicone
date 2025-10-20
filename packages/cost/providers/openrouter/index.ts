@@ -583,6 +583,18 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "anthropic/claude-sonnet-4.5",
+    },
+    cost: {
+      prompt_token: 3e-6,
+      completion_token: 1.5e-5,
+      prompt_cache_read_token: 3e-7,
+      prompt_cache_write_token: 3.75e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "mistralai/devstral-small-2505:free",
     },
     cost: {
@@ -2118,6 +2130,20 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 8e-7,
       completion_token: 4e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-haiku-4.5",
+    },
+    cost: {
+      prompt_token: 1e-6,
+      completion_token: 5e-6,
+      prompt_cache_read_token: 1e-7,
+      prompt_cache_write_token: 1.25e-6,
+      prompt_cache_creation_5m: 1.25e-6,
+      prompt_cache_creation_1h: 2e-6,
     },
   },
   {

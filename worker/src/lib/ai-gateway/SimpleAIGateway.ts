@@ -344,13 +344,17 @@ export class SimpleAIGateway {
     response: Response,
     bodyMapping?: "OPENAI" | "NO_MAPPING"
   ): Promise<Result<Response, string>> {
+    if (response.status >= 400) {
+      return ok(response);
+    }
+
     if (bodyMapping === "NO_MAPPING") {
       return ok(response); // do not map response
     }
 
     const mappingType = attempt.endpoint.modelConfig.responseFormat ?? "OPENAI";
     const contentType = response.headers.get("content-type");
-    const isStream = contentType?.includes("text/event-stream");
+    const isStream = contentType?.includes("text/event-stream") || contentType?.includes("application/vnd.amazon.eventstream");
 
     try {
       if (mappingType === "OPENAI") {

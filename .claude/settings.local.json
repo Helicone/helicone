@@ -54,7 +54,8 @@
       "Bash(~/.cache/ms-playwright/chromium-1193/chrome-linux/chrome:*)",
       "Bash(timeout:*)",
       "Bash(npx supabase:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "WebFetch(domain:ui.shadcn.com)"
     ],
     "deny": []
   },

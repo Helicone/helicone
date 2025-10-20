@@ -26,6 +26,12 @@ const bedrockAuthExpectations = {
   },
 };
 
+const deepinfraAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Anthropic Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -272,6 +278,23 @@ describe("Anthropic Registry Tests", () => {
                 response: "success",
                 data: createAnthropicMockResponse("claude-3.7-sonnet"),
                 expects: bedrockAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "claude-3.7-sonnet/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "anthropic/claude-3-7-sonnet-latest",
+                data: createAnthropicMockResponse("claude-3.7-sonnet"),
+                expects: deepinfraAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -656,6 +679,54 @@ describe("Anthropic Registry Tests", () => {
             providers: [
               {
                 url: "https://api.anthropic.com/v1/messages",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+
+      it("should handle DeepInfra provider failure for claude-3.7-sonnet", () =>
+        runGatewayTest({
+          model: "claude-3.7-sonnet/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "DeepInfra service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from DeepInfra for claude-3.7-sonnet", () =>
+        runGatewayTest({
+          model: "claude-3.7-sonnet/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle authentication failure from DeepInfra for claude-3.7-sonnet", () =>
+        runGatewayTest({
+          model: "claude-3.7-sonnet/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "failure",
                 statusCode: 401,
                 errorMessage: "Invalid API key",

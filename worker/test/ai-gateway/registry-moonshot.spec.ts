@@ -10,6 +10,13 @@ const novitaAuthExpectations = {
   },
 };
 
+// Define auth expectations for DeepInfra provider
+const deepinfraAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Moonshot AI Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -793,6 +800,352 @@ describe("Moonshot AI Registry Tests", () => {
               data: createOpenAIMockResponse("moonshotai/kimi-k2-0905"),
               expects: {
                 ...novitaAuthExpectations,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+  describe("BYOK Tests - kimi-k2-0905 with DeepInfra", () => {
+    describe("kimi-k2-0905/deepinfra", () => {
+      it("should handle deepinfra provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/deepinfra",
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "moonshotai/Kimi-K2-Instruct-0905",
+                data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+                expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with deepinfra provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/deepinfra",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "moonshotai/Kimi-K2-Instruct-0905",
+                data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle response format with deepinfra provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/deepinfra",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Generate JSON data" }],
+              response_format: { type: "json_object" },
+              temperature: 0.1,
+              top_p: 0.9,
+              frequency_penalty: 0.5,
+              presence_penalty: 0.3,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "moonshotai/Kimi-K2-Instruct-0905",
+                data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_object",
+                    "temperature",
+                    "top_p",
+                    "frequency_penalty",
+                    "presence_penalty",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle structured outputs with deepinfra provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/deepinfra",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Extract data" }],
+              response_format: {
+                type: "json_schema",
+                json_schema: {
+                  name: "data_extraction",
+                  schema: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      age: { type: "number" },
+                    },
+                    required: ["name", "age"],
+                  },
+                },
+              },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "moonshotai/Kimi-K2-Instruct-0905",
+                data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_schema",
+                    "data_extraction",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters with deepinfra provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/deepinfra",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test comprehensive parameters" },
+              ],
+              max_tokens: 1000,
+              temperature: 0.8,
+              top_p: 0.95,
+              stop: ["STOP"],
+              frequency_penalty: 0.2,
+              presence_penalty: 0.1,
+              repetition_penalty: 1.1,
+              top_k: 50,
+              seed: 12345,
+              min_p: 0.05,
+              response_format: { type: "text" },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "success",
+                model: "moonshotai/Kimi-K2-Instruct-0905",
+                data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+                expects: {
+                  ...deepinfraAuthExpectations,
+                  bodyContains: [
+                    "max_tokens",
+                    "temperature",
+                    "top_p",
+                    "stop",
+                    "frequency_penalty",
+                    "presence_penalty",
+                    "repetition_penalty",
+                    "top_k",
+                    "seed",
+                    "min_p",
+                    "response_format",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
+
+  describe("Error scenarios - kimi-k2-0905 with DeepInfra Provider", () => {
+    it("should handle DeepInfra provider failure", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "DeepInfra service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from DeepInfra", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from DeepInfra", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+
+    it("should handle model not found error from DeepInfra", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 404,
+              errorMessage: "Model not found",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle timeout from DeepInfra", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "failure",
+              statusCode: 408,
+              errorMessage: "Request timeout",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+  });
+
+  describe("Provider validation - kimi-k2-0905 with DeepInfra", () => {
+    it("should construct correct DeepInfra URL for kimi-k2-0905", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "moonshotai/Kimi-K2-Instruct-0905",
+              data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+              expects: deepinfraAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://api.deepinfra.com/
+                // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for DeepInfra", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/deepinfra",
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "moonshotai/Kimi-K2-Instruct-0905", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+              expects: deepinfraAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for DeepInfra", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/deepinfra",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.deepinfra.com/v1/openai/chat/completions",
+              response: "success",
+              model: "moonshotai/Kimi-K2-Instruct-0905",
+              data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+              expects: {
+                ...deepinfraAuthExpectations,
               },
             },
           ],

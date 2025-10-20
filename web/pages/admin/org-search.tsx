@@ -1,10 +1,10 @@
 import { ReactElement } from "react";
 import AdminLayout from "../../components/layout/admin/adminLayout";
-import { AdminFeatureFlags } from "../../components/templates/admin/adminFeatureFlags";
+import OrgSearch from "../../components/templates/admin/orgSearch";
 import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
 const Admin = () => {
-  return <AdminFeatureFlags />;
+  return <OrgSearch />;
 };
 
 Admin.getLayout = function getLayout(page: ReactElement) {

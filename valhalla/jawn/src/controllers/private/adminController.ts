@@ -28,9 +28,13 @@ import {
 } from "@helicone-package/cost";
 
 import { err, ok, Result } from "../../packages/common/result";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
-import { ENVIRONMENT } from "../../lib/clients/constant";
 import { InAppThread } from "../../managers/InAppThreadsManager";
+import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
+import { HqlQueryManager } from "../../managers/HqlQueryManager";
+import { HqlSavedQuery } from "../public/heliconeSqlController";
+
+// Admin org ID for shared admin queries
+const ADMIN_ORG_ID = "aff94038-3369-4ce9-957e-562fe5a79862";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -207,7 +211,8 @@ export class AdminController extends Controller {
             'email', u.email,
             'name', u.raw_user_meta_data->>'name',
             'role', om.org_role,
-            'last_sign_in_at', u.last_sign_in_at
+            'last_sign_in_at', u.last_sign_in_at,
+            'created_at', u.created_at
           )
         ) AS members
       FROM organization o
@@ -242,7 +247,7 @@ export class AdminController extends Controller {
           count(*) as total_requests,
           countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
         FROM request_response_rmt
-        WHERE organization_id = '${orgId}'
+        WHERE organization_id = {val_0:String}
       `;
 
       const monthlyUsageQuery = `
@@ -253,7 +258,7 @@ export class AdminController extends Controller {
           request_response_rmt
         WHERE
           request_created_at > now() - INTERVAL 3 MONTH
-          AND organization_id = '${orgId}'
+          AND organization_id = {val_0:String}
         GROUP BY
           toStartOfMonth(request_created_at)
         ORDER BY
@@ -263,7 +268,7 @@ export class AdminController extends Controller {
       const allTimeCountQuery = `
         SELECT count(*) as all_time_count
         FROM request_response_rmt
-        WHERE organization_id = '${orgId}'
+        WHERE organization_id = {val_0:String}
       `;
 
       const [usageResult, monthlyUsageResult, allTimeCountResult] =
@@ -271,14 +276,14 @@ export class AdminController extends Controller {
           clickhouseDb.dbQuery<{
             total_requests: string;
             requests_last_30_days: string;
-          }>(usageQuery, []),
+          }>(usageQuery, [orgId]),
           clickhouseDb.dbQuery<{
             month: string;
             requestCount: string;
-          }>(monthlyUsageQuery, []),
+          }>(monthlyUsageQuery, [orgId]),
           clickhouseDb.dbQuery<{
             all_time_count: string;
-          }>(allTimeCountQuery, []),
+          }>(allTimeCountQuery, [orgId]),
         ]);
 
       const usage = usageResult.data?.[0] ?? {
@@ -380,7 +385,7 @@ export class AdminController extends Controller {
     LEFT JOIN users_view AS member_user ON organization_member.member = member_user.id
     WHERE (
       true
-      ${body.tier !== "all" ? `AND organization.tier = '${body.tier}'` : ""}
+      ${body.tier !== "all" ? `AND organization.tier = $1` : ""}
     )
     GROUP BY
       organization.id,
@@ -388,7 +393,7 @@ export class AdminController extends Controller {
       users_view.email,
       users_view.last_sign_in_at;
     `,
-      []
+      body.tier !== "all" ? [body.tier] : []
     );
 
     if (!orgData.data) {
@@ -396,6 +401,15 @@ export class AdminController extends Controller {
     }
 
     // Step 1: Fetch top organizations
+    const orgIds = orgData.data?.map((org) => org.id).slice(0, 30) ?? [];
+
+    if (orgIds.length === 0) {
+      return [];
+    }
+
+    // Build IN clause with individual parameters for safety
+    const orgIdParams = orgIds.map((_, index) => `{val_${index + 2}:String}`).join(", ");
+
     const orgs = await clickhouseDb.dbQuery<{
       organization_id: string;
       ct: number;
@@ -406,20 +420,13 @@ export class AdminController extends Controller {
       count(*) as ct
     FROM request_response_rmt
     WHERE
-      request_response_rmt.request_created_at > toDateTime('${body.startDate}')
-      and request_response_rmt.request_created_at < toDateTime('${
-        body.endDate
-      }')
-    AND organization_id in (
-      ${orgData.data
-        ?.map((org) => `'${org.id}'`)
-        .slice(0, 30)
-        .join(",")}
-    )
+      request_response_rmt.request_created_at > {val_0:DateTime}
+      and request_response_rmt.request_created_at < {val_1:DateTime}
+    AND organization_id in (${orgIdParams})
     GROUP BY organization_id
     ORDER BY ct DESC
     `,
-      []
+      [body.startDate, body.endDate, ...orgIds]
     );
 
     if (!orgs.data) {
@@ -480,6 +487,11 @@ export class AdminController extends Controller {
       return [];
     }
     // Step 3: Fetch organization data over time
+    const orgIdsForTimeSeries = orgs.data?.map((org) => org.organization_id).slice(0, 30) ?? [];
+
+    // Build IN clause with individual parameters
+    const timeSeriesOrgParams = orgIdsForTimeSeries.map((_, index) => `{val_${index + 2}:String}`).join(", ");
+
     const orgsOverTime = await clickhouseDb.dbQuery<{
       count: number;
       dt: string;
@@ -491,25 +503,14 @@ export class AdminController extends Controller {
         date_trunc('${timeGrain}', request_created_at) AS dt,
         request_response_rmt.organization_id as organization_id
       from request_response_rmt
-      where request_response_rmt.organization_id in (
-        ${orgs.data
-          ?.map((org) => `'${org.organization_id}'`)
-          .slice(0, 30)
-          .join(",")}
-      )
-      and request_response_rmt.request_created_at > toDateTime('${
-        body.startDate
-      }')
-      and request_response_rmt.request_created_at < toDateTime('${
-        body.endDate
-      }')
+      where request_response_rmt.organization_id in (${timeSeriesOrgParams})
+      and request_response_rmt.request_created_at > {val_0:DateTime}
+      and request_response_rmt.request_created_at < {val_1:DateTime}
       group by dt, organization_id
       order by organization_id, dt ASC
-      WITH FILL FROM toDateTime64('${body.startDate}') TO toDateTime64('${
-        body.endDate
-      }') STEP INTERVAL 1 ${timeGrain}
+      WITH FILL FROM toDateTime64('${body.startDate}') TO toDateTime64('${body.endDate}') STEP INTERVAL 1 ${timeGrain}
     `,
-      []
+      [body.startDate, body.endDate, ...orgIdsForTimeSeries]
     );
 
     // Step 4: Merge all data into one massive object
@@ -630,7 +631,8 @@ export class AdminController extends Controller {
             'email', u.email,
             'name', u.raw_user_meta_data->>'name',
             'role', om.org_role,
-            'last_sign_in_at', u.last_sign_in_at
+            'last_sign_in_at', u.last_sign_in_at,
+            'created_at', u.created_at
           )
         ) AS members
       FROM organization o
@@ -680,7 +682,7 @@ export class AdminController extends Controller {
           count(*) as total_requests,
           countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
         FROM request_response_rmt
-        WHERE organization_id = '${org.id}'
+        WHERE organization_id = {val_0:String}
       `;
 
         const monthlyUsageQuery = `
@@ -691,7 +693,7 @@ export class AdminController extends Controller {
           request_response_rmt
         WHERE
           request_created_at > now() - INTERVAL 12 MONTH
-          AND organization_id = '${org.id}'
+          AND organization_id = {val_0:String}
         GROUP BY
           toStartOfMonth(request_created_at)
         ORDER BY
@@ -701,7 +703,7 @@ export class AdminController extends Controller {
         const allTimeCountQuery = `
         SELECT count(*) as all_time_count
         FROM request_response_rmt
-        WHERE organization_id = '${org.id}'
+        WHERE organization_id = {val_0:String}
       `;
 
         const [usageResult, monthlyUsageResult, allTimeCountResult] =
@@ -709,14 +711,14 @@ export class AdminController extends Controller {
             clickhouseDb.dbQuery<{
               total_requests: string;
               requests_last_30_days: string;
-            }>(usageQuery, []),
+            }>(usageQuery, [org.id]),
             clickhouseDb.dbQuery<{
               month: string;
               requestCount: string;
-            }>(monthlyUsageQuery, []),
+            }>(monthlyUsageQuery, [org.id]),
             clickhouseDb.dbQuery<{
               all_time_count: string;
-            }>(allTimeCountQuery, []),
+            }>(allTimeCountQuery, [org.id]),
           ]);
 
         const usage = usageResult.data?.[0] ?? {
@@ -754,6 +756,769 @@ export class AdminController extends Controller {
     );
 
     return { organizations };
+  }
+
+  @Post("/org-search")
+  public async orgSearch(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      query: string;
+    }
+  ): Promise<{
+    organizations: Array<{
+      organization: {
+        id: string;
+        name: string;
+        created_at: string;
+        owner: string;
+        tier: string;
+        stripe_customer_id: string | null;
+        stripe_subscription_id: string | null;
+        subscription_status: string | null;
+        members: {
+          id: string;
+          email: string;
+          name: string;
+          role: string;
+          last_sign_in_at: string | null;
+        }[];
+      };
+      usage: {
+        total_requests: number;
+        requests_last_30_days: number;
+        monthly_usage: {
+          month: string;
+          requestCount: number;
+        }[];
+        all_time_count: number;
+      };
+    }>;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { query } = body;
+
+    if (!query || query.trim().length === 0) {
+      return { organizations: [] };
+    }
+
+    // Intelligent search across multiple fields
+    const orgQuery = `
+      WITH matching_orgs AS (
+        SELECT DISTINCT o.id
+        FROM organization o
+        LEFT JOIN organization_member om ON o.id = om.organization
+        LEFT JOIN auth.users u ON om.member = u.id OR o.owner = u.id
+        WHERE
+          o.id::text = $1
+          OR o.name ILIKE '%' || $1 || '%'
+          OR u.email ILIKE '%' || $1 || '%'
+          OR u.id::text = $1
+      )
+      SELECT
+        o.id, o.name, o.created_at, o.owner, o.tier,
+        o.stripe_customer_id, o.stripe_subscription_id, o.subscription_status,
+        json_agg(
+          json_build_object(
+            'id', om.member,
+            'email', u.email,
+            'name', u.raw_user_meta_data->>'name',
+            'role', om.org_role,
+            'last_sign_in_at', u.last_sign_in_at,
+            'created_at', u.created_at
+          )
+        ) AS members
+      FROM organization o
+      LEFT JOIN organization_member om ON o.id = om.organization
+      LEFT JOIN auth.users u ON om.member = u.id
+      WHERE o.id IN (SELECT id FROM matching_orgs)
+      GROUP BY o.id
+      LIMIT 20
+    `;
+
+    const orgResult = await dbExecute<{
+      id: string;
+      name: string;
+      created_at: string;
+      owner: string;
+      tier: string;
+      stripe_customer_id: string | null;
+      stripe_subscription_id: string | null;
+      subscription_status: string | null;
+      members: {
+        id: string;
+        email: string;
+        name: string;
+        role: string;
+        last_sign_in_at: string | null;
+      }[];
+    }>(orgQuery, [query.trim()]);
+
+    if (!orgResult.data || orgResult.data.length === 0) {
+      return { organizations: [] };
+    }
+
+    const organizations = await Promise.all(
+      orgResult.data.map(async (org) => {
+        // Fetch usage data from ClickHouse
+        const usageQuery = `
+        SELECT
+          count(*) as total_requests,
+          countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
+        FROM request_response_rmt
+        WHERE organization_id = {val_0:String}
+      `;
+
+        const monthlyUsageQuery = `
+        SELECT
+          toStartOfMonth(request_created_at) AS month,
+          COUNT(*) AS requestCount
+        FROM
+          request_response_rmt
+        WHERE
+          request_created_at > now() - INTERVAL 12 MONTH
+          AND organization_id = {val_0:String}
+        GROUP BY
+          toStartOfMonth(request_created_at)
+        ORDER BY
+          month DESC
+      `;
+
+        const allTimeCountQuery = `
+        SELECT count(*) as all_time_count
+        FROM request_response_rmt
+        WHERE organization_id = {val_0:String}
+      `;
+
+        const [usageResult, monthlyUsageResult, allTimeCountResult] =
+          await Promise.all([
+            clickhouseDb.dbQuery<{
+              total_requests: string;
+              requests_last_30_days: string;
+            }>(usageQuery, [org.id]),
+            clickhouseDb.dbQuery<{
+              month: string;
+              requestCount: string;
+            }>(monthlyUsageQuery, [org.id]),
+            clickhouseDb.dbQuery<{
+              all_time_count: string;
+            }>(allTimeCountQuery, [org.id]),
+          ]);
+
+        const usage = usageResult.data?.[0] ?? {
+          total_requests: 0,
+          requests_last_30_days: 0,
+        };
+
+        const monthlyUsage = monthlyUsageResult.data ?? [];
+        const allTimeCount =
+          allTimeCountResult.data?.[0]?.all_time_count ?? "0";
+
+        return {
+          organization: {
+            id: org.id,
+            name: org.name,
+            created_at: org.created_at,
+            owner: org.owner,
+            tier: org.tier,
+            stripe_customer_id: org.stripe_customer_id,
+            stripe_subscription_id: org.stripe_subscription_id,
+            subscription_status: org.subscription_status,
+            members: org.members,
+          },
+          usage: {
+            total_requests: Number(usage.total_requests),
+            requests_last_30_days: Number(usage.requests_last_30_days),
+            monthly_usage: monthlyUsage.map((item) => ({
+              month: item.month,
+              requestCount: Number(item.requestCount),
+            })),
+            all_time_count: Number(allTimeCount),
+          },
+        };
+      })
+    );
+
+    return { organizations };
+  }
+
+  @Post("/org-search-fast")
+  public async orgSearchFast(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      query: string;
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<{
+    organizations: Array<{
+      id: string;
+      name: string;
+      created_at: string;
+      owner: string;
+      tier: string;
+      stripe_customer_id: string | null;
+      stripe_subscription_id: string | null;
+      subscription_status: string | null;
+      members: {
+        id: string;
+        email: string;
+        name: string;
+        role: string;
+        last_sign_in_at: string | null;
+      }[];
+    }>;
+    total: number;
+    hasMore: boolean;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { query, limit = 50, offset = 0 } = body;
+
+    if (!query || query.trim().length === 0) {
+      return { organizations: [], total: 0, hasMore: false };
+    }
+
+    // Fast search - only org details, no usage data
+    // Filter out demo orgs and sort by match relevance
+    const orgQuery = `
+      WITH matching_orgs AS (
+        SELECT DISTINCT
+          o.id,
+          CASE
+            -- Exact org ID match (highest priority)
+            WHEN o.id::text = $1 THEN 1
+            -- Exact org name match (case-insensitive)
+            WHEN LOWER(o.name) = LOWER($1) THEN 2
+            -- Exact email match
+            WHEN EXISTS (
+              SELECT 1 FROM organization_member om2
+              LEFT JOIN auth.users u2 ON om2.member = u2.id
+              WHERE om2.organization = o.id
+              AND LOWER(u2.email) = LOWER($1)
+            ) OR EXISTS (
+              SELECT 1 FROM auth.users u2
+              WHERE u2.id = o.owner
+              AND LOWER(u2.email) = LOWER($1)
+            ) THEN 3
+            -- Exact user ID match
+            WHEN EXISTS (
+              SELECT 1 FROM organization_member om2
+              WHERE om2.organization = o.id
+              AND om2.member::text = $1
+            ) OR o.owner::text = $1 THEN 4
+            -- Org name starts with query
+            WHEN o.name ILIKE $1 || '%' THEN 5
+            -- Email starts with query (e.g., query is email prefix or domain)
+            WHEN EXISTS (
+              SELECT 1 FROM organization_member om2
+              LEFT JOIN auth.users u2 ON om2.member = u2.id
+              WHERE om2.organization = o.id
+              AND u2.email ILIKE $1 || '%'
+            ) OR EXISTS (
+              SELECT 1 FROM auth.users u2
+              WHERE u2.id = o.owner
+              AND u2.email ILIKE $1 || '%'
+            ) THEN 6
+            -- Org name contains query
+            WHEN o.name ILIKE '%' || $1 || '%' THEN 7
+            -- Email contains query (e.g., partial email or domain)
+            WHEN EXISTS (
+              SELECT 1 FROM organization_member om2
+              LEFT JOIN auth.users u2 ON om2.member = u2.id
+              WHERE om2.organization = o.id
+              AND u2.email ILIKE '%' || $1 || '%'
+            ) OR EXISTS (
+              SELECT 1 FROM auth.users u2
+              WHERE u2.id = o.owner
+              AND u2.email ILIKE '%' || $1 || '%'
+            ) THEN 8
+            -- Default lowest priority
+            ELSE 9
+          END as match_score
+        FROM organization o
+        WHERE
+          o.tier != 'demo'
+          AND (
+            o.id::text = $1
+            OR o.name ILIKE '%' || $1 || '%'
+            OR EXISTS (
+              SELECT 1 FROM organization_member om2
+              LEFT JOIN auth.users u2 ON om2.member = u2.id
+              WHERE om2.organization = o.id
+              AND (u2.email ILIKE '%' || $1 || '%' OR om2.member::text = $1)
+            )
+            OR EXISTS (
+              SELECT 1 FROM auth.users u2
+              WHERE u2.id = o.owner
+              AND (u2.email ILIKE '%' || $1 || '%' OR o.owner::text = $1)
+            )
+          )
+      )
+      SELECT
+        o.id, o.name, o.created_at, o.owner, o.tier,
+        o.stripe_customer_id, o.stripe_subscription_id, o.subscription_status,
+        m.match_score,
+        json_agg(
+          json_build_object(
+            'id', om.member,
+            'email', u.email,
+            'name', u.raw_user_meta_data->>'name',
+            'role', om.org_role,
+            'last_sign_in_at', u.last_sign_in_at,
+            'created_at', u.created_at
+          )
+        ) AS members
+      FROM organization o
+      INNER JOIN matching_orgs m ON o.id = m.id
+      LEFT JOIN organization_member om ON o.id = om.organization
+      LEFT JOIN auth.users u ON om.member = u.id
+      GROUP BY o.id, o.name, o.created_at, o.owner, o.tier,
+               o.stripe_customer_id, o.stripe_subscription_id, o.subscription_status, m.match_score
+      ORDER BY m.match_score ASC, o.name ASC
+      LIMIT $2 OFFSET $3
+    `;
+
+    // Count total matching orgs
+    const countQuery = `
+      WITH matching_orgs AS (
+        SELECT DISTINCT o.id
+        FROM organization o
+        WHERE
+          o.tier != 'demo'
+          AND (
+            o.id::text = $1
+            OR o.name ILIKE '%' || $1 || '%'
+            OR EXISTS (
+              SELECT 1 FROM organization_member om2
+              LEFT JOIN auth.users u2 ON om2.member = u2.id
+              WHERE om2.organization = o.id
+              AND (u2.email ILIKE '%' || $1 || '%' OR om2.member::text = $1)
+            )
+            OR EXISTS (
+              SELECT 1 FROM auth.users u2
+              WHERE u2.id = o.owner
+              AND (u2.email ILIKE '%' || $1 || '%' OR o.owner::text = $1)
+            )
+          )
+      )
+      SELECT COUNT(*) as total FROM matching_orgs
+    `;
+
+    const [orgResult, countResult] = await Promise.all([
+      dbExecute<{
+        id: string;
+        name: string;
+        created_at: string;
+        owner: string;
+        tier: string;
+        stripe_customer_id: string | null;
+        stripe_subscription_id: string | null;
+        subscription_status: string | null;
+        match_score: number;
+        members: {
+          id: string;
+          email: string;
+          name: string;
+          role: string;
+          last_sign_in_at: string | null;
+        }[];
+      }>(orgQuery, [query.trim(), limit, offset]),
+      dbExecute<{ total: string }>(countQuery, [query.trim()]),
+    ]);
+
+    // Remove match_score from results before returning
+    const organizations = orgResult.data?.map(({ match_score, ...org }) => org) ?? [];
+    const total = parseInt(countResult.data?.[0]?.total ?? "0", 10);
+    const hasMore = offset + limit < total;
+
+    return { organizations, total, hasMore };
+  }
+
+  @Post("/user-search")
+  public async userSearch(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      query: string;
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<{
+    users: Array<{
+      id: string;
+      email: string;
+      name: string | null;
+      created_at: string;
+      last_sign_in_at: string | null;
+      is_admin: boolean;
+      organizations: {
+        id: string;
+        name: string | null;
+        role: string | null;
+      }[];
+    }>;
+    total: number;
+    hasMore: boolean;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { query, limit = 50, offset = 0 } = body;
+
+    if (!query || query.trim().length === 0) {
+      return { users: [], total: 0, hasMore: false };
+    }
+
+    const sanitizedQuery = query.trim();
+    const safeLimit = Math.min(Math.max(limit, 1), 100);
+    const safeOffset = Math.max(offset, 0);
+
+    const userQuery = `
+      WITH matching_users AS (
+        SELECT
+          u.id,
+          u.email,
+          u.created_at,
+          u.last_sign_in_at,
+          u.raw_user_meta_data->>'name' AS name,
+          CASE
+            WHEN LOWER(u.email) = LOWER($1) THEN 1
+            WHEN u.email ILIKE $1 || '%' THEN 2
+            WHEN u.email ILIKE '%' || $1 || '%' THEN 3
+            WHEN u.id::text = $1 THEN 4
+            ELSE 5
+          END AS match_score
+        FROM auth.users u
+        WHERE
+          u.email ILIKE '%' || $1 || '%'
+          OR u.id::text = $1
+        ORDER BY match_score, LOWER(u.email)
+        LIMIT $2 OFFSET $3
+      )
+      SELECT
+        mu.id,
+        mu.email,
+        mu.created_at,
+        mu.last_sign_in_at,
+        mu.name,
+        COALESCE(
+          jsonb_agg(
+            DISTINCT jsonb_build_object(
+              'id', om.organization,
+              'name', org.name,
+              'role', om.org_role
+            )
+          ) FILTER (WHERE om.organization IS NOT NULL),
+          '[]'::jsonb
+        ) AS organizations,
+        EXISTS(
+          SELECT 1 FROM admins a WHERE a.user_id = mu.id
+        ) AS is_admin,
+        mu.match_score
+      FROM matching_users mu
+      LEFT JOIN organization_member om ON om.member = mu.id
+      LEFT JOIN organization org ON org.id = om.organization
+      GROUP BY
+        mu.id,
+        mu.email,
+        mu.created_at,
+        mu.last_sign_in_at,
+        mu.name,
+        mu.match_score
+      ORDER BY mu.match_score, mu.email
+    `;
+
+    const countQuery = `
+      SELECT COUNT(*)::int as total
+      FROM auth.users u
+      WHERE
+        u.email ILIKE '%' || $1 || '%'
+        OR u.id::text = $1
+    `;
+
+    const [userResult, countResult] = await Promise.all([
+      dbExecute<{
+        id: string;
+        email: string;
+        created_at: string;
+        last_sign_in_at: string | null;
+        name: string | null;
+        organizations: {
+          id: string;
+          name: string | null;
+          role: string | null;
+        }[] | null;
+        is_admin: boolean;
+        match_score: number;
+      }>(userQuery, [sanitizedQuery, safeLimit, safeOffset]),
+      dbExecute<{ total: number }>(countQuery, [sanitizedQuery]),
+    ]);
+
+    const users =
+      userResult.data?.map(
+        ({ match_score: _match, organizations, ...user }) => ({
+          ...user,
+          organizations: Array.isArray(organizations) ? organizations : [],
+        })
+      ) ?? [];
+
+    const total = Number(countResult.data?.[0]?.total ?? 0);
+    const hasMore = safeOffset + users.length < total;
+
+    return { users, total, hasMore };
+  }
+
+  @Delete("/org/{orgId}/member/{memberId}")
+  public async removeOrgMember(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Path() memberId: string
+  ): Promise<Result<null, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { error } = await dbExecute(
+      `DELETE FROM organization_member WHERE organization = $1 AND member = $2`,
+      [orgId, memberId]
+    );
+
+    if (error) {
+      return err(error);
+    }
+
+    return ok(null);
+  }
+
+  @Patch("/org/{orgId}/member/{memberId}")
+  public async updateOrgMemberRole(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Path() memberId: string,
+    @Body() body: { role: string }
+  ): Promise<Result<null, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // If changing to owner, we need to transfer ownership
+    if (body.role.toLowerCase() === "owner") {
+      // Start a transaction to transfer ownership
+      // 1. Demote current owner to admin
+      // 2. Promote new member to owner
+      // 3. Update organization.owner
+      const transferResult = await dbExecute(
+        `
+        WITH current_owner AS (
+          SELECT member
+          FROM organization_member
+          WHERE organization = $1 AND org_role = 'owner'
+        )
+        UPDATE organization_member
+        SET org_role = CASE
+          WHEN member = $2 THEN 'owner'
+          WHEN member IN (SELECT member FROM current_owner) THEN 'admin'
+          ELSE org_role
+        END
+        WHERE organization = $1
+          AND (member = $2 OR member IN (SELECT member FROM current_owner));
+
+        UPDATE organization
+        SET owner = $2
+        WHERE id = $1;
+        `,
+        [orgId, memberId]
+      );
+
+      if (transferResult.error) {
+        return err(transferResult.error);
+      }
+
+      return ok(null);
+    }
+
+    // For non-owner roles, just update normally
+    const { error } = await dbExecute(
+      `UPDATE organization_member SET org_role = $1 WHERE organization = $2 AND member = $3`,
+      [body.role, orgId, memberId]
+    );
+
+    if (error) {
+      return err(error);
+    }
+
+    return ok(null);
+  }
+
+  @Post("/org/{orgId}/delete")
+  public async deleteOrg(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<null, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Hardcoded target owner email for security - never trust frontend input
+    const TARGET_OWNER_EMAIL = "cole+10@helicone.ai";
+
+    // Get the target owner user ID from email
+    const targetUserResult = await dbExecute<{ id: string }>(
+      `SELECT id FROM auth.users WHERE email = $1`,
+      [TARGET_OWNER_EMAIL]
+    );
+
+    if (targetUserResult.error || !targetUserResult.data?.[0]) {
+      return err(`Target owner email not found: ${TARGET_OWNER_EMAIL}`);
+    }
+
+    const targetUserId = targetUserResult.data[0].id;
+
+    // 1. Remove all existing members
+    const deleteMembersResult = await dbExecute(
+      `DELETE FROM organization_member WHERE organization = $1`,
+      [orgId]
+    );
+
+    if (deleteMembersResult.error) {
+      return err(`Failed to remove members: ${deleteMembersResult.error}`);
+    }
+
+    // 2. Update organization owner to target user
+    const updateOwnerResult = await dbExecute(
+      `UPDATE organization SET owner = $1 WHERE id = $2`,
+      [targetUserId, orgId]
+    );
+
+    if (updateOwnerResult.error) {
+      return err(`Failed to update owner: ${updateOwnerResult.error}`);
+    }
+
+    // 3. Add target user as the only member with owner role
+    const addOwnerResult = await dbExecute(
+      `INSERT INTO organization_member (organization, member, org_role) VALUES ($1, $2, $3)`,
+      [orgId, targetUserId, "owner"]
+    );
+
+    if (addOwnerResult.error) {
+      return err(`Failed to add new owner: ${addOwnerResult.error}`);
+    }
+
+    return ok(null);
+  }
+
+  @Get("/org-usage-light/{orgId}")
+  public async getOrgUsageLight(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<{
+    last_request_at: string | null;
+    requests_last_30_days: number;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Lightweight query - only fetch last request time and 30-day count
+    const usageQuery = `
+      SELECT
+        max(request_created_at) as last_request_at,
+        countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
+      FROM request_response_rmt
+      WHERE organization_id = {val_0:String}
+    `;
+
+    const usageResult = await clickhouseDb.dbQuery<{
+      last_request_at: string | null;
+      requests_last_30_days: string;
+    }>(usageQuery, [orgId]);
+
+    const usage = usageResult.data?.[0] ?? {
+      last_request_at: null,
+      requests_last_30_days: "0",
+    };
+
+    return {
+      last_request_at: usage.last_request_at,
+      requests_last_30_days: Number(usage.requests_last_30_days),
+    };
+  }
+
+  @Get("/org-usage/{orgId}")
+  public async getOrgUsage(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<{
+    total_requests: number;
+    requests_last_30_days: number;
+    monthly_usage: {
+      month: string;
+      requestCount: number;
+      cost: number;
+    }[];
+    all_time_count: number;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Fetch usage data from ClickHouse for a single org
+    const usageQuery = `
+      SELECT
+        count(*) as total_requests,
+        countIf(request_created_at >= now() - INTERVAL 30 DAY) as requests_last_30_days
+      FROM request_response_rmt
+      WHERE organization_id = {val_0:String}
+    `;
+
+    const monthlyUsageQuery = `
+      SELECT
+        toStartOfMonth(request_created_at) AS month,
+        COUNT(*) AS requestCount,
+        SUM(cost) / 1000000000 AS cost
+      FROM
+        request_response_rmt
+      WHERE
+        request_created_at > now() - INTERVAL 12 MONTH
+        AND organization_id = {val_0:String}
+      GROUP BY
+        toStartOfMonth(request_created_at)
+      ORDER BY
+        month DESC
+    `;
+
+    const allTimeCountQuery = `
+      SELECT count(*) as all_time_count
+      FROM request_response_rmt
+      WHERE organization_id = {val_0:String}
+    `;
+
+    const [usageResult, monthlyUsageResult, allTimeCountResult] =
+      await Promise.all([
+        clickhouseDb.dbQuery<{
+          total_requests: string;
+          requests_last_30_days: string;
+        }>(usageQuery, [orgId]),
+        clickhouseDb.dbQuery<{
+          month: string;
+          requestCount: string;
+          cost: string;
+        }>(monthlyUsageQuery, [orgId]),
+        clickhouseDb.dbQuery<{
+          all_time_count: string;
+        }>(allTimeCountQuery, [orgId]),
+      ]);
+
+    const usage = usageResult.data?.[0] ?? {
+      total_requests: "0",
+      requests_last_30_days: "0",
+    };
+
+    const monthlyUsage = monthlyUsageResult.data ?? [];
+    const allTimeCount = allTimeCountResult.data?.[0]?.all_time_count ?? "0";
+
+    return {
+      total_requests: Number(usage.total_requests),
+      requests_last_30_days: Number(usage.requests_last_30_days),
+      monthly_usage: monthlyUsage.map((item) => ({
+        month: item.month,
+        requestCount: Number(item.requestCount),
+        cost: Number(item.cost),
+      })),
+      all_time_count: Number(allTimeCount),
+    };
   }
 
   @Get("/settings/{name}")
@@ -1207,25 +1972,25 @@ export class AdminController extends Controller {
 
     // Step 1: Get the top organizations by total request count
     const topOrgsQuery = `
-      SELECT 
+      SELECT
           organization_id,
           COUNT(request_id) as request_count
-      FROM 
+      FROM
           request_response_rmt
       WHERE
           request_created_at > now() - interval '${timeRangeInterval}'
           AND request_created_at < now()
-      GROUP BY 
+      GROUP BY
           organization_id
-      ORDER BY 
+      ORDER BY
           request_count DESC
-      LIMIT ${limit}
+      LIMIT {val_0:UInt32}
     `;
 
     const topOrgsResult = await clickhouseDb.dbQuery<{
       organization_id: string;
       request_count: string;
-    }>(topOrgsQuery, []);
+    }>(topOrgsQuery, [limit]);
 
     if (!topOrgsResult.data || topOrgsResult.data.length === 0) {
       return { organizations: [] };
@@ -1235,15 +2000,13 @@ export class AdminController extends Controller {
 
     // Step 2: Fetch organization names
     const orgNamesQuery = `
-      SELECT id, name FROM organization WHERE id IN (${orgIds
-        .map((id) => `'${id}'`)
-        .join(",")})
+      SELECT id, name FROM organization WHERE id = ANY($1::uuid[])
     `;
 
     const orgNamesResult = await dbExecute<{
       id: string;
       name: string;
-    }>(orgNamesQuery, []);
+    }>(orgNamesQuery, [orgIds]);
 
     const orgNameMap = new Map<string, string>();
     if (orgNamesResult.data) {
@@ -1253,37 +2016,40 @@ export class AdminController extends Controller {
     }
 
     // Step 3: Get time series data for each organization with the appropriate grouping
+    // Build IN clause with individual parameters
+    const orgIdsParams = orgIds.map((_, index) => `{val_${index}:String}`).join(", ");
+
     const timeSeriesQuery =
       groupBy === "10 minute" || groupBy === "6 hour"
         ? `
-        SELECT 
+        SELECT
             organization_id,
-            COUNT(request_id) as request_count, 
+            COUNT(request_id) as request_count,
             toString(${timeFunction}) as time
-        FROM 
+        FROM
             request_response_rmt
         WHERE
             request_created_at > now() - interval '${timeRangeInterval}'
-            AND organization_id IN (${orgIds.map((id) => `'${id}'`).join(",")})
-        GROUP BY 
-            organization_id, 
+            AND organization_id IN (${orgIdsParams})
+        GROUP BY
+            organization_id,
             time
         ORDER BY
             organization_id,
             time
       `
         : `
-        SELECT 
+        SELECT
             organization_id,
-            COUNT(request_id) as request_count, 
+            COUNT(request_id) as request_count,
             toString(${timeFunction}(request_created_at)) as time
-        FROM 
+        FROM
             request_response_rmt
         WHERE
             request_created_at > now() - interval '${timeRangeInterval}'
-            AND organization_id IN (${orgIds.map((id) => `'${id}'`).join(",")})
-        GROUP BY 
-            organization_id, 
+            AND organization_id IN (${orgIdsParams})
+        GROUP BY
+            organization_id,
             time
         ORDER BY
             organization_id,
@@ -1294,7 +2060,7 @@ export class AdminController extends Controller {
       organization_id: string;
       request_count: string;
       time: string;
-    }>(timeSeriesQuery, []);
+    }>(timeSeriesQuery, orgIds);
 
     if (!timeSeriesResult.data) {
       return { organizations: [] };
@@ -1367,11 +2133,29 @@ export class AdminController extends Controller {
     totalCount: number;
   }> {
     await authCheckThrow(request.authParams.userId);
+
+    const params: (string | number | boolean | Date)[] = [];
+    let paramIndex = 0;
+
+    let dateCondition = "";
+    if (body.toDate) {
+      dateCondition = `response_created_at <= {val_${paramIndex}:DateTime64(3)}`;
+      params.push(body.toDate);
+      paramIndex++;
+    } else {
+      dateCondition = "response_created_at <= now()";
+    }
+
+    if (body.fromDate) {
+      dateCondition += ` AND response_created_at >= {val_${paramIndex}:DateTime64(3)}`;
+      params.push(body.fromDate);
+      paramIndex++;
+    }
+
     const query = `
     SELECT model, provider, count(*) AS count from request_response_rmt
     WHERE (
-      response_created_at <= ${body.toDate ? `toDateTime64('${body.toDate}', 3)` : "now()"}
-      ${body.fromDate ? `AND response_created_at >= toDateTime64('${body.fromDate}', 3)` : ""}
+      ${dateCondition}
       AND ${clickhouseModelFilter(body.models)}
       AND ${body.hasCosts ? "cost > 0" : "cost = 0"} AND (prompt_tokens > 0 OR completion_tokens > 0)
     )
@@ -1382,7 +2166,7 @@ export class AdminController extends Controller {
       model: string;
       provider: string;
       count: string;
-    }>(query, []);
+    }>(query, params);
 
     if (result.error) {
       throw new Error(result.error);
@@ -1443,6 +2227,24 @@ export class AdminController extends Controller {
   }> {
     await authCheckThrow(request.authParams.userId);
 
+    const params: (string | number | boolean | Date)[] = [];
+    let paramIndex = 0;
+
+    let dateCondition = "";
+    if (body.toDate) {
+      dateCondition = `response_created_at <= {val_${paramIndex}:DateTime64(3)}`;
+      params.push(body.toDate);
+      paramIndex++;
+    } else {
+      dateCondition = "response_created_at <= now()";
+    }
+
+    if (body.fromDate) {
+      dateCondition += ` AND response_created_at >= {val_${paramIndex}:DateTime64(3)}`;
+      params.push(body.fromDate);
+      paramIndex++;
+    }
+
     const query = `
     INSERT INTO request_response_rmt
     SELECT
@@ -1480,8 +2282,7 @@ export class AdminController extends Controller {
       now() as updated_at
     FROM request_response_rmt
     WHERE (
-      response_created_at <= ${body.toDate ? `toDateTime64('${body.toDate}', 3)` : "now()"}
-      ${body.fromDate ? `AND response_created_at >= toDateTime64('${body.fromDate}', 3)` : ""}
+      ${dateCondition}
       AND ${clickhouseModelFilter(body.models)}
     )
     `;
@@ -1490,7 +2291,7 @@ export class AdminController extends Controller {
       return { query };
     }
 
-    const result = await clickhouseDb.dbQuery<{}>(query, []);
+    const result = await clickhouseDb.dbQuery<{}>(query, params);
     if (result.error) {
       throw new Error(result.error);
     }
@@ -1515,5 +2316,223 @@ export class AdminController extends Controller {
       return err("Thread not found");
     }
     return ok(thread.data?.[0]);
+  }
+
+  @Post("/hql-enriched")
+  public async executeEnrichedHql(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      sql: string;
+      limit?: number;
+    }
+  ): Promise<
+    Result<
+      {
+        rows: Record<string, any>[];
+        elapsedMilliseconds: number;
+        size: number;
+        rowCount: number;
+      },
+      string
+    >
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    const limit = body.limit ?? 100;
+
+    // Execute HQL query using HeliconeSqlManager
+    // Note: We use a dummy org ID since this is admin-only and bypasses org filtering
+    const heliconeSqlManager = new HeliconeSqlManager({
+      organizationId: ADMIN_ORG_ID,
+      userId: request.authParams.userId,
+    });
+
+    const hqlResult = await heliconeSqlManager.executeAdminSql(body.sql, limit);
+
+    if (hqlResult.error) {
+      return err(hqlResult.error.message || String(hqlResult.error));
+    }
+
+    if (!hqlResult.data) {
+      return err("No data returned from query");
+    }
+
+    const { rows, elapsedMilliseconds, size, rowCount } = hqlResult.data;
+
+    // Extract unique organization IDs from results
+    const orgIds = [
+      ...new Set(
+        rows
+          .map((row) => row.organization_id)
+          .filter((id): id is string => typeof id === "string" && id.length > 0)
+      ),
+    ];
+
+    // If no organization IDs found, return results as-is
+    if (orgIds.length === 0) {
+      return ok({
+        rows,
+        elapsedMilliseconds,
+        size,
+        rowCount,
+      });
+    }
+
+    // Fetch organization details from PostgreSQL
+    const orgQuery = `
+      SELECT
+        o.id,
+        o.name,
+        o.tier,
+        o.stripe_customer_id,
+        u.email as owner_email
+      FROM organization o
+      LEFT JOIN auth.users u ON o.owner = u.id
+      WHERE o.id = ANY($1::uuid[])
+    `;
+
+    const orgResult = await dbExecute<{
+      id: string;
+      name: string;
+      tier: string;
+      stripe_customer_id: string | null;
+      owner_email: string;
+    }>(orgQuery, [orgIds]);
+
+    if (orgResult.error) {
+      console.error("Error fetching org details:", orgResult.error);
+      // Return original results if enrichment fails
+      return ok({
+        rows,
+        elapsedMilliseconds,
+        size,
+        rowCount,
+      });
+    }
+
+    // Create a map for fast lookup
+    const orgDetailsMap = new Map(
+      orgResult.data?.map((org) => [org.id, org]) ?? []
+    );
+
+    // Enrich rows with organization details
+    const enrichedRows = rows.map((row) => {
+      const orgId = row.organization_id;
+      if (!orgId || typeof orgId !== "string") {
+        return row;
+      }
+
+      const orgDetails = orgDetailsMap.get(orgId);
+      if (!orgDetails) {
+        return row;
+      }
+
+      return {
+        org_name: orgDetails.name,
+        owner_email: orgDetails.owner_email,
+        tier: orgDetails.tier,
+        stripe_customer_id: orgDetails.stripe_customer_id,
+        ...row,
+      };
+    });
+
+    return ok({
+      rows: enrichedRows,
+      elapsedMilliseconds,
+      size,
+      rowCount,
+    });
+  }
+
+  /**
+   * Get all saved queries for admin (stored under admin org ID)
+   */
+  @Get("/saved-queries")
+  public async getAdminSavedQueries(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<HqlSavedQuery[], string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const hqlQueryManager = new HqlQueryManager({
+      ...request.authParams,
+      organizationId: ADMIN_ORG_ID,
+    });
+
+    const result = await hqlQueryManager.getSavedQueries();
+    if (result.error) {
+      return err(result.error.message || String(result.error));
+    }
+    return ok(result.data);
+  }
+
+  /**
+   * Create a new saved query for admin (stored under admin org ID)
+   */
+  @Post("/saved-query")
+  public async createAdminSavedQuery(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: { name: string; sql: string }
+  ): Promise<Result<HqlSavedQuery[], string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const hqlQueryManager = new HqlQueryManager({
+      ...request.authParams,
+      organizationId: ADMIN_ORG_ID,
+    });
+
+    const result = await hqlQueryManager.createSavedQuery(body);
+    if (result.error) {
+      return err(result.error.message || String(result.error));
+    }
+    return ok(result.data);
+  }
+
+  /**
+   * Update a saved query for admin (stored under admin org ID)
+   */
+  @Patch("/saved-query/{queryId}")
+  public async updateAdminSavedQuery(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() queryId: string,
+    @Body() body: { name: string; sql: string }
+  ): Promise<Result<HqlSavedQuery, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const hqlQueryManager = new HqlQueryManager({
+      ...request.authParams,
+      organizationId: ADMIN_ORG_ID,
+    });
+
+    const result = await hqlQueryManager.updateSavedQuery({
+      id: queryId,
+      ...body,
+    });
+    if (result.error) {
+      return err(result.error.message || String(result.error));
+    }
+    return ok(result.data);
+  }
+
+  /**
+   * Delete a saved query for admin (stored under admin org ID)
+   */
+  @Delete("/saved-query/{queryId}")
+  public async deleteAdminSavedQuery(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() queryId: string
+  ): Promise<Result<null, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const hqlQueryManager = new HqlQueryManager({
+      ...request.authParams,
+      organizationId: ADMIN_ORG_ID,
+    });
+
+    const result = await hqlQueryManager.deleteSavedQuery(queryId);
+    if (result.error) {
+      return err(result.error.message || String(result.error));
+    }
+    return ok(null);
   }
 }

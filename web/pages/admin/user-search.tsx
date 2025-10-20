@@ -1,16 +1,16 @@
 import { ReactElement } from "react";
 import AdminLayout from "../../components/layout/admin/adminLayout";
-import AdminStats from "../../components/templates/admin/adminStats";
+import UserSearch from "../../components/templates/admin/userSearch";
 import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
-const Admin = () => {
-  return <AdminStats />;
+const AdminUserSearchPage = () => {
+  return <UserSearch />;
 };
 
-Admin.getLayout = function getLayout(page: ReactElement) {
+AdminUserSearchPage.getLayout = function getLayout(page: ReactElement) {
   return <AdminLayout>{page}</AdminLayout>;
 };
 
-export default Admin;
+export default AdminUserSearchPage;
 
 export const getServerSideProps = withAdminSSR;

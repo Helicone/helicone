@@ -55,7 +55,6 @@ export class GatewayMetrics {
 
   markPostRequestEnd(): void {
     if (this.providerEndTime === null) {
-      console.error("Provider end time not marked");
       return;
     }
     const postRequestEndTime = performance.now();

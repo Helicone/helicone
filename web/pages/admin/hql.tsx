@@ -1,16 +1,16 @@
 import { ReactElement } from "react";
 import AdminLayout from "../../components/layout/admin/adminLayout";
-import AdminModelsPage from "../../components/templates/admin/models/adminModelsPage";
+import AdminHql from "../../components/templates/admin/adminHql";
 import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
-const AdminModels = () => {
-  return <AdminModelsPage />;
+const AdminHqlPage = () => {
+  return <AdminHql />;
 };
 
-AdminModels.getLayout = function getLayout(page: ReactElement) {
+AdminHqlPage.getLayout = function getLayout(page: ReactElement) {
   return <AdminLayout>{page}</AdminLayout>;
 };
 
-export default AdminModels;
+export default AdminHqlPage;
 
 export const getServerSideProps = withAdminSSR;
