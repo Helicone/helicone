@@ -2898,6 +2898,7 @@ const models: TsoaRoute.Models = {
             "priority": {"dataType":"double"},
             "quantization": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["fp4"]},{"dataType":"enum","enums":["fp8"]},{"dataType":"enum","enums":["fp16"]},{"dataType":"enum","enums":["bf16"]}]},
             "responseFormat": {"ref":"ResponseFormat"},
+            "requireExplicitRouting": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
