@@ -31,12 +31,12 @@ import { useKeys } from "@/components/templates/keys/useKeys";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import useNotification from "@/components/shared/notification/useNotification";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../../ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "../../ui/sheet";
 import { ProviderKeySettings } from "../settings/providerKeySettings";
 import HelixIntegrationDialog from "./HelixIntegrationDialog";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
@@ -51,7 +51,7 @@ const QuickstartPage = () => {
     undefined,
   );
   const [isCreatingKey, setIsCreatingKey] = useState(false);
-  const [isProviderModalOpen, setIsProviderModalOpen] = useState(false);
+  const [isProviderSheetOpen, setIsProviderSheetOpen] = useState(false);
   const [isHelixDialogOpen, setIsHelixDialogOpen] = useState(false);
 
   const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(
@@ -215,7 +215,7 @@ const QuickstartPage = () => {
               {index === 1 && (
                 <div className="mt-4">
                   <Button
-                    onClick={() => setIsProviderModalOpen(true)}
+                    onClick={() => setIsProviderSheetOpen(true)}
                     className="w-fit"
                     variant="outline"
                   >
@@ -343,18 +343,20 @@ const QuickstartPage = () => {
         </div>
       </div>
 
-      <Dialog open={isProviderModalOpen} onOpenChange={setIsProviderModalOpen}>
-        <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add Provider Keys</DialogTitle>
-            <DialogDescription>
+      <Sheet open={isProviderSheetOpen} onOpenChange={setIsProviderSheetOpen}>
+        <SheetContent side="right" size="large" className="overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Add Provider Keys</SheetTitle>
+            <SheetDescription>
               Configure your API keys for different LLM providers to start
               making requests.
-            </DialogDescription>
-          </DialogHeader>
-          <ProviderKeySettings />
-        </DialogContent>
-      </Dialog>
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-6">
+            <ProviderKeySettings />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <HelixIntegrationDialog
         isOpen={isHelixDialogOpen}

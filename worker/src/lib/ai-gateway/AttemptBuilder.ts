@@ -9,21 +9,18 @@ import {
 } from "@helicone-package/cost/models/types";
 import { parseModelString } from "@helicone-package/cost/models/provider-helpers";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
-import { FeatureFlagManager } from "../managers/FeatureFlagManager";
 import { isErr } from "../util/results";
 import { Attempt } from "./types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { PluginHandler } from "./PluginHandler";
 
 export class AttemptBuilder {
-  private readonly featureFlagManager: FeatureFlagManager;
   private readonly pluginHandler: PluginHandler;
 
   constructor(
     private readonly providerKeysManager: ProviderKeysManager,
     private readonly env: Env
   ) {
-    this.featureFlagManager = new FeatureFlagManager(env);
     this.pluginHandler = new PluginHandler();
   }
 
@@ -34,12 +31,6 @@ export class AttemptBuilder {
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
-
-    // Check if credits feature is enabled for this organization once
-    const hasCreditsFeature = await this.featureFlagManager.hasFeature(
-      orgId,
-      "credits"
-    );
 
     for (const modelString of modelStrings) {
       const modelSpec = parseModelString(modelString);
@@ -57,7 +48,6 @@ export class AttemptBuilder {
           modelSpec.data,
           orgId,
           bodyMapping,
-          hasCreditsFeature,
           plugins
         );
         allAttempts.push(...providerAttempts);
@@ -67,7 +57,6 @@ export class AttemptBuilder {
           modelSpec.data,
           orgId,
           bodyMapping,
-          hasCreditsFeature,
           plugins
         );
         allAttempts.push(...attempts);
@@ -83,7 +72,6 @@ export class AttemptBuilder {
     modelSpec: ModelSpec,
     orgId: string,
     bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
-    hasCreditsFeature: boolean,
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get all provider data in one query
@@ -103,17 +91,13 @@ export class AttemptBuilder {
           plugins
         );
 
-        // Only build PTB attempts if credits feature is enabled
-        if (hasCreditsFeature) {
-          const ptbAttempts = await this.buildPtbAttempts(
-            modelSpec,
-            data,
-            plugins
-          );
-          return [...byokAttempts, ...ptbAttempts];
-        }
-
-        return byokAttempts;
+        // Always build PTB attempts (feature flag removed)
+        const ptbAttempts = await this.buildPtbAttempts(
+          modelSpec,
+          data,
+          plugins
+        );
+        return [...byokAttempts, ...ptbAttempts];
       })
     );
 
@@ -124,7 +108,6 @@ export class AttemptBuilder {
     modelSpec: ModelSpec,
     orgId: string,
     bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
-    hasCreditsFeature: boolean,
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get provider data once
@@ -154,17 +137,13 @@ export class AttemptBuilder {
       plugins
     );
 
-    // Only build PTB attempts if credits feature is enabled
-    if (hasCreditsFeature) {
-      const ptbAttempts = await this.buildPtbAttempts(
-        modelSpec,
-        providerData,
-        plugins
-      );
-      return [...byokAttempts, ...ptbAttempts];
-    }
-
-    return byokAttempts;
+    // Always build PTB attempts (feature flag removed)
+    const ptbAttempts = await this.buildPtbAttempts(
+      modelSpec,
+      providerData,
+      plugins
+    );
+    return [...byokAttempts, ...ptbAttempts];
   }
 
   private async buildByokAttempts(

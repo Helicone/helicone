@@ -93,10 +93,21 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const orgContext = useOrg();
 
   useEffect(() => {
-    if (orgContext?.currentOrg?.has_onboarded === false) {
+    // Allow access to certain pages during onboarding (like settings/providers for BYOK setup)
+    const allowedPagesDuringOnboarding = [
+      '/settings/providers',
+      '/settings/billing',
+      '/credits',
+    ];
+
+    const isOnAllowedPage = allowedPagesDuringOnboarding.some(path =>
+      pathname.startsWith(path)
+    );
+
+    if (orgContext?.currentOrg?.has_onboarded === false && !isOnAllowedPage) {
       router.push("/onboarding");
     }
-  }, [orgContext?.currentOrg?.has_onboarded]);
+  }, [orgContext?.currentOrg?.has_onboarded, pathname]);
 
   const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);

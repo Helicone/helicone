@@ -109,8 +109,8 @@ export default function OnboardingMembersPage() {
       );
     }
 
-    updateCurrentStep("REQUEST");
-    router.push("/onboarding/request");
+    updateCurrentStep("BILLING");
+    router.push("/onboarding/billing");
   };
 
   if (isLoading) {
