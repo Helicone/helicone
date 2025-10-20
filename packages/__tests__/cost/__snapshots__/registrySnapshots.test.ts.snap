@@ -1804,31 +1804,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "llama-3.3-70b-instruct:groq": {
-      "context": 131072,
-      "crossRegion": false,
-      "maxTokens": 32678,
-      "modelId": "llama-3.3-70b-versatile",
-      "parameters": [
-        "frequency_penalty",
-        "logit_bias",
-        "max_tokens",
-        "min_p",
-        "presence_penalty",
-        "repetition_penalty",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_k",
-        "top_p",
-      ],
-      "provider": "groq",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
     "llama-3.3-70b-instruct:novita": {
       "context": 131072,
       "crossRegion": false,
@@ -1875,6 +1850,31 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.3-70b-versatile:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 32678,
+      "modelId": "llama-3.3-70b-versatile",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "groq",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -5561,9 +5561,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-3.3-70b-instruct",
       "providers": [
-        "groq",
         "novita",
         "openrouter",
+      ],
+    },
+    {
+      "model": "llama-3.3-70b-versatile",
+      "providers": [
+        "groq",
       ],
     },
     {
@@ -5823,6 +5828,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "llama-3.1-8b-instruct",
     "llama-3.1-8b-instruct-turbo",
     "llama-3.3-70b-instruct",
+    "llama-3.3-70b-versatile",
     "llama-4-maverick",
     "llama-4-scout",
     "llama-guard-4",
@@ -5854,9 +5860,16 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
+<<<<<<< HEAD
   "totalEndpoints": 168,
   "totalModelProviderConfigs": 168,
   "totalModelsWithPtb": 70,
   "totalProviders": 15,
+=======
+  "totalEndpoints": 152,
+  "totalModelProviderConfigs": 152,
+  "totalModelsWithPtb": 67,
+  "totalProviders": 14,
+>>>>>>> origin/main
 }
 `;

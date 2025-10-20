@@ -181,7 +181,7 @@ export const endpoints = {
       "*": {},
     },
   },
-  "llama-3.3-70b-instruct:groq": {
+  "llama-3.3-70b-versatile:groq": {
     providerModelId: "llama-3.3-70b-versatile",
     provider: "groq",
     author: "meta-llama",

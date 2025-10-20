@@ -429,6 +429,15 @@ export interface paths {
   "/v1/property/query": {
     post: operations["GetProperties"];
   };
+  "/v1/property/hide": {
+    post: operations["HideProperty"];
+  };
+  "/v1/property/hidden/query": {
+    post: operations["GetHiddenProperties"];
+  };
+  "/v1/property/restore": {
+    post: operations["RestoreProperty"];
+  };
   "/v1/property/{propertyKey}/search": {
     post: operations["SearchProperties"];
   };
@@ -2763,6 +2772,11 @@ Json: JsonObject;
       error: null;
     };
     "Result_Property-Array.string_": components["schemas"]["ResultSuccess_Property-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_unknown-Array_": {
+      data: unknown[];
+      /** @enum {number|null} */
+      error: null;
+    };
     "ResultSuccess__value-string--cost-number_-Array_": {
       data: {
           /** Format: double */
@@ -6651,6 +6665,60 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Property-Array.string_"];
+        };
+      };
+    };
+  };
+  HideProperty: {
+    requestBody: {
+      content: {
+        "application/json": {
+          key: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | components["schemas"]["ResultSuccess_string_"] | {
+            error: unknown;
+            data: {
+              ok: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  GetHiddenProperties: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Property-Array.string_"];
+        };
+      };
+    };
+  };
+  RestoreProperty: {
+    requestBody: {
+      content: {
+        "application/json": {
+          key: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | components["schemas"]["ResultSuccess_string_"] | {
+            error: unknown;
+            data: {
+              ok: boolean;
+            };
+          };
         };
       };
     };
