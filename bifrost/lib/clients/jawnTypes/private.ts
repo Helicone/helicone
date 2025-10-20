@@ -1687,7 +1687,7 @@ Json: JsonObject;
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+    ModelProviderName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1757,6 +1757,13 @@ Json: JsonObject;
       databaseName?: string;
       [key: string]: unknown;
     };
+    HeliconeEventData: {
+      /** @enum {string} */
+      _type: "data";
+      name: string;
+      meta?: components["schemas"]["Record_string.any_"];
+      [key: string]: unknown;
+    };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
       provider?: string;
@@ -1795,6 +1802,7 @@ Json: JsonObject;
       };
       toolDetails?: components["schemas"]["HeliconeEventTool"];
       vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      dataDetails?: components["schemas"]["HeliconeEventData"];
       input?: string | string[];
       /** Format: double */
       n?: number | null;
@@ -1825,6 +1833,18 @@ Json: JsonObject;
       _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
     };
     LLMResponseBody: {
+      dataDetailsResponse?: {
+        name: string;
+        /** @enum {string} */
+        _type: "data";
+        metadata: {
+          timestamp: string;
+          [key: string]: unknown;
+        };
+        message: string;
+        status: string;
+        [key: string]: unknown;
+      };
       vectorDBDetailsResponse?: {
         /** @enum {string} */
         _type: "vector_db";
@@ -16399,7 +16419,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+            providerName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
           }) | {
             error: string;
           };

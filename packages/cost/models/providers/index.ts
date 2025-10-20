@@ -7,6 +7,7 @@ import { DeepInfraProvider } from "./deepinfra";
 import { DeepSeekProvider } from "./deepseek";
 import { GoogleProvider } from "./google";
 import { GroqProvider } from "./groq";
+import { HeliconeProvider } from "./helicone";
 import { NebiusProvider } from "./nebius";
 import { NovitaProvider } from "./novita";
 import { OpenAIProvider } from "./openai";
@@ -26,6 +27,7 @@ export const providers = {
   deepseek: new DeepSeekProvider(),
   "google-ai-studio": new GoogleProvider(),
   groq: new GroqProvider(),
+  helicone: new HeliconeProvider(),
   nebius: new NebiusProvider(),
   novita: new NovitaProvider(),
   openai: new OpenAIProvider(),

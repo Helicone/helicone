@@ -90,7 +90,7 @@ export function SupabaseProvider({
 }
 
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
-  const queryClient = new QueryClient();
+  const [queryClient] = useState(() => new QueryClient());
 
   const getLayout = Component.getLayout ?? ((page) => page);
 

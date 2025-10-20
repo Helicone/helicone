@@ -1804,31 +1804,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "llama-3.3-70b-instruct:groq": {
-      "context": 131072,
-      "crossRegion": false,
-      "maxTokens": 32678,
-      "modelId": "llama-3.3-70b-versatile",
-      "parameters": [
-        "frequency_penalty",
-        "logit_bias",
-        "max_tokens",
-        "min_p",
-        "presence_penalty",
-        "repetition_penalty",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_k",
-        "top_p",
-      ],
-      "provider": "groq",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
     "llama-3.3-70b-instruct:novita": {
       "context": 131072,
       "crossRegion": false,
@@ -1875,6 +1850,31 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.3-70b-versatile:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 32678,
+      "modelId": "llama-3.3-70b-versatile",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "groq",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2986,6 +2986,281 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "openai/helicone": {
+    "gpt-4.1-mini:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gt-4.1-m",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4.1-nano:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/gt-4.1-n",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4.1:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gt-4.1",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4o-mini:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gt-4p-m",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4o:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gt-4p",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-chat-latest:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-chat-latest",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-codex:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-codex",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gpt-5-mini",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/gpt-5-nano",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-pro",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o1-mini:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "pa/p1-m",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o1:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "pa/p1",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o3-mini:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "pa/p3-m",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o3:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "pa/p3",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o4-mini:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "pa/o4-mini",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "openai/o3": {
     "o3-mini:azure": {
       "context": 200000,
@@ -3814,6 +4089,24 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
     "openrouter",
+  ],
+  "openai/helicone": [
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
   ],
   "openai/o3": [
     "azure",
@@ -4756,6 +5049,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "openai/helicone": {
+    "helicone": [
+      {
+        "input": 0.000003,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+    ],
+  },
   "openai/o3": {
     "azure": [
       {
@@ -5066,6 +5368,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-4.1",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -5074,6 +5377,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-4.1-mini",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -5082,6 +5386,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-4.1-nano",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -5090,6 +5395,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-4o",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -5098,6 +5404,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-4o-mini",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -5105,6 +5412,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5",
       "providers": [
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -5112,13 +5420,21 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5-chat-latest",
       "providers": [
+        "helicone",
         "openai",
         "openrouter",
       ],
     },
     {
+      "model": "gpt-5-codex",
+      "providers": [
+        "helicone",
+      ],
+    },
+    {
       "model": "gpt-5-mini",
       "providers": [
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -5126,8 +5442,15 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5-nano",
       "providers": [
+        "helicone",
         "openai",
         "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5-pro",
+      "providers": [
+        "helicone",
       ],
     },
     {
@@ -5238,9 +5561,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-3.3-70b-instruct",
       "providers": [
-        "groq",
         "novita",
         "openrouter",
+      ],
+    },
+    {
+      "model": "llama-3.3-70b-versatile",
+      "providers": [
+        "groq",
       ],
     },
     {
@@ -5293,8 +5621,21 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "o1",
+      "providers": [
+        "helicone",
+      ],
+    },
+    {
+      "model": "o1-mini",
+      "providers": [
+        "helicone",
+      ],
+    },
+    {
       "model": "o3",
       "providers": [
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -5303,6 +5644,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "o3-mini",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -5318,6 +5660,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "o4-mini",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -5407,6 +5750,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
+      "modelCount": 16,
+      "provider": "helicone",
+    },
+    {
       "modelCount": 3,
       "provider": "nebius",
     },
@@ -5461,8 +5808,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gpt-4o-mini",
     "gpt-5",
     "gpt-5-chat-latest",
+    "gpt-5-codex",
     "gpt-5-mini",
     "gpt-5-nano",
+    "gpt-5-pro",
     "gpt-oss-120b",
     "gpt-oss-20b",
     "grok-3",
@@ -5479,6 +5828,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "llama-3.1-8b-instruct",
     "llama-3.1-8b-instruct-turbo",
     "llama-3.3-70b-instruct",
+    "llama-3.3-70b-versatile",
     "llama-4-maverick",
     "llama-4-scout",
     "llama-guard-4",
@@ -5486,6 +5836,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "llama-prompt-guard-2-86m",
     "mistral-nemo",
     "mistral-small",
+    "o1",
+    "o1-mini",
     "o3",
     "o3-mini",
     "o3-pro",
@@ -5508,9 +5860,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 152,
-  "totalModelProviderConfigs": 152,
-  "totalModelsWithPtb": 66,
-  "totalProviders": 14,
+  "totalEndpoints": 168,
+  "totalModelProviderConfigs": 168,
+  "totalModelsWithPtb": 71,
+  "totalProviders": 15,
 }
 `;

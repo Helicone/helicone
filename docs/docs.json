@@ -230,6 +230,13 @@
                 ]
               },
               {
+                "group": "Custom Logs",
+                "pages": [
+                  "integrations/data/logger-sdk",
+                  "integrations/data/curl"
+                ]
+              },
+              {
                 "group": "Tools",
                 "pages": [
                   "integrations/tools/curl",

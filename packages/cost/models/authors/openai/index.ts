@@ -12,6 +12,7 @@ import { models as o4Models } from "./o4/models";
 import { models as gpt41Models } from "./gpt-4.1/models";
 import { models as gpt5Models } from "./gpt-5/models";
 import { models as ossModels } from "./oss/models";
+import { models as heliconeModels } from "./helicone/model";
 
 // Import endpoints
 import { endpoints as gpt4oEndpoints } from "./gpt-4o/endpoints";
@@ -20,6 +21,7 @@ import { endpoints as o4Endpoints } from "./o4/endpoints";
 import { endpoints as gpt41Endpoints } from "./gpt-4.1/endpoints";
 import { endpoints as gpt5Endpoints } from "./gpt-5/endpoints";
 import { endpoints as ossEndpoints } from "./oss/endpoints";
+import { endpoints as heliconeEndpoints } from "./helicone/endpoints";
 
 // Aggregate models
 export const openaiModels = {
@@ -29,6 +31,7 @@ export const openaiModels = {
   ...gpt41Models,
   ...gpt5Models,
   ...ossModels,
+  ...heliconeModels,
 } satisfies Record<string, ModelConfig>;
 
 // Aggregate endpoints
@@ -39,4 +42,5 @@ export const openaiEndpointConfig = {
   ...gpt41Endpoints,
   ...gpt5Endpoints,
   ...ossEndpoints,
+  ...heliconeEndpoints,
 } satisfies Record<string, ModelProviderConfig>;

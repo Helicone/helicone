@@ -17,7 +17,7 @@ interface StripeConfigProps {
 const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
   const [apiKey, setApiKey] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
-  const [eventName, setEventName] = useState("helicone_request");
+  const [eventName, setEventName] = useState("token-billing-tokens");
   const [testCustomerId, setTestCustomerId] = useState("");
   const [testResult, setTestResult] = useState<{
     type: "success" | "error";
@@ -214,7 +214,7 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
             type="text"
             value={eventName}
             onChange={(e) => setEventName(e.target.value)}
-            placeholder="helicone_request"
+            placeholder="token-billing-tokens"
             disabled={isLoading}
           />
           <p className="text-xs text-muted-foreground">

@@ -90,7 +90,10 @@ export class AttemptBuilder {
     const providerDataResult = registry.getModelProviderEntriesByModel(
       modelSpec.modelName
     );
-    const providerData = providerDataResult.data || [];
+    // Filter out providers that require explicit routing (e.g., helicone)
+    const providerData = (providerDataResult.data || []).filter(
+      (data) => !data.config.requireExplicitRouting
+    );
 
     // Process all providers in parallel (we know model exists because parseModelString validated it)
     const attemptArrays = await Promise.all(

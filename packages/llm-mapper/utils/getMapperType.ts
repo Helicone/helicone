@@ -33,7 +33,11 @@ export const getMapperTypeFromHeliconeRequest = (
     return "tool";
   }
 
-  if (heliconeRequest.gateway_endpoint_version) {
+  if (heliconeRequest.request_body?._type === "data") {
+    return "data";
+  }
+
+  if (heliconeRequest.request_referrer === "ai-gateway") {
     return "ai-gateway";
   }
 
@@ -106,6 +110,14 @@ export const getMapperType = ({
 
   if (model === "vector_db") {
     return "vector-db";
+  }
+
+  if (model.startsWith("tool:")) {
+    return "tool";
+  }
+
+  if (model.startsWith("data:")) {
+    return "data";
   }
 
   if (/^gpt-3\.5-turbo-instruct/.test(model)) {

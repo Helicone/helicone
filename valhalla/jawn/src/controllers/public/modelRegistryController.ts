@@ -92,9 +92,9 @@ export class ModelRegistryController extends Controller {
    * - Input/output modalities (text, image, audio, video)
    * - Supported parameters (temperature, max_tokens, etc.)
    * - Available capabilities (audio, video, image, thinking, web_search, caching)
-   * 
+   *
    * No authentication required - this is a public endpoint.
-   * 
+   *
    * @returns {ModelRegistryResponse} Complete model registry with models and filter options
    */
   @Get("/models")
@@ -228,6 +228,14 @@ export class ModelRegistryController extends Controller {
         }
 
         if (endpoints.length === 0) {
+          continue;
+        }
+
+        const allEndpointsRequireExplicitRouting = endpoints.every(
+          (ep) => ep.endpoint?.modelConfig.requireExplicitRouting === true
+        );
+
+        if (allEndpointsRequireExplicitRouting) {
           continue;
         }
 
