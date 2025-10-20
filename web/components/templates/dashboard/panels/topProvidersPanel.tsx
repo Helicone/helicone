@@ -43,11 +43,13 @@ const TopProvidersPanel = (props: TopProvidersPanelProps) => {
         withAnimation={true}
         headerAction={expandButton}
       >
-        <div className="flex flex-row items-center justify-between pb-2">
-          <p className="text-xs font-semibold text-slate-700">Provider</p>
-          <p className="text-xs font-semibold text-slate-700">Requests</p>
+        <div className="flex h-full flex-col overflow-hidden">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <p className="text-xs font-semibold text-slate-700">Provider</p>
+            <p className="text-xs font-semibold text-slate-700">Requests</p>
+          </div>
+          <div className="flex-grow overflow-y-auto">{barList}</div>
         </div>
-        {barList}
       </StyledAreaChart>
       {modal}
     </>
