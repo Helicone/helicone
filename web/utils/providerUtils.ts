@@ -15,14 +15,10 @@ export const filterPubliclyVisibleProviders = (
   providers: Provider[],
   orgId?: string,
 ): Provider[] => {
-  const HELICONE_ORG_ID = process.env.NEXT_PUBLIC_HELICONE_ORG_ID;
-
   return providers.filter((provider) => {
-    // Helicone org can see all providers
-    if (orgId === HELICONE_ORG_ID) {
+    if (orgId === process.env.NEXT_PUBLIC_HELICONE_ORG_ID) {
       return true;
     }
-    // Default to true if not specified (backward compatible)
     return provider.publiclyVisible !== false;
   });
 };
