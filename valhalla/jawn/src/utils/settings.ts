@@ -52,6 +52,12 @@ export type SettingName = keyof SettingsType;
 
 export type Setting = KafkaSettings | AzureExperiment | ApiKey;
 
+// TODO: Add default values for all SettingName types to prevent undefined returns
+// when settings fail to load from database and don't exist in cache.
+// Missing defaults for: kafka:dlq, kafka:log, kafka:score, kafka:dlq:score,
+// kafka:dlq:eu, kafka:log:eu, kafka:orgs-to-dlq, azure:experiment, openai:apiKey,
+// anthropic:apiKey, openrouter:apiKey, togetherai:apiKey, sqs:request-response-logs,
+// sqs:helicone-scores, sqs:request-response-logs-dlq, sqs:helicone-scores-dlq
 const DEFAULTS: Partial<Record<SettingName, any>> = {
   "stripe:products": {
     cloudGatewayTokenUsageProduct:
