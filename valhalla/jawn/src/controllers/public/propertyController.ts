@@ -64,20 +64,6 @@ export class PropertyController extends Controller {
       return propertiesRes;
     }
 
-    // Ensure backing table exists and get hidden keys from Postgres
-    await dbExecute(
-      `
-        CREATE TABLE IF NOT EXISTS helicone_hidden_property_keys (
-          organization_id UUID NOT NULL,
-          key TEXT NOT NULL,
-          is_hidden BOOLEAN NOT NULL DEFAULT TRUE,
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-          PRIMARY KEY (organization_id, key)
-        )
-      `,
-      [],
-    );
-
     const hiddenRes = await dbExecute<{ property: string }>(
       `SELECT key as property
        FROM helicone_hidden_property_keys
@@ -109,20 +95,6 @@ export class PropertyController extends Controller {
       throw new Error("Property key is required");
     }
 
-    // Use Postgres upsert to track hidden state (avoids ClickHouse DDL/DML)
-    await dbExecute(
-      `
-        CREATE TABLE IF NOT EXISTS helicone_hidden_property_keys (
-          organization_id UUID NOT NULL,
-          key TEXT NOT NULL,
-          is_hidden BOOLEAN NOT NULL DEFAULT TRUE,
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-          PRIMARY KEY (organization_id, key)
-        )
-      `,
-      [],
-    );
-
     const upsert = await dbExecute(
       `INSERT INTO helicone_hidden_property_keys (organization_id, key, is_hidden)
        VALUES ($1, $2, TRUE)
@@ -142,19 +114,6 @@ export class PropertyController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
   ) {
     const orgId = request.authParams.organizationId;
-
-    await dbExecute(
-      `
-        CREATE TABLE IF NOT EXISTS helicone_hidden_property_keys (
-          organization_id UUID NOT NULL,
-          key TEXT NOT NULL,
-          is_hidden BOOLEAN NOT NULL DEFAULT TRUE,
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-          PRIMARY KEY (organization_id, key)
-        )
-      `,
-      [],
-    );
 
     return dbExecute<Property>(
       `SELECT key AS property
@@ -177,19 +136,6 @@ export class PropertyController extends Controller {
     if (!key || typeof key !== "string") {
       throw new Error("Property key is required");
     }
-
-    await dbExecute(
-      `
-        CREATE TABLE IF NOT EXISTS helicone_hidden_property_keys (
-          organization_id UUID NOT NULL,
-          key TEXT NOT NULL,
-          is_hidden BOOLEAN NOT NULL DEFAULT TRUE,
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-          PRIMARY KEY (organization_id, key)
-        )
-      `,
-      [],
-    );
 
     const upsert = await dbExecute(
       `INSERT INTO helicone_hidden_property_keys (organization_id, key, is_hidden)

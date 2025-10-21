@@ -371,6 +371,7 @@ export interface HiddenPropertyKeyRow {
   organization_id: string;
   key: string;
   is_hidden: number; // UInt8 in ClickHouse
+  updated_at?: string;
 }
 
 export interface Tags {
