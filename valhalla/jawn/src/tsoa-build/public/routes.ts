@@ -1854,6 +1854,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "amount": {"dataType":"double","required":true},
+            "returnUrl": {"dataType":"string"},
         },
         "additionalProperties": false,
     },

@@ -658,6 +658,7 @@ const QuickstartPage = () => {
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
+        returnUrl="/quickstart"
       />
 
       <HelixIntegrationDialog

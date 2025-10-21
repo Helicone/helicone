@@ -2195,6 +2195,7 @@ Json: JsonObject;
     CreateCloudGatewayCheckoutSessionRequest: {
       /** Format: double */
       amount: number;
+      returnUrl?: string;
     };
     UpgradeToProRequest: {
       addons?: {

@@ -615,6 +615,9 @@
 					"amount": {
 						"type": "number",
 						"format": "double"
+					},
+					"returnUrl": {
+						"type": "string"
 					}
 				},
 				"required": [

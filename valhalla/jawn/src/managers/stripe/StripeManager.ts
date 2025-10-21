@@ -1211,7 +1211,8 @@ WHERE (${builtFilter.filter})`,
 
   public async createCloudGatewayCheckoutSession(
     origin: string,
-    amount: number
+    amount: number,
+    returnUrl?: string
   ): Promise<Result<string, string>> {
     try {
       const customerId = await this.getOrCreateStripeCustomer();
@@ -1241,10 +1242,13 @@ WHERE (${builtFilter.filter})`,
         const stripeFeeCents = percentageFeeCents + FIXED_FEE_CENTS;
         const totalAmountCents = creditsAmountCents + stripeFeeCents;
 
+        const successUrl = returnUrl ? `${origin}${returnUrl}` : `${origin}/credits`;
+        const cancelUrl = returnUrl ? `${origin}${returnUrl}` : `${origin}/credits`;
+
         const checkoutResult = await this.stripe.checkout.sessions.create({
           customer: customerId.data,
-          success_url: `${origin}/credits`,
-          cancel_url: `${origin}/credits`,
+          success_url: successUrl,
+          cancel_url: cancelUrl,
           mode: "payment",
           line_items: [
             {

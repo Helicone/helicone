@@ -14,6 +14,7 @@ import {
   CalendarIcon,
   FileTextIcon,
   MessageCircleMore,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -93,6 +94,12 @@ const SidebarHelpDropdown = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="ml-4 w-64 text-slate-700 dark:text-slate-200">
+          <Link href="/quickstart">
+            <DropdownMenuItem className="cursor-pointer">
+              <Zap className="mr-2 h-4 w-4 text-slate-500" />
+              Quickstart
+            </DropdownMenuItem>
+          </Link>
           <Link href="https://docs.helicone.ai" target="_blank">
             <DropdownMenuItem className="cursor-pointer">
               <FileTextIcon className="mr-2 h-4 w-4 text-slate-500" />

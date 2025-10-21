@@ -815,6 +815,7 @@ export interface components {
     CreateCloudGatewayCheckoutSessionRequest: {
       /** Format: double */
       amount: number;
+      returnUrl?: string;
     };
     UpgradeToProRequest: {
       addons?: {

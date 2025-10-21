@@ -34,6 +34,7 @@ export interface UpgradeToTeamBundleRequest {
 
 export interface CreateCloudGatewayCheckoutSessionRequest {
   amount: number;
+  returnUrl?: string;
 }
 
 export enum PaymentIntentSearchKind {
@@ -153,6 +154,7 @@ export class StripeController extends Controller {
     const result = await stripeManager.createCloudGatewayCheckoutSession(
       request.headers.origin ?? "",
       body.amount,
+      body.returnUrl,
     );
 
     if (isError(result)) {
