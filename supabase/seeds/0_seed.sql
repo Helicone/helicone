@@ -38,3 +38,46 @@ INSERT INTO public.feature_flags (org_id, feature)
 VALUES
 ('83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'credits')
 ON CONFLICT DO NOTHING;
+
+
+
+
+ALTER TABLE public.provider_keys DISABLE TRIGGER  provider_keys_encrypt_secret_trigger_provider_key;
+INSERT INTO pgsodium.key (id, status, created, expires, key_type, key_id, key_context, name, associated_data, raw_key, raw_key_nonce, parent_key, comment, user_data) VALUES ('437d091d-5d86-4f5c-8d3c-2878c04742f7', 'valid', '2025-10-10 17:10:57.074659+00', NULL, 'aead-det', 1, '\x7067736f6469756d', NULL, '', NULL, NULL, NULL, NULL, NULL);
+SELECT setval('pgsodium.key_key_id_seq', 2, false);
+INSERT INTO public.provider_keys (
+  id,
+  org_id,
+  provider_name,
+  provider_key_name,
+  vault_key_id,
+  soft_delete,
+  created_at,
+  provider_key,
+  config,
+  key_id,
+  nonce,
+  auth_type,
+  provider_secret_key,
+  cuid,
+  byok_enabled
+) VALUES (
+  '697e2a38-dacf-4073-b96b-de7a8fbf20f5',
+  'a75d76e3-02e7-4d02-8a2b-c65ed27c69b2',
+  'openai',
+  'OpenAI API Key',
+  NULL,
+  FALSE,
+  '2025-10-09 07:42:31.208352+00',
+  '2GlXNCyLATazozWa/ohqecUV0ClspAx0kuKaxJeamsWmmQDlAp/axA==',
+  '{}',
+  'b70fd734-cd57-4ca5-bdc4-be5078c3b227',
+  '\xB2358976BBF00CB06EBC923D72AB7725',
+  'key',
+  'CGFFvDANGLu1iSpow9q9ugIQAn/sJRSOTznKcsCMUk8=',
+  'h8lgbai6ubdv',
+  TRUE
+)
+ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.provider_keys ENABLE TRIGGER provider_keys_encrypt_secret_trigger_provider_key;
