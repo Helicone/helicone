@@ -101,12 +101,14 @@ const AuthLayout = (props: AuthLayoutProps) => {
       "/credits",
     ];
 
-    const isOnAllowedPage = true;
+    const isOnAllowedPage = allowedPagesDuringOnboarding.some((path) =>
+      pathname.startsWith(path),
+    );
 
     if (orgContext?.currentOrg?.has_onboarded === false && !isOnAllowedPage) {
-      router.push("/onboarding");
+      router.push("/quickstart");
     }
-  }, [orgContext?.currentOrg?.has_onboarded, pathname]);
+  }, [orgContext?.currentOrg?.has_onboarded, pathname, router]);
 
   const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);
