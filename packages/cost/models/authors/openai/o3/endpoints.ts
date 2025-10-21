@@ -208,6 +208,78 @@ export const endpoints = {
       "*": {},
     },
   },
+  "o3:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/p3",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000002, // $2.00 per 1M tokens
+        output: 0.000008, // $8.00 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.25, // $0.50 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 100000,
+    supportedParameters: [
+      "max_tokens",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "o3-mini:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/p3-m",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011, // $1.10 per 1M tokens
+        output: 0.0000044, // $4.40 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.5, // $0.55 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 100000,
+    supportedParameters: [
+      "max_tokens",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "o3-pro:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/p3-pro",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00002, // $20.00 per 1M tokens
+        output: 0.00008, // $80.00 per 1M tokens
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 100000,
+    supportedParameters: [
+      "max_tokens",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${O3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
