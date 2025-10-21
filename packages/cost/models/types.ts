@@ -214,6 +214,7 @@ export interface RequestParams {
 }
 
 export interface Endpoint extends BaseConfig {
+  registryKey: string;
   modelConfig: ModelProviderConfig;
   userConfig: UserEndpointConfig;
   provider: ModelProviderName;

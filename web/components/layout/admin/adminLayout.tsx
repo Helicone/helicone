@@ -2,8 +2,7 @@ import { useRouter } from "next/router";
 import { useOrg } from "../org/organizationContext";
 import MetaData from "../public/authMetaData";
 import { logger } from "@/lib/telemetry/logger";
-import { Small } from "@/components/ui/typography";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./adminSidebar";
 import { useState, useEffect } from "react";
 

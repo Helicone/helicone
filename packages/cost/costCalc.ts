@@ -53,13 +53,15 @@ export function modelCostBreakdownFromRegistry(params: {
   provider: ModelProviderName;
   providerModelId: string;
   requestCount?: number;
+  pricingMultiplier?: number;
 }): CostBreakdown | null {
   const breakdown = calculateModelCostBreakdown({
     modelUsage: params.modelUsage,
     providerModelId: params.providerModelId,
     provider: params.provider,
     requestCount: params.requestCount,
+    pricingMultiplier: params.pricingMultiplier,
   });
-  
+
   return breakdown;
 }

@@ -9162,6 +9162,9 @@
 						},
 						"type": "array"
 					},
+					"registryKey": {
+						"type": "string"
+					},
 					"modelConfig": {
 						"$ref": "#/components/schemas/ModelProviderConfig"
 					},
@@ -9193,6 +9196,7 @@
 					"contextLength",
 					"maxCompletionTokens",
 					"ptbEnabled",
+					"registryKey",
 					"modelConfig",
 					"userConfig",
 					"provider",

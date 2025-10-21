@@ -167,7 +167,9 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
 function getHeliconeRequestType(trace: Trace): HeliconeRequestType {
   // base type on conversation trace
   const responseMessage = trace.request.schema.response;
-  const containsToolCall = responseMessage?.messages?.some((message) => message.tool_calls?.length ?? 0 > 0);
+  const containsToolCall = responseMessage?.messages?.some(
+    (message) => message.tool_calls?.length ?? 0 > 0,
+  );
   if (containsToolCall) {
     return "Tool";
   }

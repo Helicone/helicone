@@ -39,9 +39,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
         <div className="flex flex-col space-y-0.5">
           <p className="text-sm text-muted-foreground">{title}</p>
           {value !== undefined && (
-            <p className="text-xl font-semibold text-foreground">
-              {value}
-            </p>
+            <p className="text-xl font-semibold text-foreground">{value}</p>
           )}
         </div>
         {headerAction && <div>{headerAction}</div>}
@@ -50,7 +48,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
         className={clsx(
           value ? "p-2" : "py-4",
           "w-full",
-          height ? "" : "flex-grow"
+          height ? "" : "flex-grow",
         )}
         style={{
           height: height ? calculateHeight() : undefined,

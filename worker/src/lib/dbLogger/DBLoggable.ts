@@ -100,6 +100,9 @@ export interface AuthParams {
     allowNegativeBalance: boolean;
     creditLimit: number;
   };
+  pricingConfig?: {
+    endpointMultipliers?: Record<string, number>;
+  };
 }
 
 export function dbLoggableRequestFromProxyRequest(

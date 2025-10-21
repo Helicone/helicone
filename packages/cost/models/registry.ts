@@ -140,7 +140,10 @@ function buildEndpoint(
     return err(modelIdResult.error);
   }
 
+  const registryKey = `${modelIdResult.data}:${endpointConfig.provider}`;
+
   return ok({
+    registryKey,
     modelConfig: endpointConfig,
     userConfig: userEndpointConfig,
     provider: endpointConfig.provider,

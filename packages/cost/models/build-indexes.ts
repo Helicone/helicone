@@ -10,7 +10,8 @@ import type {
 function mergeConfigs(
   modelProviderConfig: ModelProviderConfig,
   endpointConfig: EndpointConfig,
-  deploymentId: string
+  deploymentId: string,
+  registryKey: string
 ): Endpoint {
   const userConfig: UserEndpointConfig = {
     region: deploymentId,
@@ -22,6 +23,7 @@ function mergeConfigs(
   };
 
   return {
+    registryKey,
     author: modelProviderConfig.author,
     modelConfig: modelProviderConfig,
     userConfig: userConfig,
@@ -142,7 +144,7 @@ export function buildIndexes(
       config.endpointConfigs
     )) {
       const endpointKey = `${configKey}:${deploymentId}` as EndpointId;
-      const endpoint = mergeConfigs(config, deploymentConfig, deploymentId);
+      const endpoint = mergeConfigs(config, deploymentConfig, deploymentId, configKey);
       endpointIdToEndpoint.set(endpointKey, endpoint);
 
       // Add to ALL endpoints index (regardless of PTB status)

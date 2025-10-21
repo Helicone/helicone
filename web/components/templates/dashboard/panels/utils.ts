@@ -1,4 +1,12 @@
-export const LIST_COLORS = ["blue", "purple", "cyan", "green", "pink", "orange", "yellow"] as const;
+export const LIST_COLORS = [
+  "blue",
+  "purple",
+  "cyan",
+  "green",
+  "pink",
+  "orange",
+  "yellow",
+] as const;
 
 export type ListColor = (typeof LIST_COLORS)[number];
 
@@ -10,9 +18,33 @@ export interface DataWithColor {
 
 // Different hardcoded color orders for each panel
 const COLOR_ORDERS = {
-  default: ["purple", "cyan", "orange", "green", "pink", "blue", "yellow"] as ListColor[],
-  alt1: ["blue", "pink", "yellow", "purple", "cyan", "green", "orange"] as ListColor[],
-  alt2: ["green", "orange", "purple", "cyan", "yellow", "blue", "pink"] as ListColor[],
+  default: [
+    "purple",
+    "cyan",
+    "orange",
+    "green",
+    "pink",
+    "blue",
+    "yellow",
+  ] as ListColor[],
+  alt1: [
+    "blue",
+    "pink",
+    "yellow",
+    "purple",
+    "cyan",
+    "green",
+    "orange",
+  ] as ListColor[],
+  alt2: [
+    "green",
+    "orange",
+    "purple",
+    "cyan",
+    "yellow",
+    "blue",
+    "pink",
+  ] as ListColor[],
 };
 
 /**
@@ -23,7 +55,7 @@ function hashString(str: string): number {
   let hash = 5381;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) + hash) + char; // hash * 33 + char
+    hash = (hash << 5) + hash + char; // hash * 33 + char
   }
   return Math.abs(hash);
 }
@@ -63,9 +95,9 @@ export function sortAndColorData<T extends { name: string; value: number }>(
  * This ensures the same model gets the same color across different charts
  * Items with name "n/a" are sorted to the end
  */
-export function sortAndColorDataByName<T extends { name: string; value: number }>(
-  data: T[] | undefined,
-): DataWithColor[] {
+export function sortAndColorDataByName<
+  T extends { name: string; value: number },
+>(data: T[] | undefined): DataWithColor[] {
   if (!data) return [];
 
   return data

@@ -95,7 +95,12 @@ export const useDashboardPage = ({
 
   // Extract providers data safely from the openapi-fetch response
   const providersData =
-    providers && 'data' in providers && providers.data && typeof providers.data === 'object' && 'data' in providers.data && !providers.data.error
+    providers &&
+    "data" in providers &&
+    providers.data &&
+    typeof providers.data === "object" &&
+    "data" in providers.data &&
+    !providers.data.error
       ? providers.data.data
       : null;
 

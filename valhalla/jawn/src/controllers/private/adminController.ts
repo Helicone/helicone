@@ -1348,6 +1348,46 @@ export class AdminController extends Controller {
     return ok(null);
   }
 
+  @Post("/org/{orgId}/pricing-config")
+  public async updateOrgPricingConfig(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body() body: { endpointMultipliers: Record<string, number> }
+  ): Promise<Result<null, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { endpointMultipliers } = body;
+
+    // Validate each multiplier
+    for (const [endpoint, multiplier] of Object.entries(endpointMultipliers)) {
+      if (multiplier < 0 || multiplier > 2 || isNaN(multiplier)) {
+        return err(`Invalid multiplier for ${endpoint}: must be between 0 and 2`);
+      }
+
+      // Validate endpoint key format (should contain colon)
+      if (!endpoint.includes(':')) {
+        return err(`Invalid endpoint key format: ${endpoint}`);
+      }
+    }
+
+    const { error } = await dbExecute(
+      `UPDATE organization
+       SET pricing_config = jsonb_set(
+         COALESCE(pricing_config, '{}'),
+         '{endpointMultipliers}',
+         $1::jsonb
+       )
+       WHERE id = $2`,
+      [JSON.stringify(endpointMultipliers), orgId]
+    );
+
+    if (error) {
+      return err(error);
+    }
+
+    return ok(null);
+  }
+
   @Post("/org/{orgId}/delete")
   public async deleteOrg(
     @Request() request: JawnAuthenticatedRequest,
