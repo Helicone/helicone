@@ -10,8 +10,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000005, // TODO: Update with actual discounted pricing
-        output: 0.000015,
+        input: 0.000015, // $15.00 per 1M tokens
+        output: 0.00012, // $120.00 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -37,8 +37,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000005,
-        output: 0.000015,
+        input: 0.00000125, // $1.25 per 1M tokens
+        output: 0.00001, // $10.00 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -62,8 +62,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000005,
-        output: 0.000015,
+        input: 0.00000125, // $1.25 per 1M tokens
+        output: 0.00001, // $10.00 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -89,8 +89,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000001,
-        output: 0.000003,
+        input: 0.00000025, // $0.25 per 1M tokens
+        output: 0.000002, // $2.00 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -116,8 +116,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.0000005,
-        output: 0.0000015,
+        input: 0.00000005, // $0.05 per 1M tokens
+        output: 0.0000004, // $0.40 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -141,8 +141,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000005,
-        output: 0.000015,
+        input: 0.00000125, // $1.25 per 1M tokens
+        output: 0.00001, // $10.00 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -168,8 +168,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000003,
-        output: 0.000012,
+        input: 0.000002, // $2.00 per 1M tokens
+        output: 0.000008, // $8.00 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -195,8 +195,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.0000003,
-        output: 0.0000012,
+        input: 0.0000001, // $0.10 per 1M tokens
+        output: 0.0000004, // $0.40 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -220,8 +220,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.0000015,
-        output: 0.000006,
+        input: 0.0000004, // $0.40 per 1M tokens
+        output: 0.0000016, // $1.60 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -247,8 +247,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.0000025,
-        output: 0.00001,
+        input: 0.0000025, // $2.50 per 1M tokens
+        output: 0.00001, // $10.00 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -274,8 +274,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.00000015,
-        output: 0.0000006,
+        input: 0.00000015, // $0.15 per 1M tokens
+        output: 0.0000006, // $0.60 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -301,8 +301,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000015,
-        output: 0.00006,
+        input: 0.000015, // $15.00 per 1M tokens
+        output: 0.00006, // $60.00 per 1M tokens
       },
     ],
     contextLength: 200000,
@@ -323,8 +323,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000003,
-        output: 0.000012,
+        input: 0.0000011, // $1.10 per 1M tokens
+        output: 0.0000044, // $4.40 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -345,8 +345,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.00002,
-        output: 0.00008,
+        input: 0.000002, // $2.00 per 1M tokens
+        output: 0.000008, // $8.00 per 1M tokens
       },
     ],
     contextLength: 200000,
@@ -367,8 +367,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000003,
-        output: 0.000012,
+        input: 0.0000011, // $1.10 per 1M tokens
+        output: 0.0000044, // $4.40 per 1M tokens
       },
     ],
     contextLength: 128000,
@@ -389,8 +389,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000003,
-        output: 0.000012,
+        input: 0.0000011, // $1.10 per 1M tokens
+        output: 0.0000044, // $4.40 per 1M tokens
       },
     ],
     contextLength: 128000,
