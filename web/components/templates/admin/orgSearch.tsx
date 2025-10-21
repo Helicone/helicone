@@ -1748,6 +1748,7 @@ const HeliconePricingSection = ({
     pricingConfig?.heliconePricingMultiplier?.toString() || "1.0",
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   const currentMultiplier = pricingConfig?.heliconePricingMultiplier || 1.0;
 
@@ -1783,7 +1784,13 @@ const HeliconePricingSection = ({
       setNotification("Multiplier must be between 0 and 2", "error");
       return;
     }
+    setConfirmDialogOpen(true);
+  };
+
+  const confirmSave = () => {
+    const value = parseFloat(multiplier);
     setIsSaving(true);
+    setConfirmDialogOpen(false);
     updatePricingMutation.mutate(value);
   };
 
@@ -1829,6 +1836,57 @@ const HeliconePricingSection = ({
               : " (no discount)"}
         </Muted>
       </div>
+
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Pricing Change</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to update the pricing multiplier from{" "}
+              <strong>{currentMultiplier}x</strong> to{" "}
+              <strong>{parseFloat(multiplier)}x</strong>?
+              {parseFloat(multiplier) < 1 && (
+                <>
+                  {" "}
+                  This will apply a{" "}
+                  <strong>
+                    {((1 - parseFloat(multiplier)) * 100).toFixed(0)}% discount
+                  </strong>{" "}
+                  to all Helicone inference costs for this organization.
+                </>
+              )}
+              {parseFloat(multiplier) > 1 && (
+                <>
+                  {" "}
+                  This will apply a{" "}
+                  <strong>
+                    {((parseFloat(multiplier) - 1) * 100).toFixed(0)}% markup
+                  </strong>{" "}
+                  to all Helicone inference costs for this organization.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={confirmSave} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Confirm"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
