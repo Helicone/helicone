@@ -6,6 +6,9 @@ on:
       - main
       - justin/get-full-testing-suite
       - ci/*
+  pull_request:
+    branches:
+      - ci/*
 
 jobs:
   e2e-tests:
