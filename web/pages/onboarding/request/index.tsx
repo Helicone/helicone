@@ -256,7 +256,13 @@ export default function RequestPage() {
                 <div className="text-sm text-destructive">{error}</div>
               ) : (
                 <div className="whitespace-pre-wrap text-sm">
-                  {JSON.parse(response).content}
+                  {(() => {
+                    try {
+                      return JSON.parse(response).content;
+                    } catch {
+                      return response;
+                    }
+                  })()}
                 </div>
               )}
               {isStreaming && (

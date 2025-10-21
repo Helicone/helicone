@@ -126,7 +126,7 @@ const RouterUseDialog = ({
 
             <TabsContent value="curl" className="mt-4">
               <DiffHighlight
-                code={getRouterCode(baseUrl, "curl")}
+                code={getRouterCode("curl")}
                 language="bash"
                 newLines={[]}
                 oldLines={[]}
@@ -137,7 +137,7 @@ const RouterUseDialog = ({
 
             <TabsContent value="javascript" className="mt-4">
               <DiffHighlight
-                code={getRouterCode(baseUrl, "javascript")}
+                code={getRouterCode("javascript")}
                 language="typescript"
                 newLines={[]}
                 oldLines={[]}
@@ -148,7 +148,7 @@ const RouterUseDialog = ({
 
             <TabsContent value="python" className="mt-4">
               <DiffHighlight
-                code={getRouterCode(baseUrl, "python")}
+                code={getRouterCode("python")}
                 language="python"
                 newLines={[]}
                 oldLines={[]}

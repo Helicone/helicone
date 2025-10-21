@@ -146,6 +146,10 @@ export class StripeController extends Controller {
       this.setStatus(400);
       throw new Error("Amount must be at least 5");
     }
+    if (body.amount > 10000) {
+      this.setStatus(400);
+      throw new Error("Amount must not exceed 10000");
+    }
     const result = await stripeManager.createCloudGatewayCheckoutSession(
       request.headers.origin ?? "",
       body.amount,
