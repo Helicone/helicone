@@ -292,6 +292,9 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000125, // $1.25 per 1M tokens
         output: 0.00001, // $10.00 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.125 per 1M tokens
+        },
       },
     ],
     contextLength: 128000,
@@ -319,6 +322,9 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000025, // $0.25 per 1M tokens
         output: 0.000002, // $2.00 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.025 per 1M tokens
+        },
       },
     ],
     contextLength: 128000,
@@ -346,6 +352,9 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000005, // $0.05 per 1M tokens
         output: 0.0000004, // $0.40 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.005 per 1M tokens
+        },
       },
     ],
     contextLength: 128000,
@@ -371,6 +380,9 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000125, // $1.25 per 1M tokens
         output: 0.00001, // $10.00 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.125 per 1M tokens
+        },
       },
     ],
     contextLength: 128000,
@@ -425,6 +437,9 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000125, // $1.25 per 1M tokens
         output: 0.00001, // $10.00 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.125 per 1M tokens
+        },
       },
     ],
     contextLength: 128000,

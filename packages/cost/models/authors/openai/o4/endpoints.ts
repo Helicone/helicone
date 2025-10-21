@@ -102,6 +102,9 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000011, // $1.10 per 1M tokens
         output: 0.0000044, // $4.40 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.25, // $0.275 per 1M tokens
+        },
       },
     ],
     contextLength: 200000,
