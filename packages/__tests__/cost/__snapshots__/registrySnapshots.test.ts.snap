@@ -314,6 +314,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-3.5-haiku:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/cd-3-5-hk-20241022",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-3.5-haiku:openrouter": {
       "context": 200000,
       "crossRegion": false,
@@ -394,6 +414,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-3.5-sonnet-v2:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/cd-3-5-st-20241022",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-3.5-sonnet-v2:openrouter": {
@@ -498,6 +538,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "claude-3.7-sonnet:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/cd-3-7-st-20250219",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-3.7-sonnet:openrouter": {
       "context": 200000,
       "crossRegion": false,
@@ -578,6 +638,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-4.5-haiku:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/claude-haiku-4-5-20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-4.5-haiku:openrouter": {
@@ -664,6 +744,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-4.5-sonnet:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/claude-sonnet-4-5-20250929",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-4.5-sonnet:openrouter": {
       "context": 200000,
       "crossRegion": false,
@@ -746,6 +846,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-opus-4:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "pa/cd-op-4-20250514",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-opus-4:openrouter": {
@@ -832,6 +952,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-opus-4-1:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "pa/claude-opus-4-1-20250805",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-opus-4-1:openrouter": {
       "context": 200000,
       "crossRegion": false,
@@ -914,6 +1054,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-sonnet-4:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/cd-st-4-20250514",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-sonnet-4:openrouter": {
@@ -3928,12 +4088,14 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "anthropic/claude-3.5-haiku": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-3.5-sonnet-v2": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
@@ -3941,36 +4103,42 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "anthropic",
     "bedrock",
     "deepinfra",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-4.5-haiku": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-4.5-sonnet": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-opus-4": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-opus-4-1": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-sonnet-4": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
@@ -4226,6 +4394,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0.00001,
       },
     ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 8e-7,
+        "output": 0.000004,
+        "threshold": 0,
+      },
+    ],
     "openrouter": [
       {
         "input": 8.44e-7,
@@ -4270,6 +4450,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 0.000015,
         "threshold": 0,
         "web_search": 0.00001,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -4328,6 +4520,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+    ],
     "openrouter": [
       {
         "input": 0.000003165,
@@ -4374,6 +4578,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0.00001,
       },
     ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+      },
+    ],
     "openrouter": [
       {
         "input": 0.00000105,
@@ -4416,6 +4632,23 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "cacheMultipliers": {
           "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
           "write5m": 1.25,
         },
         "input": 0.000003,
@@ -4478,6 +4711,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0.00001,
       },
     ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+      },
+    ],
     "openrouter": [
       {
         "input": 0.00001583,
@@ -4523,6 +4768,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 0.000075,
         "threshold": 0,
         "web_search": 0.00001,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -4582,6 +4839,23 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 0.0000225,
         "threshold": 200000,
         "web_search": 0.00001,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
       },
     ],
     "openrouter": [
@@ -5052,8 +5326,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "openai/helicone": {
     "helicone": [
       {
-        "input": 0.000003,
-        "output": 0.000012,
+        "input": 0.0000011,
+        "output": 0.0000044,
         "threshold": 0,
       },
     ],
@@ -5204,6 +5478,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -5213,6 +5488,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -5223,6 +5499,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "anthropic",
         "bedrock",
         "deepinfra",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -5232,6 +5509,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -5241,6 +5519,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -5250,6 +5529,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -5259,6 +5539,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -5268,6 +5549,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -5750,7 +6032,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 16,
+      "modelCount": 24,
       "provider": "helicone",
     },
     {
@@ -5857,11 +6139,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "chatgpt-4o-latest:openrouter:*",
     "claude-3.5-haiku:anthropic:*",
     "claude-3.5-haiku:bedrock:us-east-1",
-    "claude-3.5-haiku:openrouter:*",
+    "claude-3.5-haiku:helicone:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 168,
-  "totalModelProviderConfigs": 168,
+  "totalEndpoints": 176,
+  "totalModelProviderConfigs": 176,
   "totalModelsWithPtb": 71,
   "totalProviders": 15,
 }
