@@ -93,6 +93,28 @@ export const endpoints = {
       "*": {},
     },
   },
+  "o4-mini:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/o4-mini",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011, // $1.10 per 1M tokens
+        output: 0.0000044, // $4.40 per 1M tokens
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 100000,
+    supportedParameters: [
+      "max_tokens",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${O4ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

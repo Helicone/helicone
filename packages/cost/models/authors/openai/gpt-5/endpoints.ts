@@ -283,6 +283,164 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-5:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gpt-5",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000125, // $1.25 per 1M tokens
+        output: 0.00001, // $10.00 per 1M tokens
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 32768,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5-mini:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gpt-5-mini",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000025, // $0.25 per 1M tokens
+        output: 0.000002, // $2.00 per 1M tokens
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5-nano:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gpt-5-nano",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000005, // $0.05 per 1M tokens
+        output: 0.0000004, // $0.40 per 1M tokens
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 8192,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5-chat-latest:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gpt-5-chat-latest",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000125, // $1.25 per 1M tokens
+        output: 0.00001, // $10.00 per 1M tokens
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 32768,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5-pro:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gpt-5-pro",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000015, // $15.00 per 1M tokens
+        output: 0.00012, // $120.00 per 1M tokens
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 32768,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5-codex:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gpt-5-codex",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000125, // $1.25 per 1M tokens
+        output: 0.00001, // $10.00 per 1M tokens
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 32768,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPT5ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
