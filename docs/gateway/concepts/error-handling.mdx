@@ -1,0 +1,261 @@
+---
+title: "Error Handling & Fallback"
+description: "How Helicone AI Gateway handles errors and automatically falls back between billing methods"
+---
+
+Helicone AI Gateway automatically tries multiple billing methods to ensure your requests succeed. When one method fails, it falls back to alternatives and returns the most actionable error to help you fix issues quickly.
+
+## How Fallback Works
+
+The AI Gateway supports two billing methods:
+
+<CardGroup cols={2}>
+<Card title="Pass-Through Billing (PTB)" icon="credit-card">
+  Pay-as-you-go with Helicone credits. Simple, no provider account needed.
+</Card>
+<Card title="Bring Your Own Keys (BYOK)" icon="key">
+  Use your own provider API keys. You're billed directly by the provider.
+</Card>
+</CardGroup>
+
+**Automatic Fallback**: When you configure both methods, the gateway tries PTB first. If it fails (e.g., insufficient credits), it automatically falls back to BYOK.
+
+---
+
+## Error Priority Logic
+
+When both billing methods fail, the gateway returns the **most actionable error** to help you resolve the issue:
+
+### Priority Order
+
+1. **403 Forbidden** → Critical access issue, contact support
+2. **401 Unauthorized** → Fix your provider API key
+3. **400 Bad Request** → Fix your request format
+4. **500 Server Error** → Provider issue or configuration problem
+5. **429 Rate Limit** → Only shown if all attempts hit rate limits
+
+<Note>
+**Why this order?** If you configured BYOK, errors from your provider keys (401, 500) are more actionable than PTB's "insufficient credits" (429). You chose BYOK for a reason!
+</Note>
+
+---
+
+## Common Error Scenarios
+
+| Error Code | What It Means | Action Required | Example |
+|------------|---------------|-----------------|---------|
+| **401** | Authentication failed | Check your provider API key in settings | Invalid OpenAI API key |
+| **403** | Access forbidden | Contact support@helicone.ai | Wallet suspended, model blocked |
+| **400** | Invalid request format | Fix your request body or parameters | Missing required field |
+| **429** | Insufficient credits | Add credits OR configure provider keys | No Helicone credits, no BYOK |
+| **500** | Upstream provider error | Check provider status or retry | Provider API timeout |
+| **503** | Service unavailable | Provider temporarily down, retry later | Provider maintenance |
+
+---
+
+## Fallback Scenarios
+
+<AccordionGroup>
+<Accordion title="Scenario 1: PTB Succeeds">
+**Setup**: You have Helicone credits
+
+**Result**: ✅ Request completes using Pass-Through Billing
+
+**Error**: None - successful response
+</Accordion>
+
+<Accordion title="Scenario 2: PTB Fails, BYOK Succeeds">
+**Setup**: No Helicone credits, but valid provider API key configured
+
+**Result**: ✅ Request completes using your provider key
+
+**Error**: None - successful response (PTB's 429 is hidden since BYOK succeeded)
+</Accordion>
+
+<Accordion title="Scenario 3: PTB Fails, BYOK Fails">
+**Setup**: No Helicone credits, invalid/failing provider key
+
+**Result**: ❌ Request fails
+
+**Error Returned**: BYOK's error (401, 500, etc.) - NOT PTB's 429
+
+**Why**: You configured BYOK, so we show what's wrong with your provider key rather than "insufficient credits"
+
+**Example**:
+```json
+{
+  "error": {
+    "message": "Authentication failed",
+    "type": "invalid_api_key",
+    "code": 401
+  }
+}
+```
+</Accordion>
+
+<Accordion title="Scenario 4: No BYOK Configured, PTB Fails">
+**Setup**: No Helicone credits, no provider keys configured
+
+**Result**: ❌ Request fails
+
+**Error Returned**: 429 Insufficient credits
+
+**Why**: No alternative billing method available
+
+**Example**:
+```json
+{
+  "error": {
+    "message": "Insufficient credits",
+    "type": "request_failed",
+    "code": 429
+  }
+}
+```
+
+**Solutions**:
+1. Add Helicone credits at `/credits`
+2. Configure provider keys in `/settings/providers`
+3. Enable [automatic retries](/features/advanced-usage/retries) with `Helicone-Retry-Enabled: true` to handle transient failures
+
+<Info>
+**Retries can help!** If you're experiencing temporary rate limits or server errors, use [Helicone retry headers](/features/advanced-usage/retries) to automatically retry failed requests with exponential backoff.
+</Info>
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Understanding Error Sources
+
+When you see an error, you can determine which billing method it came from:
+
+**PTB Errors**:
+- 429: "Insufficient credits" → Add credits at `/credits`
+- 403: "Wallet suspended" → Contact support
+
+**BYOK Errors**:
+- 401: "Invalid API key" → Check provider keys in `/settings/providers`
+- 500: "Provider error" → Check provider status
+- 503: "Service unavailable" → Provider having issues
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+<Card title="Configure Both Methods" icon="shield-check">
+  Set up both PTB and BYOK for maximum reliability. If one fails, the other serves as backup.
+</Card>
+<Card title="Monitor Credit Balance" icon="chart-line">
+  Keep track of your Helicone credits to avoid 429 errors during critical requests.
+</Card>
+<Card title="Enable Automatic Retries" icon="rotate-cw">
+  Use [Helicone retry headers](/features/advanced-usage/retries) to automatically retry transient errors (429, 500, 503) with exponential backoff.
+</Card>
+<Card title="Log Error Details" icon="file-text">
+  Log the full error response to debug provider-specific issues quickly.
+</Card>
+</CardGroup>
+
+---
+
+## Error Handling in Code
+
+<Tip>
+**Prefer built-in retries**: Instead of implementing your own retry logic, use [Helicone's automatic retry headers](/features/advanced-usage/retries) by adding `Helicone-Retry-Enabled: true` to your requests. This handles exponential backoff automatically.
+</Tip>
+
+### Retry Logic Example
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+async function callWithRetry(maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: "Hello!" }],
+      });
+      return response;
+    } catch (error: any) {
+      const status = error?.status || 500;
+
+      // Don't retry auth errors or bad requests
+      if (status === 401 || status === 403 || status === 400) {
+        throw error;
+      }
+
+      // Don't retry insufficient credits unless it's the last attempt
+      if (status === 429 && i === maxRetries - 1) {
+        throw error;
+      }
+
+      // Retry transient errors (500, 503) with exponential backoff
+      if (status >= 500 || status === 429) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        continue;
+      }
+
+      throw error;
+    }
+  }
+}
+```
+
+### Error Classification
+
+```typescript
+function classifyError(error: any) {
+  const status = error?.status || 500;
+
+  if (status === 401) {
+    return {
+      type: "authentication",
+      action: "Check your API keys in settings",
+      retryable: false
+    };
+  }
+
+  if (status === 429) {
+    return {
+      type: "rate_limit",
+      action: "Add credits or wait before retrying",
+      retryable: true
+    };
+  }
+
+  if (status >= 500) {
+    return {
+      type: "server_error",
+      action: "Retry with exponential backoff",
+      retryable: true
+    };
+  }
+
+  return {
+    type: "unknown",
+    action: "Check error message for details",
+    retryable: false
+  };
+}
+```
+
+---
+
+## Related Resources
+
+- [Automatic Retries](/features/advanced-usage/retries) - Configure retry headers for handling transient failures
+- [Provider Routing](/gateway/provider-routing) - Learn how to configure fallback providers
+- [Settings: Provider Keys](/settings/providers) - Add your provider API keys
+- [Credits](/credits) - Add Helicone credits for Pass-Through Billing
+
+<Info>
+**Need Help?** If you're seeing unexpected errors or need assistance configuring fallback, contact us at support@helicone.ai or join our [Discord community](https://discord.com/invite/zsSTcH2qhG).
+</Info>

@@ -395,6 +395,9 @@ export interface paths {
   "/v1/trace/log-python": {
     post: operations["LogPythonTrace"];
   };
+  "/v1/test/gateway-request": {
+    post: operations["SendTestRequest"];
+  };
   "/v1/session/has-session": {
     get: operations["HasSession"];
   };
@@ -2212,6 +2215,7 @@ Json: JsonObject;
     CreateCloudGatewayCheckoutSessionRequest: {
       /** Format: double */
       amount: number;
+      returnUrl?: string;
     };
     UpgradeToProRequest: {
       addons?: {
@@ -2399,6 +2403,15 @@ Json: JsonObject;
               }[];
           };
         }[];
+    };
+    SendTestRequestResponse: {
+      success: boolean;
+      response?: string;
+      requestId?: string;
+      error?: string;
+    };
+    SendTestRequestRequest: {
+      apiKey: string;
     };
     SessionResult: {
       created_at: string;
@@ -6269,9 +6282,11 @@ export interface operations {
   };
   MigrateToPro: {
     responses: {
-      /** @description No content */
-      204: {
-        content: never;
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
       };
     };
   };
@@ -6500,6 +6515,21 @@ export interface operations {
       /** @description No content */
       204: {
         content: never;
+      };
+    };
+  };
+  SendTestRequest: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SendTestRequestRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SendTestRequestResponse"];
+        };
       };
     };
   };

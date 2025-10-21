@@ -55,7 +55,10 @@
       "Bash(timeout:*)",
       "Bash(npx supabase:*)",
       "Bash(docker exec:*)",
-      "WebFetch(domain:ui.shadcn.com)"
+      "WebFetch(domain:ui.shadcn.com)",
+      "mcp__playwright__browser_tabs",
+      "mcp__playwright__browser_close",
+      "Bash(psql:*)"
     ],
     "deny": []
   },

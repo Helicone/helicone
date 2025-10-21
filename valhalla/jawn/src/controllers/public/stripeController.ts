@@ -15,7 +15,6 @@ import { StripeManager } from "../../managers/stripe/StripeManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { isError } from "../../packages/common/result";
 import express from "express";
-import { checkFeatureFlag } from "../../lib/utils/featureFlags";
 import Stripe from "stripe";
 
 export interface UpgradeToProRequest {
@@ -35,6 +34,7 @@ export interface UpgradeToTeamBundleRequest {
 
 export interface CreateCloudGatewayCheckoutSessionRequest {
   amount: number;
+  returnUrl?: string;
 }
 
 export enum PaymentIntentSearchKind {
@@ -142,27 +142,38 @@ export class StripeController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: CreateCloudGatewayCheckoutSessionRequest
   ): Promise<{ checkoutUrl: string }> {
-    const featureFlagResult = await checkFeatureFlag(
-      request.authParams.organizationId,
-      "credits"
-    );
-    
-    if (isError(featureFlagResult)) {
-      this.setStatus(500);
-      throw new Error(featureFlagResult.error);
-    } else if (!featureFlagResult.data) {
-      this.setStatus(403);
-      throw new Error("Credits feature is not enabled for this organization");
-    }
-    
     const stripeManager = new StripeManager(request.authParams);
     if (body.amount < 5) {
       this.setStatus(400);
       throw new Error("Amount must be at least 5");
     }
+    if (body.amount > 10000) {
+      this.setStatus(400);
+      throw new Error("Amount must not exceed 10000");
+    }
+
+    // Validate returnUrl to prevent open redirect attacks
+    if (body.returnUrl) {
+      if (!body.returnUrl.startsWith('/')) {
+        this.setStatus(400);
+        throw new Error("returnUrl must be a relative path starting with /");
+      }
+      if (body.returnUrl.includes('..')) {
+        this.setStatus(400);
+        throw new Error("returnUrl contains invalid characters");
+      }
+      // Whitelist allowed paths
+      const allowedPaths = ['/quickstart', '/credits', '/dashboard', '/settings'];
+      if (!allowedPaths.some(path => body.returnUrl?.startsWith(path))) {
+        this.setStatus(400);
+        throw new Error("returnUrl must start with one of: " + allowedPaths.join(', '));
+      }
+    }
+
     const result = await stripeManager.createCloudGatewayCheckoutSession(
       request.headers.origin ?? "",
       body.amount,
+      body.returnUrl,
     );
 
     if (isError(result)) {
@@ -389,6 +400,14 @@ export class StripeController extends Controller {
   public async migrateToPro(@Request() request: JawnAuthenticatedRequest) {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.migrateToPro();
+
+    if (isError(result) || !result.data) {
+      console.error("Error migrating to pro", JSON.stringify(result.error || "No data returned"));
+      this.setStatus(400);
+      throw new Error(result.error || "Failed to migrate to pro");
+    }
+
+    return result.data;
   }
 
   @Get("/payment-intents/search")
