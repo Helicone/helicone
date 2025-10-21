@@ -3305,6 +3305,7 @@ Json: JsonObject;
       ptbEnabled: boolean;
       version?: string;
       unsupportedParameters?: components["schemas"]["StandardParameter"][];
+      registryKey: string;
       modelConfig: components["schemas"]["ModelProviderConfig"];
       userConfig: components["schemas"]["UserEndpointConfig"];
       provider: components["schemas"]["ModelProviderName"];

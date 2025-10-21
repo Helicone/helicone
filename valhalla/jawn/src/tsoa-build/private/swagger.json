@@ -56940,13 +56940,12 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"heliconePricingMultiplier": {
-										"type": "number",
-										"format": "double"
+									"endpointMultipliers": {
+										"$ref": "#/components/schemas/Record_string.number_"
 									}
 								},
 								"required": [
-									"heliconePricingMultiplier"
+									"endpointMultipliers"
 								],
 								"type": "object"
 							}

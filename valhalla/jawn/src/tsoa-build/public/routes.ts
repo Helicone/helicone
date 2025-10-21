@@ -2929,6 +2929,7 @@ const models: TsoaRoute.Models = {
             "ptbEnabled": {"dataType":"boolean","required":true},
             "version": {"dataType":"string"},
             "unsupportedParameters": {"dataType":"array","array":{"dataType":"refAlias","ref":"StandardParameter"}},
+            "registryKey": {"dataType":"string","required":true},
             "modelConfig": {"ref":"ModelProviderConfig","required":true},
             "userConfig": {"ref":"UserEndpointConfig","required":true},
             "provider": {"ref":"ModelProviderName","required":true},

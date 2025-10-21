@@ -1352,23 +1352,33 @@ export class AdminController extends Controller {
   public async updateOrgPricingConfig(
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string,
-    @Body() body: { heliconePricingMultiplier: number }
+    @Body() body: { endpointMultipliers: Record<string, number> }
   ): Promise<Result<null, string>> {
     await authCheckThrow(request.authParams.userId);
 
-    const { heliconePricingMultiplier } = body;
+    const { endpointMultipliers } = body;
 
-    if (
-      heliconePricingMultiplier < 0 ||
-      heliconePricingMultiplier > 2 ||
-      isNaN(heliconePricingMultiplier)
-    ) {
-      return err("Pricing multiplier must be between 0 and 2");
+    // Validate each multiplier
+    for (const [endpoint, multiplier] of Object.entries(endpointMultipliers)) {
+      if (multiplier < 0 || multiplier > 2 || isNaN(multiplier)) {
+        return err(`Invalid multiplier for ${endpoint}: must be between 0 and 2`);
+      }
+
+      // Validate endpoint key format (should contain colon)
+      if (!endpoint.includes(':')) {
+        return err(`Invalid endpoint key format: ${endpoint}`);
+      }
     }
 
     const { error } = await dbExecute(
-      `UPDATE organization SET pricing_config = jsonb_set(COALESCE(pricing_config, '{}'), '{heliconePricingMultiplier}', $1::text::jsonb) WHERE id = $2`,
-      [heliconePricingMultiplier.toString(), orgId]
+      `UPDATE organization
+       SET pricing_config = jsonb_set(
+         COALESCE(pricing_config, '{}'),
+         '{endpointMultipliers}',
+         $1::jsonb
+       )
+       WHERE id = $2`,
+      [JSON.stringify(endpointMultipliers), orgId]
     );
 
     if (error) {

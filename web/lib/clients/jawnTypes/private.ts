@@ -19538,8 +19538,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          /** Format: double */
-          heliconePricingMultiplier: number;
+          endpointMultipliers: components["schemas"]["Record_string.number_"];
         };
       };
     };

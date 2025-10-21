@@ -101,7 +101,7 @@ export interface AuthParams {
     creditLimit: number;
   };
   pricingConfig?: {
-    heliconePricingMultiplier?: number;
+    endpointMultipliers?: Record<string, number>;
   };
 }
 

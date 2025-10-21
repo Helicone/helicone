@@ -20631,7 +20631,7 @@ export function RegisterRoutes(app: Router) {
         const argsAdminController_updateOrgPricingConfig: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"heliconePricingMultiplier":{"dataType":"double","required":true}}},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"endpointMultipliers":{"ref":"Record_string.number_","required":true}}},
         };
         app.post('/v1/admin/org/:orgId/pricing-config',
             authenticateMiddleware([{"api_key":[]}]),

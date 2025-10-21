@@ -1085,9 +1085,9 @@ const OrgTableRow = ({
                     <FeatureFlagsSection orgId={org.id} orgName={org.name} />
                   </div>
 
-                  {/* Helicone Pricing */}
+                  {/* Endpoint Pricing */}
                   <div className="border-t border-border pt-2">
-                    <HeliconePricingSection
+                    <EndpointPricingSection
                       orgId={org.id}
                       pricingConfig={org.pricing_config}
                     />
@@ -1735,7 +1735,7 @@ const FeatureFlagsSection = ({
   );
 };
 
-const HeliconePricingSection = ({
+const EndpointPricingSection = ({
   orgId,
   pricingConfig,
 }: {
@@ -1744,127 +1744,164 @@ const HeliconePricingSection = ({
 }) => {
   const queryClient = useQueryClient();
   const { setNotification } = useNotification();
-  const [multiplier, setMultiplier] = useState<string>(
-    pricingConfig?.heliconePricingMultiplier?.toString() || "1.0",
+  const [endpointMultipliers, setEndpointMultipliers] = useState<Record<string, number>>(
+    pricingConfig?.endpointMultipliers || {}
   );
+  const [newEndpoint, setNewEndpoint] = useState("");
+  const [newMultiplier, setNewMultiplier] = useState("1.0");
   const [isSaving, setIsSaving] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-
-  const currentMultiplier = pricingConfig?.heliconePricingMultiplier || 1.0;
+  const [pendingChanges, setPendingChanges] = useState<Record<string, number>>({});
 
   const updatePricingMutation = useMutation({
-    mutationFn: async (newMultiplier: number) => {
+    mutationFn: async (multipliers: Record<string, number>) => {
       const jawn = getJawnClient();
       const { error } = await jawn.POST(
         "/v1/admin/org/{orgId}/pricing-config",
         {
           params: { path: { orgId } },
-          body: { heliconePricingMultiplier: newMultiplier },
+          body: { endpointMultipliers: multipliers },
         },
       );
       if (error) throw new Error(error);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orgSearchFast"] });
-      setNotification("Pricing multiplier updated successfully", "success");
+      setNotification("Endpoint pricing updated successfully", "success");
       setIsSaving(false);
+      setPendingChanges({});
     },
     onError: (error: any) => {
       setNotification(
-        error.message || "Failed to update pricing multiplier",
+        error.message || "Failed to update endpoint pricing",
         "error",
       );
       setIsSaving(false);
     },
   });
 
-  const handleSave = () => {
-    const value = parseFloat(multiplier);
+  const handleAddEndpoint = () => {
+    if (!newEndpoint || !newEndpoint.includes(":")) {
+      setNotification("Invalid endpoint format. Use model:provider", "error");
+      return;
+    }
+    const value = parseFloat(newMultiplier);
     if (isNaN(value) || value < 0 || value > 2) {
       setNotification("Multiplier must be between 0 and 2", "error");
       return;
     }
+    setEndpointMultipliers({ ...endpointMultipliers, [newEndpoint]: value });
+    setPendingChanges({ ...pendingChanges, [newEndpoint]: value });
+    setNewEndpoint("");
+    setNewMultiplier("1.0");
+  };
+
+  const handleRemoveEndpoint = (endpoint: string) => {
+    const updated = { ...endpointMultipliers };
+    delete updated[endpoint];
+    setEndpointMultipliers(updated);
+    setPendingChanges(updated);
+  };
+
+  const handleSave = () => {
     setConfirmDialogOpen(true);
   };
 
   const confirmSave = () => {
-    const value = parseFloat(multiplier);
     setIsSaving(true);
     setConfirmDialogOpen(false);
-    updatePricingMutation.mutate(value);
+    updatePricingMutation.mutate(endpointMultipliers);
   };
 
-  const discountPercent = ((1 - currentMultiplier) * 100).toFixed(0);
+  const hasChanges = JSON.stringify(endpointMultipliers) !== JSON.stringify(pricingConfig?.endpointMultipliers || {});
 
   return (
-    <div className="flex w-full flex-col gap-2">
-      <Small className="font-semibold text-foreground">Helicone Pricing</Small>
-      <div className="flex flex-col gap-2 pl-2">
+    <div className="flex w-full flex-col gap-4">
+      <Small className="font-semibold text-foreground">Endpoint Pricing</Small>
+
+      <div className="flex flex-col gap-2">
+        {Object.entries(endpointMultipliers).length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {Object.entries(endpointMultipliers).map(([endpoint, multiplier]) => {
+              const discountPercent = ((1 - multiplier) * 100).toFixed(0);
+              return (
+                <div key={endpoint} className="flex items-center gap-2 rounded border border-border p-2">
+                  <code className="flex-1 text-xs">{endpoint}</code>
+                  <Small className="min-w-[80px] text-muted-foreground">
+                    {multiplier}x
+                    {multiplier < 1 && ` (${discountPercent}% off)`}
+                    {multiplier > 1 && ` (+${((multiplier - 1) * 100).toFixed(0)}%)`}
+                  </Small>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveEndpoint(endpoint)}
+                    className="h-6 w-6 p-0"
+                  >
+                    <X size={14} />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <Muted className="text-xs">No endpoint pricing configured</Muted>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2 rounded border border-border p-3">
+        <Small className="font-semibold">Add Endpoint</Small>
         <div className="flex items-center gap-2">
-          <Small className="min-w-[70px] text-muted-foreground">
-            Multiplier
-          </Small>
+          <Input
+            placeholder="gpt-5-pro:helicone"
+            value={newEndpoint}
+            onChange={(e) => setNewEndpoint(e.target.value)}
+            className="h-8 flex-1 text-xs font-mono"
+          />
           <Input
             type="number"
             step="0.1"
             min="0"
             max="2"
-            value={multiplier}
-            onChange={(e) => setMultiplier(e.target.value)}
-            className="h-7 w-20 text-xs"
+            placeholder="1.0"
+            value={newMultiplier}
+            onChange={(e) => setNewMultiplier(e.target.value)}
+            className="h-8 w-20 text-xs"
           />
           <Button
             variant="outline"
             size="sm"
-            onClick={handleSave}
-            disabled={
-              isSaving ||
-              parseFloat(multiplier) === currentMultiplier ||
-              isNaN(parseFloat(multiplier))
-            }
-            className="h-7 px-2"
+            onClick={handleAddEndpoint}
+            className="h-8"
           >
-            {isSaving ? <Loader2 size={12} className="animate-spin" /> : "Save"}
+            Add
           </Button>
         </div>
-        <Muted className="text-xs">
-          Current: {currentMultiplier}x
-          {currentMultiplier < 1
-            ? ` (${discountPercent}% discount)`
-            : currentMultiplier > 1
-              ? ` (+${((currentMultiplier - 1) * 100).toFixed(0)}% markup)`
-              : " (no discount)"}
-        </Muted>
       </div>
+
+      {hasChanges && (
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="self-end"
+        >
+          {isSaving ? (
+            <>
+              <Loader2 size={16} className="mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            "Save Changes"
+          )}
+        </Button>
+      )}
 
       <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Pricing Change</DialogTitle>
+            <DialogTitle>Confirm Pricing Changes</DialogTitle>
             <DialogDescription>
-              Are you sure you want to update the pricing multiplier from{" "}
-              <strong>{currentMultiplier}x</strong> to{" "}
-              <strong>{parseFloat(multiplier)}x</strong>?
-              {parseFloat(multiplier) < 1 && (
-                <>
-                  {" "}
-                  This will apply a{" "}
-                  <strong>
-                    {((1 - parseFloat(multiplier)) * 100).toFixed(0)}% discount
-                  </strong>{" "}
-                  to all Helicone inference costs for this organization.
-                </>
-              )}
-              {parseFloat(multiplier) > 1 && (
-                <>
-                  {" "}
-                  This will apply a{" "}
-                  <strong>
-                    {((parseFloat(multiplier) - 1) * 100).toFixed(0)}% markup
-                  </strong>{" "}
-                  to all Helicone inference costs for this organization.
-                </>
-              )}
+              Are you sure you want to update the endpoint pricing configuration for this organization?
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
@@ -1875,14 +1912,7 @@ const HeliconePricingSection = ({
               Cancel
             </Button>
             <Button onClick={confirmSave} disabled={isSaving}>
-              {isSaving ? (
-                <>
-                  <Loader2 size={16} className="mr-2 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                "Confirm"
-              )}
+              Confirm
             </Button>
           </div>
         </DialogContent>

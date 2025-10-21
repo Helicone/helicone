@@ -40,6 +40,17 @@ import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcesso
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
 
+function getPricingMultiplier(
+  pricingConfig: any,
+  endpointKey: string | null
+): number {
+  if (!pricingConfig?.endpointMultipliers || !endpointKey) {
+    return 1.0;
+  }
+
+  return pricingConfig.endpointMultipliers[endpointKey] ?? 1.0;
+}
+
 export async function proxyForwarder(
   request: RequestWrapper,
   env: Env,
@@ -550,10 +561,11 @@ async function log(
               cost = usage.data.cost;
             } else {
               // Use the standard cost calculation from registry
-              const pricingMultiplier =
-                attemptProvider === "helicone"
-                  ? orgData?.pricingConfig?.heliconePricingMultiplier ?? 1.0
-                  : 1.0;
+              const endpointKey = gatewayAttempt.endpoint.registryKey;
+              const pricingMultiplier = getPricingMultiplier(
+                orgData?.pricingConfig,
+                endpointKey
+              );
               const breakdown = modelCostBreakdownFromRegistry({
                 modelUsage: usage.data,
                 providerModelId: attemptModel,
@@ -602,10 +614,11 @@ async function log(
               });
 
               if (usage.data) {
-                const pricingMultiplier =
-                  modelProviderName === "helicone"
-                    ? orgData?.pricingConfig?.heliconePricingMultiplier ?? 1.0
-                    : 1.0;
+                const endpointKey = `${model}:${modelProviderName}`;
+                const pricingMultiplier = getPricingMultiplier(
+                  orgData?.pricingConfig,
+                  endpointKey
+                );
                 const breakdown = modelCostBreakdownFromRegistry({
                   modelUsage: usage.data,
                   providerModelId: model,
