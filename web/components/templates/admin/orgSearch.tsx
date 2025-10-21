@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { getJawnClient } from "@/lib/clients/jawn";
 import {
@@ -7,7 +7,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -16,7 +16,7 @@ import {
 import { formatLargeNumber } from "@/components/shared/utils/numberFormat";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Search, Loader2, Trash2, UserPlus, X, Copy } from "lucide-react";
-import { H1, P, H3, Small, Muted } from "@/components/ui/typography";
+import { H3, Small, Muted } from "@/components/ui/typography";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

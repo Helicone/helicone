@@ -52,7 +52,11 @@ const navigation = [
     group: "Business",
     items: [
       { name: "Wallet", href: "/admin/wallet", icon: Wallet },
-      { name: "Stripe Projections", href: "/admin/projections", icon: BarChart },
+      {
+        name: "Stripe Projections",
+        href: "/admin/projections",
+        icon: BarChart,
+      },
       { name: "Governance", href: "/admin/governance-orgs", icon: Users },
       {
         name: "Helix Threads",
@@ -86,7 +90,7 @@ export function AdminSidebar() {
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="h-8 w-8 shrink-0 hover:bg-slate-200 dark:hover:bg-slate-800 group-data-[collapsible=icon]:mx-auto"
+            className="h-8 w-8 shrink-0 hover:bg-slate-200 group-data-[collapsible=icon]:mx-auto dark:hover:bg-slate-800"
           >
             <ChevronLeft
               size={16}
@@ -113,7 +117,10 @@ export function AdminSidebar() {
                       className="h-8 text-xs font-normal text-slate-500 hover:bg-slate-200 hover:text-slate-900 data-[active=true]:bg-blue-100 data-[active=true]:text-blue-700 dark:hover:bg-slate-700 dark:hover:text-slate-100 dark:data-[active=true]:bg-blue-900/50 dark:data-[active=true]:text-blue-300"
                     >
                       <a href={item.href} className="flex items-center gap-2">
-                        <item.icon size={14} className="shrink-0 text-slate-500 data-[active=true]:text-blue-700 dark:data-[active=true]:text-blue-300" />
+                        <item.icon
+                          size={14}
+                          className="shrink-0 text-slate-500 data-[active=true]:text-blue-700 dark:data-[active=true]:text-blue-300"
+                        />
                         <span>{item.name}</span>
                       </a>
                     </SidebarMenuButton>

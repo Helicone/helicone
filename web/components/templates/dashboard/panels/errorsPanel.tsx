@@ -1,4 +1,3 @@
-import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { formatLargeNumber } from "../../../shared/utils/numberFormat";
 import { sortAndColorData } from "./utils";
 import { useExpandableBarList } from "./barListPanel";

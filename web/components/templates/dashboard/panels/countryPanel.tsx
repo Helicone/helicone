@@ -6,7 +6,7 @@ import { CountryData } from "../../../../services/lib/country";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getMockCountries } from "../mockDashboardData";
-import { sortAndColorData, DataWithColor } from "./utils";
+import { sortAndColorData } from "./utils";
 import { useExpandableBarList } from "./barListPanel";
 import { useState } from "react";
 
