@@ -1,7 +1,5 @@
 import { Provider, SortOption } from "@/types/provider";
 
-const HELICONE_ORG_ID = process.env.NEXT_PUBLIC_HELICONE_ORG_ID;
-
 /**
  * Get provider name by ID
  */
@@ -17,6 +15,8 @@ export const filterPubliclyVisibleProviders = (
   providers: Provider[],
   orgId?: string,
 ): Provider[] => {
+  const HELICONE_ORG_ID = process.env.NEXT_PUBLIC_HELICONE_ORG_ID;
+
   return providers.filter((provider) => {
     // Helicone org can see all providers
     if (orgId === HELICONE_ORG_ID) {
