@@ -23,7 +23,6 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useOrgOnboarding } from "../../../services/hooks/useOrgOnboarding";
 import { useOrg } from "../../layout/org/organizationContext";
@@ -72,11 +71,11 @@ const QuickstartPage = () => {
   const [testRequestId, setTestRequestId] = useState<string | null>(null);
   const [testError, setTestError] = useState<string | null>(null);
 
-  const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(
+  const { hasKeys, hasProviderKeys } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
   );
 
-  const { data: creditData, isLoading: creditsLoading } = useCredits();
+  const { data: creditData } = useCredits();
   const hasCredits = (creditData?.balance ?? 0) > 0;
   const hasBillingSetup = hasCredits || hasProviderKeys;
 
@@ -92,7 +91,7 @@ const QuickstartPage = () => {
     if (hasKeys === false) {
       setQuickstartKey(undefined);
     }
-  }, [hasKeys]);
+  }, [hasKeys, setQuickstartKey]);
 
   useEffect(() => {
     setToolHandler("quickstart-open-integration-guide", async () => {
@@ -222,32 +221,6 @@ const QuickstartPage = () => {
               isCompleted={isCompleted ?? false}
               link={step.link}
               rightContent={step.description}
-              rightComponent={
-                index === 0 ? (
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <a
-                      href="/credits"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 transition-colors hover:text-foreground"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span>Add credits</span>
-                      <MoveUpRight size={12} />
-                    </a>
-                    <a
-                      href="/settings/providers"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 transition-colors hover:text-foreground"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span>Configure keys</span>
-                      <MoveUpRight size={12} />
-                    </a>
-                  </div>
-                ) : undefined
-              }
               headerAction={
                 index === 2 ? (
                   <TooltipProvider>
@@ -339,7 +312,7 @@ const QuickstartPage = () => {
                   </div>
 
                   {/* BYOK Option - Simple text link */}
-                  <div className="flex items-center justify-center pt-2">
+                  <div className="flex items-center justify-start pl-4 pt-4 pb-2">
                     <button
                       onClick={() => setIsProviderSheetOpen(true)}
                       className="group flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"

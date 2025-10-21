@@ -151,6 +151,25 @@ export class StripeController extends Controller {
       this.setStatus(400);
       throw new Error("Amount must not exceed 10000");
     }
+
+    // Validate returnUrl to prevent open redirect attacks
+    if (body.returnUrl) {
+      if (!body.returnUrl.startsWith('/')) {
+        this.setStatus(400);
+        throw new Error("returnUrl must be a relative path starting with /");
+      }
+      if (body.returnUrl.includes('..')) {
+        this.setStatus(400);
+        throw new Error("returnUrl contains invalid characters");
+      }
+      // Whitelist allowed paths
+      const allowedPaths = ['/quickstart', '/credits', '/dashboard', '/settings'];
+      if (!allowedPaths.some(path => body.returnUrl?.startsWith(path))) {
+        this.setStatus(400);
+        throw new Error("returnUrl must start with one of: " + allowedPaths.join(', '));
+      }
+    }
+
     const result = await stripeManager.createCloudGatewayCheckoutSession(
       request.headers.origin ?? "",
       body.amount,
@@ -382,10 +401,10 @@ export class StripeController extends Controller {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.migrateToPro();
 
-    if (isError(result)) {
-      console.error("Error migrating to pro", JSON.stringify(result.error));
+    if (isError(result) || !result.data) {
+      console.error("Error migrating to pro", JSON.stringify(result.error || "No data returned"));
       this.setStatus(400);
-      throw new Error(result.error);
+      throw new Error(result.error || "Failed to migrate to pro");
     }
 
     return result.data;
