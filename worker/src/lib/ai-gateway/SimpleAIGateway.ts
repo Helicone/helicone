@@ -409,32 +409,52 @@ export class SimpleAIGateway {
     let code = "all_attempts_failed";
 
     // Priority order for status codes:
-    // 1. If ANY error is 429 (insufficient credits), return 429
+    // 1. If ANY error is 403 (wallet suspended, etc), return 403 with upstream message
     // 2. If ANY error is 401 (authentication), return 401
-    // 3. If ANY error is 403 (wallet suspended, etc), return 403 with upstream message
-    // 4. If ALL errors are disallowed (400), return 400
-    // 5. Otherwise return 500
+    // 3. If ANY non-429 error exists (BYOK provider errors), return it (normalized to 500)
+    // 4. If first error is 400 (invalid_format), return 400
+    // 5. If ALL errors are disallowed (400), return 400
+    // 6. If ALL errors are 429 (insufficient credits), return 429
+    // 7. Otherwise return 500
 
-    const has429 = errors.some((e) => e.statusCode === 429);
-    const has401 = errors.some((e) => e.statusCode === 401);
     const first403 = errors.find((e) => e.statusCode === 403);
+    const has401 = errors.some((e) => e.statusCode === 401);
     const firstInvalid = errors.find(
       (e) => e.statusCode === 400 && e.type === "invalid_format"
     );
     const allDisallowed =
       errors.length > 0 && errors.every((e) => e.type === "disallowed");
 
-    if (has429) {
-      statusCode = 429;
-      message = "Insufficient credits";
+    // Find any non-429 error (BYOK errors) that should be prioritized
+    const firstNon429Error = errors.find(
+      (e) =>
+        e.statusCode !== 429 &&
+        e.statusCode !== 403 &&
+        e.statusCode !== 401 &&
+        e.type !== "invalid_format" &&
+        e.type !== "disallowed"
+    );
+
+    const all429 = errors.length > 0 && errors.every((e) => e.statusCode === 429);
+
+    if (first403) {
+      statusCode = 403;
+      message = first403.message;
       code = "request_failed";
     } else if (has401) {
       statusCode = 401;
       message = "Authentication failed";
       code = "request_failed";
-    } else if (first403) {
-      statusCode = 403;
-      message = first403.message;
+    } else if (firstNon429Error) {
+      // Prefer BYOK provider errors over our own validation errors
+      // This ensures users see what's wrong with their configured provider keys
+      // Only preserve actionable authentication/access errors:
+      // - 401 (Unauthorized): User needs to fix API key
+      // - 403 (Forbidden): Access denied
+      // All other provider errors normalize to 500 for consistency
+      const isActionableAuthError = firstNon429Error.statusCode === 401 || firstNon429Error.statusCode === 403;
+      statusCode = isActionableAuthError ? firstNon429Error.statusCode : 500;
+      message = firstNon429Error.message || "Request failed";
       code = "request_failed";
     } else if (firstInvalid) {
       statusCode = 400;
@@ -444,6 +464,11 @@ export class SimpleAIGateway {
       statusCode = 400;
       message =
         "Cloud billing is disabled for all requested models. Please contact support@helicone.ai for help";
+      code = "request_failed";
+    } else if (all429) {
+      // Only return 429 if ALL attempts failed with 429
+      statusCode = 429;
+      message = "Insufficient credits";
       code = "request_failed";
     }
 

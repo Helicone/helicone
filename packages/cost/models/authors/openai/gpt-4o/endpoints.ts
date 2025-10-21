@@ -283,6 +283,66 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-4o:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gt-4p",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000025, // $2.50 per 1M tokens
+        output: 0.00001, // $10.00 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.5, // $1.25 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-4o-mini:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gt-4p-m",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000015, // $0.15 per 1M tokens
+        output: 0.0000006, // $0.60 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.5, // $0.075 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPT4oModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

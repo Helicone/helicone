@@ -164,15 +164,15 @@
   @apply transition-transform hover:shadow-md active:scale-95;
 }
 
-::-webkit-scrollbar {
+:not(.scrollbar-auto-hide)::-webkit-scrollbar {
   @apply w-2;
 }
 
-::-webkit-scrollbar-track {
+:not(.scrollbar-auto-hide)::-webkit-scrollbar-track {
   @apply bg-transparent;
 }
 
-::-webkit-scrollbar-thumb {
+:not(.scrollbar-auto-hide)::-webkit-scrollbar-thumb {
   @apply cursor-grab rounded-full border border-solid border-slate-200/50 bg-slate-300/60 hover:bg-slate-400/80 dark:border-slate-800/50 dark:bg-slate-700/60 dark:hover:bg-slate-600/80;
 }
 
@@ -203,3 +203,4 @@
 .text-tertiary {
   @apply text-slate-400 dark:text-slate-600;
 }
+

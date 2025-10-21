@@ -45,6 +45,26 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
+  "gpt-5-pro": {
+    name: "OpenAI: GPT-5 Pro",
+    author: "openai",
+    description: "Most capable GPT-5 model with extended thinking capabilities",
+    contextLength: 128000,
+    maxOutputTokens: 32768,
+    created: "2025-01-01T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
+  "gpt-5-codex": {
+    name: "OpenAI: GPT-5 Codex",
+    author: "openai",
+    description: "Specialized model for code generation and analysis",
+    contextLength: 128000,
+    maxOutputTokens: 32768,
+    created: "2025-01-01T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type GPT5ModelName = keyof typeof models;

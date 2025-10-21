@@ -36,13 +36,16 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       const hashedAPIKey = await requestWrapper.getProviderAuthHeader();
 
       if (!hashedAPIKey) {
-        return new Response("Invalid API key", { status: 401 });
+        return new Response("Invalid Helicone API key (hshed)", {
+          status: 401,
+        });
       }
 
       const { data: auth, error: authError } = await requestWrapper.auth();
 
       if (authError || !auth || !rawAPIKey) {
-        return new Response("Invalid API key", { status: 401 });
+        console.error(authError);
+        return new Response("Invalid Helicone API key", { status: 401 });
       }
 
       const db = new DBWrapper(env, auth);

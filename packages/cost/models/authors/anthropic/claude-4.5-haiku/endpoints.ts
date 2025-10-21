@@ -135,6 +135,40 @@ export const endpoints = {
       "*": {},
     },
   },
+  "claude-4.5-haiku:helicone": {
+    provider: "helicone",
+    author: "anthropic",
+    providerModelId: "pa/claude-haiku-4-5-20251001",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000001,
+        output: 0.000005,
+        cacheMultipliers: {
+          cachedInput: 0.1,
+          write5m: 1.25,
+          write1h: 2.0,
+        },
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 8192,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "stop",
+    ],
+    ptbEnabled: true,
+    requireExplicitRouting: true,
+    endpointConfigs: {
+      "*": {},
+    },
+    responseFormat: "ANTHROPIC",
+  },
 } satisfies Partial<
   Record<`${Claude45HaikuModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

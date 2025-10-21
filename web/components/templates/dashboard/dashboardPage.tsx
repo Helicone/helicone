@@ -312,7 +312,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   return (
     <>
-      <div className="flex h-screen w-full flex-col">
+      <div className="flex h-screen w-full flex-col overflow-x-hidden">
         {!shouldShowMockData && (
           <Header
             title="Dashboard"

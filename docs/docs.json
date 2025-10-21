@@ -23,7 +23,6 @@
           },
           {
             "group": "AI Gateway",
-            "tag": "EARLY ACCESS",
             "pages": [
               "gateway/overview",
               "gateway/provider-routing",
@@ -43,12 +42,14 @@
                 "group": "Concepts",
                 "pages": [
                   "gateway/concepts/prompt-caching",
-                  "gateway/web-search"
+                  "gateway/web-search",
+                  "gateway/concepts/error-handling"
                 ]
               },
               {
                 "group": "Integrations",
                 "pages": [
+                  "gateway/integrations/langchain",
                   "gateway/integrations/semantic-kernel"
                 ]
               }

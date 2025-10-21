@@ -615,6 +615,9 @@
 					"amount": {
 						"type": "number",
 						"format": "double"
+					},
+					"returnUrl": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -49825,8 +49828,13 @@
 			"post": {
 				"operationId": "MigrateToPro",
 				"responses": {
-					"204": {
-						"description": "No content"
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
 					}
 				},
 				"tags": [

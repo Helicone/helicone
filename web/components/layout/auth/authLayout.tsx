@@ -93,10 +93,22 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const orgContext = useOrg();
 
   useEffect(() => {
-    if (orgContext?.currentOrg?.has_onboarded === false) {
-      router.push("/onboarding");
+    // Allow access to certain pages during onboarding (like quickstart and settings for setup)
+    const allowedPagesDuringOnboarding = [
+      "/quickstart",
+      "/settings/providers",
+      "/settings/billing",
+      "/credits",
+    ];
+
+    const isOnAllowedPage = allowedPagesDuringOnboarding.some((path) =>
+      pathname.startsWith(path),
+    );
+
+    if (orgContext?.currentOrg?.has_onboarded === false && !isOnAllowedPage) {
+      router.push("/quickstart");
     }
-  }, [orgContext?.currentOrg?.has_onboarded]);
+  }, [orgContext?.currentOrg?.has_onboarded, pathname, router]);
 
   const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);

@@ -28,12 +28,9 @@ import {
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { ReactElement, useState } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import { NextPageWithLayout } from "./_app";
-import { useFeatureFlag } from "@/services/hooks/admin";
-import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
 
 const Credits: NextPageWithLayout<void> = () => {
   const [currentPageToken, setCurrentPageToken] = useState<string | null>(null);
@@ -42,9 +39,6 @@ const Credits: NextPageWithLayout<void> = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const org = useOrg();
-
-  const { data: hasCreditsFeatureFlag, isLoading: isFeatureFlagLoading } =
-    useFeatureFlag("credits", org?.currentOrg?.id ?? "");
 
   const {
     data: creditData,
@@ -67,44 +61,25 @@ const Credits: NextPageWithLayout<void> = () => {
   const hasPrevious = pageTokenHistory.length > 0;
   const currentPageNumber = pageTokenHistory.length + 1;
 
-  const hasAccess = hasCreditsFeatureFlag?.data;
-
-  // Show loading state while checking feature flag
-  if (isFeatureFlagLoading) {
-    return (
-      <div className="flex h-full w-full flex-col">
-        <Header title="Credits" />
-        <div className="flex flex-1 items-center justify-center">
-          <Small className="text-muted-foreground">Loading...</Small>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-screen w-full flex-col">
       <Header
         title="Credits"
         rightActions={
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs">
-              Early Access
-            </Badge>
-            {hasAccess && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  refetch();
-                  refetchTransactions();
-                }}
-                disabled={isLoading || transactionsLoading}
-              >
-                <RefreshCcw
-                  className={`h-4 w-4 ${isLoading || transactionsLoading ? "animate-spin" : ""}`}
-                />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                refetch();
+                refetchTransactions();
+              }}
+              disabled={isLoading || transactionsLoading}
+            >
+              <RefreshCcw
+                className={`h-4 w-4 ${isLoading || transactionsLoading ? "animate-spin" : ""}`}
+              />
+            </Button>
           </div>
         }
       />
@@ -112,133 +87,9 @@ const Credits: NextPageWithLayout<void> = () => {
       <div className="flex flex-1 justify-center">
         <div className="flex w-full flex-col">
           <div className="flex-1 overflow-auto">
-            {/* Waitlist Experience - Show when no access */}
-            {!hasAccess ? (
-              <div className="px-4 py-12 sm:px-6 lg:px-8">
-                {/* Hero Section */}
-                <div className="mb-16 text-center">
-                  <h1 className="mb-4 text-4xl font-bold text-slate-900 dark:text-slate-100">
-                    Helicone Credits
-                  </h1>
-                  <p className="mb-8 text-xl text-slate-600 dark:text-slate-400">
-                    Pay-as-you-go LLM billing. Simple, transparent, and
-                    flexible.
-                  </p>
-                </div>
-
-                {/* Demo Image with Waitlist Overlay */}
-                <div className="mb-16">
-                  <div className="relative overflow-hidden rounded-lg border border-border">
-                    <Image
-                      src="/static/credits-demo.png"
-                      alt="Credits Dashboard Demo"
-                      width={1200}
-                      height={600}
-                      className="h-auto w-full"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                      <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-slate-900">
-                        <FeatureWaitlist
-                          feature="credits"
-                          title="Get Early Access"
-                          description="Be the first to know when Credits launches for your organization."
-                          organizationId={org?.currentOrg?.id}
-                          variant="flat"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Benefits Section */}
-                <div className="mb-16">
-                  <h2 className="mb-8 text-center text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                    Why Helicone Credits?
-                  </h2>
-                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
-                          <span className="text-green-600 dark:text-green-400">
-                            ✓
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="mb-1 font-semibold text-slate-900 dark:text-slate-100">
-                          No subscriptions or commitments
-                        </h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                          Add credits when you need them. Pay only for what you
-                          use with no monthly fees.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
-                          <span className="text-green-600 dark:text-green-400">
-                            ✓
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="mb-1 font-semibold text-slate-900 dark:text-slate-100">
-                          Real-time usage tracking
-                        </h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                          Monitor your AI spending as it happens with detailed
-                          analytics and insights.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
-                          <span className="text-green-600 dark:text-green-400">
-                            ✓
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="mb-1 font-semibold text-slate-900 dark:text-slate-100">
-                          Shared across your team
-                        </h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                          One balance for your entire organization. Simplify
-                          billing and management.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border">
-                          <span className="text-green-600 dark:text-green-400">
-                            ✓
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="mb-1 font-semibold text-slate-900 dark:text-slate-100">
-                          Detailed transaction history
-                        </h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                          Complete visibility into every credit spent with
-                          comprehensive reporting.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Credits Management Experience - Show when has access */
-              <div>
-                {/* Current Balance Section */}
-                <div className="border-b border-border bg-slate-100 px-6 py-8 dark:bg-slate-900">
+            <div>
+              {/* Current Balance Section */}
+              <div className="border-b border-border bg-slate-100 px-6 py-8 dark:bg-slate-900">
                   <Small className="text-muted-foreground">
                     Current Balance
                   </Small>
@@ -266,11 +117,11 @@ const Credits: NextPageWithLayout<void> = () => {
                       })()}`
                     )}
                   </div>
-                </div>
+              </div>
 
-                {/* Buy Credits and Auto Top-Up Section */}
-                <div className="border-b border-border px-6 py-8">
-                  <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              {/* Buy Credits and Auto Top-Up Section */}
+              <div className="border-b border-border px-6 py-8">
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                     {/* Buy Credits */}
                     <div>
                       <Small className="mb-4 font-semibold text-slate-900 dark:text-slate-100">
@@ -321,11 +172,11 @@ const Credits: NextPageWithLayout<void> = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+              </div>
 
-                {/* Recent Transactions Section */}
-                <div className="px-6 py-8">
-                  <div className="mb-6 flex items-center justify-between">
+              {/* Recent Transactions Section */}
+              <div className="px-6 py-8">
+                <div className="mb-6 flex items-center justify-between">
                     <Small className="font-semibold text-slate-900 dark:text-slate-100">
                       Recent Transactions
                     </Small>
@@ -610,21 +461,18 @@ const Credits: NextPageWithLayout<void> = () => {
                         </Button>
                       </div>
                     )}
-                  </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Payment Modal - Only when has access */}
-      {hasAccess && (
-        <PaymentModal
-          isOpen={isPaymentModalOpen}
-          onClose={() => setIsPaymentModalOpen(false)}
-        />
-      )}
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+      />
     </div>
   );
 };
