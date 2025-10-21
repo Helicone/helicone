@@ -7931,27 +7931,6 @@
 					}
 				]
 			},
-			"ResultSuccess_unknown-Array_": {
-				"properties": {
-					"data": {
-						"items": {},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"ResultSuccess__value-string--cost-number_-Array_": {
 				"properties": {
 					"data": {
@@ -19265,7 +19244,43 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_Property-Array.string_"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultError_string_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_Property-Array_"
+										},
+										{
+											"properties": {
+												"error": {
+													"type": "string"
+												},
+												"data": {}
+											},
+											"required": [
+												"error",
+												"data"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"error": {},
+												"data": {
+													"items": {
+														"$ref": "#/components/schemas/Property"
+													},
+													"type": "array"
+												}
+											},
+											"required": [
+												"error",
+												"data"
+											],
+											"type": "object"
+										}
+									]
 								}
 							}
 						}
@@ -19304,13 +19319,17 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/ResultError_string_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_unknown-Array_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_string_"
+											"properties": {
+												"error": {
+													"type": "string"
+												},
+												"data": {}
+											},
+											"required": [
+												"error",
+												"data"
+											],
+											"type": "object"
 										},
 										{
 											"properties": {
@@ -19405,13 +19424,17 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/ResultError_string_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_unknown-Array_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultSuccess_string_"
+											"properties": {
+												"error": {
+													"type": "string"
+												},
+												"data": {}
+											},
+											"required": [
+												"error",
+												"data"
+											],
+											"type": "object"
 										},
 										{
 											"properties": {

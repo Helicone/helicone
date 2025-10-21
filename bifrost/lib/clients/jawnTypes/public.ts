@@ -2805,11 +2805,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_Property-Array.string_": components["schemas"]["ResultSuccess_Property-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_unknown-Array_": {
-      data: unknown[];
-      /** @enum {number|null} */
-      error: null;
-    };
     "ResultSuccess__value-string--cost-number_-Array_": {
       data: {
           /** Format: double */
@@ -6715,7 +6710,13 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Property-Array.string_"];
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_Property-Array_"] | {
+            error: string;
+            data: unknown;
+          } | {
+            error: unknown;
+            data: components["schemas"]["Property"][];
+          };
         };
       };
     };
@@ -6732,7 +6733,10 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | components["schemas"]["ResultSuccess_string_"] | {
+          "application/json": {
+            error: string;
+            data: unknown;
+          } | {
             error: unknown;
             data: {
               ok: boolean;
@@ -6764,7 +6768,10 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | components["schemas"]["ResultSuccess_string_"] | {
+          "application/json": {
+            error: string;
+            data: unknown;
+          } | {
             error: unknown;
             data: {
               ok: boolean;

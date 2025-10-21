@@ -8,8 +8,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
   buildFilterWithAuthClickHouse,
   buildFilterWithAuthClickHouseOrganizationProperties,
@@ -48,24 +47,53 @@ export class PropertyController extends Controller {
         filter: {},
       });
 
+    // Fetch all org properties from ClickHouse, then filter using Postgres hidden set
     const query = `
     SELECT DISTINCT organization_properties.property_key AS property
     FROM organization_properties
-    LEFT JOIN default.hidden_property_keys AS hp
-      ON hp.organization_id = organization_properties.organization_id
-     AND hp.key = organization_properties.property_key
     WHERE (
       ${builtFilter.filter}
-      AND (hp.is_hidden = 0 OR hp.is_hidden IS NULL)
     )
   `;
 
-    const properties = await dbQueryClickhouse<Property>(
+    const propertiesRes = await dbQueryClickhouse<Property>(
       query,
       builtFilter.argsAcc,
     );
+    if (propertiesRes.error) {
+      return propertiesRes;
+    }
 
-    return properties;
+    // Ensure backing table exists and get hidden keys from Postgres
+    await dbExecute(
+      `
+        CREATE TABLE IF NOT EXISTS helicone_hidden_property_keys (
+          organization_id UUID NOT NULL,
+          key TEXT NOT NULL,
+          is_hidden BOOLEAN NOT NULL DEFAULT TRUE,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (organization_id, key)
+        )
+      `,
+      [],
+    );
+
+    const hiddenRes = await dbExecute<{ property: string }>(
+      `SELECT key as property
+       FROM helicone_hidden_property_keys
+       WHERE organization_id = $1 AND is_hidden = TRUE`,
+      [request.authParams.organizationId],
+    );
+    if (hiddenRes.error) {
+      return { data: null, error: hiddenRes.error };
+    }
+
+    const hiddenSet = new Set((hiddenRes.data ?? []).map((r) => r.property));
+    const filtered = (propertiesRes.data ?? []).filter(
+      (p) => !hiddenSet.has(p.property),
+    );
+
+    return { data: filtered, error: null };
   }
 
   @Post("hide")
@@ -81,22 +109,29 @@ export class PropertyController extends Controller {
       throw new Error("Property key is required");
     }
 
-    // Ensure any existing entry is removed, then insert hidden flag
-    const deleteQuery = `
-      ALTER TABLE default.hidden_property_keys
-      DELETE WHERE organization_id = {val_0: UUID} AND key = {val_1: String}
-    `;
-    const delRes = await dbQueryClickhouse(deleteQuery, [orgId, key]);
-    if (delRes.error) {
-      return delRes;
-    }
-
-    const insRes = await clickhouseDb.dbInsertClickhouse(
-      "hidden_property_keys",
-      [{ organization_id: orgId, key, is_hidden: 1 }],
+    // Use Postgres upsert to track hidden state (avoids ClickHouse DDL/DML)
+    await dbExecute(
+      `
+        CREATE TABLE IF NOT EXISTS helicone_hidden_property_keys (
+          organization_id UUID NOT NULL,
+          key TEXT NOT NULL,
+          is_hidden BOOLEAN NOT NULL DEFAULT TRUE,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (organization_id, key)
+        )
+      `,
+      [],
     );
-    if (insRes.error) {
-      return insRes;
+
+    const upsert = await dbExecute(
+      `INSERT INTO helicone_hidden_property_keys (organization_id, key, is_hidden)
+       VALUES ($1, $2, TRUE)
+       ON CONFLICT (organization_id, key)
+       DO UPDATE SET is_hidden = EXCLUDED.is_hidden, updated_at = NOW()`,
+      [orgId, key],
+    );
+    if (upsert.error) {
+      return { data: null, error: upsert.error };
     }
 
     return { data: { ok: true }, error: null };
@@ -108,15 +143,26 @@ export class PropertyController extends Controller {
   ) {
     const orgId = request.authParams.organizationId;
 
-    const query = `
-    SELECT key AS property
-    FROM default.hidden_property_keys
-    WHERE organization_id = {val_0: UUID}
-      AND is_hidden = 1
-    ORDER BY key
-  `;
+    await dbExecute(
+      `
+        CREATE TABLE IF NOT EXISTS helicone_hidden_property_keys (
+          organization_id UUID NOT NULL,
+          key TEXT NOT NULL,
+          is_hidden BOOLEAN NOT NULL DEFAULT TRUE,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (organization_id, key)
+        )
+      `,
+      [],
+    );
 
-    return dbQueryClickhouse<Property>(query, [orgId]);
+    return dbExecute<Property>(
+      `SELECT key AS property
+       FROM helicone_hidden_property_keys
+       WHERE organization_id = $1 AND is_hidden = TRUE
+       ORDER BY key`,
+      [orgId],
+    );
   }
 
   @Post("restore")
@@ -132,21 +178,28 @@ export class PropertyController extends Controller {
       throw new Error("Property key is required");
     }
 
-    const deleteQuery = `
-      ALTER TABLE default.hidden_property_keys
-      DELETE WHERE organization_id = {val_0: UUID} AND key = {val_1: String}
-    `;
-    const delRes = await dbQueryClickhouse(deleteQuery, [orgId, key]);
-    if (delRes.error) {
-      return delRes;
-    }
-
-    const insRes = await clickhouseDb.dbInsertClickhouse(
-      "hidden_property_keys",
-      [{ organization_id: orgId, key, is_hidden: 0 }],
+    await dbExecute(
+      `
+        CREATE TABLE IF NOT EXISTS helicone_hidden_property_keys (
+          organization_id UUID NOT NULL,
+          key TEXT NOT NULL,
+          is_hidden BOOLEAN NOT NULL DEFAULT TRUE,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (organization_id, key)
+        )
+      `,
+      [],
     );
-    if (insRes.error) {
-      return insRes;
+
+    const upsert = await dbExecute(
+      `INSERT INTO helicone_hidden_property_keys (organization_id, key, is_hidden)
+       VALUES ($1, $2, FALSE)
+       ON CONFLICT (organization_id, key)
+       DO UPDATE SET is_hidden = EXCLUDED.is_hidden, updated_at = NOW()`,
+      [orgId, key],
+    );
+    if (upsert.error) {
+      return { data: null, error: upsert.error };
     }
 
     return { data: { ok: true }, error: null };
