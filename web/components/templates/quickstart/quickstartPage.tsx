@@ -1,45 +1,41 @@
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
-import { H2, H3, P } from "../../ui/typography";
-import { useOrg } from "../../layout/org/organizationContext";
+import useNotification from "@/components/shared/notification/useNotification";
+import { useKeys } from "@/components/templates/keys/useKeys";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useCredits } from "@/services/hooks/useCredits";
 import {
-  OnboardingState,
-  useOrgOnboarding,
-} from "../../../services/hooks/useOrgOnboarding";
-import { QuickstartStepCard } from "../../onboarding/QuickstartStep";
-import IntegrationGuide from "./integrationGuide";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "../../ui/dropdown-menu";
-import { Button } from "../../ui/button";
-import {
-  ChevronDown,
-  BookOpen,
-  MessageSquare,
-  Mail,
-  Copy,
-  Loader,
-  Check,
-  Bot,
-  MoveUpRight,
-  CreditCard,
-  DollarSign,
-  Zap,
-  Key,
-  Send,
-  ExternalLink,
-  BarChart,
-  ListTreeIcon,
-  UserPlus,
   ArrowRight,
+  BarChart,
+  BookOpen,
+  Bot,
+  Check,
+  ChevronDown,
+  Copy,
+  CreditCard,
+  ExternalLink,
+  Key,
+  ListTreeIcon,
+  Loader,
+  Mail,
+  MessageSquare,
+  MoveUpRight,
+  Send,
+  UserPlus,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useKeys } from "@/components/templates/keys/useKeys";
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import useNotification from "@/components/shared/notification/useNotification";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useOrgOnboarding } from "../../../services/hooks/useOrgOnboarding";
+import { useOrg } from "../../layout/org/organizationContext";
+import { QuickstartStepCard } from "../../onboarding/QuickstartStep";
+import { Button } from "../../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -47,21 +43,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from "../../ui/sheet";
-import { ProviderKeySettings } from "../settings/providerKeySettings";
-import PaymentModal from "../settings/PaymentModal";
-import HelixIntegrationDialog from "./HelixIntegrationDialog";
-import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
-import { useCredits } from "@/services/hooks/useCredits";
-import { getJawnClient } from "@/lib/clients/jawn";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "../../ui/tooltip";
+import { H2, H3, P } from "../../ui/typography";
+import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
+import PaymentModal from "../settings/PaymentModal";
+import { ProviderKeySettings } from "../settings/providerKeySettings";
+import HelixIntegrationDialog from "./HelixIntegrationDialog";
+import IntegrationGuide from "./integrationGuide";
 
 const QuickstartPage = () => {
-  const router = useRouter();
   const org = useOrg();
   const { setNotification } = useNotification();
   const { addKey } = useKeys();
@@ -95,23 +90,10 @@ const QuickstartPage = () => {
   } = useHeliconeAgent();
 
   useEffect(() => {
-    if (org?.currentOrg?.onboarding_status) {
-      const hasCompletedQuickstart = (
-        org?.currentOrg?.onboarding_status as unknown as OnboardingState
-      ).hasCompletedQuickstart;
-      if (hasCompletedQuickstart) {
-        router.push("/dashboard");
-      }
-    }
-
     if (hasKeys === false) {
       setQuickstartKey(undefined);
     }
   }, [hasKeys]);
-
-  useEffect(() => {
-    setAgentChatOpen(true);
-  }, []);
 
   useEffect(() => {
     setToolHandler("quickstart-open-integration-guide", async () => {
@@ -190,7 +172,8 @@ const QuickstartPage = () => {
         setNotification(result.data?.error ?? "Request failed", "error");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       setTestError(errorMessage);
       setNotification(errorMessage, "error");
     } finally {
@@ -247,7 +230,7 @@ const QuickstartPage = () => {
                       href="/credits"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      className="flex items-center gap-1 transition-colors hover:text-foreground"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <span>Add credits</span>
@@ -257,7 +240,7 @@ const QuickstartPage = () => {
                       href="/settings/providers"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      className="flex items-center gap-1 transition-colors hover:text-foreground"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <span>Configure keys</span>
@@ -283,7 +266,10 @@ const QuickstartPage = () => {
                           >
                             {isTestLoading ? (
                               <>
-                                <Loader size={14} className="mr-1 animate-spin" />
+                                <Loader
+                                  size={14}
+                                  className="mr-1 animate-spin"
+                                />
                                 Sending...
                               </>
                             ) : (
@@ -334,7 +320,10 @@ const QuickstartPage = () => {
                       </div>
                       {hasCredits && (
                         <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 dark:bg-green-900">
-                          <Zap size={12} className="text-green-600 dark:text-green-400" />
+                          <Zap
+                            size={12}
+                            className="text-green-600 dark:text-green-400"
+                          />
                           <span className="text-xs font-medium text-green-700 dark:text-green-300">
                             ${(creditData?.balance ?? 0).toFixed(2)}
                           </span>
@@ -351,9 +340,7 @@ const QuickstartPage = () => {
                   </div>
 
                   {/* BYOK Option */}
-                  <div
-                    className="flex items-start justify-between gap-3 rounded-lg border-2 border-muted-foreground/20 bg-muted p-4"
-                  >
+                  <div className="flex items-start justify-between gap-3 rounded-lg border-2 border-muted-foreground/20 bg-muted p-4">
                     <div className="flex flex-1 items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background">
                         <Key size={20} className="text-muted-foreground" />
@@ -368,7 +355,10 @@ const QuickstartPage = () => {
                       </div>
                       {hasProviderKeys && (
                         <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 dark:bg-green-900">
-                          <Zap size={12} className="text-green-600 dark:text-green-400" />
+                          <Zap
+                            size={12}
+                            className="text-green-600 dark:text-green-400"
+                          />
                           <span className="text-xs font-medium text-green-700 dark:text-green-300">
                             Configured
                           </span>
@@ -430,7 +420,10 @@ const QuickstartPage = () => {
                       <div className="rounded-sm border border-green-200 bg-green-50 p-3 dark:border-green-900 dark:bg-green-950">
                         <div className="flex flex-col gap-2">
                           <div className="flex items-start gap-2">
-                            <Check size={16} className="mt-0.5 text-green-600 dark:text-green-400" />
+                            <Check
+                              size={16}
+                              className="mt-0.5 text-green-600 dark:text-green-400"
+                            />
                             <div className="flex-1">
                               <p className="text-sm font-medium text-green-900 dark:text-green-100">
                                 Response:
@@ -457,7 +450,9 @@ const QuickstartPage = () => {
                     {testError && (
                       <div className="rounded-sm border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950">
                         <div className="flex items-start gap-2">
-                          <div className="mt-0.5 text-sm text-red-600 dark:text-red-400">✗</div>
+                          <div className="mt-0.5 text-sm text-red-600 dark:text-red-400">
+                            ✗
+                          </div>
                           <div className="flex-1">
                             <p className="text-sm font-medium text-red-900 dark:text-red-100">
                               Error:
@@ -584,7 +579,10 @@ const QuickstartPage = () => {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                       <BarChart size={20} className="text-primary" />
                     </div>
-                    <ArrowRight size={16} className="text-muted-foreground transition-transform group-hover:translate-x-1" />
+                    <ArrowRight
+                      size={16}
+                      className="text-muted-foreground transition-transform group-hover:translate-x-1"
+                    />
                   </div>
                   <div>
                     <h4 className="font-semibold">View Dashboard</h4>
@@ -604,7 +602,10 @@ const QuickstartPage = () => {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                       <ListTreeIcon size={20} className="text-primary" />
                     </div>
-                    <ArrowRight size={16} className="text-muted-foreground transition-transform group-hover:translate-x-1" />
+                    <ArrowRight
+                      size={16}
+                      className="text-muted-foreground transition-transform group-hover:translate-x-1"
+                    />
                   </div>
                   <div>
                     <h4 className="font-semibold">Setup Sessions</h4>
@@ -624,7 +625,10 @@ const QuickstartPage = () => {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                       <UserPlus size={20} className="text-primary" />
                     </div>
-                    <ArrowRight size={16} className="text-muted-foreground transition-transform group-hover:translate-x-1" />
+                    <ArrowRight
+                      size={16}
+                      className="text-muted-foreground transition-transform group-hover:translate-x-1"
+                    />
                   </div>
                   <div>
                     <h4 className="font-semibold">Invite Members</h4>
@@ -637,7 +641,6 @@ const QuickstartPage = () => {
             </Link>
           </div>
         </div>
-
       </div>
 
       <Sheet open={isProviderSheetOpen} onOpenChange={setIsProviderSheetOpen}>
