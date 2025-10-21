@@ -81,6 +81,35 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-5-mini:azure": {
+    providerModelId: "gpt-5-mini",
+    provider: "azure",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000025,
+        output: 0.000002,
+        cacheMultipliers: {
+          cachedInput: 0.12,
+        },
+      },
+    ],
+    contextLength: 400000,
+    maxCompletionTokens: 128000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_tokens",
+      "response_format",
+      "structured_outputs"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "gpt-5-nano:openai": {
     providerModelId: "gpt-5-nano",
     provider: "openai",
