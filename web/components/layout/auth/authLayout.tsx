@@ -95,15 +95,13 @@ const AuthLayout = (props: AuthLayoutProps) => {
   useEffect(() => {
     // Allow access to certain pages during onboarding (like quickstart and settings for setup)
     const allowedPagesDuringOnboarding = [
-      '/quickstart',
-      '/settings/providers',
-      '/settings/billing',
-      '/credits',
+      "/quickstart",
+      "/settings/providers",
+      "/settings/billing",
+      "/credits",
     ];
 
-    const isOnAllowedPage = allowedPagesDuringOnboarding.some(path =>
-      pathname.startsWith(path)
-    );
+    const isOnAllowedPage = true;
 
     if (orgContext?.currentOrg?.has_onboarded === false && !isOnAllowedPage) {
       router.push("/onboarding");

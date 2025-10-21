@@ -26,7 +26,6 @@ const BreadcrumbSeparator = () => (
 
 export const STEP_ROUTES: Record<OnboardingStep, string> = {
   ORGANIZATION: "/onboarding",
-  MEMBERS: "/onboarding/members",
   BILLING: "/onboarding/billing",
   REQUEST: "/onboarding/request",
 };
@@ -56,7 +55,6 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
 
   const steps: { label: string; step: OnboardingStep }[] = [
     { label: "Create organization", step: "ORGANIZATION" },
-    { label: "Invite members", step: "MEMBERS" },
     { label: "Send a request", step: "REQUEST" },
   ];
 

@@ -431,7 +431,7 @@ const DesktopSidebar = ({
                               : "text-muted-foreground",
                           )}
                         >
-                          ${((creditData?.balance ?? 0) / 100).toFixed(0)}
+                          ${(creditData?.balance ?? 0).toFixed(2)}
                         </span>
                       </span>
                     )}

@@ -6492,6 +6492,39 @@
 				],
 				"type": "object"
 			},
+			"SendTestRequestResponse": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"response": {
+						"type": "string"
+					},
+					"requestId": {
+						"type": "string"
+					},
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"success"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SendTestRequestRequest": {
+				"properties": {
+					"apiKey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"apiKey"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"SessionResult": {
 				"properties": {
 					"created_at": {
@@ -18109,8 +18142,13 @@
 			"post": {
 				"operationId": "MigrateToPro",
 				"responses": {
-					"204": {
-						"description": "No content"
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
 					}
 				},
 				"tags": [
@@ -18688,6 +18726,42 @@
 					"content": {
 						"application/json": {
 							"schema": {}
+						}
+					}
+				}
+			}
+		},
+		"/v1/test/gateway-request": {
+			"post": {
+				"operationId": "SendTestRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SendTestRequestResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Test"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SendTestRequestRequest"
+							}
 						}
 					}
 				}

@@ -45,6 +45,7 @@ interface QuickstartStepCardProps {
   link: string;
   rightContent?: string;
   rightComponent?: React.ReactNode;
+  headerAction?: React.ReactNode;
   children?: React.ReactNode;
 }
 
@@ -55,6 +56,7 @@ export const QuickstartStepCard = ({
   link,
   rightContent,
   rightComponent,
+  headerAction,
   children,
 }: QuickstartStepCardProps) => {
   return (
@@ -64,35 +66,40 @@ export const QuickstartStepCard = ({
         "bg-background hover:bg-background",
       )}
     >
-      <div className="flex items-center justify-between">
-        <Link href={link} className="flex items-center gap-2">
-          <div
-            className={cn(
-              "flex h-5 w-5 items-center justify-center rounded-full text-xs",
-              "bg-muted text-muted-foreground",
-            )}
-          >
-            {stepNumber}
-          </div>
-          <h3
-            className={cn(
-              "font-medium",
-              isCompleted && "text-muted-foreground line-through",
-            )}
-          >
-            {title}
-          </h3>
-        </Link>
-        {rightComponent ? (
-          rightComponent
-        ) : rightContent ? (
-          <Link href={link}>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <span>{rightContent}</span>
-              <MoveUpRight className="h-3 w-3" />
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <Link href={link} className="flex items-center gap-2">
+            <div
+              className={cn(
+                "flex h-5 w-5 items-center justify-center rounded-full text-xs",
+                "bg-muted text-muted-foreground",
+              )}
+            >
+              {stepNumber}
             </div>
+            <h3
+              className={cn(
+                "font-medium",
+                isCompleted && "text-muted-foreground line-through",
+              )}
+            >
+              {title}
+            </h3>
           </Link>
-        ) : null}
+          <div className="flex items-center gap-3">
+            {headerAction}
+            {rightComponent ? (
+              rightComponent
+            ) : rightContent ? (
+              <Link href={link}>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <span>{rightContent}</span>
+                  <MoveUpRight className="h-3 w-3" />
+                </div>
+              </Link>
+            ) : null}
+          </div>
+        </div>
       </div>
       {children}
     </div>

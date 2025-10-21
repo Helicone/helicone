@@ -16779,9 +16779,11 @@ export interface operations {
   };
   MigrateToPro: {
     responses: {
-      /** @description No content */
-      204: {
-        content: never;
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
       };
     };
   };
