@@ -1,23 +1,54 @@
 import { BaseProvider } from "./base";
-import type { RequestParams, Endpoint, RequestBodyContext } from "../types";
+import type { AuthContext, AuthResult, Endpoint, RequestBodyContext, RequestParams } from "../types";
 
 export class HeliconeProvider extends BaseProvider {
   readonly displayName = "Helicone";
-  readonly baseUrl = "https://inference.helicone.ai/openai/v1";
+  readonly baseUrl = "https://inference.helicone.ai";
   readonly auth = "api-key" as const;
   readonly pricingPages = ["https://helicone.ai/pricing"];
   readonly modelPages = ["https://helicone.ai/models"];
 
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
+    // Check if this is an Anthropic model
+    const isAnthropicModel = endpoint.author === "anthropic";
+
+    if (isAnthropicModel) {
+      return `${this.baseUrl}/anthropic/v1/messages`;
+    }
+
     // Use responses endpoint for pro and codex models
     const isResponsesEndpoint = endpoint.providerModelId.includes("gpt-5-pro") ||
                                  endpoint.providerModelId.includes("gpt-5-codex");
 
     const path = isResponsesEndpoint ? "/responses" : "/chat/completions";
-    return `${this.baseUrl}${path}`;
+    return `${this.baseUrl}/openai/v1${path}`;
+  }
+
+  authenticate(authContext: AuthContext): AuthResult {
+    const headers: Record<string, string> = {};
+
+    // Default to Bearer token auth for OpenAI models
+    headers["Authorization"] = `Bearer ${authContext.apiKey || ""}`;
+
+    return { headers };
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
+    // Check if this is an Anthropic model
+    const isAnthropicModel = endpoint.author === "anthropic";
+
+    if (isAnthropicModel) {
+      // Use Anthropic message format (converted from OpenAI format if needed)
+      if (context.bodyMapping === "NO_MAPPING") {
+        return JSON.stringify({
+          ...context.parsedBody,
+          model: endpoint.providerModelId,
+        });
+      }
+      const anthropicBody = context.toAnthropic(context.parsedBody, endpoint.providerModelId);
+      return JSON.stringify(anthropicBody);
+    }
+
     const isResponsesEndpoint = endpoint.providerModelId.includes("gpt-5-pro") ||
                                  endpoint.providerModelId.includes("gpt-5-codex");
 
@@ -36,7 +67,7 @@ export class HeliconeProvider extends BaseProvider {
       });
     }
 
-    // Standard chat completions format
+    // Standard chat completions format for OpenAI models
     return JSON.stringify({
       ...context.parsedBody,
       model: endpoint.providerModelId,
