@@ -1348,6 +1348,36 @@ export class AdminController extends Controller {
     return ok(null);
   }
 
+  @Post("/org/{orgId}/pricing-config")
+  public async updateOrgPricingConfig(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body() body: { heliconePricingMultiplier: number }
+  ): Promise<Result<null, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { heliconePricingMultiplier } = body;
+
+    if (
+      heliconePricingMultiplier < 0 ||
+      heliconePricingMultiplier > 2 ||
+      isNaN(heliconePricingMultiplier)
+    ) {
+      return err("Pricing multiplier must be between 0 and 2");
+    }
+
+    const { error } = await dbExecute(
+      `UPDATE organization SET pricing_config = jsonb_set(COALESCE(pricing_config, '{}'), '{heliconePricingMultiplier}', $1::text::jsonb) WHERE id = $2`,
+      [heliconePricingMultiplier.toString(), orgId]
+    );
+
+    if (error) {
+      return err(error);
+    }
+
+    return ok(null);
+  }
+
   @Post("/org/{orgId}/delete")
   public async deleteOrg(
     @Request() request: JawnAuthenticatedRequest,

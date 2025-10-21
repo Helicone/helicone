@@ -551,6 +551,9 @@ export interface paths {
     delete: operations["RemoveOrgMember"];
     patch: operations["UpdateOrgMemberRole"];
   };
+  "/v1/admin/org/{orgId}/pricing-config": {
+    patch: operations["UpdateOrgPricingConfig"];
+  };
   "/v1/admin/org/{orgId}/delete": {
     post: operations["DeleteOrg"];
   };
@@ -19510,6 +19513,29 @@ export interface operations {
       content: {
         "application/json": {
           role: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrgPricingConfig: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          heliconePricingMultiplier: number;
         };
       };
     };

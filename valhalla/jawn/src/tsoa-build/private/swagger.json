@@ -56871,6 +56871,60 @@
 				}
 			}
 		},
+		"/v1/admin/org/{orgId}/pricing-config": {
+			"patch": {
+				"operationId": "UpdateOrgPricingConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"heliconePricingMultiplier": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"heliconePricingMultiplier"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/admin/org/{orgId}/delete": {
 			"post": {
 				"operationId": "DeleteOrg",

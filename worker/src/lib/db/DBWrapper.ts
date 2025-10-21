@@ -238,6 +238,7 @@ export class DBWrapper {
         allowNegativeBalance: org.data.allow_negative_balance,
         creditLimit: org.data.credit_limit,
       },
+      pricingConfig: org.data.pricing_config as { heliconePricingMultiplier?: number } | undefined,
     });
   }
 

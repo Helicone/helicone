@@ -100,6 +100,9 @@ export interface AuthParams {
     allowNegativeBalance: boolean;
     creditLimit: number;
   };
+  pricingConfig?: {
+    heliconePricingMultiplier?: number;
+  };
 }
 
 export function dbLoggableRequestFromProxyRequest(

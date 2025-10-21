@@ -7,7 +7,6 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { BarChart as TremorBarChart } from "@tremor/react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
@@ -63,7 +62,11 @@ const OrgSearch = () => {
       queryFn: async ({ pageParam = 0 }) => {
         const jawn = getJawnClient();
         const { data, error } = await jawn.POST("/v1/admin/org-search-fast", {
-          body: { query: debouncedSearchQuery, limit, offset: pageParam as number },
+          body: {
+            query: debouncedSearchQuery,
+            limit,
+            offset: pageParam as number,
+          },
         });
 
         if (error) throw error;
@@ -262,7 +265,9 @@ const OrgSearch = () => {
   return (
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-6">
       <div className="flex items-center gap-2">
-        <Small className="font-medium text-muted-foreground">Organizations</Small>
+        <Small className="font-medium text-muted-foreground">
+          Organizations
+        </Small>
       </div>
       <div className="flex w-full max-w-2xl flex-shrink-0 gap-2">
         <div className="relative flex-1">
@@ -641,7 +646,7 @@ const OrgTableRow = ({
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const currentRow = rowRef.current;
@@ -677,7 +682,7 @@ const OrgTableRow = ({
         "/v1/admin/org-usage-light/{orgId}",
         {
           params: { path: { orgId: org.id } },
-        }
+        },
       );
 
       if (error) throw error;
@@ -697,7 +702,9 @@ const OrgTableRow = ({
         {},
       );
       if (error) throw error;
-      return data?.data?.find((orgData: any) => orgData.organization_id === org.id);
+      return data?.data?.find(
+        (orgData: any) => orgData.organization_id === org.id,
+      );
     },
     staleTime: 5 * 60 * 1000,
     enabled: shouldFetch, // Only fetch when visible and after delay
@@ -774,7 +781,10 @@ const OrgTableRow = ({
       setDeleteOrgDialogOpen(false);
     },
     onError: (error: any) => {
-      setNotification(error.message || "Failed to delete organization", "error");
+      setNotification(
+        error.message || "Failed to delete organization",
+        "error",
+      );
     },
   });
 
@@ -868,12 +878,13 @@ const OrgTableRow = ({
           ) : (
             <div className="relative max-w-[200px]">
               <div className="flex gap-1 overflow-hidden">
-                {featureFlagsData?.flags && featureFlagsData.flags.length > 0 ? (
+                {featureFlagsData?.flags &&
+                featureFlagsData.flags.length > 0 ? (
                   featureFlagsData.flags.map((flag: string) => (
                     <Badge
                       key={flag}
                       variant="secondary"
-                      className="shrink-0 text-xs px-1.5 py-0"
+                      className="shrink-0 px-1.5 py-0 text-xs"
                     >
                       {flag}
                     </Badge>
@@ -916,435 +927,454 @@ const OrgTableRow = ({
         <tr>
           <td colSpan={8} className="bg-muted/30 px-4 py-6">
             <div className="flex flex-col gap-6">
-                {/* Quick Stats + Chart - Side by Side */}
-                <div className="grid grid-cols-1 gap-4 border border-border bg-background p-4 lg:grid-cols-[350px_1fr]">
-                  {/* Left: Stats */}
-                  <div className="flex flex-col gap-4">
-                    {/* Org Info Section */}
-                    <div className="flex flex-col gap-2">
-                      <Small className="font-semibold text-foreground">
-                        Organization
-                      </Small>
-                      <div className="flex flex-col gap-2 pl-2">
-                        <div className="flex items-center justify-between gap-3">
-                          <Small className="min-w-[70px] text-muted-foreground">
-                            ID
-                          </Small>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="font-mono h-6 flex-1 justify-between px-2 text-xs"
+              {/* Quick Stats + Chart - Side by Side */}
+              <div className="grid grid-cols-1 gap-4 border border-border bg-background p-4 lg:grid-cols-[350px_1fr]">
+                {/* Left: Stats */}
+                <div className="flex flex-col gap-4">
+                  {/* Org Info Section */}
+                  <div className="flex flex-col gap-2">
+                    <Small className="font-semibold text-foreground">
+                      Organization
+                    </Small>
+                    <div className="flex flex-col gap-2 pl-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <Small className="min-w-[70px] text-muted-foreground">
+                          ID
+                        </Small>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="font-mono h-6 flex-1 justify-between px-2 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(org.id);
+                            setNotification(
+                              "Organization ID copied",
+                              "success",
+                            );
+                          }}
+                        >
+                          {org.id.slice(0, 8)}...
+                          <Copy size={12} />
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <Small className="min-w-[70px] text-muted-foreground">
+                          Created
+                        </Small>
+                        <Muted className="text-xs">
+                          {new Date(org.created_at).toLocaleDateString()}
+                        </Muted>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <Small className="min-w-[70px] text-muted-foreground">
+                          Tier
+                        </Small>
+                        <Muted className="text-xs">
+                          {org.subscription_status || "N/A"}
+                        </Muted>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Section */}
+                  <div className="flex flex-col gap-2 border-t border-border pt-2">
+                    <Small className="font-semibold text-foreground">
+                      Contact
+                    </Small>
+                    <div className="flex flex-col gap-2 pl-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <Small className="min-w-[70px] pt-0.5 text-muted-foreground">
+                          Owner
+                        </Small>
+                        {owner.email && owner.email !== "N/A" ? (
+                          <a
+                            href={`/admin/org-search?q=${encodeURIComponent(owner.email)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 break-all text-right text-xs text-blue-600 hover:underline dark:text-blue-400"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigator.clipboard.writeText(org.id);
-                              setNotification(
-                                "Organization ID copied",
-                                "success",
+                              e.preventDefault();
+                              window.open(
+                                `/admin/org-search?q=${encodeURIComponent(owner.email)}`,
+                                "_blank",
                               );
                             }}
                           >
-                            {org.id.slice(0, 8)}...
-                            <Copy size={12} />
-                          </Button>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <Small className="min-w-[70px] text-muted-foreground">
-                            Created
-                          </Small>
-                          <Muted className="text-xs">
-                            {new Date(org.created_at).toLocaleDateString()}
-                          </Muted>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <Small className="min-w-[70px] text-muted-foreground">
-                            Tier
-                          </Small>
-                          <Muted className="text-xs">
-                            {org.subscription_status || "N/A"}
-                          </Muted>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Contact Section */}
-                    <div className="flex flex-col gap-2 border-t border-border pt-2">
-                      <Small className="font-semibold text-foreground">
-                        Contact
-                      </Small>
-                      <div className="flex flex-col gap-2 pl-2">
-                        <div className="flex items-start justify-between gap-3">
-                          <Small className="min-w-[70px] pt-0.5 text-muted-foreground">
-                            Owner
-                          </Small>
-                          {owner.email && owner.email !== "N/A" ? (
-                            <a
-                              href={`/admin/org-search?q=${encodeURIComponent(owner.email)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex-1 break-all text-right text-xs text-blue-600 hover:underline dark:text-blue-400"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                window.open(
-                                  `/admin/org-search?q=${encodeURIComponent(owner.email)}`,
-                                  "_blank",
-                                );
-                              }}
-                            >
-                              {owner.email}
-                            </a>
-                          ) : (
-                            <Muted className="text-xs">N/A</Muted>
-                          )}
-                        </div>
-                        {org.stripe_customer_id && (
-                          <div className="flex items-center justify-between gap-3">
-                            <Small className="min-w-[70px] text-muted-foreground">
-                              Stripe
-                            </Small>
-                            <a
-                              href={`https://dashboard.stripe.com/customers/${org.stripe_customer_id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex-1 truncate text-right text-xs text-blue-600 hover:underline dark:text-blue-400"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                window.open(
-                                  `https://dashboard.stripe.com/customers/${org.stripe_customer_id}`,
-                                  "_blank",
-                                );
-                              }}
-                            >
-                              {org.stripe_customer_id}
-                            </a>
-                          </div>
+                            {owner.email}
+                          </a>
+                        ) : (
+                          <Muted className="text-xs">N/A</Muted>
                         )}
                       </div>
-                    </div>
-
-                    {/* Usage Stats Section */}
-                    <div className="flex flex-col gap-2 border-t border-border pt-2">
-                      <Small className="font-semibold text-foreground">
-                        Usage
-                      </Small>
-                      {usageLoading ? (
-                        <div className="flex items-center gap-2 py-4 pl-2">
-                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                          <Muted className="text-xs">Loading detailed usage...</Muted>
+                      {org.stripe_customer_id && (
+                        <div className="flex items-center justify-between gap-3">
+                          <Small className="min-w-[70px] text-muted-foreground">
+                            Stripe
+                          </Small>
+                          <a
+                            href={`https://dashboard.stripe.com/customers/${org.stripe_customer_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 truncate text-right text-xs text-blue-600 hover:underline dark:text-blue-400"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              window.open(
+                                `https://dashboard.stripe.com/customers/${org.stripe_customer_id}`,
+                                "_blank",
+                              );
+                            }}
+                          >
+                            {org.stripe_customer_id}
+                          </a>
                         </div>
-                      ) : usageData ? (
-                        <div className="flex flex-col gap-2 pl-2">
-                          <div className="flex items-center justify-between gap-3">
-                            <Small className="min-w-[70px] text-muted-foreground">
-                              Total
-                            </Small>
-                            <Muted className="text-xs font-semibold">
-                              {formatLargeNumber(usageData.total_requests)}
-                            </Muted>
-                          </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <Small className="min-w-[70px] text-muted-foreground">
-                              Last 30d
-                            </Small>
-                            <Muted className="text-xs font-semibold">
-                              {formatLargeNumber(usageData.requests_last_30_days)}
-                            </Muted>
-                          </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <Small className="min-w-[70px] text-muted-foreground">
-                              All-Time
-                            </Small>
-                            <Muted className="text-xs font-semibold">
-                              {formatLargeNumber(usageData.all_time_count)}
-                            </Muted>
-                          </div>
-                        </div>
-                      ) : (
-                        <Muted className="pl-2 text-xs">Unable to load usage data</Muted>
                       )}
-                    </div>
-
-                    {/* Feature Flags */}
-                    <div className="border-t border-border pt-2">
-                      <FeatureFlagsSection orgId={org.id} orgName={org.name} />
                     </div>
                   </div>
 
-                  {/* Right: Charts - Match left column height */}
-                  <div className="flex flex-col gap-4">
-                    {/* Usage Chart */}
-                    <div className="flex flex-1 flex-col gap-2">
-                      <Small className="font-medium">
-                        Monthly Usage (Last 12 Months)
-                      </Small>
-                      {usageLoading ? (
-                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
-                          <div className="flex items-center gap-2">
-                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                            <Muted className="text-xs">Loading chart data...</Muted>
-                          </div>
+                  {/* Usage Stats Section */}
+                  <div className="flex flex-col gap-2 border-t border-border pt-2">
+                    <Small className="font-semibold text-foreground">
+                      Usage
+                    </Small>
+                    {usageLoading ? (
+                      <div className="flex items-center gap-2 py-4 pl-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        <Muted className="text-xs">
+                          Loading detailed usage...
+                        </Muted>
+                      </div>
+                    ) : usageData ? (
+                      <div className="flex flex-col gap-2 pl-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <Small className="min-w-[70px] text-muted-foreground">
+                            Total
+                          </Small>
+                          <Muted className="text-xs font-semibold">
+                            {formatLargeNumber(usageData.total_requests)}
+                          </Muted>
                         </div>
-                      ) : usageData?.monthly_usage ? (
-                        <div className="h-[200px] w-full">
-                          <ChartContainer
-                            config={{
-                              requestCount: {
-                                label: "Requests",
-                                color: "hsl(200 90% 50%)",
-                              },
-                            }}
-                            className="h-full w-full"
-                          >
-                            <BarChart
-                              data={sortAndFormatMonthlyUsage(
-                                usageData.monthly_usage,
-                              )}
-                              margin={{ top: 5, right: 5, left: 5, bottom: 0 }}
-                            >
-                              <CartesianGrid
-                                vertical={false}
-                                strokeDasharray="3 3"
-                                opacity={0.2}
-                              />
-                              <XAxis
-                                dataKey="month"
-                                tickLine={false}
-                                tickMargin={8}
-                                axisLine={false}
-                                tickFormatter={(value) => value.slice(0, 3)}
-                                fontSize={11}
-                              />
-                              <ChartTooltip
-                                content={
-                                  <ChartTooltipContent
-                                    valueFormatter={(value) =>
-                                      formatLargeNumber(value as number)
-                                    }
-                                  />
-                                }
-                              />
-                              <Bar
-                                dataKey="requestCount"
-                                fill="var(--color-requestCount)"
-                                radius={[3, 3, 0, 0]}
-                                maxBarSize={35}
-                              />
-                            </BarChart>
-                          </ChartContainer>
+                        <div className="flex items-center justify-between gap-3">
+                          <Small className="min-w-[70px] text-muted-foreground">
+                            Last 30d
+                          </Small>
+                          <Muted className="text-xs font-semibold">
+                            {formatLargeNumber(usageData.requests_last_30_days)}
+                          </Muted>
                         </div>
-                      ) : (
-                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
-                          <Muted className="text-xs">Unable to load chart data</Muted>
+                        <div className="flex items-center justify-between gap-3">
+                          <Small className="min-w-[70px] text-muted-foreground">
+                            All-Time
+                          </Small>
+                          <Muted className="text-xs font-semibold">
+                            {formatLargeNumber(usageData.all_time_count)}
+                          </Muted>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <Muted className="pl-2 text-xs">
+                        Unable to load usage data
+                      </Muted>
+                    )}
+                  </div>
 
-                    {/* Cost Chart */}
-                    <div className="flex flex-1 flex-col gap-2">
-                      <Small className="font-medium">
-                        Monthly Cost (Last 12 Months)
-                      </Small>
-                      {usageLoading ? (
-                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
-                          <div className="flex items-center gap-2">
-                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                            <Muted className="text-xs">Loading chart data...</Muted>
-                          </div>
-                        </div>
-                      ) : usageData?.monthly_usage ? (
-                        <div className="h-[200px] w-full">
-                          <ChartContainer
-                            config={{
-                              cost: {
-                                label: "Cost",
-                                color: "hsl(142 76% 36%)",
-                              },
-                            }}
-                            className="h-full w-full"
-                          >
-                            <BarChart
-                              data={sortAndFormatMonthlyUsage(
-                                usageData.monthly_usage,
-                              )}
-                              margin={{ top: 5, right: 5, left: 5, bottom: 0 }}
-                            >
-                              <CartesianGrid
-                                vertical={false}
-                                strokeDasharray="3 3"
-                                opacity={0.2}
-                              />
-                              <XAxis
-                                dataKey="month"
-                                tickLine={false}
-                                tickMargin={8}
-                                axisLine={false}
-                                tickFormatter={(value) => value.slice(0, 3)}
-                                fontSize={11}
-                              />
-                              <ChartTooltip
-                                content={
-                                  <ChartTooltipContent
-                                    valueFormatter={(value) =>
-                                      `$${(value as number).toFixed(2)}`
-                                    }
-                                  />
-                                }
-                              />
-                              <Bar
-                                dataKey="cost"
-                                fill="var(--color-cost)"
-                                radius={[3, 3, 0, 0]}
-                                maxBarSize={35}
-                              />
-                            </BarChart>
-                          </ChartContainer>
-                        </div>
-                      ) : (
-                        <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
-                          <Muted className="text-xs">Unable to load chart data</Muted>
-                        </div>
-                      )}
-                    </div>
+                  {/* Feature Flags */}
+                  <div className="border-t border-border pt-2">
+                    <FeatureFlagsSection orgId={org.id} orgName={org.name} />
+                  </div>
+
+                  {/* Helicone Pricing */}
+                  <div className="border-t border-border pt-2">
+                    <HeliconePricingSection
+                      orgId={org.id}
+                      pricingConfig={org.pricing_config}
+                    />
                   </div>
                 </div>
 
-                {/* Organization Members */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
+                {/* Right: Charts - Match left column height */}
+                <div className="flex flex-col gap-4">
+                  {/* Usage Chart */}
+                  <div className="flex flex-1 flex-col gap-2">
                     <Small className="font-medium">
-                      Organization Members ({org.members.length})
+                      Monthly Usage (Last 12 Months)
                     </Small>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteOrgDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 size={16} className="mr-2" />
-                        Delete Org
-                      </Button>
-                      <AddAdminDialog orgId={org.id} orgName={org.name} />
-                    </div>
-                  </div>
-                  <div className="overflow-hidden border border-border">
-                    <table className="w-full">
-                      <thead className="bg-muted">
-                        <tr>
-                          <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                            Name
-                          </th>
-                          <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                            Email
-                          </th>
-                          <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                            Role
-                          </th>
-                          <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                            Last Sign In
-                          </th>
-                          <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                            Created At
-                          </th>
-                          <th className="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border bg-background">
-                        {org.members.map((member: any) => (
-                          <tr key={member.id}>
-                            <td className="whitespace-nowrap px-4 py-2 text-sm">
-                              {member.name || "N/A"}
-                            </td>
-                            <td className="whitespace-nowrap px-4 py-2 text-sm">
-                              {member.email}
-                            </td>
-                            <td className="whitespace-nowrap px-4 py-2 text-sm">
-                              <Select
-                                value={member.role}
-                                onValueChange={(newRole) => {
-                                  setRoleChange({
-                                    memberId: member.id,
-                                    memberEmail: member.email,
-                                    oldRole: member.role,
-                                    newRole,
-                                  });
-                                  setChangeRoleDialogOpen(true);
-                                }}
-                              >
-                                <SelectTrigger className="h-7 w-32 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="owner">Owner</SelectItem>
-                                  <SelectItem value="admin">Admin</SelectItem>
-                                  <SelectItem value="member">Member</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </td>
-                            <td className="whitespace-nowrap px-4 py-2 text-xs text-muted-foreground">
-                              {member.last_sign_in_at
-                                ? new Date(member.last_sign_in_at).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      month: "short",
-                                      day: "numeric",
-                                      year: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    }
-                                  )
-                                : "Never"}
-                            </td>
-                            <td className="whitespace-nowrap px-4 py-2 text-xs text-muted-foreground">
-                              {member.created_at
-                                ? new Date(member.created_at).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      month: "short",
-                                      day: "numeric",
-                                      year: "numeric",
-                                    }
-                                  )
-                                : "N/A"}
-                            </td>
-                            <td className="whitespace-nowrap px-4 py-2 text-right text-sm">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setMemberToDelete({
-                                    id: member.id,
-                                    email: member.email,
-                                  });
-                                  setDeleteMemberDialogOpen(true);
-                                }}
-                                disabled={removeMemberMutation.isPending}
-                              >
-                                <Trash2
-                                  size={14}
-                                  className="text-destructive"
+                    {usageLoading ? (
+                      <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                          <Muted className="text-xs">
+                            Loading chart data...
+                          </Muted>
+                        </div>
+                      </div>
+                    ) : usageData?.monthly_usage ? (
+                      <div className="h-[200px] w-full">
+                        <ChartContainer
+                          config={{
+                            requestCount: {
+                              label: "Requests",
+                              color: "hsl(200 90% 50%)",
+                            },
+                          }}
+                          className="h-full w-full"
+                        >
+                          <BarChart
+                            data={sortAndFormatMonthlyUsage(
+                              usageData.monthly_usage,
+                            )}
+                            margin={{ top: 5, right: 5, left: 5, bottom: 0 }}
+                          >
+                            <CartesianGrid
+                              vertical={false}
+                              strokeDasharray="3 3"
+                              opacity={0.2}
+                            />
+                            <XAxis
+                              dataKey="month"
+                              tickLine={false}
+                              tickMargin={8}
+                              axisLine={false}
+                              tickFormatter={(value) => value.slice(0, 3)}
+                              fontSize={11}
+                            />
+                            <ChartTooltip
+                              content={
+                                <ChartTooltipContent
+                                  valueFormatter={(value) =>
+                                    formatLargeNumber(value as number)
+                                  }
                                 />
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                              }
+                            />
+                            <Bar
+                              dataKey="requestCount"
+                              fill="var(--color-requestCount)"
+                              radius={[3, 3, 0, 0]}
+                              maxBarSize={35}
+                            />
+                          </BarChart>
+                        </ChartContainer>
+                      </div>
+                    ) : (
+                      <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
+                        <Muted className="text-xs">
+                          Unable to load chart data
+                        </Muted>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cost Chart */}
+                  <div className="flex flex-1 flex-col gap-2">
+                    <Small className="font-medium">
+                      Monthly Cost (Last 12 Months)
+                    </Small>
+                    {usageLoading ? (
+                      <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                          <Muted className="text-xs">
+                            Loading chart data...
+                          </Muted>
+                        </div>
+                      </div>
+                    ) : usageData?.monthly_usage ? (
+                      <div className="h-[200px] w-full">
+                        <ChartContainer
+                          config={{
+                            cost: {
+                              label: "Cost",
+                              color: "hsl(142 76% 36%)",
+                            },
+                          }}
+                          className="h-full w-full"
+                        >
+                          <BarChart
+                            data={sortAndFormatMonthlyUsage(
+                              usageData.monthly_usage,
+                            )}
+                            margin={{ top: 5, right: 5, left: 5, bottom: 0 }}
+                          >
+                            <CartesianGrid
+                              vertical={false}
+                              strokeDasharray="3 3"
+                              opacity={0.2}
+                            />
+                            <XAxis
+                              dataKey="month"
+                              tickLine={false}
+                              tickMargin={8}
+                              axisLine={false}
+                              tickFormatter={(value) => value.slice(0, 3)}
+                              fontSize={11}
+                            />
+                            <ChartTooltip
+                              content={
+                                <ChartTooltipContent
+                                  valueFormatter={(value) =>
+                                    `$${(value as number).toFixed(2)}`
+                                  }
+                                />
+                              }
+                            />
+                            <Bar
+                              dataKey="cost"
+                              fill="var(--color-cost)"
+                              radius={[3, 3, 0, 0]}
+                              maxBarSize={35}
+                            />
+                          </BarChart>
+                        </ChartContainer>
+                      </div>
+                    ) : (
+                      <div className="flex h-[200px] w-full items-center justify-center border border-border bg-muted/10">
+                        <Muted className="text-xs">
+                          Unable to load chart data
+                        </Muted>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
+
+              {/* Organization Members */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <Small className="font-medium">
+                    Organization Members ({org.members.length})
+                  </Small>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteOrgDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 size={16} className="mr-2" />
+                      Delete Org
+                    </Button>
+                    <AddAdminDialog orgId={org.id} orgName={org.name} />
+                  </div>
+                </div>
+                <div className="overflow-hidden border border-border">
+                  <table className="w-full">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Name
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Email
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Role
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Last Sign In
+                        </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Created At
+                        </th>
+                        <th className="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-background">
+                      {org.members.map((member: any) => (
+                        <tr key={member.id}>
+                          <td className="whitespace-nowrap px-4 py-2 text-sm">
+                            {member.name || "N/A"}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2 text-sm">
+                            {member.email}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2 text-sm">
+                            <Select
+                              value={member.role}
+                              onValueChange={(newRole) => {
+                                setRoleChange({
+                                  memberId: member.id,
+                                  memberEmail: member.email,
+                                  oldRole: member.role,
+                                  newRole,
+                                });
+                                setChangeRoleDialogOpen(true);
+                              }}
+                            >
+                              <SelectTrigger className="h-7 w-32 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="owner">Owner</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="member">Member</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2 text-xs text-muted-foreground">
+                            {member.last_sign_in_at
+                              ? new Date(
+                                  member.last_sign_in_at,
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "Never"}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2 text-xs text-muted-foreground">
+                            {member.created_at
+                              ? new Date(member.created_at).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  },
+                                )
+                              : "N/A"}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2 text-right text-sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setMemberToDelete({
+                                  id: member.id,
+                                  email: member.email,
+                                });
+                                setDeleteMemberDialogOpen(true);
+                              }}
+                              disabled={removeMemberMutation.isPending}
+                            >
+                              <Trash2 size={14} className="text-destructive" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </td>
         </tr>
       )}
 
       {/* Delete Member Confirmation Dialog */}
-      <Dialog open={deleteMemberDialogOpen} onOpenChange={setDeleteMemberDialogOpen}>
+      <Dialog
+        open={deleteMemberDialogOpen}
+        onOpenChange={setDeleteMemberDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Remove Member</DialogTitle>
@@ -1383,14 +1413,18 @@ const OrgTableRow = ({
       </Dialog>
 
       {/* Change Role Confirmation Dialog */}
-      <Dialog open={changeRoleDialogOpen} onOpenChange={setChangeRoleDialogOpen}>
+      <Dialog
+        open={changeRoleDialogOpen}
+        onOpenChange={setChangeRoleDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change Member Role</DialogTitle>
             <DialogDescription>
               Are you sure you want to change{" "}
-              <span className="font-medium">{roleChange?.memberEmail}</span>'s role
-              from <span className="font-medium">{roleChange?.oldRole}</span> to{" "}
+              <span className="font-medium">{roleChange?.memberEmail}</span>'s
+              role from{" "}
+              <span className="font-medium">{roleChange?.oldRole}</span> to{" "}
               <span className="font-medium">{roleChange?.newRole}</span>?
             </DialogDescription>
           </DialogHeader>
@@ -1678,10 +1712,7 @@ const FeatureFlagsSection = ({
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setAddDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
               Cancel
             </Button>
             <Button
@@ -1700,6 +1731,104 @@ const FeatureFlagsSection = ({
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+};
+
+const HeliconePricingSection = ({
+  orgId,
+  pricingConfig,
+}: {
+  orgId: string;
+  pricingConfig: any;
+}) => {
+  const queryClient = useQueryClient();
+  const { setNotification } = useNotification();
+  const [multiplier, setMultiplier] = useState<string>(
+    pricingConfig?.heliconePricingMultiplier?.toString() || "1.0",
+  );
+  const [isSaving, setIsSaving] = useState(false);
+
+  const currentMultiplier = pricingConfig?.heliconePricingMultiplier || 1.0;
+
+  const updatePricingMutation = useMutation({
+    mutationFn: async (newMultiplier: number) => {
+      const jawn = getJawnClient();
+      const { error } = await jawn.POST(
+        "/v1/admin/org/{orgId}/pricing-config",
+        {
+          params: { path: { orgId } },
+          body: { heliconePricingMultiplier: newMultiplier },
+        },
+      );
+      if (error) throw new Error(error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orgSearchFast"] });
+      setNotification("Pricing multiplier updated successfully", "success");
+      setIsSaving(false);
+    },
+    onError: (error: any) => {
+      setNotification(
+        error.message || "Failed to update pricing multiplier",
+        "error",
+      );
+      setIsSaving(false);
+    },
+  });
+
+  const handleSave = () => {
+    const value = parseFloat(multiplier);
+    if (isNaN(value) || value < 0 || value > 2) {
+      setNotification("Multiplier must be between 0 and 2", "error");
+      return;
+    }
+    setIsSaving(true);
+    updatePricingMutation.mutate(value);
+  };
+
+  const discountPercent = ((1 - currentMultiplier) * 100).toFixed(0);
+
+  return (
+    <div className="flex w-full flex-col gap-2">
+      <Small className="font-semibold text-foreground">Helicone Pricing</Small>
+      <div className="flex flex-col gap-2 pl-2">
+        <div className="flex items-center gap-2">
+          <Small className="min-w-[70px] text-muted-foreground">
+            Multiplier
+          </Small>
+          <Input
+            type="number"
+            step="0.1"
+            min="0"
+            max="2"
+            value={multiplier}
+            onChange={(e) => setMultiplier(e.target.value)}
+            className="h-7 w-20 text-xs"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSave}
+            disabled={
+              isSaving ||
+              parseFloat(multiplier) === currentMultiplier ||
+              isNaN(parseFloat(multiplier))
+            }
+            className="h-7 px-2"
+          >
+            {isSaving ? <Loader2 size={12} className="animate-spin" /> : "Save"}
+          </Button>
+        </div>
+        <Muted className="text-xs">
+          Current: {currentMultiplier}x
+          {currentMultiplier < 1
+            ? ` (${discountPercent}% discount)`
+            : currentMultiplier > 1
+              ? ` (+${((currentMultiplier - 1) * 100).toFixed(0)}% markup)`
+              : " (no discount)"}
+        </Muted>
+      </div>
     </div>
   );
 };

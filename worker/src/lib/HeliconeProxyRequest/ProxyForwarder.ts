@@ -550,10 +550,15 @@ async function log(
               cost = usage.data.cost;
             } else {
               // Use the standard cost calculation from registry
+              const pricingMultiplier =
+                attemptProvider === "helicone"
+                  ? orgData?.pricingConfig?.heliconePricingMultiplier ?? 1.0
+                  : 1.0;
               const breakdown = modelCostBreakdownFromRegistry({
                 modelUsage: usage.data,
                 providerModelId: attemptModel,
                 provider: attemptProvider,
+                pricingMultiplier,
               });
               cost = breakdown?.totalCost;
             }
@@ -597,10 +602,15 @@ async function log(
               });
 
               if (usage.data) {
+                const pricingMultiplier =
+                  modelProviderName === "helicone"
+                    ? orgData?.pricingConfig?.heliconePricingMultiplier ?? 1.0
+                    : 1.0;
                 const breakdown = modelCostBreakdownFromRegistry({
                   modelUsage: usage.data,
                   providerModelId: model,
                   provider: modelProviderName,
+                  pricingMultiplier,
                 });
 
                 cost = breakdown?.totalCost;

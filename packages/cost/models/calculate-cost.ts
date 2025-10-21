@@ -37,9 +37,10 @@ export function calculateModelCostBreakdown(
     providerModelId: string;
     provider: ModelProviderName;
     requestCount?: number;
+    pricingMultiplier?: number;
   }
 ): CostBreakdown | null {
-  const { modelUsage, providerModelId, provider, requestCount = 1 } = params;
+  const { modelUsage, providerModelId, provider, requestCount = 1, pricingMultiplier = 1.0 } = params;
 
   const configResult = registry.getModelProviderConfigByProviderModelId(providerModelId, provider);
   if (configResult.error || !configResult.data) return null;
@@ -112,7 +113,7 @@ export function calculateModelCostBreakdown(
     breakdown.requestCost = requestCount * pricing.request;
   }
 
-  breakdown.totalCost = 
+  breakdown.totalCost =
     breakdown.inputCost +
     breakdown.outputCost +
     breakdown.cachedInputCost +
@@ -124,6 +125,8 @@ export function calculateModelCostBreakdown(
     breakdown.webSearchCost +
     breakdown.imageCost +
     breakdown.requestCost;
+
+  breakdown.totalCost *= pricingMultiplier;
 
   return breakdown;
 }
