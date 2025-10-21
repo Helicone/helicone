@@ -52,7 +52,7 @@ export type SettingName = keyof SettingsType;
 
 export type Setting = KafkaSettings | AzureExperiment | ApiKey;
 
-const DEFAULTS: Record<SettingName, any> = {
+const DEFAULTS: Partial<Record<SettingName, any>> = {
   "stripe:products": {
     cloudGatewayTokenUsageProduct:
       process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT,

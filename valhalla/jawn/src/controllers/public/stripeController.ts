@@ -379,6 +379,14 @@ export class StripeController extends Controller {
   public async migrateToPro(@Request() request: JawnAuthenticatedRequest) {
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.migrateToPro();
+
+    if (isError(result)) {
+      console.error("Error migrating to pro", JSON.stringify(result.error));
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
   }
 
   @Get("/payment-intents/search")
