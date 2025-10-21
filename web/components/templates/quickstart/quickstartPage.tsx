@@ -13,7 +13,6 @@ import {
   Copy,
   CreditCard,
   ExternalLink,
-  Key,
   ListTreeIcon,
   Loader,
   Mail,
@@ -339,39 +338,21 @@ const QuickstartPage = () => {
                     </Button>
                   </div>
 
-                  {/* BYOK Option */}
-                  <div className="flex items-start justify-between gap-3 rounded-lg border-2 border-muted-foreground/20 bg-muted p-4">
-                    <div className="flex flex-1 items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background">
-                        <Key size={20} className="text-muted-foreground" />
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-sm font-semibold">
-                          Bring Your Own Keys (BYOK)
-                        </span>
-                        <p className="text-xs text-muted-foreground">
-                          Use your existing provider accounts
-                        </p>
-                      </div>
-                      {hasProviderKeys && (
-                        <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 dark:bg-green-900">
-                          <Zap
-                            size={12}
-                            className="text-green-600 dark:text-green-400"
-                          />
-                          <span className="text-xs font-medium text-green-700 dark:text-green-300">
-                            Configured
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
+                  {/* BYOK Option - Simple text link */}
+                  <div className="flex items-center justify-center pt-2">
+                    <button
                       onClick={() => setIsProviderSheetOpen(true)}
+                      className="group flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {hasProviderKeys ? "Manage Keys" : "Configure Keys"}
-                    </Button>
+                      <span>or use your own provider keys</span>
+                      <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+                      {hasProviderKeys && (
+                        <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900 dark:text-green-300">
+                          <Zap size={10} />
+                          Configured
+                        </span>
+                      )}
+                    </button>
                   </div>
                 </div>
               )}
@@ -488,20 +469,6 @@ const QuickstartPage = () => {
                     </div>
                   </div>
 
-                  <Link
-                    href="https://docs.helicone.ai/getting-started/quick-start"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button
-                      variant="link"
-                      className="flex w-auto items-center gap-1"
-                    >
-                      Using another SDK?
-                      <MoveUpRight size={12} />
-                    </Button>
-                  </Link>
-
                   {/* Help Section */}
                   <div className="mx-4 mt-4">
                     <DropdownMenu>
@@ -517,7 +484,7 @@ const QuickstartPage = () => {
                       <DropdownMenuContent>
                         <DropdownMenuItem asChild>
                           <button
-                            onClick={() => setIsHelixDialogOpen(true)}
+                            onClick={() => setAgentChatOpen(true)}
                             className="flex w-full items-center"
                           >
                             <Bot size={16} className="mr-2" />
