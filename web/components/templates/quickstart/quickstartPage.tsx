@@ -615,8 +615,7 @@ const QuickstartPage = () => {
           <SheetHeader>
             <SheetTitle>Add Provider Keys</SheetTitle>
             <SheetDescription>
-              Configure your API keys for different LLM providers to start
-              making requests.
+              Add your own provider API keys (BYOK). When "Enable for AI Gateway" is toggled on, requests will attempt to use these keys first, then automatically fall back to Helicone credits if they fail.
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6">
