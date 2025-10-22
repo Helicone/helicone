@@ -96,10 +96,25 @@ export class ScoreStore extends BaseStore {
       uniqueRequestResponseLogs
     );
 
+    // Create a map of newVersions by request_id and organization_id for correct matching
+    const newVersionsMap = new Map(
+      newVersions.map((v) => [
+        `${v.requestId}-${v.organizationId}`,
+        v,
+      ])
+    );
+
     const res = await clickhouseDb.dbInsertClickhouse(
       "request_response_rmt",
-      filteredRequestResponseLogs.flatMap((row, index) => {
-        const newVersion = newVersions[index];
+      filteredRequestResponseLogs.flatMap((row) => {
+        const key = `${row.request_id}-${row.organization_id}`;
+        const newVersion = newVersionsMap.get(key);
+
+        // Skip if no matching newVersion found (shouldn't happen but be safe)
+        if (!newVersion) {
+          console.warn(`No matching newVersion for request ${row.request_id}`);
+          return [];
+        }
 
         // Merge existing scores with new scores
         const combinedScores = {

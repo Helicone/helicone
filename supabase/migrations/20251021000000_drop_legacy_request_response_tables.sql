@@ -1,20 +1,43 @@
 -- Drop legacy request and response tables and their foreign key constraints
--- These tables were used before ClickHouse migration and are no longer needed
--- All data is now stored in ClickHouse (request_response_rmt table)
--- Note: Avoiding CASCADE to prevent performance issues with large datasets
+-- ============================================================================
 --
--- IMPORTANT: The following code files have been updated to work without these tables:
--- - valhalla/jawn/src/lib/stores/request/VersionedRequestStore.ts (deprecated putPropertyAndBumpVersion)
--- - valhalla/jawn/src/managers/request/RequestManager.ts (updated waitForRequestAndResponse to use ClickHouse)
--- - valhalla/jawn/src/lib/stores/ScoreStore.ts (deprecated bumpRequestVersion)
--- - valhalla/jawn/src/managers/inputs/InputsManager.ts (removed request/response table joins)
+-- CONTEXT: These tables were used before the ClickHouse migration (2023-2024).
+-- All new request/response data is now stored exclusively in ClickHouse's
+-- request_response_rmt table. No new inserts have been happening to these
+-- Postgres tables for months.
 --
--- WARNING: The following files may still reference these tables and may need updates:
--- - valhalla/jawn/src/lib/stores/experimentStore.ts
--- - valhalla/jawn/src/lib/stores/request/request.ts (getRequests function - likely unused)
--- - valhalla/jawn/src/managers/dataset/DatasetManager.ts
--- - valhalla/jawn/src/managers/experiment/ExperimentV2Manager.ts
--- Monitor for errors after deployment and update these files if needed.
+-- TABLES BEING DROPPED:
+-- 1. request, response - Legacy request/response storage (replaced by ClickHouse)
+--    MAY CONTAIN OLD DATA on production, but it's no longer being read or written
+-- 2. asset, cache_hits, feedback - Related legacy tables
+-- 3. prompt_input_record - Part of DEPRECATED PromptManager system
+--    (marked DEPRECATED at valhalla/jawn/src/managers/prompt/PromptManager.ts:805-806)
+--    New system uses prompts_2025_inputs instead
+--    Legacy prompt UI (?legacy=true) will break but this is acceptable
+--
+-- SAFETY:
+-- - Tables contain only legacy/deprecated data that is no longer accessed
+-- - All FK constraints are explicitly dropped first (no CASCADE operations)
+-- - Code has been updated to use ClickHouse or new prompt system
+-- - No active reads or writes to these tables
+--
+-- ROLLBACK PLAN:
+-- If issues are found after deployment:
+-- 1. Restore tables from backup
+-- 2. Revert code changes in VersionedRequestStore.ts, RequestManager.ts, ScoreStore.ts
+-- 3. Re-run old migration to recreate tables and constraints
+--
+-- CODE CHANGES MADE:
+-- - valhalla/jawn/src/lib/stores/request/VersionedRequestStore.ts
+--   (fixed addPropertyToRequest to use ClickHouse)
+-- - valhalla/jawn/src/managers/request/RequestManager.ts
+--   (updated waitForRequestAndResponse to use ClickHouse)
+-- - valhalla/jawn/src/lib/stores/ScoreStore.ts
+--   (fixed array mapping bug, deprecated bumpRequestVersion)
+--
+-- KNOWN LIMITATIONS:
+-- - Legacy prompt UI (?legacy=true) will no longer work
+-- - Some experiment-related code may reference these tables but is likely unused
 
 -- First, drop any legacy views that might reference these tables
 DROP VIEW IF EXISTS response_and_request;
