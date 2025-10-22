@@ -52,6 +52,7 @@ export type HeliconeOrg = {
   created_at: string | null;
   domain: string | null;
   governance_settings: any | null;
+  gateway_discount_enabled: boolean;
   has_onboarded: boolean;
   has_integrated: boolean;
   icon: string;
