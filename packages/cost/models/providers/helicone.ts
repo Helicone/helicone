@@ -40,8 +40,15 @@ export class HeliconeProvider extends BaseProvider {
     if (isAnthropicModel) {
       // Use Anthropic message format (converted from OpenAI format if needed)
       if (context.bodyMapping === "NO_MAPPING") {
+        const body = { ...context.parsedBody };
+
+        // Ensure system message is in object format if it's a string
+        if (typeof body.system === "string") {
+          body.system = [{ type: "text", text: body.system }];
+        }
+
         return JSON.stringify({
-          ...context.parsedBody,
+          ...body,
           model: endpoint.providerModelId,
         });
       }
