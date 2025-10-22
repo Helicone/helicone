@@ -17,13 +17,12 @@ import {
   Loader,
   Mail,
   MessageSquare,
-  MoveUpRight,
   Send,
   UserPlus,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useOrgOnboarding } from "../../../services/hooks/useOrgOnboarding";
 import { useOrg } from "../../layout/org/organizationContext";
 import { QuickstartStepCard } from "../../onboarding/QuickstartStep";
@@ -59,10 +58,16 @@ const QuickstartPage = () => {
   const { setNotification } = useNotification();
   const { addKey } = useKeys();
   const [quickstartKey, setQuickstartKey] = useLocalStorage<string | undefined>(
-    `${org?.currentOrg?.id}_quickstartKey`,
+    "quickstartKey",
     undefined,
   );
-  const [isCreatingKey, setIsCreatingKey] = useState(false);
+
+  useEffect(() => {
+    if (!org?.currentOrg?.id) {
+      org?.refetchOrgs();
+    }
+  }, [org]);
+
   const [isProviderSheetOpen, setIsProviderSheetOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isHelixDialogOpen, setIsHelixDialogOpen] = useState(false);
@@ -103,27 +108,29 @@ const QuickstartPage = () => {
     });
   }, []);
 
-  const handleCreateKey = async () => {
+  const handleCreateKey = useCallback(async () => {
     try {
       let isEu = false;
       if (typeof window !== "undefined") {
         isEu = window.location.hostname.includes("eu.");
       }
-      setIsCreatingKey(true);
-      const { apiKey } = await addKey.mutateAsync({
-        permission: "rw",
-        keyName: "Quickstart",
-        isEu,
-      });
-      if (apiKey) {
-        setQuickstartKey(apiKey);
-      }
+
+      addKey.mutateAsync(
+        {
+          permission: "rw",
+          keyName: "Quickstart",
+          isEu,
+        },
+        {
+          onSuccess: (key) => {
+            setQuickstartKey(key.apiKey);
+          },
+        },
+      );
     } catch (error) {
       console.error("Failed to create API key:", error);
-    } finally {
-      setIsCreatingKey(false);
     }
-  };
+  }, [addKey, setQuickstartKey]);
 
   const handleHelixSubmit = (message: string) => {
     const helpMessage = {
@@ -199,6 +206,8 @@ const QuickstartPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col gap-8 p-6">
+      {`${org?.currentOrg?.id}_quickstartKey`}
+      {quickstartKey}
       <div className="mx-auto mt-4 w-full max-w-4xl items-start">
         <H2>Quickstart</H2>
         <P className="mt-2 text-sm text-muted-foreground">
@@ -312,13 +321,16 @@ const QuickstartPage = () => {
                   </div>
 
                   {/* BYOK Option - Simple text link */}
-                  <div className="flex items-center justify-start pl-4 pt-4 pb-2">
+                  <div className="flex items-center justify-start pb-2 pt-4">
                     <button
                       onClick={() => setIsProviderSheetOpen(true)}
                       className="group flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       <span>or use your own provider keys</span>
-                      <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+                      <ArrowRight
+                        size={14}
+                        className="transition-transform group-hover:translate-x-0.5"
+                      />
                       {hasProviderKeys && (
                         <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900 dark:text-green-300">
                           <Zap size={10} />
@@ -354,11 +366,11 @@ const QuickstartPage = () => {
                     <div className="flex flex-col gap-2">
                       <Button
                         onClick={handleCreateKey}
-                        disabled={isCreatingKey}
+                        disabled={addKey.isPending}
                         className="w-fit"
                         variant="outline"
                       >
-                        {isCreatingKey ? "Creating..." : "Create API Key"}
+                        {addKey.isPending ? "Creating..." : "Create API Key"}
                       </Button>
                     </div>
                   )}
@@ -588,7 +600,10 @@ const QuickstartPage = () => {
           <SheetHeader>
             <SheetTitle>Add Provider Keys</SheetTitle>
             <SheetDescription>
-              Add your own provider API keys (BYOK). When "Enable for AI Gateway" is toggled on, requests will attempt to use these keys first, then automatically fall back to Helicone credits if they fail.
+              Add your own provider API keys (BYOK). When "Enable for AI
+              Gateway" is toggled on, requests will attempt to use these keys
+              first, then automatically fall back to Helicone credits if they
+              fail.
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6">
