@@ -297,7 +297,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     }
   }, [router.query.page]);
 
-  return hasSessions.data?.data?.data || isSessionsLoading ? (
+  return hasSessions || isSessionsLoading ? (
     <main className="flex h-screen w-full animate-fade-in flex-col">
       <Tabs
         value={currentTab}
