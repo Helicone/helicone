@@ -1,7 +1,6 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import clsx from "clsx";
 import { useScores } from "./useScores";
 import { ScoresPanelProps } from "./ScoresPanelProps";
 import { useOrg } from "@/components/layout/org/organizationContext";

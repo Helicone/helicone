@@ -34,6 +34,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   const [open, setOpen] = useState(false);
   const [chatWindowOpen, setChatWindowOpen] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const agentChatPanelRef = useRef<any>(null);
 
   const auth = useHeliconeAuthClient();
@@ -128,8 +129,8 @@ const AuthLayout = (props: AuthLayoutProps) => {
     const isEligibleForDiscount = GATEWAY_DISCOUNT_ELIGIBLE_ORGS.includes(
       orgContext?.currentOrg?.id || ""
     );
-    const gatewayBannerDismissed = typeof window !== "undefined" &&
-      sessionStorage.getItem("gateway-discount-banner-dismissed") === "true";
+    const gatewayBannerDismissed = bannerDismissed || (typeof window !== "undefined" &&
+      sessionStorage.getItem("gateway-discount-banner-dismissed") === "true");
 
     if (isEligibleForDiscount && !gatewayBannerDismissed) {
       return {
@@ -142,7 +143,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         dismissible: true,
         onDismiss: () => {
           sessionStorage.setItem("gateway-discount-banner-dismissed", "true");
-          window.location.reload();
+          setBannerDismissed(true);
         },
       } as BannerType;
     }
@@ -168,7 +169,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
       } as BannerType;
     }
     return null;
-  }, [alertBanners?.data, orgContext, router]);
+  }, [alertBanners?.data, orgContext, router, bannerDismissed]);
 
   const { changelog } = useChangelog();
 

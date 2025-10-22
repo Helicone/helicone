@@ -318,6 +318,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     .filter((d) => d.value !== 0);
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
+  const [gatewayDiscountDismissed, setGatewayDiscountDismissed] = useState(false);
 
   return (
     <>
@@ -541,6 +542,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                             orgContext?.currentOrg?.id || "",
                           ) &&
                             metrics.totalCost.data?.data &&
+                            !gatewayDiscountDismissed &&
                             !sessionStorage.getItem("gateway-discount-dismissed") && (
                               <div className="group flex items-center gap-1">
                                 <button
@@ -581,7 +583,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                                 <button
                                   onClick={() => {
                                     sessionStorage.setItem("gateway-discount-dismissed", "true");
-                                    window.location.reload();
+                                    setGatewayDiscountDismissed(true);
                                   }}
                                   className="text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
                                   aria-label="Dismiss"
