@@ -39,6 +39,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 
 const OrgSearch = () => {
   const router = useRouter();
@@ -1065,6 +1066,15 @@ const OrgTableRow = ({
                       )}
                     </div>
 
+                    {/* Gateway Discount */}
+                    <div className="border-t border-border pt-2">
+                      <GatewayDiscountSection
+                        orgId={org.id}
+                        orgName={org.name}
+                        gatewayDiscountEnabled={org.gateway_discount_enabled}
+                      />
+                    </div>
+
                     {/* Feature Flags */}
                     <div className="border-t border-border pt-2">
                       <FeatureFlagsSection orgId={org.id} orgName={org.name} />
@@ -1695,6 +1705,114 @@ const FeatureFlagsSection = ({
                 </>
               ) : (
                 "Add"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+// Gateway Discount Section Component
+const GatewayDiscountSection = ({
+  orgId,
+  orgName,
+  gatewayDiscountEnabled,
+}: {
+  orgId: string;
+  orgName: string;
+  gatewayDiscountEnabled: boolean;
+}) => {
+  const queryClient = useQueryClient();
+  const { setNotification } = useNotification();
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [pendingValue, setPendingValue] = useState<boolean | null>(null);
+
+  // Update gateway discount mutation
+  const updateGatewayDiscountMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const jawn = getJawnClient();
+      const { error } = await jawn.PATCH("/v1/admin/org/{orgId}/gateway-discount", {
+        params: { path: { orgId } },
+        body: { enabled },
+      });
+      if (error) throw new Error(error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orgSearchFast"] });
+      setNotification("Gateway discount updated successfully", "success");
+      setConfirmDialogOpen(false);
+      setPendingValue(null);
+    },
+    onError: (error: any) => {
+      setNotification(
+        error.message || "Failed to update gateway discount",
+        "error",
+      );
+      setPendingValue(null);
+    },
+  });
+
+  const handleToggle = (checked: boolean) => {
+    setPendingValue(checked);
+    setConfirmDialogOpen(true);
+  };
+
+  const confirmToggle = () => {
+    if (pendingValue !== null) {
+      updateGatewayDiscountMutation.mutate(pendingValue);
+    }
+  };
+
+  return (
+    <div className="flex w-full flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <Small className="font-medium">Gateway Discount</Small>
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={gatewayDiscountEnabled}
+            onCheckedChange={handleToggle}
+            disabled={updateGatewayDiscountMutation.isPending}
+          />
+          <Small className="text-muted-foreground">
+            {gatewayDiscountEnabled ? "Enabled" : "Disabled"}
+          </Small>
+        </div>
+      </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Gateway Discount</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to {pendingValue ? "enable" : "disable"} gateway
+              discount for <span className="font-medium">{orgName}</span>?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setConfirmDialogOpen(false);
+                setPendingValue(null);
+              }}
+              disabled={updateGatewayDiscountMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmToggle}
+              disabled={updateGatewayDiscountMutation.isPending}
+            >
+              {updateGatewayDiscountMutation.isPending ? (
+                <>
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Confirm"
               )}
             </Button>
           </div>

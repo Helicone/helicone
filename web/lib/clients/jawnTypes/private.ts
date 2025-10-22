@@ -551,6 +551,9 @@ export interface paths {
     delete: operations["RemoveOrgMember"];
     patch: operations["UpdateOrgMemberRole"];
   };
+  "/v1/admin/org/{orgId}/gateway-discount": {
+    patch: operations["UpdateGatewayDiscount"];
+  };
   "/v1/admin/org/{orgId}/delete": {
     post: operations["DeleteOrg"];
   };
@@ -19438,6 +19441,7 @@ export interface operations {
                     email: string;
                     id: string;
                   })[];
+                gateway_discount_enabled: boolean;
                 subscription_status: string | null;
                 stripe_subscription_id: string | null;
                 stripe_customer_id: string | null;
@@ -19517,6 +19521,28 @@ export interface operations {
       content: {
         "application/json": {
           role: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateGatewayDiscount: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          enabled: boolean;
         };
       };
     };
