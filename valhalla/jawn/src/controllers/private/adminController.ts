@@ -962,6 +962,7 @@ export class AdminController extends Controller {
       stripe_customer_id: string | null;
       stripe_subscription_id: string | null;
       subscription_status: string | null;
+      gateway_discount_enabled: boolean;
       members: {
         id: string;
         email: string;
@@ -1060,6 +1061,7 @@ export class AdminController extends Controller {
       SELECT
         o.id, o.name, o.created_at, o.owner, o.tier,
         o.stripe_customer_id, o.stripe_subscription_id, o.subscription_status,
+        o.gateway_discount_enabled,
         m.match_score,
         json_agg(
           json_build_object(
@@ -1076,7 +1078,8 @@ export class AdminController extends Controller {
       LEFT JOIN organization_member om ON o.id = om.organization
       LEFT JOIN auth.users u ON om.member = u.id
       GROUP BY o.id, o.name, o.created_at, o.owner, o.tier,
-               o.stripe_customer_id, o.stripe_subscription_id, o.subscription_status, m.match_score
+               o.stripe_customer_id, o.stripe_subscription_id, o.subscription_status,
+               o.gateway_discount_enabled, m.match_score
       ORDER BY m.match_score ASC, o.name ASC
       LIMIT $2 OFFSET $3
     `;
@@ -1117,6 +1120,7 @@ export class AdminController extends Controller {
         stripe_customer_id: string | null;
         stripe_subscription_id: string | null;
         subscription_status: string | null;
+        gateway_discount_enabled: boolean;
         match_score: number;
         members: {
           id: string;
@@ -1339,6 +1343,26 @@ export class AdminController extends Controller {
     const { error } = await dbExecute(
       `UPDATE organization_member SET org_role = $1 WHERE organization = $2 AND member = $3`,
       [body.role, orgId, memberId]
+    );
+
+    if (error) {
+      return err(error);
+    }
+
+    return ok(null);
+  }
+
+  @Patch("/org/{orgId}/gateway-discount")
+  public async updateGatewayDiscount(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body() body: { enabled: boolean }
+  ): Promise<Result<null, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { error } = await dbExecute(
+      `UPDATE organization SET gateway_discount_enabled = $1 WHERE id = $2`,
+      [body.enabled, orgId]
     );
 
     if (error) {

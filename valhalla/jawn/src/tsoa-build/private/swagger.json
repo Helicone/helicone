@@ -56573,6 +56573,9 @@
 														},
 														"type": "array"
 													},
+													"gateway_discount_enabled": {
+														"type": "boolean"
+													},
 													"subscription_status": {
 														"type": "string",
 														"nullable": true
@@ -56603,6 +56606,7 @@
 												},
 												"required": [
 													"members",
+													"gateway_discount_enabled",
 													"subscription_status",
 													"stripe_subscription_id",
 													"stripe_customer_id",
@@ -56886,6 +56890,59 @@
 								},
 								"required": [
 									"role"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/org/{orgId}/gateway-discount": {
+			"patch": {
+				"operationId": "UpdateGatewayDiscount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"enabled": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"enabled"
 								],
 								"type": "object"
 							}
