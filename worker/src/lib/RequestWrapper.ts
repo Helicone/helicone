@@ -580,7 +580,8 @@ export class RequestWrapper {
       `getProxy-CP-${authKey}`,
       env,
       async () =>
-        await getProviderKeyFromPortalKey(authKey, env, supabaseClient)
+        await getProviderKeyFromPortalKey(authKey, env, supabaseClient),
+      43200 // 12 hours
     );
   }
 
@@ -647,7 +648,8 @@ export async function getProviderKeyFromProxyCache(
   return await getAndStoreInCache(
     `getProxyKey-${authKey}`,
     env,
-    async () => await getProviderKeyFromProxy(authKey, env, supabaseClient)
+    async () => await getProviderKeyFromProxy(authKey, env, supabaseClient),
+    43200 // 12 hours
   );
 }
 
