@@ -98,10 +98,7 @@ export class ScoreStore extends BaseStore {
 
     // Create a map of newVersions by request_id and organization_id for correct matching
     const newVersionsMap = new Map(
-      newVersions.map((v) => [
-        `${v.requestId}-${v.organizationId}`,
-        v,
-      ])
+      newVersions.map((v) => [`${v.requestId}-${v.organizationId}`, v])
     );
 
     const res = await clickhouseDb.dbInsertClickhouse(
@@ -208,16 +205,5 @@ export class ScoreStore extends BaseStore {
     }
 
     return "";
-  }
-
-  // DEPRECATED: This method previously bumped version in legacy Postgres request table.
-  // The table no longer exists. Versioning is now handled in ClickHouse.
-  public async bumpRequestVersion(
-    requests: { id: string; organizationId: string }[]
-  ): Promise<Result<UpdatedRequestVersion[], string>> {
-    // No-op: Legacy Postgres table no longer exists
-    return err(
-      "Legacy request table no longer supported. Versioning handled in ClickHouse."
-    );
   }
 }
