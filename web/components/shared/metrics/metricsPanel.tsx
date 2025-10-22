@@ -19,7 +19,7 @@ export function MetricsPanel(props: MetricsPanelProps) {
   const { metric } = props;
 
   return (
-    <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white dark:border-slate-800">
+    <div className="flex h-full flex-col border-b border-r border-border bg-card">
       <dd className="flex flex-grow flex-col p-4 text-foreground">
         <div className="flex w-full items-center justify-between">
           <div className="text-[13px] text-muted-foreground">{metric.label}</div>

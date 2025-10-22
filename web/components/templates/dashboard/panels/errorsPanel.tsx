@@ -45,7 +45,7 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
 
   return (
     <>
-      <div className="flex h-full w-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+      <div className="flex h-full w-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
         <div className="flex h-full flex-col">
           <div className="flex items-start justify-between">
             <div className="flex flex-col space-y-0.5">
@@ -63,8 +63,8 @@ const ErrorsPanel = (props: ErrorsPanelProps) => {
           </div>
           <div className="flex flex-grow flex-col overflow-hidden pt-4">
             <div className="flex flex-row items-center justify-between pb-2">
-              <p className="text-xs font-semibold text-slate-700">Error Type</p>
-              <p className="text-xs font-semibold text-slate-700">Percentage</p>
+              <p className="text-xs font-semibold text-foreground">Error Type</p>
+              <p className="text-xs font-semibold text-foreground">Percentage</p>
             </div>
             <div className="flex-grow overflow-y-auto">{barList}</div>
           </div>

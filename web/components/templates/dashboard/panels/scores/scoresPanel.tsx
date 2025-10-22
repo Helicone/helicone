@@ -1,7 +1,6 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import clsx from "clsx";
 import { useScores } from "./useScores";
 import { ScoresPanelProps } from "./ScoresPanelProps";
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -58,7 +57,7 @@ export const ScoresPanel = (props: ScoresPanelProps) => {
   const hasData = displayScoreKeys && displayScoreKeys.length > 0 && displayScores && displayScores.length > 0;
 
   return (
-    <div className="flex h-full w-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+    <div className="flex h-full w-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
       <div className="flex w-full flex-row items-center justify-between">
         <div className="flex w-full flex-col space-y-0.5">
           <p className="text-sm text-muted-foreground">

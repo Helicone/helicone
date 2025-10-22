@@ -34,7 +34,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
   };
 
   return (
-    <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+    <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
       <div className="flex items-start justify-between">
         <div className="flex flex-col space-y-0.5">
           <p className="text-sm text-muted-foreground">{title}</p>
@@ -57,7 +57,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
         }}
       >
         {isDataOverTimeLoading ? (
-          <div className="h-full w-full rounded-md bg-slate-200 pt-4 dark:bg-slate-800">
+          <div className="h-full w-full rounded-md bg-muted pt-4">
             {withAnimation && <LoadingAnimation height={175} width={175} />}
           </div>
         ) : (

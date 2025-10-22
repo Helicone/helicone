@@ -42,6 +42,12 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import UnauthorizedView from "../requests/UnauthorizedView";
 import DashboardEmptyState from "./DashboardEmptyState";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
+import { Cloud } from "lucide-react";
+
+// Gateway discount configuration
+const GATEWAY_DISCOUNT_MIN = 0.10; // 10%
+const GATEWAY_DISCOUNT_MAX = 0.20; // 20%
+const CALENDLY_URL = "https://cal.com/cole-gottdank/inference-discount";
 import {
   getMockMetrics,
   getMockModels,
@@ -309,6 +315,7 @@ const DashboardPage = (props: DashboardPageProps) => {
     .filter((d) => d.value !== 0);
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
+  const [gatewayDiscountDismissed, setGatewayDiscountDismissed] = useState(false);
 
   return (
     <>
@@ -406,7 +413,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 ))}
                 <div key="requests">
-                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                  <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
                         <p className="text-sm text-muted-foreground">Requests</p>
@@ -513,20 +520,87 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <TopProvidersPanel providers={providers} />
                 </div>
                 <div key="costs">
-                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                  <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
                         <p className="text-sm text-muted-foreground">Costs</p>
-                        <p className="text-xl font-semibold text-foreground">
-                          {metrics.totalCost.data?.data
-                            ? `$${formatNumberString(
-                                metrics.totalCost.data?.data < 0.02
-                                  ? metrics.totalCost.data?.data.toFixed(7)
-                                  : metrics.totalCost.data?.data.toFixed(2),
-                                true,
-                              )}`
-                            : "$0.00"}
-                        </p>
+                        <div className="flex flex-col gap-0.5">
+                          <p className="text-xl font-semibold text-foreground">
+                            {metrics.totalCost.data?.data
+                              ? `$${formatNumberString(
+                                  metrics.totalCost.data?.data < 0.02
+                                    ? metrics.totalCost.data?.data.toFixed(7)
+                                    : metrics.totalCost.data?.data.toFixed(2),
+                                  true,
+                                )}`
+                              : "$0.00"}
+                          </p>
+                          {orgContext?.currentOrg?.gateway_discount_enabled &&
+                            metrics.totalCost.data?.data &&
+                            !gatewayDiscountDismissed &&
+                            !sessionStorage.getItem("gateway-discount-dismissed") && (
+                              <div className="group flex items-center gap-1">
+                                <button
+                                  onClick={() =>
+                                    window.open(CALENDLY_URL, "_blank", "noopener,noreferrer")
+                                  }
+                                  className="group/button flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 transition-all hover:text-primary hover:underline"
+                                >
+                                  <span>
+                                    save{" "}
+                                    <span className="text-confirmative group-hover/button:text-primary">
+                                      $
+                                      {formatNumberString(
+                                        (
+                                          metrics.totalCost.data.data * GATEWAY_DISCOUNT_MAX
+                                        ).toFixed(2),
+                                      )}
+                                      /mo
+                                    </span>{" "}
+                                    w/ AI Gateway
+                                  </span>
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 15 15"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="transition-transform group-hover/button:translate-x-0.5"
+                                  >
+                                    <path
+                                      d="M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z"
+                                      fill="currentColor"
+                                      fillRule="evenodd"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    sessionStorage.setItem("gateway-discount-dismissed", "true");
+                                    setGatewayDiscountDismissed(true);
+                                  }}
+                                  className="text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+                                  aria-label="Dismiss"
+                                >
+                                  <svg
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 15 15"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z"
+                                      fill="currentColor"
+                                      fillRule="evenodd"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
+                        </div>
                       </div>
                     </div>
 
@@ -585,7 +659,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 </div>
                 <div key="users">
-                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                  <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
                         <p className="text-sm text-muted-foreground">Users</p>
@@ -670,7 +744,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </div>
                 <div key="latency">
-                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                  <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
                         <p className="text-sm text-muted-foreground">Latency</p>
@@ -759,7 +833,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </div>
                 <div key="time-to-first-token">
-                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                  <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
                         <p className="text-sm text-muted-foreground">Time to First Token</p>
@@ -841,7 +915,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 </div>
                 <div key="threats">
-                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                  <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
                         <p className="text-sm text-muted-foreground">Threats</p>
@@ -923,7 +997,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 </div>
                 <div key="suggest-more-graphs">
-                  <div className="flex h-full w-full flex-col items-center justify-center space-y-2 border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                  <div className="flex h-full w-full flex-col items-center justify-center space-y-2 border-b border-r border-border bg-card p-6 text-card-foreground">
                     <PresentationChartLineIcon className="h-12 w-12 text-foreground" />
                     <button
                       className="text-semibold p-4 text-lg"
@@ -949,7 +1023,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 </div>
                 <div key="tokens-per-min-over-time">
-                  <div className="flex h-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+                  <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
                         <p className="text-sm text-muted-foreground">Tokens / Minute</p>
