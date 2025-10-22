@@ -122,6 +122,31 @@ const AuthLayout = (props: AuthLayoutProps) => {
         updated_at: activeBanner.updated_at,
       } as BannerType;
     }
+
+    // Gateway discount banner for eligible orgs
+    const GATEWAY_DISCOUNT_ELIGIBLE_ORGS = ["d5b44029-db72-40c9-91bb-0166f51b52da"];
+    const isEligibleForDiscount = GATEWAY_DISCOUNT_ELIGIBLE_ORGS.includes(
+      orgContext?.currentOrg?.id || ""
+    );
+    const gatewayBannerDismissed = typeof window !== "undefined" &&
+      sessionStorage.getItem("gateway-discount-banner-dismissed") === "true";
+
+    if (isEligibleForDiscount && !gatewayBannerDismissed) {
+      return {
+        message: "Save 10-20% on your inference costs for 6 months",
+        title: "Limited Offer: Switch to Helicone AI Gateway",
+        active: true,
+        onClick: () => {
+          window.open("https://cal.com/cole-gottdank/inference-discount", "_blank", "noopener,noreferrer");
+        },
+        dismissible: true,
+        onDismiss: () => {
+          sessionStorage.setItem("gateway-discount-banner-dismissed", "true");
+          window.location.reload();
+        },
+      } as BannerType;
+    }
+
     if (orgContext?.currentOrg?.tier === "demo") {
       return {
         message: (

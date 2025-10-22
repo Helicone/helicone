@@ -58,7 +58,7 @@ export const ScoresPanel = (props: ScoresPanelProps) => {
   const hasData = displayScoreKeys && displayScoreKeys.length > 0 && displayScores && displayScores.length > 0;
 
   return (
-    <div className="flex h-full w-full flex-col border-b border-r border-slate-200 bg-white p-6 text-foreground dark:border-slate-800">
+    <div className="flex h-full w-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
       <div className="flex w-full flex-row items-center justify-between">
         <div className="flex w-full flex-col space-y-0.5">
           <p className="text-sm text-muted-foreground">
