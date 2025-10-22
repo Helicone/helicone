@@ -138,7 +138,7 @@ export class SimpleAIGateway {
 
     // Step 6: Try each attempt in order
     for (const attempt of attempts) {
-      if (attempt.authType === "ptb") {
+      if (attempt.authType === "ptb" && this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping !== "NO_MAPPING") {
         const validationResult = validateOpenAIChatPayload(finalBody);
         if (isErr(validationResult)) {
           errors.push({
