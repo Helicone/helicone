@@ -125,10 +125,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     }
 
     // Gateway discount banner for eligible orgs
-    const GATEWAY_DISCOUNT_ELIGIBLE_ORGS = ["d5b44029-db72-40c9-91bb-0166f51b52da"];
-    const isEligibleForDiscount = GATEWAY_DISCOUNT_ELIGIBLE_ORGS.includes(
-      orgContext?.currentOrg?.id || ""
-    );
+    const isEligibleForDiscount = orgContext?.currentOrg?.gateway_discount_enabled === true;
     const gatewayBannerDismissed = bannerDismissed || (typeof window !== "undefined" &&
       sessionStorage.getItem("gateway-discount-banner-dismissed") === "true");
 

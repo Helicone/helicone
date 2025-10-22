@@ -44,10 +44,7 @@ import DashboardEmptyState from "./DashboardEmptyState";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import { Cloud } from "lucide-react";
 
-// Organizations eligible for gateway discount
-const GATEWAY_DISCOUNT_ELIGIBLE_ORGS: string[] = [
-  "d5b44029-db72-40c9-91bb-0166f51b52da",
-];
+// Gateway discount configuration
 const GATEWAY_DISCOUNT_MIN = 0.10; // 10%
 const GATEWAY_DISCOUNT_MAX = 0.20; // 20%
 const CALENDLY_URL = "https://cal.com/cole-gottdank/inference-discount";
@@ -538,9 +535,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                                 )}`
                               : "$0.00"}
                           </p>
-                          {GATEWAY_DISCOUNT_ELIGIBLE_ORGS.includes(
-                            orgContext?.currentOrg?.id || "",
-                          ) &&
+                          {orgContext?.currentOrg?.gateway_discount_enabled &&
                             metrics.totalCost.data?.data &&
                             !gatewayDiscountDismissed &&
                             !sessionStorage.getItem("gateway-discount-dismissed") && (
