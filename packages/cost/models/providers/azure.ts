@@ -23,7 +23,7 @@ export class AzureOpenAIProvider extends BaseProvider {
     const baseUri =
       endpoint.userConfig.baseUri ||
       (endpoint.ptbEnabled
-        ? "https://helicone-gateway.cognitiveservices.azure.com"
+        ? "https://east1-gateway-resource.cognitiveservices.azure.com/"
         : null);
 
     if (!baseUri) {

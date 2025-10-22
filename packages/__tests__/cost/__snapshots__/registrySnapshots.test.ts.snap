@@ -3139,6 +3139,25 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5-mini:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-mini",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5-mini:helicone": {
       "context": 128000,
       "crossRegion": false,
@@ -4268,6 +4287,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/gpt-5": [
+    "azure",
     "helicone",
     "helicone",
     "helicone",
@@ -5340,6 +5360,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "openai/gpt-5": {
+    "azure": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.12,
+        },
+        "input": 2.5e-7,
+        "output": 0.000002,
+        "threshold": 0,
+      },
+    ],
     "helicone": [
       {
         "cacheMultipliers": {
@@ -5781,6 +5811,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5-mini",
       "providers": [
+        "azure",
         "helicone",
         "openai",
         "openrouter",
@@ -6070,7 +6101,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "anthropic",
     },
     {
-      "modelCount": 7,
+      "modelCount": 8,
       "provider": "azure",
     },
     {
@@ -6208,8 +6239,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:helicone:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 177,
-  "totalModelProviderConfigs": 177,
+  "totalEndpoints": 178,
+  "totalModelProviderConfigs": 178,
   "totalModelsWithPtb": 71,
   "totalProviders": 15,
 }

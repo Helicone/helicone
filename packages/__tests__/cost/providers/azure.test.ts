@@ -160,7 +160,7 @@ describe("AzureOpenAIProvider", () => {
         const url = provider.buildUrl(ptbEndpoint, { isStreaming: false });
 
         expect(url).toBe(
-          "https://helicone-gateway.cognitiveservices.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview"
+          "https://east1-gateway-resource.cognitiveservices.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview"
         );
       });
 
