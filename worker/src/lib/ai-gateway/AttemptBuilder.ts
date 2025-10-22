@@ -6,6 +6,7 @@ import {
   Endpoint,
   Plugin,
   ModelSpec,
+  BodyMappingType,
 } from "@helicone-package/cost/models/types";
 import { parseModelString } from "@helicone-package/cost/models/provider-helpers";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
@@ -27,7 +28,7 @@ export class AttemptBuilder {
   async buildAttempts(
     modelStrings: string[],
     orgId: string,
-    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
@@ -71,7 +72,7 @@ export class AttemptBuilder {
   private async buildAttemptsForAllProviders(
     modelSpec: ModelSpec,
     orgId: string,
-    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get all provider data in one query
@@ -110,7 +111,7 @@ export class AttemptBuilder {
   private async getProviderAttempts(
     modelSpec: ModelSpec,
     orgId: string,
-    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get provider data once
@@ -153,7 +154,7 @@ export class AttemptBuilder {
     modelSpec: ModelSpec,
     providerData: ModelProviderEntry,
     orgId: string,
-    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get user's provider key
@@ -204,7 +205,7 @@ export class AttemptBuilder {
   private async buildPassthroughAttempt(
     modelSpec: ModelSpec,
     orgId: string,
-    bodyMapping: "OPENAI" | "NO_MAPPING" = "OPENAI",
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get user's provider key for passthrough

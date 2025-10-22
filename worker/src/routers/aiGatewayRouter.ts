@@ -2,12 +2,11 @@ import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../supabase/database.types";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { BaseRouter } from "./routerFactory";
-import { APIKeysStore } from "../lib/db/APIKeysStore";
-import { APIKeysManager } from "../lib/managers/APIKeysManager";
 import { SimpleAIGateway } from "../lib/ai-gateway/SimpleAIGateway";
 import { GatewayMetrics } from "../lib/ai-gateway/GatewayMetrics";
 import { getDataDogClient } from "../lib/monitoring/DataDogClient";
 import { DBWrapper } from "../lib/db/DBWrapper";
+import { HeliconeHeaders } from "../lib/models/HeliconeHeaders";
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
   router.post(
@@ -19,6 +18,21 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       requestWrapper.setRequestReferrer("ai-gateway");
+
+      try {
+        const pathLower = new URL(requestWrapper.getUrl()).pathname.toLowerCase();
+        const existingMapping = requestWrapper.headers.get(
+          "Helicone-Gateway-Body-Mapping"
+        );
+        if ((!existingMapping || existingMapping === "OPENAI") && pathLower.includes("v1/responses")) {
+          const headers = new Headers(requestWrapper.headers);
+          headers.set("Helicone-Gateway-Body-Mapping", "RESPONSES");
+          requestWrapper.remapHeaders(headers);
+          requestWrapper.heliconeHeaders = new HeliconeHeaders(requestWrapper.headers);
+        }
+      } catch (_e) {
+        // ignore URL parsing issues
+      }
 
       // Authenticate first
       const isEU = requestWrapper.isEU();

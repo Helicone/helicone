@@ -2865,6 +2865,11 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BodyMappingType": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["OPENAI"]},{"dataType":"enum","enums":["NO_MAPPING"]},{"dataType":"enum","enums":["RESPONSES"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "EndpointConfig": {
         "dataType": "refObject",
         "properties": {
@@ -2876,7 +2881,7 @@ const models: TsoaRoute.Models = {
             "resourceName": {"dataType":"string"},
             "apiVersion": {"dataType":"string"},
             "crossRegion": {"dataType":"boolean"},
-            "gatewayMapping": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["OPENAI"]},{"dataType":"enum","enums":["NO_MAPPING"]}]},
+            "gatewayMapping": {"ref":"BodyMappingType"},
             "modelName": {"dataType":"string"},
             "providerModelId": {"dataType":"string"},
             "pricing": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelPricing"}},
@@ -2936,7 +2941,7 @@ const models: TsoaRoute.Models = {
             "resourceName": {"dataType":"string"},
             "apiVersion": {"dataType":"string"},
             "crossRegion": {"dataType":"boolean"},
-            "gatewayMapping": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["OPENAI"]},{"dataType":"enum","enums":["NO_MAPPING"]}]},
+            "gatewayMapping": {"ref":"BodyMappingType"},
             "modelName": {"dataType":"string"},
         },
         "additionalProperties": false,

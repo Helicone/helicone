@@ -183,6 +183,8 @@ export interface WebSearchPlugin extends BasePlugin<"web"> {
 
 export type Plugin = WebSearchPlugin; // Add more with | as we add plugin types
 
+export type BodyMappingType = "OPENAI" | "NO_MAPPING" | "RESPONSES";
+
 export interface ModelProviderConfig extends BaseConfig {
   providerModelId: string;
   provider: ModelProviderName;
@@ -232,7 +234,7 @@ export interface UserEndpointConfig {
   resourceName?: string;
   apiVersion?: string; // Azure OpenAI
   crossRegion?: boolean;
-  gatewayMapping?: "OPENAI" | "NO_MAPPING";
+  gatewayMapping?: BodyMappingType;
   modelName?: string;
 }
 
@@ -247,7 +249,7 @@ export interface AuthContext {
   apiKey?: string;
   secretKey?: string;
   orgId?: string;
-  bodyMapping?: "OPENAI" | "NO_MAPPING";
+  bodyMapping?: BodyMappingType;
   requestMethod?: string;
   requestUrl?: string;
   requestBody?: string;
@@ -259,6 +261,6 @@ export interface AuthResult {
 
 export interface RequestBodyContext {
   parsedBody: any;
-  bodyMapping: "OPENAI" | "NO_MAPPING";
+  bodyMapping: BodyMappingType;
   toAnthropic: (body: any, providerModelId?: string) => any;
 }

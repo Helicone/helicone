@@ -15,7 +15,7 @@ import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { validateOpenAIChatPayload } from "./validators/openaiRequestValidator";
-import { RequestParams } from "@helicone-package/cost/models/types";
+import { RequestParams, BodyMappingType } from "@helicone-package/cost/models/types";
 import { SecureCacheProvider } from "../util/cache/secureCache";
 import { GatewayMetrics } from "./GatewayMetrics";
 import {
@@ -72,6 +72,9 @@ export class SimpleAIGateway {
   }
 
   async handle(): Promise<Response> {
+    if (this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "RESPONSES") {
+      return new Response("The Responses API is not supported on the AI Gateway. Please use Chat Completions instead.", { status: 400 });
+    }
     // Step 1: Parse and prepare request
     const parseResult = await this.parseAndPrepareRequest();
     if (isErr(parseResult)) {
@@ -342,7 +345,7 @@ export class SimpleAIGateway {
   private async mapResponse(
     attempt: Attempt,
     response: Response,
-    bodyMapping?: "OPENAI" | "NO_MAPPING"
+    bodyMapping?: BodyMappingType
   ): Promise<Result<Response, string>> {
     if (response.status >= 400) {
       return ok(response);
