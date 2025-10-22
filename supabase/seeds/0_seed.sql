@@ -42,9 +42,29 @@ ON CONFLICT DO NOTHING;
 
 
 
-ALTER TABLE public.provider_keys DISABLE TRIGGER  provider_keys_encrypt_secret_trigger_provider_key;
-INSERT INTO pgsodium.key (id, status, created, expires, key_type, key_id, key_context, name, associated_data, raw_key, raw_key_nonce, parent_key, comment, user_data) VALUES ('437d091d-5d86-4f5c-8d3c-2878c04742f7', 'valid', '2025-10-10 17:10:57.074659+00', NULL, 'aead-det', 1, '\x7067736f6469756d', NULL, '', NULL, NULL, NULL, NULL, NULL);
-SELECT setval('pgsodium.key_key_id_seq', 2, false);
+
+
+DO $$
+DECLARE has_pgsodium boolean := false;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1
+    FROM pg_extension
+    WHERE extname = 'pgsodium'
+  ) INTO has_pgsodium;
+
+  IF has_pgsodium THEN
+    INSERT INTO pgsodium.key (id, status, created, expires, key_type, key_id, key_context, name, associated_data, raw_key, raw_key_nonce, parent_key, comment, user_data)
+    VALUES ('437d091d-5d86-4f5c-8d3c-2878c04742f7', 'valid', '2025-10-10 17:10:57.074659+00', NULL, 'aead-det', 1, '\x7067736f6469756d', NULL, '', NULL, NULL, NULL, NULL, NULL)
+    ON CONFLICT (id) DO NOTHING;
+    PERFORM setval('pgsodium.key_key_id_seq', 2, false);
+	ALTER TABLE public.provider_keys DISABLE TRIGGER provider_keys_encrypt_secret_trigger_provider_key;
+  END IF;
+  
+END $$;
+
+
+
 INSERT INTO public.provider_keys (
   id,
   org_id,
@@ -80,4 +100,19 @@ INSERT INTO public.provider_keys (
 )
 ON CONFLICT (id) DO NOTHING;
 
-ALTER TABLE public.provider_keys ENABLE TRIGGER provider_keys_encrypt_secret_trigger_provider_key;
+
+DO $$
+DECLARE has_pgsodium boolean := false;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1
+    FROM pg_extension
+    WHERE extname = 'pgsodium'
+  ) INTO has_pgsodium;
+
+  IF has_pgsodium THEN
+	ALTER TABLE public.provider_keys ENABLE TRIGGER provider_keys_encrypt_secret_trigger_provider_key;
+  END IF;
+  
+END $$;
+
