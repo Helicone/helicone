@@ -82,7 +82,7 @@ const useSessions = ({
   return {
     sessions: data?.data?.data || [],
     refetch,
-    isLoading,
+    isLoading: isLoading || properties.isLoading,
     isRefetching,
     hasSessions: !!properties.data?.data?.find((p) =>
       p.property.toLowerCase().includes("helicone-session"),
