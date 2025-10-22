@@ -49,30 +49,18 @@ export class VersionedRequestStore {
     return ok(result.data);
   }
 
-  // Updates the propeties column (JSONB) of the request table
-  // to include {property: value}
-  // and bumps the version column
+  // DEPRECATED: This method previously updated the legacy Postgres request table
+  // which is no longer used. Properties are now stored in ClickHouse only.
   private async putPropertyAndBumpVersion(
     requestId: string,
     property: string,
     value: string
   ) {
-    return await dbExecute<{
-      id: string;
-      version: number;
-      provider: string;
-      properties: Record<string, string>;
-    }>(
-      `
-      UPDATE request
-      SET properties = properties || $1,
-          version = version + 1
-      WHERE helicone_org_id = $2
-      AND id = $3
-      RETURNING version, id, provider, properties
-      `,
-      [{ [property]: value }, this.orgId, requestId]
-    );
+    // No-op: Legacy Postgres table no longer exists
+    return {
+      data: null,
+      error: "Legacy request table no longer supported. Use ClickHouse only.",
+    };
   }
 
   // Updates the request_response_rmt table in Clickhouse

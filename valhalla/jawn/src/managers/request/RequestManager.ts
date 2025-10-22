@@ -172,6 +172,8 @@ export class RequestManager extends BaseManager {
     return ok(null);
   }
 
+  // DEPRECATED: This method previously waited for request/response in legacy Postgres tables.
+  // These tables no longer exist. All data is in ClickHouse now.
   private async waitForRequestAndResponse(
     heliconeId: string,
     organizationId: string
@@ -184,42 +186,26 @@ export class RequestManager extends BaseManager {
       string
     >
   > {
-    const maxRetries = 3;
+    // Check ClickHouse instead of legacy Postgres tables
+    const requestClickhouse = await this.getRequestsClickhouse({
+      filter: {
+        request_response_rmt: {
+          request_id: {
+            equals: heliconeId,
+          },
+        },
+      },
+      limit: 1,
+    });
 
-    let sleepDuration = 30_000; // 30 seconds
-    for (let i = 0; i < maxRetries; i++) {
-      const { data: response, error: responseError } = await dbExecute<{
-        request: string;
-        response: string;
-      }>(
-        `
-        SELECT
-          request.id as request,
-          response.id as response
-        FROM request inner join response on request.id = response.request
-        WHERE request.helicone_org_id = $1
-        AND request.id = $2
-        `,
-        [organizationId, heliconeId]
-      );
-
-      if (responseError) {
-        console.error("Error fetching response:", responseError);
-        return err(responseError);
-      }
-
-      if (response && response.length > 0) {
-        return ok({
-          requestId: response[0].request,
-          responseId: response[0].response,
-        });
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, sleepDuration));
-      sleepDuration *= 2.5; // 30s, 75s, 187.5s
+    if (requestClickhouse.error || !requestClickhouse.data?.[0]) {
+      return err("Request not found in ClickHouse.");
     }
 
-    return { error: "Request not found.", data: null };
+    return ok({
+      requestId: requestClickhouse.data[0].request_id,
+      responseId: requestClickhouse.data[0].response_id ?? "",
+    });
   }
   async feedbackRequest(
     requestId: string,

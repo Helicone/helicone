@@ -195,28 +195,14 @@ export class ScoreStore extends BaseStore {
     return "";
   }
 
+  // DEPRECATED: This method previously bumped version in legacy Postgres request table.
+  // The table no longer exists. Versioning is now handled in ClickHouse.
   public async bumpRequestVersion(
     requests: { id: string; organizationId: string }[]
   ): Promise<Result<UpdatedRequestVersion[], string>> {
-    const placeholders = requests
-      .map((_, index) => `($${index * 2 + 1}::uuid, $${index * 2 + 2}::uuid)`)
-      .join(", ");
-
-    const values = requests.flatMap((request) => [
-      request.organizationId,
-      request.id,
-    ]);
-
-    const query = `
-      UPDATE request AS r
-      SET version = r.version + 1
-      FROM (VALUES ${placeholders}) AS v(org_id, req_id)
-      WHERE r.helicone_org_id = v.org_id AND r.id = v.req_id
-      RETURNING r.id, r.version, r.provider, r.helicone_org_id
-    `;
-
-    const result = await dbExecute<UpdatedRequestVersion>(query, values);
-
-    return result;
+    // No-op: Legacy Postgres table no longer exists
+    return err(
+      "Legacy request table no longer supported. Versioning handled in ClickHouse."
+    );
   }
 }

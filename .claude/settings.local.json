@@ -58,7 +58,10 @@
       "WebFetch(domain:ui.shadcn.com)",
       "mcp__playwright__browser_tabs",
       "mcp__playwright__browser_close",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(for table in asset cache_hits experiment_output experiment_v2_hypothesis_run feedback finetune_dataset_data job_node_request prompt_input_record properties request_job_task score_value)",
+      "Bash(do echo -n \"$table: \")",
+      "Bash(done)"
     ],
     "deny": []
   },
