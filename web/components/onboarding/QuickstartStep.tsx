@@ -1,6 +1,12 @@
 import { cn } from "@/lib/utils";
-import { MoveUpRight } from "lucide-react";
+import { Lock, MoveUpRight } from "lucide-react";
 import Link from "next/link";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 interface QuickstartStepProps {
   stepNumber: number;
@@ -47,6 +53,8 @@ interface QuickstartStepCardProps {
   rightComponent?: React.ReactNode;
   headerAction?: React.ReactNode;
   children?: React.ReactNode;
+  disabled?: boolean;
+  lockedMessage?: string;
 }
 
 export const QuickstartStepCard = ({
@@ -58,50 +66,81 @@ export const QuickstartStepCard = ({
   rightComponent,
   headerAction,
   children,
+  disabled = false,
+  lockedMessage = "Complete previous steps to unlock",
 }: QuickstartStepCardProps) => {
-  return (
+  const cardContent = (
     <div
       className={cn(
-        "cursor-pointer rounded border border-border px-4 py-4 transition-colors duration-150",
-        "bg-background hover:bg-background",
+        "rounded border border-border px-4 py-4 transition-colors duration-150",
+        disabled
+          ? "cursor-not-allowed bg-muted/30 opacity-60"
+          : "cursor-pointer bg-background hover:bg-background",
       )}
     >
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <Link href={link} className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <div
               className={cn(
                 "flex h-5 w-5 items-center justify-center rounded-full text-xs",
                 "bg-muted text-muted-foreground",
               )}
             >
-              {stepNumber}
+              {disabled ? <Lock size={12} /> : stepNumber}
             </div>
-            <h3
-              className={cn(
-                "font-medium",
-                isCompleted && "text-muted-foreground line-through",
-              )}
-            >
-              {title}
-            </h3>
-          </Link>
-          <div className="flex items-center gap-3">
-            {headerAction}
-            {rightComponent ? (
-              rightComponent
-            ) : rightContent ? (
+            {disabled ? (
+              <h3 className="font-medium text-muted-foreground">{title}</h3>
+            ) : (
               <Link href={link}>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <span>{rightContent}</span>
-                  <MoveUpRight className="h-3 w-3" />
-                </div>
+                <h3
+                  className={cn(
+                    "font-medium",
+                    isCompleted && "text-muted-foreground line-through",
+                  )}
+                >
+                  {title}
+                </h3>
               </Link>
-            ) : null}
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            {!disabled && headerAction}
+            {!disabled &&
+              (rightComponent ? (
+                rightComponent
+              ) : rightContent ? (
+                <Link href={link}>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <span>{rightContent}</span>
+                    <MoveUpRight className="h-3 w-3" />
+                  </div>
+                </Link>
+              ) : null)}
           </div>
         </div>
       </div>
-      {children}
+      {!disabled && children}
+      {disabled && (
+        <div className="mt-3 rounded-sm bg-muted/50 px-3 py-2">
+          <p className="text-sm text-muted-foreground">{lockedMessage}</p>
+        </div>
+      )}
     </div>
   );
+
+  if (disabled) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{cardContent}</TooltipTrigger>
+          <TooltipContent>
+            <p>{lockedMessage}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return cardContent;
 };

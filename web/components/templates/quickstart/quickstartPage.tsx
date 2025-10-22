@@ -213,6 +213,10 @@ const QuickstartPage = () => {
             (index === 1 && hasKeys) ||
             (index === 2 && org?.currentOrg?.has_integrated);
 
+          const isDisabled =
+            (index === 1 && !hasBillingSetup) ||
+            (index === 2 && !hasBillingSetup);
+
           return (
             <QuickstartStepCard
               key={index}
@@ -221,6 +225,14 @@ const QuickstartPage = () => {
               isCompleted={isCompleted ?? false}
               link={step.link}
               rightContent={step.description}
+              disabled={isDisabled}
+              lockedMessage={
+                index === 1
+                  ? "Complete step 1: Add credits or configure provider keys to unlock"
+                  : index === 2
+                    ? "Complete step 1: Add credits or configure provider keys to unlock"
+                    : undefined
+              }
               headerAction={
                 index === 2 ? (
                   <TooltipProvider>
@@ -264,29 +276,36 @@ const QuickstartPage = () => {
               }
             >
               {index === 0 && (
-                <div className="mt-4 flex flex-col gap-3">
+                <div className="mt-4 flex flex-col gap-4">
+                  {/* Billing requirement message */}
+                  <p className="text-xs italic text-muted-foreground">
+                    To use Helicone, you need to either add credits
+                    (pay-as-you-go) or configure your own provider API keys
+                    (BYOK). Choose one option below to continue.
+                  </p>
+
                   {/* PTB Option */}
                   <div
-                    className={`flex items-start justify-between gap-3 rounded-lg border-2 p-4 ${
+                    className={`flex items-start justify-between gap-3 rounded-lg border-2 p-5 ${
                       hasCredits
                         ? "border-primary bg-primary/5"
-                        : "border-border bg-background"
+                        : "border-primary/50 bg-primary/5"
                     }`}
                   >
                     <div className="flex flex-1 items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        <CreditCard size={20} className="text-primary" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/20">
+                        <CreditCard size={24} className="text-primary" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold">
+                          <span className="text-base font-semibold">
                             Pass-Through Billing
                           </span>
-                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                          <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
                             Recommended
                           </span>
                         </div>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           Simple pay-as-you-go pricing
                         </p>
                       </div>
@@ -304,7 +323,7 @@ const QuickstartPage = () => {
                     </div>
                     <Button
                       variant="action"
-                      size="sm"
+                      size="default"
                       onClick={() => setIsPaymentModalOpen(true)}
                     >
                       {hasCredits ? "Add More" : "Add Credits"}
@@ -315,7 +334,7 @@ const QuickstartPage = () => {
                   <div className="flex items-center justify-start pb-2 pt-4">
                     <button
                       onClick={() => setIsProviderSheetOpen(true)}
-                      className="group flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="group flex items-center gap-1 text-sm text-foreground underline-offset-2 transition-colors hover:text-primary hover:underline"
                     >
                       <span>or use your own provider keys</span>
                       <ArrowRight
@@ -506,84 +525,86 @@ const QuickstartPage = () => {
           );
         })}
 
-        {/* Next Steps Section */}
-        <div className="mt-8 flex flex-col gap-4">
-          <H3>Next Steps</H3>
-          <P className="text-sm text-muted-foreground">
-            Explore popular features to get the most out of Helicone
-          </P>
+        {/* Next Steps Section - Only show when billing is setup */}
+        {hasBillingSetup && (
+          <div className="mt-8 flex flex-col gap-4">
+            <H3>Next Steps</H3>
+            <P className="text-sm text-muted-foreground">
+              Explore popular features to get the most out of Helicone
+            </P>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {/* Dashboard Card */}
-            <Link href="/dashboard">
-              <div className="group cursor-pointer rounded-lg border border-border bg-background p-4 transition-all hover:border-primary hover:shadow-md">
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <BarChart size={20} className="text-primary" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {/* Dashboard Card */}
+              <Link href="/dashboard">
+                <div className="group cursor-pointer rounded-lg border border-border bg-background p-4 transition-all hover:border-primary hover:shadow-md">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <BarChart size={20} className="text-primary" />
+                      </div>
+                      <ArrowRight
+                        size={16}
+                        className="text-muted-foreground transition-transform group-hover:translate-x-1"
+                      />
                     </div>
-                    <ArrowRight
-                      size={16}
-                      className="text-muted-foreground transition-transform group-hover:translate-x-1"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">View Dashboard</h4>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      See your request analytics and usage metrics
-                    </p>
+                    <div>
+                      <h4 className="font-semibold">View Dashboard</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        See your request analytics and usage metrics
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
 
-            {/* Sessions Card */}
-            <Link href="/sessions">
-              <div className="group cursor-pointer rounded-lg border border-border bg-background p-4 transition-all hover:border-primary hover:shadow-md">
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <ListTreeIcon size={20} className="text-primary" />
+              {/* Sessions Card */}
+              <Link href="/sessions">
+                <div className="group cursor-pointer rounded-lg border border-border bg-background p-4 transition-all hover:border-primary hover:shadow-md">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <ListTreeIcon size={20} className="text-primary" />
+                      </div>
+                      <ArrowRight
+                        size={16}
+                        className="text-muted-foreground transition-transform group-hover:translate-x-1"
+                      />
                     </div>
-                    <ArrowRight
-                      size={16}
-                      className="text-muted-foreground transition-transform group-hover:translate-x-1"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Setup Sessions</h4>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Track user conversations and interactions
-                    </p>
+                    <div>
+                      <h4 className="font-semibold">Setup Sessions</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Track user conversations and interactions
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
 
-            {/* Invite Members Card */}
-            <Link href="/settings/members">
-              <div className="group cursor-pointer rounded-lg border border-border bg-background p-4 transition-all hover:border-primary hover:shadow-md">
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <UserPlus size={20} className="text-primary" />
+              {/* Invite Members Card */}
+              <Link href="/settings/members">
+                <div className="group cursor-pointer rounded-lg border border-border bg-background p-4 transition-all hover:border-primary hover:shadow-md">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <UserPlus size={20} className="text-primary" />
+                      </div>
+                      <ArrowRight
+                        size={16}
+                        className="text-muted-foreground transition-transform group-hover:translate-x-1"
+                      />
                     </div>
-                    <ArrowRight
-                      size={16}
-                      className="text-muted-foreground transition-transform group-hover:translate-x-1"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Invite Members</h4>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Collaborate with your team members
-                    </p>
+                    <div>
+                      <h4 className="font-semibold">Invite Members</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Collaborate with your team members
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <Sheet open={isProviderSheetOpen} onOpenChange={setIsProviderSheetOpen}>
