@@ -18842,32 +18842,6 @@
 				}
 			}
 		},
-		"/v1/session/has-session": {
-			"get": {
-				"operationId": "HasSession",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_boolean.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Session"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
-			}
-		},
 		"/v1/session/query": {
 			"post": {
 				"operationId": "GetSessions",

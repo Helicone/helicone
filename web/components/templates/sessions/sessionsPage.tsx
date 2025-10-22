@@ -207,7 +207,7 @@ const SessionsPage = (props: SessionsPageProps) => {
   );
 
   const isSessionsLoading =
-    isLoading || allNames.isLoading || names.isLoading || hasSessions.isLoading;
+    isLoading || allNames.isLoading || names.isLoading;
 
   // Helper function to get TimeFilter object
   const getTimeFilterObject = (start: Date, end: Date): TimeFilter => ({
@@ -297,7 +297,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     }
   }, [router.query.page]);
 
-  return hasSessions.data?.data?.data || isSessionsLoading ? (
+  return hasSessions || isSessionsLoading ? (
     <main className="flex h-screen w-full animate-fade-in flex-col">
       <Tabs
         value={currentTab}

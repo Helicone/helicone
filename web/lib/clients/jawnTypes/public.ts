@@ -398,9 +398,6 @@ export interface paths {
   "/v1/test/gateway-request": {
     post: operations["SendTestRequest"];
   };
-  "/v1/session/has-session": {
-    get: operations["HasSession"];
-  };
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
@@ -6529,16 +6526,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["SendTestRequestResponse"];
-        };
-      };
-    };
-  };
-  HasSession: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_boolean.string_"];
         };
       };
     };
