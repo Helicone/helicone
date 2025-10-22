@@ -58,7 +58,8 @@
       "WebFetch(domain:ui.shadcn.com)",
       "mcp__playwright__browser_tabs",
       "mcp__playwright__browser_close",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(jq:*)"
     ],
     "deny": []
   },
