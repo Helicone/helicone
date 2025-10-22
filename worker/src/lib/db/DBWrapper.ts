@@ -22,7 +22,7 @@ export type RateLimitPolicy = {
   segment: string | undefined;
 };
 
-const RATE_LIMIT_CACHE_TTL = 120; // 2 minutes
+const RATE_LIMIT_CACHE_TTL = 43200; // 12 hours
 
 async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,
@@ -253,7 +253,8 @@ export class DBWrapper {
     const authParams = await getAndStoreInCache(
       `authParams3-${cacheKey}`,
       this.env,
-      async () => await this._getAuthParams()
+      async () => await this._getAuthParams(),
+      43200 // 12 hours
     );
     if (!authParams || authParams.error || !authParams.data) {
       return err(authParams?.error || "Invalid authentication.");
@@ -342,7 +343,8 @@ export class DBWrapper {
           id: data?.id ?? "",
           percentLog: data?.percent_to_log ?? 100_000,
         });
-      }
+      },
+      43200 // 12 hours
     );
   }
 

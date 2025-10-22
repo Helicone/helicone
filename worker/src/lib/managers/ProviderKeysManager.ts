@@ -20,7 +20,8 @@ export class ProviderKeysManager {
           await storeInCache(
             `provider_keys_${orgId}`,
             JSON.stringify(keys),
-            this.env
+            this.env,
+            43200 // 12 hours
           );
         })
       );
@@ -36,7 +37,8 @@ export class ProviderKeysManager {
     await storeInCache(
       `provider_keys_${orgId}`,
       JSON.stringify(providerKeys),
-      this.env
+      this.env,
+      43200 // 12 hours
     );
   }
   async getProviderKey(
@@ -44,7 +46,11 @@ export class ProviderKeysManager {
     orgId: string,
     keyCuid?: string
   ): Promise<ProviderKey | null> {
-    const keys = await getFromKVCacheOnly(`provider_keys_${orgId}`, this.env);
+    const keys = await getFromKVCacheOnly(
+      `provider_keys_${orgId}`,
+      this.env,
+      43200 // 12 hours
+    );
     if (!keys) {
       return null;
     }
@@ -81,7 +87,8 @@ export class ProviderKeysManager {
 
       const existingKeys = await getFromKVCacheOnly(
         `provider_keys_${orgId}`,
-        this.env
+        this.env,
+        43200 // 12 hours
       );
       if (existingKeys) {
         const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
@@ -89,13 +96,15 @@ export class ProviderKeysManager {
         await storeInCache(
           `provider_keys_${orgId}`,
           JSON.stringify(existingKeysData),
-          this.env
+          this.env,
+          43200 // 12 hours
         );
       } else {
         await storeInCache(
           `provider_keys_${orgId}`,
           JSON.stringify([key]),
-          this.env
+          this.env,
+          43200 // 12 hours
         );
       }
       return key;

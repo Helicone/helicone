@@ -23,7 +23,8 @@ export class APIKeysManager {
           await storeInCache(
             `api_keys_${key.api_key_hash}`,
             key.organization_id,
-            this.env
+            this.env,
+            43200 // 12 hours
           );
         })
       );
@@ -42,11 +43,20 @@ export class APIKeysManager {
       await removeFromCache(`api_keys_${apiKeyHash}`, this.env);
       return;
     }
-    await storeInCache(`api_keys_${apiKeyHash}`, organizationId, this.env);
+    await storeInCache(
+      `api_keys_${apiKeyHash}`,
+      organizationId,
+      this.env,
+      43200 // 12 hours
+    );
   }
 
   async getAPIKey(apiKeyHash: string): Promise<string | null> {
-    const key = await getFromKVCacheOnly(`api_keys_${apiKeyHash}`, this.env);
+    const key = await getFromKVCacheOnly(
+      `api_keys_${apiKeyHash}`,
+      this.env,
+      43200 // 12 hours
+    );
     if (!key) {
       return null;
     }
