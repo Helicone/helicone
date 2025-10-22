@@ -41,26 +41,6 @@ const agent = createReactAgent({
 });
 ```
 
-```typescript TypeScript - Anthropic
-import { ChatAnthropic } from "@langchain/anthropic";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import { MemorySaver } from "@langchain/langgraph";
-
-const model = new ChatAnthropic({
-    model: 'claude-opus-4-1',
-    apiKey: process.env.HELICONE_API_KEY,
-    clientOptions: {
-        baseURL: "https://ai-gateway.helicone.ai",
-    },
-});
-
-const agent = createReactAgent({
-    llm: model,
-    tools: yourTools,
-    checkpointer: new MemorySaver(),
-});
-```
-
 ```python Python - OpenAI
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
@@ -70,24 +50,6 @@ model = ChatOpenAI(
     model='gpt-4.1-mini',
     api_key=os.getenv('HELICONE_API_KEY'),
     base_url="https://ai-gateway.helicone.ai/v1",
-)
-
-agent = create_react_agent(
-    model,
-    tools=your_tools,
-    checkpointer=MemorySaver(),
-)
-```
-
-```python Python - Anthropic
-from langchain_anthropic import ChatAnthropic
-from langgraph.prebuilt import create_react_agent
-from langgraph.checkpoint.memory import MemorySaver
-
-model = ChatAnthropic(
-    model='claude-opus-4-1',
-    api_key=os.getenv('HELICONE_API_KEY'),
-    base_url="https://ai-gateway.helicone.ai",
 )
 
 agent = create_react_agent(
