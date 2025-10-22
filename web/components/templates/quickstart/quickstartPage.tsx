@@ -61,13 +61,6 @@ const QuickstartPage = () => {
     "quickstartKey",
     undefined,
   );
-
-  useEffect(() => {
-    if (!org?.currentOrg?.id) {
-      org?.refetchOrgs();
-    }
-  }, [org]);
-
   const [isProviderSheetOpen, setIsProviderSheetOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isHelixDialogOpen, setIsHelixDialogOpen] = useState(false);
@@ -206,8 +199,6 @@ const QuickstartPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col gap-8 p-6">
-      {`${org?.currentOrg?.id}_quickstartKey`}
-      {quickstartKey}
       <div className="mx-auto mt-4 w-full max-w-4xl items-start">
         <H2>Quickstart</H2>
         <P className="mt-2 text-sm text-muted-foreground">

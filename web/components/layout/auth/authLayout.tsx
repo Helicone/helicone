@@ -99,7 +99,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
       "/settings/providers",
       "/settings/billing",
       "/credits",
-      "/settings",
     ];
 
     const isOnAllowedPage = allowedPagesDuringOnboarding.some((path) =>

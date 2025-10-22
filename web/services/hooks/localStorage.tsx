@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { logger } from "@/lib/telemetry/logger";
 
@@ -8,16 +8,7 @@ export function useLocalStorage<T>(
   onNothingStored?: (_setStored: (_t: T) => void) => void,
 ): [T, (_t: T) => void] {
   const org = useOrg();
-  useEffect(() => {
-    if (!org?.currentOrg?.id) {
-      org?.refetchOrgs();
-    }
-  }, [org]);
-
-  const orgId = useMemo(() => {
-    const id = org?.currentOrg?.id ?? "";
-    return id;
-  }, [org]);
+  const orgId = org?.currentOrg?.id ?? "";
   const orgKey = `${orgId}_${key}`;
   const [storedValue, setStoredValue] = useState<T>(initialValue);
 
