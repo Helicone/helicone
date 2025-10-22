@@ -1,27 +1,27 @@
 /* eslint-disable @next/next/no-img-element */
 
-import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { $JAWN_API } from "@/lib/clients/jawn";
-import { Rocket } from "lucide-react";
-import { useRouter } from "next/router";
-import { useMemo, useRef, useState, useEffect } from "react";
-import { useChangelog } from "../../../services/hooks/admin";
-import UpgradeProModal from "../../shared/upgradeProModal";
-import { Row } from "../common";
-import { logger } from "@/lib/telemetry/logger";
-import { useOrg } from "../org/organizationContext";
-import MetaData from "../public/authMetaData";
-import DemoModal from "./DemoModal";
-import MainContent, { BannerType } from "./MainContent";
-import Sidebar from "./Sidebar";
-import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import AgentChat from "@/components/templates/agent/agentChat";
 import { HeliconeAgentProvider } from "@/components/templates/agent/HeliconeAgentContext";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import AgentChat from "@/components/templates/agent/agentChat";
+import { $JAWN_API } from "@/lib/clients/jawn";
+import { logger } from "@/lib/telemetry/logger";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { Rocket } from "lucide-react";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useChangelog } from "../../../services/hooks/admin";
+import UpgradeProModal from "../../shared/upgradeProModal";
+import { Row } from "../common";
+import { useOrg } from "../org/organizationContext";
+import MetaData from "../public/authMetaData";
+import DemoModal from "./DemoModal";
+import MainContent, { BannerType } from "./MainContent";
+import Sidebar from "./Sidebar";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -91,24 +91,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
     {},
   );
   const orgContext = useOrg();
-
-  useEffect(() => {
-    // Allow access to certain pages during onboarding (like quickstart and settings for setup)
-    const allowedPagesDuringOnboarding = [
-      "/quickstart",
-      "/settings/providers",
-      "/settings/billing",
-      "/credits",
-    ];
-
-    const isOnAllowedPage = allowedPagesDuringOnboarding.some((path) =>
-      pathname.startsWith(path),
-    );
-
-    if (orgContext?.currentOrg?.has_onboarded === false && !isOnAllowedPage) {
-      router.push("/quickstart");
-    }
-  }, [orgContext?.currentOrg?.has_onboarded, pathname, router]);
 
   const banner = useMemo((): BannerType | null => {
     const activeBanner = alertBanners?.data?.find((x) => x.active);
