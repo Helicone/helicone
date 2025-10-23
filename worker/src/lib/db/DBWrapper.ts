@@ -237,6 +237,7 @@ export class DBWrapper {
       metaData: {
         allowNegativeBalance: org.data.allow_negative_balance,
         creditLimit: org.data.credit_limit,
+        dangerouslyBypassWalletCheck: org.data.dangerously_bypass_wallet_check,
       },
     });
   }

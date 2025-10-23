@@ -1611,6 +1611,7 @@ export type Database = {
           color: string
           created_at: string | null
           credit_limit: number
+          dangerously_bypass_wallet_check: boolean
           domain: string | null
           gateway_discount_enabled: boolean
           governance_settings: Json | null
@@ -1644,6 +1645,7 @@ export type Database = {
           color?: string
           created_at?: string | null
           credit_limit?: number
+          dangerously_bypass_wallet_check?: boolean
           domain?: string | null
           gateway_discount_enabled?: boolean
           governance_settings?: Json | null
@@ -1677,6 +1679,7 @@ export type Database = {
           color?: string
           created_at?: string | null
           credit_limit?: number
+          dangerously_bypass_wallet_check?: boolean
           domain?: string | null
           gateway_discount_enabled?: boolean
           governance_settings?: Json | null
@@ -2730,6 +2733,44 @@ export type Database = {
           soft_delete: boolean | null
           vault_key_id: string | null
         }
+        Insert: {
+          auth_type?: string | null
+          byok_enabled?: boolean | null
+          config?: Json | null
+          created_at?: string | null
+          cuid?: string | null
+          decrypted_provider_key?: string | null
+          decrypted_provider_secret_key?: string | null
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          provider_secret_key?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Update: {
+          auth_type?: string | null
+          byok_enabled?: boolean | null
+          config?: Json | null
+          created_at?: string | null
+          cuid?: string | null
+          decrypted_provider_key?: string | null
+          decrypted_provider_secret_key?: string | null
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          provider_secret_key?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
         Relationships: [
           {
             foreignKeyName: "provider_keys_org_id_fkey"
@@ -2763,6 +2804,7 @@ export type Database = {
       }
     }
     Functions: {
+      bytea_to_text: { Args: { data: string }; Returns: string }
       check_request_access: {
         Args: { this_auth_hash: string; this_user_id: string }
         Returns: boolean
@@ -2928,6 +2970,7 @@ export type Database = {
         }
         Returns: number
       }
+      text_to_bytea: { Args: { data: string }; Returns: string }
       try_det_decrypt_utf8: {
         Args: { aad: string; ct: string; key_id: string; nonce: string }
         Returns: string

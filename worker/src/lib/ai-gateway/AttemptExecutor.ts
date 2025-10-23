@@ -32,6 +32,7 @@ interface ExecutorProps {
   orgMeta: {
     allowNegativeBalance: boolean;
     creditLimit: number;
+    dangerouslyBypassWalletCheck: boolean;
   };
 }
 
@@ -245,6 +246,7 @@ export class AttemptExecutor {
     orgMeta: {
       allowNegativeBalance: boolean;
       creditLimit: number;
+      dangerouslyBypassWalletCheck: boolean;
     }
   ): Promise<
     Result<{ escrowId: string }, { statusCode?: number; message: string }>
@@ -279,6 +281,11 @@ export class AttemptExecutor {
     try {
       const walletId = this.env.WALLET.idFromName(orgId);
       const walletStub = this.env.WALLET.get(walletId);
+      if (orgMeta.dangerouslyBypassWalletCheck) {
+        return ok({
+          escrowId: "BYPASS_ESCROW",
+        });
+      }
 
       const escrowResult = await walletStub.reserveCostInEscrow(
         orgId,

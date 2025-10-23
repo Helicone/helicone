@@ -533,6 +533,9 @@ export class Wallet extends DurableObject<Env> {
     escrowId: string,
     actualCost: number
   ): { clickhouseLastCheckedAt: number } {
+    if (escrowId === "BYPASS_ESCROW") {
+      return { clickhouseLastCheckedAt: Date.now() };
+    }
     const actualCostScaled = actualCost * SCALE_FACTOR;
     if (actualCostScaled < 0) {
       throw new Error("actualCost cannot be negative");

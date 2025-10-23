@@ -31,6 +31,7 @@ export interface AuthContext {
   orgMeta: {
     allowNegativeBalance: boolean;
     creditLimit: number;
+    dangerouslyBypassWalletCheck: boolean;
   };
   apiKey: string;
   supabaseClient: any;

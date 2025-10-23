@@ -47852,6 +47852,9 @@
 									"type": "number",
 									"format": "double"
 								},
+								"dangerouslyBypassWalletCheck": {
+									"type": "boolean"
+								},
 								"creditLimit": {
 									"type": "number",
 									"format": "double"
@@ -47893,6 +47896,7 @@
 								}
 							},
 							"required": [
+								"dangerouslyBypassWalletCheck",
 								"creditLimit",
 								"allowNegativeBalance",
 								"ownerEmail",
@@ -48128,10 +48132,13 @@
 					}
 				]
 			},
-			"ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__": {
+			"ResultSuccess__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean__": {
 				"properties": {
 					"data": {
 						"properties": {
+							"dangerouslyBypassWalletCheck": {
+								"type": "boolean"
+							},
 							"creditLimit": {
 								"type": "number",
 								"format": "double"
@@ -48141,6 +48148,7 @@
 							}
 						},
 						"required": [
+							"dangerouslyBypassWalletCheck",
 							"creditLimit",
 							"allowNegativeBalance"
 						],
@@ -48161,10 +48169,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__allowNegativeBalance-boolean--creditLimit-number_.string_": {
+			"Result__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"
+						"$ref": "#/components/schemas/ResultSuccess__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -58458,7 +58466,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__allowNegativeBalance-boolean--creditLimit-number_.string_"
+									"$ref": "#/components/schemas/Result__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean_.string_"
 								}
 							}
 						}
@@ -58496,6 +58504,14 @@
 						"schema": {
 							"format": "double",
 							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "dangerouslyBypassWalletCheck",
+						"required": false,
+						"schema": {
+							"type": "boolean"
 						}
 					}
 				]

@@ -16133,6 +16133,7 @@ Json: JsonObject;
           walletEffectiveBalance?: number;
           /** Format: double */
           walletBalance?: number;
+          dangerouslyBypassWalletCheck: boolean;
           /** Format: double */
           creditLimit: number;
           allowNegativeBalance: boolean;
@@ -16207,8 +16208,9 @@ Json: JsonObject;
       error: null;
     };
     "Result_TableDataResponse.string_": components["schemas"]["ResultSuccess_TableDataResponse_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__": {
+    "ResultSuccess__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean__": {
       data: {
+        dangerouslyBypassWalletCheck: boolean;
         /** Format: double */
         creditLimit: number;
         allowNegativeBalance: boolean;
@@ -16216,7 +16218,7 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "Result__allowNegativeBalance-boolean--creditLimit-number_.string_": components["schemas"]["ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"] | components["schemas"]["ResultError_string_"];
+    "Result__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean_.string_": components["schemas"]["ResultSuccess__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean__"] | components["schemas"]["ResultError_string_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -20084,6 +20086,7 @@ export interface operations {
       query?: {
         allowNegativeBalance?: boolean;
         creditLimit?: number;
+        dangerouslyBypassWalletCheck?: boolean;
       };
       path: {
         orgId: string;
@@ -20093,7 +20096,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__allowNegativeBalance-boolean--creditLimit-number_.string_"];
+          "application/json": components["schemas"]["Result__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean_.string_"];
         };
       };
     };

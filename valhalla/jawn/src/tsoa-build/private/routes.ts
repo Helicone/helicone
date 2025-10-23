@@ -14585,7 +14585,7 @@ const models: TsoaRoute.Models = {
     "DashboardData": {
         "dataType": "refObject",
         "properties": {
-            "organizations": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"walletProcessedEventsCount":{"dataType":"double"},"walletDisallowedModelCount":{"dataType":"double"},"walletTotalDebits":{"dataType":"double"},"walletTotalCredits":{"dataType":"double"},"walletEffectiveBalance":{"dataType":"double"},"walletBalance":{"dataType":"double"},"creditLimit":{"dataType":"double","required":true},"allowNegativeBalance":{"dataType":"boolean","required":true},"ownerEmail":{"dataType":"string","required":true},"tier":{"dataType":"string","required":true},"lastPaymentDate":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},"clickhouseTotalSpend":{"dataType":"double","required":true},"paymentsCount":{"dataType":"double","required":true},"totalPayments":{"dataType":"double","required":true},"stripeCustomerId":{"dataType":"string","required":true},"orgName":{"dataType":"string","required":true},"orgId":{"dataType":"string","required":true}}},"required":true},
+            "organizations": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"walletProcessedEventsCount":{"dataType":"double"},"walletDisallowedModelCount":{"dataType":"double"},"walletTotalDebits":{"dataType":"double"},"walletTotalCredits":{"dataType":"double"},"walletEffectiveBalance":{"dataType":"double"},"walletBalance":{"dataType":"double"},"dangerouslyBypassWalletCheck":{"dataType":"boolean","required":true},"creditLimit":{"dataType":"double","required":true},"allowNegativeBalance":{"dataType":"boolean","required":true},"ownerEmail":{"dataType":"string","required":true},"tier":{"dataType":"string","required":true},"lastPaymentDate":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},"clickhouseTotalSpend":{"dataType":"double","required":true},"paymentsCount":{"dataType":"double","required":true},"totalPayments":{"dataType":"double","required":true},"stripeCustomerId":{"dataType":"string","required":true},"orgName":{"dataType":"string","required":true},"orgId":{"dataType":"string","required":true}}},"required":true},
             "summary": {"dataType":"nestedObjectLiteral","nestedProperties":{"totalCreditsSpent":{"dataType":"double","required":true},"totalCreditsIssued":{"dataType":"double","required":true},"totalOrgsWithCredits":{"dataType":"double","required":true}},"required":true},
             "isProduction": {"dataType":"boolean","required":true},
         },
@@ -14656,18 +14656,18 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_TableDataResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__": {
+    "ResultSuccess__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean__": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"creditLimit":{"dataType":"double","required":true},"allowNegativeBalance":{"dataType":"boolean","required":true}},"required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"dangerouslyBypassWalletCheck":{"dataType":"boolean","required":true},"creditLimit":{"dataType":"double","required":true},"allowNegativeBalance":{"dataType":"boolean","required":true}},"required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result__allowNegativeBalance-boolean--creditLimit-number_.string_": {
+    "Result__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean_.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__allowNegativeBalance-boolean--creditLimit-number--dangerouslyBypassWalletCheck-boolean__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ConvertToWavResponse": {
@@ -21538,6 +21538,7 @@ export function RegisterRoutes(app: Router) {
                 orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
                 allowNegativeBalance: {"in":"query","name":"allowNegativeBalance","dataType":"boolean"},
                 creditLimit: {"in":"query","name":"creditLimit","dataType":"double"},
+                dangerouslyBypassWalletCheck: {"in":"query","name":"dangerouslyBypassWalletCheck","dataType":"boolean"},
         };
         app.post('/v1/admin/wallet/:orgId/update-settings',
             authenticateMiddleware([{"api_key":[]}]),
