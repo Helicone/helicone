@@ -3239,6 +3239,8 @@ Json: JsonObject;
       /** Format: double */
       web_search?: number;
     };
+    /** @enum {string} */
+    BodyMappingType: "OPENAI" | "NO_MAPPING" | "RESPONSES";
     EndpointConfig: {
       region?: string;
       location?: string;
@@ -3248,8 +3250,7 @@ Json: JsonObject;
       resourceName?: string;
       apiVersion?: string;
       crossRegion?: boolean;
-      /** @enum {string} */
-      gatewayMapping?: "OPENAI" | "NO_MAPPING";
+      gatewayMapping?: components["schemas"]["BodyMappingType"];
       modelName?: string;
       providerModelId?: string;
       pricing?: components["schemas"]["ModelPricing"][];
@@ -3302,8 +3303,7 @@ Json: JsonObject;
       resourceName?: string;
       apiVersion?: string;
       crossRegion?: boolean;
-      /** @enum {string} */
-      gatewayMapping?: "OPENAI" | "NO_MAPPING";
+      gatewayMapping?: components["schemas"]["BodyMappingType"];
       modelName?: string;
     };
     Endpoint: {

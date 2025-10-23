@@ -8953,6 +8953,14 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"BodyMappingType": {
+				"type": "string",
+				"enum": [
+					"OPENAI",
+					"NO_MAPPING",
+					"RESPONSES"
+				]
+			},
 			"EndpointConfig": {
 				"properties": {
 					"region": {
@@ -8980,11 +8988,7 @@
 						"type": "boolean"
 					},
 					"gatewayMapping": {
-						"type": "string",
-						"enum": [
-							"OPENAI",
-							"NO_MAPPING"
-						]
+						"$ref": "#/components/schemas/BodyMappingType"
 					},
 					"modelName": {
 						"type": "string"
@@ -9157,11 +9161,7 @@
 						"type": "boolean"
 					},
 					"gatewayMapping": {
-						"type": "string",
-						"enum": [
-							"OPENAI",
-							"NO_MAPPING"
-						]
+						"$ref": "#/components/schemas/BodyMappingType"
 					},
 					"modelName": {
 						"type": "string"

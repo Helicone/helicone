@@ -15,7 +15,7 @@ import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { validateOpenAIChatPayload } from "./validators/openaiRequestValidator";
-import { RequestParams } from "@helicone-package/cost/models/types";
+import { RequestParams, BodyMappingType } from "@helicone-package/cost/models/types";
 import { SecureCacheProvider } from "../util/cache/secureCache";
 import { GatewayMetrics } from "./GatewayMetrics";
 import {
@@ -81,6 +81,7 @@ export class SimpleAIGateway {
 
     const requestParams: RequestParams = {
       isStreaming: parsedBody.stream === true,
+      bodyMapping: this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
     };
 
     let finalBody = parsedBody;
@@ -138,6 +139,16 @@ export class SimpleAIGateway {
 
     // Step 6: Try each attempt in order
     for (const attempt of attempts) {
+      // temporarily disable Responses API calls for non-OpenAI endpoints
+      if (this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "RESPONSES" && attempt.endpoint.provider !== "openai") {
+        errors.push({
+          source: attempt.source,
+          message: "The Responses API is only supported for OpenAI provider endpoints.",
+          type: "invalid_format",
+          statusCode: 400,
+        });
+        continue;
+      }
       if (attempt.authType === "ptb" && this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping !== "NO_MAPPING") {
         const validationResult = validateOpenAIChatPayload(finalBody);
         if (isErr(validationResult)) {
@@ -342,7 +353,7 @@ export class SimpleAIGateway {
   private async mapResponse(
     attempt: Attempt,
     response: Response,
-    bodyMapping?: "OPENAI" | "NO_MAPPING"
+    bodyMapping?: BodyMappingType
   ): Promise<Result<Response, string>> {
     if (response.status >= 400) {
       return ok(response);
