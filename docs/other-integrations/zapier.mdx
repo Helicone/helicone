@@ -1,0 +1,66 @@
+---
+title: "Zapier Integration"
+sidebarTitle: "Zapier"
+description: "Use the Helicone Zapier app to run Chat Completions via the AI Gateway — no provider keys required."
+"twitter:title": "Zapier Integration - Helicone OSS LLM Observability"
+---
+
+## Introduction
+
+Use the Helicone app on Zapier to generate chat completions from any supported model through the Helicone AI Gateway. Provide your Helicone API key, select a model, and pass your prompt data from any Zapier trigger — all with full observability in Helicone.
+
+<Note>
+  The Zapier action uses Helicone’s OpenAI-compatible Chat Completions API. No OpenAI or third‑party provider keys are required when using the AI Gateway.
+</Note>
+
+## Integration Steps
+
+<Steps>
+  <Step title="Create a Helicone API key">
+    Create a Helicone account at <a href="https://www.helicone.ai/" target="_blank">helicone.ai</a> and generate an
+    <a href="https://us.helicone.ai/settings/api-keys" target="_blank">API key</a>.
+
+    <Note>
+      You can use a write-only key for logging requests. Learn more about
+      <a href="/helicone-headers/header-directory">Helicone-Auth</a>.
+    </Note>
+  </Step>
+
+  <Step title="Add the Helicone app in Zapier">
+    - In Zapier, create a new Zap (or edit an existing one).
+    - For the Action step, search for and select "Helicone".
+    - Choose the "Chat Completion" action.
+    - When prompted, connect your Helicone account and paste your Helicone API key.
+  </Step>
+
+  <Step title="Configure the Chat Completion action">
+    - Model: pick any supported model (see <a href="https://www.helicone.ai/models" target="_blank">model registry</a>).
+    - Messages: map your trigger fields (e.g., prompt text) into the user message.
+    - Optional: set temperature, max tokens, or system instructions.
+
+    <Info>
+      The action routes through Helicone’s AI Gateway. You can later change the target provider or model in Helicone without updating your Zap.
+    </Info>
+  </Step>
+
+  <Step title="Test and publish your Zap">
+    - Run a test to see the model’s response.
+    - Publish the Zap when you’re satisfied.
+  </Step>
+
+  <Step title="Verify in Helicone">
+    Open your Helicone dashboard and check the Requests tab to see your Zapier‑originated requests, costs, and latencies.
+  </Step>
+</Steps>
+
+## Example Use Cases
+
+- Auto‑draft replies from form submissions or support tickets
+- Summarize new rows in Google Sheets or Airtable
+- Generate product descriptions from e‑commerce triggers
+
+## Troubleshooting
+
+- Ensure your Helicone API key is valid and has write access.
+- If a request fails, review the error in the Zap run details and the corresponding request in Helicone for provider/model‑specific messages.
+- To switch models later, update the model field in the Zap action or use Helicone routing/policies to control traffic centrally.
