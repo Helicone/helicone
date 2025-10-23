@@ -1,45 +1,9 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   calculateNetAmount,
   dollarsToCents,
 } from "@helicone-package/common/stripe/feeCalculator";
+import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { $JAWN_API } from "@/lib/clients/jawn";
-import React, { useRef, useEffect } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { getJawnClient } from "@/lib/clients/jawn";
-import {
-  Loader2,
-  Search,
-  DollarSign,
-  TrendingUp,
-  AlertCircle,
-  ExternalLink,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Trash2,
-  Copy,
-  Check,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
-import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
-import { Small, H3, H4 } from "@/components/ui/typography";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +14,38 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { H4, Small } from "@/components/ui/typography";
+import { $JAWN_API, getJawnClient } from "@/lib/clients/jawn";
+import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  DollarSign,
+  ExternalLink,
+  Loader2,
+  Search,
+  Trash2,
+  TrendingUp,
+} from "lucide-react";
+import { useEffect, useRef } from "react";
 
 const formatCurrency = (amount: number | undefined) => {
   if (amount === undefined) return "UNDEFINED";
@@ -112,15 +108,18 @@ export default function AdminWallet() {
     queryKey: ["walletDashboard", searchQuery, sortBy, sortOrder],
     queryFn: async ({ pageParam = 0 }) => {
       const jawn = getJawnClient();
-      const { data, error } = await jawn.POST("/v1/admin/wallet/gateway/dashboard_data", {
-        params: {
-          query: {
-            search: searchQuery || undefined,
-            sortBy: sortBy,
-            sortOrder: sortOrder,
+      const { data, error } = await jawn.POST(
+        "/v1/admin/wallet/gateway/dashboard_data",
+        {
+          params: {
+            query: {
+              search: searchQuery || undefined,
+              sortBy: sortBy,
+              sortOrder: sortOrder,
+            },
           },
         },
-      });
+      );
 
       if (error) throw error;
 
@@ -133,7 +132,16 @@ export default function AdminWallet() {
       const offset = pageParam as number;
       const paginatedOrgs = orgs.slice(offset, offset + limit);
 
-      console.log("Query function - Response data:", responseData, "Total orgs:", orgs.length, "Offset:", offset, "Paginated:", paginatedOrgs.length);
+      console.log(
+        "Query function - Response data:",
+        responseData,
+        "Total orgs:",
+        orgs.length,
+        "Offset:",
+        offset,
+        "Paginated:",
+        paginatedOrgs.length,
+      );
 
       return {
         data: {
@@ -154,9 +162,17 @@ export default function AdminWallet() {
 
   // Flatten paginated results
   const dashboardData = data?.pages[0]; // For summary stats (has data.summary)
-  const allOrganizations = data?.pages.flatMap((page: any) => page.data?.organizations || []) || [];
+  const allOrganizations =
+    data?.pages.flatMap((page: any) => page.data?.organizations || []) || [];
 
-  console.log("Pages:", data?.pages.length, "All organizations:", allOrganizations.length, "First page:", data?.pages[0]);
+  console.log(
+    "Pages:",
+    data?.pages.length,
+    "All organizations:",
+    allOrganizations.length,
+    "First page:",
+    data?.pages[0],
+  );
 
   // Fetch wallet details (lazy loaded when org is selected)
   const {
@@ -180,7 +196,14 @@ export default function AdminWallet() {
 
   const walletDetails = (walletDetailsResponse as any)?.data;
 
-  console.log("Selected org:", selectedOrg, "Wallet loading:", walletLoading, "Wallet details:", walletDetails);
+  console.log(
+    "Selected org:",
+    selectedOrg,
+    "Wallet loading:",
+    walletLoading,
+    "Wallet details:",
+    walletDetails,
+  );
 
   // Mutation for modifying wallet balance
   const modifyBalanceMutation = $JAWN_API.useMutation(
@@ -262,7 +285,7 @@ export default function AdminWallet() {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const currentTarget = observerTarget.current;
@@ -297,7 +320,9 @@ export default function AdminWallet() {
       if (org) {
         setAllowNegativeBalance(org.allowNegativeBalance || false);
         setCreditLimit(org.creditLimit ? org.creditLimit.toString() : "0");
-        setDangerouslyBypassWalletCheck(org.dangerouslyBypassWalletCheck || false);
+        setDangerouslyBypassWalletCheck(
+          org.dangerouslyBypassWalletCheck || false,
+        );
       }
     }
   };
@@ -424,7 +449,9 @@ export default function AdminWallet() {
         if (result.data) {
           setAllowNegativeBalance(result.data.allowNegativeBalance);
           setCreditLimit(result.data.creditLimit?.toString() ?? "0");
-          setDangerouslyBypassWalletCheck(result.data.dangerouslyBypassWalletCheck);
+          setDangerouslyBypassWalletCheck(
+            result.data.dangerouslyBypassWalletCheck,
+          );
         }
         // Refresh dashboard data to update the table
         refetchDashboard();
@@ -451,38 +478,44 @@ export default function AdminWallet() {
               handleSearch();
             }}
           >
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          <Button
-            type="submit"
-            disabled={dashboardLoading}
-            variant="default"
-          >
-            {dashboardLoading ? <Loader2 size={14} className="animate-spin" /> : "Search"}
-          </Button>
-          {searchQuery && (
-            <Button
-              type="button"
-              onClick={handleClearSearch}
-              disabled={dashboardLoading}
-              variant="outline"
-            >
-              Clear
+            <div className="relative flex-1">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                placeholder="Search by org name, ID, owner email, or Stripe customer ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Button type="submit" disabled={dashboardLoading} variant="default">
+              {dashboardLoading ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                "Search"
+              )}
             </Button>
-          )}
+            {searchQuery && (
+              <Button
+                type="button"
+                onClick={handleClearSearch}
+                disabled={dashboardLoading}
+                variant="outline"
+              >
+                Clear
+              </Button>
+            )}
           </form>
 
           {/* Summary Stats - Compact */}
           <div className="flex items-center gap-4 border-l pl-4">
             {dashboardLoading ? (
-              <Loader2 size={16} className="animate-spin text-muted-foreground" />
+              <Loader2
+                size={16}
+                className="animate-spin text-muted-foreground"
+              />
             ) : dashboardError ? (
               <Small className="text-red-600">Error loading summary</Small>
             ) : (
@@ -500,7 +533,9 @@ export default function AdminWallet() {
                 <div className="flex items-center gap-1.5">
                   <TrendingUp size={14} className="text-muted-foreground" />
                   <div className="flex flex-col">
-                    <span className="text-xs text-muted-foreground">Issued</span>
+                    <span className="text-xs text-muted-foreground">
+                      Issued
+                    </span>
                     <span className="text-sm font-semibold">
                       {formatCurrency(
                         dashboardData?.data?.summary?.totalCreditsIssued || 0,
@@ -527,461 +562,608 @@ export default function AdminWallet() {
 
         {/* Organizations Table */}
         <div
-          className="relative min-h-0 flex-1 w-full overflow-auto border"
+          className="relative min-h-0 w-full flex-1 overflow-auto border"
           style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'hsl(var(--border)) transparent'
+            scrollbarWidth: "thin",
+            scrollbarColor: "hsl(var(--border)) transparent",
           }}
         >
           {dashboardLoading ? (
             <div className="flex h-full items-center justify-center">
-              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+              <Loader2
+                size={24}
+                className="animate-spin text-muted-foreground"
+              />
             </div>
           ) : dashboardError ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
                 <AlertCircle size={24} className="mx-auto mb-2 text-red-500" />
                 <p className="text-red-600">Error loading dashboard data</p>
-                <Small className="text-muted-foreground">{dashboardError}</Small>
+                <Small className="text-muted-foreground">
+                  {dashboardError}
+                </Small>
               </div>
             </div>
           ) : (
             <table className="w-full caption-bottom text-sm">
-                  <TableHeader className="sticky top-0 z-10 bg-background">
-                    <TableRow>
-                      <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("org_created_at")}
-                      >
-                        <div className="flex items-center">
-                          Organization
-                          <SortIcon column="org_created_at" />
-                        </div>
-                      </TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("total_payments")}
-                      >
-                        <div className="flex items-center">
-                          Total Net
-                          <SortIcon column="total_payments" />
-                        </div>
-                      </TableHead>
-                      <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("total_spend")}
-                      >
-                        <div className="flex items-center">
-                          Total Spent
-                          <SortIcon column="total_spend" />
-                        </div>
-                      </TableHead>
-                      <TableHead>Balance</TableHead>
-                      <TableHead>Wallet Balance</TableHead>
-                      <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
-                        onClick={() => handleSort("credit_limit")}
-                      >
-                        <div className="flex items-center">
-                          Settings
-                          <SortIcon column="credit_limit" />
-                        </div>
-                      </TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {allOrganizations?.map((org) => {
-                      // Calculate net amount after removing Stripe fees
-                      const totalGrossCents = dollarsToCents(org.totalPayments);
-                      const totalNetCents = calculateNetAmount(
-                        totalGrossCents,
-                        org.paymentsCount || 0,
-                      );
-                      const totalNetDollars = totalNetCents / 100;
+              <TableHeader className="sticky top-0 z-10 bg-background">
+                <TableRow>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("org_created_at")}
+                  >
+                    <div className="flex items-center">
+                      Organization
+                      <SortIcon column="org_created_at" />
+                    </div>
+                  </TableHead>
+                  <TableHead>Owner</TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("total_payments")}
+                  >
+                    <div className="flex items-center">
+                      Total Net
+                      <SortIcon column="total_payments" />
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("total_spend")}
+                  >
+                    <div className="flex items-center">
+                      Total Spent
+                      <SortIcon column="total_spend" />
+                    </div>
+                  </TableHead>
+                  <TableHead>Balance</TableHead>
+                  <TableHead>Wallet Balance</TableHead>
+                  <TableHead
+                    className="cursor-pointer select-none hover:bg-muted/50"
+                    onClick={() => handleSort("credit_limit")}
+                  >
+                    <div className="flex items-center">
+                      Settings
+                      <SortIcon column="credit_limit" />
+                    </div>
+                  </TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {allOrganizations?.map((org) => {
+                  // Calculate net amount after removing Stripe fees
+                  const totalGrossCents = dollarsToCents(org.totalPayments);
+                  const totalNetCents = calculateNetAmount(
+                    totalGrossCents,
+                    org.paymentsCount || 0,
+                  );
+                  const totalNetDollars = totalNetCents / 100;
 
-                      const balance =
-                        totalNetDollars - org.clickhouseTotalSpend;
-                      const isNegativeBalance = balance < 0;
+                  const balance = totalNetDollars - org.clickhouseTotalSpend;
+                  const isNegativeBalance = balance < 0;
 
-                      return [
-                        <TableRow
-                          key={org.orgId}
-                          className={`cursor-pointer ${selectedOrg === org.orgId ? "bg-muted" : ""}`}
-                          onClick={() => handleOrgClick(org.orgId)}
-                        >
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{org.orgName}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigator.clipboard.writeText(org.orgId);
-                                  setCopiedOrgId(org.orgId);
-                                  setTimeout(() => setCopiedOrgId(null), 2000);
-                                }}
-                              >
-                                {copiedOrgId === org.orgId ? (
-                                  <Check size={12} className="text-green-600" />
-                                ) : (
-                                  <Copy size={12} />
-                                )}
-                              </Button>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Small className="text-muted-foreground">
-                              {org.ownerEmail}
-                            </Small>
-                          </TableCell>
-                          <TableCell>
-                            {formatCurrency(totalNetDollars)}
-                          </TableCell>
-                          <TableCell>
-                            {formatCurrency(org.clickhouseTotalSpend)}
-                          </TableCell>
-                          <TableCell>
-                            <span
-                              className={
-                                isNegativeBalance
-                                  ? "font-medium text-red-500"
-                                  : ""
-                              }
-                            >
-                              {formatCurrency(balance)}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            {org.walletBalance !== undefined ? (
-                              <span
-                                className={
-                                  org.walletBalance < 0
-                                    ? "font-medium text-red-500"
-                                    : ""
-                                }
-                              >
-                                {formatCurrency(org.walletBalance)}
-                              </span>
+                  return [
+                    <TableRow
+                      key={org.orgId}
+                      className={`cursor-pointer ${selectedOrg === org.orgId ? "bg-muted" : ""}`}
+                      onClick={() => handleOrgClick(org.orgId)}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{org.orgName}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(org.orgId);
+                              setCopiedOrgId(org.orgId);
+                              setTimeout(() => setCopiedOrgId(null), 2000);
+                            }}
+                          >
+                            {copiedOrgId === org.orgId ? (
+                              <Check size={12} className="text-green-600" />
                             ) : (
-                              <Small className="text-muted-foreground">
-                                N/A
-                              </Small>
+                              <Copy size={12} />
                             )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <Small className="text-muted-foreground">
-                                {formatCurrency(org.creditLimit || 0)}
-                              </Small>
-                              <Small
-                                className={
-                                  org.allowNegativeBalance
-                                    ? "text-green-600"
-                                    : "text-muted-foreground"
-                                }
-                              >
-                                {org.allowNegativeBalance ? "Allow Neg" : "No Neg"}
-                              </Small>
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Small className="text-muted-foreground">
+                          {org.ownerEmail}
+                        </Small>
+                      </TableCell>
+                      <TableCell>{formatCurrency(totalNetDollars)}</TableCell>
+                      <TableCell>
+                        {formatCurrency(org.clickhouseTotalSpend)}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={
+                            isNegativeBalance ? "font-medium text-red-500" : ""
+                          }
+                        >
+                          {formatCurrency(balance)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {org.walletBalance !== undefined ? (
+                          <span
+                            className={
+                              org.walletBalance < 0
+                                ? "font-medium text-red-500"
+                                : ""
+                            }
+                          >
+                            {formatCurrency(org.walletBalance)}
+                          </span>
+                        ) : (
+                          <Small className="text-muted-foreground">N/A</Small>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <Small className="text-muted-foreground">
+                            {formatCurrency(org.creditLimit || 0)}
+                          </Small>
+                          <Small
+                            className={
+                              org.allowNegativeBalance
+                                ? "text-green-600"
+                                : "text-muted-foreground"
+                            }
+                          >
+                            {org.allowNegativeBalance ? "Allow Neg" : "No Neg"}
+                          </Small>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-2">
+                          {org.stripeCustomerId && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const stripeUrl = dashboardData?.data
+                                  ?.isProduction
+                                  ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
+                                  : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
+                                window.open(stripeUrl, "_blank");
+                              }}
+                            >
+                              <ExternalLink size={14} />
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOrgClick(org.orgId);
+                            }}
+                          >
+                            {selectedOrg === org.orgId ? (
+                              <ChevronUp size={16} />
+                            ) : (
+                              <ChevronDown size={16} />
+                            )}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>,
+                    selectedOrg === org.orgId && walletDetails && (
+                      <TableRow key={`${org.orgId}-details`}>
+                        <TableCell colSpan={8} className="bg-muted/30 p-6">
+                          {walletLoading ? (
+                            <div className="flex h-32 items-center justify-center">
+                              <Loader2 size={20} className="animate-spin" />
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-end gap-2">
-                              {org.stripeCustomerId && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const stripeUrl = dashboardData?.data
-                                      ?.isProduction
-                                      ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
-                                      : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
-                                    window.open(stripeUrl, "_blank");
-                                  }}
-                                >
-                                  <ExternalLink size={14} />
-                                </Button>
-                              )}
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOrgClick(org.orgId);
-                                }}
-                              >
-                                {selectedOrg === org.orgId ? (
-                                  <ChevronUp size={16} />
-                                ) : (
-                                  <ChevronDown size={16} />
-                                )}
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>,
-                        selectedOrg === org.orgId && walletDetails && (
-                          <TableRow key={`${org.orgId}-details`}>
-                            <TableCell colSpan={8} className="bg-muted/30 p-6">
-                              {walletLoading ? (
-                                <div className="flex h-32 items-center justify-center">
-                                  <Loader2 size={20} className="animate-spin" />
+                          ) : walletDetails ? (
+                            <div className="flex flex-col gap-6">
+                              {/* Overview */}
+                              <div className="flex flex-col gap-3">
+                                <H4>Overview</H4>
+                                <div className="flex items-center gap-6">
+                                  <div className="flex flex-col gap-1">
+                                    <Small className="text-muted-foreground">
+                                      Balance
+                                    </Small>
+                                    <span className="text-base font-semibold">
+                                      {formatCurrency(walletDetails.balance)}
+                                    </span>
+                                  </div>
+                                  <div className="h-8 w-px bg-border" />
+                                  <div className="flex flex-col gap-1">
+                                    <Small className="text-muted-foreground">
+                                      Effective Balance
+                                    </Small>
+                                    <span className="text-base font-semibold">
+                                      {formatCurrency(
+                                        walletDetails.effectiveBalance,
+                                      )}
+                                    </span>
+                                  </div>
+                                  <div className="h-8 w-px bg-border" />
+                                  <div className="flex flex-col gap-1">
+                                    <Small className="text-muted-foreground">
+                                      Total Credits
+                                    </Small>
+                                    <span className="text-base font-semibold">
+                                      {formatCurrency(
+                                        walletDetails.totalCredits,
+                                      )}
+                                    </span>
+                                  </div>
+                                  <div className="h-8 w-px bg-border" />
+                                  <div className="flex flex-col gap-1">
+                                    <Small className="text-muted-foreground">
+                                      Total Debits
+                                    </Small>
+                                    <span className="text-base font-semibold">
+                                      {formatCurrency(
+                                        walletDetails.totalDebits,
+                                      )}
+                                    </span>
+                                  </div>
+                                  <div className="h-8 w-px bg-border" />
+                                  <div className="flex flex-col gap-1">
+                                    <Small className="text-muted-foreground">
+                                      Escrow
+                                    </Small>
+                                    <span className="text-base font-semibold">
+                                      {formatCurrency(
+                                        walletDetails.totalEscrow,
+                                      )}
+                                    </span>
+                                  </div>
                                 </div>
-                              ) : walletDetails ? (
-                                <div className="flex flex-col gap-6">
-                                  {/* Overview */}
-                                  <div className="flex flex-col gap-3">
-                                    <H4>Overview</H4>
-                                    <div className="flex items-center gap-6">
-                                      <div className="flex flex-col gap-1">
-                                        <Small className="text-muted-foreground">Balance</Small>
-                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.balance)}</span>
-                                      </div>
-                                      <div className="h-8 w-px bg-border" />
-                                      <div className="flex flex-col gap-1">
-                                        <Small className="text-muted-foreground">Effective Balance</Small>
-                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.effectiveBalance)}</span>
-                                      </div>
-                                      <div className="h-8 w-px bg-border" />
-                                      <div className="flex flex-col gap-1">
-                                        <Small className="text-muted-foreground">Total Credits</Small>
-                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.totalCredits)}</span>
-                                      </div>
-                                      <div className="h-8 w-px bg-border" />
-                                      <div className="flex flex-col gap-1">
-                                        <Small className="text-muted-foreground">Total Debits</Small>
-                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.totalDebits)}</span>
-                                      </div>
-                                      <div className="h-8 w-px bg-border" />
-                                      <div className="flex flex-col gap-1">
-                                        <Small className="text-muted-foreground">Escrow</Small>
-                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.totalEscrow)}</span>
-                                      </div>
-                                    </div>
-                                  </div>
+                              </div>
 
-                                  {/* Modify Balance */}
-                                  <div className="flex flex-col gap-2">
-                                    <H4>Modify Balance</H4>
-                                    <div className="flex items-center gap-3">
-                                      <Input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="Amount"
-                                        value={modifyAmount}
-                                        onChange={(e) => setModifyAmount(e.target.value)}
-                                        disabled={isModifying}
-                                        className="h-8 w-32"
+                              {/* Modify Balance */}
+                              <div className="flex flex-col gap-2">
+                                <H4>Modify Balance</H4>
+                                <div className="flex items-center gap-3">
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="Amount"
+                                    value={modifyAmount}
+                                    onChange={(e) =>
+                                      setModifyAmount(e.target.value)
+                                    }
+                                    disabled={isModifying}
+                                    className="h-8 w-32"
+                                  />
+                                  <RadioGroup
+                                    value={modifyType}
+                                    onValueChange={(value) =>
+                                      setModifyType(value as "credit" | "debit")
+                                    }
+                                    disabled={isModifying}
+                                    className="flex gap-3"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <RadioGroupItem
+                                        value="credit"
+                                        id={`credit-${org.orgId}`}
                                       />
-                                      <RadioGroup
-                                        value={modifyType}
-                                        onValueChange={(value) => setModifyType(value as "credit" | "debit")}
-                                        disabled={isModifying}
-                                        className="flex gap-3"
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <RadioGroupItem value="credit" id={`credit-${org.orgId}`} />
-                                          <Label htmlFor={`credit-${org.orgId}`}>Credit</Label>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <RadioGroupItem value="debit" id={`debit-${org.orgId}`} />
-                                          <Label htmlFor={`debit-${org.orgId}`}>Debit</Label>
-                                        </div>
-                                      </RadioGroup>
-                                      <Input
-                                        placeholder="Reason"
-                                        value={modifyReason}
-                                        onChange={(e) => setModifyReason(e.target.value)}
-                                        disabled={isModifying}
-                                        className="h-8 flex-1"
-                                      />
-                                      <Button
-                                        onClick={handleModifyBalance}
-                                        disabled={isModifying}
-                                        size="sm"
-                                      >
-                                        {isModifying ? <Loader2 size={14} className="animate-spin" /> : "Apply"}
-                                      </Button>
+                                      <Label htmlFor={`credit-${org.orgId}`}>
+                                        Credit
+                                      </Label>
                                     </div>
-                                    {modifyError && <Small className="text-red-600">{modifyError}</Small>}
-                                    {modifySuccess && <Small className="text-green-600">{modifySuccess}</Small>}
-                                  </div>
+                                    <div className="flex items-center gap-2">
+                                      <RadioGroupItem
+                                        value="debit"
+                                        id={`debit-${org.orgId}`}
+                                      />
+                                      <Label htmlFor={`debit-${org.orgId}`}>
+                                        Debit
+                                      </Label>
+                                    </div>
+                                  </RadioGroup>
+                                  <Input
+                                    placeholder="Reason"
+                                    value={modifyReason}
+                                    onChange={(e) =>
+                                      setModifyReason(e.target.value)
+                                    }
+                                    disabled={isModifying}
+                                    className="h-8 flex-1"
+                                  />
+                                  <Button
+                                    onClick={handleModifyBalance}
+                                    disabled={isModifying}
+                                    size="sm"
+                                  >
+                                    {isModifying ? (
+                                      <Loader2
+                                        size={14}
+                                        className="animate-spin"
+                                      />
+                                    ) : (
+                                      "Apply"
+                                    )}
+                                  </Button>
+                                </div>
+                                {modifyError && (
+                                  <Small className="text-red-600">
+                                    {modifyError}
+                                  </Small>
+                                )}
+                                {modifySuccess && (
+                                  <Small className="text-green-600">
+                                    {modifySuccess}
+                                  </Small>
+                                )}
+                              </div>
 
-                                  {/* Settings */}
-                                  <div className="flex flex-col gap-2">
-                                    <H4>Wallet Settings</H4>
-                                    <div className="flex flex-col gap-3">
-                                      <div className="flex items-center gap-3">
-                                        <div className="flex items-center gap-2">
-                                          <input
-                                            type="checkbox"
-                                            id={`allowNeg-${org.orgId}`}
-                                            checked={allowNegativeBalance}
-                                            onChange={(e) => setAllowNegativeBalance(e.target.checked)}
-                                            disabled={isUpdatingSettings}
-                                            className="h-4 w-4 cursor-pointer"
-                                          />
-                                          <Label htmlFor={`allowNeg-${org.orgId}`} className="cursor-pointer">Allow Negative Balance</Label>
-                                        </div>
-                                        <Input
-                                          type="number"
-                                          step="0.01"
-                                          min="0"
-                                          placeholder="Credit Limit"
-                                          value={creditLimit}
-                                          onChange={(e) => setCreditLimit(e.target.value)}
-                                          disabled={isUpdatingSettings}
-                                          className="h-8 w-40"
+                              {/* Settings */}
+                              <div className="flex flex-col gap-2">
+                                <H4>Wallet Settings</H4>
+                                <div className="flex flex-col gap-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="checkbox"
+                                        id={`allowNeg-${org.orgId}`}
+                                        checked={allowNegativeBalance}
+                                        onChange={(e) =>
+                                          setAllowNegativeBalance(
+                                            e.target.checked,
+                                          )
+                                        }
+                                        disabled={isUpdatingSettings}
+                                        className="h-4 w-4 cursor-pointer"
+                                      />
+                                      <Label
+                                        htmlFor={`allowNeg-${org.orgId}`}
+                                        className="cursor-pointer"
+                                      >
+                                        Allow Negative Balance
+                                      </Label>
+                                    </div>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      placeholder="Credit Limit"
+                                      value={creditLimit}
+                                      onChange={(e) =>
+                                        setCreditLimit(e.target.value)
+                                      }
+                                      disabled={isUpdatingSettings}
+                                      className="h-8 w-40"
+                                    />
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="checkbox"
+                                        id={`bypassWallet-${org.orgId}`}
+                                        checked={dangerouslyBypassWalletCheck}
+                                        onChange={(e) =>
+                                          setDangerouslyBypassWalletCheck(
+                                            e.target.checked,
+                                          )
+                                        }
+                                        disabled={isUpdatingSettings}
+                                        className="h-4 w-4 cursor-pointer accent-red-600"
+                                      />
+                                      <Label
+                                        htmlFor={`bypassWallet-${org.orgId}`}
+                                        className="cursor-pointer font-semibold text-red-600"
+                                      >
+                                        <AlertCircle
+                                          size={14}
+                                          className="mr-1 inline"
+                                        />
+                                        DANGER: Bypass All Wallet Checks
+                                      </Label>
+                                    </div>
+                                    <Small className="text-red-600">
+                                      Disables balance AND dispute checks
+                                    </Small>
+                                  </div>
+                                  <Button
+                                    onClick={handleUpdateSettings}
+                                    disabled={isUpdatingSettings}
+                                    size="sm"
+                                    className="w-fit"
+                                  >
+                                    {isUpdatingSettings ? (
+                                      <Loader2
+                                        size={14}
+                                        className="animate-spin"
+                                      />
+                                    ) : (
+                                      "Update Settings"
+                                    )}
+                                  </Button>
+                                </div>
+                                {settingsError && (
+                                  <Small className="text-red-600">
+                                    {settingsError}
+                                  </Small>
+                                )}
+                                {settingsSuccess && (
+                                  <Small className="text-green-600">
+                                    {settingsSuccess}
+                                  </Small>
+                                )}
+                              </div>
+
+                              {/* Disallow List */}
+                              {(walletDetails.data?.disallowList?.length ?? 0) >
+                                0 && (
+                                <div className="flex flex-col gap-2">
+                                  <H4>
+                                    Disallow List (
+                                    {walletDetails.data?.disallowList?.length ??
+                                      0}
+                                    )
+                                  </H4>
+                                  <div className="border">
+                                    <table className="w-full text-sm">
+                                      <thead className="bg-muted">
+                                        <tr>
+                                          <th className="p-2 text-left">
+                                            Request ID
+                                          </th>
+                                          <th className="p-2 text-left">
+                                            Provider
+                                          </th>
+                                          <th className="p-2 text-left">
+                                            Model
+                                          </th>
+                                          <th className="w-12 p-2"></th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {walletDetails.disallowList?.map(
+                                          (entry: any, idx: number) => (
+                                            <tr key={idx} className="border-t">
+                                              <td className="font-mono p-2 text-xs">
+                                                {entry.helicone_request_id.substring(
+                                                  0,
+                                                  8,
+                                                )}
+                                                ...
+                                              </td>
+                                              <td className="p-2">
+                                                {entry.provider}
+                                              </td>
+                                              <td className="p-2">
+                                                {entry.model}
+                                              </td>
+                                              <td className="p-2">
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="h-6 w-6 p-0"
+                                                  onClick={() => {
+                                                    setEntryToDelete({
+                                                      provider: entry.provider,
+                                                      model: entry.model,
+                                                    });
+                                                    setDeleteDialogOpen(true);
+                                                  }}
+                                                >
+                                                  <Trash2
+                                                    size={14}
+                                                    className="text-destructive"
+                                                  />
+                                                </Button>
+                                              </td>
+                                            </tr>
+                                          ),
+                                        )}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Raw Tables */}
+                              <div className="flex flex-col gap-2">
+                                <H4>Raw Tables</H4>
+                                <div className="flex gap-2">
+                                  {[
+                                    "credit_purchases",
+                                    "aggregated_debits",
+                                    "escrows",
+                                    "processed_webhook_events",
+                                  ].map((tableName) => (
+                                    <Button
+                                      key={tableName}
+                                      variant={
+                                        selectedTable === tableName
+                                          ? "default"
+                                          : "outline"
+                                      }
+                                      size="sm"
+                                      onClick={() =>
+                                        handleTableClick(tableName)
+                                      }
+                                    >
+                                      {tableName.split("_")[0]}
+                                    </Button>
+                                  ))}
+                                </div>
+                                {selectedTable && (
+                                  <div className="border bg-muted/10 p-3">
+                                    {tableLoading ? (
+                                      <div className="flex items-center justify-center py-4">
+                                        <Loader2
+                                          size={16}
+                                          className="animate-spin"
                                         />
                                       </div>
-                                      <div className="flex items-center gap-3">
-                                        <div className="flex items-center gap-2">
-                                          <input
-                                            type="checkbox"
-                                            id={`bypassWallet-${org.orgId}`}
-                                            checked={dangerouslyBypassWalletCheck}
-                                            onChange={(e) => setDangerouslyBypassWalletCheck(e.target.checked)}
-                                            disabled={isUpdatingSettings}
-                                            className="h-4 w-4 cursor-pointer accent-red-600"
-                                          />
-                                          <Label htmlFor={`bypassWallet-${org.orgId}`} className="cursor-pointer text-red-600 font-semibold">
-                                            <AlertCircle size={14} className="inline mr-1" />
-                                            DANGER: Bypass All Wallet Checks
-                                          </Label>
-                                        </div>
-                                        <Small className="text-red-600">Disables balance AND dispute checks</Small>
+                                    ) : tableData?.data ? (
+                                      <div className="max-h-64 overflow-auto">
+                                        <pre className="font-mono whitespace-pre-wrap text-xs">
+                                          {JSON.stringify(
+                                            tableData.data,
+                                            null,
+                                            2,
+                                          )}
+                                        </pre>
                                       </div>
-                                      <Button
-                                        onClick={handleUpdateSettings}
-                                        disabled={isUpdatingSettings}
-                                        size="sm"
-                                        className="w-fit"
-                                      >
-                                        {isUpdatingSettings ? <Loader2 size={14} className="animate-spin" /> : "Update Settings"}
-                                      </Button>
-                                    </div>
-                                    {settingsError && <Small className="text-red-600">{settingsError}</Small>}
-                                    {settingsSuccess && <Small className="text-green-600">{settingsSuccess}</Small>}
-                                  </div>
-
-                                  {/* Disallow List */}
-                                  {(walletDetails.data.disallowList?.length ?? 0) > 0 && (
-                                    <div className="flex flex-col gap-2">
-                                      <H4>Disallow List ({walletDetails.data.disallowList?.length ?? 0})</H4>
-                                      <div className="border">
-                                        <table className="w-full text-sm">
-                                          <thead className="bg-muted">
-                                            <tr>
-                                              <th className="p-2 text-left">Request ID</th>
-                                              <th className="p-2 text-left">Provider</th>
-                                              <th className="p-2 text-left">Model</th>
-                                              <th className="p-2 w-12"></th>
-                                            </tr>
-                                          </thead>
-                                          <tbody>
-                                            {walletDetails.disallowList?.map((entry: any, idx: number) => (
-                                              <tr key={idx} className="border-t">
-                                                <td className="p-2 font-mono text-xs">{entry.helicone_request_id.substring(0, 8)}...</td>
-                                                <td className="p-2">{entry.provider}</td>
-                                                <td className="p-2">{entry.model}</td>
-                                                <td className="p-2">
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-6 w-6 p-0"
-                                                    onClick={() => {
-                                                      setEntryToDelete({ provider: entry.provider, model: entry.model });
-                                                      setDeleteDialogOpen(true);
-                                                    }}
-                                                  >
-                                                    <Trash2 size={14} className="text-destructive" />
-                                                  </Button>
-                                                </td>
-                                              </tr>
-                                            ))}
-                                          </tbody>
-                                        </table>
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {/* Raw Tables */}
-                                  <div className="flex flex-col gap-2">
-                                    <H4>Raw Tables</H4>
-                                    <div className="flex gap-2">
-                                      {["credit_purchases", "aggregated_debits", "escrows", "processed_webhook_events"].map((tableName) => (
-                                        <Button
-                                          key={tableName}
-                                          variant={selectedTable === tableName ? "default" : "outline"}
-                                          size="sm"
-                                          onClick={() => handleTableClick(tableName)}
-                                        >
-                                          {tableName.split("_")[0]}
-                                        </Button>
-                                      ))}
-                                    </div>
-                                    {selectedTable && (
-                                      <div className="border p-3 bg-muted/10">
-                                        {tableLoading ? (
-                                          <div className="flex items-center justify-center py-4">
-                                            <Loader2 size={16} className="animate-spin" />
-                                          </div>
-                                        ) : tableData?.data ? (
-                                          <div className="max-h-64 overflow-auto">
-                                            <pre className="font-mono text-xs whitespace-pre-wrap">
-                                              {JSON.stringify(tableData.data, null, 2)}
-                                            </pre>
-                                          </div>
-                                        ) : (
-                                          <Small className="text-muted-foreground">No data</Small>
-                                        )}
-                                      </div>
+                                    ) : (
+                                      <Small className="text-muted-foreground">
+                                        No data
+                                      </Small>
                                     )}
                                   </div>
-                                </div>
-                              ) : (
-                                <p className="text-sm text-muted-foreground">Failed to load wallet details</p>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        )
-                      ].filter(Boolean);
-                    })}
-                    {/* Loading indicator for next page */}
-                    {isFetchingNextPage && (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center py-4">
-                          <Loader2 size={20} className="animate-spin inline-block text-muted-foreground" />
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              Failed to load wallet details
+                            </p>
+                          )}
                         </TableCell>
                       </TableRow>
-                    )}
-                    {/* Intersection observer target */}
-                    <tr ref={observerTarget} style={{ height: '1px' }}>
-                      <td colSpan={8} />
-                    </tr>
-                  </TableBody>
-                </table>
-              )}
+                    ),
+                  ].filter(Boolean);
+                })}
+                {/* Loading indicator for next page */}
+                {isFetchingNextPage && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-4 text-center">
+                      <Loader2
+                        size={20}
+                        className="inline-block animate-spin text-muted-foreground"
+                      />
+                    </TableCell>
+                  </TableRow>
+                )}
+                {/* Intersection observer target */}
+                <tr ref={observerTarget} style={{ height: "1px" }}>
+                  <td colSpan={8} />
+                </tr>
+              </TableBody>
+            </table>
+          )}
         </div>
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-      >
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Disallow Entry?</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to remove{" "}
               <strong>{entryToDelete?.provider}</strong> /{" "}
-              <strong>{entryToDelete?.model}</strong> from the disallow
-              list? This action cannot be undone.
+              <strong>{entryToDelete?.model}</strong> from the disallow list?
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
