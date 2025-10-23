@@ -7,7 +7,7 @@ export const endpoints = {
     provider: "anthropic",
     author: "anthropic",
     providerModelId: "claude-3-5-haiku-20241022",
-    priority: 3,
+    priority: 2,
     pricing: [
       {
         threshold: 0,
@@ -44,7 +44,7 @@ export const endpoints = {
     author: "anthropic",
     providerModelId: "claude-3-5-haiku@20241022",
     crossRegion: false,
-    priority: 2,
+    priority: 3,
     pricing: [
       {
         threshold: 0,

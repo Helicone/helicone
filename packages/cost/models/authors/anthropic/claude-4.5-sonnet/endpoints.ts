@@ -8,7 +8,7 @@ export const endpoints = {
     provider: "anthropic",
     author: "anthropic",
     version: "20250929",
-    priority: 3,
+    priority: 2,
     pricing: [
       {
         threshold: 0,
@@ -51,7 +51,7 @@ export const endpoints = {
     version: "vertex-2023-10-16",
     ptbEnabled: true,
     crossRegion: true,
-    priority: 2,
+    priority: 3,
     pricing: [
       {
         threshold: 0,
