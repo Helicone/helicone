@@ -184,68 +184,6 @@ export type Database = {
           },
         ]
       }
-      asset: {
-        Row: {
-          created_at: string
-          id: string
-          organization_id: string
-          request_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          organization_id: string
-          request_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          organization_id?: string
-          request_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "asset_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "asset_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      cache_hits: {
-        Row: {
-          created_at: string
-          organization_id: string | null
-          request_id: string
-        }
-        Insert: {
-          created_at?: string
-          organization_id?: string | null
-          request_id: string
-        }
-        Update: {
-          created_at?: string
-          organization_id?: string | null
-          request_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cache_hits_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       contact_submissions: {
         Row: {
           company_description: string | null
@@ -495,13 +433,6 @@ export type Database = {
             referencedRelation: "helicone_dataset"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "public_experiment_dataset_v2_row_input_record_fkey"
-            columns: ["input_record"]
-            isOneToOne: false
-            referencedRelation: "prompt_input_record"
-            referencedColumns: ["id"]
-          },
         ]
       }
       experiment_output: {
@@ -541,24 +472,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "public_experiment_output_input_record_id_fkey"
-            columns: ["input_record_id"]
-            isOneToOne: false
-            referencedRelation: "prompt_input_record"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "public_experiment_output_prompt_version_id_fkey"
             columns: ["prompt_version_id"]
             isOneToOne: false
             referencedRelation: "prompts_versions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_experiment_output_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
             referencedColumns: ["id"]
           },
         ]
@@ -733,13 +650,6 @@ export type Database = {
             referencedRelation: "experiment_v2_hypothesis"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "public_experiment_v2_hypothesis_run_result_request_id_fkey"
-            columns: ["result_request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
         ]
       }
       experiment_v3: {
@@ -880,35 +790,6 @@ export type Database = {
         }
         Relationships: []
       }
-      feedback: {
-        Row: {
-          created_at: string
-          id: string
-          rating: boolean
-          response_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          rating: boolean
-          response_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          rating?: boolean
-          response_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "feedback_response_id_fkey"
-            columns: ["response_id"]
-            isOneToOne: true
-            referencedRelation: "response"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       finetune_dataset: {
         Row: {
           created_at: string
@@ -976,13 +857,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "finetune_dataset_data_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
             referencedColumns: ["id"]
           },
         ]
@@ -1579,13 +1453,6 @@ export type Database = {
             referencedRelation: "job_node"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "job_node_request_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
         ]
       }
       layout: {
@@ -2041,58 +1908,6 @@ export type Database = {
           },
         ]
       }
-      prompt_input_record: {
-        Row: {
-          auto_prompt_inputs: Json
-          created_at: string | null
-          experiment_id: string | null
-          id: string
-          inputs: Json
-          prompt_version: string
-          source_request: string | null
-        }
-        Insert: {
-          auto_prompt_inputs?: Json
-          created_at?: string | null
-          experiment_id?: string | null
-          id?: string
-          inputs: Json
-          prompt_version: string
-          source_request?: string | null
-        }
-        Update: {
-          auto_prompt_inputs?: Json
-          created_at?: string | null
-          experiment_id?: string | null
-          id?: string
-          inputs?: Json
-          prompt_version?: string
-          source_request?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_prompt_version"
-            columns: ["prompt_version"]
-            isOneToOne: false
-            referencedRelation: "prompts_versions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_source_request"
-            columns: ["source_request"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_prompt_input_record_experiment_id_fkey"
-            columns: ["experiment_id"]
-            isOneToOne: false
-            referencedRelation: "experiment_v3"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       prompt_v2: {
         Row: {
           created_at: string | null
@@ -2340,13 +2155,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "properties_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "properties_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -2456,107 +2264,6 @@ export type Database = {
           },
         ]
       }
-      request: {
-        Row: {
-          auth_hash: string
-          country_code: string | null
-          created_at: string
-          formatted_prompt_id: string | null
-          helicone_api_key_id: number | null
-          helicone_org_id: string | null
-          helicone_proxy_key_id: string | null
-          helicone_user: string | null
-          id: string
-          model: string | null
-          model_override: string | null
-          path: string
-          prompt_id: string | null
-          prompt_values: Json | null
-          properties: Json | null
-          provider: string
-          request_ip: string | null
-          target_url: string | null
-          threat: boolean | null
-          user_id: string | null
-          version: number
-        }
-        Insert: {
-          auth_hash: string
-          country_code?: string | null
-          created_at?: string
-          formatted_prompt_id?: string | null
-          helicone_api_key_id?: number | null
-          helicone_org_id?: string | null
-          helicone_proxy_key_id?: string | null
-          helicone_user?: string | null
-          id?: string
-          model?: string | null
-          model_override?: string | null
-          path: string
-          prompt_id?: string | null
-          prompt_values?: Json | null
-          properties?: Json | null
-          provider?: string
-          request_ip?: string | null
-          target_url?: string | null
-          threat?: boolean | null
-          user_id?: string | null
-          version?: number
-        }
-        Update: {
-          auth_hash?: string
-          country_code?: string | null
-          created_at?: string
-          formatted_prompt_id?: string | null
-          helicone_api_key_id?: number | null
-          helicone_org_id?: string | null
-          helicone_proxy_key_id?: string | null
-          helicone_user?: string | null
-          id?: string
-          model?: string | null
-          model_override?: string | null
-          path?: string
-          prompt_id?: string | null
-          prompt_values?: Json | null
-          properties?: Json | null
-          provider?: string
-          request_ip?: string | null
-          target_url?: string | null
-          threat?: boolean | null
-          user_id?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "request_helicone_api_key_id_fkey"
-            columns: ["helicone_api_key_id"]
-            isOneToOne: false
-            referencedRelation: "helicone_api_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "request_helicone_org_id_fkey"
-            columns: ["helicone_org_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "request_helicone_proxy_key_id_fkey"
-            columns: ["helicone_proxy_key_id"]
-            isOneToOne: false
-            referencedRelation: "helicone_proxy_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "request_helicone_user_fkey"
-            columns: ["helicone_user"]
-            isOneToOne: false
-            referencedRelation: "users_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       request_job_task: {
         Row: {
           job_id: string
@@ -2582,13 +2289,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "request_job_task_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "request_job_task_task_id_fkey"
             columns: ["task_id"]
             isOneToOne: false
@@ -2596,60 +2296,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      response: {
-        Row: {
-          completion_audio_tokens: number | null
-          completion_tokens: number | null
-          created_at: string
-          delay_ms: number | null
-          feedback: Json | null
-          helicone_org_id: string | null
-          id: string
-          model: string | null
-          prompt_audio_tokens: number | null
-          prompt_cache_read_tokens: number | null
-          prompt_cache_write_tokens: number | null
-          prompt_tokens: number | null
-          request: string
-          status: number | null
-          time_to_first_token: number | null
-        }
-        Insert: {
-          completion_audio_tokens?: number | null
-          completion_tokens?: number | null
-          created_at?: string
-          delay_ms?: number | null
-          feedback?: Json | null
-          helicone_org_id?: string | null
-          id?: string
-          model?: string | null
-          prompt_audio_tokens?: number | null
-          prompt_cache_read_tokens?: number | null
-          prompt_cache_write_tokens?: number | null
-          prompt_tokens?: number | null
-          request: string
-          status?: number | null
-          time_to_first_token?: number | null
-        }
-        Update: {
-          completion_audio_tokens?: number | null
-          completion_tokens?: number | null
-          created_at?: string
-          delay_ms?: number | null
-          feedback?: Json | null
-          helicone_org_id?: string | null
-          id?: string
-          model?: string | null
-          prompt_audio_tokens?: number | null
-          prompt_cache_read_tokens?: number | null
-          prompt_cache_write_tokens?: number | null
-          prompt_tokens?: number | null
-          request?: string
-          status?: number | null
-          time_to_first_token?: number | null
-        }
-        Relationships: []
       }
       rosetta_mappers: {
         Row: {
@@ -2860,13 +2506,6 @@ export type Database = {
           score_attribute?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "fk_request_id"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "request"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "fk_score_attribute"
             columns: ["score_attribute"]
