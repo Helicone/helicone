@@ -52,7 +52,8 @@
                 "pages": [
                   "gateway/integrations/langchain",
                   "gateway/integrations/langgraph",
-                  "gateway/integrations/semantic-kernel"
+                  "gateway/integrations/semantic-kernel",
+                  "gateway/integrations/codex"
                 ]
               }
             ]
