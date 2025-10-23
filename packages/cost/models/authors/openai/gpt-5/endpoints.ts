@@ -342,6 +342,38 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-5:azure": {
+    provider: "azure",
+    author: "openai",
+    providerModelId: "gpt-5",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000125, // $1.25 per 1M tokens
+        output: 0.00001, // $10.00 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.104, // $0.13 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 272_000,
+    maxCompletionTokens: 128_000,
+    rateLimits: {
+      rpm: 500
+    },
+    supportedParameters: [
+      "max_tokens",
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "gpt-5-mini:helicone": {
     provider: "helicone",
     author: "openai",
