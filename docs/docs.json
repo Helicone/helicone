@@ -43,7 +43,8 @@
                 "pages": [
                   "gateway/concepts/prompt-caching",
                   "gateway/web-search",
-                  "gateway/concepts/error-handling"
+                  "gateway/concepts/error-handling",
+                  "gateway/concepts/responses-api"
                 ]
               },
               {
