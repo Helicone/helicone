@@ -213,6 +213,7 @@ export interface EndpointConfig extends UserEndpointConfig {
 
 export interface RequestParams {
   isStreaming?: boolean;
+  bodyMapping?: BodyMappingType;
 }
 
 export interface Endpoint extends BaseConfig {

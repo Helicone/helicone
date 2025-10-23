@@ -9,6 +9,11 @@ export class OpenAIProvider extends BaseProvider {
   readonly modelPages = ["https://platform.openai.com/docs/models"];
 
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
-    return "https://api.openai.com/v1/chat/completions";
+    switch (requestParams.bodyMapping) {
+      case "RESPONSES":
+        return "https://api.openai.com/v1/responses";
+      default:
+        return "https://api.openai.com/v1/chat/completions";
+    }
   }
 }

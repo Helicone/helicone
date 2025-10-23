@@ -72,9 +72,6 @@ export class SimpleAIGateway {
   }
 
   async handle(): Promise<Response> {
-    if (this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "RESPONSES") {
-      return new Response("The Responses API is not supported on the AI Gateway. Please use Chat Completions instead.", { status: 400 });
-    }
     // Step 1: Parse and prepare request
     const parseResult = await this.parseAndPrepareRequest();
     if (isErr(parseResult)) {
@@ -84,6 +81,7 @@ export class SimpleAIGateway {
 
     const requestParams: RequestParams = {
       isStreaming: parsedBody.stream === true,
+      bodyMapping: this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
     };
 
     let finalBody = parsedBody;
@@ -141,6 +139,16 @@ export class SimpleAIGateway {
 
     // Step 6: Try each attempt in order
     for (const attempt of attempts) {
+      // temporarily disable Responses API calls for non-OpenAI endpoints
+      if (this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "RESPONSES" && attempt.endpoint.provider !== "openai") {
+        errors.push({
+          source: attempt.source,
+          message: "The Responses API is only supported for OpenAI provider endpoints.",
+          type: "invalid_format",
+          statusCode: 400,
+        });
+        continue;
+      }
       if (attempt.authType === "ptb" && this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping !== "NO_MAPPING") {
         const validationResult = validateOpenAIChatPayload(finalBody);
         if (isErr(validationResult)) {
