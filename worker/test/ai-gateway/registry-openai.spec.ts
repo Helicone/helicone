@@ -475,6 +475,23 @@ describe("OpenAI Registry Tests", () => {
           },
         }));
 
+      it("should handle azure provider", () =>
+        runGatewayTest({
+          model: "gpt-5/azure",
+          expected: {
+            providers: [
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-5",
+                data: createOpenAIMockResponse("gpt-5"),
+                expects: azureAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
       it("should auto-select openai provider when none specified", () =>
         runGatewayTest({
           model: "gpt-5",
@@ -486,6 +503,29 @@ describe("OpenAI Registry Tests", () => {
                 model: "gpt-5",
                 data: createOpenAIMockResponse("gpt-5"),
                 expects: openaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should fallback from openai to azure when openai fails", () =>
+        runGatewayTest({
+          model: "gpt-5",
+          expected: {
+            providers: [
+              {
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+              {
+                url: "https://test-resource.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview",
+                response: "success",
+                model: "gpt-5",
+                data: createOpenAIMockResponse("gpt-5"),
+                expects: azureAuthExpectations,
               },
             ],
             finalStatus: 200,
