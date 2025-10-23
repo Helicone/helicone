@@ -3,9 +3,31 @@
 # Configuration
 SLEEP_TIME_SECONDS=0    # Time to sleep between iterations (in seconds) - default: 60 (1 minute)
 DONE_FILE="./.agent/DONE.md"  # File to check for completion
+PROMPT_FILE="./prompt.md"  # Generated prompt file
+
+# Ensure .agent directory exists
 mkdir -p ./.agent
 
-# Run wallet testing loop until DONE.md file is created
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Error handling
+set -e
+trap 'echo -e "\n${YELLOW}Agent loop interrupted. Cleaning up...${NC}"; exit 0' INT TERM
+
+# Generate the prompt from source files
+echo -e "${GREEN}Generating prompt from source files...${NC}"
+./generate-prompt.sh
+if [ ! -f "$PROMPT_FILE" ]; then
+  echo -e "${RED}Error: Failed to generate $PROMPT_FILE${NC}"
+  exit 1
+fi
+echo ""
+
+# Run Claude Code agent loop until DONE.md file is created
 
 # Remove the DONE file if it exists from a previous run
 if [ -f "$DONE_FILE" ]; then
@@ -17,7 +39,7 @@ ITERATION=0
 START_TIME=$(date +%s)
 
 echo "========================================"
-echo "Starting Admin Wallet Testing Loop"
+echo "Starting Claude Code Agent Loop"
 echo "Start time: $(date)"
 echo "Will run until $DONE_FILE is created"
 echo "========================================"
@@ -33,10 +55,10 @@ while [ ! -f "$DONE_FILE" ]; do
   # Run Claude Code with the prompt
   if [ $ITERATION -eq 1 ]; then
     # First iteration: start fresh without --continue
-    cat prompt.md | claude -p --dangerously-skip-permissions
+    cat "$PROMPT_FILE" | claude -p --dangerously-skip-permissions
   else
     # Subsequent iterations: use --continue
-    cat prompt.md | claude -p --dangerously-skip-permissions --continue
+    cat "$PROMPT_FILE" | claude -p --dangerously-skip-permissions --continue
   fi
 
   # Check if DONE file was created
@@ -60,7 +82,9 @@ done
 
 echo ""
 echo "========================================"
-echo "Testing Loop Complete"
+echo "Agent Loop Complete"
 echo "End time: $(date)"
 echo "Total iterations: $ITERATION"
+ELAPSED=$(($(date +%s) - START_TIME))
+echo "Total elapsed time: $((ELAPSED / 60)) minutes $((ELAPSED % 60)) seconds"
 echo "========================================"
