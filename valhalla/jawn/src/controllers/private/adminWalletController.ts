@@ -34,6 +34,7 @@ interface DashboardData {
     ownerEmail: string;
     allowNegativeBalance: boolean;
     creditLimit: number;
+    dangerouslyBypassWalletCheck: boolean;
     walletBalance?: number;
     walletEffectiveBalance?: number;
     walletTotalCredits?: number;

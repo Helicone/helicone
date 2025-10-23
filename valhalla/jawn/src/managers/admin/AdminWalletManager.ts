@@ -23,6 +23,7 @@ interface DashboardData {
     ownerEmail: string;
     allowNegativeBalance: boolean;
     creditLimit: number;
+    dangerouslyBypassWalletCheck: boolean;
     walletBalance?: number;
     walletEffectiveBalance?: number;
     walletTotalCredits?: number;
@@ -248,6 +249,7 @@ export class AdminWalletManager extends BaseManager {
       owner_email: string;
       allow_negative_balance: boolean;
       credit_limit: string;
+      dangerously_bypass_wallet_check: boolean;
       total_amount_received: number;
       payments_count: number;
       last_payment_date: string | null;
@@ -261,6 +263,7 @@ export class AdminWalletManager extends BaseManager {
           auth.users.email as owner_email,
           organization.allow_negative_balance,
           organization.credit_limit,
+          organization.dangerously_bypass_wallet_check,
           COALESCE(SUM(stripe.payment_intents.amount_received), 0) as total_amount_received,
           COALESCE(COUNT(stripe.payment_intents.id), 0) as payments_count,
           MAX(stripe.payment_intents.created) as last_payment_date
@@ -280,7 +283,8 @@ export class AdminWalletManager extends BaseManager {
           organization.tier,
           auth.users.email,
           organization.allow_negative_balance,
-          organization.credit_limit
+          organization.credit_limit,
+          organization.dangerously_bypass_wallet_check
         `,
       [...queryParams, ...orgIds]
     );
@@ -339,6 +343,7 @@ export class AdminWalletManager extends BaseManager {
           ownerEmail: org.owner_email || "Unknown",
           allowNegativeBalance: org.allow_negative_balance,
           creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0,
+          dangerouslyBypassWalletCheck: org.dangerously_bypass_wallet_check,
           walletBalance: walletState.balance,
           walletEffectiveBalance: walletState.effectiveBalance,
           walletTotalCredits: walletState.totalCredits,
@@ -433,6 +438,7 @@ export class AdminWalletManager extends BaseManager {
       owner_email: string;
       allow_negative_balance: boolean;
       credit_limit: string;
+      dangerously_bypass_wallet_check: boolean;
       total_amount_received: number;
       payments_count: number;
       last_payment_date: string | null;
@@ -446,6 +452,7 @@ export class AdminWalletManager extends BaseManager {
           auth.users.email as owner_email,
           organization.allow_negative_balance,
           organization.credit_limit,
+          organization.dangerously_bypass_wallet_check,
           COALESCE(SUM(stripe.payment_intents.amount_received), 0) as total_amount_received,
           COALESCE(COUNT(stripe.payment_intents.id), 0) as payments_count,
           MAX(stripe.payment_intents.created) as last_payment_date
@@ -465,6 +472,7 @@ export class AdminWalletManager extends BaseManager {
           auth.users.email,
           organization.allow_negative_balance,
           organization.credit_limit,
+          organization.dangerously_bypass_wallet_check,
           organization.created_at
         ${orderClause}
         LIMIT 100
@@ -543,6 +551,7 @@ export class AdminWalletManager extends BaseManager {
         ownerEmail: org.owner_email || "Unknown",
         allowNegativeBalance: org.allow_negative_balance,
         creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0, // Convert cents to dollars
+        dangerouslyBypassWalletCheck: org.dangerously_bypass_wallet_check,
         walletBalance: walletState.balance,
         walletEffectiveBalance: walletState.effectiveBalance,
         walletTotalCredits: walletState.totalCredits,

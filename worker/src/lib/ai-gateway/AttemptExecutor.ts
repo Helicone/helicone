@@ -280,6 +280,11 @@ export class AttemptExecutor {
     try {
       const walletId = this.env.WALLET.idFromName(orgId);
       const walletStub = this.env.WALLET.get(walletId);
+      if (orgMeta.dangerouslyBypassWalletCheck) {
+        return ok({
+          escrowId: "BYPASS_ESCROW",
+        });
+      }
 
       const escrowResult = await walletStub.reserveCostInEscrow(
         orgId,
@@ -288,8 +293,7 @@ export class AttemptExecutor {
         {
           enabled: orgMeta.allowNegativeBalance,
           limit: orgMeta.creditLimit,
-        },
-        orgMeta.dangerouslyBypassWalletCheck
+        }
       );
 
       if (isErr(escrowResult)) {
