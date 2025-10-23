@@ -142,33 +142,6 @@ export class DatasetManager extends BaseManager {
     }
   }
 
-  async getDatasetRowInputRecord(
-    datasetRowId: string
-  ): Promise<
-    Result<Database["public"]["Tables"]["prompt_input_record"]["Row"], string>
-  > {
-    try {
-      const result = await dbExecute<
-        Database["public"]["Tables"]["prompt_input_record"]["Row"]
-      >(
-        `SELECT *
-         FROM prompt_input_record
-         WHERE id = $1
-         LIMIT 1`,
-        [datasetRowId]
-      );
-
-      if (result.error || !result.data || result.data.length === 0) {
-        return err(result.error ?? "Failed to get dataset row input record");
-      }
-
-      return ok(result.data[0]);
-    } catch (error) {
-      console.error("Error getting dataset row input record:", error);
-      return err(String(error));
-    }
-  }
-
   async addRandomDataset(params: RandomDatasetParams): Promise<
     Result<
       {
