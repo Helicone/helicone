@@ -159,10 +159,11 @@ export class SimpleAIGateway {
         });
         continue;
       }
+
       if (
         attempt.authType === "ptb" &&
-        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping !==
-          "NO_MAPPING"
+        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping ===
+          "OPENAI"
       ) {
         const validationResult = validateOpenAIChatPayload(finalBody);
         if (isErr(validationResult)) {
