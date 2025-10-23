@@ -60,7 +60,8 @@
       "mcp__playwright__browser_close",
       "Bash(psql:*)",
       "Bash(jq:*)",
-      "Bash(./genSupabaseTypes.sh:*)"
+      "Bash(./genSupabaseTypes.sh:*)",
+      "Bash(yarn tsc:*)"
     ],
     "deny": []
   },

@@ -32,6 +32,7 @@ interface ExecutorProps {
   orgMeta: {
     allowNegativeBalance: boolean;
     creditLimit: number;
+    dangerouslyBypassWalletCheck: boolean;
   };
 }
 

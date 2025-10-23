@@ -99,6 +99,7 @@ export interface AuthParams {
   metaData: {
     allowNegativeBalance: boolean;
     creditLimit: number;
+    dangerouslyBypassWalletCheck: boolean;
   };
 }
 
