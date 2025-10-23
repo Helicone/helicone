@@ -25,6 +25,7 @@ import {
   toOpenAIResponse,
   toOpenAIStreamResponse,
 } from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
+import { ResponsesAPIEnabledProviders } from "@helicone-package/cost/models/providers";
 
 export interface AuthContext {
   orgId: string;
@@ -76,6 +77,7 @@ export class SimpleAIGateway {
 
   async handle(): Promise<Response> {
     // Step 1: Parse and prepare request
+    const bodyMapping: BodyMappingType = this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
     const parseResult = await this.parseAndPrepareRequest();
     if (isErr(parseResult)) {
       return parseResult.error;
@@ -84,12 +86,18 @@ export class SimpleAIGateway {
 
     const requestParams: RequestParams = {
       isStreaming: parsedBody.stream === true,
-      bodyMapping:
-        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+      bodyMapping: bodyMapping,
     };
 
     let finalBody = parsedBody;
-    if (this.hasPromptFields(parsedBody)) {
+    // TODO: add prompt merging support for Responses API format
+    if (this.hasPromptFields(parsedBody) && bodyMapping !== "NO_MAPPING") {
+      if (bodyMapping === "RESPONSES") {
+        return new Response(
+          "Helicone Prompts is not supported for Responses API format on the AI Gateway",
+          { status: 400 }
+        );
+      }
       this.metrics.markPromptRequestStart();
       const expandResult = await this.expandPrompt(parsedBody);
       if (isErr(expandResult)) {
@@ -105,7 +113,7 @@ export class SimpleAIGateway {
     const attempts = await this.attemptBuilder.buildAttempts(
       modelStrings,
       this.orgId,
-      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+      bodyMapping,
       plugins
     );
     if (attempts.length === 0) {
@@ -145,24 +153,22 @@ export class SimpleAIGateway {
     for (const attempt of attempts) {
       // temporarily disable Responses API calls for non-OpenAI endpoints
       if (
-        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping ===
-          "RESPONSES" &&
-        attempt.endpoint.provider !== "openai" &&
-        attempt.endpoint.provider !== "helicone"
+        bodyMapping === "RESPONSES" &&
+        !ResponsesAPIEnabledProviders.includes(attempt.endpoint.provider)
       ) {
         errors.push({
           source: attempt.source,
           message:
-            "The Responses API is only supported for OpenAI provider endpoints.",
+            `The Responses API is only supported for the providers: ${ResponsesAPIEnabledProviders.join(", ")}`,
           type: "invalid_format",
           statusCode: 400,
         });
         continue;
       }
+      // TODO: add validation schema for Responses API format
       if (
         attempt.authType === "ptb" &&
-        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping !==
-          "NO_MAPPING"
+        bodyMapping === "OPENAI"
       ) {
         const validationResult = validateOpenAIChatPayload(finalBody);
         if (isErr(validationResult)) {
@@ -210,7 +216,7 @@ export class SimpleAIGateway {
         const mappedResponse = await this.mapResponse(
           attempt,
           result.data,
-          this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping
+          bodyMapping
         );
 
         if (isErr(mappedResponse)) {
