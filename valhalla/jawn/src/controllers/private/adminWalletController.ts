@@ -322,12 +322,14 @@ export class AdminWalletController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string,
     @Query() allowNegativeBalance?: boolean,
-    @Query() creditLimit?: number
+    @Query() creditLimit?: number,
+    @Query() dangerouslyBypassWalletCheck?: boolean
   ): Promise<
     Result<
       {
         allowNegativeBalance: boolean;
         creditLimit: number;
+        dangerouslyBypassWalletCheck: boolean;
       },
       string
     >
@@ -335,7 +337,11 @@ export class AdminWalletController extends Controller {
     await authCheckThrow(request.authParams.userId);
 
     // Validate that at least one parameter is provided
-    if (allowNegativeBalance === undefined && creditLimit === undefined) {
+    if (
+      allowNegativeBalance === undefined &&
+      creditLimit === undefined &&
+      dangerouslyBypassWalletCheck === undefined
+    ) {
       return err("At least one setting must be provided");
     }
 
@@ -364,18 +370,25 @@ export class AdminWalletController extends Controller {
         paramIndex++;
       }
 
+      if (dangerouslyBypassWalletCheck !== undefined) {
+        updates.push(`dangerously_bypass_wallet_check = $${paramIndex}`);
+        values.push(dangerouslyBypassWalletCheck);
+        paramIndex++;
+      }
+
       // Add orgId as the last parameter
       values.push(orgId);
 
       const updateResult = await dbExecute<{
         allow_negative_balance: boolean;
         credit_limit: string;
+        dangerously_bypass_wallet_check: boolean;
       }>(
         `
         UPDATE organization
         SET ${updates.join(", ")}
         WHERE id = $${paramIndex}
-        RETURNING allow_negative_balance, credit_limit
+        RETURNING allow_negative_balance, credit_limit, dangerously_bypass_wallet_check
         `,
         values
       );
@@ -393,6 +406,7 @@ export class AdminWalletController extends Controller {
       return ok({
         allowNegativeBalance: updatedOrg.allow_negative_balance,
         creditLimit: Number(updatedOrg.credit_limit) / 100, // Convert cents back to dollars
+        dangerouslyBypassWalletCheck: updatedOrg.dangerously_bypass_wallet_check,
       });
     } catch (error) {
       console.error("Error updating wallet settings:", error);

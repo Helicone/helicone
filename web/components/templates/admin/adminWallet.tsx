@@ -92,6 +92,8 @@ export default function AdminWallet() {
   const [allowNegativeBalance, setAllowNegativeBalance] =
     useState<boolean>(false);
   const [creditLimit, setCreditLimit] = useState<string>("");
+  const [dangerouslyBypassWalletCheck, setDangerouslyBypassWalletCheck] =
+    useState<boolean>(false);
   const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
@@ -295,6 +297,7 @@ export default function AdminWallet() {
       if (org) {
         setAllowNegativeBalance(org.allowNegativeBalance || false);
         setCreditLimit(org.creditLimit ? org.creditLimit.toString() : "0");
+        setDangerouslyBypassWalletCheck(org.dangerouslyBypassWalletCheck || false);
       }
     }
   };
@@ -408,6 +411,7 @@ export default function AdminWallet() {
           query: {
             allowNegativeBalance,
             creditLimit: limitValue,
+            dangerouslyBypassWalletCheck,
           },
         },
       });
@@ -420,6 +424,7 @@ export default function AdminWallet() {
         if (result.data) {
           setAllowNegativeBalance(result.data.allowNegativeBalance);
           setCreditLimit(result.data.creditLimit?.toString() ?? "0");
+          setDangerouslyBypassWalletCheck(result.data.dangerouslyBypassWalletCheck);
         }
         // Refresh dashboard data to update the table
         refetchDashboard();
@@ -809,32 +814,52 @@ export default function AdminWallet() {
                                   {/* Settings */}
                                   <div className="flex flex-col gap-2">
                                     <H4>Wallet Settings</H4>
-                                    <div className="flex items-center gap-3">
-                                      <div className="flex items-center gap-2">
-                                        <input
-                                          type="checkbox"
-                                          id={`allowNeg-${org.orgId}`}
-                                          checked={allowNegativeBalance}
-                                          onChange={(e) => setAllowNegativeBalance(e.target.checked)}
+                                    <div className="flex flex-col gap-3">
+                                      <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-2">
+                                          <input
+                                            type="checkbox"
+                                            id={`allowNeg-${org.orgId}`}
+                                            checked={allowNegativeBalance}
+                                            onChange={(e) => setAllowNegativeBalance(e.target.checked)}
+                                            disabled={isUpdatingSettings}
+                                            className="h-4 w-4 cursor-pointer"
+                                          />
+                                          <Label htmlFor={`allowNeg-${org.orgId}`} className="cursor-pointer">Allow Negative Balance</Label>
+                                        </div>
+                                        <Input
+                                          type="number"
+                                          step="0.01"
+                                          min="0"
+                                          placeholder="Credit Limit"
+                                          value={creditLimit}
+                                          onChange={(e) => setCreditLimit(e.target.value)}
                                           disabled={isUpdatingSettings}
-                                          className="h-4 w-4 cursor-pointer"
+                                          className="h-8 w-40"
                                         />
-                                        <Label htmlFor={`allowNeg-${org.orgId}`} className="cursor-pointer">Allow Negative Balance</Label>
                                       </div>
-                                      <Input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="Credit Limit"
-                                        value={creditLimit}
-                                        onChange={(e) => setCreditLimit(e.target.value)}
-                                        disabled={isUpdatingSettings}
-                                        className="h-8 w-40"
-                                      />
+                                      <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-2">
+                                          <input
+                                            type="checkbox"
+                                            id={`bypassWallet-${org.orgId}`}
+                                            checked={dangerouslyBypassWalletCheck}
+                                            onChange={(e) => setDangerouslyBypassWalletCheck(e.target.checked)}
+                                            disabled={isUpdatingSettings}
+                                            className="h-4 w-4 cursor-pointer accent-red-600"
+                                          />
+                                          <Label htmlFor={`bypassWallet-${org.orgId}`} className="cursor-pointer text-red-600 font-semibold">
+                                            <AlertCircle size={14} className="inline mr-1" />
+                                            DANGER: Bypass All Wallet Checks
+                                          </Label>
+                                        </div>
+                                        <Small className="text-red-600">Disables balance AND dispute checks</Small>
+                                      </div>
                                       <Button
                                         onClick={handleUpdateSettings}
                                         disabled={isUpdatingSettings}
                                         size="sm"
+                                        className="w-fit"
                                       >
                                         {isUpdatingSettings ? <Loader2 size={14} className="animate-spin" /> : "Update Settings"}
                                       </Button>

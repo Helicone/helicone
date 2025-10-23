@@ -456,10 +456,24 @@ export class Wallet extends DurableObject<Env> {
     creditLine: {
       limit: number; // in cents
       enabled: boolean;
-    }
+    },
+    dangerouslyBypassWalletCheck: boolean = false
   ): Result<{ escrowId: string }, { statusCode: number; message: string }> {
     const amountToReserveScaled = amountToReserve * SCALE_FACTOR;
     return this.ctx.storage.transactionSync(() => {
+      // DANGEROUS: Bypass all wallet checks if flag is enabled
+      if (dangerouslyBypassWalletCheck) {
+        const escrowId = crypto.randomUUID();
+        this.ctx.storage.sql.exec(
+          "INSERT INTO escrows (id, amount, created_at, request_id) VALUES (?, ?, ?, ?)",
+          escrowId,
+          amountToReserveScaled,
+          Date.now(),
+          requestId
+        );
+        return ok({ escrowId });
+      }
+
       // Check if wallet is suspended due to disputes
       const activeDisputesCount = this.ctx.storage.sql
         .exec<{

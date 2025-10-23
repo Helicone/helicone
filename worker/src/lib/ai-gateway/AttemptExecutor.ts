@@ -245,6 +245,7 @@ export class AttemptExecutor {
     orgMeta: {
       allowNegativeBalance: boolean;
       creditLimit: number;
+      dangerouslyBypassWalletCheck: boolean;
     }
   ): Promise<
     Result<{ escrowId: string }, { statusCode?: number; message: string }>
@@ -287,7 +288,8 @@ export class AttemptExecutor {
         {
           enabled: orgMeta.allowNegativeBalance,
           limit: orgMeta.creditLimit,
-        }
+        },
+        orgMeta.dangerouslyBypassWalletCheck
       );
 
       if (isErr(escrowResult)) {
