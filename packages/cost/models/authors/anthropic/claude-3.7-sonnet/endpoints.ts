@@ -167,6 +167,7 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
+    priority: 3,
     endpointConfigs: {
       "*": {},
     },
