@@ -86,7 +86,9 @@ This integration uses the [AI Gateway](/gateway/overview), which provides a unif
       apiKey: process.env.HELICONE_API_KEY,
     });
 
-    const thread = codex.startThread();
+    const thread = codex.startThread({
+      model: "gpt-5" // 100+ models supported
+    });
     const turn = await thread.run("What files are in the current directory?");
 
     console.log(turn.finalResponse);
