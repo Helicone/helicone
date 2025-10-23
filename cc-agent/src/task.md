@@ -1,13 +1,23 @@
-# Task to complete....
+# Task: Get E2E Test Suite Working
 
-Can you run `act workflow_dispatch -W .github/workflows/e2e-test-suite.yml -j e2e-tests`
+## Objective
 
-## and please get it to work...
+Run the E2E test suite using `act` and get it to work successfully.
 
-You will run on a loop for the next 3 hours. good luck!
+## Steps
 
-If everythig is working and you were able to test it manually, please create a doc in the scratchpad name "./.agent/DONE.md" with proof that everything works well and you were able to reproduce the error and the error is now fixed with a summary of the fixes and all the tests and builds are working
+1. Run the following command:
+   ```bash
+   act workflow_dispatch -W .github/workflows/e2e-test-suite.yml -j e2e-tests
+   ```
 
-^ It's okay if you did not finish, we will re-run you in a min. Only write the DONE.md if you are 1000000% done
+2. Investigate and fix any failures or errors that occur
 
-## MAKE SURE YOU ARE 100% done, if not DO NOT write the done file... really make sure...
+3. Ensure the test suite runs to completion successfully
+
+## Acceptance Criteria
+
+- [ ] The `act` command runs without errors
+- [ ] All E2E tests pass
+- [ ] Any issues found during execution are documented and resolved
+- [ ] The workflow completes successfully

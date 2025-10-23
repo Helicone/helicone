@@ -2,22 +2,49 @@
 
 ## Prerequisites - Start Required Services
 
-Before running the tests, ensure these services are running in the background:
+**IMPORTANT:** You need to start the following services in the background and monitor their terminal output for errors:
 
-1. **Workers** - Run in background: `./run_all_workers.sh`
-2. **Jawn (Backend API)** - Run in background from `/valhalla/jawn`: `yarn dev`
-3. **Web (Frontend)** - Run in background from `/web`: `yarn dev:local -p 3000`
+1. **Workers** - Run in background: `cd /workspaces/helicone && ./run_all_workers.sh`
+2. **Jawn (Backend API)** - Run in background: `cd /workspaces/helicone/valhalla/jawn && yarn dev`
+3. **Web (Frontend)** - Run in background: `cd /workspaces/helicone/web && yarn dev:local -p 3000`
 
-**IMPORTANT: Use the Playwright MCP tools to automate browser interactions. You have access to:**
+**Important notes:**
+- Use the Bash tool with `run_in_background: true` to start each service
+- Monitor the terminal output from each service to catch any startup errors
+- Wait for each service to be fully ready before starting the next one
+- Keep the services running throughout the task execution
 
-here are keys you can use to send test requests to them models through the worker to visualize them in helicone
+## Testing & Browser Automation
 
-Also please make sure we are testing this, by sending a request to openai and reproduce the issue that we can see in playwright. take screenshots for proof
+**Use the Playwright MCP tools to automate browser interactions:**
+- Navigate to `http://localhost:3000`
+- Test features by interacting with the UI
+- Take screenshots for proof of functionality
+- Verify that requests appear in the Helicone dashboard
 
-You will run on a loop for the next few hours. good luck!
+## API Keys
 
-If everything is working and you were able to test it manually, please create a doc in the scratchpad name "./.agent/DONE.md" with proof that everything works well and you were able to reproduce the error and the error is now fixed with a summary of the fixes and all the tests and builds are working
+API keys for testing will be provided below (injected from private/keys.md during prompt generation).
 
-^ It's okay if you did not finish, we will re-run you in a min. Only write the DONE.md if you are 1000000% done
+## Loop Execution
 
-## MAKE SURE YOU ARE 100% done, if not DO NOT write the done file... really make sure...
+You will run in a loop for the next few hours. Each iteration will continue from where you left off.
+
+## Completion Criteria
+
+**CRITICAL:** Only create the file `./.agent/DONE.md` when you have completed ALL of the following:
+
+1. ✅ All required services are running without errors
+2. ✅ All code changes have been made and tested
+3. ✅ All tests pass (if applicable)
+4. ✅ All builds succeed (if applicable)
+5. ✅ Manual testing completed with proof (screenshots, logs, etc.)
+6. ✅ The specific task has been fully verified as working
+
+**What to include in ./.agent/DONE.md:**
+- Summary of what was accomplished
+- Proof of success (screenshot paths, test results, etc.)
+- Any issues encountered and how they were resolved
+- Verification that all acceptance criteria are met
+
+**IMPORTANT:** If you are not 100% confident that everything is complete and working, DO NOT create the DONE.md file. The loop will continue and you can keep working on the task.
