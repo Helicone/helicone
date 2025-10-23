@@ -53,7 +53,7 @@ import {
 
 const formatCurrency = (amount: number | undefined) => {
   if (amount === undefined) return "UNDEFINED";
-  return remoteFormatCurrency(amount, "USD", 6);
+  return remoteFormatCurrency(amount, "USD", 2);
 };
 
 type SortColumn =
@@ -643,7 +643,7 @@ export default function AdminWallet() {
                             <span
                               className={
                                 isNegativeBalance
-                                  ? "font-medium text-red-600"
+                                  ? "font-medium text-red-500"
                                   : ""
                               }
                             >
@@ -655,7 +655,7 @@ export default function AdminWallet() {
                               <span
                                 className={
                                   org.walletBalance < 0
-                                    ? "font-medium text-red-600"
+                                    ? "font-medium text-red-500"
                                     : ""
                                 }
                               >
@@ -725,7 +725,7 @@ export default function AdminWallet() {
                                 <div className="flex h-32 items-center justify-center">
                                   <Loader2 size={20} className="animate-spin" />
                                 </div>
-                              ) : walletDetails?.data ? (
+                              ) : walletDetails ? (
                                 <div className="flex flex-col gap-6">
                                   {/* Overview */}
                                   <div className="flex flex-col gap-3">
@@ -733,27 +733,27 @@ export default function AdminWallet() {
                                     <div className="flex items-center gap-6">
                                       <div className="flex flex-col gap-1">
                                         <Small className="text-muted-foreground">Balance</Small>
-                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.data.balance)}</span>
+                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.balance)}</span>
                                       </div>
                                       <div className="h-8 w-px bg-border" />
                                       <div className="flex flex-col gap-1">
                                         <Small className="text-muted-foreground">Effective Balance</Small>
-                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.data.effectiveBalance)}</span>
+                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.effectiveBalance)}</span>
                                       </div>
                                       <div className="h-8 w-px bg-border" />
                                       <div className="flex flex-col gap-1">
                                         <Small className="text-muted-foreground">Total Credits</Small>
-                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.data.totalCredits)}</span>
+                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.totalCredits)}</span>
                                       </div>
                                       <div className="h-8 w-px bg-border" />
                                       <div className="flex flex-col gap-1">
                                         <Small className="text-muted-foreground">Total Debits</Small>
-                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.data.totalDebits)}</span>
+                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.totalDebits)}</span>
                                       </div>
                                       <div className="h-8 w-px bg-border" />
                                       <div className="flex flex-col gap-1">
                                         <Small className="text-muted-foreground">Escrow</Small>
-                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.data.totalEscrow)}</span>
+                                        <span className="text-base font-semibold">{formatCurrency(walletDetails.totalEscrow)}</span>
                                       </div>
                                     </div>
                                   </div>
