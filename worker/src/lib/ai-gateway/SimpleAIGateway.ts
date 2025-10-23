@@ -15,7 +15,10 @@ import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { validateOpenAIChatPayload } from "./validators/openaiRequestValidator";
-import { RequestParams, BodyMappingType } from "@helicone-package/cost/models/types";
+import {
+  RequestParams,
+  BodyMappingType,
+} from "@helicone-package/cost/models/types";
 import { SecureCacheProvider } from "../util/cache/secureCache";
 import { GatewayMetrics } from "./GatewayMetrics";
 import {
@@ -81,7 +84,8 @@ export class SimpleAIGateway {
 
     const requestParams: RequestParams = {
       isStreaming: parsedBody.stream === true,
-      bodyMapping: this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+      bodyMapping:
+        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
     };
 
     let finalBody = parsedBody;
@@ -140,16 +144,26 @@ export class SimpleAIGateway {
     // Step 6: Try each attempt in order
     for (const attempt of attempts) {
       // temporarily disable Responses API calls for non-OpenAI endpoints
-      if (this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "RESPONSES" && attempt.endpoint.provider !== "openai") {
+      if (
+        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping ===
+          "RESPONSES" &&
+        attempt.endpoint.provider !== "openai" &&
+        attempt.endpoint.provider !== "helicone"
+      ) {
         errors.push({
           source: attempt.source,
-          message: "The Responses API is only supported for OpenAI provider endpoints.",
+          message:
+            "The Responses API is only supported for OpenAI provider endpoints.",
           type: "invalid_format",
           statusCode: 400,
         });
         continue;
       }
-      if (attempt.authType === "ptb" && this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping !== "NO_MAPPING") {
+      if (
+        attempt.authType === "ptb" &&
+        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping !==
+          "NO_MAPPING"
+      ) {
         const validationResult = validateOpenAIChatPayload(finalBody);
         if (isErr(validationResult)) {
           errors.push({
@@ -365,7 +379,9 @@ export class SimpleAIGateway {
 
     const mappingType = attempt.endpoint.modelConfig.responseFormat ?? "OPENAI";
     const contentType = response.headers.get("content-type");
-    const isStream = contentType?.includes("text/event-stream") || contentType?.includes("application/vnd.amazon.eventstream");
+    const isStream =
+      contentType?.includes("text/event-stream") ||
+      contentType?.includes("application/vnd.amazon.eventstream");
 
     try {
       if (mappingType === "OPENAI") {
@@ -446,7 +462,8 @@ export class SimpleAIGateway {
         e.type !== "disallowed"
     );
 
-    const all429 = errors.length > 0 && errors.every((e) => e.statusCode === 429);
+    const all429 =
+      errors.length > 0 && errors.every((e) => e.statusCode === 429);
 
     if (first403) {
       statusCode = 403;
@@ -463,7 +480,9 @@ export class SimpleAIGateway {
       // - 401 (Unauthorized): User needs to fix API key
       // - 403 (Forbidden): Access denied
       // All other provider errors normalize to 500 for consistency
-      const isActionableAuthError = firstNon429Error.statusCode === 401 || firstNon429Error.statusCode === 403;
+      const isActionableAuthError =
+        firstNon429Error.statusCode === 401 ||
+        firstNon429Error.statusCode === 403;
       statusCode = isActionableAuthError ? firstNon429Error.statusCode : 500;
       message = firstNon429Error.message || "Request failed";
       code = "request_failed";
