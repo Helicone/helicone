@@ -51,7 +51,8 @@
                 "pages": [
                   "gateway/integrations/langchain",
                   "gateway/integrations/langgraph",
-                  "gateway/integrations/semantic-kernel"
+                  "gateway/integrations/semantic-kernel",
+                  "other-integrations/zapier"
                 ]
               }
             ]
@@ -211,6 +212,7 @@
                   "getting-started/integration-method/vercelai",
                   "getting-started/integration-method/crewai",
                   "other-integrations/dify",
+                  "gateway/integrations/llamaindex",
                   "other-integrations/ragas"
                 ]
               },
