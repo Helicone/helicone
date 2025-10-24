@@ -141,6 +141,21 @@ export function uiFilterRowToFilterLeaf(
     };
   }
 
+  // Special-case: map "AI Gateway" boolean to request_referrer mapping
+  if (
+    filterDef?.label === "AI Gateway" &&
+    filterDef?.table === "request_response_rmt"
+  ) {
+    const isYes = String(filter.value) === "true";
+    return {
+      request_response_rmt: {
+        request_referrer: {
+          equals: isYes ? "ai-gateway" : "__empty__",
+        },
+      },
+    };
+  }
+
   return {
     [filterDef?.table]: {
       [filterDef?.column]: {
