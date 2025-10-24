@@ -19,6 +19,7 @@ export class ChatToResponsesStreamConverter {
   private itemAdded: boolean = false;
   private partAdded: boolean = false;
   private emittedFunctionItems: Set<string> = new Set();
+  private completedEmitted: boolean = false;
 
   constructor() {
     this.toolCalls = new Map();
@@ -139,28 +140,27 @@ export class ChatToResponsesStreamConverter {
         }
       }
 
-      // if finish reason was sent for this choice, emit text.done
+      // if finish reason was sent for this choice, emit done + completed
       if (choice?.finish_reason) {
-        const doneEvt: ResponseOutputTextDoneEvent = {
-          type: "response.output_text.done",
-          item_id: `msg_${this.responseId}`,
-          output_index: 0,
-          content_index: 0,
-          text: this.textBuffer,
-        };
-        events.push(doneEvt);
-
-        // close part and item
-        if (this.partAdded) {
-          events.push({
-            type: "response.content_part.done",
+        if (this.itemAdded) {
+          const doneEvt: ResponseOutputTextDoneEvent = {
+            type: "response.output_text.done",
             item_id: `msg_${this.responseId}`,
             output_index: 0,
             content_index: 0,
-            part: { type: "output_text", text: this.textBuffer, annotations: [] },
-          } as any);
-        }
-        if (this.itemAdded) {
+            text: this.textBuffer,
+          };
+          events.push(doneEvt);
+
+          if (this.partAdded) {
+            events.push({
+              type: "response.content_part.done",
+              item_id: `msg_${this.responseId}`,
+              output_index: 0,
+              content_index: 0,
+              part: { type: "output_text", text: this.textBuffer, annotations: [] },
+            } as any);
+          }
           events.push({
             type: "response.output_item.done",
             output_index: 0,
@@ -178,14 +178,12 @@ export class ChatToResponsesStreamConverter {
 
         // Finalize any function calls
         this.toolCalls.forEach((tc) => {
-          // Done event with full arguments
           events.push({
             type: "response.function_call_arguments.done",
             item_id: tc.item_id,
             output_index: 0,
             arguments: tc.arguments || "{}",
           } as any);
-          // Output item done
           events.push({
             type: "response.output_item.done",
             output_index: 0,
@@ -200,11 +198,50 @@ export class ChatToResponsesStreamConverter {
             },
           } as any);
         });
+
+        // Emit completed now if usage not provided
+        const usage = this.finalUsage || undefined;
+        const completed: ResponseCompletedEvent = {
+          type: "response.completed",
+          response: {
+            id: this.responseId,
+            object: "response",
+            created: this.created,
+            created_at: this.created as any,
+            status: "completed" as any,
+            model: this.model,
+            output: [
+              ...(this.itemAdded
+                ? ([
+                    {
+                      type: "message" as const,
+                      role: "assistant" as const,
+                      content: [
+                        { type: "output_text" as const, text: this.textBuffer },
+                      ],
+                    },
+                  ] as any)
+                : []),
+              ...Array.from(this.toolCalls.values()).map((tc) => ({
+                id: `fc_${tc.id}`,
+                type: "function_call" as const,
+                status: "completed" as const,
+                name: tc.name || "",
+                call_id: tc.id,
+                arguments: tc.arguments || "{}",
+                parsed_arguments: null,
+              })),
+            ],
+            ...(usage ? { usage } : {}),
+          },
+        };
+        events.push(completed);
+        this.completedEmitted = true;
       }
     }
 
-    // usage usagealley (haha...?) arrives in the final chunk with empty choices
-    if (c.usage) {
+    // usage arrives in the final chunk with empty choices
+    if (c.usage && !this.completedEmitted) {
       const usage: ResponsesUsage = {
         input_tokens: c.usage.prompt_tokens,
         output_tokens: c.usage.completion_tokens,
@@ -253,6 +290,7 @@ export class ChatToResponsesStreamConverter {
         },
       };
       events.push(completed);
+      this.completedEmitted = true;
     }
 
     return events;

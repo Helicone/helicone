@@ -37,18 +37,12 @@ export function oaiChat2responsesStream(
             if (line.startsWith("data: ")) {
               const data = line.slice(6);
               if (data.trim() === "[DONE]") {
-                // Ensure stream termination; Responses API may end with response.completed
-                if (!emittedCompleted) {
-                  // If the converter hasn't emitted a response.completed (e.g., no usage)
-                  // we just end the stream. Clients also listen for "event: done".
-                  controller.enqueue(encoder.encode("event: done\n\n"));
-                }
+                // end of upstream stream, so response.completed should have been emitted by converter.
                 continue;
               }
 
               try {
                 const chunk = JSON.parse(data) as ChatCompletionChunk;
-                console.log("chunk", JSON.stringify(chunk, null, 2));
                 const events = converter.convert(chunk);
                 for (const ev of events) {
                   const type = (ev as any).type;

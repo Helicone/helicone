@@ -40,7 +40,34 @@ export const providers = {
 export type ModelProviderName = keyof typeof providers;
 
 // TODO: temporarily whitelist responses API providers until all mappings are done
-export const ResponsesAPIEnabledProviders: ModelProviderName[] = ["openai", "helicone", "vertex"];
+export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
+  "openai",
+  "helicone",
+
+  // chat completions only
+  "azure",
+  "chutes",
+  "cohere",
+  "deepinfra",
+  "deepseek",
+  
+  // has known issues with returning structured JSONS
+  // should be okay to enable, but its not stable enough to add without request
+  // "google-ai-studio",
+  
+  "groq",
+  "nebius",
+  "novita",
+  "openrouter",
+  "perplexity",
+  "xai",
+
+  // anthropic and chat completions provider
+  "vertex"
+
+  // anthropic only
+  // none right now, need anthropic mapper
+];
 
 // Re-export base for extending
 export { BaseProvider } from "./base";
