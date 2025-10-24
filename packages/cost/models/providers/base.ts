@@ -55,8 +55,12 @@ export abstract class BaseProvider {
     endpoint: Endpoint,
     context: RequestBodyContext
   ): string | Promise<string> {
+    let updatedBody = context.parsedBody;
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(updatedBody);
+    }
     return JSON.stringify({
-      ...context.parsedBody,
+      ...updatedBody,
       model: endpoint.providerModelId,
     });
   }
