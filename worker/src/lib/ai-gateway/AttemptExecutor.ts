@@ -1,22 +1,27 @@
 import {
-  buildRequestBody,
   authenticateRequest,
-  buildErrorMessage,
   buildEndpointUrl,
+  buildErrorMessage,
+  buildRequestBody,
 } from "@helicone-package/cost/models/provider-helpers";
-import { RequestWrapper } from "../RequestWrapper";
-import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
-import { isErr, Result, ok, err } from "../util/results";
-import { Plugin } from "@helicone-package/cost/models/types";
-import { Attempt, EscrowInfo, AttemptError } from "./types";
 import {
   AuthContext,
   Endpoint,
+  Plugin,
   RequestParams,
 } from "@helicone-package/cost/models/types";
-import { ProviderKey } from "../db/ProviderKeysStore";
+import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
 import { CacheProvider } from "../../../../packages/common/cache/provider";
+import { ProviderKey } from "../db/ProviderKeysStore";
+import {
+  createDataDogTracer,
+  DataDogTracer,
+  TraceContext,
+} from "../monitoring/DataDogTracer";
+import { RequestWrapper } from "../RequestWrapper";
+import { err, isErr, ok, Result } from "../util/results";
 import { GatewayMetrics } from "./GatewayMetrics";
+import { Attempt, AttemptError, EscrowInfo } from "./types";
 
 interface ExecutorProps {
   attempt: Attempt;
@@ -36,17 +41,22 @@ interface ExecutorProps {
 }
 
 export class AttemptExecutor {
+  private tracer: DataDogTracer;
+
   constructor(
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
     private readonly cacheProvider?: CacheProvider
-  ) {}
+  ) {
+    this.tracer = createDataDogTracer(env);
+  }
 
   async PTBPreCheck(props: {
     attempt: Attempt;
     requestWrapper: RequestWrapper;
     orgId: string;
     orgMeta: ExecutorProps["orgMeta"];
+    traceContext?: TraceContext | null;
   }): Promise<
     Result<
       {
@@ -55,20 +65,49 @@ export class AttemptExecutor {
       AttemptError
     >
   > {
+    // Start credit validation span
+    const spanId = props.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ptb.credit_validation",
+          "reserve_escrow",
+          "helicone-wallet",
+          {
+            org_id: props.traceContext.tags.org_id,
+          },
+          props.traceContext
+        )
+      : null;
+
     const escrowResult = await this.reserveEscrow(
       props.attempt,
       props.requestWrapper.heliconeHeaders.requestId,
       props.orgId,
-      props.orgMeta
+      props.orgMeta,
+      props.traceContext
     );
 
     if (isErr(escrowResult)) {
+      // Mark span with error
+      if (spanId) {
+        this.tracer.setTag(spanId, "wallet.escrow_status", "failed");
+        this.tracer.setTag(spanId, "error_message", escrowResult.error.message);
+        this.tracer.finishSpan(spanId);
+      }
+
       return err({
         type: "request_failed",
         message: escrowResult.error.message,
         statusCode: escrowResult.error.statusCode || 500,
       });
     }
+
+    // Mark span as successful
+    if (spanId) {
+      this.tracer.setTag(spanId, "wallet.escrow_status", "reserved");
+      this.tracer.setTag(spanId, "escrow_id", escrowResult.data.escrowId);
+      this.tracer.finishSpan(spanId);
+    }
+
     return ok({ reservedEscrowId: escrowResult.data.escrowId });
   }
 
@@ -76,12 +115,37 @@ export class AttemptExecutor {
     const { endpoint, providerKey } = props.attempt;
 
     let escrowInfo: EscrowInfo | undefined;
+    let traceContext: TraceContext | null = null;
+
+    // Start trace for PTB requests
+    if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
+      const resource = `${props.requestWrapper.getMethod()} ${props.requestWrapper.getUrl()}`;
+
+      traceContext = this.tracer.startTrace("ptb.request", resource, {
+        org_id: props.orgId || "unknown",
+        provider: endpoint.provider,
+        model: endpoint.providerModelId,
+        http_method: props.requestWrapper.getMethod(),
+      });
+    }
 
     // Reserve escrow if needed (PTB only)
     if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
-      const ptbCheck = await this.PTBPreCheck(props);
+      const ptbCheck = await this.PTBPreCheck({
+        ...props,
+        traceContext,
+      });
 
       if (isErr(ptbCheck)) {
+        // Finish trace with error
+        if (traceContext?.sampled) {
+          this.tracer.finishTrace({
+            error: "true",
+            error_message: ptbCheck.error.message,
+            http_status_code: ptbCheck.error.statusCode?.toString(),
+          });
+          this.ctx.waitUntil(this.tracer.sendTrace());
+        }
         return err(ptbCheck.error);
       }
 
@@ -101,7 +165,8 @@ export class AttemptExecutor {
       props.forwarder,
       escrowInfo,
       props.metrics,
-      props.attempt.plugins
+      props.attempt.plugins,
+      traceContext
     );
 
     // If error, cancel escrow and return the error
@@ -109,10 +174,28 @@ export class AttemptExecutor {
       if (escrowInfo) {
         this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, props.orgId));
       }
+
+      // Finish trace with error
+      if (traceContext?.sampled) {
+        this.tracer.finishTrace({
+          error: "true",
+          error_message: result.error.message,
+          http_status_code: result.error.statusCode?.toString(),
+        });
+        this.ctx.waitUntil(this.tracer.sendTrace());
+      }
+
       return result;
     }
 
-    // Success
+    // Success - finish trace
+    if (traceContext?.sampled) {
+      this.tracer.finishTrace({
+        http_status_code: result.data.status.toString(),
+      });
+      this.ctx.waitUntil(this.tracer.sendTrace());
+    }
+
     return result;
   }
 
@@ -129,7 +212,8 @@ export class AttemptExecutor {
     ) => Promise<Response>,
     escrowInfo: EscrowInfo | undefined,
     metrics: GatewayMetrics,
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    traceContext?: TraceContext | null
   ): Promise<Result<Response, AttemptError>> {
     try {
       const bodyResult = await buildRequestBody(endpoint, {
@@ -207,9 +291,44 @@ export class AttemptExecutor {
       metrics.markPreRequestEnd();
       metrics.markProviderStart();
 
+      // Start provider request span
+      const providerSpanId = traceContext?.sampled
+        ? this.tracer.startSpan(
+            "provider.llm_request",
+            `${endpoint.provider} ${endpoint.providerModelId}`,
+            "llm-provider",
+            {
+              org_id: traceContext.tags.org_id,
+              provider: endpoint.provider,
+              model: endpoint.providerModelId,
+            },
+            traceContext
+          )
+        : null;
+
+      const providerStartTime = Date.now();
       const response = await forwarder(urlResult.data, escrowInfo);
+      const providerLatency = Date.now() - providerStartTime;
 
       metrics.markProviderEnd(response.status);
+
+      // Finish provider span
+      if (providerSpanId) {
+        this.tracer.setTag(
+          providerSpanId,
+          "http.status_code",
+          response.status.toString()
+        );
+        this.tracer.setTag(
+          providerSpanId,
+          "provider.latency_ms",
+          providerLatency
+        );
+        if (!response.ok) {
+          this.tracer.setTag(providerSpanId, "error", "true");
+        }
+        this.tracer.finishSpan(providerSpanId);
+      }
 
       if (!response.ok) {
         const errorMessageResult = await buildErrorMessage(endpoint, response);
@@ -245,7 +364,8 @@ export class AttemptExecutor {
     orgMeta: {
       allowNegativeBalance: boolean;
       creditLimit: number;
-    }
+    },
+    traceContext?: TraceContext | null
   ): Promise<
     Result<{ escrowId: string }, { statusCode?: number; message: string }>
   > {
@@ -287,7 +407,8 @@ export class AttemptExecutor {
         {
           enabled: orgMeta.allowNegativeBalance,
           limit: orgMeta.creditLimit,
-        }
+        },
+        traceContext
       );
 
       if (isErr(escrowResult)) {
