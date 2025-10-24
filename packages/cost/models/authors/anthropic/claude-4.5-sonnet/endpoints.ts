@@ -51,7 +51,7 @@ export const endpoints = {
     version: "vertex-2023-10-16",
     ptbEnabled: true,
     crossRegion: true,
-    priority: 3,
+    priority: 4,
     pricing: [
       {
         threshold: 0,
@@ -92,7 +92,7 @@ export const endpoints = {
     providerModelId: "anthropic.claude-sonnet-4-5-20250929-v1:0",
     version: "20250929",
     crossRegion: true,
-    priority: 3,
+    priority: 4,
     pricing: [
       {
         threshold: 0,
