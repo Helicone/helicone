@@ -120,18 +120,6 @@ function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
       });
     }
   );
-
-  router.post(
-    "/v1/log",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      return await handleLoggingEndpoint(requestWrapper, env);
-    }
-  );
 }
 
 export function buildRouter(

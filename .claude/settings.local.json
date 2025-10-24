@@ -59,7 +59,10 @@
       "mcp__playwright__browser_tabs",
       "mcp__playwright__browser_close",
       "Bash(psql:*)",
-      "Bash(jq:*)"
+      "Bash(jq:*)",
+      "Bash(git log:*)",
+      "Bash(git grep:*)",
+      "Bash(xargs git grep -l \"request\\|response\")"
     ],
     "deny": []
   },
