@@ -113,7 +113,7 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
+    priority: 2,
     endpointConfigs: {
       "*": {},
     },
