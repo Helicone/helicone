@@ -1,6 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { err, ok, Result } from "../util/results";
 import Stripe from "stripe";
+import { TraceContext } from "../monitoring/DataDogTracer";
 
 // 10^10 is the scale factor for the balance
 // (which is sent to us by stripe in cents)
@@ -456,10 +457,17 @@ export class Wallet extends DurableObject<Env> {
     creditLine: {
       limit: number; // in cents
       enabled: boolean;
-    }
+    },
+    traceContext?: TraceContext | null
   ): Result<{ escrowId: string }, { statusCode: number; message: string }> {
+    const startTime = Date.now();
     const amountToReserveScaled = amountToReserve * SCALE_FACTOR;
-    return this.ctx.storage.transactionSync(() => {
+
+    // Create wallet span if tracing is enabled
+    const spanId = traceContext?.sampled ? this.generateId() : null;
+    const spanStart = spanId ? startTime * 1_000_000 : 0; // Convert to nanoseconds
+
+    const result = this.ctx.storage.transactionSync(() => {
       // Check if wallet is suspended due to disputes
       const activeDisputesCount = this.ctx.storage.sql
         .exec<{
@@ -526,6 +534,29 @@ export class Wallet extends DurableObject<Env> {
 
       return ok({ escrowId });
     });
+
+    // Send wallet span if tracing is enabled
+    if (spanId && traceContext) {
+      const duration = (Date.now() - startTime) * 1_000_000; // Convert to nanoseconds
+      const errorTags: Record<string, string> = {};
+      if ("error" in result && result.error && typeof result.error === "object" && "message" in result.error) {
+        errorTags.error = "true";
+        errorTags.error_message = (result.error as { message: string }).message || "Unknown error";
+      }
+      this.sendWalletSpan(
+        spanId,
+        traceContext,
+        spanStart,
+        duration,
+        {
+          has_disputes: "false",
+          org_id: traceContext.tags.org_id || orgId,
+        },
+        errorTags
+      );
+    }
+
+    return result as Result<{ escrowId: string }, { statusCode: number; message: string }>;
   }
 
   finalizeEscrow(
@@ -774,5 +805,71 @@ export class Wallet extends DurableObject<Env> {
         return err(`Failed to update dispute: ${error}`);
       }
     });
+  }
+
+  /**
+   * Generate a random 64-bit ID for span (matches DataDogTracer format)
+   */
+  private generateId(): string {
+    const high = Math.floor(Math.random() * 0x100000000);
+    const low = Math.floor(Math.random() * 0x100000000);
+    const id = BigInt(high) * BigInt(0x100000000) + BigInt(low);
+    return id.toString();
+  }
+
+  /**
+   * Send a wallet span directly to Datadog APM
+   * Fire-and-forget to avoid blocking
+   */
+  private sendWalletSpan(
+    spanId: string,
+    traceContext: TraceContext,
+    start: number,
+    duration: number,
+    tags: Record<string, string>,
+    errorTags: Record<string, string> = {}
+  ): void {
+    try {
+      const span = {
+        trace_id: traceContext.trace_id,
+        span_id: spanId,
+        parent_id: traceContext.parent_span_id,
+        name: "wallet.reserve_escrow",
+        resource: "sqlite_transaction",
+        service: "wallet-do",
+        start,
+        duration,
+        meta: {
+          ...tags,
+          ...errorTags,
+        },
+        metrics: {},
+        error: errorTags.error === "true" ? 1 : 0,
+      };
+
+      // Send to Datadog APM (fire and forget)
+      const apiKey = this.env.DATADOG_API_KEY || "";
+      const endpoint =
+        this.env.DATADOG_APM_ENDPOINT || "https://trace.agent.datadoghq.com";
+
+      if (!apiKey || !endpoint) {
+        return; // Skip if not configured
+      }
+
+      fetch(`${endpoint}/v0.5/traces`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Datadog-Meta-Tracer-Version": "1.0.0",
+          "X-Datadog-Trace-Count": "1",
+          "DD-API-KEY": apiKey,
+        },
+        body: JSON.stringify([[span]]),
+      }).catch(() => {
+        // Silently ignore errors
+      });
+    } catch {
+      // Silently ignore errors - monitoring must never break the app
+    }
   }
 }
