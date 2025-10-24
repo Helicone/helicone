@@ -17,7 +17,6 @@ import { parseJSXObject } from "@helicone/prompts";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
-import { RequestBodyBuffer_InMemory } from "../RequestBodyBuffer/RequestBodyBuffer_InMemory";
 import {
   IRequestBodyBuffer,
   ValidRequestBody,
