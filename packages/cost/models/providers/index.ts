@@ -40,7 +40,7 @@ export const providers = {
 export type ModelProviderName = keyof typeof providers;
 
 // TODO: temporarily whitelist responses API providers until all mappings are done
-export const ResponsesAPIEnabledProviders: ModelProviderName[] = ["openai", "helicone"];
+export const ResponsesAPIEnabledProviders: ModelProviderName[] = ["openai", "helicone", "vertex"];
 
 // Re-export base for extending
 export { BaseProvider } from "./base";

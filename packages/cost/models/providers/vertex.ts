@@ -87,8 +87,12 @@ export class VertexProvider extends BaseProvider {
     const modelId = endpoint.providerModelId || "";
 
     if (modelId.toLowerCase().includes("gemini")) {
-      const updatedBody = {
-        ...context.parsedBody,
+      let updatedBody = context.parsedBody;
+      if (context.bodyMapping === "RESPONSES") {
+        updatedBody = context.toChatCompletions(context.parsedBody);
+      }
+      updatedBody = {
+        ...updatedBody,
         model: `google/${modelId}`,
       };
       return JSON.stringify(updatedBody);

@@ -264,4 +264,5 @@ export interface RequestBodyContext {
   parsedBody: any;
   bodyMapping: BodyMappingType;
   toAnthropic: (body: any, providerModelId?: string) => any;
+  toChatCompletions: (body: any) => any;
 }

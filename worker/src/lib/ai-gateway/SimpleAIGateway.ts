@@ -26,6 +26,8 @@ import {
   toOpenAIStreamResponse,
 } from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
 import { ResponsesAPIEnabledProviders } from "@helicone-package/cost/models/providers";
+import { oaiChat2responsesResponse } from "../clients/llmmapper/router/oaiChat2responses/nonStream";
+import { oaiChat2responsesStreamResponse } from "../clients/llmmapper/router/oaiChat2responses/stream";
 
 export interface AuthContext {
   orgId: string;
@@ -391,10 +393,22 @@ export class SimpleAIGateway {
 
     try {
       if (mappingType === "OPENAI") {
-        // Response is already in OpenAI format, just normalize usage
+        // If the request body mapping is Responses, convert Chat Completions
+        // output to Responses API output for non-OpenAI providers.
         const provider = attempt.endpoint.provider;
         const providerModelId = attempt.endpoint.providerModelId;
 
+        if (bodyMapping === "RESPONSES" && provider !== "openai") {
+          if (isStream) {
+            const mapped = oaiChat2responsesStreamResponse(response);
+            return ok(mapped);
+          } else {
+            const mapped = await oaiChat2responsesResponse(response);
+            return ok(mapped);
+          }
+        }
+
+        // Otherwise, response is already in OpenAI format; normalize usage
         if (isStream) {
           const normalizedResponse = toOpenAIStreamResponse(
             response,

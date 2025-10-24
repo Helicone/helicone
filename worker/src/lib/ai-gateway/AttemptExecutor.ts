@@ -17,6 +17,7 @@ import {
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { CacheProvider } from "../../../../packages/common/cache/provider";
 import { GatewayMetrics } from "./GatewayMetrics";
+import { toChatCompletions } from "@helicone-package/llm-mapper/transform/providers/responses/request/toChatCompletions";
 
 interface ExecutorProps {
   attempt: Attempt;
@@ -136,6 +137,7 @@ export class AttemptExecutor {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
         toAnthropic: (body, modelId) => toAnthropic(body, modelId, plugins),
+        toChatCompletions: (body) => toChatCompletions(body),
       });
 
       if (isErr(bodyResult) || !bodyResult.data) {
