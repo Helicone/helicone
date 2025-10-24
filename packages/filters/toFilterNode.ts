@@ -125,6 +125,23 @@ export function toFilterNode(
       );
     }
 
+    // Special-case: map virtual UI field "ai_gateway" to request_referrer mapping
+    if (
+      condition.field.table === "request_response_rmt" &&
+      String(condition.field.column) === "ai_gateway"
+    ) {
+      const isGateway = String(condition.value) === "true";
+      const referrerValue = isGateway ? "ai-gateway" : "";
+      const result: FilterLeaf = {
+        request_response_rmt: {
+          request_referrer: {
+            equals: referrerValue,
+          },
+        },
+      };
+      return result;
+    }
+
     const table = getTableFromField(condition.field);
     const operator = operatorMap[condition.operator] || condition.operator;
 
