@@ -147,6 +147,16 @@ function openAIContentToAnthropicContent(
       case "input_audio":
         // expected format: { type: "input_audio", input_audio: { data: base64str, format: "wav" }}
         throw new Error(`${part.type} is not supported by Anthropic Messages.`);
+      case "document":
+        // Anthropic document type - pass through as-is since it's already in Anthropic format
+        // Document blocks are used for extended context features with citations
+        return {
+          type: "document",
+          source: part.source,
+          title: part.title,
+          citations: part.citations,
+          cache_control: part.cache_control,
+        };
       case "file":
         // TODO: Chat Completions API does not support files whereas Anthropic Messages API does
         // would need to extend the HeliconeChatCreateParams types to support files, and map it to the Anthropic format:
