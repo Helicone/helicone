@@ -319,7 +319,7 @@ export class AttemptBuilder {
           endpoint,
           providerKey,
           authType: "ptb",
-          priority: endpoint.priority ?? 2,
+          priority: endpoint.priority ?? 4,
           source: `${modelName}/${provider}/ptb`,
           plugins: plugins && plugins.length > 0 ? plugins : undefined,
         }) as Attempt

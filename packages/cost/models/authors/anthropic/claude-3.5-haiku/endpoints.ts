@@ -7,7 +7,7 @@ export const endpoints = {
     provider: "anthropic",
     author: "anthropic",
     providerModelId: "claude-3-5-haiku-20241022",
-    priority: 2,
+    priority: 3,
     pricing: [
       {
         threshold: 0,
@@ -44,7 +44,7 @@ export const endpoints = {
     author: "anthropic",
     providerModelId: "claude-3-5-haiku@20241022",
     crossRegion: false,
-    priority: 3,
+    priority: 4,
     pricing: [
       {
         threshold: 0,
@@ -80,7 +80,7 @@ export const endpoints = {
     providerModelId: "anthropic.claude-3-5-haiku-20241022-v1:0",
     version: "20241022",
     crossRegion: true,
-    priority: 3,
+    priority: 4,
     pricing: [
       {
         threshold: 0,
@@ -166,7 +166,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
+    priority: 2,
     endpointConfigs: {
       "*": {},
     },
