@@ -10,7 +10,6 @@ import { getAPIRouter } from "./api/apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
 import { handleFeedback } from "../lib/managers/FeedbackManager";
 import { getGatewayAPIRouter } from "./gatewayRouter";
-import { handleLoggingEndpoint } from "../lib/managers/PropertiesManager";
 import { getGenerateRouter } from "./generateRouter";
 import { getAIGatewayRouter } from "./aiGatewayRouter";
 

@@ -62,7 +62,8 @@
       "Bash(jq:*)",
       "Bash(git log:*)",
       "Bash(git grep:*)",
-      "Bash(xargs git grep -l \"request\\|response\")"
+      "Bash(xargs git grep -l \"request\\|response\")",
+      "Bash(cat:*)"
     ],
     "deny": []
   },
