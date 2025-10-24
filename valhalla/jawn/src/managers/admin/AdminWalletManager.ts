@@ -208,16 +208,14 @@ export class AdminWalletManager extends BaseManager {
     // Get org IDs from ClickHouse results
     const orgIds = clickhouseSpendResult.data.map((row) => row.organization_id);
 
+    // If no data in ClickHouse, fall back to Postgres sort to still show organizations
     if (orgIds.length === 0) {
-      return ok({
-        organizations: [],
-        isProduction: ENVIRONMENT === "production",
-        summary: {
-          totalOrgsWithCredits: 0,
-          totalCreditsIssued: 0,
-          totalCreditsSpent: 0,
-        },
-      });
+      return this.getDashboardWithPostgresSort(
+        search,
+        tokenUsageProductId,
+        "org_created_at",
+        sortOrder
+      );
     }
 
     // Build search filter for org details query

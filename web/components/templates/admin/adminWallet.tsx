@@ -844,9 +844,9 @@ export default function AdminWallet() {
                                   </div>
 
                                   {/* Disallow List */}
-                                  {(walletDetails.data.disallowList?.length ?? 0) > 0 && (
+                                  {(walletDetails.data?.disallowList?.length ?? 0) > 0 && (
                                     <div className="flex flex-col gap-2">
-                                      <H4>Disallow List ({walletDetails.data.disallowList?.length ?? 0})</H4>
+                                      <H4>Disallow List ({walletDetails.data?.disallowList?.length ?? 0})</H4>
                                       <div className="border">
                                         <table className="w-full text-sm">
                                           <thead className="bg-muted">
