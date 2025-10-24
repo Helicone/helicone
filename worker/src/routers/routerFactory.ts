@@ -10,7 +10,6 @@ import { getAPIRouter } from "./api/apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
 import { handleFeedback } from "../lib/managers/FeedbackManager";
 import { getGatewayAPIRouter } from "./gatewayRouter";
-import { handleLoggingEndpoint } from "../lib/managers/PropertiesManager";
 import { getGenerateRouter } from "./generateRouter";
 import { getAIGatewayRouter } from "./aiGatewayRouter";
 
@@ -118,18 +117,6 @@ function addBaseRoutes(router: BaseRouter | BaseOpenAPIRouter): void {
           "Access-Control-Allow-Headers": "Content-Type, helicone-jwt",
         },
       });
-    }
-  );
-
-  router.post(
-    "/v1/log",
-    async (
-      _,
-      requestWrapper: RequestWrapper,
-      env: Env,
-      _ctx: ExecutionContext
-    ) => {
-      return await handleLoggingEndpoint(requestWrapper, env);
     }
   );
 }

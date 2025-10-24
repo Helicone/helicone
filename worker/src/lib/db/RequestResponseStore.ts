@@ -1,26 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
-import { getResponse } from "../managers/FeedbackManager";
-import {
-  DBQueryTimer,
-  FREQUENT_PRECENT_LOGGING,
-} from "../util/loggers/DBQueryTimer";
+import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { Result } from "../util/results";
 import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
 import { Valhalla } from "./valhalla";
-
-export interface RequestPayload {
-  request: Database["public"]["Tables"]["request"]["Insert"];
-  properties: Database["public"]["Tables"]["properties"]["Insert"][];
-  responseId: string;
-}
-
-export interface ResponsePayload {
-  responseId: string;
-  requestId: string;
-  response: Database["public"]["Tables"]["response"]["Update"];
-}
 
 export class RequestResponseStore {
   constructor(
@@ -31,32 +15,6 @@ export class RequestResponseStore {
     public fallBackQueue: Queue,
     public responseAndResponseQueueKV: KVNamespace
   ) {}
-
-  async updateResponsePostgres(
-    responsePayload: ResponsePayload
-  ): Promise<Result<null, string>> {
-    const { responseId, requestId, response } = responsePayload;
-    if (!responseId) {
-      return { data: null, error: "Missing responseId" };
-    }
-    return await this.queryTimer
-      .withTiming(
-        this.database
-          .from("response")
-          .update(response)
-          .match({ id: responseId, request: requestId }),
-        {
-          queryName: "update_response",
-          percentLogging: FREQUENT_PRECENT_LOGGING,
-        }
-      )
-      .then((res) => {
-        if (res.error) {
-          return { data: null, error: res.error.message };
-        }
-        return { data: null, error: null };
-      });
-  }
 
   async addRequestNodeRelationship(
     job_id: string,
@@ -152,63 +110,5 @@ export class RequestResponseStore {
     }
 
     return { data: null, error: null };
-  }
-
-  private getModelFromResponse(
-    responseData: Database["public"]["Tables"]["response"]["Update"]
-  ) {
-    try {
-      const body = (responseData as any)?.body as any;
-      if (typeof body !== "object" || !body) {
-        return "unknown";
-      }
-      if (Array.isArray(body)) {
-        return "unknown";
-      }
-
-      return body["model"] || (body.body as any)["model"] || "unknown";
-    } catch (e) {
-      return "unknown";
-    }
-  }
-
-  async updateResponse(
-    responseId: string,
-    requestId: string,
-    response: Database["public"]["Tables"]["response"]["Update"]
-  ): Promise<Result<null, string>> {
-    const payload: ResponsePayload = {
-      responseId,
-      requestId,
-      response,
-    };
-    const res = await this.updateResponsePostgres(payload);
-
-    const responseUpdate = await this.valhalla.patch("/v1/response", {
-      model: this.getModelFromResponse(response),
-      response_id: responseId,
-      heliconeRequestId: requestId,
-      http_status: response.status ?? null,
-      responseReceivedAt: new Date().toISOString(),
-      completion_tokens: response.completion_tokens ?? null,
-      prompt_tokens: response.prompt_tokens ?? null,
-      delay_ms: response.delay_ms ?? null,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      body: (response as any)?.body ?? null,
-    });
-
-    if (responseUpdate.error) {
-      // console.error("Error updating response in valhalla:", responseUpdate);
-      // return err(responseUpdate.error);
-    }
-    if (res.error) {
-      console.error("Error inserting into response:", res.error);
-      return res;
-    }
-    return { data: null, error: null };
-  }
-
-  async waitForResponse(requestId: string) {
-    await getResponse(this.database, this.queryTimer, requestId);
   }
 }
