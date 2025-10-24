@@ -113,7 +113,7 @@ export const endpoints = {
   "claude-haiku-4-5-20251001:openrouter": {
     provider: "openrouter",
     author: "anthropic",
-    providerModelId: "anthropic/claude-4.5-haiku",
+    providerModelId: "anthropic/claude-haiku-4.5",
     pricing: [
       {
         threshold: 0,
@@ -173,5 +173,8 @@ export const endpoints = {
     responseFormat: "ANTHROPIC",
   },
 } satisfies Partial<
-  Record<`${ClaudeHaiku4520251001ModelName}:${ModelProviderName}`, ModelProviderConfig>
+  Record<
+    `${ClaudeHaiku4520251001ModelName}:${ModelProviderName}`,
+    ModelProviderConfig
+  >
 >;
