@@ -18,7 +18,7 @@ function mergeConfigs(
     projectId: endpointConfig.projectId,
     deploymentName: endpointConfig.deploymentName,
     resourceName: endpointConfig.resourceName,
-    crossRegion: endpointConfig.crossRegion,
+    crossRegion: endpointConfig.crossRegion ?? modelProviderConfig.crossRegion,
   };
 
   return {
