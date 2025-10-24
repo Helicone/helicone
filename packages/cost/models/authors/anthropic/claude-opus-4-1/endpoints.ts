@@ -8,7 +8,7 @@ export const endpoints = {
     provider: "anthropic",
     author: "anthropic",
     version: "20250805",
-    priority: 2,
+    priority: 3,
     pricing: [
       {
         threshold: 0,
@@ -175,7 +175,7 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
+    priority: 2,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},

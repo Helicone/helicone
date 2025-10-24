@@ -345,7 +345,7 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
+    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -373,7 +373,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
+    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -403,7 +403,7 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
+    priority: 2,
     endpointConfigs: {
       "*": {},
     },

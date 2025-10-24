@@ -8,7 +8,7 @@ export const endpoints = {
     author: "anthropic",
     providerModelId: "claude-3-7-sonnet-20250219",
     version: "20250219",
-    priority: 2,
+    priority: 3,
     pricing: [
       {
         threshold: 0,
@@ -201,7 +201,7 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
+    priority: 2,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
