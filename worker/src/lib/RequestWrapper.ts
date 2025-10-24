@@ -107,11 +107,11 @@ export class RequestWrapper {
           return headers;
         } catch (error) {
           console.error(`Failed retrieving API key from path: ${error}`);
-          return request.headers;
+          return headers;
         }
       }
 
-      return request.headers;
+      return headers;
     }
 
     if (headers.has("helicone-auth")) {
