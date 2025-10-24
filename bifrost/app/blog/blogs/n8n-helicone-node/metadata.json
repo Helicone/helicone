@@ -1,0 +1,11 @@
+{
+  "title": "How to Use Helicone in Your n8n Workflows",
+  "title1": "How to Use Helicone in Your n8n Workflows",
+  "title2": "How to Use Helicone in Your n8n Workflows",
+  "description": "Call any LLM using n8n by using the Helicone node to query, monitor, and debug your AI workflow",
+  "images": "/static/blog/n8n-helicone-node/thumbnail.webp",
+  "time": "2 minute read",
+  "author": "Juliette Chevalier",
+  "date": "October 24, 2025",
+  "badge": "Frameworks & Tools"
+}
