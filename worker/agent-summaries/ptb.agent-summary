@@ -1,0 +1,2472 @@
+# AGENT SUMMARY: Pass-Through Billing (PTB) & Credits System
+
+## EXECUTIVE SUMMARY
+
+Helicone's billing system uses **Pass-Through Billing (PTB)** and a **Credits Wallet** system. PTB allows users to make LLM requests using Helicone's provider API keys instead of their own (BYOK), with costs deducted from their credit balance using an escrow pattern. The system is implemented across Worker (Cloudflare), Jawn (backend), and syncs with ClickHouse analytics.
+
+**Key Architecture**:
+- **Worker**: Cloudflare Durable Objects with SQLite for wallet state
+- **Jawn**: Express.js backend for API and ClickHouse integration
+- **Escrow Pattern**: Pre-authorize worst-case cost, finalize with actual cost
+- **Dual Billing Modes**: BYOK (priority 1) and PTB (priority 2)
+- **Precision**: 10^10 scale factor for wallet, 10^9 for ClickHouse
+
+---
+
+## SECTION 1: CREDITS SYSTEM ARCHITECTURE
+
+### 1.1 Core Components
+
+**Wallet Durable Object** (`/worker/src/lib/durable-objects/Wallet.ts`):
+- SQLite-backed state per organization
+- SCALE_FACTOR = 10_000_000_000 (10^10) for precision
+- Transactional operations via `transactionSync()`
+- Tables: credit_purchases, aggregated_debits, escrows, disallow_list, disputes, processed_webhook_events, alert_state
+
+**Jawn Credits Manager** (`/valhalla/jawn/src/managers/creditsManager.ts`):
+- API layer for credit balance queries
+- ClickHouse total spend queries
+- Payment history pagination
+
+**Stripe Integration** (`/worker/src/lib/managers/StripeManager.ts`):
+- Webhook handler for payments, refunds, disputes
+- Idempotency via processed_webhook_events table
+- Support for US and EU Stripe accounts
+
+### 1.2 Database Schema (Wallet Durable Object SQLite)
+
+```sql
+-- Lines 104-168 in Wallet.ts
+
+CREATE TABLE IF NOT EXISTS credit_purchases (
+  id TEXT PRIMARY KEY,           -- UUID
+  created_at INTEGER NOT NULL,   -- Unix timestamp
+  credits INTEGER NOT NULL,      -- Scaled by SCALE_FACTOR (can be negative for refunds)
+  reference_id TEXT NOT NULL     -- Stripe payment_intent_id or admin action ID
+);
+
+CREATE TABLE IF NOT EXISTS aggregated_debits (
+  org_id TEXT PRIMARY KEY,
+  debits INTEGER NOT NULL DEFAULT 0,        -- Scaled total spending
+  updated_at INTEGER NOT NULL,
+  ch_last_checked_at INTEGER,               -- Last ClickHouse sync timestamp
+  ch_last_value INTEGER                     -- Last known ClickHouse total
+);
+
+CREATE TABLE IF NOT EXISTS escrows (
+  id TEXT PRIMARY KEY,           -- UUID
+  amount INTEGER NOT NULL,       -- Scaled worst-case cost reservation
+  created_at INTEGER NOT NULL,
+  request_id TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS disallow_list (
+  helicone_request_id TEXT,
+  created_at INTEGER NOT NULL,
+  provider TEXT NOT NULL,        -- e.g., "openai"
+  model TEXT NOT NULL,           -- e.g., "gpt-4"
+  PRIMARY KEY (provider, model)
+);
+
+CREATE TABLE IF NOT EXISTS disputes (
+  id TEXT PRIMARY KEY,           -- Stripe dispute ID
+  charge_id TEXT NOT NULL,       -- Stripe charge ID
+  amount INTEGER NOT NULL,       -- Scaled amount
+  currency TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  status TEXT NOT NULL,          -- Stripe dispute status
+  created_at INTEGER NOT NULL,
+  event_id TEXT UNIQUE           -- Stripe event ID for idempotency
+);
+
+CREATE TABLE IF NOT EXISTS processed_webhook_events (
+  id TEXT PRIMARY KEY,           -- Stripe event ID
+  processed_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS alert_state (
+  id TEXT PRIMARY KEY,           -- Alert identifier
+  state TEXT NOT NULL,           -- "on" or "off"
+  created_at INTEGER NOT NULL
+);
+```
+
+### 1.3 Wallet State Calculation
+
+**Interface** (Wallet.ts lines 30-47):
+```typescript
+interface WalletState {
+  balance: number;              // totalCredits - totalDebits (in cents, descaled)
+  effectiveBalance: number;     // balance - totalEscrow
+  totalEscrow: number;          // Sum of in-flight reservations
+  totalDebits: number;          // Total spent from aggregated_debits
+  totalCredits: number;         // Sum of credit_purchases
+  disallowList: DisallowListEntry[];
+  disputeStatus: "active" | "suspended" | "resolved";
+  activeDisputes: Dispute[];
+}
+```
+
+**Calculation** (Wallet.ts lines 438-449):
+```typescript
+// All values stored scaled, returned descaled
+const totalCreditsPurchased = sumCreditPurchases() / SCALE_FACTOR;  // cents
+const totalDebits = aggregatedDebits.debits / SCALE_FACTOR;         // cents
+const totalEscrow = sumEscrows() / SCALE_FACTOR;                    // cents
+
+balance = totalCreditsPurchased - totalDebits;
+effectiveBalance = balance - totalEscrow;
+```
+
+### 1.4 Credit Operations
+
+#### Adding Credits (Stripe Webhook)
+
+**File**: `/worker/src/routers/api/walletRouter.ts` lines 354-408
+**Trigger**: Stripe `charge.succeeded` webhook
+
+**Flow**:
+1. Validate webhook signature with Stripe secret
+2. Extract `payment_intent.amount` (in cents)
+3. Check idempotency: `SELECT * FROM processed_webhook_events WHERE id = ?`
+4. If not processed:
+   ```sql
+   BEGIN TRANSACTION;
+   INSERT INTO credit_purchases (id, created_at, credits, reference_id)
+   VALUES (uuid(), now(), amount * SCALE_FACTOR, event_id);
+   INSERT INTO processed_webhook_events (id, processed_at)
+   VALUES (event_id, now());
+   COMMIT;
+   ```
+5. Update PostgreSQL organization payment records (Jawn)
+
+**Scaling**: Stripe amount (cents) × 10^10 = wallet credits
+
+#### Deducting Credits (Refunds)
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts` lines 257-319
+**Trigger**: Stripe `charge.refunded` webhook
+
+**Flow**:
+1. Validate refund doesn't exceed effective balance
+2. If valid:
+   ```sql
+   INSERT INTO credit_purchases (id, created_at, credits, reference_id)
+   VALUES (uuid(), now(), -refundAmount * SCALE_FACTOR, event_id);
+   ```
+3. **Negative credit entry** acts as debit
+
+**Protection**: Returns 400 if `refundAmount > effectiveBalance`
+
+#### Manual Admin Adjustments
+
+**File**: `/worker/src/routers/api/walletRouter.ts` lines 216-301
+**Endpoint**: `POST /admin/wallet/:orgId/modify-balance`
+
+**Payload**:
+```typescript
+{
+  amount: number,           // Cents
+  type: "credit" | "debit",
+  reason: string,
+  referenceId: string,      // Audit trail
+  adminUserId: string       // Who made the change
+}
+```
+
+**Implementation**:
+- Credit: Same as Stripe payment (INSERT positive)
+- Debit: INSERT negative credit entry
+- Logged with admin user ID for auditing
+
+### 1.5 Cost Precision Constants
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts` lines 8, 11-14
+
+```typescript
+export const SCALE_FACTOR = 10_000_000_000;  // 10^10 - Worker wallet precision
+const MINIMUM_RESERVE = 1 * SCALE_FACTOR;    // 1 cent minimum balance
+```
+
+**File**: `/packages/cost/costCalc.ts`
+
+```typescript
+const COST_PRECISION_MULTIPLIER = 1_000_000_000;  // 10^9 - ClickHouse precision
+```
+
+**Conversion Chain**:
+```
+Stripe payment: $10.00 → 1000 cents
+                          ↓
+Wallet storage: 1000 × 10^10 = 10,000,000,000,000 (scaled integer)
+                          ↓
+Retrieval: 10,000,000,000,000 ÷ 10^10 = 1000 cents
+                          ↓
+Display: 1000 ÷ 100 = $10.00
+
+ClickHouse cost: 0.05 USD → 0.05 × 10^9 = 50,000,000 (stored)
+                                           ↓
+Total spend query: SUM(cost) ÷ 10^9 = USD
+                                           ↓
+Wallet sync: USD × 100 = cents
+```
+
+---
+
+## SECTION 2: PASS-THROUGH BILLING (PTB) SYSTEM
+
+### 2.1 PTB vs BYOK
+
+**BYOK (Bring Your Own Key)**:
+- User provides their own provider API key
+- Direct billing with provider
+- Priority 1 in attempt ordering
+- No escrow or credit checks
+- Enabled by default unless `byok_enabled = false` in provider key
+
+**PTB (Pass-Through Billing)**:
+- Helicone provides provider API key (from HELICONE_ORG_ID)
+- User pays Helicone via credits
+- Priority 2 in attempt ordering
+- Requires escrow reservation
+- Requires payload validation
+- Must have `creditsEnabled = true` in organization
+
+**Attempt Ordering** (SimpleAIGateway.ts):
+```
+For model "gpt-4/openai,claude-3/anthropic":
+
+Attempts built:
+1. gpt-4/openai - BYOK (priority=1) [if user has OpenAI key]
+2. claude-3/anthropic - BYOK (priority=1) [if user has Anthropic key]
+3. gpt-4/openai - PTB (priority=2) [if endpoint.ptbEnabled]
+4. claude-3/anthropic - PTB (priority=2) [if endpoint.ptbEnabled]
+
+Execution order: Try #1 → #2 → #3 → #4 (first success wins)
+```
+
+### 2.2 PTB Configuration Points
+
+**Organization Level** (PostgreSQL):
+- `allow_negative_balance` (boolean) - Enables credit line
+- `credit_limit` (bigint, cents) - Max negative balance allowed
+- `creditsEnabled` (wallet state) - PTB enabled flag
+
+**Provider Key Level** (decrypted_provider_keys_v2):
+- `byok_enabled` (boolean | null) - null defaults to true
+- `org_id` - Identifies key owner
+- `decrypted_provider_key` - API key value
+
+**Endpoint Level** (Cost Registry):
+- `ptbEnabled` (boolean) - Whether endpoint supports PTB
+- `ptbEndpoints` (array) - List of PTB-available endpoints
+- Pricing tiers for cost calculation
+
+**Request Level** (Helicone Headers):
+- `gatewayConfig.bodyMapping` - Request format (OPENAI, NO_MAPPING, RESPONSES)
+- `gateway-provider` - Override provider selection
+
+### 2.3 PTB Request Flow
+
+**File**: `/worker/src/lib/ai-gateway/SimpleAIGateway.ts`
+
+```
+1. Request arrives at worker
+   ↓
+2. Parse model: "gpt-4/openai,claude-3/anthropic"
+   Extract: modelStrings = ["gpt-4/openai", "claude-3/anthropic"]
+   ↓
+3. AttemptBuilder.build():
+   For each modelString:
+     For each provider:
+       a) buildByokAttempts() → priority=1 attempts
+       b) buildPtbAttempts() → priority=2 attempts
+   ↓
+4. Sort attempts by priority (1 before 2)
+   ↓
+5. SimpleAIGateway.handle() - iterate attempts:
+   For each attempt:
+     if (attempt.authType === "ptb"):
+       a) Validate payload (validateOpenAIChatPayload)
+       b) Check disallow list
+       c) PTBPreCheck (reserve escrow)
+       d) If any fails: add error, continue to next
+     ↓
+     Execute attempt
+     ↓
+     If success: finalize escrow, return response
+     If error: cancel escrow, try next attempt
+   ↓
+6. If all attempts fail: return aggregated errors
+```
+
+### 2.4 PTB Payload Validation
+
+**File**: `/worker/src/lib/ai-gateway/payload-validation.ts`
+**Called**: AttemptExecutor.execute() for PTB attempts
+
+**Allowed Fields**:
+- `messages` (required) - Chat messages array
+- `model` (required) - Model identifier
+- `prompt_cache_key` - Helicone cache key
+- `user` - OpenAI user identifier
+- `safety_identifier` - Helicone safety tracking
+- `cache_control` - Anthropic prompt caching (ephemeral only)
+- `metadata` - Helicone metadata
+- Standard OpenAI fields: temperature, max_tokens, top_p, n, stream, etc.
+
+**Rejected Fields (PTB Only)**:
+- `web_search_options` - Cannot bill web search
+- `modalities: ["audio"]` - Audio not supported
+- `audio: { voice, format }` - Audio output not supported
+- `input_audio` in messages - Audio input not supported
+
+**Validation Error**: Returns 400 with specific field rejection message
+
+**BYOK**: No validation, user responsible for payload
+
+### 2.5 Attempt Building
+
+**File**: `/worker/src/lib/ai-gateway/AttemptBuilder.ts`
+
+#### BYOK Attempts (lines 130-192):
+```typescript
+async buildByokAttempts(modelName, provider, plugins) {
+  // Fetch user's provider key from their org
+  const userKey = await this.providerKeysManager.getProviderKey(
+    provider,
+    this.orgId  // User's organization
+  );
+
+  if (!userKey || userKey.byok_enabled === false) {
+    return [];  // No BYOK available
+  }
+
+  // Get endpoints from registry
+  const endpoints = getEndpointsFromRegistry(provider, modelName);
+
+  return endpoints.map(endpoint => ({
+    endpoint,
+    providerKey: userKey,
+    authType: "byok",
+    priority: endpoint.priority ?? 1,
+    source: `${modelName}/${provider}/byok`,
+    plugins,
+  }));
+}
+```
+
+#### PTB Attempts (lines 194-257):
+```typescript
+async buildPtbAttempts(modelName, provider, plugins) {
+  // Get Helicone's provider key (not user's)
+  const heliconeKey = await this.providerKeysManager.getProviderKeyWithFetch(
+    provider,
+    this.env.HELICONE_ORG_ID  // Helicone's org ID
+  );
+
+  if (!heliconeKey) {
+    return [];  // Helicone doesn't have key for this provider
+  }
+
+  // Get PTB-enabled endpoints only
+  const ptbEndpoints = getPtbEndpointsFromRegistry(provider, modelName);
+
+  return ptbEndpoints
+    .filter(endpoint => endpoint.ptbEnabled)
+    .map(endpoint => ({
+      endpoint,
+      providerKey: heliconeKey,  // ← CRITICAL: Helicone's key, not user's
+      authType: "ptb",
+      priority: endpoint.priority ?? 2,
+      source: `${modelName}/${provider}/ptb`,
+      plugins,
+    }));
+}
+```
+
+---
+
+## SECTION 3: ESCROW SYSTEM
+
+### 3.1 Escrow Lifecycle
+
+**Purpose**: Pre-authorize funds before expensive LLM requests to prevent overspending
+
+**Flow**:
+```
+1. Pre-Request (AttemptExecutor.reserveEscrow)
+   ↓
+   Calculate worst-case cost:
+     maxPromptCost = contextLength × inputPricePerToken
+     maxCompletionCost = maxCompletionTokens × outputPricePerToken
+     worstCaseCost = maxPromptCost + maxCompletionCost
+   ↓
+   wallet.reserveCostInEscrow(orgId, requestId, worstCaseCost, creditLine)
+   ↓
+   Check: effectiveBalance >= worstCaseCost + 1 cent
+   ↓
+   If YES:
+     INSERT INTO escrows (id, amount, created_at, request_id)
+     RETURN escrowId
+   If NO:
+     RETURN 429 (insufficient balance)
+   ↓
+2. Request Execution (ProxyForwarder)
+   ↓
+   Forward request to provider with escrowInfo attached
+   ↓
+3. Post-Response (WalletManager.finalizeEscrowAndSyncSpend)
+   ↓
+   Parse actual cost from response (prompt_tokens × price + completion_tokens × price)
+   ↓
+   wallet.finalizeEscrow(orgId, escrowId, actualCost)
+   ↓
+   BEGIN TRANSACTION;
+   UPDATE aggregated_debits SET debits = debits + (actualCost × SCALE_FACTOR);
+   DELETE FROM escrows WHERE id = escrowId;
+   COMMIT;
+   ↓
+   RETURN clickhouseLastCheckedAt
+   ↓
+4. On Error (AttemptExecutor.cancelEscrow)
+   ↓
+   DELETE FROM escrows WHERE id = escrowId;
+   (No debit recorded)
+```
+
+### 3.2 Worst-Case Cost Calculation
+
+**File**: `/worker/src/lib/ai-gateway/AttemptExecutor.ts` lines 254-277
+
+```typescript
+const contextLength = getContextLength(request);  // From model registry or request
+const maxCompletionTokens = request.max_tokens ?? getDefaultMaxTokens(model);
+
+// Get first pricing tier (cheapest region)
+const pricingTier = endpoint.pricing[0];
+const inputPricePerToken = pricingTier.inputPrice / 1_000_000;   // Convert to per-token
+const outputPricePerToken = pricingTier.outputPrice / 1_000_000;
+
+const maxPromptCost = contextLength * inputPricePerToken;
+const maxCompletionCost = maxCompletionTokens * outputPricePerToken;
+const worstCaseCost = maxPromptCost + maxCompletionCost;
+
+// Example: GPT-4 Turbo 128K
+// contextLength = 128,000
+// maxCompletionTokens = 4,096 (default)
+// inputPrice = $10.00 per 1M tokens = 0.00001 per token
+// outputPrice = $30.00 per 1M tokens = 0.00003 per token
+// worstCaseCost = (128,000 × 0.00001) + (4,096 × 0.00003) = $1.28 + $0.12 = $1.40
+```
+
+**Context Length Determination** (lines 260-268):
+1. Check `max_prompt_tokens` in request
+2. Fallback to model's `contextLength` from registry
+3. Default to 4096 if not found
+
+### 3.3 Escrow Reservation
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts` lines 452-529
+
+```typescript
+async reserveCostInEscrow(
+  orgId: string,
+  requestId: string,
+  amount: number,  // USD dollars
+  creditLine: { enabled: boolean; limit: number }  // limit in cents
+): Promise<Result<string, { statusCode: number; message: string }>> {
+
+  // 1. Convert to cents and scale
+  const amountInCents = amount * 100;
+  const amountScaled = amountInCents * SCALE_FACTOR;
+
+  // 2. Check for active disputes
+  const activeDisputes = await this.getActiveDisputes();
+  if (activeDisputes.length > 0) {
+    return err({
+      statusCode: 403,
+      message: "Wallet is suspended due to payment disputes"
+    });
+  }
+
+  // 3. Calculate available balance
+  const totalCreditsPurchased = this.sumCreditPurchases();  // scaled
+  const totalDebits = this.getAggregatedDebits();           // scaled
+  const totalEscrow = this.sumEscrows();                    // scaled
+
+  let availableBalance = totalCreditsPurchased - totalDebits - totalEscrow;
+
+  // 4. Apply credit line if enabled
+  if (creditLine.enabled) {
+    const creditLimitScaled = creditLine.limit * SCALE_FACTOR;
+    availableBalance += creditLimitScaled;
+  }
+
+  // 5. Validate sufficient balance
+  const balanceAfterReserve = availableBalance - amountScaled;
+  if (balanceAfterReserve < MINIMUM_RESERVE) {  // 1 cent minimum
+    return err({
+      statusCode: 429,
+      message: `Insufficient balance. Need ${amountInCents} cents, have ${availableBalance / SCALE_FACTOR} cents available.`
+    });
+  }
+
+  // 6. Create escrow entry
+  const escrowId = crypto.randomUUID();
+  await this.sql.exec(`
+    INSERT INTO escrows (id, amount, created_at, request_id)
+    VALUES (?, ?, ?, ?)
+  `, escrowId, amountScaled, Date.now(), requestId);
+
+  return ok(escrowId);
+}
+```
+
+**Credit Line Logic**:
+- If `allowNegativeBalance = true` and `creditLimit = 5000` (cents = $50):
+  - Available balance can go negative up to -$50
+  - Example: $10 credits - $15 debits - $5 escrow + $50 limit = $40 available
+
+### 3.4 Escrow Finalization
+
+**File**: `/worker/src/lib/managers/WalletManager.ts` lines 27-82
+
+```typescript
+async finalizeEscrowAndSyncSpend(
+  organizationId: string,
+  escrowInfo: EscrowInfo,
+  cost: number | undefined,  // USD dollars or undefined if parse failed
+  cached: boolean
+): Promise<void> {
+
+  const walletId = this.env.WALLET.idFromName(organizationId);
+  const walletStub = this.env.WALLET.get(walletId);
+
+  // Convert cost to cents
+  const costInCents = cost !== undefined ? cost * 100 : 0;
+
+  // Check for cost parsing failure (abuse prevention)
+  if (cost === undefined && !cached) {
+    // Response succeeded but no cost parseable → potential abuse
+    const { provider, model } = escrowInfo.endpoint;
+    await walletStub.addToDisallowList(requestId, provider, model);
+    console.warn(`Added ${provider}/${model} to disallow list - cost parsing failed`);
+  }
+
+  // Finalize escrow
+  const { clickhouseLastCheckedAt } = await walletStub.finalizeEscrow(
+    organizationId,
+    escrowInfo.escrowId,
+    costInCents
+  );
+
+  // Check if ClickHouse sync is stale (> 1 minute)
+  const now = Date.now();
+  const staleness = now - (clickhouseLastCheckedAt ?? 0);
+
+  if (staleness > 60_000) {  // 1 minute threshold
+    await this.syncClickhouseSpend(
+      organizationId,
+      walletStub,
+      escrowInfo.endpoint.provider
+    );
+  }
+}
+```
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts` lines 531-568
+
+```typescript
+async finalizeEscrow(
+  orgId: string,
+  escrowId: string,
+  costInCents: number
+): Promise<{ clickhouseLastCheckedAt: number | null }> {
+
+  return await this.transactionSync(async () => {
+    // 1. Update aggregated debits
+    const costScaled = costInCents * SCALE_FACTOR;
+
+    const existing = await this.sql.exec(
+      `SELECT debits, ch_last_checked_at FROM aggregated_debits WHERE org_id = ?`,
+      orgId
+    ).one();
+
+    if (existing) {
+      await this.sql.exec(`
+        UPDATE aggregated_debits
+        SET debits = debits + ?, updated_at = ?
+        WHERE org_id = ?
+      `, costScaled, Date.now(), orgId);
+    } else {
+      await this.sql.exec(`
+        INSERT INTO aggregated_debits (org_id, debits, updated_at, ch_last_checked_at)
+        VALUES (?, ?, ?, NULL)
+      `, orgId, costScaled, Date.now());
+    }
+
+    // 2. Delete escrow
+    await this.sql.exec(`DELETE FROM escrows WHERE id = ?`, escrowId);
+
+    // 3. Return last ClickHouse sync time
+    return { clickhouseLastCheckedAt: existing?.ch_last_checked_at ?? null };
+  });
+}
+```
+
+### 3.5 Escrow Cancellation
+
+**File**: `/worker/src/lib/ai-gateway/AttemptExecutor.ts` lines 309-325
+
+```typescript
+private async cancelEscrow(escrowId: string, orgId: string): Promise<void> {
+  try {
+    const walletId = this.env.WALLET.idFromName(orgId);
+    const walletStub = this.env.WALLET.get(walletId);
+
+    await runInDurableObject(walletStub, async (wallet) => {
+      await wallet.sql.exec(`DELETE FROM escrows WHERE id = ?`, escrowId);
+    });
+  } catch (error) {
+    console.error(`Failed to cancel escrow ${escrowId}:`, error);
+    // Don't throw - escrow will eventually be cleaned up
+  }
+}
+```
+
+**Triggers**:
+- Request execution failed (network error, provider error, timeout)
+- Validation failed after escrow reserved
+- Next attempt selected (retry logic)
+
+---
+
+## SECTION 4: COST CALCULATION & TRACKING
+
+### 4.1 Cost Sources
+
+**Primary**: Token usage from provider response
+**Secondary**: OpenRouter direct cost header
+**Fallback**: Legacy cost calculation
+
+**File**: `/worker/src/lib/HeliconeProxyRequest/ProxyForwarder.ts` lines 527-630
+
+```typescript
+async function calculateCost(response, provider, model) {
+  // 1. AI Gateway path (new registry)
+  if (aiGatewayMode) {
+    const usageProcessor = getUsageProcessor(provider);
+    const usage = usageProcessor.parseResponse(response);
+
+    // Special case: OpenRouter provides direct cost
+    if (provider === "openrouter") {
+      return parseFloat(response.headers.get("x-cost"));
+    }
+
+    // Calculate from token usage
+    const cost = modelCostBreakdownFromRegistry(
+      provider,
+      model,
+      usage.data.promptTokens,
+      usage.data.completionTokens,
+      usage.data.cacheReadTokens,
+      usage.data.cacheWriteTokens
+    );
+
+    return cost.total;  // USD dollars
+  }
+
+  // 2. Legacy path
+  const { totalCost } = await costOfPrompt({
+    response,
+    model,
+    provider,
+    promptTokens: response.usage.prompt_tokens,
+    completionTokens: response.usage.completion_tokens,
+  });
+
+  return totalCost;  // USD dollars
+}
+```
+
+### 4.2 Model Cost Registry
+
+**File**: `/packages/cost/providers/*/models.ts`
+
+**Structure**:
+```typescript
+interface Endpoint {
+  path: string;              // e.g., "/v1/chat/completions"
+  method: "POST" | "GET";
+  ptbEnabled: boolean;       // Whether PTB supports this endpoint
+  pricing: PricingTier[];    // Regional pricing
+}
+
+interface PricingTier {
+  region?: string;                    // e.g., "us-east-1"
+  inputPrice: number;                 // Per 1M tokens (USD)
+  outputPrice: number;                // Per 1M tokens (USD)
+  cacheReadPrice?: number;            // Per 1M tokens (USD)
+  cacheWritePrice?: number;           // Per 1M tokens (USD)
+  batchInputPrice?: number;
+  batchOutputPrice?: number;
+}
+
+interface Model {
+  id: string;                         // Model identifier
+  displayName: string;                // Human-readable name
+  contextLength: number;              // Max context window
+  endpoints: Endpoint[];              // Available endpoints
+  releaseDate?: string;
+  deprecationDate?: string;
+}
+```
+
+**Example**: `packages/cost/providers/openai/models.ts`
+```typescript
+{
+  id: "gpt-4-turbo-2024-04-09",
+  displayName: "GPT-4 Turbo",
+  contextLength: 128000,
+  endpoints: [{
+    path: "/v1/chat/completions",
+    method: "POST",
+    ptbEnabled: true,
+    pricing: [{
+      inputPrice: 10.00,      // $10 per 1M tokens
+      outputPrice: 30.00,     // $30 per 1M tokens
+    }]
+  }]
+}
+```
+
+### 4.3 Cost Precision in ClickHouse
+
+**File**: `/packages/cost/costCalc.ts`
+
+```typescript
+const COST_PRECISION_MULTIPLIER = 1_000_000_000;  // 10^9
+
+// Stored in ClickHouse as:
+cost_integer = (cost_usd * COST_PRECISION_MULTIPLIER)
+
+// Retrieved as:
+SELECT SUM(cost) / 1000000000.0 as total_usd FROM request_response_versioned
+```
+
+**Why different from wallet?**
+- ClickHouse: 10^9 (sufficient for analytics, optimized for aggregation)
+- Wallet: 10^10 (extra precision for escrow math, matches Stripe cents scale)
+
+### 4.4 Token Usage Parsing
+
+**File**: `/packages/cost/providers/*/usage.ts`
+
+**OpenAI** (`packages/cost/providers/openai/usage.ts`):
+```typescript
+parseResponse(response) {
+  return {
+    promptTokens: response.usage.prompt_tokens,
+    completionTokens: response.usage.completion_tokens,
+    cacheReadTokens: response.usage.prompt_tokens_details?.cached_tokens,
+    cacheWriteTokens: response.usage.prompt_tokens_details?.cached_tokens_written,
+  };
+}
+```
+
+**Anthropic** (`packages/cost/providers/anthropic/usage.ts`):
+```typescript
+parseResponse(response) {
+  return {
+    promptTokens: response.usage.input_tokens,
+    completionTokens: response.usage.output_tokens,
+    cacheReadTokens: response.usage.cache_read_input_tokens,
+    cacheWriteTokens: response.usage.cache_creation_input_tokens,
+  };
+}
+```
+
+**Cost Calculation**:
+```typescript
+function modelCostBreakdownFromRegistry(
+  provider: string,
+  model: string,
+  promptTokens: number,
+  completionTokens: number,
+  cacheReadTokens: number = 0,
+  cacheWriteTokens: number = 0
+): CostBreakdown {
+
+  const pricing = lookupPricing(provider, model);
+
+  const promptCost = (promptTokens / 1_000_000) * pricing.inputPrice;
+  const completionCost = (completionTokens / 1_000_000) * pricing.outputPrice;
+  const cacheReadCost = (cacheReadTokens / 1_000_000) * (pricing.cacheReadPrice ?? 0);
+  const cacheWriteCost = (cacheWriteTokens / 1_000_000) * (pricing.cacheWritePrice ?? 0);
+
+  return {
+    promptCost,
+    completionCost,
+    cacheReadCost,
+    cacheWriteCost,
+    total: promptCost + completionCost + cacheReadCost + cacheWriteCost
+  };
+}
+```
+
+---
+
+## SECTION 5: DISALLOW LIST SYSTEM
+
+### 5.1 Purpose
+
+Prevents billing abuse by blocking provider/model pairs where cost cannot be reliably calculated from responses.
+
+**Triggers**:
+- Response status 200 OK (success)
+- Cost parsing returns `undefined`
+- Not a cached response
+- Not a streaming response (more lenient due to parsing difficulty)
+
+### 5.2 Adding to Disallow List
+
+**File**: `/worker/src/lib/managers/WalletManager.ts` lines 45-63
+
+```typescript
+if (cost === undefined && statusCode >= 200 && statusCode < 300) {
+  if (!cached) {
+    // Successfully returned but couldn't parse cost
+    await walletStub.addToDisallowList(
+      requestId,
+      escrowInfo.endpoint.provider,
+      escrowInfo.endpoint.model
+    );
+  }
+}
+```
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts` lines 570-599
+
+```typescript
+async addToDisallowList(
+  heliconeRequestId: string,
+  provider: string,
+  model: string
+): Promise<void> {
+  await this.sql.exec(`
+    INSERT OR REPLACE INTO disallow_list (helicone_request_id, created_at, provider, model)
+    VALUES (?, ?, ?, ?)
+  `, heliconeRequestId, Date.now(), provider, model);
+}
+```
+
+**Effect**: Future PTB attempts for this provider/model are immediately rejected
+
+### 5.3 Disallow List Checking
+
+**File**: `/worker/src/lib/ai-gateway/SimpleAIGateway.ts` lines 174-184
+
+```typescript
+if (this.isDisallowed(attempt, disallowList)) {
+  errors.push({
+    message: `Cloud billing is disabled for ${attempt.endpoint.model} on ${attempt.endpoint.provider}.`,
+    type: "disallowed",
+    statusCode: 400,
+    source: attempt.source,
+  });
+  continue;  // Skip to next attempt
+}
+
+private isDisallowed(attempt: Attempt, disallowList: DisallowListEntry[]): boolean {
+  if (attempt.authType !== "ptb") return false;
+
+  return disallowList.some(entry =>
+    entry.provider === attempt.endpoint.provider &&
+    entry.model === attempt.endpoint.model
+  );
+}
+```
+
+### 5.4 Removing from Disallow List
+
+**File**: `/worker/src/routers/api/walletRouter.ts` lines 303-352
+
+**Endpoint**: `DELETE /admin/wallet/:orgId/disallow-list`
+
+**Payload**:
+```typescript
+{
+  provider: string,  // e.g., "openai"
+  model: string      // e.g., "gpt-4"
+}
+```
+
+**Implementation**:
+```typescript
+await runInDurableObject(walletStub, async (wallet) => {
+  await wallet.sql.exec(`
+    DELETE FROM disallow_list
+    WHERE provider = ? AND model = ?
+  `, provider, model);
+});
+```
+
+**Use Case**: Admin manually verifies cost calculation works, re-enables billing
+
+---
+
+## SECTION 6: DISPUTE HANDLING
+
+### 6.1 Dispute Lifecycle
+
+**Stripe Dispute Events**:
+1. `dispute.created` - Chargeback initiated
+2. `dispute.updated` - Status changed
+3. `dispute.closed` - Dispute resolved (won/lost)
+
+**File**: `/worker/src/lib/managers/StripeManager.ts` lines 407-595
+
+### 6.2 Dispute Creation
+
+**Webhook**: `charge.dispute.created`
+
+```typescript
+async handleDisputeCreated(event: Stripe.Event) {
+  const dispute = event.data.object as Stripe.Dispute;
+
+  // 1. Validate this is a token usage charge
+  const charge = await stripe.charges.retrieve(dispute.charge);
+  const productId = charge.metadata?.stripe_product_id;
+
+  if (productId !== TOKEN_USAGE_PRODUCT_ID) {
+    return;  // Not a Helicone charge
+  }
+
+  // 2. Find organization from charge metadata
+  const orgId = charge.metadata?.organization_id;
+
+  // 3. Add dispute to wallet
+  const walletId = env.WALLET.idFromName(orgId);
+  const walletStub = env.WALLET.get(walletId);
+
+  await walletStub.addDispute({
+    id: dispute.id,
+    chargeId: dispute.charge,
+    amount: dispute.amount,  // Cents
+    currency: dispute.currency,
+    reason: dispute.reason,
+    status: dispute.status,
+    eventId: event.id,
+  });
+}
+```
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts` lines 702-745
+
+```typescript
+async addDispute(dispute: Dispute): Promise<void> {
+  await this.transactionSync(async () => {
+    // Check idempotency
+    const existing = await this.sql.exec(
+      `SELECT id FROM disputes WHERE event_id = ?`,
+      dispute.eventId
+    ).one();
+
+    if (existing) return;  // Already processed
+
+    // Insert dispute
+    await this.sql.exec(`
+      INSERT INTO disputes (id, charge_id, amount, currency, reason, status, created_at, event_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+      dispute.id,
+      dispute.chargeId,
+      dispute.amount * SCALE_FACTOR,  // Scale amount
+      dispute.currency,
+      dispute.reason,
+      dispute.status,
+      Date.now(),
+      dispute.eventId
+    );
+
+    // Record processed event
+    await this.sql.exec(
+      `INSERT INTO processed_webhook_events (id, processed_at) VALUES (?, ?)`,
+      dispute.eventId,
+      Date.now()
+    );
+  });
+}
+```
+
+### 6.3 Wallet Suspension
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts` lines 463-479 (in reserveCostInEscrow)
+
+```typescript
+const activeDisputes = await this.getActiveDisputes();
+
+if (activeDisputes.length > 0) {
+  return err({
+    statusCode: 403,
+    message: "Wallet is suspended due to payment disputes. Please contact support."
+  });
+}
+
+async getActiveDisputes(): Promise<Dispute[]> {
+  const rows = await this.sql.exec(`
+    SELECT * FROM disputes
+    WHERE status NOT IN ('won', 'resolved', 'lost')
+    ORDER BY created_at DESC
+  `).toArray();
+
+  return rows.map(row => ({
+    id: row.id,
+    status: row.status,
+    reason: row.reason,
+    amount: row.amount / SCALE_FACTOR,  // Descale to cents
+  }));
+}
+```
+
+**Effect**: ALL new PTB requests return 403 until disputes resolved
+
+### 6.4 Dispute Status Tracking
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts` lines 431-449 (in getWalletState)
+
+```typescript
+const activeDisputes = await this.getActiveDisputes();
+
+const disputeStatus =
+  activeDisputes.length === 0 ? "resolved" :
+  activeDisputes.some(d => d.status === "needs_response") ? "suspended" :
+  "active";
+
+return {
+  // ...other fields
+  disputeStatus,
+  activeDisputes,
+};
+```
+
+**Status Values**:
+- `"resolved"` - No active disputes, wallet enabled
+- `"active"` - Disputes exist but not urgent
+- `"suspended"` - Disputes require response, wallet disabled
+
+### 6.5 Dispute Resolution
+
+**Webhook**: `charge.dispute.updated` or `charge.dispute.closed`
+
+```typescript
+async handleDisputeUpdated(event: Stripe.Event) {
+  const dispute = event.data.object as Stripe.Dispute;
+
+  await walletStub.updateDispute({
+    id: dispute.id,
+    status: dispute.status,  // "won", "lost", "resolved"
+    eventId: event.id,
+  });
+}
+```
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts` lines 747-777
+
+```typescript
+async updateDispute(update: { id: string; status: string; eventId: string }): Promise<void> {
+  await this.transactionSync(async () => {
+    // Check idempotency
+    const existing = await this.sql.exec(
+      `SELECT id FROM processed_webhook_events WHERE id = ?`,
+      update.eventId
+    ).one();
+
+    if (existing) return;
+
+    // Update dispute status
+    await this.sql.exec(`
+      UPDATE disputes
+      SET status = ?
+      WHERE id = ?
+    `, update.status, update.id);
+
+    // Record processed event
+    await this.sql.exec(
+      `INSERT INTO processed_webhook_events (id, processed_at) VALUES (?, ?)`,
+      update.eventId,
+      Date.now()
+    );
+  });
+}
+```
+
+**Auto Re-enable**: Once all disputes have status `won`, `lost`, or `resolved`, next escrow reservation succeeds
+
+---
+
+## SECTION 7: CLICKHOUSE RECONCILIATION
+
+### 7.1 Purpose
+
+ClickHouse is the **source of truth** for actual spending. Wallet aggregated_debits is a performance cache that must periodically sync.
+
+**Why ClickHouse?**
+- Stores every individual request with cost
+- Analytics queries run here
+- Immutable event log (can't be corrupted)
+- Wallet could drift due to bugs or race conditions
+
+### 7.2 Sync Trigger
+
+**File**: `/worker/src/lib/managers/WalletManager.ts` lines 27-82
+
+```typescript
+async finalizeEscrowAndSyncSpend(...) {
+  // Finalize escrow first
+  const { clickhouseLastCheckedAt } = await walletStub.finalizeEscrow(...);
+
+  // Check staleness
+  const now = Date.now();
+  const staleness = now - (clickhouseLastCheckedAt ?? 0);
+
+  if (staleness > 60_000) {  // 1 minute threshold
+    await this.syncClickhouseSpend(organizationId, walletStub, provider);
+  }
+}
+```
+
+**Frequency**: At most once per minute per organization
+
+### 7.3 Sync Process
+
+**File**: `/worker/src/lib/managers/WalletManager.ts` lines 84-134
+
+```typescript
+async syncClickhouseSpend(
+  organizationId: string,
+  walletStub: DurableObjectStub<Wallet>,
+  provider: string
+) {
+  // 1. Fetch total spend from Jawn (queries ClickHouse)
+  const jawnUrl = `https://jawn.helicone.com/v1/credits/totalSpend`;
+  const response = await fetch(jawnUrl, {
+    headers: {
+      'Authorization': `Bearer ${JAWN_API_KEY}`,
+      'Helicone-Org-Id': organizationId,
+    }
+  });
+
+  const { totalSpend } = await response.json();  // USD dollars
+  const clickhouseTotalCents = totalSpend * 100;
+
+  // 2. Get wallet's current total
+  const walletState = await walletStub.getWalletState();
+  const walletTotalCents = walletState.totalDebits;
+
+  // 3. Calculate delta
+  const delta = Math.abs(clickhouseTotalCents - walletTotalCents);
+
+  // 4. Alert if significant drift
+  const ALERT_THRESHOLD = 10;  // 10 cents = $0.10
+  const ALERT_ID = "total_spend_delta_alert";
+
+  if (delta > ALERT_THRESHOLD) {
+    // Check if alert already active
+    const alertState = await walletStub.getAlertState(ALERT_ID);
+
+    if (alertState !== "on") {
+      // Send Slack notification
+      await this.sendSlackAlert({
+        message: `Total spend delta is greater than $${ALERT_THRESHOLD / 100} USD.
+                  Current total spend: $${clickhouseTotalCents / 100} USD.
+                  Wallet total spend: $${walletTotalCents / 100} USD.
+                  Delta: $${delta / 100} USD.
+                  Org ID: ${organizationId}`,
+        channel: "#ops-alerts",
+      });
+
+      // Set alert state to prevent spam
+      await walletStub.setAlertState(ALERT_ID, "on");
+    }
+  } else {
+    // Delta acceptable, clear alert if it was on
+    const alertState = await walletStub.getAlertState(ALERT_ID);
+    if (alertState === "on") {
+      await walletStub.setAlertState(ALERT_ID, "off");
+    }
+  }
+
+  // 5. Update wallet's last checked timestamp
+  await walletStub.updateClickhouseSync(clickhouseTotalCents, Date.now());
+}
+```
+
+### 7.4 ClickHouse Query (Jawn Side)
+
+**File**: `/valhalla/jawn/src/managers/creditsManager.ts`
+
+```typescript
+async getTotalSpend(organizationId: string): Promise<number> {
+  const query = `
+    SELECT SUM(cost) / 1000000000.0 as total_usd
+    FROM request_response_versioned
+    WHERE organization_id = {organizationId:String}
+      AND cost IS NOT NULL
+      AND cost > 0
+  `;
+
+  const result = await clickhouse.query({
+    query,
+    query_params: { organizationId },
+  });
+
+  const row = await result.json();
+  return row.data[0]?.total_usd ?? 0;
+}
+```
+
+**Note**: Cost in ClickHouse is scaled by 10^9, query divides to get USD
+
+### 7.5 Wallet Update
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts`
+
+```typescript
+async updateClickhouseSync(clickhouseTotalCents: number, timestamp: number): Promise<void> {
+  const clickhouseScaled = clickhouseTotalCents * SCALE_FACTOR;
+
+  await this.sql.exec(`
+    UPDATE aggregated_debits
+    SET ch_last_checked_at = ?, ch_last_value = ?
+    WHERE org_id = ?
+  `, timestamp, clickhouseScaled, this.orgId);
+}
+```
+
+**Columns**:
+- `ch_last_checked_at` - Timestamp of last successful sync
+- `ch_last_value` - ClickHouse total at last sync (for drift detection)
+
+---
+
+## SECTION 8: ADMIN API ENDPOINTS
+
+### 8.1 Wallet State
+
+**Endpoint**: `GET /admin/wallet/:orgId/state`
+**Auth**: Admin access key
+**File**: `/worker/src/routers/api/walletRouter.ts` lines 62-88
+
+**Response**:
+```typescript
+{
+  balance: number,              // cents
+  effectiveBalance: number,     // cents (available for new requests)
+  totalEscrow: number,          // cents reserved
+  totalDebits: number,          // cents spent
+  totalCredits: number,         // cents purchased
+  disallowList: [
+    {
+      provider: string,
+      model: string,
+      heliconeRequestId: string,
+      createdAt: number
+    }
+  ],
+  disputeStatus: "active" | "suspended" | "resolved",
+  activeDisputes: [
+    {
+      id: string,
+      status: string,
+      reason: string,
+      amount: number  // cents
+    }
+  ]
+}
+```
+
+### 8.2 User Wallet State
+
+**Endpoint**: `GET /wallet/state`
+**Auth**: User API key
+**File**: `/worker/src/routers/api/walletRouter.ts` lines 42-60
+
+**Difference**: Uses authenticated user's org ID instead of path parameter
+
+### 8.3 Table Inspection
+
+**Endpoint**: `GET /admin/wallet/:orgId/tables/:tableName`
+**Auth**: Admin access key
+**File**: `/worker/src/routers/api/walletRouter.ts` lines 90-151
+
+**Tables**:
+- `credit_purchases`
+- `aggregated_debits`
+- `escrows`
+- `disallow_list`
+- `disputes`
+- `processed_webhook_events`
+- `alert_state`
+
+**Query Params**:
+- `page` (default: 1)
+- `pageSize` (default: 10, max: 100)
+- `orderBy` (column name)
+- `orderDirection` ("asc" | "desc")
+
+**Response**:
+```typescript
+{
+  tableName: string,
+  page: number,
+  pageSize: number,
+  totalRows: number,
+  data: Array<Record<string, any>>
+}
+```
+
+### 8.4 Manual Balance Modification
+
+**Endpoint**: `POST /admin/wallet/:orgId/modify-balance`
+**Auth**: Admin access key
+**File**: `/worker/src/routers/api/walletRouter.ts` lines 216-301
+
+**Request**:
+```typescript
+{
+  amount: number,           // Cents (positive integer)
+  type: "credit" | "debit",
+  reason: string,           // Audit trail
+  referenceId: string,      // Unique identifier
+  adminUserId: string       // Who performed action
+}
+```
+
+**Implementation**:
+- `type: "credit"` → INSERT positive credit
+- `type: "debit"` → INSERT negative credit (acts as debit)
+- Validation: amount > 0, reason non-empty, referenceId unique
+
+**Use Cases**:
+- Manual credit grants (promotions, refunds)
+- Corrections for billing errors
+- Testing in staging
+
+### 8.5 Disallow List Management
+
+**Endpoint**: `DELETE /admin/wallet/:orgId/disallow-list`
+**Auth**: Admin access key
+**File**: `/worker/src/routers/api/walletRouter.ts` lines 303-352
+
+**Request**:
+```typescript
+{
+  provider: string,  // e.g., "openai"
+  model: string      // e.g., "gpt-4o"
+}
+```
+
+**Effect**: Removes block on provider/model, allows PTB billing again
+
+---
+
+## SECTION 9: STRIPE WEBHOOK INTEGRATION
+
+### 9.1 Webhook Endpoint
+
+**Endpoint**: `POST /stripe/webhook`
+**Auth**: Stripe signature validation
+**File**: `/worker/src/routers/api/walletRouter.ts` lines 354-408
+
+**Supported Events**:
+- `charge.succeeded` - Add credits
+- `charge.refunded` - Deduct credits
+- `charge.dispute.created` - Add dispute
+- `charge.dispute.updated` - Update dispute status
+- `charge.dispute.closed` - Resolve dispute
+
+### 9.2 Signature Validation
+
+**File**: `/worker/src/lib/managers/StripeManager.ts` lines 94-149
+
+```typescript
+async validateWebhook(request: Request): Promise<Stripe.Event> {
+  const signature = request.headers.get('stripe-signature');
+  const body = await request.text();
+
+  // Try US webhook secret first
+  try {
+    return stripe.webhooks.constructEvent(
+      body,
+      signature,
+      env.STRIPE_WEBHOOK_SECRET_US
+    );
+  } catch (err) {
+    // Try EU webhook secret
+    return stripe.webhooks.constructEvent(
+      body,
+      signature,
+      env.STRIPE_WEBHOOK_SECRET_EU
+    );
+  }
+}
+```
+
+**Security**: HMAC signature prevents replay attacks and unauthorized events
+
+### 9.3 Event Handling
+
+**File**: `/worker/src/lib/managers/StripeManager.ts` lines 151-405
+
+```typescript
+async handleEvent(event: Stripe.Event): Promise<void> {
+  // Check idempotency FIRST
+  const processed = await this.checkProcessedEvent(event.id);
+  if (processed) {
+    console.log(`Event ${event.id} already processed, skipping`);
+    return;
+  }
+
+  switch (event.type) {
+    case 'charge.succeeded':
+      await this.handleChargeSucceeded(event);
+      break;
+
+    case 'charge.refunded':
+      await this.handleChargeRefunded(event);
+      break;
+
+    case 'charge.dispute.created':
+      await this.handleDisputeCreated(event);
+      break;
+
+    case 'charge.dispute.updated':
+      await this.handleDisputeUpdated(event);
+      break;
+
+    case 'charge.dispute.closed':
+      await this.handleDisputeClosed(event);
+      break;
+
+    default:
+      console.log(`Unhandled event type: ${event.type}`);
+  }
+}
+```
+
+### 9.4 Charge Succeeded
+
+**Webhook**: `charge.succeeded`
+
+```typescript
+async handleChargeSucceeded(event: Stripe.Event) {
+  const charge = event.data.object as Stripe.Charge;
+
+  // 1. Validate this is a token usage product
+  const productId = charge.metadata?.stripe_product_id;
+  if (productId !== TOKEN_USAGE_PRODUCT_ID) {
+    return;  // Not a Helicone credit purchase
+  }
+
+  // 2. Get organization ID
+  const orgId = charge.metadata?.organization_id;
+  if (!orgId) {
+    throw new Error('Missing organization_id in charge metadata');
+  }
+
+  // 3. Get payment amount
+  const amountInCents = charge.amount;  // Stripe always uses cents
+
+  // 4. Add credits to wallet
+  const walletId = env.WALLET.idFromName(orgId);
+  const walletStub = env.WALLET.get(walletId);
+
+  await walletStub.addCredits(
+    amountInCents,
+    event.id  // Use event ID as reference for idempotency
+  );
+
+  // 5. Update PostgreSQL payment records (Jawn)
+  await this.updatePaymentRecords(orgId, charge);
+}
+```
+
+### 9.5 Charge Refunded
+
+**Webhook**: `charge.refunded`
+
+```typescript
+async handleChargeRefunded(event: Stripe.Event) {
+  const charge = event.data.object as Stripe.Charge;
+
+  // Validate product
+  const productId = charge.metadata?.stripe_product_id;
+  if (productId !== TOKEN_USAGE_PRODUCT_ID) return;
+
+  const orgId = charge.metadata?.organization_id;
+  const refundAmount = charge.amount_refunded;  // Partial refunds supported
+
+  // Deduct credits (adds negative credit entry)
+  const walletId = env.WALLET.idFromName(orgId);
+  const walletStub = env.WALLET.get(walletId);
+
+  const result = await walletStub.deductCredits(
+    refundAmount,
+    event.id,
+    orgId
+  );
+
+  if (isErr(result)) {
+    // Refund exceeds effective balance
+    throw new Error(result.error);
+  }
+}
+```
+
+### 9.6 Idempotency
+
+**Why**: Stripe retries webhooks on failure/timeout, must handle duplicates
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts` (in all webhook operations)
+
+```typescript
+await this.transactionSync(async () => {
+  // 1. Check if already processed
+  const existing = await this.sql.exec(
+    `SELECT id FROM processed_webhook_events WHERE id = ?`,
+    eventId
+  ).one();
+
+  if (existing) {
+    console.log(`Event ${eventId} already processed`);
+    return;
+  }
+
+  // 2. Perform operation (credit/debit/dispute)
+  // ...
+
+  // 3. Mark as processed IN SAME TRANSACTION
+  await this.sql.exec(
+    `INSERT INTO processed_webhook_events (id, processed_at) VALUES (?, ?)`,
+    eventId,
+    Date.now()
+  );
+});
+```
+
+**Critical**: Idempotency check and operation must be in same transaction to prevent race conditions
+
+---
+
+## SECTION 10: REQUEST FLOW INTEGRATION
+
+### 10.1 End-to-End PTB Request Flow
+
+```
+1. Request arrives at Worker
+   URL: https://helicone-gateway.workers.dev/v1/chat/completions
+   Headers:
+     - Authorization: Bearer <HELICONE_API_KEY>
+     - Helicone-Org-Id: <ORG_ID>
+   Body:
+     - model: "gpt-4/openai,claude-3/anthropic"
+     - messages: [...]
+   ↓
+
+2. RequestWrapper.ts - Authentication
+   - Validate API key
+   - Load organization metadata:
+     * allowNegativeBalance
+     * creditLimit
+     * byok_enabled per provider
+   ↓
+
+3. SimpleAIGateway.handle() - Routing
+   - Parse model string → ["gpt-4/openai", "claude-3/anthropic"]
+   - AttemptBuilder.build():
+     a) For OpenAI:
+        - buildByokAttempts() → priority=1 (if user has key)
+        - buildPtbAttempts() → priority=2 (if PTB enabled)
+     b) For Anthropic:
+        - buildByokAttempts() → priority=1
+        - buildPtbAttempts() → priority=2
+   - Sort attempts by priority
+   ↓
+
+4. Attempt Execution Loop
+   For each attempt in order:
+
+   a) If authType === "ptb":
+      - Validate payload (reject audio, web_search)
+      - Check disallow list
+      - PTBPreCheck:
+        * Calculate worst-case cost
+        * Reserve escrow
+        * If insufficient balance: add error, try next
+
+   b) Execute request:
+      - Build provider-specific request
+      - Authenticate with provider key
+      - Forward to provider
+
+   c) If success:
+      - Parse response
+      - Calculate actual cost
+      - Finalize escrow (if PTB)
+      - Return response to user
+      - BREAK loop
+
+   d) If error:
+      - Cancel escrow (if PTB)
+      - Try next attempt
+   ↓
+
+5. Post-Request Processing (async)
+   - Log to ClickHouse
+   - Update rate limits
+   - Sync ClickHouse spend (if stale)
+```
+
+### 10.2 Key Decision Points
+
+**Decision 1: BYOK vs PTB**
+```
+Does user have provider key with byok_enabled !== false?
+  YES → Build BYOK attempt (priority=1)
+  NO → Skip BYOK for this provider
+
+Does endpoint have ptbEnabled=true AND org has creditsEnabled?
+  YES → Build PTB attempt (priority=2)
+  NO → Skip PTB for this endpoint
+```
+
+**Decision 2: Escrow Reservation**
+```
+effectiveBalance = totalCredits - totalDebits - totalEscrow
+if (creditLineEnabled):
+  effectiveBalance += creditLimit
+
+worstCaseCost = (contextLength × inputPrice) + (maxTokens × outputPrice)
+
+if (effectiveBalance - worstCaseCost < 1 cent):
+  REJECT with 429
+else:
+  ACCEPT, create escrow
+```
+
+**Decision 3: Cost Finalization**
+```
+if (cost === undefined AND statusCode=200 AND !cached):
+  Add to disallow list
+  Finalize escrow with cost=0
+
+else if (cost !== undefined):
+  Finalize escrow with actual cost
+  Update aggregated_debits
+
+if (timeSinceLastSync > 1 minute):
+  Sync with ClickHouse
+  Alert if delta > $0.10
+```
+
+### 10.3 Error Handling
+
+**Escrow Reservation Failed (429)**:
+```json
+{
+  "error": {
+    "message": "Insufficient balance. Need 140 cents, have 50 cents available.",
+    "statusCode": 429,
+    "type": "insufficient_balance"
+  }
+}
+```
+
+**Wallet Suspended (403)**:
+```json
+{
+  "error": {
+    "message": "Wallet is suspended due to payment disputes. Please contact support.",
+    "statusCode": 403,
+    "type": "wallet_suspended"
+  }
+}
+```
+
+**Model Disallowed (400)**:
+```json
+{
+  "error": {
+    "message": "Cloud billing is disabled for gpt-4o on openai.",
+    "statusCode": 400,
+    "type": "disallowed"
+  }
+}
+```
+
+**All Attempts Failed**:
+```json
+{
+  "error": {
+    "message": "All attempts failed",
+    "attempts": [
+      {
+        "source": "gpt-4/openai/byok",
+        "error": "Invalid API key",
+        "statusCode": 401
+      },
+      {
+        "source": "gpt-4/openai/ptb",
+        "error": "Insufficient balance",
+        "statusCode": 429
+      }
+    ]
+  }
+}
+```
+
+---
+
+## SECTION 11: TESTING & DEBUGGING
+
+### 11.1 Test Framework
+
+**File**: `/worker/test/ai-gateway/test-framework.ts`
+
+**Key Functions**:
+```typescript
+// Set up test scenario
+setSupabaseTestCase({
+  byokEnabled: boolean,           // User has BYOK key
+  creditsEnabled: boolean,        // PTB enabled
+  creditLimit: number,            // Credit line in cents
+  allowNegativeBalance: boolean   // Credit line enabled
+});
+
+// Add credits to wallet
+await addCreditsToWallet(orgId, amountInCents);
+
+// Run gateway test
+await runGatewayTest({
+  model: string,                  // e.g., "gpt-4/openai"
+  request: object,                // Request payload
+  expected: {
+    providers: [
+      {
+        url: string,              // Expected provider URL
+        response: "success" | "error",
+        expects: {
+          escrowInfo: boolean,    // Should have escrow
+          cost: number,           // Expected cost
+        }
+      }
+    ],
+    finalStatus: number           // Expected HTTP status
+  }
+});
+```
+
+### 11.2 Test Cases
+
+**File**: `/worker/test/ai-gateway/ptb-validation.spec.ts`
+
+**Test 1: PTB Success**
+```typescript
+test('PTB with sufficient balance succeeds', async () => {
+  setSupabaseTestCase({
+    byokEnabled: false,
+    creditsEnabled: true,
+  });
+
+  await addCreditsToWallet(orgId, 100_00);  // $100
+
+  await runGatewayTest({
+    model: 'gpt-4o-mini/openai',
+    request: {
+      messages: [{ role: 'user', content: 'Hello' }],
+    },
+    expected: {
+      providers: [{
+        url: 'https://api.openai.com/v1/chat/completions',
+        response: 'success',
+        expects: { escrowInfo: true },
+      }],
+      finalStatus: 200,
+    },
+  });
+});
+```
+
+**Test 2: Insufficient Balance**
+```typescript
+test('PTB with insufficient balance fails', async () => {
+  setSupabaseTestCase({
+    byokEnabled: false,
+    creditsEnabled: true,
+  });
+
+  await addCreditsToWallet(orgId, 10);  // Only 10 cents
+
+  await runGatewayTest({
+    model: 'gpt-4-turbo/openai',  // Expensive model
+    request: {
+      messages: [{ role: 'user', content: 'Hello' }],
+    },
+    expected: {
+      providers: [],
+      finalStatus: 429,  // Insufficient balance
+    },
+  });
+});
+```
+
+**Test 3: BYOK Fallback to PTB**
+```typescript
+test('BYOK fails, falls back to PTB', async () => {
+  setSupabaseTestCase({
+    byokEnabled: true,  // BYOK available
+    creditsEnabled: true,
+    byokWillFail: true,  // Simulate BYOK failure
+  });
+
+  await addCreditsToWallet(orgId, 100_00);
+
+  await runGatewayTest({
+    model: 'gpt-4o/openai',
+    request: {
+      messages: [{ role: 'user', content: 'Hello' }],
+    },
+    expected: {
+      providers: [
+        {
+          url: 'https://api.openai.com/v1/chat/completions',
+          response: 'error',  // BYOK attempt fails
+          expects: { escrowInfo: false },
+        },
+        {
+          url: 'https://api.openai.com/v1/chat/completions',
+          response: 'success',  // PTB attempt succeeds
+          expects: { escrowInfo: true },
+        },
+      ],
+      finalStatus: 200,
+    },
+  });
+});
+```
+
+### 11.3 Debugging Tools
+
+**Wallet State Inspection**:
+```bash
+curl -X GET https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/state \
+  -H "Authorization: Bearer {ADMIN_KEY}"
+```
+
+**Table Inspection**:
+```bash
+# View escrows
+curl -X GET "https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/tables/escrows?page=1&pageSize=10" \
+  -H "Authorization: Bearer {ADMIN_KEY}"
+
+# View credit purchases
+curl -X GET "https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/tables/credit_purchases?orderBy=created_at&orderDirection=desc" \
+  -H "Authorization: Bearer {ADMIN_KEY}"
+```
+
+**Manual Credit Addition** (testing):
+```bash
+curl -X POST https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/modify-balance \
+  -H "Authorization: Bearer {ADMIN_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 10000,
+    "type": "credit",
+    "reason": "Testing",
+    "referenceId": "test-'$(date +%s)'",
+    "adminUserId": "admin@helicone.ai"
+  }'
+```
+
+---
+
+## SECTION 12: KEY CONSTANTS & CONFIGURATION
+
+### 12.1 Environment Variables (Worker)
+
+```typescript
+WALLET: DurableObjectNamespace          // Wallet DO binding
+HELICONE_ORG_ID: string                // Helicone's org for PTB keys
+STRIPE_WEBHOOK_SECRET_US: string       // US webhook validation
+STRIPE_WEBHOOK_SECRET_EU: string       // EU webhook validation
+STRIPE_API_KEY: string                 // Stripe SDK key
+JAWN_URL: string                       // Backend API URL
+JAWN_API_KEY: string                   // Backend auth
+SLACK_WEBHOOK_URL: string              // Alerts channel
+```
+
+### 12.2 Constants
+
+**File**: `/worker/src/lib/durable-objects/Wallet.ts`
+```typescript
+SCALE_FACTOR = 10_000_000_000          // Wallet precision
+MINIMUM_RESERVE = 1 * SCALE_FACTOR     // 1 cent minimum
+```
+
+**File**: `/worker/src/lib/managers/WalletManager.ts`
+```typescript
+SYNC_STALENESS_THRESHOLD = 60_000      // 1 minute (ms)
+ALERT_THRESHOLD = 10                   // 10 cents
+ALERT_ID = "total_spend_delta_alert"
+```
+
+**File**: `/packages/cost/costCalc.ts`
+```typescript
+COST_PRECISION_MULTIPLIER = 1_000_000_000  // ClickHouse precision
+```
+
+**File**: `/worker/src/lib/managers/StripeManager.ts`
+```typescript
+TOKEN_USAGE_PRODUCT_ID: string         // Stripe product for credits
+```
+
+### 12.3 Priority Values
+
+```typescript
+BYOK_PRIORITY = 1                      // Always try user's key first
+PTB_PRIORITY = 2                       // Fallback to Helicone's key
+```
+
+### 12.4 Status Codes
+
+```typescript
+200 - Success
+400 - Validation error, disallowed model
+401 - Invalid API key
+403 - Wallet suspended (disputes)
+429 - Insufficient balance
+500 - Internal error
+```
+
+---
+
+## SECTION 13: FILE REFERENCE TABLE
+
+| File Path | Purpose | Key Functions/Endpoints |
+|-----------|---------|-------------------------|
+| `/worker/src/lib/durable-objects/Wallet.ts` | Wallet state management | addCredits, deductCredits, reserveCostInEscrow, finalizeEscrow, addToDisallowList, addDispute |
+| `/worker/src/routers/api/walletRouter.ts` | Wallet HTTP API | GET /wallet/state, GET /admin/wallet/:orgId/state, POST /admin/wallet/:orgId/modify-balance, DELETE /admin/wallet/:orgId/disallow-list, POST /stripe/webhook |
+| `/worker/src/lib/managers/WalletManager.ts` | Escrow finalization & sync | finalizeEscrowAndSyncSpend, syncClickhouseSpend |
+| `/worker/src/lib/managers/StripeManager.ts` | Stripe webhook handler | handleEvent, handleChargeSucceeded, handleChargeRefunded, handleDisputeCreated |
+| `/worker/src/lib/ai-gateway/SimpleAIGateway.ts` | Request routing | handle, executeAttempts, isDisallowed |
+| `/worker/src/lib/ai-gateway/AttemptBuilder.ts` | Attempt construction | buildByokAttempts, buildPtbAttempts |
+| `/worker/src/lib/ai-gateway/AttemptExecutor.ts` | Attempt execution | execute, reserveEscrow, cancelEscrow |
+| `/worker/src/lib/HeliconeProxyRequest/ProxyForwarder.ts` | Request proxying | forwardRequest, calculateCost, log |
+| `/worker/src/lib/db/DBWrapper.ts` | Organization data | _getAuthParams, getOrgMetadata |
+| `/packages/cost/costCalc.ts` | Cost calculation | modelCostBreakdownFromRegistry, COST_PRECISION_MULTIPLIER |
+| `/packages/cost/providers/*/models.ts` | Model registry | Model definitions, pricing, endpoints |
+| `/packages/cost/providers/*/usage.ts` | Usage parsing | parseResponse (per provider) |
+| `/valhalla/jawn/src/managers/creditsManager.ts` | Credits API | getCreditsBalance, listTokenUsagePayments, getTotalSpend |
+| `/valhalla/jawn/src/controllers/public/creditsController.ts` | Public endpoints | GET /v1/credits/balance, GET /v1/credits/payments, GET /v1/credits/totalSpend |
+| `/worker/test/ai-gateway/test-framework.ts` | Test utilities | runGatewayTest, setSupabaseTestCase, addCreditsToWallet |
+| `/worker/test/ai-gateway/ptb-validation.spec.ts` | PTB tests | Various PTB test cases |
+
+---
+
+## SECTION 14: COMMON OPERATIONS
+
+### 14.1 Add Credits to Organization
+
+**Via Stripe** (production):
+1. User purchases credits on helicone.ai
+2. Stripe `charge.succeeded` webhook fires
+3. Worker validates signature
+4. Wallet.addCredits() called with amount
+5. Credits immediately available
+
+**Via Admin API** (testing/support):
+```bash
+curl -X POST https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/modify-balance \
+  -H "Authorization: Bearer {ADMIN_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 5000,
+    "type": "credit",
+    "reason": "Promotional credit",
+    "referenceId": "promo-2024-01",
+    "adminUserId": "admin@helicone.ai"
+  }'
+```
+
+### 14.2 Refund Credits
+
+**Via Stripe** (automatic):
+1. Admin initiates refund in Stripe dashboard
+2. Stripe `charge.refunded` webhook fires
+3. Wallet.deductCredits() called
+4. Negative credit entry created
+
+**Via Admin API** (manual):
+```bash
+curl -X POST https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/modify-balance \
+  -H "Authorization: Bearer {ADMIN_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 5000,
+    "type": "debit",
+    "reason": "Manual refund adjustment",
+    "referenceId": "refund-2024-01",
+    "adminUserId": "admin@helicone.ai"
+  }'
+```
+
+### 14.3 Unblock Model from Disallow List
+
+```bash
+curl -X DELETE https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/disallow-list \
+  -H "Authorization: Bearer {ADMIN_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "openai",
+    "model": "gpt-4o"
+  }'
+```
+
+### 14.4 Check Wallet State
+
+```bash
+curl -X GET https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/state \
+  -H "Authorization: Bearer {ADMIN_KEY}"
+```
+
+### 14.5 Inspect Active Escrows
+
+```bash
+curl -X GET "https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/tables/escrows" \
+  -H "Authorization: Bearer {ADMIN_KEY}"
+```
+
+---
+
+## SECTION 15: EDGE CASES & GUARDS
+
+| Scenario | Handling | Location |
+|----------|----------|----------|
+| **Cost parsing fails (200 OK, non-stream)** | Add to disallow list | WalletManager.ts:45-63 |
+| **Cost parsing fails (cached)** | Finalize with cost=0, skip disallow | WalletManager.ts:53 |
+| **Refund exceeds effective balance** | Reject with 400 error | Wallet.ts:294-299 |
+| **Duplicate webhook event** | Check processed_webhook_events, skip | Wallet.ts:220-226 |
+| **Active payment dispute** | Suspend wallet, reject new requests (403) | Wallet.ts:463-479 |
+| **Escrow reservation during escrow** | Included in totalEscrow calculation | Wallet.ts:506-508 |
+| **Negative balance with credit line** | Allow up to creditLimit | Wallet.ts:510-514 |
+| **ClickHouse unavailable** | Log error, continue (don't block requests) | WalletManager.ts:119-121 |
+| **Multiple regions (US/EU Stripe)** | Try both webhook secrets | StripeManager.ts:94-149 |
+| **Streaming response cost undefined** | More lenient, don't auto-disallow | WalletManager.ts:50-52 |
+| **Model not in registry** | Use legacy cost calculation | ProxyForwarder.ts:571-630 |
+| **Provider returns no usage** | Cost undefined, disallow if 200 OK | WalletManager.ts:47 |
+| **Escrow not finalized (orphan)** | Manual cleanup via admin API | walletRouter.ts:90-151 |
+| **Delta < $0.10** | Clear alert if active | WalletManager.ts:122-124 |
+| **Delta >= $0.10** | Send Slack alert once | WalletManager.ts:116-121 |
+
+---
+
+## SECTION 16: PERFORMANCE CONSIDERATIONS
+
+### 16.1 Durable Object Caching
+
+**Wallet instances are cached in Cloudflare's memory**:
+- Same org → Same DO instance (usually)
+- Avoids cold starts for frequent requesters
+- SQLite state persists across requests
+
+**Trade-off**: Stale reads possible if multiple DO instances exist (rare)
+
+### 16.2 ClickHouse Sync Throttling
+
+**Only sync once per minute per org**:
+- Reduces ClickHouse query load
+- Prevents alert spam
+- Acceptable staleness window
+
+**Stored**: `ch_last_checked_at` timestamp in aggregated_debits
+
+### 16.3 Escrow Cleanup
+
+**No automatic cleanup**:
+- Escrows deleted on finalization or cancellation
+- Orphan escrows possible if worker crashes mid-request
+- **Manual cleanup**: Admin API table inspection + deletion
+
+**Future improvement**: Background job to cleanup stale escrows (>1 hour old)
+
+### 16.4 Transaction Batching
+
+**All wallet operations use transactionSync()**:
+- Prevents race conditions
+- Ensures atomic updates
+- SQLite ACID guarantees
+
+**Critical for**:
+- Credit additions with idempotency
+- Escrow reservation + balance check
+- Dispute creation + event recording
+
+---
+
+## SECTION 17: MIGRATION NOTES
+
+### 17.1 Legacy to New Billing
+
+**Old System**:
+- Cost tracked only in ClickHouse
+- No pre-authorization
+- Could overspend before balance check
+
+**New System (PTB)**:
+- Wallet Durable Object with escrow
+- Pre-authorization prevents overspending
+- Real-time balance validation
+
+**Migration Path**:
+1. Deploy wallet infrastructure
+2. Enable PTB for endpoints
+3. Set `creditsEnabled=true` for orgs
+4. Gradually migrate from BYOK to PTB
+
+### 17.2 Data Migration
+
+**No migration needed**:
+- ClickHouse remains source of truth
+- Wallet starts at 0, syncs on first request
+- Historical data accessible via ClickHouse queries
+
+**Initial sync**:
+```typescript
+// On first escrow finalization
+const totalSpend = await clickhouse.getTotalSpend(orgId);
+await wallet.updateClickhouseSync(totalSpend * 100, Date.now());
+```
+
+---
+
+## SECTION 18: SECURITY CONSIDERATIONS
+
+### 18.1 Stripe Webhook Validation
+
+**CRITICAL**: Always validate signature before processing
+- Prevents unauthorized credit additions
+- HMAC signature ensures authenticity
+- Reject invalid signatures immediately
+
+**File**: StripeManager.ts:94-149
+
+### 18.2 Admin API Authentication
+
+**Admin endpoints require access key**:
+- Separate from user API keys
+- Can modify any organization's balance
+- Audit trail via adminUserId parameter
+
+**File**: walletRouter.ts:20-38
+
+### 18.3 Escrow Race Conditions
+
+**Protected by transactions**:
+- Balance check + escrow creation atomic
+- No TOCTOU (time-of-check-time-of-use) vulnerability
+- SQLite serializable isolation
+
+**File**: Wallet.ts:452-529
+
+### 18.4 Disallow List Bypass
+
+**Cannot bypass**:
+- Checked before escrow reservation
+- Applies to all PTB requests
+- Only admin can remove from list
+
+**File**: SimpleAIGateway.ts:174-184
+
+---
+
+## SECTION 19: MONITORING & ALERTING
+
+### 19.1 Slack Alerts
+
+**Alert Triggers**:
+- ClickHouse delta > $0.10
+- Wallet/ClickHouse spending mismatch
+
+**Alert State**:
+- Stored in wallet DO (alert_state table)
+- "on" = Alert active, don't spam
+- "off" = Alert cleared, can trigger again
+
+**File**: WalletManager.ts:84-134
+
+### 19.2 Metrics to Monitor
+
+**Wallet Health**:
+- Total escrow amount (stuck funds indicator)
+- Credit purchases vs debits trend
+- Active disputes count
+
+**Request Success**:
+- PTB vs BYOK success rate
+- 429 error rate (insufficient balance)
+- 403 error rate (suspended wallets)
+
+**Cost Accuracy**:
+- ClickHouse/wallet delta distribution
+- Disallow list growth rate
+- Cost parsing failure rate
+
+### 19.3 Logging
+
+**Worker Logs**:
+```typescript
+console.log('Escrow reserved', { orgId, escrowId, amount });
+console.log('Escrow finalized', { orgId, escrowId, actualCost });
+console.error('Cost parsing failed', { provider, model, requestId });
+console.warn('Added to disallow list', { provider, model });
+```
+
+**ClickHouse Logs**:
+- Every request logged with cost
+- Searchable by org, model, provider
+- Historical cost trends
+
+---
+
+## SECTION 20: FUTURE IMPROVEMENTS
+
+### 20.1 Potential Enhancements
+
+**Escrow Optimization**:
+- Use average cost instead of worst-case
+- Release partial escrow as response streams
+- Predictive cost estimation based on history
+
+**Credit Line Automation**:
+- Auto-approve credit lines based on payment history
+- Dynamic limits based on usage patterns
+- Auto-suspend on unusual activity
+
+**Cost Accuracy**:
+- Machine learning for cost prediction
+- Provider-specific cost parsers
+- Validate costs against provider bills
+
+**Performance**:
+- Batch ClickHouse sync for multiple orgs
+- Cache pricing data in worker KV
+- Lazy-load wallet state (only on PTB requests)
+
+### 20.2 Known Limitations
+
+**No real-time cost streaming**:
+- Escrow uses worst-case until response completes
+- Could lock more funds than necessary
+- Improvement: Partial release as tokens stream
+
+**No automatic escrow cleanup**:
+- Orphan escrows possible on worker crashes
+- Manual cleanup via admin API
+- Improvement: Background cleanup job
+
+**Single DO per org**:
+- Could bottleneck high-volume orgs
+- All requests to same org → same DO
+- Improvement: Shard by request ID
+
+**Alert threshold fixed**:
+- $0.10 may be too sensitive for large orgs
+- No customization per org
+- Improvement: Dynamic thresholds based on volume
+
+---
+
+## SECTION 21: TROUBLESHOOTING GUIDE
+
+### 21.1 User Reports Insufficient Balance
+
+**Check**:
+```bash
+# 1. Get wallet state
+curl -X GET https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/state \
+  -H "Authorization: Bearer {ADMIN_KEY}"
+
+# 2. Check escrows
+curl -X GET https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/tables/escrows \
+  -H "Authorization: Bearer {ADMIN_KEY}"
+
+# 3. Check ClickHouse total
+curl -X GET https://jawn.helicone.com/v1/credits/totalSpend \
+  -H "Authorization: Bearer {JAWN_KEY}" \
+  -H "Helicone-Org-Id: {ORG_ID}"
+```
+
+**Common Causes**:
+- Large escrow from abandoned request (cleanup needed)
+- Recent large spend not yet reflected in wallet
+- Credit purchase not processed (check Stripe)
+
+### 21.2 Cost Calculation Failing
+
+**Check**:
+```bash
+# View disallow list
+curl -X GET https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/tables/disallow_list \
+  -H "Authorization: Bearer {ADMIN_KEY}"
+```
+
+**Common Causes**:
+- New model not in registry
+- Provider changed response format
+- Usage parser needs update
+
+**Fix**:
+1. Add model to registry with pricing
+2. Update usage parser
+3. Remove from disallow list
+
+### 21.3 Wallet Suspended
+
+**Check**:
+```bash
+# View disputes
+curl -X GET https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/tables/disputes \
+  -H "Authorization: Bearer {ADMIN_KEY}"
+```
+
+**Resolution**:
+1. Review dispute in Stripe dashboard
+2. Contact customer if needed
+3. Resolve dispute
+4. Stripe webhook auto-updates wallet
+5. Wallet auto-enables on resolution
+
+### 21.4 ClickHouse Delta Alert
+
+**Check**:
+```bash
+# 1. Get wallet total
+curl -X GET https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/state \
+  -H "Authorization: Bearer {ADMIN_KEY}" | jq .totalDebits
+
+# 2. Get ClickHouse total
+curl -X GET https://jawn.helicone.com/v1/credits/totalSpend \
+  -H "Authorization: Bearer {JAWN_KEY}" \
+  -H "Helicone-Org-Id: {ORG_ID}" | jq .totalSpend
+```
+
+**Common Causes**:
+- Escrows finalized with wrong cost
+- ClickHouse writes delayed
+- Wallet corrupted (rare)
+
+**Fix**:
+1. Compare credit_purchases vs aggregated_debits
+2. Manually adjust if needed via modify-balance
+3. Force ClickHouse sync
+
+---
+
+## APPENDIX A: SQL QUERIES
+
+### A.1 Get Wallet Balance
+```sql
+SELECT
+  (SELECT COALESCE(SUM(credits), 0) FROM credit_purchases) as total_credits,
+  (SELECT COALESCE(debits, 0) FROM aggregated_debits WHERE org_id = ?) as total_debits,
+  (SELECT COALESCE(SUM(amount), 0) FROM escrows) as total_escrow;
+```
+
+### A.2 Find Orphan Escrows
+```sql
+SELECT * FROM escrows
+WHERE created_at < ?  -- 1 hour ago
+ORDER BY created_at ASC;
+```
+
+### A.3 Get Credit Purchase History
+```sql
+SELECT
+  id,
+  created_at,
+  credits / 10000000000.0 as credits_cents,
+  reference_id
+FROM credit_purchases
+ORDER BY created_at DESC
+LIMIT 100;
+```
+
+### A.4 Check Active Disputes
+```sql
+SELECT * FROM disputes
+WHERE status NOT IN ('won', 'resolved', 'lost')
+ORDER BY created_at DESC;
+```
+
+---
+
+## APPENDIX B: API EXAMPLES
+
+### B.1 User Get Balance
+```bash
+curl -X GET https://jawn.helicone.com/v1/credits/balance \
+  -H "Authorization: Bearer {USER_API_KEY}" \
+  -H "Helicone-Org-Id: {ORG_ID}"
+```
+
+Response:
+```json
+{
+  "totalCreditsPurchased": 10000,
+  "balance": 7543
+}
+```
+
+### B.2 User Get Payment History
+```bash
+curl -X GET "https://jawn.helicone.com/v1/credits/payments?page=1&pageSize=10" \
+  -H "Authorization: Bearer {USER_API_KEY}" \
+  -H "Helicone-Org-Id: {ORG_ID}"
+```
+
+Response:
+```json
+{
+  "payments": [
+    {
+      "id": "uuid",
+      "createdAt": 1234567890,
+      "credits": 5000,
+      "referenceId": "evt_stripe_123"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "total": 42
+}
+```
+
+### B.3 Admin Modify Balance
+```bash
+curl -X POST https://helicone-gateway.workers.dev/admin/wallet/{ORG_ID}/modify-balance \
+  -H "Authorization: Bearer {ADMIN_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 5000,
+    "type": "credit",
+    "reason": "Refund for billing error",
+    "referenceId": "support-ticket-12345",
+    "adminUserId": "admin@helicone.ai"
+  }'
+```
+
+---
+
+END OF AGENT SUMMARY
