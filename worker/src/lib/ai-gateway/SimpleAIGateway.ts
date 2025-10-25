@@ -14,7 +14,10 @@ import { Plugin } from "@helicone-package/cost/models/types";
 import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
-import { validateOpenAIChatPayload } from "./validators/openaiRequestValidator";
+import {
+  validateOpenAIChatPayload,
+  normalizeReasoningConfig,
+} from "./validators/openaiRequestValidator";
 import {
   RequestParams,
   BodyMappingType,
@@ -97,6 +100,12 @@ export class SimpleAIGateway {
       }
       this.metrics.markPromptRequestEnd();
       finalBody = expandResult.data.body;
+    }
+
+    if (
+      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
+    ) {
+      finalBody = normalizeReasoningConfig(finalBody);
     }
 
     const errors: Array<AttemptError> = [];

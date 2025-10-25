@@ -170,6 +170,13 @@ const ReasoningEffort = z.union([
   z.enum(["minimal", "low", "medium", "high"]),
   z.null(),
 ]);
+// OpenRouter-style reasoning configuration
+const ReasoningConfig = z
+  .object({
+    effort: z.enum(["low", "medium", "high"]).optional(), // Maps to reasoning_effort
+    enabled: z.boolean().optional(), // Activate with defaults (maps to reasoning_effort: "low")
+  })
+  .partial();
 const WebSearchLocation = z
   .object({
     country: z.string(),
@@ -305,6 +312,7 @@ const CreateChatCompletionRequest = z
     modalities: ResponseModalities.optional(),
     verbosity: Verbosity.optional(),
     reasoning_effort: ReasoningEffort.optional(),
+    reasoning: ReasoningConfig.optional(), // OpenRouter-style reasoning config
     max_completion_tokens: z.number().int().nullish(),
     frequency_penalty: z.number().gte(-2).lte(2).nullish().default(0),
     presence_penalty: z.number().gte(-2).lte(2).nullish().default(0),
