@@ -12,6 +12,7 @@ import { models as claudeSonnet4Models } from "./claude-sonnet-4/model";
 import { models as claude37SonnetModels } from "./claude-3.7-sonnet/model";
 import { models as claude35SonnetV2Models } from "./claude-3.5-sonnet-v2/model";
 import { models as claude35HaikuModels } from "./claude-3.5-haiku/model";
+import { models as claude3HaikuModels } from "./claude-3-haiku-20240307/model";
 import { models as claude45SonnetModels } from "./claude-4.5-sonnet/model";
 import { models as claude45HaikuModels } from "./claude-4.5-haiku/model";
 import { models as claudeSonnet4520250929Models } from "./claude-sonnet-4-5-20250929/model";
@@ -25,6 +26,7 @@ import { endpoints as claudeSonnet4Endpoints } from "./claude-sonnet-4/endpoints
 import { endpoints as claude37SonnetEndpoints } from "./claude-3.7-sonnet/endpoints";
 import { endpoints as claude35SonnetV2Endpoints } from "./claude-3.5-sonnet-v2/endpoints";
 import { endpoints as claude35HaikuEndpoints } from "./claude-3.5-haiku/endpoints";
+import { endpoints as claude3HaikuEndpoints } from "./claude-3-haiku-20240307/endpoints";
 import { endpoints as claude45SonnetEndpoints } from "./claude-4.5-sonnet/endpoints";
 import { endpoints as claude45HaikuEndpoints } from "./claude-4.5-haiku/endpoints";
 import { endpoints as claudeSonnet4520250929Endpoints } from "./claude-sonnet-4-5-20250929/endpoints";
@@ -39,6 +41,7 @@ export const anthropicModels = {
   ...claude37SonnetModels,
   ...claude35SonnetV2Models,
   ...claude35HaikuModels,
+  ...claude3HaikuModels,
   ...claude45SonnetModels,
   ...claude45HaikuModels,
   ...claudeSonnet4520250929Models,
@@ -54,6 +57,7 @@ export const anthropicEndpointConfig = {
   ...claude37SonnetEndpoints,
   ...claude35SonnetV2Endpoints,
   ...claude35HaikuEndpoints,
+  ...claude3HaikuEndpoints,
   ...claude45SonnetEndpoints,
   ...claude45HaikuEndpoints,
   ...claudeSonnet4520250929Endpoints,
