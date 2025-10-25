@@ -13,20 +13,20 @@ Now that your requests are flowing through Helicone, let's explore what you can 
   />
 </Frame>
 
-## How We Integrate
+## How It Works
 
-Helicone works through our **AI Gateway** - a unified API that sits between your application and LLM providers:
+Helicone's **AI Gateway** gives you access to 100+ LLM models through a single unified API:
 
-1. **Single Integration** - Point your OpenAI SDK to our gateway URL
-2. **Automatic Logging** - Every request and response is logged after we return it to you
-3. **Header-Based Features** - Enable capabilities like fallbacks, caching, and agent tracking via simple headers
-4. **Zero Latency Impact** - Edge deployment keeps overhead under 50ms
+1. **Add Credits** - Top up your Helicone account (0% markup)
+2. **Single Integration** - Point your OpenAI SDK to our gateway URL
+3. **Use Any Model** - Switch between providers by just changing the model name
+4. **Automatic Observability** - Every request is logged with costs, latency, and errors tracked
 
-This means you get both gateway features (routing, fallbacks, unified API) AND complete observability (costs, errors, latency) without any complex setup.
+No need to sign up for OpenAI, Anthropic, Google, or any other provider. We manage the API keys and you get complete observability built in.
 
-<Note>
-Supports BYOK (Bring Your Own Keys), passthrough routing, and pass-through billing (PTB). To enable PTB with Helicone's API keys, request access in Settings → Credits.
-</Note>
+<Accordion title="Advanced: Bring your own provider keys">
+  Prefer to use your own API keys? You can configure your own provider keys at [Provider Keys](https://us.helicone.ai/providers) for direct control over billing and provider accounts.
+</Accordion>
 
 ## The Problems We Solve
 
@@ -48,7 +48,7 @@ Supports BYOK (Bring Your Own Keys), passthrough routing, and pass-through billi
 ## Our Principles
 
 **Best Price Always**
-We fight for every penny. PTB finds the absolute lowest price across providers. No markup, no games.
+We fight for every penny. 0% markup on credits means you pay exactly what providers charge. No hidden fees, no games.
 
 **Invisible Performance**  
 Your app shouldn't slow down for observability. Edge deployment keeps us under 50ms. Always.
@@ -68,20 +68,51 @@ When production breaks and everyone's panicking, we're rock solid. Built for whe
 ## Real Scenarios
 
 <AccordionGroup>
-  <Accordion title="Costs spiked 300% overnight">
-    Helicone's user tracking and custom properties turn cost mysteries into clear insights. See exactly which users or features are driving spend with automatic cost breakdowns by user ID, feature, or any custom dimension you define. Instead of panic and guesswork, you get immediate visibility into what changed and can take targeted action.
+  <Accordion title="Costs spiked 300% overnight 📈">
+    **What happened:** Your AWS bill shows \$15K in LLM costs this month vs \$5K last month.
+
+    **How Helicone helps:**
+    - Instant breakdown by user, feature, or any custom dimension
+    - See exactly which user/feature caused the spike
+    - Take targeted action in minutes, not days
+
+    **Real example:** An enterprise customer had an API key leaked and racked up over \$1M in LLM spend. With Helicone's user tracking and custom properties, they identified the compromised key within minutes and prevented further damage.
   </Accordion>
-  
-  <Accordion title="User says AI gave wrong answer">
-    Session tracking captures the full conversation context so you can see exactly what led to the wrong answer. Find the user's complete interaction history, trace through multi-step workflows, and identify the exact prompt or step that failed. With prompt versioning, you can fix and deploy the correction instantly without touching code.
+
+  <Accordion title="User says AI gave wrong answer 🤔">
+    **What happened:** Customer support forwards a complaint that your AI chatbot gave incorrect information.
+
+    **How Helicone helps:**
+    - View the complete conversation history with session tracking
+    - Trace through multi-step workflows to find where it failed
+    - Identify the exact prompt that caused the issue
+    - Deploy the fix instantly with prompt versioning (no code deploy needed)
+
+    **Real impact:** Traced bad response to outdated prompt version. Fixed and deployed new version in 5 minutes without engineering.
   </Accordion>
-  
-  <Accordion title="OpenAI is down">
-    Automatic fallback chains keep your app running when providers fail. Configure GPT-4o on OpenAI → Vertex → Bedrock sequences that trigger instantly when requests fail or hit rate limits. Your users get the same model through a different provider, your app stays online, and you maintain full observability throughout the outage.
+
+  <Accordion title="OpenAI is down 🔴">
+    **What happened:** OpenAI API returns 503 errors. Your production app stops working.
+
+    **How Helicone helps:**
+    - Configure automatic fallback chains (e.g., GPT-4o: OpenAI → Vertex → Bedrock)
+    - Requests automatically route to backup providers when failures occur
+    - Users get responses from alternative providers seamlessly
+    - Full observability maintained throughout the outage
+
+    **Real impact:** App stayed online during 2-hour OpenAI outage. Users never noticed.
   </Accordion>
-  
-  <Accordion title="AI agent workflow is broken">
-    Session trees show you exactly how complex AI workflows unfold across multiple LLM calls. When multi-step agents fail, trace the entire sequence to pinpoint where it broke - whether it's hitting token limits, using wrong context, or failing prompt logic. See the full chain of reasoning that led to the failure and fix the root cause.
+
+  <Accordion title="AI agent workflow is broken 🤖">
+    **What happened:** Your multi-step AI agent isn't completing tasks. Users are frustrated.
+
+    **How Helicone helps:**
+    - Session trees visualize the entire workflow across multiple LLM calls
+    - Trace exactly where the sequence breaks down
+    - See if it's hitting token limits, using wrong context, or failing prompt logic
+    - Pinpoint the root cause in the chain of reasoning
+
+    **Real impact:** Discovered agent was hitting context limits on step 3. Adjusted prompt strategy and fixed cascading failures.
   </Accordion>
 </AccordionGroup>
 
@@ -98,11 +129,11 @@ When production breaks and everyone's panicking, we're rock solid. Built for whe
 </Card>
 
 <Card
-  title="Session Tracking" 
+  title="Agent Debugging"
   href="/features/sessions"
   icon="code-branch"
 >
-  Debug complex AI agents or AI workflows
+  Debug complex AI agents and multi-step workflows
 </Card>
 
 <Card
