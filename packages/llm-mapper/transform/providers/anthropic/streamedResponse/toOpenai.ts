@@ -91,8 +91,10 @@ export class AnthropicToOpenAIStreamConverter {
       case "content_block_start":
         if (event.content_block.type === "text") {
           // Check if this text block has citations
+          // Only process if citations is an array (web search results), not a config object (document)
           if (
             event.content_block.citations &&
+            Array.isArray(event.content_block.citations) &&
             event.content_block.citations.length > 0
           ) {
             // Calculate start position for this text block
