@@ -25,10 +25,10 @@ import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import PlaygroundVariablesPanel from "./components/PlaygroundVariablesPanel";
-import { playgroundModels } from "@helicone-package/cost/providers/mappings";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
+import { useModelRegistry } from "@/services/hooks/useModelRegistry";
 import {
   useCreatePrompt,
   usePushPromptVersion,
@@ -64,7 +64,7 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
       },
     ],
   },
-  model: "gpt-4.1-mini",
+  model: "gpt-4o-mini",
   raw: {
     request: {},
     response: {},
@@ -168,7 +168,7 @@ const convertOpenAIChatRequestToMappedLLMRequest = (
       response: "",
       concatenatedMessages: internalRequest.messages || [],
     },
-    model: openaiRequest.model || "gpt-4.1-mini",
+    model: openaiRequest.model || "gpt-4o-mini",
     raw: {
       request: openaiRequest,
       response: {},
@@ -253,7 +253,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   const [selectedModel, setSelectedModel] = useState<string>(
-    "openai/gpt-4.1-mini",
+    "gpt-4o-mini",
   );
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
@@ -351,19 +351,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       );
 
       const model = promptVersionData.promptBody.model;
-      if (model && playgroundModels.includes(model)) {
-        setSelectedModel(model);
-      } else if (model) {
-        const similarities = playgroundModels.map((m) => ({
-          target: m,
-          similarity: findBestMatch(model, m),
-        }));
-
-        const closestMatch = similarities.reduce((best, current) =>
-          current.similarity > best.similarity ? current : best,
-        );
-        setSelectedModel(closestMatch.target);
-      }
+      // Model will be set when registry loads
+      setSelectedModel(model || "");
 
       setMappedContent(convertedContent);
       setDefaultContent(convertedContent);
@@ -479,19 +468,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
     if (requestData?.data && !isRequestLoading && !requestPromptVersionId) {
       const model = requestData.data.model;
-      if (model && playgroundModels.includes(model)) {
-        setSelectedModel(model);
-      } else if (model) {
-        const similarities = playgroundModels.map((m) => ({
-          target: m,
-          similarity: findBestMatch(model, m),
-        }));
-
-        const closestMatch = similarities.reduce((best, current) =>
-          current.similarity > best.similarity ? current : best,
-        );
-        setSelectedModel(closestMatch.target);
-      }
+      // Model will be set when registry loads
+      setSelectedModel(model || "");
 
       const content = heliconeRequestToMappedContent(requestData.data);
       let contentWithIds = {
@@ -556,7 +534,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [error, setError] = useState<string | null>(null);
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsLoading] = useState<boolean>(false);
-  const [useAIGateway, setUseAIGateway] = useState<boolean>(false);
+  // Always use AI Gateway now that we've migrated from OpenRouter
+  const [useAIGateway, setUseAIGateway] = useState<boolean>(true);
 
   useEffect(() => {
     if (response) {

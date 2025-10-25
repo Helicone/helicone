@@ -303,8 +303,32 @@ export const providers: {
   },
 ];
 
-export const playgroundModels =
-  openRouterCosts.map((cost) => cost.model.value) ?? [];
+// Extract playground models from native providers
+const getPlaygroundModelsFromProvider = (
+  costs: ModelRow[] | undefined,
+  providerName: ProviderName
+): { model: string; provider: ProviderName }[] => {
+  if (!costs) return [];
+  return costs
+    .filter((cost) => cost.showInPlayground === true)
+    .map((cost) => ({
+      model: cost.model.value,
+      provider: providerName,
+    }));
+};
+
+// Native provider playground models
+export const playgroundModels = [
+  ...getPlaygroundModelsFromProvider(openAIProvider.costs, "OPENAI"),
+  ...getPlaygroundModelsFromProvider(anthropicProvider.costs, "ANTHROPIC"),
+  ...getPlaygroundModelsFromProvider(googleProvider.costs, "GOOGLE"),
+].sort((a, b) => {
+  // Sort by provider first, then by model name
+  if (a.provider !== b.provider) {
+    return a.provider.localeCompare(b.provider);
+  }
+  return a.model.localeCompare(b.model);
+});
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const defaultProvider = providers.find(

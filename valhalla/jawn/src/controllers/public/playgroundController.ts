@@ -53,7 +53,7 @@ export class PlaygroundController extends Controller {
       useAIGateway?: boolean;
       logRequest?: boolean;
     },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<
     Result<
       | OpenAI.Chat.Completions.ChatCompletion
@@ -62,34 +62,13 @@ export class PlaygroundController extends Controller {
     >
   > {
     try {
-      const { useAIGateway, ...params } = bodyParams;
+      const { useAIGateway = true, ...params } = bodyParams;
       const org = await dbExecute<{
         id: string;
         playground_helicone: boolean;
       }>(`SELECT id, playground_helicone FROM organization WHERE id = $1`, [
         request.authParams.organizationId,
       ]);
-
-      if (useAIGateway) {
-        const featureFlags = await dbExecute<{
-          id: string;
-        }>(
-          `SELECT id from feature_flags where org_id = $1 and feature = 'ai_gateway'`,
-          [request.authParams.organizationId]
-        );
-        if (featureFlags.error) {
-          return err(`Failed to get feature flags: ${featureFlags.error}`);
-        }
-        const hasAccessToAIGateway =
-          featureFlags.data && featureFlags.data.length > 0;
-
-        if (!hasAccessToAIGateway) {
-          this.setStatus(403);
-          return err(
-            "You do not have access to the AI Gateway. Please contact support to enable this feature."
-          );
-        }
-      }
 
       if (org.error) {
         return err(`Failed to get organization: ${org.error}`);
@@ -104,32 +83,8 @@ export class PlaygroundController extends Controller {
 
       if (tempKey.error || !tempKey.data) {
         throw new Error(
-          tempKey.error || "Failed to generate temporary API key"
+          tempKey.error || "Failed to generate temporary API key",
         );
-      }
-
-      const result = await dbExecute<{
-        id: string;
-        org_id: string;
-        decrypted_provider_key: string;
-        provider_key_name: string;
-        provider_name: string;
-      }>(
-        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
-         FROM decrypted_provider_keys_v2
-         WHERE org_id = $1
-         AND soft_delete = false
-         AND provider_name = 'openrouter'
-         LIMIT 1`,
-        [request.authParams.organizationId]
-      );
-
-      let openRouterKey = await GET_KEY("key:openrouter");
-      let selfKey = false;
-
-      if (result?.data?.[0]?.decrypted_provider_key) {
-        openRouterKey = result.data?.[0]?.decrypted_provider_key;
-        selfKey = true;
       }
 
       return tempKey.data.with<
@@ -139,17 +94,19 @@ export class PlaygroundController extends Controller {
           string
         >
       >(async (secretKey) => {
+        // Use Helicone AI Gateway with PTB (Pass-Through Billing)
+        // AI Gateway uses Helicone API key and Helicone provides the provider keys
+        const isLocalDev = process.env.VERCEL_ENV !== "production";
+        const aiGatewayBaseURL = isLocalDev
+          ? "http://localhost:8793/v1"
+          : "https://ai-gateway.helicone.ai/v1";
+
         const openai = new OpenAI({
-          baseURL: `https://openrouter.helicone.ai/api/v1/`,
-          apiKey: useAIGateway ? secretKey : openRouterKey,
+          baseURL: aiGatewayBaseURL,
+          apiKey: secretKey, // Helicone API key
           defaultHeaders: {
-            "Helicone-Auth": `Bearer ${secretKey}`,
             "Helicone-User-Id": "helicone_playground",
             "Helicone-Property-Org_Id": request.authParams.organizationId,
-            ...(!selfKey && {
-              // 30 per month
-              "Helicone-RateLimit-Policy": `30;w=${30 * 24 * 60 * 60};s=org_id`,
-            }),
           },
         });
         const abortController = new AbortController();
@@ -157,7 +114,7 @@ export class PlaygroundController extends Controller {
         try {
           const response = await openai.chat.completions.create(
             {
-              model: isOnPrem ? params.model?.split("/")[1] : params.model,
+              model: params.model, // Use model ID as-is (e.g., "gpt-4o-mini")
               messages: params.messages,
               temperature: params.temperature,
               max_tokens: params.max_tokens,
@@ -173,7 +130,7 @@ export class PlaygroundController extends Controller {
             } as any,
             {
               signal: abortController.signal,
-            }
+            },
           );
 
           if (params.stream) {
@@ -235,7 +192,7 @@ export class PlaygroundController extends Controller {
 
           if (!content && !calls) {
             console.warn(
-              "[API] LLM call resulted in empty content and no tool calls."
+              "[API] LLM call resulted in empty content and no tool calls.",
             );
           }
 
@@ -261,7 +218,7 @@ export class PlaygroundController extends Controller {
               ) {
                 this.setStatus(429);
                 return err(
-                  "You have reached your free playground limit. Please add your own OpenRouter key to continue using the Playground."
+                  "You have reached your free playground limit. Please upgrade your plan to continue using the Playground.",
                 );
               }
 
@@ -294,22 +251,22 @@ export class PlaygroundController extends Controller {
   @Post("/requests-through-helicone")
   public async requestsThroughHelicone(
     @Body() params: { requestsThroughHelicone: boolean },
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
     const playgroundManager = new PlaygroundManager(request.authParams);
     return playgroundManager.setPlaygroundRequestsThroughHelicone(
       request.authParams.organizationId,
-      params.requestsThroughHelicone
+      params.requestsThroughHelicone,
     );
   }
 
   @Get("/requests-through-helicone")
   public async getRequestsThroughHelicone(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<boolean, string>> {
     const playgroundManager = new PlaygroundManager(request.authParams);
     return playgroundManager.getRequestsThroughHelicone(
-      request.authParams.organizationId
+      request.authParams.organizationId,
     );
   }
 }
