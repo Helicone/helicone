@@ -114,4 +114,58 @@ describe("parseModelString", () => {
       expect(result.error).toContain("Invalid provider: invalid-provider");
     });
   });
+
+  describe("model name mappings for backward compatibility", () => {
+    it("should map gemini-1.5-flash to gemini-2.5-flash-lite", () => {
+      const result = parseModelString("gemini-1.5-flash");
+
+      expect(result.data?.modelName).toBe("gemini-2.5-flash-lite");
+      expect(result.error).toBeNull();
+    });
+
+    it("should map claude-3.5-sonnet to claude-3.5-sonnet-v2", () => {
+      const result = parseModelString("claude-3.5-sonnet");
+
+      expect(result.data?.modelName).toBe("claude-3.5-sonnet-v2");
+      expect(result.error).toBeNull();
+    });
+
+    it("should map claude-3.5-sonnet-20240620 to claude-3.5-sonnet-v2", () => {
+      const result = parseModelString("claude-3.5-sonnet-20240620");
+
+      expect(result.data?.modelName).toBe("claude-3.5-sonnet-v2");
+      expect(result.error).toBeNull();
+    });
+
+    it("should map deepseek-r1 to deepseek-reasoner", () => {
+      const result = parseModelString("deepseek-r1");
+
+      expect(result.data?.modelName).toBe("deepseek-reasoner");
+      expect(result.error).toBeNull();
+    });
+
+
+    it("should preserve model names that don't need mapping", () => {
+      const result = parseModelString("gpt-4o");
+
+      expect(result.data?.modelName).toBe("gpt-4o");
+      expect(result.error).toBeNull();
+    });
+
+    it("should apply mapping even with :online suffix", () => {
+      const result = parseModelString("claude-3.5-sonnet:online");
+
+      expect(result.data?.modelName).toBe("claude-3.5-sonnet-v2");
+      expect(result.data?.isOnline).toBe(true);
+      expect(result.error).toBeNull();
+    });
+
+    it("should apply mapping with provider specified", () => {
+      const result = parseModelString("claude-3.5-sonnet/anthropic");
+
+      expect(result.data?.modelName).toBe("claude-3.5-sonnet-v2");
+      expect(result.data?.provider).toBe("anthropic");
+      expect(result.error).toBeNull();
+    });
+  });
 });
