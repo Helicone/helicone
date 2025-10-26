@@ -88,18 +88,6 @@ export async function logAsync(
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: supabase,
       dbWrapper: new DBWrapper(env, auth),
-      queue: new RequestResponseStore(
-        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        new DBQueryTimer(ctx, {
-          enabled: (env.DATADOG_ENABLED ?? "false") === "true",
-          apiKey: env.DATADOG_API_KEY,
-          endpoint: env.DATADOG_ENDPOINT,
-        }),
-        new Valhalla(env.VALHALLA_URL, auth),
-        new ClickhouseClientWrapper(env),
-        env.FALLBACK_QUEUE,
-        env.REQUEST_AND_RESPONSE_QUEUE_KV
-      ),
       requestResponseManager: new RequestResponseManager(
         new S3Client(
           env.S3_ACCESS_KEY ?? "",

@@ -39,11 +39,54 @@ type S3Record = {
   assets: Map<string, string>;
 };
 
+// Legacy type definitions for deleted tables
+export interface ResponseInsert {
+  id: string;
+  request: string;
+  helicone_org_id: string | null;
+  status: number | null;
+  model: string | null | undefined;
+  completion_tokens: number | null | undefined;
+  prompt_tokens: number | null | undefined;
+  prompt_cache_write_tokens?: number | null | undefined;
+  prompt_cache_read_tokens?: number | null | undefined;
+  time_to_first_token: number | null | undefined;
+  delay_ms: number | null | undefined;
+  created_at: string;
+}
+
+export interface RequestInsert {
+  id: string;
+  path: string;
+  auth_hash: string;
+  user_id: string | null;
+  prompt_id: string | null;
+  properties: Record<string, string>;
+  helicone_user: string | null;
+  helicone_api_key_id: number | null;
+  helicone_org_id: string | null;
+  provider: string;
+  helicone_proxy_key_id: string | null;
+  model: string | null | undefined;
+  model_override: string | null;
+  threat: boolean | null;
+  target_url: string;
+  country_code: string | null;
+  created_at: string;
+}
+
+export interface AssetInsert {
+  id: string;
+  request_id: string;
+  organization_id: string;
+  created_at: string;
+}
+
 export type BatchPayload = {
-  responses: Database["public"]["Tables"]["response"]["Insert"][];
-  requests: Database["public"]["Tables"]["request"]["Insert"][];
+  responses: ResponseInsert[];
+  requests: RequestInsert[];
   prompts: PromptRecord[];
-  assets: Database["public"]["Tables"]["asset"]["Insert"][];
+  assets: AssetInsert[];
   s3Records: S3Record[];
   requestResponseVersionedCH: RequestResponseRMT[];
   cacheMetricCH: CacheMetricSMT[];
@@ -434,9 +477,7 @@ export class LoggingHandler extends AbstractLogHandler {
     return s3Record;
   }
 
-  mapAssets(
-    context: HandlerContext
-  ): Database["public"]["Tables"]["asset"]["Insert"][] {
+  mapAssets(context: HandlerContext): AssetInsert[] {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
     const assets = context.processedLog.assets;
@@ -445,13 +486,14 @@ export class LoggingHandler extends AbstractLogHandler {
       return [];
     }
 
-    const assetInserts: Database["public"]["Tables"]["asset"]["Insert"][] =
-      Array.from(assets.entries()).map(([assetId]) => ({
+    const assetInserts: AssetInsert[] = Array.from(assets.entries()).map(
+      ([assetId]) => ({
         id: assetId,
         request_id: request.id,
         organization_id: orgParams.id,
         created_at: request.requestCreatedAt.toISOString(),
-      }));
+      })
+    );
 
     return assetInserts;
   }
@@ -773,9 +815,7 @@ export class LoggingHandler extends AbstractLogHandler {
     }
   }
 
-  mapResponse(
-    context: HandlerContext
-  ): Database["public"]["Tables"]["response"]["Insert"] {
+  mapResponse(context: HandlerContext): ResponseInsert {
     const response = context.message.log.response;
     const processedResponse = context.processedLog.response;
     const orgParams = context.orgParams;
@@ -791,7 +831,7 @@ export class LoggingHandler extends AbstractLogHandler {
       context.usage,
       context.legacyUsage
     );
-    const responseInsert: Database["public"]["Tables"]["response"]["Insert"] = {
+    const responseInsert: ResponseInsert = {
       id: response.id,
       request: context.message.log.request.id,
       helicone_org_id: orgParams?.id ?? null,
@@ -810,16 +850,14 @@ export class LoggingHandler extends AbstractLogHandler {
     return responseInsert;
   }
 
-  mapRequest(
-    context: HandlerContext
-  ): Database["public"]["Tables"]["request"]["Insert"] {
+  mapRequest(context: HandlerContext): RequestInsert {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
     const authParams = context.authParams;
     const heliconeMeta = context.message.heliconeMeta;
     const processedRequest = context.processedLog.request;
 
-    const requestInsert: Database["public"]["Tables"]["request"]["Insert"] = {
+    const requestInsert: RequestInsert = {
       id: request.id,
       path: request.path,
       auth_hash: "",
