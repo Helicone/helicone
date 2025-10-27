@@ -143,7 +143,7 @@ export const endpoints = {
       "presence_penalty",
       "verbosity",
     ],
-    unsupportedParameters: ["temperature"],
+    unsupportedParameters: ["temperature", "top_p", "frequency_penalty", "presence_penalty"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -272,7 +272,7 @@ export const endpoints = {
       "frequency_penalty",
       "presence_penalty",
     ],
-    unsupportedParameters: ["temperature"],
+    unsupportedParameters: ["temperature", "top_p", "frequency_penalty", "presence_penalty"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -415,6 +415,7 @@ export const endpoints = {
     contextLength: 128000,
     maxCompletionTokens: 8192,
     supportedParameters: ["max_tokens", "temperature", "top_p", "stop"],
+    unsupportedParameters: ["temperature", "top_p", "frequency_penalty", "presence_penalty"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
