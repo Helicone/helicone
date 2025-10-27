@@ -76,10 +76,14 @@ export class PlaygroundController extends Controller {
 
       const shouldGenerateTempKey =
         org.data?.[0]?.playground_helicone || bodyParams.logRequest;
-      const tempKey =
-        !useAIGateway && shouldGenerateTempKey
-          ? await generateTempHeliconeAPIKey(request.authParams.organizationId)
-          : await getHeliconeDefaultTempKey(request.authParams.organizationId);
+
+      // When using AI Gateway (PTB), we need an API key that belongs to the user's organization
+      // When not using AI Gateway, use the global HELICONE_ON_HELICONE key for OpenRouter direct calls
+      const tempKey = useAIGateway
+        ? await generateTempHeliconeAPIKey(request.authParams.organizationId)
+        : (shouldGenerateTempKey
+            ? await generateTempHeliconeAPIKey(request.authParams.organizationId)
+            : await getHeliconeDefaultTempKey(request.authParams.organizationId));
 
       if (tempKey.error || !tempKey.data) {
         throw new Error(
