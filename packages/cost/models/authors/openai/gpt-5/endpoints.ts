@@ -214,7 +214,6 @@ export const endpoints = {
     ],
     unsupportedParameters: ["temperature"],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -245,7 +244,6 @@ export const endpoints = {
     ],
     unsupportedParameters: ["temperature"],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -276,7 +274,6 @@ export const endpoints = {
     ],
     unsupportedParameters: ["temperature"],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -307,7 +304,6 @@ export const endpoints = {
     ],
     unsupportedParameters: ["temperature"],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -337,7 +333,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -399,7 +394,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -422,7 +416,6 @@ export const endpoints = {
     maxCompletionTokens: 8192,
     supportedParameters: ["max_tokens", "temperature", "top_p", "stop"],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -452,7 +445,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -479,7 +471,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -502,7 +493,6 @@ export const endpoints = {
     maxCompletionTokens: 32768,
     supportedParameters: ["max_tokens", "temperature", "top_p", "stop"],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
