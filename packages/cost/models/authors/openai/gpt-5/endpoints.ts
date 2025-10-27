@@ -105,6 +105,7 @@ export const endpoints = {
       "response_format",
       "structured_outputs",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -326,12 +327,12 @@ export const endpoints = {
     maxCompletionTokens: 32768,
     supportedParameters: [
       "max_tokens",
-      "temperature",
       "top_p",
       "stop",
       "frequency_penalty",
       "presence_penalty",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -364,6 +365,7 @@ export const endpoints = {
       "max_completion_tokens",
       "response_format",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -387,12 +389,12 @@ export const endpoints = {
     maxCompletionTokens: 16384,
     supportedParameters: [
       "max_tokens",
-      "temperature",
       "top_p",
       "stop",
       "frequency_penalty",
       "presence_penalty",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -414,7 +416,7 @@ export const endpoints = {
     ],
     contextLength: 128000,
     maxCompletionTokens: 8192,
-    supportedParameters: ["max_tokens", "temperature", "top_p", "stop"],
+    supportedParameters: ["max_tokens", "top_p", "stop"],
     unsupportedParameters: ["temperature", "top_p", "frequency_penalty", "presence_penalty"],
     ptbEnabled: true,
     endpointConfigs: {
@@ -439,12 +441,12 @@ export const endpoints = {
     maxCompletionTokens: 32768,
     supportedParameters: [
       "max_tokens",
-      "temperature",
       "top_p",
       "stop",
       "frequency_penalty",
       "presence_penalty",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -465,12 +467,12 @@ export const endpoints = {
     maxCompletionTokens: 32768,
     supportedParameters: [
       "max_tokens",
-      "temperature",
       "top_p",
       "stop",
       "frequency_penalty",
       "presence_penalty",
     ],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -492,7 +494,8 @@ export const endpoints = {
     ],
     contextLength: 128000,
     maxCompletionTokens: 32768,
-    supportedParameters: ["max_tokens", "temperature", "top_p", "stop"],
+    supportedParameters: ["max_tokens", "top_p", "stop"],
+    unsupportedParameters: ["temperature"],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
