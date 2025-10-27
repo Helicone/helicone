@@ -199,44 +199,8 @@ export class ChatToResponsesStreamConverter {
           } as any);
         });
 
-        // Emit completed now if usage not provided
-        const usage = this.finalUsage || undefined;
-        const completed: ResponseCompletedEvent = {
-          type: "response.completed",
-          response: {
-            id: this.responseId,
-            object: "response",
-            created: this.created,
-            created_at: this.created as any,
-            status: "completed" as any,
-            model: this.model,
-            output: [
-              ...(this.itemAdded
-                ? ([
-                    {
-                      type: "message" as const,
-                      role: "assistant" as const,
-                      content: [
-                        { type: "output_text" as const, text: this.textBuffer },
-                      ],
-                    },
-                  ] as any)
-                : []),
-              ...Array.from(this.toolCalls.values()).map((tc) => ({
-                id: `fc_${tc.id}`,
-                type: "function_call" as const,
-                status: "completed" as const,
-                name: tc.name || "",
-                call_id: tc.id,
-                arguments: tc.arguments || "{}",
-                parsed_arguments: null,
-              })),
-            ],
-            ...(usage ? { usage } : {}),
-          },
-        };
-        events.push(completed);
-        this.completedEmitted = true;
+        // Don't emit completed here - wait for usage chunk to arrive
+        // The completed event will be emitted when usage arrives (line 244-293)
       }
     }
 

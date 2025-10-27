@@ -173,6 +173,7 @@ describe("OpenAI Chat -> Responses converters", () => {
         type: "output_text",
         text: "Hello world",
       });
+      expect(completed.response.usage).toBeDefined();
       expect(completed.response.usage?.input_tokens).toBe(10);
       expect(completed.response.usage?.output_tokens).toBe(2);
     });
