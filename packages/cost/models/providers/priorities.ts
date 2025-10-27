@@ -51,3 +51,18 @@ export const DEFAULT_PROVIDER_PRIORITY = 4;
 export function getProviderPriority(provider: ModelProviderName): number {
   return PROVIDER_PRIORITIES[provider] ?? DEFAULT_PROVIDER_PRIORITY;
 }
+
+/**
+ * Sort attempts by auth type (BYOK first) and provider priority
+ */
+export function sortAttemptsByPriority<
+  T extends { authType: "byok" | "ptb"; priority: number }
+>(attempts: T[]): T[] {
+  return attempts.sort((a, b) => {
+    // BYOK always comes before PTB
+    if (a.authType === "byok" && b.authType !== "byok") return -1;
+    if (a.authType !== "byok" && b.authType === "byok") return 1;
+    // Within same auth type, sort by provider priority
+    return a.priority - b.priority;
+  });
+}
