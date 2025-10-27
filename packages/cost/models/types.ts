@@ -85,7 +85,8 @@ export type StandardParameter =
   | "logprobs"
   | "top_logprobs"
   | "structured_outputs"
-  | "verbosity";
+  | "verbosity"
+  | "n";
 
 export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   max_tokens: "Max Tokens",
@@ -115,6 +116,7 @@ export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   top_logprobs: "Top Log Probs",
   structured_outputs: "Structured Outputs",
   verbosity: "Verbosity",
+  n: "Number of Completions",
 };
 
 export interface ModelPricing {
