@@ -19,6 +19,14 @@ const deepinfraAuthExpectations = {
   },
 };
 
+// Define auth expectations for Chutes
+const chutesAuthExpectations = {
+  headers: {
+    // Chutes uses Authorization header with Bearer token
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Google Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -250,6 +258,143 @@ describe("Google Registry Tests", () => {
         }));
     });
 
+    describe("gemma2-9b-it", () => {
+      it("should handle chutes provider", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: chutesAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select chutes provider when none specified", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: chutesAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle streaming requests", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          request: {
+            stream: true,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: {
+                  ...chutesAuthExpectations,
+                  bodyContains: ['"stream":true'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle supported parameters", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          request: {
+            maxTokens: 1000,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: {
+                  ...chutesAuthExpectations,
+                  bodyContains: ['"max_tokens":1000'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle temperature and top_p parameters", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Hello" }],
+              temperature: 0.7,
+              top_p: 0.9,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: {
+                  ...chutesAuthExpectations,
+                  bodyContains: ['"temperature":0.7', '"top_p":0.9'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle stop sequences and penalties", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Hello" }],
+              stop: ["END", "STOP"],
+              frequency_penalty: 0.5,
+              presence_penalty: 0.3,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: {
+                  ...chutesAuthExpectations,
+                  bodyContains: ['"stop":["END","STOP"]'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
     // Note: Since Google models only have one provider, fallback tests aren't needed
     // as there's nothing to fallback to
 
@@ -375,6 +520,88 @@ describe("Google Registry Tests", () => {
             providers: [
               {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 402,
+                errorMessage: "Quota exceeded",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("Chutes Error scenarios", () => {
+      it("should handle Chutes provider failure", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "Chutes service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from Chutes", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle Chutes authentication failure", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+
+      it("should handle model not found error on Chutes", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle quota exceeded error on Chutes", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
                 response: "failure",
                 statusCode: 402,
                 errorMessage: "Quota exceeded",

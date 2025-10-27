@@ -2055,27 +2055,23 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "google/gemma": {
-    "gemma2-9b-it:groq": {
+    "gemma2-9b-it:chutes": {
       "context": 8192,
       "crossRegion": false,
       "maxTokens": 8192,
-      "modelId": "gemma2-9b-it",
+      "modelId": "unsloth/gemma-2-9b-it",
       "parameters": [
         "frequency_penalty",
-        "logit_bias",
-        "logprobs",
         "max_tokens",
-        "min_p",
         "presence_penalty",
         "repetition_penalty",
         "seed",
         "stop",
         "temperature",
         "top_k",
-        "top_logprobs",
         "top_p",
       ],
-      "provider": "groq",
+      "provider": "chutes",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -4603,7 +4599,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "vertex",
   ],
   "google/gemma": [
-    "groq",
+    "chutes",
     "openrouter",
   ],
   "google/gemma-3": [
@@ -5757,11 +5753,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "google/gemma": {
-    "groq": [
+    "chutes": [
       {
-        "image": 0,
-        "input": 2e-7,
-        "output": 2e-7,
+        "input": 1e-8,
+        "output": 3e-8,
         "threshold": 0,
       },
     ],
@@ -6377,7 +6372,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gemma2-9b-it",
       "providers": [
-        "groq",
+        "chutes",
         "openrouter",
       ],
     },
@@ -6756,7 +6751,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "chutes",
     },
     {
@@ -6772,7 +6767,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "google-ai-studio",
     },
     {
-      "modelCount": 14,
+      "modelCount": 13,
       "provider": "groq",
     },
     {

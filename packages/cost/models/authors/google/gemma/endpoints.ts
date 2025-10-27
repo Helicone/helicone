@@ -3,34 +3,29 @@ import type { ModelProviderConfig } from "../../../types";
 import { GemmaModelName } from "./model";
 
 export const endpoints = {
-  "gemma2-9b-it:groq": {
-    providerModelId: "gemma2-9b-it",
-    provider: "groq",
+  "gemma2-9b-it:chutes": {
+    providerModelId: "unsloth/gemma-2-9b-it",
+    provider: "chutes",
     author: "google",
     pricing: [
       {
         threshold: 0,
-        input: 0.0000002,
-        output: 0.0000002,
-        image: 0.0,
+        input: 0.00000001,
+        output: 0.00000003,
       },
     ],
     contextLength: 8192,
     maxCompletionTokens: 8192,
     supportedParameters: [
-      "frequency_penalty",
-      "logit_bias",
-      "logprobs",
       "max_tokens",
-      "min_p",
-      "presence_penalty",
-      "repetition_penalty",
-      "seed",
-      "stop",
       "temperature",
-      "top_k",
-      "top_logprobs",
       "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "repetition_penalty",
     ],
     ptbEnabled: true,
     endpointConfigs: {
