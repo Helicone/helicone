@@ -72,5 +72,4 @@ export abstract class BaseProvider {
       return `Request failed with status ${response.status}`;
     }
   }
-
 }

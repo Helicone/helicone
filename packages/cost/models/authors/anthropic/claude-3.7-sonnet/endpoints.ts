@@ -8,7 +8,6 @@ export const endpoints = {
     author: "anthropic",
     providerModelId: "claude-3-7-sonnet-20250219",
     version: "20250219",
-    priority: 3,
     pricing: [
       {
         threshold: 0,
@@ -47,7 +46,6 @@ export const endpoints = {
     providerModelId: "claude-3-7-sonnet@20250219",
     version: "vertex-2023-10-16",
     crossRegion: true,
-    priority: 4,
     pricing: [
       {
         threshold: 0,
@@ -83,7 +81,6 @@ export const endpoints = {
     providerModelId: "anthropic.claude-3-7-sonnet-20250219-v1:0",
     version: "20250219",
     crossRegion: true,
-    priority: 4,
     pricing: [
       {
         threshold: 0,
@@ -136,7 +133,6 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
-    priority: 100,
     endpointConfigs: {
       "*": {},
     },
@@ -167,7 +163,6 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
-    priority: 4,
     endpointConfigs: {
       "*": {},
     },
@@ -201,7 +196,6 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    priority: 2,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},

@@ -253,7 +253,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -284,7 +283,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -315,7 +313,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -345,7 +342,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -373,7 +369,6 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -403,7 +398,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
