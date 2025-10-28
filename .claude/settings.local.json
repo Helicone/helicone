@@ -60,7 +60,18 @@
       "mcp__playwright__browser_close",
       "Bash(psql:*)",
       "Bash(jq:*)",
-      "Bash(npx wrangler types:*)"
+      "Bash(npx wrangler types:*)",
+      "WebFetch(domain:docs.datadoghq.com)",
+      "WebFetch(domain:stackoverflow.com)",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__take_screenshot",
+      "Read(//var/folders/zc/g8ym72nn3tl70yg68f5khk040000gn/T/chrome-devtools-mcp-1IFeOS/**)",
+      "mcp__chrome-devtools__fill",
+      "mcp__chrome-devtools__evaluate_script",
+      "mcp__chrome-devtools__wait_for"
     ],
     "deny": []
   },

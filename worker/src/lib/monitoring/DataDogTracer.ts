@@ -1,20 +1,21 @@
 /**
  * Lightweight DataDog APM Tracer
  *
- * Sends distributed traces to DataDog APM without heavy SDK dependencies.
- * Uses Datadog Trace API v0.5 format.
+ * Sends distributed traces to DataDog as structured logs for correlation.
+ * Uses Datadog Logs API v2 format (since APM direct intake requires an agent).
  *
  * Features:
  * - Minimal bundle size (~200 lines, no external deps)
  * - Async send via ctx.waitUntil (zero impact on response latency)
  * - Tag support for filtering (org_id, provider, model, etc.)
  * - Parent-child span relationships
+ * - Trace correlation in Datadog via trace_id/span_id fields
  */
 
 export interface DataDogTracerConfig {
   enabled: boolean;
   apiKey: string;
-  endpoint: string; // e.g., "https://trace.agent.datadoghq.com"
+  endpoint: string; // e.g., "https://http-intake.logs.datadoghq.com"
   sampleRate?: number; // 0-1, defaults to 0.01 (1%)
   service?: string; // Default service name
   env?: string; // Environment (production, development, etc.)
@@ -208,7 +209,7 @@ export class DataDogTracer {
   }
 
   /**
-   * Send the complete trace to DataDog APM
+   * Send the complete trace to DataDog Logs API
    * Should be called within ctx.waitUntil() to avoid blocking response
    */
   async sendTrace(): Promise<void> {
@@ -217,27 +218,51 @@ export class DataDogTracer {
         return;
       }
 
-      // Convert Map to array for serialization
-      const spansArray = Array.from(this.spans.values()).map((span) => ({
-        ...span,
-        // Convert nanoseconds to proper format
-        start: span.start,
-        duration: span.duration || 0,
-      }));
+      // Convert spans to structured log entries
+      const logEntries = Array.from(this.spans.values()).map((span) => {
+        // Build ddtags from span metadata
+        const tags = [
+          `service:${span.service}`,
+          `env:${this.config.env}`,
+          `operation:${span.name}`,
+          `resource:${span.resource}`,
+          ...Object.entries(span.meta).map(([k, v]) => `${k}:${v}`),
+        ];
 
-      // Datadog expects an array of traces (each trace is an array of spans)
-      const payload = [spansArray];
+        return {
+          ddsource: "apm.trace",
+          ddtags: tags.join(","),
+          hostname: "cloudflare-worker",
+          service: span.service,
+          message: `[${span.name}] ${span.resource}`,
+          timestamp: new Date(span.start / 1_000_000).toISOString(),
+          // Trace correlation fields
+          trace_id: span.trace_id,
+          span_id: span.span_id,
+          parent_id: span.parent_id,
+          // Span details
+          operation: span.name,
+          operation_name: span.name, // Facet-friendly field for grouping in Datadog UI
+          resource: span.resource,
+          duration_ms: span.duration ? span.duration / 1_000_000 : 0,
+          error: span.error === 1,
+          // Include all meta tags as top-level fields for easier querying
+          ...span.meta,
+          // Include all numeric metrics
+          ...Object.fromEntries(
+            Object.entries(span.metrics).map(([k, v]) => [`metric.${k}`, v])
+          ),
+        };
+      });
 
-      // Send to Datadog APM Trace API
-      await fetch(`${this.config.endpoint}/v0.5/traces`, {
+      // Send to Datadog Logs API (accepts array of log entries)
+      await fetch(`${this.config.endpoint}/api/v2/logs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Datadog-Meta-Tracer-Version": "1.0.0",
-          "X-Datadog-Trace-Count": "1",
           "DD-API-KEY": this.config.apiKey,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(logEntries),
       });
 
       // Clear spans after sending
@@ -324,7 +349,8 @@ export function createDataDogTracer(env: {
   return new DataDogTracer({
     enabled: (env.DATADOG_APM_ENABLED ?? "false") === "true",
     apiKey: env.DATADOG_API_KEY || "",
-    endpoint: env.DATADOG_APM_ENDPOINT || "https://trace.agent.datadoghq.com",
+    endpoint:
+      env.DATADOG_APM_ENDPOINT || "https://http-intake.logs.us5.datadoghq.com",
     sampleRate: parseFloat(env.DATADOG_APM_SAMPLING_RATE || "0.01"),
     env: env.ENVIRONMENT || "production",
   });

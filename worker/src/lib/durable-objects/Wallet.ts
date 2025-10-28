@@ -818,7 +818,7 @@ export class Wallet extends DurableObject<Env> {
   }
 
   /**
-   * Send a wallet span directly to Datadog APM
+   * Send a wallet span directly to Datadog Logs API as structured log
    * Fire-and-forget to avoid blocking
    */
   private sendWalletSpan(
@@ -830,41 +830,55 @@ export class Wallet extends DurableObject<Env> {
     errorTags: Record<string, string> = {}
   ): void {
     try {
-      const span = {
+      const allTags = { ...tags, ...errorTags };
+      const env = this.env.ENVIRONMENT || "production";
+
+      // Build ddtags from span metadata
+      const ddtagsArray = [
+        `service:wallet-do`,
+        `env:${env}`,
+        `operation:wallet.reserve_escrow`,
+        `resource:sqlite_transaction`,
+        ...Object.entries(allTags).map(([k, v]) => `${k}:${v}`),
+      ];
+
+      const logEntry = {
+        ddsource: "apm.trace",
+        ddtags: ddtagsArray.join(","),
+        hostname: "cloudflare-worker",
+        service: "wallet-do",
+        message: `[wallet.reserve_escrow] sqlite_transaction`,
+        timestamp: new Date(start / 1_000_000).toISOString(),
+        // Trace correlation fields
         trace_id: traceContext.trace_id,
         span_id: spanId,
         parent_id: traceContext.parent_span_id,
-        name: "wallet.reserve_escrow",
+        // Span details
+        operation: "wallet.reserve_escrow",
+        operation_name: "wallet.reserve_escrow", // Facet-friendly field for grouping in Datadog UI
         resource: "sqlite_transaction",
-        service: "wallet-do",
-        start,
-        duration,
-        meta: {
-          ...tags,
-          ...errorTags,
-        },
-        metrics: {},
-        error: errorTags.error === "true" ? 1 : 0,
+        duration_ms: duration / 1_000_000,
+        error: errorTags.error === "true",
+        // Include all tags as top-level fields
+        ...allTags,
       };
 
-      // Send to Datadog APM (fire and forget)
+      // Send to Datadog Logs API (fire and forget)
       const apiKey = this.env.DATADOG_API_KEY || "";
       const endpoint =
-        this.env.DATADOG_APM_ENDPOINT || "https://trace.agent.datadoghq.com";
+        this.env.DATADOG_APM_ENDPOINT || "https://http-intake.logs.us5.datadoghq.com";
 
       if (!apiKey || !endpoint) {
         return; // Skip if not configured
       }
 
-      fetch(`${endpoint}/v0.5/traces`, {
+      fetch(`${endpoint}/api/v2/logs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Datadog-Meta-Tracer-Version": "1.0.0",
-          "X-Datadog-Trace-Count": "1",
           "DD-API-KEY": apiKey,
         },
-        body: JSON.stringify([[span]]),
+        body: JSON.stringify([logEntry]),
       }).catch(() => {
         // Silently ignore errors
       });
