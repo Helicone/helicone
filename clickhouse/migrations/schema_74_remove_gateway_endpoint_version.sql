@@ -1,2 +1,0 @@
-ALTER TABLE request_response_rmt
-DROP COLUMN gateway_endpoint_version;
