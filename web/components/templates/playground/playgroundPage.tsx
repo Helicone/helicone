@@ -251,9 +251,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     requestId || "",
   );
 
-  const [selectedModel, setSelectedModel] = useState<string>(
-    "gpt-4o-mini",
-  );
+  const [selectedModel, setSelectedModel] = useState<string>("gpt-4o-mini");
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
     null,
@@ -857,8 +855,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               setError(result.error.message);
             }
           }
-          // setError(result.error.message || result.error?.error?.message);
-          console.error("error", result.error);
+          const error = result.error.message || result.error?.error?.message;
+          if (error.includes("Insufficient credits")) {
+            setError("You are out of free messages for this month. Please add credits to continue using the playground.");
+          }
         }
       } catch (error) {
         if (error instanceof Error) {

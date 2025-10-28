@@ -89,14 +89,23 @@ export class PlaygroundController extends Controller {
             "Helicone-User-Id": "helicone_playground",
             "Helicone-Property-Playground_Org_ID": orgIdForRateLimit,
             ...(withRateLimit && {
-              "Helicone-RateLimit-Policy": `30;w=${30 * 24 * 60 * 60};s=user`, // 30 free messages per month, per org
+              "Helicone-RateLimit-Policy": `30;w=${30 * 24 * 60 * 60};s=playground_org_id`, // 30 free messages per month, per org
             }),
           },
         });
 
       const abortController = new AbortController();
 
-      const send = async (client: OpenAI, isStreaming: boolean) => {
+      const send = async (
+        client: OpenAI,
+        isStreaming: boolean,
+      ): Promise<
+        Result<
+          | OpenAI.Chat.Completions.ChatCompletion
+          | { content: string; reasoning: string; calls: any },
+          string
+        >
+      > => {
         // Use Helicone AI Gateway with PTB (Pass-Through Billing)
         // AI Gateway uses Helicone API key and Helicone provides the provider keys
         try {
@@ -187,29 +196,48 @@ export class PlaygroundController extends Controller {
           return ok({ content, reasoning, calls });
         } catch (error) {
           console.error("[API] Inner try-catch error:", error);
-          throw error;
+          // Return error instead of throwing to maintain proper type inference
+          // Include status code in error message for rate limit detection
+          if (error instanceof OpenAI.APIError) {
+            const statusCode = error.status || 0;
+            return err(
+              `[${statusCode}] ${error.message || "API Error occurred"}`,
+            );
+          }
+          if (error instanceof Error) {
+            return err(error.message);
+          }
+          return err("Unknown error occurred");
         }
       };
 
       // 1) Try with Admin Helicone key (rate limited)
-      try {
-        const adminClient = buildClient(adminHeliconeKey, true);
-        const isStreaming = Boolean(params.stream);
-        return await send(adminClient, isStreaming);
-      } catch (error) {
+      const adminClient = buildClient(adminHeliconeKey, true);
+      const isStreaming = Boolean(params.stream);
+      const adminResult = await send(adminClient, isStreaming);
+
+      // Check if admin client request failed
+      if (adminResult.error) {
         // 2) If rate limited (429), fallback to a temp user Helicone key
-        if (error instanceof OpenAI.APIError && error.status === 429) {
+        const isRateLimited = adminResult.error.startsWith("[429]");
+
+        if (isRateLimited) {
           try {
             const tempKey = await generateTempHeliconeAPIKey(
               request.authParams.organizationId,
             );
             if (tempKey.error || !tempKey.data) {
-              throw new Error(
-                tempKey.error || "Failed to generate temporary API key",
+              console.error(
+                "[API] Failed to generate temp key:",
+                tempKey.error,
+              );
+              this.setStatus(429);
+              return err(
+                "You have reached your free playground limit. To continue using the playground, add credits to your account.",
               );
             }
 
-            return tempKey.data.with<
+            const fallbackResult = await tempKey.data.with<
               Result<
                 | OpenAI.Chat.Completions.ChatCompletion
                 | { content: string; reasoning: string; calls: any },
@@ -217,11 +245,24 @@ export class PlaygroundController extends Controller {
               >
             >(async (secretKey) => {
               const userClient = buildClient(secretKey, false);
-              const isStreaming = Boolean(params.stream);
               return await send(userClient, isStreaming);
             });
+
+            // If fallback also failed, return rate limit message
+            if (fallbackResult.error) {
+              console.error(
+                "[API] Fallback after 429 failed:",
+                fallbackResult.error,
+              );
+              this.setStatus(429);
+              return err(
+                "You have reached your free playground limit. To continue using the playground, add credits to your account.",
+              );
+            }
+
+            return fallbackResult;
           } catch (fallbackErr) {
-            console.error("[API] Fallback after 429 failed:", fallbackErr);
+            console.error("[API] Fallback exception:", fallbackErr);
             this.setStatus(429);
             return err(
               "You have reached your free playground limit. To continue using the playground, add credits to your account.",
@@ -229,32 +270,19 @@ export class PlaygroundController extends Controller {
           }
         }
 
-        // Other errors
-        this.setStatus(500);
-        if (error instanceof Error) {
-          if (error.name === "ResponseAborted" || error.name === "AbortError") {
-            this.setStatus(400);
-            return err("Request cancelled");
-          }
-
-          if (error instanceof OpenAI.APIError) {
-            this.setStatus(400);
-            if ((error as any).error?.metadata?.raw) {
-              try {
-                const raw = JSON.parse(
-                  (error as any).error.metadata?.raw || "{}",
-                );
-                if (raw.error?.message) {
-                  return err(raw.error?.message);
-                }
-              } catch {}
-            }
-            return err((error as any)?.error?.message ?? JSON.stringify(error));
-          }
-          return err(error?.message ?? JSON.stringify(error));
+        // Other errors - extract status code if present
+        const statusMatch = adminResult.error.match(/^\[(\d+)\]/);
+        if (statusMatch) {
+          const status = parseInt(statusMatch[1], 10);
+          this.setStatus(status >= 400 && status < 500 ? 400 : 500);
+        } else {
+          this.setStatus(500);
         }
-        return err("Failed to generate response: " + JSON.stringify(error));
+
+        return adminResult;
       }
+
+      return adminResult;
     } catch (error) {
       this.setStatus(500);
       return err("Failed to generate response: " + JSON.stringify(error));

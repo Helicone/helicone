@@ -146,7 +146,8 @@ export default function ModelParametersForm({
     if (
       error &&
       (error.includes("You have reached your free playground limit") ||
-        error.includes("No") && error.includes("API key found"))
+        error.includes("Insufficient credits") ||
+        (error.includes("No") && error.includes("API key found")))
     ) {
       setIsProviderKeyDialogOpen(true);
     }
