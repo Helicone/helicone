@@ -787,6 +787,34 @@ const convertResponse = (responseBody: any): Message[] => {
         });
       }
 
+      // Handle standalone reasoning items (e.g., from reasoning models like o1, o3)
+      if (outputItem.type === "reasoning") {
+        let reasoningContent = "";
+
+        if (Array.isArray(outputItem.summary)) {
+          reasoningContent = outputItem.summary
+            .map((s: any) => {
+              if (s.type === "summary_text" && s.text) {
+                return s.text;
+              }
+              return typeof s === "string" ? s : JSON.stringify(s);
+            })
+            .join(" ");
+        } else if (typeof outputItem.summary === "string") {
+          reasoningContent = outputItem.summary;
+        } else if (outputItem.summary) {
+          reasoningContent = JSON.stringify(outputItem.summary);
+        }
+
+        messages.push({
+          _type: "message",
+          role: "assistant",
+          reasoning: reasoningContent,
+          content: "",
+          id: outputItem.id || `resp-msg-reasoning-${index}`,
+        });
+      }
+
       // Handle function_call items (assistant tool calls in responses)
       if (outputItem.type === "function_call") {
         const toolCall = {

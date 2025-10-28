@@ -188,7 +188,8 @@ export default function RequestDrawer(props: RequestDivProps) {
   /* -------------------------------------------------------------------------- */
   const isChatRequest = useMemo(
     () =>
-      request?._type === "ai-gateway" ||
+      request?._type === "ai-gateway-chat" ||
+      request?._type === "ai-gateway-responses" ||
       request?._type === "openai-chat" ||
       request?._type === "anthropic-chat" ||
       request?._type === "gemini-chat",
