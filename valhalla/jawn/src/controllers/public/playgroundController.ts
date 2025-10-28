@@ -64,10 +64,17 @@ export class PlaygroundController extends Controller {
       const providerSecrets = await settingsManager.getSetting(
         "secrets:provider-keys",
       );
+      if (!providerSecrets || typeof providerSecrets !== "object") {
+        console.error("Invalid provider secrets configuration");
+        this.setStatus(503);
+        return err("Service temporarily unavailable");
+      }
 
       const adminHeliconeKey = providerSecrets?.["helicone"];
       if (!adminHeliconeKey) {
-        throw new Error("Admin Helicone API key not configured");
+        console.error("Admin Helicone API key not configured");
+        this.setStatus(503);
+        return err("Service temporarily unavailable");
       }
 
       const isLocalDev = process.env.VERCEL_ENV !== "production";
