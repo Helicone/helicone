@@ -1842,7 +1842,6 @@ export interface components {
       updated_at?: string;
       request_referrer?: string | null;
       ai_gateway_body_mapping: string | null;
-      gateway_endpoint_version: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];

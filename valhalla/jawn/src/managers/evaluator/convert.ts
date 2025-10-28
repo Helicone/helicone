@@ -43,7 +43,6 @@ export const convertTestInputToHeliconeRequest = (
     completion_audio_tokens: null,
     cost: null,
     prompt_version: null,
-    gateway_endpoint_version: null,
     ai_gateway_body_mapping: null,
   };
 };
