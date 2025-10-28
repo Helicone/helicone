@@ -256,7 +256,7 @@ export class DataDogTracer {
       });
 
       // Send to Datadog Logs API (accepts array of log entries)
-      await fetch(`${this.config.endpoint}/api/v2/logs`, {
+      const response = await fetch(`${this.config.endpoint}/api/v2/logs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -324,16 +324,6 @@ export class DataDogTracer {
     // Convert to nanoseconds (multiply by 1,000,000)
     return Date.now() * 1_000_000;
   }
-}
-
-/**
- * Helper function to safely extract org_id from various sources
- */
-export function extractOrgId(
-  endpoint?: { organization_id?: string },
-  headers?: { organizationId?: string }
-): string {
-  return endpoint?.organization_id || headers?.organizationId || "unknown";
 }
 
 /**

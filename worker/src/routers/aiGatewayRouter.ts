@@ -7,6 +7,7 @@ import { GatewayMetrics } from "../lib/ai-gateway/GatewayMetrics";
 import { getDataDogClient } from "../lib/monitoring/DataDogClient";
 import { DBWrapper } from "../lib/db/DBWrapper";
 import { HeliconeHeaders } from "../lib/models/HeliconeHeaders";
+import { createDataDogTracer } from "../lib/monitoring/DataDogTracer";
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
   router.post(
@@ -46,24 +47,68 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
             env.SUPABASE_SERVICE_ROLE_KEY
           );
 
+      // Initialize DataDog tracer for timing instrumentation
+      const tracer = createDataDogTracer(env);
+      const traceContext = tracer.startTrace(
+        "ai_gateway.request",
+        requestWrapper.getUrl(),
+        {
+          http_method: requestWrapper.getMethod(),
+        }
+      );
+
       const rawAPIKey = requestWrapper.getRawProviderAuthHeader();
+
+      // Timing: Hash API key
+      const hashSpan = tracer.startSpan(
+        "auth.hash_api_key",
+        "getProviderAuthHeader",
+        "ai-gateway",
+        {},
+        traceContext || undefined
+      );
       const hashedAPIKey = await requestWrapper.getProviderAuthHeader();
+      tracer.finishSpan(hashSpan);
 
       if (!hashedAPIKey) {
+        tracer.finishTrace({ error: "invalid_hashed_key" });
+        ctx.waitUntil(tracer.sendTrace());
         return new Response("Invalid Helicone API key (hshed)", {
           status: 401,
         });
       }
 
+      // Timing: Validate API key
+      const authSpan = tracer.startSpan(
+        "auth.validate_key",
+        "requestWrapper.auth",
+        "ai-gateway",
+        {},
+        traceContext || undefined
+      );
       const { data: auth, error: authError } = await requestWrapper.auth();
+      tracer.finishSpan(authSpan);
 
       if (authError || !auth || !rawAPIKey) {
         console.error(authError);
+        tracer.setError(authSpan, authError?.toString() || "Invalid API key");
+        tracer.finishTrace({ error: "auth_failed" });
+        ctx.waitUntil(tracer.sendTrace());
         return new Response("Invalid Helicone API key", { status: 401 });
       }
 
       const db = new DBWrapper(env, auth);
+
+      // Timing: Get auth params
+      const dbSpan = tracer.startSpan(
+        "db.get_auth_params",
+        "getAuthParams",
+        "ai-gateway",
+        {},
+        traceContext || undefined
+      );
       const { data: orgData, error: orgError } = await db.getAuthParams();
+      tracer.finishSpan(dbSpan);
       if (orgError || !orgData) {
         return new Response("Organization not found", { status: 401 });
       }
@@ -82,10 +127,18 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
           supabaseClient,
           orgMeta: orgData?.metaData,
         },
-        metrics
+        metrics,
+        tracer,
+        traceContext
       );
 
-      return gateway.handle();
+      const response = await gateway.handle();
+
+      // Finish trace and send to DataDog
+      tracer.finishTrace();
+      ctx.waitUntil(tracer.sendTrace());
+
+      return response;
     }
   );
 

@@ -25,6 +25,7 @@ import {
   toOpenAIResponse,
   toOpenAIStreamResponse,
 } from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
+import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
 
 export interface AuthContext {
   orgId: string;
@@ -44,19 +45,25 @@ export class SimpleAIGateway {
   private readonly supabaseClient: any;
   private readonly metrics: GatewayMetrics;
   private readonly orgMeta: AuthContext["orgMeta"];
+  private readonly tracer: DataDogTracer;
+  private readonly traceContext: TraceContext | null;
 
   constructor(
     private readonly requestWrapper: RequestWrapper,
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
     authContext: AuthContext,
-    metrics: GatewayMetrics
+    metrics: GatewayMetrics,
+    tracer: DataDogTracer,
+    traceContext: TraceContext | null
   ) {
     this.orgId = authContext.orgId;
     this.apiKey = authContext.apiKey;
     this.supabaseClient = authContext.supabaseClient;
     this.orgMeta = authContext.orgMeta;
     this.metrics = metrics;
+    this.tracer = tracer;
+    this.traceContext = traceContext;
 
     const providerKeysManager = new ProviderKeysManager(
       new ProviderKeysStore(this.supabaseClient),
@@ -76,7 +83,15 @@ export class SimpleAIGateway {
 
   async handle(): Promise<Response> {
     // Step 1: Parse and prepare request
+    const parseSpan = this.tracer.startSpan(
+      "gateway.parse_request",
+      "parseAndPrepareRequest",
+      "ai-gateway",
+      {},
+      this.traceContext || undefined
+    );
     const parseResult = await this.parseAndPrepareRequest();
+    this.tracer.finishSpan(parseSpan);
     if (isErr(parseResult)) {
       return parseResult.error;
     }
@@ -102,12 +117,20 @@ export class SimpleAIGateway {
     const errors: Array<AttemptError> = [];
 
     // Step 3: Build all attempts
+    const buildSpan = this.tracer.startSpan(
+      "gateway.build_attempts",
+      "attemptBuilder.buildAttempts",
+      "ai-gateway",
+      {},
+      this.traceContext || undefined
+    );
     const attempts = await this.attemptBuilder.buildAttempts(
       modelStrings,
       this.orgId,
       this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
       plugins
     );
+    this.tracer.finishSpan(buildSpan);
     if (attempts.length === 0) {
       errors.push({
         source: "No available providers",
@@ -120,7 +143,15 @@ export class SimpleAIGateway {
     }
 
     // Step 4: Get disallow list
+    const disallowSpan = this.tracer.startSpan(
+      "gateway.get_disallow_list",
+      "getDisallowList",
+      "ai-gateway",
+      {},
+      this.traceContext || undefined
+    );
     const disallowList = await this.getDisallowList(this.orgId);
+    this.tracer.finishSpan(disallowSpan);
 
     // Step 5: Create forwarder function
     const forwarder = (
