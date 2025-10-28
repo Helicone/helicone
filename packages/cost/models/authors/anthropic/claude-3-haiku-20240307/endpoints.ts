@@ -7,7 +7,6 @@ export const endpoints = {
     provider: "anthropic",
     author: "anthropic",
     providerModelId: "claude-3-haiku-20240307",
-    priority: 3,
     pricing: [
       {
         threshold: 0,
@@ -65,7 +64,6 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },

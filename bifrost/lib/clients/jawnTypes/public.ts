@@ -1841,7 +1841,7 @@ export interface components {
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
-      gateway_endpoint_version: string | null;
+      ai_gateway_body_mapping: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -3198,7 +3198,7 @@ Json: JsonObject;
     /** @enum {string} */
     AuthorName: "anthropic" | "cohere" | "deepseek" | "openai" | "perplexity" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "zai" | "baidu" | "passthrough";
     /** @enum {string} */
-    StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
+    StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity" | "n";
     /** @enum {string} */
     PluginId: "web";
     RateLimits: {

@@ -29,7 +29,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
           const headers = new Headers(requestWrapper.headers);
           headers.set("Helicone-Gateway-Body-Mapping", "RESPONSES");
           requestWrapper.remapHeaders(headers);
-          requestWrapper.heliconeHeaders = new HeliconeHeaders(requestWrapper.headers);
+          requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping = "RESPONSES";
         }
       } catch (_e) {
         // ignore URL parsing issues

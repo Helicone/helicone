@@ -151,7 +151,6 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -177,7 +176,6 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -203,7 +201,6 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -228,7 +225,6 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -253,7 +249,6 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },
@@ -275,7 +270,6 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
-    priority: 2,
     endpointConfigs: {
       "*": {},
     },

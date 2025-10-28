@@ -87,8 +87,12 @@ export class VertexProvider extends BaseProvider {
     const modelId = endpoint.providerModelId || "";
 
     if (modelId.toLowerCase().includes("gemini")) {
-      const updatedBody = {
-        ...context.parsedBody,
+      let updatedBody = context.parsedBody;
+      if (context.bodyMapping === "RESPONSES") {
+        updatedBody = context.toChatCompletions(context.parsedBody);
+      }
+      updatedBody = {
+        ...updatedBody,
         model: `google/${modelId}`,
       };
       return JSON.stringify(updatedBody);
@@ -97,7 +101,11 @@ export class VertexProvider extends BaseProvider {
     if (endpoint.providerModelId.includes("claude-")) {
       const anthropicBody =
         context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
+          ? context.toAnthropic(
+              context.parsedBody,
+              endpoint.providerModelId,
+              { includeCacheBreakpoints: false }
+            )
           : context.parsedBody;
       const updatedBody = {
         ...anthropicBody,
