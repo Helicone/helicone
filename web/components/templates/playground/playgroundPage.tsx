@@ -25,7 +25,6 @@ import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import PlaygroundVariablesPanel from "./components/PlaygroundVariablesPanel";
-import { playgroundModels } from "@helicone-package/cost/providers/mappings";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
@@ -64,7 +63,7 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
       },
     ],
   },
-  model: "gpt-4.1-mini",
+  model: "gpt-4o-mini",
   raw: {
     request: {},
     response: {},
@@ -168,7 +167,7 @@ const convertOpenAIChatRequestToMappedLLMRequest = (
       response: "",
       concatenatedMessages: internalRequest.messages || [],
     },
-    model: openaiRequest.model || "gpt-4.1-mini",
+    model: openaiRequest.model || "gpt-4o-mini",
     raw: {
       request: openaiRequest,
       response: {},
@@ -252,9 +251,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     requestId || "",
   );
 
-  const [selectedModel, setSelectedModel] = useState<string>(
-    "openai/gpt-4.1-mini",
-  );
+  const [selectedModel, setSelectedModel] = useState<string>("gpt-4o-mini");
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
     null,
@@ -351,19 +348,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       );
 
       const model = promptVersionData.promptBody.model;
-      if (model && playgroundModels.includes(model)) {
-        setSelectedModel(model);
-      } else if (model) {
-        const similarities = playgroundModels.map((m) => ({
-          target: m,
-          similarity: findBestMatch(model, m),
-        }));
-
-        const closestMatch = similarities.reduce((best, current) =>
-          current.similarity > best.similarity ? current : best,
-        );
-        setSelectedModel(closestMatch.target);
-      }
+      // Model will be set when registry loads
+      setSelectedModel(model || "");
 
       setMappedContent(convertedContent);
       setDefaultContent(convertedContent);
@@ -479,19 +465,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
     if (requestData?.data && !isRequestLoading && !requestPromptVersionId) {
       const model = requestData.data.model;
-      if (model && playgroundModels.includes(model)) {
-        setSelectedModel(model);
-      } else if (model) {
-        const similarities = playgroundModels.map((m) => ({
-          target: m,
-          similarity: findBestMatch(model, m),
-        }));
-
-        const closestMatch = similarities.reduce((best, current) =>
-          current.similarity > best.similarity ? current : best,
-        );
-        setSelectedModel(closestMatch.target);
-      }
+      // Model will be set when registry loads
+      setSelectedModel(model || "");
 
       const content = heliconeRequestToMappedContent(requestData.data);
       let contentWithIds = {
@@ -556,7 +531,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [error, setError] = useState<string | null>(null);
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsLoading] = useState<boolean>(false);
-  const [useAIGateway, setUseAIGateway] = useState<boolean>(false);
 
   useEffect(() => {
     if (response) {
@@ -851,7 +825,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         const stream = await generateStream({
           ...openaiRequest,
           signal: abortController.current.signal,
-          useAIGateway,
         } as any);
 
         const result = await processStream(
@@ -882,8 +855,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               setError(result.error.message);
             }
           }
-          // setError(result.error.message || result.error?.error?.message);
-          console.error("error", result.error);
+          const error = result.error.message || result.error?.error?.message;
+          if (error.includes("Insufficient credits")) {
+            setError("You are out of free messages for this month. Please add credits to continue using the playground.");
+          }
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -1037,8 +1012,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 onCreatePrompt={onCreatePrompt}
                 onSavePrompt={onSavePrompt}
                 onRun={onRun}
-                useAIGateway={useAIGateway}
-                setUseAIGateway={setUseAIGateway}
                 error={error}
                 isLoading={isStreaming}
                 createPrompt={createPrompt}
