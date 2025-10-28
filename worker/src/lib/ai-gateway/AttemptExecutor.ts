@@ -38,6 +38,7 @@ interface ExecutorProps {
     allowNegativeBalance: boolean;
     creditLimit: number;
   };
+  traceContext: TraceContext | null;
 }
 
 export class AttemptExecutor {
@@ -46,9 +47,11 @@ export class AttemptExecutor {
   constructor(
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
-    private readonly cacheProvider?: CacheProvider
+    private readonly cacheProvider?: CacheProvider,
+    tracer?: DataDogTracer
   ) {
-    this.tracer = createDataDogTracer(env);
+    // Use passed tracer or create new one (for backwards compatibility)
+    this.tracer = tracer || createDataDogTracer(env);
   }
 
   async PTBPreCheck(props: {
@@ -68,12 +71,10 @@ export class AttemptExecutor {
     // Start credit validation span
     const spanId = props.traceContext?.sampled
       ? this.tracer.startSpan(
-          "ptb.credit_validation",
+          "ai_gateway.ptb.credit_validation",
           "reserve_escrow",
           "helicone-wallet",
-          {
-            org_id: props.traceContext.tags.org_id,
-          },
+          {},
           props.traceContext
         )
       : null;
@@ -115,36 +116,38 @@ export class AttemptExecutor {
     const { endpoint, providerKey } = props.attempt;
 
     let escrowInfo: EscrowInfo | undefined;
-    let traceContext: TraceContext | null = null;
+    let ptbSpanId: string | null = null;
 
-    // Start trace for PTB requests
+    // Start PTB span for PTB requests
     if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
-      const resource = `${props.requestWrapper.getMethod()} ${props.requestWrapper.getUrl()}`;
-
-      traceContext = this.tracer.startTrace("ptb.request", resource, {
-        org_id: props.orgId || "unknown",
-        provider: endpoint.provider,
-        model: endpoint.providerModelId,
-        http_method: props.requestWrapper.getMethod(),
-      });
+      ptbSpanId = props.traceContext?.sampled
+        ? this.tracer.startSpan(
+            "ai_gateway.ptb",
+            `${props.requestWrapper.getMethod()} ${props.requestWrapper.getUrl()}`,
+            "ai-gateway-ptb",
+            {
+              provider: endpoint.provider,
+              model: endpoint.providerModelId,
+              http_method: props.requestWrapper.getMethod(),
+            },
+            props.traceContext
+          )
+        : null;
     }
 
     // Reserve escrow if needed (PTB only)
     if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
       const ptbCheck = await this.PTBPreCheck({
         ...props,
-        traceContext,
       });
 
       if (isErr(ptbCheck)) {
-        // Finish trace with error
-        if (traceContext?.sampled) {
-          this.tracer.finishTrace({
-            error: "true",
-            error_message: ptbCheck.error.message,
+        // Finish PTB span with error
+        if (ptbSpanId) {
+          this.tracer.setError(ptbSpanId, ptbCheck.error.message);
+          this.tracer.finishSpan(ptbSpanId, {
             http_status_code: ptbCheck.error.statusCode?.toString(),
           });
-          this.ctx.waitUntil(this.tracer.sendTrace());
         }
         return err(ptbCheck.error);
       }
@@ -166,7 +169,7 @@ export class AttemptExecutor {
       escrowInfo,
       props.metrics,
       props.attempt.plugins,
-      traceContext
+      props.traceContext
     );
 
     // If error, cancel escrow and return the error
@@ -175,25 +178,22 @@ export class AttemptExecutor {
         this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, props.orgId));
       }
 
-      // Finish trace with error
-      if (traceContext?.sampled) {
-        this.tracer.finishTrace({
-          error: "true",
-          error_message: result.error.message,
+      // Finish PTB span with error
+      if (ptbSpanId) {
+        this.tracer.setError(ptbSpanId, result.error.message);
+        this.tracer.finishSpan(ptbSpanId, {
           http_status_code: result.error.statusCode?.toString(),
         });
-        this.ctx.waitUntil(this.tracer.sendTrace());
       }
 
       return result;
     }
 
-    // Success - finish trace
-    if (traceContext?.sampled) {
-      this.tracer.finishTrace({
+    // Success - finish PTB span
+    if (ptbSpanId) {
+      this.tracer.finishSpan(ptbSpanId, {
         http_status_code: result.data.status.toString(),
       });
-      this.ctx.waitUntil(this.tracer.sendTrace());
     }
 
     return result;
@@ -294,11 +294,10 @@ export class AttemptExecutor {
       // Start provider request span
       const providerSpanId = traceContext?.sampled
         ? this.tracer.startSpan(
-            "provider.llm_request",
+            "ai_gateway.ptb.provider.llm_request",
             `${endpoint.provider} ${endpoint.providerModelId}`,
             "llm-provider",
             {
-              org_id: traceContext.tags.org_id,
               provider: endpoint.provider,
               model: endpoint.providerModelId,
             },

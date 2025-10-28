@@ -77,14 +77,14 @@ export class SimpleAIGateway {
       REQUEST_CACHE_KEY_2: env.REQUEST_CACHE_KEY_2,
     });
 
-    this.attemptBuilder = new AttemptBuilder(providerKeysManager, env);
-    this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider);
+    this.attemptBuilder = new AttemptBuilder(providerKeysManager, env, tracer, traceContext);
+    this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider, tracer);
   }
 
   async handle(): Promise<Response> {
     // Step 1: Parse and prepare request
     const parseSpan = this.tracer.startSpan(
-      "gateway.parse_request",
+      "ai_gateway.gateway.parse_request",
       "parseAndPrepareRequest",
       "ai-gateway",
       {},
@@ -118,7 +118,7 @@ export class SimpleAIGateway {
 
     // Step 3: Build all attempts
     const buildSpan = this.tracer.startSpan(
-      "gateway.build_attempts",
+      "ai_gateway.gateway.build_attempts",
       "attemptBuilder.buildAttempts",
       "ai-gateway",
       {},
@@ -144,7 +144,7 @@ export class SimpleAIGateway {
 
     // Step 4: Get disallow list
     const disallowSpan = this.tracer.startSpan(
-      "gateway.get_disallow_list",
+      "ai_gateway.gateway.get_disallow_list",
       "getDisallowList",
       "ai-gateway",
       {},
@@ -230,6 +230,7 @@ export class SimpleAIGateway {
         forwarder,
         metrics: this.metrics,
         orgMeta: this.orgMeta,
+        traceContext: this.traceContext,
       });
 
       if (isErr(result)) {

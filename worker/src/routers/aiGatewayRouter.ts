@@ -50,7 +50,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       // Initialize DataDog tracer for timing instrumentation
       const tracer = createDataDogTracer(env);
       const traceContext = tracer.startTrace(
-        "ai_gateway.request",
+        "ai_gateway",
         requestWrapper.getUrl(),
         {
           http_method: requestWrapper.getMethod(),
@@ -61,7 +61,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
 
       // Timing: Hash API key
       const hashSpan = tracer.startSpan(
-        "auth.hash_api_key",
+        "ai_gateway.auth.hash_api_key",
         "getProviderAuthHeader",
         "ai-gateway",
         {},
@@ -80,7 +80,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
 
       // Timing: Validate API key
       const authSpan = tracer.startSpan(
-        "auth.validate_key",
+        "ai_gateway.auth.validate_key",
         "requestWrapper.auth",
         "ai-gateway",
         {},
@@ -101,7 +101,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
 
       // Timing: Get auth params
       const dbSpan = tracer.startSpan(
-        "db.get_auth_params",
+        "ai_gateway.db.get_auth_params",
         "getAuthParams",
         "ai-gateway",
         {},
@@ -112,6 +112,9 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       if (orgError || !orgData) {
         return new Response("Organization not found", { status: 401 });
       }
+
+      // Set org_id as a core primitive for all spans in this trace
+      tracer.setOrgId(orgData.organizationId);
 
       const dataDogClient = getDataDogClient(env);
       const metrics = new GatewayMetrics(dataDogClient);

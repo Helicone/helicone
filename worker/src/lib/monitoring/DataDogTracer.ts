@@ -16,7 +16,7 @@ export interface DataDogTracerConfig {
   enabled: boolean;
   apiKey: string;
   endpoint: string; // e.g., "https://http-intake.logs.datadoghq.com"
-  sampleRate?: number; // 0-1, defaults to 0.01 (1%)
+  sampleRate: number; // 0-1, defaults to 0.01 (1%)
   service?: string; // Default service name
   env?: string; // Environment (production, development, etc.)
 }
@@ -47,17 +47,21 @@ export class DataDogTracer {
   private spans: Map<string, Span> = new Map();
   private traceId?: string;
   private rootSpanId?: string;
+  private orgId?: string;
 
   // MASTER KILL SWITCH - set to true to disable ALL tracing
   private readonly DISABLED = false;
 
   constructor(config: DataDogTracerConfig) {
     this.config = {
-      sampleRate: 0.01, // Default 1% sampling
       service: "helicone-worker",
       env: "production",
       ...config,
     };
+  }
+
+  setOrgId(orgId: string) {
+    this.orgId = orgId;
   }
 
   /**
@@ -75,7 +79,7 @@ export class DataDogTracer {
     }
 
     // Apply sampling decision
-    const sampled = Math.random() < (this.config.sampleRate ?? 0.01);
+    const sampled = Math.random() < this.config.sampleRate;
     if (!sampled) {
       return { trace_id: "", sampled: false, tags: {} };
     }
@@ -229,6 +233,11 @@ export class DataDogTracer {
           ...Object.entries(span.meta).map(([k, v]) => `${k}:${v}`),
         ];
 
+        // Add org_id to tags if available
+        if (this.orgId) {
+          tags.push(`org_id:${this.orgId}`);
+        }
+
         return {
           ddsource: "apm.trace",
           ddtags: tags.join(","),
@@ -240,6 +249,8 @@ export class DataDogTracer {
           trace_id: span.trace_id,
           span_id: span.span_id,
           parent_id: span.parent_id,
+          // Core primitives
+          org_id: this.orgId, // Top-level field for org_id as a core primitive
           // Span details
           operation: span.name,
           operation_name: span.name, // Facet-friendly field for grouping in Datadog UI
