@@ -75,8 +75,11 @@ export class PlaygroundController extends Controller {
         ? "http://localhost:8793/v1"
         : "https://ai-gateway.helicone.ai/v1";
 
-      const userIdForRateLimit =
-        request.authParams.userId || request.authParams.organizationId || "";
+      const orgIdForRateLimit = request.authParams.organizationId;
+
+      if (!orgIdForRateLimit) {
+        throw new Error("Organization ID not found");
+      }
 
       const buildClient = (key: string, withRateLimit: boolean) =>
         new OpenAI({
@@ -84,10 +87,10 @@ export class PlaygroundController extends Controller {
           apiKey: key,
           defaultHeaders: {
             "Helicone-User-Id": "helicone_playground",
-            "Helicone-Property-Org_Id": userIdForRateLimit,
-            ...(withRateLimit
-              ? { "Helicone-RateLimit-Policy": "30;w=86400;s=user" }
-              : {}),
+            "Helicone-Property-Playground_Org_ID": orgIdForRateLimit,
+            ...(withRateLimit && {
+              "Helicone-RateLimit-Policy": `30;w=${30 * 24 * 60 * 60};s=user`, // 30 free messages per month, per org
+            }),
           },
         });
 
