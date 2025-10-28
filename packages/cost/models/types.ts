@@ -265,5 +265,9 @@ export interface AuthResult {
 export interface RequestBodyContext {
   parsedBody: any;
   bodyMapping: BodyMappingType;
-  toAnthropic: (body: any, providerModelId?: string) => any;
+  toAnthropic: (
+    body: any,
+    providerModelId?: string,
+    options?: { includeCacheBreakpoints?: boolean }
+  ) => any;
 }

@@ -233,10 +233,10 @@ describe("Anthropic to OpenAI Response Mapper", () => {
 
       expect(result.model).toBe("claude-3.5-haiku");
       expect(result.messages).toHaveLength(1);
-      expect(result.messages[0]).toEqual({
-        role: "user",
-        content: "Hello, how are you?",
-      });
+      expect(result.messages[0].role).toBe("user");
+      expect(result.messages[0].content).toEqual([
+        { type: "text", text: "Hello, how are you?", cache_control: { type: "ephemeral", ttl: "5m" } },
+      ]);
       expect(result.temperature).toBe(0.7);
       expect(result.max_tokens).toBe(1000);
       expect(result.stream).toBe(false);
@@ -321,6 +321,7 @@ describe("Anthropic to OpenAI Response Mapper", () => {
         type: "tool_result",
         tool_use_id: "call_DoWwQL7W9AJBpwCtn9tRC2gt",
         content: "100",
+        cache_control: { type: "ephemeral", ttl: "5m" },
       });
 
       expect(result.tools).toHaveLength(1);
@@ -375,6 +376,7 @@ describe("Anthropic to OpenAI Response Mapper", () => {
         id: "call_123",
         name: "calculate",
         input: { expression: "2+2" },
+        cache_control: { type: "ephemeral", ttl: "5m" },
       });
     });
 
@@ -397,10 +399,10 @@ describe("Anthropic to OpenAI Response Mapper", () => {
 
       expect(result.system).toBe("You are a helpful assistant.");
       expect(result.messages).toHaveLength(1);
-      expect(result.messages[0]).toEqual({
-        role: "user",
-        content: "Hello",
-      });
+      expect(result.messages[0].role).toBe("user");
+      expect(result.messages[0].content).toEqual([
+        { type: "text", text: "Hello", cache_control: { type: "ephemeral", ttl: "5m" } },
+      ]);
     });
 
     it("should handle cache control on system message", () => {

@@ -14,8 +14,12 @@ import { Plugin } from "@helicone-package/cost/models/types";
 export function toAnthropic(
   openAIBody: HeliconeChatCreateParams,
   providerModelId?: string,
-  plugins?: Plugin[]
+  plugins?: Plugin[],
+  options?: {
+    includeCacheBreakpoints?: boolean;
+  }
 ): AnthropicRequestBody {
+  const includeCache = options?.includeCacheBreakpoints !== false;
   const antBody: AnthropicRequestBody = {
     model: providerModelId || openAIBody.model,
     messages: [],
@@ -35,8 +39,11 @@ export function toAnthropic(
         : [];
   }
 
-  const { messages, system } = extractSystemMessage(openAIBody.messages);
-  antBody.messages = mapMessages(messages);
+  const { messages, system } = extractSystemMessage(
+    openAIBody.messages,
+    includeCache
+  );
+  antBody.messages = mapMessages(messages, includeCache);
   if (system) {
     antBody.system = system;
   }
@@ -87,11 +94,18 @@ export function toAnthropic(
     throw new Error("Logit bias is not supported");
   }
 
+  // if and only if the user did not provide any cache control breakpoints,
+  // add a default ephemeral 5m breakpoint at the end of the content.
+  if (includeCache && !hasAnyCacheControl(openAIBody)) {
+    appendDefaultCacheBreakpoint(antBody);
+  }
+
   return antBody;
 }
 
 function openAIContentToAnthropicContent(
-  content: string | HeliconeChatCompletionContentPart[] | null
+  content: string | HeliconeChatCompletionContentPart[] | null,
+  includeCache: boolean
 ): string | AnthropicContentBlock[] {
   if (content === null) {
     return "";
@@ -107,7 +121,9 @@ function openAIContentToAnthropicContent(
         return {
           type: "text",
           text: part.text,
-          cache_control: part.cache_control,
+          ...(includeCache && part.cache_control
+            ? { cache_control: part.cache_control }
+            : {}),
         };
       case "image_url":
         // expected format: { type: "image_url", image_url: { url: string } }
@@ -132,7 +148,9 @@ function openAIContentToAnthropicContent(
               media_type: mediaType,
               data: base64Data,
             },
-            cache_control: part.cache_control,
+            ...(includeCache && part.cache_control
+              ? { cache_control: part.cache_control }
+              : {}),
           };
         } else {
           return {
@@ -141,7 +159,9 @@ function openAIContentToAnthropicContent(
               type: "url",
               url: url,
             },
-            cache_control: part.cache_control,
+            ...(includeCache && part.cache_control
+              ? { cache_control: part.cache_control }
+              : {}),
           };
         }
       case "input_audio":
@@ -168,7 +188,67 @@ function openAIContentToAnthropicContent(
   });
 }
 
-function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
+function hasAnyCacheControl(body: HeliconeChatCreateParams): boolean {
+  const msgs = body.messages || [];
+  for (const m of msgs) {
+    if ((m as any).cache_control) {
+      return true;
+    }
+    const content = (m as any).content;
+    if (Array.isArray(content)) {
+      for (const part of content) {
+        if ((part as any)?.cache_control) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function appendDefaultCacheBreakpoint(antBody: AnthropicRequestBody) {
+  const defaultCache = { type: "ephemeral" as const, ttl: "5m" as const };
+
+  if (antBody.messages.length > 0) {
+    const last = antBody.messages[antBody.messages.length - 1];
+    if (typeof last.content === "string") {
+      last.content = [
+        {
+          type: "text",
+          text: last.content,
+          cache_control: defaultCache,
+        },
+      ];
+      return;
+    }
+    if (Array.isArray(last.content) && last.content.length > 0) {
+      const idx = last.content.length - 1;
+      const block = last.content[idx];
+      last.content[idx] = {
+        ...block,
+        cache_control: defaultCache,
+      } as AnthropicContentBlock;
+      return;
+    }
+  }
+
+  if (antBody.system && Array.isArray(antBody.system) && antBody.system.length > 0) {
+    const idx = antBody.system.length - 1;
+    const block = antBody.system[idx];
+    antBody.system[idx] = {
+      ...block,
+      cache_control: defaultCache,
+    } as AnthropicContentBlock;
+    return;
+  }
+
+  // If system is a string and there are no messages, it's okay not to add it
+}
+
+function extractSystemMessage(
+  messages: HeliconeChatCreateParams["messages"],
+  includeCache: boolean
+): {
   messages: HeliconeChatCreateParams["messages"];
   system?: string | AnthropicContentBlock[];
 } {
@@ -183,7 +263,7 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
     typeof systemMessages[0].content === "string"
   ) {
     const content = systemMessages[0].content;
-    if (!systemMessages[0].cache_control) {
+    if (!includeCache || !systemMessages[0].cache_control) {
       return {
         messages: otherMessages,
         system: content,
@@ -195,7 +275,9 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
         {
           type: "text",
           text: systemMessages[0].content,
-          cache_control: systemMessages[0].cache_control,
+          ...(includeCache && systemMessages[0].cache_control
+            ? { cache_control: systemMessages[0].cache_control }
+            : {}),
         },
       ],
     };
@@ -203,12 +285,17 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
 
   const systemMessageBlocks: AnthropicContentBlock[] = [];
   for (const msg of systemMessages) {
-    const convertedBlock = openAIContentToAnthropicContent(msg.content);
+    const convertedBlock = openAIContentToAnthropicContent(
+      msg.content,
+      includeCache
+    );
     if (typeof convertedBlock === "string") {
       systemMessageBlocks.push({
         type: "text",
         text: convertedBlock,
-        cache_control: msg.cache_control,
+        ...(includeCache && (msg as any).cache_control
+          ? { cache_control: (msg as any).cache_control }
+          : {}),
       });
     } else {
       systemMessageBlocks.push(...convertedBlock);
@@ -222,7 +309,8 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
 }
 
 function mapMessages(
-  messages: HeliconeChatCreateParams["messages"]
+  messages: HeliconeChatCreateParams["messages"],
+  includeCache: boolean
 ): AnthropicRequestBody["messages"] {
   if (!messages) {
     return [];
@@ -241,7 +329,9 @@ function mapMessages(
             type: "tool_result",
             tool_use_id: message.tool_call_id,
             content: typeof message.content === "string" ? message.content : "",
-            cache_control: message.cache_control,
+            ...(includeCache && (message as any).cache_control
+              ? { cache_control: (message as any).cache_control }
+              : {}),
           },
         ],
       };
@@ -272,18 +362,19 @@ function mapMessages(
       let processedContent: string | AnthropicContentBlock[] = [];
       if (message.content) {
         const convertedContent = openAIContentToAnthropicContent(
-          message.content
+          message.content,
+          includeCache
         );
         if (typeof convertedContent === "string") {
           // if the message requires forming a content array
-          if (
-            message.cache_control ||
-            processedToolCallContent.length > 0
-          ) {
+          const hasMsgCache = includeCache && !!(message as any).cache_control;
+          if (hasMsgCache || processedToolCallContent.length > 0) {
             processedContent.push({
               type: "text",
               text: convertedContent,
-              cache_control: message.cache_control,
+              ...(includeCache && (message as any).cache_control
+                ? { cache_control: (message as any).cache_control }
+                : {}),
             });
           } else {
             // there was no cache control breakpoint, the content was just string,
@@ -300,8 +391,10 @@ function mapMessages(
       antMessage.content = processedContent;
       return antMessage;
     }
-
-    antMessage.content = openAIContentToAnthropicContent(message.content);
+    antMessage.content = openAIContentToAnthropicContent(
+      message.content,
+      includeCache
+    );
     return antMessage;
   });
 }
