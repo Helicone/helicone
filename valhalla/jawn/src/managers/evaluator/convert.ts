@@ -44,5 +44,6 @@ export const convertTestInputToHeliconeRequest = (
     cost: null,
     prompt_version: null,
     gateway_endpoint_version: null,
+    ai_gateway_body_mapping: null,
   };
 };

@@ -4213,6 +4213,10 @@
 					"ai_gateway_body_mapping": {
 						"type": "string",
 						"nullable": true
+					},
+					"gateway_endpoint_version": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -4253,7 +4257,8 @@
 					"model",
 					"cache_reference_id",
 					"cache_enabled",
-					"ai_gateway_body_mapping"
+					"ai_gateway_body_mapping",
+					"gateway_endpoint_version"
 				],
 				"type": "object",
 				"additionalProperties": false

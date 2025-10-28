@@ -390,4 +390,5 @@ export interface HeliconeRequest {
   updated_at?: string;
   request_referrer?: string | null;
   ai_gateway_body_mapping: string | null;
+  gateway_endpoint_version: string | null;
 }
