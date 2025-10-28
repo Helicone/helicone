@@ -28,7 +28,6 @@ import PlaygroundVariablesPanel from "./components/PlaygroundVariablesPanel";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
-import { useModelRegistry } from "@/services/hooks/useModelRegistry";
 import {
   useCreatePrompt,
   usePushPromptVersion,

@@ -224,7 +224,7 @@ export class PlaygroundController extends Controller {
             console.error("[API] Fallback after 429 failed:", fallbackErr);
             this.setStatus(429);
             return err(
-              "You have reached your free playground limit. Please upgrade your plan or add a key to continue using the Playground.",
+              "You have reached your free playground limit. To continue using the playground, add credits to your account.",
             );
           }
         }
