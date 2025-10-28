@@ -48,8 +48,6 @@ interface ModelParametersFormProps {
   onParametersChange: (_parameters: ModelParameters) => void;
   responseFormat: ResponseFormat;
   onResponseFormatChange: (_responseFormat: ResponseFormat) => void;
-  useAIGateway: boolean;
-  setUseAIGateway: (_useAIGateway: boolean) => void;
   error: string | null;
 }
 
@@ -68,8 +66,6 @@ export default function ModelParametersForm({
   onParametersChange,
   responseFormat,
   onResponseFormatChange,
-  useAIGateway,
-  setUseAIGateway,
   error,
 }: ModelParametersFormProps) {
   const updateParameter = (key: keyof ModelParameters, value: any) => {

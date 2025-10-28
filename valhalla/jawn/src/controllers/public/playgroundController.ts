@@ -59,7 +59,7 @@ export class PlaygroundController extends Controller {
     >
   > {
     try {
-      const { useAIGateway = true, ...params } = bodyParams;
+      const { ...params } = bodyParams;
       const settingsManager = new SettingsManager();
       const providerSecrets = await settingsManager.getSetting(
         "secrets:provider-keys",

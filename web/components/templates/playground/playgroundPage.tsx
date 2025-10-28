@@ -534,8 +534,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [error, setError] = useState<string | null>(null);
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsLoading] = useState<boolean>(false);
-  // Always use AI Gateway now that we've migrated from OpenRouter
-  const [useAIGateway, setUseAIGateway] = useState<boolean>(true);
 
   useEffect(() => {
     if (response) {
@@ -830,7 +828,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         const stream = await generateStream({
           ...openaiRequest,
           signal: abortController.current.signal,
-          useAIGateway,
         } as any);
 
         const result = await processStream(
@@ -1016,8 +1013,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 onCreatePrompt={onCreatePrompt}
                 onSavePrompt={onSavePrompt}
                 onRun={onRun}
-                useAIGateway={useAIGateway}
-                setUseAIGateway={setUseAIGateway}
                 error={error}
                 isLoading={isStreaming}
                 createPrompt={createPrompt}

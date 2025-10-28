@@ -44,8 +44,6 @@ interface PlaygroundHeaderProps {
   ) => void;
   onRun: () => void;
   isScrolled: boolean;
-  useAIGateway: boolean;
-  setUseAIGateway: (_useAIGateway: boolean) => void;
   error: string | null;
   isLoading?: boolean;
   createPrompt?: boolean;
@@ -68,8 +66,6 @@ const PlaygroundHeader = ({
   onSavePrompt,
   onRun,
   isScrolled,
-  useAIGateway,
-  setUseAIGateway,
   error,
   isLoading,
   createPrompt,
@@ -185,8 +181,6 @@ const PlaygroundHeader = ({
               onResponseFormatChange={setResponseFormat}
               parameters={modelParameters}
               onParametersChange={setModelParameters}
-              useAIGateway={useAIGateway}
-              setUseAIGateway={setUseAIGateway}
               error={error}
             />
           </div>
