@@ -7,7 +7,7 @@ import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { ModelUsage } from "@helicone-package/cost";
 import { CostBreakdown } from "@helicone-package/cost/models/calculate-cost";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
-import { ResponseFormat } from "@helicone-package/cost/models/types";
+import { BodyMappingType } from "@helicone-package/cost/models/types";
 
 export class HandlerContext extends SetOnce {
   public message: KafkaMessageContents;
@@ -138,8 +138,7 @@ export type HeliconeMeta = {
   
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
-  gatewayResponseFormat?: ResponseFormat;
-  gatewayEndpointVersion?: string; // endpoint config version
+  aiGatewayBodyMapping?: BodyMappingType; // body mapping type
 };
 
 export type KafkaMessageContents = {
@@ -250,7 +249,7 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     cache_reference_id: context.message.log.request.cacheReferenceId ?? null,
     cache_enabled: context.message.log.request.cacheEnabled ?? false,
     request_referrer: context.message.log.request.requestReferrer ?? null,
-    gateway_endpoint_version: context.message.heliconeMeta.gatewayEndpointVersion ?? null,
+    ai_gateway_body_mapping: context.message.heliconeMeta.aiGatewayBodyMapping ?? null,
   };
 };
 

@@ -4210,7 +4210,7 @@
 						"type": "string",
 						"nullable": true
 					},
-					"gateway_endpoint_version": {
+					"ai_gateway_body_mapping": {
 						"type": "string",
 						"nullable": true
 					}
@@ -4253,7 +4253,7 @@
 					"model",
 					"cache_reference_id",
 					"cache_enabled",
-					"gateway_endpoint_version"
+					"ai_gateway_body_mapping"
 				],
 				"type": "object",
 				"additionalProperties": false

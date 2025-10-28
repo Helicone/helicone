@@ -298,7 +298,7 @@ export interface RequestResponseRMT {
   prompt_audio_tokens: number;
   completion_audio_tokens: number;
   model: string;
-  gateway_endpoint_version: string;
+  ai_gateway_body_mapping: string;
   request_id: string;
   request_created_at: string;
   user_id: string;
