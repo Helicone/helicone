@@ -13,13 +13,10 @@ import { type JawnAuthenticatedRequest } from "../../types/request";
 import { Message, Tool } from "@helicone-package/llm-mapper/types";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import OpenAI from "openai";
-import {
-  generateTempHeliconeAPIKey,
-  getHeliconeDefaultTempKey,
-} from "../../lib/experiment/tempKeys/tempAPIKey";
-import { GET_KEY } from "../../lib/clients/constant";
+import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { PlaygroundManager } from "../../managers/playgroundManager";
+import { SettingsManager } from "../../utils/settings";
 
 export interface GenerateParams {
   provider: any;
@@ -63,60 +60,44 @@ export class PlaygroundController extends Controller {
   > {
     try {
       const { useAIGateway = true, ...params } = bodyParams;
-      const org = await dbExecute<{
-        id: string;
-        playground_helicone: boolean;
-      }>(`SELECT id, playground_helicone FROM organization WHERE id = $1`, [
-        request.authParams.organizationId,
-      ]);
+      const settingsManager = new SettingsManager();
+      const providerSecrets = await settingsManager.getSetting(
+        "secrets:provider-keys",
+      );
 
-      if (org.error) {
-        return err(`Failed to get organization: ${org.error}`);
+      const adminHeliconeKey = providerSecrets?.["helicone"];
+      if (!adminHeliconeKey) {
+        throw new Error("Admin Helicone API key not configured");
       }
 
-      const shouldGenerateTempKey =
-        org.data?.[0]?.playground_helicone || bodyParams.logRequest;
+      const isLocalDev = process.env.VERCEL_ENV !== "production";
+      const aiGatewayBaseURL = isLocalDev
+        ? "http://localhost:8793/v1"
+        : "https://ai-gateway.helicone.ai/v1";
 
-      // When using AI Gateway (PTB), we need an API key that belongs to the user's organization
-      // When not using AI Gateway, use the global HELICONE_ON_HELICONE key for OpenRouter direct calls
-      const tempKey = useAIGateway
-        ? await generateTempHeliconeAPIKey(request.authParams.organizationId)
-        : (shouldGenerateTempKey
-            ? await generateTempHeliconeAPIKey(request.authParams.organizationId)
-            : await getHeliconeDefaultTempKey(request.authParams.organizationId));
+      const userIdForRateLimit =
+        request.authParams.userId || request.authParams.organizationId || "";
 
-      if (tempKey.error || !tempKey.data) {
-        throw new Error(
-          tempKey.error || "Failed to generate temporary API key",
-        );
-      }
-
-      return tempKey.data.with<
-        Result<
-          | OpenAI.Chat.Completions.ChatCompletion
-          | { content: string; reasoning: string; calls: any },
-          string
-        >
-      >(async (secretKey) => {
-        // Use Helicone AI Gateway with PTB (Pass-Through Billing)
-        // AI Gateway uses Helicone API key and Helicone provides the provider keys
-        const isLocalDev = process.env.VERCEL_ENV !== "production";
-        const aiGatewayBaseURL = isLocalDev
-          ? "http://localhost:8793/v1"
-          : "https://ai-gateway.helicone.ai/v1";
-
-        const openai = new OpenAI({
+      const buildClient = (key: string, withRateLimit: boolean) =>
+        new OpenAI({
           baseURL: aiGatewayBaseURL,
-          apiKey: secretKey, // Helicone API key
+          apiKey: key,
           defaultHeaders: {
             "Helicone-User-Id": "helicone_playground",
-            "Helicone-Property-Org_Id": request.authParams.organizationId,
+            "Helicone-Property-Org_Id": userIdForRateLimit,
+            ...(withRateLimit
+              ? { "Helicone-RateLimit-Policy": "30;w=86400;s=user" }
+              : {}),
           },
         });
-        const abortController = new AbortController();
 
+      const abortController = new AbortController();
+
+      const send = async (client: OpenAI, isStreaming: boolean) => {
+        // Use Helicone AI Gateway with PTB (Pass-Through Billing)
+        // AI Gateway uses Helicone API key and Helicone provides the provider keys
         try {
-          const response = await openai.chat.completions.create(
+          const response = await client.chat.completions.create(
             {
               model: params.model, // Use model ID as-is (e.g., "gpt-4o-mini")
               messages: params.messages,
@@ -126,7 +107,7 @@ export class PlaygroundController extends Controller {
               frequency_penalty: params.frequency_penalty,
               presence_penalty: params.presence_penalty,
               stop: params.stop,
-              stream: params.stream !== undefined,
+              stream: isStreaming,
               response_format: params.response_format,
               tools: params.tools,
               reasoning_effort: params.reasoning_effort,
@@ -137,7 +118,7 @@ export class PlaygroundController extends Controller {
             },
           );
 
-          if (params.stream) {
+          if (isStreaming) {
             // Set up streaming response
             (<any>request.res).setHeader("Content-Type", "text/event-stream");
             (<any>request.res).setHeader("Cache-Control", "no-cache");
@@ -203,49 +184,74 @@ export class PlaygroundController extends Controller {
           return ok({ content, reasoning, calls });
         } catch (error) {
           console.error("[API] Inner try-catch error:", error);
-          this.setStatus(500);
-          if (error instanceof Error) {
-            if (
-              error.name === "ResponseAborted" ||
-              error.name === "AbortError"
-            ) {
-              this.setStatus(400);
-              return err("Request cancelled");
+          throw error;
+        }
+      };
+
+      // 1) Try with Admin Helicone key (rate limited)
+      try {
+        const adminClient = buildClient(adminHeliconeKey, true);
+        const isStreaming = Boolean(params.stream);
+        return await send(adminClient, isStreaming);
+      } catch (error) {
+        // 2) If rate limited (429), fallback to a temp user Helicone key
+        if (error instanceof OpenAI.APIError && error.status === 429) {
+          try {
+            const tempKey = await generateTempHeliconeAPIKey(
+              request.authParams.organizationId,
+            );
+            if (tempKey.error || !tempKey.data) {
+              throw new Error(
+                tempKey.error || "Failed to generate temporary API key",
+              );
             }
 
-            if (error instanceof OpenAI.APIError) {
-              if (
-                error.status === 429 &&
-                // TODO: this should do a .get and check if it's 0 once the
-                // ratelimit logic is fixed in Helicone
-                error.headers.has("helicone-ratelimit-remaining")
-              ) {
-                this.setStatus(429);
-                return err(
-                  "You have reached your free playground limit. Please upgrade your plan to continue using the Playground.",
-                );
-              }
+            return tempKey.data.with<
+              Result<
+                | OpenAI.Chat.Completions.ChatCompletion
+                | { content: string; reasoning: string; calls: any },
+                string
+              >
+            >(async (secretKey) => {
+              const userClient = buildClient(secretKey, false);
+              const isStreaming = Boolean(params.stream);
+              return await send(userClient, isStreaming);
+            });
+          } catch (fallbackErr) {
+            console.error("[API] Fallback after 429 failed:", fallbackErr);
+            this.setStatus(429);
+            return err(
+              "You have reached your free playground limit. Please upgrade your plan or add a key to continue using the Playground.",
+            );
+          }
+        }
 
-              this.setStatus(400);
-              if (error.error?.metadata?.raw) {
-                try {
-                  const raw = JSON.parse(error.error.metadata?.raw || "{}");
-                  if (raw.error?.message) {
-                    return err(raw.error?.message);
-                  }
-                } catch (err) {}
-              }
-
-              return err(error?.error?.message ?? JSON.stringify(error));
-            }
-            this.setStatus(500);
-            return err(error?.message ?? JSON.stringify(error));
+        // Other errors
+        this.setStatus(500);
+        if (error instanceof Error) {
+          if (error.name === "ResponseAborted" || error.name === "AbortError") {
+            this.setStatus(400);
+            return err("Request cancelled");
           }
 
-          this.setStatus(500);
-          return err("Failed to generate response: " + JSON.stringify(error));
+          if (error instanceof OpenAI.APIError) {
+            this.setStatus(400);
+            if ((error as any).error?.metadata?.raw) {
+              try {
+                const raw = JSON.parse(
+                  (error as any).error.metadata?.raw || "{}",
+                );
+                if (raw.error?.message) {
+                  return err(raw.error?.message);
+                }
+              } catch {}
+            }
+            return err((error as any)?.error?.message ?? JSON.stringify(error));
+          }
+          return err(error?.message ?? JSON.stringify(error));
         }
-      });
+        return err("Failed to generate response: " + JSON.stringify(error));
+      }
     } catch (error) {
       this.setStatus(500);
       return err("Failed to generate response: " + JSON.stringify(error));
