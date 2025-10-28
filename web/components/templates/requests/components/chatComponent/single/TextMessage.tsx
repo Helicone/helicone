@@ -115,7 +115,9 @@ export default function TextMessage({
       }
       text={
         typeof displayContent === "string"
-          ? displayContent
+          ? displayReasoning && !displayContent
+            ? displayReasoning
+            : displayContent
           : JSON.stringify(displayContent)
       }
       disabled={chatMode !== "PLAYGROUND_INPUT"}
