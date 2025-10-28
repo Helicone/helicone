@@ -77,7 +77,10 @@ export class PlaygroundController extends Controller {
         return err("Service temporarily unavailable");
       }
 
-      const isLocalDev = process.env.VERCEL_ENV !== "production";
+      const isLocalDev =
+        process.env.NODE_ENV === "development" ||
+        process.env.VERCEL_ENV === "development";
+
       const aiGatewayBaseURL = isLocalDev
         ? "http://localhost:8793/v1"
         : "https://ai-gateway.helicone.ai/v1";
