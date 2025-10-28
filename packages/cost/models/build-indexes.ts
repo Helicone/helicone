@@ -18,7 +18,7 @@ function mergeConfigs(
     projectId: endpointConfig.projectId,
     deploymentName: endpointConfig.deploymentName,
     resourceName: endpointConfig.resourceName,
-    crossRegion: endpointConfig.crossRegion,
+    crossRegion: endpointConfig.crossRegion ?? modelProviderConfig.crossRegion,
   };
 
   return {
@@ -37,6 +37,7 @@ function mergeConfigs(
     ptbEnabled: endpointConfig.ptbEnabled ?? modelProviderConfig.ptbEnabled,
     version: endpointConfig.version ?? modelProviderConfig.version,
     supportedParameters: modelProviderConfig.supportedParameters,
+    unsupportedParameters: modelProviderConfig.unsupportedParameters,
     priority: endpointConfig.priority ?? modelProviderConfig.priority,
   };
 }

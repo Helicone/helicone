@@ -1949,7 +1949,7 @@ Json: JsonObject;
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
-      gateway_endpoint_version: string | null;
+      ai_gateway_body_mapping: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2352,10 +2352,9 @@ Json: JsonObject;
       customer_id: string;
     };
     /** @enum {string} */
-    ResponseFormat: "ANTHROPIC" | "OPENAI";
+    BodyMappingType: "OPENAI" | "NO_MAPPING" | "RESPONSES";
     HeliconeMeta: {
-      gatewayEndpointVersion?: string;
-      gatewayResponseFormat?: components["schemas"]["ResponseFormat"];
+      aiGatewayBodyMapping?: components["schemas"]["BodyMappingType"];
       providerModelId?: string;
       gatewayModel?: string;
       gatewayProvider?: components["schemas"]["ModelProviderName"];

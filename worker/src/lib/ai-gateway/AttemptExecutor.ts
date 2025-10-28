@@ -136,7 +136,7 @@ export class AttemptExecutor {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: (body, modelId) => toAnthropic(body, modelId, plugins),
+        toAnthropic: (body, modelId, options) => toAnthropic(body, modelId, plugins, options),
         toChatCompletions: (body) => toChatCompletions(body),
       });
 

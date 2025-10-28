@@ -36,6 +36,7 @@ const llamaApiPattern = /^https:\/\/api\.llama\.com/;
 const nvidiaApiPattern = /^https:\/\/integrate\.api\.nvidia\.com/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
 const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
+const heliconeInferencePattern = /^https:\/\/inference\.helicone\.ai/;
 const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
 const anyscalePattern = /^https:\/\/api\.endpoints\.anyscale\.com/;
 const cloudflareAiGatewayPattern = /^https:\/\/gateway\.ai\.cloudflare\.com/;
@@ -171,6 +172,10 @@ export const providers: {
   },
   {
     pattern: heliconeProxyPattern,
+    provider: "HELICONE",
+  },
+  {
+    pattern: heliconeInferencePattern,
     provider: "HELICONE",
   },
   {

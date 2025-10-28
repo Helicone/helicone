@@ -273,6 +273,48 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "anthropic/claude-3-haiku-20240307": {
+    "claude-3-haiku-20240307:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "claude-3-haiku-20240307",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-3-haiku-20240307:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "pa/cd-3-hk-20240307",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "anthropic/claude-3.5-haiku": {
     "claude-3.5-haiku:anthropic": {
       "context": 200000,
@@ -805,6 +847,108 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "anthropic/claude-haiku-4-5-20251001": {
+    "claude-haiku-4-5-20251001:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "claude-haiku-4-5-20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-haiku-4-5-20251001:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 8192,
+      "modelId": "anthropic.claude-haiku-4-5-20251001-v1:0",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-haiku-4-5-20251001:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/claude-haiku-4-5-20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-haiku-4-5-20251001:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "anthropic/claude-haiku-4.5",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-haiku-4-5-20251001:vertex": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "claude-haiku-4-5@20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east5",
+      ],
+    },
+  },
   "anthropic/claude-opus-4": {
     "claude-opus-4:anthropic": {
       "context": 200000,
@@ -1013,6 +1157,110 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "anthropic/claude-opus-4-1-20250805": {
+    "claude-opus-4-1-20250805:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "claude-opus-4-1-20250805",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-opus-4-1-20250805:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 32000,
+      "modelId": "anthropic.claude-opus-4-1-20250805-v1:0",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-opus-4-1-20250805:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "pa/claude-opus-4-1-20250805",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-opus-4-1-20250805:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "anthropic/claude-opus-4.1",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-opus-4-1-20250805:vertex": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 32000,
+      "modelId": "claude-opus-4-1@20250805",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "anthropic/claude-sonnet-4": {
     "claude-sonnet-4:anthropic": {
       "context": 200000,
@@ -1101,6 +1349,110 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "crossRegion": true,
       "maxTokens": 64000,
       "modelId": "claude-sonnet-4@20250514",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "anthropic/claude-sonnet-4-5-20250929": {
+    "claude-sonnet-4-5-20250929:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "claude-sonnet-4-5-20250929",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-sonnet-4-5-20250929:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-sonnet-4-5-20250929:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/claude-sonnet-4-5-20250929",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-sonnet-4-5-20250929:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "anthropic/claude-sonnet-4.5",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-sonnet-4-5-20250929:vertex": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "claude-sonnet-4-5@20250929",
       "parameters": [
         "include_reasoning",
         "max_tokens",
@@ -1703,27 +2055,23 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "google/gemma": {
-    "gemma2-9b-it:groq": {
+    "gemma2-9b-it:chutes": {
       "context": 8192,
       "crossRegion": false,
       "maxTokens": 8192,
-      "modelId": "gemma2-9b-it",
+      "modelId": "unsloth/gemma-2-9b-it",
       "parameters": [
         "frequency_penalty",
-        "logit_bias",
-        "logprobs",
         "max_tokens",
-        "min_p",
         "presence_penalty",
         "repetition_penalty",
         "seed",
         "stop",
         "temperature",
         "top_k",
-        "top_logprobs",
         "top_p",
       ],
-      "provider": "groq",
+      "provider": "chutes",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -3064,12 +3412,8 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 32768,
       "modelId": "pa/gpt-5-chat-latest",
       "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
+        "max_completion_tokens",
         "stop",
-        "temperature",
-        "top_p",
       ],
       "provider": "helicone",
       "ptbEnabled": true,
@@ -3083,15 +3427,12 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 16384,
       "modelId": "gpt-5-chat-latest",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
         "verbosity",
       ],
       "provider": "openai",
@@ -3106,15 +3447,12 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 16384,
       "modelId": "openai/gpt-5-chat",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
       ],
       "provider": "openrouter",
       "ptbEnabled": true,
@@ -3128,10 +3466,8 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 32768,
       "modelId": "pa/gpt-5-codex",
       "parameters": [
-        "max_tokens",
+        "max_completion_tokens",
         "stop",
-        "temperature",
-        "top_p",
       ],
       "provider": "helicone",
       "ptbEnabled": true,
@@ -3145,7 +3481,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "gpt-5-mini",
       "parameters": [
-        "max_tokens",
+        "max_completion_tokens",
         "response_format",
         "seed",
         "structured_outputs",
@@ -3164,12 +3500,8 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 16384,
       "modelId": "pa/gpt-5-mini",
       "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
+        "max_completion_tokens",
         "stop",
-        "temperature",
-        "top_p",
       ],
       "provider": "helicone",
       "ptbEnabled": true,
@@ -3183,15 +3515,12 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "gpt-5-mini",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
         "verbosity",
       ],
       "provider": "openai",
@@ -3206,15 +3535,12 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "openai/gpt-5-mini",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
       ],
       "provider": "openrouter",
       "ptbEnabled": true,
@@ -3228,10 +3554,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 8192,
       "modelId": "pa/gpt-5-nano",
       "parameters": [
-        "max_tokens",
-        "stop",
-        "temperature",
-        "top_p",
+        "max_completion_tokens",
       ],
       "provider": "helicone",
       "ptbEnabled": true,
@@ -3245,15 +3568,11 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "gpt-5-nano",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
-        "stop",
         "tool_choice",
         "tools",
-        "top_p",
         "verbosity",
       ],
       "provider": "openai",
@@ -3268,15 +3587,11 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "openai/gpt-5-nano",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
-        "stop",
         "tool_choice",
         "tools",
-        "top_p",
       ],
       "provider": "openrouter",
       "ptbEnabled": true,
@@ -3290,12 +3605,8 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 32768,
       "modelId": "pa/gpt-5-pro",
       "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
+        "max_completion_tokens",
         "stop",
-        "temperature",
-        "top_p",
       ],
       "provider": "helicone",
       "ptbEnabled": true,
@@ -3310,7 +3621,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "modelId": "gpt-5",
       "parameters": [
         "max_completion_tokens",
-        "max_tokens",
         "response_format",
         "seed",
         "tool_choice",
@@ -3328,12 +3638,8 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 32768,
       "modelId": "pa/gpt-5",
       "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
+        "max_completion_tokens",
         "stop",
-        "temperature",
-        "top_p",
       ],
       "provider": "helicone",
       "ptbEnabled": true,
@@ -3347,15 +3653,12 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "gpt-5",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
         "verbosity",
       ],
       "provider": "openai",
@@ -3370,15 +3673,12 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "openai/gpt-5",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
       ],
       "provider": "openrouter",
       "ptbEnabled": true,
@@ -4137,6 +4437,10 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "novita",
     "openrouter",
   ],
+  "anthropic/claude-3-haiku-20240307": [
+    "anthropic",
+    "helicone",
+  ],
   "anthropic/claude-3.5-haiku": [
     "anthropic",
     "bedrock",
@@ -4173,6 +4477,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "anthropic/claude-haiku-4-5-20251001": [
+    "anthropic",
+    "bedrock",
+    "helicone",
+    "openrouter",
+    "vertex",
+  ],
   "anthropic/claude-opus-4": [
     "anthropic",
     "bedrock",
@@ -4187,7 +4498,21 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "anthropic/claude-opus-4-1-20250805": [
+    "anthropic",
+    "bedrock",
+    "helicone",
+    "openrouter",
+    "vertex",
+  ],
   "anthropic/claude-sonnet-4": [
+    "anthropic",
+    "bedrock",
+    "helicone",
+    "openrouter",
+    "vertex",
+  ],
+  "anthropic/claude-sonnet-4-5-20250929": [
     "anthropic",
     "bedrock",
     "helicone",
@@ -4232,7 +4557,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "vertex",
   ],
   "google/gemma": [
-    "groq",
+    "chutes",
     "openrouter",
   ],
   "google/gemma-3": [
@@ -4419,6 +4744,32 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "input": 4.22e-7,
         "output": 8.44e-7,
+        "threshold": 0,
+      },
+    ],
+  },
+  "anthropic/claude-3-haiku-20240307": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.12,
+          "write1h": 2,
+          "write5m": 1.2,
+        },
+        "input": 2.5e-7,
+        "output": 0.00000125,
+        "threshold": 0,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.12,
+          "write1h": 2,
+          "write5m": 1.2,
+        },
+        "input": 2.5e-7,
+        "output": 0.00000125,
         "threshold": 0,
       },
     ],
@@ -4740,6 +5091,64 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "anthropic/claude-haiku-4-5-20251001": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.00001,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.00001,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000105,
+        "output": 0.00000527,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.00001,
+      },
+    ],
+  },
   "anthropic/claude-opus-4": {
     "anthropic": [
       {
@@ -4800,6 +5209,65 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "anthropic/claude-opus-4-1": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+        "web_search": 0.00001,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+        "web_search": 0.00001,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00001583,
+        "output": 0.00007913,
+        "threshold": 0,
+        "web_search": 0.00001,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+        "web_search": 0.00001,
+      },
+    ],
+  },
+  "anthropic/claude-opus-4-1-20250805": {
     "anthropic": [
       {
         "cacheMultipliers": {
@@ -4937,6 +5405,81 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 0.0000225,
         "threshold": 200000,
         "web_search": 0.00001,
+      },
+    ],
+  },
+  "anthropic/claude-sonnet-4-5-20250929": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000633,
+        "output": 0.00002374,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
       },
     ],
   },
@@ -5168,11 +5711,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "google/gemma": {
-    "groq": [
+    "chutes": [
       {
-        "image": 0,
-        "input": 2e-7,
-        "output": 2e-7,
+        "input": 1e-8,
+        "output": 3e-8,
         "threshold": 0,
       },
     ],
@@ -5589,6 +6131,13 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "claude-3-haiku-20240307",
+      "providers": [
+        "anthropic",
+        "helicone",
+      ],
+    },
+    {
       "model": "claude-3.5-haiku",
       "providers": [
         "anthropic",
@@ -5640,6 +6189,16 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "claude-haiku-4-5-20251001",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "helicone",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "claude-opus-4",
       "providers": [
         "anthropic",
@@ -5660,7 +6219,27 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "claude-opus-4-1-20250805",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "helicone",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "claude-sonnet-4",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "helicone",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "claude-sonnet-4-5-20250929",
       "providers": [
         "anthropic",
         "bedrock",
@@ -5751,7 +6330,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gemma2-9b-it",
       "providers": [
-        "groq",
+        "chutes",
         "openrouter",
       ],
     },
@@ -6118,7 +6697,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
   ],
   "providerBreakdown": [
     {
-      "modelCount": 8,
+      "modelCount": 12,
       "provider": "anthropic",
     },
     {
@@ -6126,11 +6705,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "azure",
     },
     {
-      "modelCount": 8,
+      "modelCount": 11,
       "provider": "bedrock",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "chutes",
     },
     {
@@ -6146,11 +6725,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "google-ai-studio",
     },
     {
-      "modelCount": 14,
+      "modelCount": 13,
       "provider": "groq",
     },
     {
-      "modelCount": 25,
+      "modelCount": 29,
       "provider": "helicone",
     },
     {
@@ -6166,11 +6745,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 43,
+      "modelCount": 46,
       "provider": "openrouter",
     },
     {
-      "modelCount": 11,
+      "modelCount": 14,
       "provider": "vertex",
     },
     {
@@ -6180,14 +6759,18 @@ exports[`Registry Snapshots verify registry state 1`] = `
   ],
   "ptbEnabledModels": [
     "chatgpt-4o-latest",
+    "claude-3-haiku-20240307",
     "claude-3.5-haiku",
     "claude-3.5-sonnet-v2",
     "claude-3.7-sonnet",
     "claude-4.5-haiku",
     "claude-4.5-sonnet",
+    "claude-haiku-4-5-20251001",
     "claude-opus-4",
     "claude-opus-4-1",
+    "claude-opus-4-1-20250805",
     "claude-sonnet-4",
+    "claude-sonnet-4-5-20250929",
     "deepseek-r1-distill-llama-70b",
     "deepseek-reasoner",
     "deepseek-tng-r1t2-chimera",
@@ -6255,14 +6838,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
   "sampleEndpointIds": [
     "chatgpt-4o-latest:openai:*",
     "chatgpt-4o-latest:openrouter:*",
+    "claude-3-haiku-20240307:anthropic:*",
+    "claude-3-haiku-20240307:helicone:*",
     "claude-3.5-haiku:anthropic:*",
-    "claude-3.5-haiku:bedrock:us-east-1",
-    "claude-3.5-haiku:helicone:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 179,
-  "totalModelProviderConfigs": 179,
-  "totalModelsWithPtb": 71,
+  "totalEndpoints": 196,
+  "totalModelProviderConfigs": 196,
+  "totalModelsWithPtb": 75,
   "totalProviders": 15,
 }
 `;

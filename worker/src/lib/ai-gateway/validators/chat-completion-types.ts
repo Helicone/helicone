@@ -63,9 +63,20 @@ const ChatCompletionRequestMessageContentPartFile = z.object({
     })
     .partial(),
 });
+const ChatCompletionRequestMessageContentPartDocument = z.object({
+  type: z.literal("document"),
+  source: z.object({
+    type: z.literal("text"),
+    media_type: z.string(),
+    data: z.string(),
+  }),
+  title: z.string().optional(),
+  citations: z.object({ enabled: z.boolean() }).optional(),
+});
 const ChatCompletionRequestUserMessageContentPart = z.union([
   ChatCompletionRequestMessageContentPartText,
   ChatCompletionRequestMessageContentPartImage,
+  ChatCompletionRequestMessageContentPartDocument,
 
   // HELICONE_DISABLED
   // ChatCompletionRequestMessageContentPartAudio,
