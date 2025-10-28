@@ -1,17 +1,3 @@
-/**
- * Lightweight DataDog APM Tracer
- *
- * Sends distributed traces to DataDog as structured logs for correlation.
- * Uses Datadog Logs API v2 format (since APM direct intake requires an agent).
- *
- * Features:
- * - Minimal bundle size (~200 lines, no external deps)
- * - Async send via ctx.waitUntil (zero impact on response latency)
- * - Tag support for filtering (org_id, provider, model, etc.)
- * - Parent-child span relationships
- * - Trace correlation in Datadog via trace_id/span_id fields
- */
-
 export interface DataDogTracerConfig {
   enabled: boolean;
   apiKey: string;
@@ -64,10 +50,6 @@ export class DataDogTracer {
     this.orgId = orgId;
   }
 
-  /**
-   * Start a new trace (root span)
-   * Returns trace context for passing to child operations
-   */
   startTrace(
     name: string,
     resource: string,
@@ -115,10 +97,6 @@ export class DataDogTracer {
     };
   }
 
-  /**
-   * Start a child span within an existing trace
-   * Returns span ID for later finishing
-   */
   startSpan(
     name: string,
     resource: string,
@@ -155,9 +133,6 @@ export class DataDogTracer {
     return spanId;
   }
 
-  /**
-   * Add or update a tag on a span
-   */
   setTag(spanId: string | null, key: string, value: string | number): void {
     if (!spanId) return;
 
@@ -171,9 +146,6 @@ export class DataDogTracer {
     }
   }
 
-  /**
-   * Mark a span as having an error
-   */
   setError(spanId: string | null, error: Error | string): void {
     if (!spanId) return;
 
@@ -188,9 +160,6 @@ export class DataDogTracer {
     }
   }
 
-  /**
-   * Finish a span (records duration)
-   */
   finishSpan(spanId: string | null, tags?: Record<string, string>): void {
     if (!spanId) return;
 
@@ -204,9 +173,6 @@ export class DataDogTracer {
     }
   }
 
-  /**
-   * Finish the root span (marks end of trace)
-   */
   finishTrace(tags?: Record<string, string>): void {
     if (!this.rootSpanId) return;
     this.finishSpan(this.rootSpanId, {
@@ -215,10 +181,6 @@ export class DataDogTracer {
     });
   }
 
-  /**
-   * Send the complete trace to DataDog Logs API
-   * Should be called within ctx.waitUntil() to avoid blocking response
-   */
   async sendTrace(): Promise<void> {
     try {
       if (this.DISABLED || !this.config.enabled || this.spans.size === 0) {
@@ -293,27 +255,6 @@ export class DataDogTracer {
     }
   }
 
-  /**
-   * Get current trace context (for passing to async operations)
-   */
-  getTraceContext(): TraceContext | null {
-    if (!this.traceId || !this.rootSpanId) {
-      return null;
-    }
-
-    const rootSpan = this.spans.get(this.rootSpanId);
-    return {
-      trace_id: this.traceId,
-      parent_span_id: this.rootSpanId,
-      sampled: true,
-      tags: rootSpan?.meta || {},
-    };
-  }
-
-
-  /**
-   * Generate a random 64-bit ID as decimal string
-   */
   private generateId(): string {
     // Generate random 64-bit number (JavaScript safe integer is 53 bits, so use BigInt)
     const high = Math.floor(Math.random() * 0x100000000);
@@ -322,9 +263,6 @@ export class DataDogTracer {
     return id.toString();
   }
 
-  /**
-   * Get current time in nanoseconds (Datadog APM format)
-   */
   private nowNanos(): number {
     // JavaScript Date.now() is in milliseconds
     // Convert to nanoseconds (multiply by 1,000,000)
@@ -332,9 +270,6 @@ export class DataDogTracer {
   }
 }
 
-/**
- * Create tracer from environment config
- */
 export function createDataDogTracer(env: {
   DATADOG_APM_ENABLED?: string;
   DATADOG_API_KEY?: string;
