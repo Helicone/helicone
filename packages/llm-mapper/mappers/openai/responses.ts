@@ -878,6 +878,25 @@ export const mapOpenAIResponse = ({
     // Look for the last user message or any message with content
     for (let i = requestMessages.length - 1; i >= 0; i--) {
       const message = requestMessages[i];
+
+      // Handle contentArray type messages (messages with array content)
+      if (
+        message?._type === "contentArray" &&
+        Array.isArray(message.contentArray)
+      ) {
+        for (const item of message.contentArray) {
+          if (
+            item?._type === "message" &&
+            item.content &&
+            typeof item.content === "string" &&
+            item.content.trim().length > 0
+          ) {
+            return item.content;
+          }
+        }
+      }
+
+      // Handle regular messages with string content
       if (
         message?.content &&
         typeof message.content === "string" &&
