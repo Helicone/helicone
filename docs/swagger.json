@@ -8854,7 +8854,8 @@
 					"logprobs",
 					"top_logprobs",
 					"structured_outputs",
-					"verbosity"
+					"verbosity",
+					"n"
 				]
 			},
 			"PluginId": {
