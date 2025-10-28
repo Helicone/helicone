@@ -176,10 +176,18 @@ function getModelProviderConfigByProviderModelId(
   provider: ModelProviderName
 ): Result<ModelProviderConfig> {
   const providerModelIdKey = `${providerModelId}:${provider}`;
-  const result = indexes.providerModelIdToConfig.get(providerModelIdKey);
-  return result
-    ? ok(result)
-    : err(`Config not found for providerModelId: ${providerModelId}`);
+
+  let result = indexes.providerModelIdToConfig.get(providerModelIdKey);
+  if (result) {
+    return ok(result);
+  }
+
+  result = indexes.providerModelIdAliasToConfig.get(providerModelIdKey);
+  if (result) {
+    return ok(result);
+  }
+
+  return err(`Config not found for providerModelId: ${providerModelId}`);
 }
 
 function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {

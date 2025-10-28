@@ -2926,6 +2926,7 @@ const models: TsoaRoute.Models = {
             "quantization": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["fp4"]},{"dataType":"enum","enums":["fp8"]},{"dataType":"enum","enums":["fp16"]},{"dataType":"enum","enums":["bf16"]}]},
             "responseFormat": {"ref":"ResponseFormat"},
             "requireExplicitRouting": {"dataType":"boolean"},
+            "providerModelIdAliases": {"dataType":"array","array":{"dataType":"string"}},
         },
         "additionalProperties": false,
     },
