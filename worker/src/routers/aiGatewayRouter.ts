@@ -110,6 +110,8 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       const { data: orgData, error: orgError } = await db.getAuthParams();
       tracer.finishSpan(dbSpan);
       if (orgError || !orgData) {
+        tracer.finishTrace({ error: "org_not_found" });
+        ctx.waitUntil(tracer.sendTrace());
         return new Response("Organization not found", { status: 401 });
       }
 

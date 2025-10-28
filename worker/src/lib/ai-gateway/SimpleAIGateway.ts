@@ -83,13 +83,15 @@ export class SimpleAIGateway {
 
   async handle(): Promise<Response> {
     // Step 1: Parse and prepare request
-    const parseSpan = this.tracer.startSpan(
-      "ai_gateway.gateway.parse_request",
-      "parseAndPrepareRequest",
-      "ai-gateway",
-      {},
-      this.traceContext || undefined
-    );
+    const parseSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.parse_request",
+          "parseAndPrepareRequest",
+          "ai-gateway",
+          {},
+          this.traceContext
+        )
+      : null;
     const parseResult = await this.parseAndPrepareRequest();
     this.tracer.finishSpan(parseSpan);
     if (isErr(parseResult)) {
@@ -117,13 +119,15 @@ export class SimpleAIGateway {
     const errors: Array<AttemptError> = [];
 
     // Step 3: Build all attempts
-    const buildSpan = this.tracer.startSpan(
-      "ai_gateway.gateway.build_attempts",
-      "attemptBuilder.buildAttempts",
-      "ai-gateway",
-      {},
-      this.traceContext || undefined
-    );
+    const buildSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.build_attempts",
+          "attemptBuilder.buildAttempts",
+          "ai-gateway",
+          {},
+          this.traceContext
+        )
+      : null;
     const attempts = await this.attemptBuilder.buildAttempts(
       modelStrings,
       this.orgId,
@@ -143,13 +147,15 @@ export class SimpleAIGateway {
     }
 
     // Step 4: Get disallow list
-    const disallowSpan = this.tracer.startSpan(
-      "ai_gateway.gateway.get_disallow_list",
-      "getDisallowList",
-      "ai-gateway",
-      {},
-      this.traceContext || undefined
-    );
+    const disallowSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.get_disallow_list",
+          "getDisallowList",
+          "ai-gateway",
+          {},
+          this.traceContext
+        )
+      : null;
     const disallowList = await this.getDisallowList(this.orgId);
     this.tracer.finishSpan(disallowSpan);
 

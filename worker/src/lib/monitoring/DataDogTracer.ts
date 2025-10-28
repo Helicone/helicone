@@ -209,7 +209,10 @@ export class DataDogTracer {
    */
   finishTrace(tags?: Record<string, string>): void {
     if (!this.rootSpanId) return;
-    this.finishSpan(this.rootSpanId, tags);
+    this.finishSpan(this.rootSpanId, {
+      ...tags,
+      span_count: this.spans.size.toString(),
+    });
   }
 
   /**
@@ -276,6 +279,10 @@ export class DataDogTracer {
         body: JSON.stringify(logEntries),
       });
 
+      if (!response.ok) {
+        console.error("[DataDogTracer] Failed to send trace:", response.status);
+      }
+
       // Clear spans after sending
       this.spans.clear();
       this.traceId = undefined;
@@ -303,18 +310,6 @@ export class DataDogTracer {
     };
   }
 
-  /**
-   * Create a child trace context from a parent span
-   */
-  createChildContext(
-    parentSpanId: string,
-    traceContext: TraceContext
-  ): TraceContext {
-    return {
-      ...traceContext,
-      parent_span_id: parentSpanId,
-    };
-  }
 
   /**
    * Generate a random 64-bit ID as decimal string
