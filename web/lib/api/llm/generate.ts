@@ -180,8 +180,6 @@ export async function generate<T extends object | undefined = undefined>(
 
   const apiEndpoint = params.endpoint === "agent" ? "agent" : "playground";
 
-  // Make request through Jawn backend, which routes to Helicone AI Gateway
-  // Backend handles authentication and provider key management
   const response = await fetch(
     `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/${apiEndpoint}/generate`,
     {
