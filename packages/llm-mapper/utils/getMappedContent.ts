@@ -29,7 +29,8 @@ const MAX_PREVIEW_LENGTH = 1_000;
 export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   // the request-response will be converted to openai format if necessary
   // thus uses the same mapper.
-  "ai-gateway": mapOpenAIRequest,
+  "ai-gateway-chat": mapOpenAIRequest,
+  "ai-gateway-responses": mapOpenAIResponse,
   "openai-chat": mapOpenAIRequest,
   "openai-response": mapOpenAIResponse,
   "anthropic-chat": mapAnthropicRequest,

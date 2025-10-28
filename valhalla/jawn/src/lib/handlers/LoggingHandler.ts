@@ -626,8 +626,8 @@ export class LoggingHandler extends AbstractLogHandler {
       request_referrer: context.message.log.request.requestReferrer ?? "",
       is_passthrough_billing:
         context.message.heliconeMeta.isPassthroughBilling ?? false,
-      gateway_endpoint_version:
-        context.message.heliconeMeta.gatewayEndpointVersion ?? "",
+      ai_gateway_body_mapping:
+        context.message.heliconeMeta.aiGatewayBodyMapping ?? "",
     };
 
     return requestResponseLog;
