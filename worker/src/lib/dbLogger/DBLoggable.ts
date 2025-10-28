@@ -749,7 +749,6 @@ export class DBLoggable {
       gatewayProvider = provider as ModelProviderName;
       gatewayModel = model as string;
       aiGatewayBodyMapping = this.request.attempt?.endpoint.userConfig?.gatewayMapping ?? "OPENAI";
-      console.log("aiGatewayBodyMapping", aiGatewayBodyMapping);
     }
 
     const kafkaMessage: MessageData = {
