@@ -270,4 +270,5 @@ export interface RequestBodyContext {
     providerModelId?: string,
     options?: { includeCacheBreakpoints?: boolean }
   ) => any;
+  toChatCompletions: (body: any) => any;
 }
