@@ -197,7 +197,8 @@ const PlaygroundMessagesPanel = ({
             );
           }
           switch (mappedContent?._type) {
-            case "ai-gateway":
+            case "ai-gateway-chat":
+            case "ai-gateway-responses":
             case "openai-chat":
             case "anthropic-chat":
             case "gemini-chat":

@@ -4969,7 +4969,7 @@
 						"type": "string",
 						"nullable": true
 					},
-					"gateway_endpoint_version": {
+					"ai_gateway_body_mapping": {
 						"type": "string",
 						"nullable": true
 					}
@@ -5012,7 +5012,7 @@
 					"model",
 					"cache_reference_id",
 					"cache_enabled",
-					"gateway_endpoint_version"
+					"ai_gateway_body_mapping"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -6739,20 +6739,18 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResponseFormat": {
+			"BodyMappingType": {
 				"type": "string",
 				"enum": [
-					"ANTHROPIC",
-					"OPENAI"
+					"OPENAI",
+					"NO_MAPPING",
+					"RESPONSES"
 				]
 			},
 			"HeliconeMeta": {
 				"properties": {
-					"gatewayEndpointVersion": {
-						"type": "string"
-					},
-					"gatewayResponseFormat": {
-						"$ref": "#/components/schemas/ResponseFormat"
+					"aiGatewayBodyMapping": {
+						"$ref": "#/components/schemas/BodyMappingType"
 					},
 					"providerModelId": {
 						"type": "string"

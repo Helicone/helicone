@@ -17,6 +17,7 @@ import {
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { CacheProvider } from "../../../../packages/common/cache/provider";
 import { GatewayMetrics } from "./GatewayMetrics";
+import { toChatCompletions } from "@helicone-package/llm-mapper/transform/providers/responses/request/toChatCompletions";
 
 interface ExecutorProps {
   attempt: Attempt;
@@ -135,7 +136,8 @@ export class AttemptExecutor {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: (body, modelId) => toAnthropic(body, modelId, plugins),
+        toAnthropic: (body, modelId, options) => toAnthropic(body, modelId, plugins, options),
+        toChatCompletions: (body) => toChatCompletions(body),
       });
 
       if (isErr(bodyResult) || !bodyResult.data) {

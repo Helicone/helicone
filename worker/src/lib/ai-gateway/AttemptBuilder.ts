@@ -2,6 +2,10 @@ import { registry } from "@helicone-package/cost/models/registry";
 import { ModelProviderEntry } from "@helicone-package/cost/models/build-indexes";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import {
+  getProviderPriority,
+  sortAttemptsByPriority,
+} from "@helicone-package/cost/models/providers/priorities";
+import {
   UserEndpointConfig,
   Endpoint,
   Plugin,
@@ -44,7 +48,7 @@ export class AttemptBuilder {
       }
 
       if (modelSpec.data.provider) {
-        // Explicit provider specified - only try this provider
+        // Explicit provider specified - preserve user's order
         const providerAttempts = await this.getProviderAttempts(
           modelSpec.data,
           orgId,
@@ -53,20 +57,19 @@ export class AttemptBuilder {
         );
         allAttempts.push(...providerAttempts);
       } else {
-        // No provider specified - try all providers
+        // No provider specified - get all providers and sort by priority
         const attempts = await this.buildAttemptsForAllProviders(
           modelSpec.data,
           orgId,
           bodyMapping,
           plugins
         );
-        allAttempts.push(...attempts);
+        const sortedAttempts = sortAttemptsByPriority(attempts);
+        allAttempts.push(...sortedAttempts);
       }
     }
 
-    // Sort by priority (BYOK=1 before PTB=2)
-    // Within each priority, endpoints are already sorted by cost from registry
-    return allAttempts.sort((a, b) => a.priority - b.priority);
+    return allAttempts;
   }
 
   private async buildAttemptsForAllProviders(
@@ -190,12 +193,14 @@ export class AttemptBuilder {
       plugins
     );
 
+    const providerDefaultPriority = getProviderPriority(providerData.provider);
+
     return [
       {
         endpoint: endpointResult.data,
         providerKey: userKey,
         authType: "byok",
-        priority: endpointResult.data.priority ?? 1,
+        priority: endpointResult.data.priority ?? providerDefaultPriority,
         source: `${modelSpec.modelName}/${providerData.provider}/byok${modelSpec.customUid ? `/${modelSpec.customUid}` : ""}`,
         plugins: processedPlugins.length > 0 ? processedPlugins : undefined,
       },
@@ -313,13 +318,15 @@ export class AttemptBuilder {
       };
     });
 
+    const providerDefaultPriority = getProviderPriority(provider);
+
     return updatedEndpoints.map(
       (endpoint) =>
         ({
           endpoint,
           providerKey,
           authType: "ptb",
-          priority: endpoint.priority ?? 4,
+          priority: endpoint.priority ?? providerDefaultPriority,
           source: `${modelName}/${provider}/ptb`,
           plugins: plugins && plugins.length > 0 ? plugins : undefined,
         }) as Attempt
@@ -334,5 +341,4 @@ export class AttemptBuilder {
       providerKey.byok_enabled === true
     );
   }
-
 }
