@@ -14,20 +14,19 @@ export class XAIUsageProcessor extends OpenAIUsageProcessor {
 
     const usage = parsedResponse.usage || {};
 
-    const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
     const completionTokens = usage.completion_tokens ?? usage.output_tokens ?? 0;
 
     const promptDetails = usage.prompt_tokens_details || usage.input_tokens_details || {};
     const completionDetails = usage.completion_tokens_details || usage.output_tokens_details || {};
 
+    // For XAI, use text_tokens from details (excludes cached tokens)
+    const textTokens = promptDetails.text_tokens ?? 0;
     const cachedTokens = promptDetails.cached_tokens ?? 0;
     const promptAudioTokens = promptDetails.audio_tokens ?? 0;
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
 
-    // For XAI, prompt_tokens and completion_tokens are already effective
-    // (they don't include cached, audio, or reasoning), so we use them directly
-    const effectivePromptTokens = promptTokens;
+    const effectivePromptTokens = textTokens;
     const effectiveCompletionTokens = completionTokens;
 
     const modelUsage: ModelUsage = {
