@@ -5,6 +5,7 @@ export interface DataDogTracerConfig {
   sampleRate: number; // 0-1, defaults to 0.01 (1%)
   service?: string; // Default service name
   env?: string; // Environment (production, development, etc.)
+  globalDisabled?: boolean; // Master kill switch to disable all tracing
 }
 
 export interface TraceContext {
@@ -35,8 +36,8 @@ export class DataDogTracer {
   private rootSpanId?: string;
   private orgId?: string;
 
-  // MASTER KILL SWITCH - set to true to disable ALL tracing
-  private readonly DISABLED = false;
+  // MASTER KILL SWITCH - configurable via config.globalDisabled
+  private readonly DISABLED: boolean;
 
   constructor(config: DataDogTracerConfig) {
     this.config = {
@@ -44,6 +45,7 @@ export class DataDogTracer {
       env: "production",
       ...config,
     };
+    this.DISABLED = config.globalDisabled ?? false;
   }
 
   setOrgId(orgId: string) {
@@ -187,6 +189,12 @@ export class DataDogTracer {
         return;
       }
 
+      // Validate API key is configured
+      if (!this.config.apiKey) {
+        console.warn("[DataDogTracer] No API key configured, skipping trace");
+        return;
+      }
+
       // Convert spans to structured log entries
       const logEntries = Array.from(this.spans.values()).map((span) => {
         // Build ddtags from span metadata
@@ -244,14 +252,14 @@ export class DataDogTracer {
       if (!response.ok) {
         console.error("[DataDogTracer] Failed to send trace:", response.status);
       }
-
-      // Clear spans after sending
-      this.spans.clear();
-      this.traceId = undefined;
-      this.rootSpanId = undefined;
     } catch (error) {
       // Silently ignore errors - monitoring must never break the app
       console.error("[DataDogTracer] Failed to send trace:", error);
+    } finally {
+      // Always clear spans to prevent memory leaks, even on failure
+      this.spans.clear();
+      this.traceId = undefined;
+      this.rootSpanId = undefined;
     }
   }
 
