@@ -63,6 +63,7 @@ export interface ModelIndexes {
   modelToProviderData: Map<ModelName, ModelProviderEntry[]>;
   modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry>;
   providerModelIdToConfig: Map<string, ModelProviderConfig>;
+  providerModelIdAliasToConfig: Map<string, ModelProviderConfig>;
   modelToArchivedEndpointConfigs: Map<string, ModelProviderConfig>;
 }
 
@@ -87,6 +88,8 @@ export function buildIndexes(
   const modelProviderToData: Map<ModelProviderConfigId, ModelProviderEntry> =
     new Map();
   const providerModelIdToConfig: Map<string, ModelProviderConfig> = new Map();
+  const providerModelIdAliasToConfig: Map<string, ModelProviderConfig> =
+    new Map();
   const modelToArchivedEndpointConfigs: Map<string, ModelProviderConfig> =
     new Map();
 
@@ -103,6 +106,14 @@ export function buildIndexes(
     // Store providerModelId -> config mapping
     const providerModelIdKey = `${config.providerModelId}:${config.provider}`;
     providerModelIdToConfig.set(providerModelIdKey, config);
+
+    // Store providerModelIdAliases -> config mapping
+    if (config.providerModelIdAliases && config.providerModelIdAliases.length > 0) {
+      for (const alias of config.providerModelIdAliases) {
+        const aliasKey = `${alias}:${config.provider}`;
+        providerModelIdAliasToConfig.set(aliasKey, config);
+      }
+    }
 
     // Track provider to models mapping
     if (!providerToModels.has(provider)) {
@@ -206,6 +217,7 @@ export function buildIndexes(
     modelToProviderData,
     modelProviderToData,
     providerModelIdToConfig,
+    providerModelIdAliasToConfig,
     modelToArchivedEndpointConfigs,
   };
 }

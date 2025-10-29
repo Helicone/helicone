@@ -9119,6 +9119,12 @@
 					},
 					"requireExplicitRouting": {
 						"type": "boolean"
+					},
+					"providerModelIdAliases": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					}
 				},
 				"required": [

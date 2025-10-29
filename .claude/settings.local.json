@@ -73,7 +73,8 @@
       "mcp__chrome-devtools__evaluate_script",
       "mcp__chrome-devtools__wait_for",
       "Bash(git fetch:*)",
-      "Bash(gh pr checks:*)"
+      "Bash(gh pr checks:*)",
+      "WebFetch(domain:docs.helicone.ai)"
     ],
     "deny": []
   },

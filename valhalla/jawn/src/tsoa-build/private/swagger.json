@@ -9351,7 +9351,8 @@
 					"sqs:helicone-scores",
 					"sqs:request-response-logs-dlq",
 					"sqs:helicone-scores-dlq",
-					"stripe:products"
+					"stripe:products",
+					"secrets:provider-keys"
 				],
 				"nullable": false
 			},

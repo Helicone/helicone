@@ -48,8 +48,6 @@ interface ModelParametersFormProps {
   onParametersChange: (_parameters: ModelParameters) => void;
   responseFormat: ResponseFormat;
   onResponseFormatChange: (_responseFormat: ResponseFormat) => void;
-  useAIGateway: boolean;
-  setUseAIGateway: (_useAIGateway: boolean) => void;
   error: string | null;
 }
 
@@ -68,8 +66,6 @@ export default function ModelParametersForm({
   onParametersChange,
   responseFormat,
   onResponseFormatChange,
-  useAIGateway,
-  setUseAIGateway,
   error,
 }: ModelParametersFormProps) {
   const updateParameter = (key: keyof ModelParameters, value: any) => {
@@ -142,30 +138,25 @@ export default function ModelParametersForm({
     },
   });
 
-  const [isOpenRouterDialogOpen, setIsOpenRouterDialogOpen] = useState(false);
+  const [isProviderKeyDialogOpen, setIsProviderKeyDialogOpen] = useState(false);
 
-  // Auto-open OpenRouter dialog when the specific error occurs
+  // Auto-open provider key dialog when rate limit error occurs
   useEffect(() => {
     logger.error({ error }, "Error occurred");
     if (
       error &&
-      error.includes(
-        "You have reached your free playground limit. Please add your own OpenRouter key to continue using the Playground.",
-      )
+      (error.includes("You have reached your free playground limit") ||
+        error.includes("Insufficient credits") ||
+        (error.includes("No") && error.includes("API key found")))
     ) {
-      setIsOpenRouterDialogOpen(true);
+      setIsProviderKeyDialogOpen(true);
     }
   }, [error]);
 
   return (
     <>
       <Popover
-        open={
-          isModelParametersPopoverOpen ||
-          error?.includes(
-            "You have reached your free playground limit. Please add your own OpenRouter key to continue using the Playground.",
-          )
-        }
+        open={isModelParametersPopoverOpen}
         onOpenChange={setIsModelParametersPopoverOpen}
       >
         <PopoverTrigger asChild>
@@ -593,8 +584,8 @@ export default function ModelParametersForm({
               </Select>
             </div> */}
             <Dialog
-              open={isOpenRouterDialogOpen}
-              onOpenChange={setIsOpenRouterDialogOpen}
+              open={isProviderKeyDialogOpen}
+              onOpenChange={setIsProviderKeyDialogOpen}
             >
               <DialogTrigger asChild>
                 <Button

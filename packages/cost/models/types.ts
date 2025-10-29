@@ -200,6 +200,7 @@ export interface ModelProviderConfig extends BaseConfig {
   quantization?: "fp4" | "fp8" | "fp16" | "bf16";
   responseFormat?: ResponseFormat;
   requireExplicitRouting?: boolean;
+  providerModelIdAliases?: string[];
 }
 
 export interface EndpointConfig extends UserEndpointConfig {
