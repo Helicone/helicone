@@ -56,36 +56,38 @@ const Stats = ({
       <div
         className={cn(
           ISLAND_WIDTH,
-          "flex justify-between items-start pt-0 pb-32"
+          "flex flex-col md:flex-row justify-between items-start pt-0 pb-16 md:pb-32 px-4 md:px-8"
         )}
       >
-        <h1 className="gap-y-4 text-3xl md:text-6xl font-semibold !leading-[150%] text-black max-w-[1100px] text-wrap">
+        <h1 className="gap-y-4 text-2xl sm:text-3xl md:text-6xl font-semibold !leading-[150%] text-black max-w-[1100px] text-wrap mb-4 md:mb-0">
           Today,{" "}
           <span
             ref={elementRef}
             className={cn(
-              "inline-block bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-1 px-5 text-brand translate-y-[-10px] transition-transform duration-500 text-nowrap",
-              isVisible ? "rotate-[-3deg]" : "rotate-[0  deg]"
+              "inline-block bg-[#E7F6FD] border-[3px] border-brand rounded-xl py-1 px-3 md:px-5 text-brand translate-y-[-5px] md:translate-y-[-10px] transition-transform duration-500",
+              isVisible ? "rotate-[-3deg]" : "rotate-[0deg]"
             )}
           >
             {humanReadableNumber(totalValuesData?.total_requests ?? 0)}
           </span>{" "}
-          requests processed,{" "}
-          <span className="text-brand">
-            {humanReadableNumber(totalValuesData?.total_tokens ?? 0)}
-          </span>{" "}
-          tokens logged and <span className="text-brand">18.3 million</span>{" "}
-          users tracked
+          <span className="block md:inline">
+            requests processed,{" "}
+            <span className="text-brand">
+              {humanReadableNumber(totalValuesData?.total_tokens ?? 0)}
+            </span>{" "}
+            tokens logged and <span className="text-brand">18.3 million</span>{" "}
+            users tracked
+          </span>
         </h1>
-        <div className="flex gap-2 items-center md:gap-4">
+        <div className="flex gap-2 items-center md:gap-4 self-end md:self-start">
           <Link href="https://us.helicone.ai/open-stats" target="_blank" rel="noopener">
             <Button
               variant="ghost"
               size="landing_page"
-              className="hover:bg-brand hover:border-brand hover:text-white p-5 text-base md:text-2xl md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
+              className="hover:bg-brand hover:border-brand hover:text-white p-3 md:p-5 text-base md:text-2xl md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
             >
               Live
-              <ArrowUpRight className="size-5 md:size-6" />
+              <ArrowUpRight className="size-4 md:size-5 lg:size-6" />
             </Button>
           </Link>
         </div>
