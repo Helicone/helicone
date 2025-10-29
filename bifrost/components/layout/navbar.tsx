@@ -148,14 +148,14 @@ const MobileNav = () => {
 
   return (
     <nav className="lg:hidden" aria-label="Global">
-      <div className="fixed inset-x-0 top-0 z-50 bg-background">
+      <div className="fixed inset-x-0 top-[42px] z-50 bg-background">
         <MobileHeader
           menuDispatch={[menuOpen, setMenuOpen]}
           className="pl-2 pr-4"
         />
       </div>
       {menuOpen && (
-        <div className="fixed inset-0 top-[57px] z-50 bg-background">
+        <div className="fixed inset-0 top-[99px] z-50 bg-background">
           <div className="h-full pb-10 overflow-y-auto">
             <div className="flex flex-col gap-4 pt-3 px-4">
               {/* Login and Contact Buttons */}
