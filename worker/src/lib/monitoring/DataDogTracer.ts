@@ -264,11 +264,17 @@ export class DataDogTracer {
   }
 
   private generateId(): string {
-    // Generate cryptographically secure random 64-bit number for distributed tracing
-    // Using crypto.getRandomValues() for better entropy than Math.random()
+    // Generate cryptographically secure random 64-bit positive integer for DataDog
+    // DataDog expects unsigned 64-bit integers as trace/span IDs
     const bytes = new Uint32Array(2);
     crypto.getRandomValues(bytes);
+
+    // Combine two 32-bit unsigned integers into one 64-bit unsigned integer
+    // Use bitwise OR to ensure result is always positive
     const id = (BigInt(bytes[0]) << BigInt(32)) | BigInt(bytes[1]);
+
+    // Ensure the result is within valid 64-bit unsigned range (0 to 2^64-1)
+    // BigInt operations preserve the unsigned nature when using Uint32Array
     return id.toString();
   }
 
