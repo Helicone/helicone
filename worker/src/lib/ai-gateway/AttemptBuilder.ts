@@ -118,10 +118,11 @@ export class AttemptBuilder {
           plugins
         );
 
-        // Always build PTB attempts (feature flag removed)
+        // Build PTB attempts unless request comes from master org
         const ptbAttempts = await this.buildPtbAttempts(
           modelSpec,
           data,
+          orgId,
           plugins
         );
         return [...byokAttempts, ...ptbAttempts];
@@ -166,10 +167,11 @@ export class AttemptBuilder {
       plugins
     );
 
-    // Always build PTB attempts (feature flag removed)
+    // Build PTB attempts unless request comes from master org
     const ptbAttempts = await this.buildPtbAttempts(
       modelSpec,
       providerData,
+      orgId,
       plugins
     );
     return [...byokAttempts, ...ptbAttempts];
@@ -300,8 +302,13 @@ export class AttemptBuilder {
   private async buildPtbAttempts(
     modelSpec: ModelSpec,
     providerData: ModelProviderEntry,
+    orgId: string,
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
+    // Skip PTB if caller org is the master org (same keys as PTB)
+    if (orgId === this.env.HELICONE_ORG_ID) {
+      return [];
+    }
     // Check if we have PTB endpoints
     if (providerData.ptbEndpoints.length === 0) {
       return []; // No PTB endpoints available
