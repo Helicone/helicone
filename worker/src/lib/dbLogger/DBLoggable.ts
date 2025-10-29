@@ -693,7 +693,7 @@ export class DBLoggable {
 
               // Skip normalization for RESPONSES - since the normalizer expects chat completions
               // TODO: make a normalizer for RESPONSES
-              if (bodyMapping !== "RESPONSES") {
+              if (bodyMapping === "OPENAI") {
                 openAIResponse = await normalizeAIGatewayResponse({
                   responseText: providerResponse,
                   isStream: this.request.isStream,
