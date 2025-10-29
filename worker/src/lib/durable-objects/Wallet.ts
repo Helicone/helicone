@@ -1,7 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
-import { err, isErr, ok, Result } from "../util/results";
+import { err, ok, Result } from "../util/results";
 import Stripe from "stripe";
-import { TraceContext } from "../monitoring/DataDogTracer";
 
 // 10^10 is the scale factor for the balance
 // (which is sent to us by stripe in cents)
@@ -457,15 +456,9 @@ export class Wallet extends DurableObject<Env> {
     creditLine: {
       limit: number; // in cents
       enabled: boolean;
-    },
-    traceContext?: TraceContext | null
+    }
   ): Result<{ escrowId: string }, { statusCode: number; message: string }> {
-    const startTime = Date.now();
     const amountToReserveScaled = amountToReserve * SCALE_FACTOR;
-
-    // Create wallet span if tracing is enabled
-    const spanId = traceContext?.sampled ? this.generateId() : null;
-    const spanStart = spanId ? startTime * 1_000_000 : 0; // Convert to nanoseconds
 
     const result = this.ctx.storage.transactionSync(() => {
       // Check if wallet is suspended due to disputes
@@ -534,31 +527,6 @@ export class Wallet extends DurableObject<Env> {
 
       return ok({ escrowId });
     });
-
-    // Send wallet span if tracing is enabled
-    if (spanId && traceContext) {
-      const duration = (Date.now() - startTime) * 1_000_000; // Convert to nanoseconds
-      const errorTags: Record<string, string> = {};
-      if (isErr(result)) {
-        errorTags.error = "true";
-        const errorObj = result.error as {
-          statusCode: number;
-          message: string;
-        };
-        errorTags.error_message = errorObj.message || "Unknown error";
-      }
-      this.sendWalletSpan(
-        spanId,
-        traceContext,
-        spanStart,
-        duration,
-        {
-          has_disputes: "false",
-          org_id: traceContext.tags.org_id || orgId,
-        },
-        errorTags
-      );
-    }
 
     return result as Result<
       { escrowId: string },
@@ -817,83 +785,4 @@ export class Wallet extends DurableObject<Env> {
   /**
    * Generate a random 64-bit ID for span (matches DataDogTracer format)
    */
-  private generateId(): string {
-    const high = Math.floor(Math.random() * 0x100000000);
-    const low = Math.floor(Math.random() * 0x100000000);
-    const id = BigInt(high) * BigInt(0x100000000) + BigInt(low);
-    return id.toString();
-  }
-
-  /**
-   * Send a wallet span directly to Datadog Logs API as structured log
-   * Fire-and-forget to avoid blocking
-   */
-  private sendWalletSpan(
-    spanId: string,
-    traceContext: TraceContext,
-    start: number,
-    duration: number,
-    tags: Record<string, string>,
-    errorTags: Record<string, string> = {}
-  ): void {
-    try {
-      const allTags = { ...tags, ...errorTags };
-      const env = this.env.ENVIRONMENT || "production";
-
-      // Build ddtags from span metadata
-      const ddtagsArray = [
-        `service:wallet-do`,
-        `env:${env}`,
-        `operation:wallet.reserve_escrow`,
-        `resource:sqlite_transaction`,
-        ...Object.entries(allTags).map(([k, v]) => `${k}:${v}`),
-      ];
-
-      const logEntry = {
-        ddsource: "apm.trace",
-        ddtags: ddtagsArray.join(","),
-        hostname: "cloudflare-worker",
-        service: "wallet-do",
-        message: `[wallet.reserve_escrow] sqlite_transaction`,
-        timestamp: new Date(start / 1_000_000).toISOString(),
-        // Trace correlation fields
-        trace_id: traceContext.trace_id,
-        span_id: spanId,
-        parent_id: traceContext.parent_span_id,
-        // Span details
-        operation: "wallet.reserve_escrow",
-        operation_name: "wallet.reserve_escrow", // Facet-friendly field for grouping in Datadog UI
-        resource: "sqlite_transaction",
-        duration_ms: duration / 1_000_000,
-        error: errorTags.error === "true",
-        // Include all tags as top-level fields
-        ...allTags,
-      };
-
-      // Send to Datadog Logs API (fire and forget)
-      const apiKey = this.env.DATADOG_API_KEY || "";
-      const endpoint =
-        this.env.DATADOG_APM_ENDPOINT ||
-        "https://http-intake.logs.us5.datadoghq.com";
-
-      if (!apiKey || !endpoint) {
-        return; // Skip if not configured
-      }
-
-      this.ctx.waitUntil(
-        fetch(`${endpoint}/api/v2/logs`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "DD-API-KEY": apiKey,
-          },
-          body: JSON.stringify([logEntry]),
-        }).catch(() => {
-          // Silently ignore errors
-        })
-      );
-    } catch {
-      // Silently ignore errors - monitoring must never break the app
-    }
-  }
 }

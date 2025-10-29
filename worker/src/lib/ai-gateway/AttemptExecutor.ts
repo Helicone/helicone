@@ -80,19 +80,25 @@ export class AttemptExecutor {
         )
       : null;
 
+    // Time the wallet operation
+    const walletStartTime = Date.now();
+
     const escrowResult = await this.reserveEscrow(
       props.attempt,
       props.requestWrapper.heliconeHeaders.requestId,
       props.orgId,
-      props.orgMeta,
-      props.traceContext
+      props.orgMeta
     );
+
+    // Capture wallet operation duration
+    const walletDuration = Date.now() - walletStartTime;
 
     if (isErr(escrowResult)) {
       // Mark span with error
       if (spanId) {
         this.tracer.setTag(spanId, "wallet.escrow_status", "failed");
         this.tracer.setTag(spanId, "error_message", escrowResult.error.message);
+        this.tracer.setTag(spanId, "wallet.duration_ms", walletDuration);
         this.tracer.finishSpan(spanId);
       }
 
@@ -107,6 +113,7 @@ export class AttemptExecutor {
     if (spanId) {
       this.tracer.setTag(spanId, "wallet.escrow_status", "reserved");
       this.tracer.setTag(spanId, "escrow_id", escrowResult.data.escrowId);
+      this.tracer.setTag(spanId, "wallet.duration_ms", walletDuration);
       this.tracer.finishSpan(spanId);
     }
 
@@ -366,8 +373,7 @@ export class AttemptExecutor {
     orgMeta: {
       allowNegativeBalance: boolean;
       creditLimit: number;
-    },
-    traceContext?: TraceContext | null
+    }
   ): Promise<
     Result<{ escrowId: string }, { statusCode?: number; message: string }>
   > {
@@ -409,8 +415,7 @@ export class AttemptExecutor {
         {
           enabled: orgMeta.allowNegativeBalance,
           limit: orgMeta.creditLimit,
-        },
-        traceContext
+        }
       );
 
       if (isErr(escrowResult)) {
