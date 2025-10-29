@@ -156,8 +156,9 @@ export class SimpleAIGateway {
       return this.createErrorResponse(errors);
     }
 
-    // Step 4: Get disallow list
-    const disallowSpan = this.traceContext?.sampled
+    // Step 4: Get disallow list (only if there are PTB attempts)
+    const hasPtbAttempts = attempts.some((a) => a.source === "ptb");
+    const disallowSpan = this.traceContext?.sampled && hasPtbAttempts
       ? this.tracer.startSpan(
           "ai_gateway.gateway.get_disallow_list",
           "getDisallowList",
@@ -166,7 +167,9 @@ export class SimpleAIGateway {
           this.traceContext
         )
       : null;
-    const disallowList = await this.getDisallowList(this.orgId);
+    const disallowList = hasPtbAttempts
+      ? await this.getDisallowList(this.orgId)
+      : [];
     this.tracer.finishSpan(disallowSpan);
 
     // Step 5: Create forwarder function
@@ -220,8 +223,8 @@ export class SimpleAIGateway {
         }
       }
 
-      // Check disallow list
-      if (this.isDisallowed(attempt, disallowList)) {
+      // Check disallow list (only for PTB attempts)
+      if (attempt.source === "ptb" && this.isDisallowed(attempt, disallowList)) {
         errors.push({
           source: attempt.source,
           message:
