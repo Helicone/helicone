@@ -302,7 +302,7 @@ export function createDataDogTracer(env: {
     apiKey: env.DATADOG_API_KEY || "",
     endpoint:
       env.DATADOG_APM_ENDPOINT || "https://http-intake.logs.us5.datadoghq.com",
-    sampleRate: parseFloat(env.DATADOG_APM_SAMPLING_RATE || "0.01"),
+    sampleRate: parseFloat(env.DATADOG_APM_SAMPLING_RATE || "1.00"),
     env: env.ENVIRONMENT || "production",
   });
 }

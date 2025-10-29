@@ -43,17 +43,12 @@ interface ExecutorProps {
 }
 
 export class AttemptExecutor {
-  private tracer: DataDogTracer;
-
   constructor(
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
-    private readonly cacheProvider?: CacheProvider,
-    tracer?: DataDogTracer
-  ) {
-    // Use passed tracer or create new one (for backwards compatibility)
-    this.tracer = tracer || createDataDogTracer(env);
-  }
+    private readonly cacheProvider: CacheProvider,
+    private readonly tracer: DataDogTracer
+  ) {}
 
   async PTBPreCheck(props: {
     attempt: Attempt;
@@ -72,7 +67,7 @@ export class AttemptExecutor {
     // Start wallet operation span
     const walletSpanId = props.traceContext?.sampled
       ? this.tracer.startSpan(
-          "ai_gateway.ptb.credit_validation.wallet_operation",
+          "ai_gateway.ptb.credit_validation.reserve_escrow",
           "reserveEscrow",
           "helicone-wallet",
           {
