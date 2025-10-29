@@ -541,7 +541,10 @@ export class Wallet extends DurableObject<Env> {
       const errorTags: Record<string, string> = {};
       if (isErr(result)) {
         errorTags.error = "true";
-        const errorObj = result.error as { statusCode: number; message: string };
+        const errorObj = result.error as {
+          statusCode: number;
+          message: string;
+        };
         errorTags.error_message = errorObj.message || "Unknown error";
       }
       this.sendWalletSpan(
@@ -557,7 +560,10 @@ export class Wallet extends DurableObject<Env> {
       );
     }
 
-    return result as Result<{ escrowId: string }, { statusCode: number; message: string }>;
+    return result as Result<
+      { escrowId: string },
+      { statusCode: number; message: string }
+    >;
   }
 
   finalizeEscrow(
@@ -867,7 +873,8 @@ export class Wallet extends DurableObject<Env> {
       // Send to Datadog Logs API (fire and forget)
       const apiKey = this.env.DATADOG_API_KEY || "";
       const endpoint =
-        this.env.DATADOG_APM_ENDPOINT || "https://http-intake.logs.us5.datadoghq.com";
+        this.env.DATADOG_APM_ENDPOINT ||
+        "https://http-intake.logs.us5.datadoghq.com";
 
       if (!apiKey || !endpoint) {
         return; // Skip if not configured
