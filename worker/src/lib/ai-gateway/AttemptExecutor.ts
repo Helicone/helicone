@@ -91,7 +91,10 @@ export class AttemptExecutor {
       }
 
       return err({
-        type: "request_failed",
+        type:
+          (escrowResult.error.statusCode || 500) === 429
+            ? "insufficient_credit_limit"
+            : "request_failed",
         message: escrowResult.error.message,
         statusCode: escrowResult.error.statusCode || 500,
       });
