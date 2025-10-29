@@ -1,22 +1,27 @@
 import {
-  buildRequestBody,
   authenticateRequest,
-  buildErrorMessage,
   buildEndpointUrl,
+  buildErrorMessage,
+  buildRequestBody,
 } from "@helicone-package/cost/models/provider-helpers";
-import { RequestWrapper } from "../RequestWrapper";
-import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
-import { isErr, Result, ok, err } from "../util/results";
-import { Plugin } from "@helicone-package/cost/models/types";
-import { Attempt, EscrowInfo, AttemptError } from "./types";
 import {
   AuthContext,
   Endpoint,
+  Plugin,
   RequestParams,
 } from "@helicone-package/cost/models/types";
-import { ProviderKey } from "../db/ProviderKeysStore";
+import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
 import { CacheProvider } from "../../../../packages/common/cache/provider";
+import { ProviderKey } from "../db/ProviderKeysStore";
+import {
+  createDataDogTracer,
+  DataDogTracer,
+  TraceContext,
+} from "../monitoring/DataDogTracer";
+import { RequestWrapper } from "../RequestWrapper";
+import { err, isErr, ok, Result } from "../util/results";
 import { GatewayMetrics } from "./GatewayMetrics";
+import { Attempt, AttemptError, EscrowInfo } from "./types";
 import { toChatCompletions } from "@helicone-package/llm-mapper/transform/providers/responses/request/toChatCompletions";
 
 interface ExecutorProps {
@@ -34,20 +39,28 @@ interface ExecutorProps {
     allowNegativeBalance: boolean;
     creditLimit: number;
   };
+  traceContext: TraceContext | null;
 }
 
 export class AttemptExecutor {
+  private tracer: DataDogTracer;
+
   constructor(
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
-    private readonly cacheProvider?: CacheProvider
-  ) {}
+    private readonly cacheProvider?: CacheProvider,
+    tracer?: DataDogTracer
+  ) {
+    // Use passed tracer or create new one (for backwards compatibility)
+    this.tracer = tracer || createDataDogTracer(env);
+  }
 
   async PTBPreCheck(props: {
     attempt: Attempt;
     requestWrapper: RequestWrapper;
     orgId: string;
     orgMeta: ExecutorProps["orgMeta"];
+    traceContext?: TraceContext | null;
   }): Promise<
     Result<
       {
@@ -56,6 +69,19 @@ export class AttemptExecutor {
       AttemptError
     >
   > {
+    // Start wallet operation span
+    const walletSpanId = props.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.ptb.credit_validation.wallet_operation",
+          "reserveEscrow",
+          "helicone-wallet",
+          {
+            operation: "reserve_escrow",
+          },
+          props.traceContext
+        )
+      : null;
+
     const escrowResult = await this.reserveEscrow(
       props.attempt,
       props.requestWrapper.heliconeHeaders.requestId,
@@ -64,12 +90,24 @@ export class AttemptExecutor {
     );
 
     if (isErr(escrowResult)) {
+      if (walletSpanId) {
+        this.tracer.setError(walletSpanId, escrowResult.error.message);
+        this.tracer.finishSpan(walletSpanId);
+      }
+
       return err({
         type: "request_failed",
         message: escrowResult.error.message,
         statusCode: escrowResult.error.statusCode || 500,
       });
     }
+
+    // Finish wallet span with success tags
+    if (walletSpanId) {
+      this.tracer.setTag(walletSpanId, "escrow_id", escrowResult.data.escrowId);
+      this.tracer.finishSpan(walletSpanId);
+    }
+
     return ok({ reservedEscrowId: escrowResult.data.escrowId });
   }
 
@@ -77,12 +115,39 @@ export class AttemptExecutor {
     const { endpoint, providerKey } = props.attempt;
 
     let escrowInfo: EscrowInfo | undefined;
+    let ptbSpanId: string | null = null;
+
+    // Start PTB span for PTB requests
+    if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
+      ptbSpanId = props.traceContext?.sampled
+        ? this.tracer.startSpan(
+            "ai_gateway.ptb",
+            `${props.requestWrapper.getMethod()} ${props.requestWrapper.getUrl()}`,
+            "ai-gateway-ptb",
+            {
+              provider: endpoint.provider,
+              model: endpoint.providerModelId,
+              http_method: props.requestWrapper.getMethod(),
+            },
+            props.traceContext
+          )
+        : null;
+    }
 
     // Reserve escrow if needed (PTB only)
     if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
-      const ptbCheck = await this.PTBPreCheck(props);
+      const ptbCheck = await this.PTBPreCheck({
+        ...props,
+      });
 
       if (isErr(ptbCheck)) {
+        // Finish PTB span with error
+        if (ptbSpanId) {
+          this.tracer.setError(ptbSpanId, ptbCheck.error.message);
+          this.tracer.finishSpan(ptbSpanId, {
+            http_status_code: ptbCheck.error.statusCode?.toString(),
+          });
+        }
         return err(ptbCheck.error);
       }
 
@@ -102,7 +167,8 @@ export class AttemptExecutor {
       props.forwarder,
       escrowInfo,
       props.metrics,
-      props.attempt.plugins
+      props.attempt.plugins,
+      props.traceContext
     );
 
     // If error, cancel escrow and return the error
@@ -110,10 +176,25 @@ export class AttemptExecutor {
       if (escrowInfo) {
         this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, props.orgId));
       }
+
+      // Finish PTB span with error
+      if (ptbSpanId) {
+        this.tracer.setError(ptbSpanId, result.error.message);
+        this.tracer.finishSpan(ptbSpanId, {
+          http_status_code: result.error.statusCode?.toString(),
+        });
+      }
+
       return result;
     }
 
-    // Success
+    // Success - finish PTB span
+    if (ptbSpanId) {
+      this.tracer.finishSpan(ptbSpanId, {
+        http_status_code: result.data.status.toString(),
+      });
+    }
+
     return result;
   }
 
@@ -130,13 +211,15 @@ export class AttemptExecutor {
     ) => Promise<Response>,
     escrowInfo: EscrowInfo | undefined,
     metrics: GatewayMetrics,
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    traceContext?: TraceContext | null
   ): Promise<Result<Response, AttemptError>> {
     try {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
         bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: (body, modelId, options) => toAnthropic(body, modelId, plugins, options),
+        toAnthropic: (body, modelId, options) =>
+          toAnthropic(body, modelId, plugins, options),
         toChatCompletions: (body) => toChatCompletions(body),
       });
 
@@ -209,9 +292,43 @@ export class AttemptExecutor {
       metrics.markPreRequestEnd();
       metrics.markProviderStart();
 
+      // Start provider request span
+      const providerSpanId = traceContext?.sampled
+        ? this.tracer.startSpan(
+            "ai_gateway.ptb.provider.llm_request",
+            `${endpoint.provider} ${endpoint.providerModelId}`,
+            "llm-provider",
+            {
+              provider: endpoint.provider,
+              model: endpoint.providerModelId,
+            },
+            traceContext
+          )
+        : null;
+
+      const providerStartTime = Date.now();
       const response = await forwarder(urlResult.data, escrowInfo);
+      const providerLatency = Date.now() - providerStartTime;
 
       metrics.markProviderEnd(response.status);
+
+      // Finish provider span
+      if (providerSpanId) {
+        this.tracer.setTag(
+          providerSpanId,
+          "http.status_code",
+          response.status.toString()
+        );
+        this.tracer.setTag(
+          providerSpanId,
+          "provider.latency_ms",
+          providerLatency
+        );
+        if (!response.ok) {
+          this.tracer.setTag(providerSpanId, "error", "true");
+        }
+        this.tracer.finishSpan(providerSpanId);
+      }
 
       if (!response.ok) {
         const errorMessageResult = await buildErrorMessage(endpoint, response);

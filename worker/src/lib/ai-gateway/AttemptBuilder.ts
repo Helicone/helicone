@@ -18,15 +18,22 @@ import { isErr } from "../util/results";
 import { Attempt } from "./types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { PluginHandler } from "./PluginHandler";
+import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
 
 export class AttemptBuilder {
   private readonly pluginHandler: PluginHandler;
+  private readonly tracer: DataDogTracer;
+  private readonly traceContext: TraceContext | null;
 
   constructor(
     private readonly providerKeysManager: ProviderKeysManager,
-    private readonly env: Env
+    private readonly env: Env,
+    tracer: DataDogTracer,
+    traceContext: TraceContext | null
   ) {
     this.pluginHandler = new PluginHandler();
+    this.tracer = tracer;
+    this.traceContext = traceContext;
   }
 
   async buildAttempts(
@@ -88,6 +95,19 @@ export class AttemptBuilder {
     );
 
     // Process all providers in parallel (we know model exists because parseModelString validated it)
+    const parallelSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.build_attempts.process_all_providers",
+          "Promise.all",
+          "ai-gateway",
+          {
+            provider_count: providerData.length.toString(),
+            model: modelSpec.modelName,
+          },
+          this.traceContext
+        )
+      : null;
+
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
         const byokAttempts = await this.buildByokAttempts(
@@ -107,6 +127,8 @@ export class AttemptBuilder {
         return [...byokAttempts, ...ptbAttempts];
       })
     );
+
+    this.tracer.finishSpan(parallelSpan);
 
     return attemptArrays.flat();
   }
@@ -161,11 +183,26 @@ export class AttemptBuilder {
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get user's provider key
+    const keySpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.build_attempts.get_provider_key",
+          "getProviderKeyWithFetch",
+          "ai-gateway",
+          {
+            provider: providerData.provider,
+            model: modelSpec.modelName,
+          },
+          this.traceContext
+        )
+      : null;
+
     const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
       orgId,
       modelSpec.customUid
     );
+
+    this.tracer.finishSpan(keySpan);
 
     if (!userKey || !this.isByokEnabled(userKey)) {
       return []; // No BYOK available
@@ -271,10 +308,25 @@ export class AttemptBuilder {
     }
 
     // Get Helicone's provider key for PTB
+    const ptbKeySpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.build_attempts.get_helicone_ptb_key",
+          "getProviderKeyWithFetch",
+          "ai-gateway",
+          {
+            provider: providerData.provider,
+            model: modelSpec.modelName,
+          },
+          this.traceContext
+        )
+      : null;
+
     const heliconeKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
       this.env.HELICONE_ORG_ID
     );
+
+    this.tracer.finishSpan(ptbKeySpan);
 
     if (!heliconeKey) {
       console.error("Can't do PTB without Helicone's key");

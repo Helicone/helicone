@@ -25,6 +25,7 @@ import {
   toOpenAIResponse,
   toOpenAIStreamResponse,
 } from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
+import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
 import { ResponsesAPIEnabledProviders } from "@helicone-package/cost/models/providers";
 import { oaiChat2responsesResponse } from "../clients/llmmapper/router/oaiChat2responses/nonStream";
 import { oaiChat2responsesStreamResponse } from "../clients/llmmapper/router/oaiChat2responses/stream";
@@ -47,19 +48,25 @@ export class SimpleAIGateway {
   private readonly supabaseClient: any;
   private readonly metrics: GatewayMetrics;
   private readonly orgMeta: AuthContext["orgMeta"];
+  private readonly tracer: DataDogTracer;
+  private readonly traceContext: TraceContext | null;
 
   constructor(
     private readonly requestWrapper: RequestWrapper,
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
     authContext: AuthContext,
-    metrics: GatewayMetrics
+    metrics: GatewayMetrics,
+    tracer: DataDogTracer,
+    traceContext: TraceContext | null
   ) {
     this.orgId = authContext.orgId;
     this.apiKey = authContext.apiKey;
     this.supabaseClient = authContext.supabaseClient;
     this.orgMeta = authContext.orgMeta;
     this.metrics = metrics;
+    this.tracer = tracer;
+    this.traceContext = traceContext;
 
     const providerKeysManager = new ProviderKeysManager(
       new ProviderKeysStore(this.supabaseClient),
@@ -73,14 +80,24 @@ export class SimpleAIGateway {
       REQUEST_CACHE_KEY_2: env.REQUEST_CACHE_KEY_2,
     });
 
-    this.attemptBuilder = new AttemptBuilder(providerKeysManager, env);
-    this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider);
+    this.attemptBuilder = new AttemptBuilder(providerKeysManager, env, tracer, traceContext);
+    this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider, tracer);
   }
 
   async handle(): Promise<Response> {
     // Step 1: Parse and prepare request
     const bodyMapping: BodyMappingType = this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
+    const parseSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.parse_request",
+          "parseAndPrepareRequest",
+          "ai-gateway",
+          {},
+          this.traceContext
+        )
+      : null;
     const parseResult = await this.parseAndPrepareRequest();
+    this.tracer.finishSpan(parseSpan);
     if (isErr(parseResult)) {
       return parseResult.error;
     }
@@ -112,12 +129,22 @@ export class SimpleAIGateway {
     const errors: Array<AttemptError> = [];
 
     // Step 3: Build all attempts
+    const buildSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.build_attempts",
+          "attemptBuilder.buildAttempts",
+          "ai-gateway",
+          {},
+          this.traceContext
+        )
+      : null;
     const attempts = await this.attemptBuilder.buildAttempts(
       modelStrings,
       this.orgId,
       bodyMapping,
       plugins
     );
+    this.tracer.finishSpan(buildSpan);
     if (attempts.length === 0) {
       errors.push({
         source: "No available providers",
@@ -130,7 +157,17 @@ export class SimpleAIGateway {
     }
 
     // Step 4: Get disallow list
+    const disallowSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.get_disallow_list",
+          "getDisallowList",
+          "ai-gateway",
+          {},
+          this.traceContext
+        )
+      : null;
     const disallowList = await this.getDisallowList(this.orgId);
+    this.tracer.finishSpan(disallowSpan);
 
     // Step 5: Create forwarder function
     const forwarder = (
@@ -206,6 +243,7 @@ export class SimpleAIGateway {
         forwarder,
         metrics: this.metrics,
         orgMeta: this.orgMeta,
+        traceContext: this.traceContext,
       });
 
       if (isErr(result)) {
