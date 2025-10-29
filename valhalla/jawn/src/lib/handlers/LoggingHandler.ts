@@ -559,10 +559,10 @@ export class LoggingHandler extends AbstractLogHandler {
     // rather than falling back to legacy usage cost
     if (context.message.heliconeMeta.providerModelId) {
       rawCost = atLeastZero(
-        context.costBreakdown?.totalCost ?? context.legacyUsage.cost ?? 0
+        context.costBreakdown?.totalCost ?? 0
       );
     } else {
-      rawCost = atLeastZero(context.legacyUsage.cost ?? 0);
+      rawCost = atLeastZero(context.costBreakdown?.totalCost ?? context.legacyUsage.cost ?? 0);
     }
     const cost = Math.round(rawCost * COST_PRECISION_MULTIPLIER);
 

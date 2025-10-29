@@ -3293,6 +3293,7 @@ Json: JsonObject;
       quantization?: "fp4" | "fp8" | "fp16" | "bf16";
       responseFormat?: components["schemas"]["ResponseFormat"];
       requireExplicitRouting?: boolean;
+      providerModelIdAliases?: string[];
     };
     UserEndpointConfig: {
       region?: string;

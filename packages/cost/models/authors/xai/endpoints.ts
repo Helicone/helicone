@@ -99,6 +99,7 @@ export const endpoints = {
     providerModelId: "grok-4-fast",
     provider: "xai",
     author: "xai",
+    providerModelIdAliases: ["grok-4-fast-reasoning"],
     pricing: [
       {
         threshold: 0,
