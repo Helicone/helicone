@@ -35,7 +35,7 @@
     "prettier": "^3.6.2",
     "typescript": "^5.8.3",
     "vitest": "~3.2.0",
-    "wrangler": "^4.27.0",
+    "wrangler": "^4.45.2",
     "yarn": "^1.22.22"
   },
   "dependencies": {
