@@ -459,8 +459,7 @@ export class Wallet extends DurableObject<Env> {
     }
   ): Result<{ escrowId: string }, { statusCode: number; message: string }> {
     const amountToReserveScaled = amountToReserve * SCALE_FACTOR;
-
-    const result = this.ctx.storage.transactionSync(() => {
+    return this.ctx.storage.transactionSync(() => {
       // Check if wallet is suspended due to disputes
       const activeDisputesCount = this.ctx.storage.sql
         .exec<{
@@ -527,11 +526,6 @@ export class Wallet extends DurableObject<Env> {
 
       return ok({ escrowId });
     });
-
-    return result as Result<
-      { escrowId: string },
-      { statusCode: number; message: string }
-    >;
   }
 
   finalizeEscrow(
@@ -781,8 +775,4 @@ export class Wallet extends DurableObject<Env> {
       }
     });
   }
-
-  /**
-   * Generate a random 64-bit ID for span (matches DataDogTracer format)
-   */
 }
