@@ -72,7 +72,8 @@
       "mcp__chrome-devtools__fill",
       "mcp__chrome-devtools__evaluate_script",
       "mcp__chrome-devtools__wait_for",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(gh pr checks:*)"
     ],
     "deny": []
   },

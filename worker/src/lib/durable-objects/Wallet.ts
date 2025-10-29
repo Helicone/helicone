@@ -1,5 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
-import { err, ok, Result } from "../util/results";
+import { err, isErr, ok, Result } from "../util/results";
 import Stripe from "stripe";
 import { TraceContext } from "../monitoring/DataDogTracer";
 
@@ -539,9 +539,10 @@ export class Wallet extends DurableObject<Env> {
     if (spanId && traceContext) {
       const duration = (Date.now() - startTime) * 1_000_000; // Convert to nanoseconds
       const errorTags: Record<string, string> = {};
-      if ("error" in result && result.error && typeof result.error === "object" && "message" in result.error) {
+      if (isErr(result)) {
         errorTags.error = "true";
-        errorTags.error_message = (result.error as { message: string }).message || "Unknown error";
+        const errorObj = result.error as { statusCode: number; message: string };
+        errorTags.error_message = errorObj.message || "Unknown error";
       }
       this.sendWalletSpan(
         spanId,
@@ -872,16 +873,18 @@ export class Wallet extends DurableObject<Env> {
         return; // Skip if not configured
       }
 
-      fetch(`${endpoint}/api/v2/logs`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "DD-API-KEY": apiKey,
-        },
-        body: JSON.stringify([logEntry]),
-      }).catch(() => {
-        // Silently ignore errors
-      });
+      this.ctx.waitUntil(
+        fetch(`${endpoint}/api/v2/logs`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "DD-API-KEY": apiKey,
+          },
+          body: JSON.stringify([logEntry]),
+        }).catch(() => {
+          // Silently ignore errors
+        })
+      );
     } catch {
       // Silently ignore errors - monitoring must never break the app
     }

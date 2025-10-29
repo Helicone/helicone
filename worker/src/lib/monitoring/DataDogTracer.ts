@@ -264,10 +264,11 @@ export class DataDogTracer {
   }
 
   private generateId(): string {
-    // Generate random 64-bit number (JavaScript safe integer is 53 bits, so use BigInt)
-    const high = Math.floor(Math.random() * 0x100000000);
-    const low = Math.floor(Math.random() * 0x100000000);
-    const id = BigInt(high) * BigInt(0x100000000) + BigInt(low);
+    // Generate cryptographically secure random 64-bit number for distributed tracing
+    // Using crypto.getRandomValues() for better entropy than Math.random()
+    const bytes = new Uint32Array(2);
+    crypto.getRandomValues(bytes);
+    const id = (BigInt(bytes[0]) << BigInt(32)) | BigInt(bytes[1]);
     return id.toString();
   }
 
