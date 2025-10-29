@@ -69,19 +69,18 @@ export class AttemptExecutor {
       AttemptError
     >
   > {
-    // Start credit validation span
-    const spanId = props.traceContext?.sampled
+    // Start wallet operation span
+    const walletSpanId = props.traceContext?.sampled
       ? this.tracer.startSpan(
-          "ai_gateway.ptb.credit_validation",
-          "reserve_escrow",
+          "ai_gateway.ptb.credit_validation.wallet_operation",
+          "reserveEscrow",
           "helicone-wallet",
-          {},
+          {
+            operation: "reserve_escrow",
+          },
           props.traceContext
         )
       : null;
-
-    // Time the wallet operation
-    const walletStartTime = Date.now();
 
     const escrowResult = await this.reserveEscrow(
       props.attempt,
@@ -90,16 +89,10 @@ export class AttemptExecutor {
       props.orgMeta
     );
 
-    // Capture wallet operation duration
-    const walletDuration = Date.now() - walletStartTime;
-
     if (isErr(escrowResult)) {
-      // Mark span with error
-      if (spanId) {
-        this.tracer.setTag(spanId, "wallet.escrow_status", "failed");
-        this.tracer.setTag(spanId, "error_message", escrowResult.error.message);
-        this.tracer.setTag(spanId, "wallet.duration_ms", walletDuration);
-        this.tracer.finishSpan(spanId);
+      if (walletSpanId) {
+        this.tracer.setError(walletSpanId, escrowResult.error.message);
+        this.tracer.finishSpan(walletSpanId);
       }
 
       return err({
@@ -109,12 +102,10 @@ export class AttemptExecutor {
       });
     }
 
-    // Mark span as successful
-    if (spanId) {
-      this.tracer.setTag(spanId, "wallet.escrow_status", "reserved");
-      this.tracer.setTag(spanId, "escrow_id", escrowResult.data.escrowId);
-      this.tracer.setTag(spanId, "wallet.duration_ms", walletDuration);
-      this.tracer.finishSpan(spanId);
+    // Finish wallet span with success tags
+    if (walletSpanId) {
+      this.tracer.setTag(walletSpanId, "escrow_id", escrowResult.data.escrowId);
+      this.tracer.finishSpan(walletSpanId);
     }
 
     return ok({ reservedEscrowId: escrowResult.data.escrowId });
