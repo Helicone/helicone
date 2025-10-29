@@ -69,16 +69,12 @@ type LogLevel = "quiet" | "normal" | "verbose";
 // Constants
 // ============================================================================
 
-const HELICONE_API_KEY = process.env.HELICONE_API_KEY!;
+const HELICONE_API_KEY = process.env.HELICONE_API_KEY;
 const CHECKPOINT_FILE = ".helicone-export-state.json";
 const API_ENDPOINT = "https://api.helicone.ai/v1/request/query-clickhouse";
 const DEFAULT_BATCH_SIZE = 1000;
 const DEFAULT_MAX_RETRIES = 5;
 const DEFAULT_BASE_DELAY = 1000; // 1 second
-
-if (!HELICONE_API_KEY) {
-  throw new Error("HELICONE_API_KEY environment variable is required");
-}
 
 // ============================================================================
 // Checkpoint Manager
@@ -147,29 +143,23 @@ class CheckpointManager {
 
   /**
    * Validate checkpoint matches current configuration
+   * Only checks critical fields - format and output file existence
    */
   validate(state: CheckpointState, options: QueryOptions): boolean {
+    // Only validate format matches
     if (state.format !== options.format) {
       console.error(
         `Checkpoint format mismatch: ${state.format} vs ${options.format}`
       );
       return false;
     }
-    if (state.includeBody !== options.includeBody) {
-      console.error("Checkpoint includeBody setting mismatch");
-      return false;
-    }
-    if (
-      state.startDate !== options.startDate?.toISOString() ||
-      state.endDate !== options.endDate?.toISOString()
-    ) {
-      console.error("Checkpoint date range mismatch");
-      return false;
-    }
+
+    // Only validate output file exists
     if (!fs.existsSync(state.outputPath)) {
       console.error(`Output file not found: ${state.outputPath}`);
       return false;
     }
+
     return true;
   }
 }
@@ -445,7 +435,6 @@ class ExportWriter {
     append: boolean = false
   ) {
     this.instanceId = Math.random().toString(36).substring(7);
-    console.log(`[DEBUG] Creating ExportWriter instance ${this.instanceId}, format=${format}, outputPath=${outputPath}, append=${append}`);
     this.format = format;
     this.outputPath = outputPath;
 
@@ -516,7 +505,6 @@ class ExportWriter {
   }
 
   writeRecord(record: RequestResponse): void {
-    console.log(`[DEBUG] writeRecord [${this.instanceId}]: format=${this.format}, recordsWritten=${this.recordsWritten}`);
     if (this.format === "json") {
       if (!this.isFirstRecord) {
         this.stream.write(",\n");
@@ -524,10 +512,7 @@ class ExportWriter {
       this.stream.write(JSON.stringify(record, null, 2));
       this.isFirstRecord = false;
     } else if (this.format === "jsonl") {
-      const line = JSON.stringify(record) + "\n";
-      console.log(`[DEBUG] Writing JSONL line, length=${line.length}, has newline=${line.includes('\n')}`);
-      const written = this.stream.write(line);
-      console.log(`[DEBUG] stream.write returned: ${written}`);
+      this.stream.write(JSON.stringify(record) + "\n");
     } else if (this.format === "csv") {
       this.stream.write(this.convertToCSVRow(record) + "\n");
     }
@@ -536,23 +521,18 @@ class ExportWriter {
   }
 
   writeRecords(records: RequestResponse[]): void {
-    console.log(`[DEBUG] ExportWriter.writeRecords called with ${records.length} records`);
-    records.forEach((record, idx) => {
+    records.forEach((record) => {
       this.writeRecord(record);
-      console.log(`[DEBUG] Wrote record ${idx + 1}/${records.length} in this batch`);
     });
-    console.log(`[DEBUG] ExportWriter.recordsWritten now = ${this.recordsWritten}`);
   }
 
   async close(): Promise<void> {
-    console.log(`[DEBUG] ExportWriter.close() called. Total records written: ${this.recordsWritten}`);
     if (this.format === "json") {
       this.stream.write("\n]\n");
     }
 
     return new Promise((resolve) => {
       this.stream.end(() => {
-        console.log(`[DEBUG] Stream ended and flushed`);
         resolve();
       });
     });
@@ -743,6 +723,11 @@ function parseArgs(): QueryOptions {
  * Main export function with checkpoint support
  */
 async function exportData(options: QueryOptions): Promise<void> {
+  // Check API key is set
+  if (!HELICONE_API_KEY) {
+    throw new Error("HELICONE_API_KEY environment variable is required");
+  }
+
   const checkpointManager = new CheckpointManager();
   const progressTracker = new ProgressTracker(options.logLevel!, options.limit);
 
@@ -769,16 +754,42 @@ async function exportData(options: QueryOptions): Promise<void> {
       checkpoint = null;
       checkpointManager.remove();
     } else {
-      // Prompt user for resume confirmation
-      const shouldResume = await promptUser("Resume from checkpoint? (y/n): ");
-
-      if (shouldResume) {
+      // Check if --resume flag was provided
+      if (options.resume) {
         resuming = true;
         progressTracker.log(`Resuming export from offset ${checkpoint.offset}`);
+
+        // Restore checkpoint configuration (but allow override of limit)
+        options.startDate = new Date(checkpoint.startDate);
+        options.endDate = new Date(checkpoint.endDate);
+        options.includeBody = checkpoint.includeBody;
+        // Only restore limit if not explicitly provided by user
+        if (!process.argv.includes('--limit')) {
+          options.limit = checkpoint.limit;
+        }
+        options.outputPath = checkpoint.outputPath;
       } else {
-        progressTracker.log("Starting fresh export");
-        checkpoint = null;
-        checkpointManager.remove();
+        // Prompt user for resume confirmation
+        const shouldResume = await promptUser("Resume from checkpoint? (y/n): ");
+
+        if (shouldResume) {
+          resuming = true;
+          progressTracker.log(`Resuming export from offset ${checkpoint.offset}`);
+
+          // Restore checkpoint configuration (but allow override of limit)
+          options.startDate = new Date(checkpoint.startDate);
+          options.endDate = new Date(checkpoint.endDate);
+          options.includeBody = checkpoint.includeBody;
+          // Only restore limit if not explicitly provided by user
+          if (!process.argv.includes('--limit')) {
+            options.limit = checkpoint.limit;
+          }
+          options.outputPath = checkpoint.outputPath;
+        } else {
+          progressTracker.log("Starting fresh export");
+          checkpoint = null;
+          checkpointManager.remove();
+        }
       }
     }
   }
@@ -800,7 +811,6 @@ async function exportData(options: QueryOptions): Promise<void> {
     // Explicitly remove the file to ensure clean start
     try {
       fs.unlinkSync(options.outputPath!);
-      console.log(`[DEBUG] Removed existing file: ${options.outputPath}`);
     } catch (e) {
       // File might not exist, that's okay
     }
@@ -822,44 +832,143 @@ async function exportData(options: QueryOptions): Promise<void> {
     resuming
   );
 
-  // Setup signal handlers for graceful shutdown
-  let shuttingDown = false;
-  const signalHandler = () => {
-    if (shuttingDown) return;
-    shuttingDown = true;
+  // Build filter object with proper AST structure
+  // Each condition must be a separate leaf in the tree
+  let filter: any = "all";
 
-    progressTracker.log("\n\nReceived interrupt signal. Saving progress...");
-    writer.close();
-    process.exit(0);
-  };
+  // Build date range filter (if provided)
+  let dateRangeFilter: any = null;
+  if (options.startDate && options.endDate) {
+    // Both start and end date - need to AND them together
+    dateRangeFilter = {
+      left: {
+        request_response_rmt: {
+          request_created_at: {
+            gte: options.startDate.toISOString(),
+          },
+        },
+      },
+      operator: "and",
+      right: {
+        request_response_rmt: {
+          request_created_at: {
+            lte: options.endDate.toISOString(),
+          },
+        },
+      },
+    };
+  } else if (options.startDate) {
+    // Only start date
+    dateRangeFilter = {
+      request_response_rmt: {
+        request_created_at: {
+          gte: options.startDate.toISOString(),
+        },
+      },
+    };
+  } else if (options.endDate) {
+    // Only end date
+    dateRangeFilter = {
+      request_response_rmt: {
+        request_created_at: {
+          lte: options.endDate.toISOString(),
+        },
+      },
+    };
+  }
 
-  process.on("SIGINT", signalHandler);
-  process.on("SIGTERM", signalHandler);
-
-  // Build filter object with property filters if provided
-  const filter: any = {};
-
+  // Build property filters (if provided)
+  let propertyFilter: any = null;
   if (
     options.propertyFilters &&
     Object.keys(options.propertyFilters).length > 0
   ) {
-    // Build properties filter according to Helicone API format
-    const properties: any = {};
-    for (const [key, value] of Object.entries(options.propertyFilters)) {
-      properties[key] = {
-        equals: value,
-      };
-    }
+    const propertyEntries = Object.entries(options.propertyFilters);
 
-    filter.request_response_rmt = {
-      properties,
+    if (propertyEntries.length === 1) {
+      // Single property filter
+      const [key, value] = propertyEntries[0];
+      propertyFilter = {
+        request_response_rmt: {
+          properties: {
+            [key]: {
+              equals: value,
+            },
+          },
+        },
+      };
+    } else {
+      // Multiple property filters - AND them together
+      propertyFilter = propertyEntries.reduce((acc, [key, value], index) => {
+        const condition = {
+          request_response_rmt: {
+            properties: {
+              [key]: {
+                equals: value,
+              },
+            },
+          },
+        };
+
+        if (index === 0) {
+          return condition;
+        } else {
+          return {
+            left: acc,
+            operator: "and",
+            right: condition,
+          };
+        }
+      }, null as any);
+    }
+  }
+
+  // Combine date range and property filters
+  if (dateRangeFilter && propertyFilter) {
+    filter = {
+      left: dateRangeFilter,
+      operator: "and",
+      right: propertyFilter,
     };
+  } else if (dateRangeFilter) {
+    filter = dateRangeFilter;
+  } else if (propertyFilter) {
+    filter = propertyFilter;
   }
 
   // Start export
   let offset = checkpoint?.offset || 0;
   let totalRecords = checkpoint?.totalRecords || 0;
   const batchSize = options.batchSize!;
+
+  // Setup signal handlers for graceful shutdown - MUST be after offset/totalRecords are defined
+  let shuttingDown = false;
+  const signalHandler = async () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+
+    progressTracker.log("\n\nReceived interrupt signal. Saving progress...");
+
+    // Save checkpoint with current state
+    checkpointManager.save({
+      offset,
+      totalRecords,
+      lastUpdateTime: new Date().toISOString(),
+      outputPath: options.outputPath!,
+      format: options.format!,
+      startDate: options.startDate!.toISOString(),
+      endDate: options.endDate!.toISOString(),
+      includeBody: options.includeBody!,
+      limit: options.limit,
+    });
+
+    await writer.close();
+    progressTracker.log(`Progress saved. Resume with: --resume`);
+    process.exit(0);
+  };
+
+  process.on("SIGINT", signalHandler);
+  process.on("SIGTERM", signalHandler);
 
   let exportInfo = `Starting export: format=${options.format}, output=${options.outputPath}`;
   if (
@@ -875,9 +984,7 @@ async function exportData(options: QueryOptions): Promise<void> {
       if (shuttingDown) break;
 
       // Fetch batch
-      console.log(`[DEBUG] Fetching batch: offset=${offset}, batchSize=${batchSize}, totalRecords=${totalRecords}`);
       const batchData = await client.makeRequest(offset, batchSize, filter, options);
-      console.log(`[DEBUG] Batch fetched: batchData.length=${batchData?.length || 0}`);
 
       progressTracker.log(
         `Fetched ${batchData?.length || 0} records at offset ${offset}`,
@@ -885,7 +992,6 @@ async function exportData(options: QueryOptions): Promise<void> {
       );
 
       if (!batchData || batchData.length === 0) {
-        console.log(`[DEBUG] No more data from API, breaking outer loop`);
         progressTracker.log(
           `No more records found. Total collected: ${totalRecords}`,
           "verbose"
@@ -898,15 +1004,12 @@ async function exportData(options: QueryOptions): Promise<void> {
         if (shuttingDown) break;
 
         const chunk = batchData.slice(i, i + 10);
-        console.log(`[DEBUG] Processing chunk: i=${i}, chunk.length=${chunk.length}, totalRecords=${totalRecords}, limit=${options.limit}`);
 
         const processedChunk = await Promise.all(
           chunk.map(async (record) => {
             // Drop streamed_data field if present (can be very large)
             if (record.streamed_data) {
-              console.log(`[DEBUG] Found streamed_data in record ${record.response_id}, deleting...`);
               delete record.streamed_data;
-              console.log(`[DEBUG] After delete, has streamed_data: ${record.streamed_data !== undefined}`);
             }
 
             if (options.includeBody && record.signed_body_url) {
@@ -915,40 +1018,39 @@ async function exportData(options: QueryOptions): Promise<void> {
               );
               if (signedBody.request) {
                 record.request_body = signedBody.request;
+                // Remove streamed_data from request if present
+                if (record.request_body && typeof record.request_body === 'object' && 'streamed_data' in record.request_body) {
+                  delete (record.request_body as any).streamed_data;
+                }
               }
               if (signedBody.response) {
                 record.response_body = signedBody.response;
-                console.log(`[DEBUG] Added response_body, checking if streamed_data returned: ${signedBody.response?.streamed_data !== undefined}`);
+                // Remove streamed_data from response if present
+                if (record.response_body && typeof record.response_body === 'object' && 'streamed_data' in record.response_body) {
+                  delete (record.response_body as any).streamed_data;
+                }
               }
             }
             return record;
           })
         );
 
-        console.log(`[DEBUG] Processed chunk: processedChunk.length=${processedChunk.length}`);
-
         // Check if writing this chunk would exceed the limit
         let recordsToWrite = processedChunk;
         if (options.limit && totalRecords + processedChunk.length > options.limit) {
           const remaining = options.limit - totalRecords;
-          console.log(`[DEBUG] Would exceed limit! Only writing ${remaining} of ${processedChunk.length} records`);
           recordsToWrite = processedChunk.slice(0, remaining);
-          console.log(`[DEBUG] After slice: recordsToWrite.length=${recordsToWrite.length}`);
         }
 
         // Write processed records (possibly truncated to limit)
-        console.log(`[DEBUG] About to call writer.writeRecords with ${recordsToWrite.length} records`);
         writer.writeRecords(recordsToWrite);
         totalRecords += recordsToWrite.length;
-
-        console.log(`[DEBUG] After writing: totalRecords=${totalRecords}, limit=${options.limit}`);
 
         // Update progress
         progressTracker.updateProgress(totalRecords);
 
         // Check limit
         if (options.limit && totalRecords >= options.limit) {
-          console.log(`[DEBUG] Limit reached! Breaking out of chunk loop`);
           progressTracker.log(
             `Reached user limit of ${options.limit} records`,
             "verbose"

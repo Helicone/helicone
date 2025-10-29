@@ -39,36 +39,64 @@ that would be visible in the request table at
 | -------------------------------------------------------------- | ----------------------------------- |
 | [Get Request by User](/guides/cookbooks/getting-user-requests) | Get all the requests made by a user |
 
-### Filter
+### Filter Structure
 
-A filter is either a FilterLeaf or a FilterBranch, and can be composed of multiple filters generating an [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree) of ANDs/ORs.
+<Note>
+  **Important:** Filters use an AST (Abstract Syntax Tree) structure where **each condition must be a separate leaf node**. You cannot combine multiple conditions in a single `request_response_rmt` object.
+</Note>
 
-Here is how it is represented in typescript:
+A filter is either a **FilterLeaf** or a **FilterBranch**, and can be composed of multiple filters generating an [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree) of ANDs/ORs.
+
+#### TypeScript Types
 
 ```ts
 export interface FilterBranch {
   left: FilterNode;
-  operator: "or" | "and"; // Can add more later
+  operator: "or" | "and";
   right: FilterNode;
 }
+
+export type FilterLeaf = {
+  request_response_rmt: {
+    [field: string]: {
+      [operator: string]: any;
+    };
+  };
+};
 
 export type FilterNode = FilterLeaf | FilterBranch | "all";
 ```
 
-This allows us to build complex filters like this:
+#### Simple Filter (Single Condition)
 
 ```json
 {
   "filter": {
-    "operator": "and",
-    "right": {
+    "request_response_rmt": {
+      "model": {
+        "contains": "gpt-4"
+      }
+    }
+  }
+}
+```
+
+#### Complex Filter (Multiple Conditions)
+
+**Each condition is a separate leaf, connected with `and`/`or` operators:**
+
+```json
+{
+  "filter": {
+    "left": {
       "request_response_rmt": {
         "model": {
           "contains": "gpt-4"
         }
       }
     },
-    "left": {
+    "operator": "and",
+    "right": {
       "request_response_rmt": {
         "user_id": {
           "equals": "abc@email.com"
@@ -79,11 +107,76 @@ This allows us to build complex filters like this:
 }
 ```
 
+#### Match All Requests (No Filter)
+
+```json
+{
+  "filter": "all"
+}
+```
+
+### Filtering by Date Range
+
+<Note>
+  Date ranges use **inclusive** bounds - both `gte` (greater than or equal) and `lte` (less than or equal) include the specified timestamps.
+</Note>
+
+**Single date filter:**
+
+```json
+{
+  "filter": {
+    "request_response_rmt": {
+      "request_created_at": {
+        "gte": "2024-01-01T00:00:00Z"
+      }
+    }
+  }
+}
+```
+
+**Date range (start AND end):**
+
+<Warning>
+  **Important:** Each date condition must be a separate leaf! Don't put both `gte` and `lte` in the same object.
+</Warning>
+
+```json
+{
+  "filter": {
+    "left": {
+      "request_response_rmt": {
+        "request_created_at": {
+          "gte": "2024-01-01T00:00:00Z"
+        }
+      }
+    },
+    "operator": "and",
+    "right": {
+      "request_response_rmt": {
+        "request_created_at": {
+          "lte": "2024-12-31T23:59:59Z"
+        }
+      }
+    }
+  }
+}
+```
+
+**Available date operators:**
+- `gte` - Greater than or equal (start date, inclusive)
+- `lte` - Less than or equal (end date, inclusive)
+- `gt` - Greater than (exclusive)
+- `lt` - Less than (exclusive)
+- `equals` - Exact timestamp match
+
 ### Filtering by Properties
 
 <Note>
   **Important:** When filtering by custom properties, you must nest the `properties` filter inside a `request_response_rmt` object.
 </Note>
+
+**Single property:**
 
 ```json
 {
@@ -91,7 +184,7 @@ This allows us to build complex filters like this:
     "request_response_rmt": {
       "properties": {
         "environment": {
-          "like": "%-dev"
+          "equals": "production"
         }
       }
     }
@@ -99,12 +192,11 @@ This allows us to build complex filters like this:
 }
 ```
 
-You can combine property filters with other filters using the `and`/`or` operators:
+**Combining property filter with other filters:**
 
 ```json
 {
   "filter": {
-    "operator": "and",
     "left": {
       "request_response_rmt": {
         "model": {
@@ -112,11 +204,12 @@ You can combine property filters with other filters using the `and`/`or` operato
         }
       }
     },
+    "operator": "and",
     "right": {
       "request_response_rmt": {
         "properties": {
           "environment": {
-            "like": "%-dev"
+            "equals": "production"
           }
         }
       }
@@ -124,3 +217,60 @@ You can combine property filters with other filters using the `and`/`or` operato
   }
 }
 ```
+
+### Complete Example: Date Range + Property Filter
+
+This example shows how to combine a date range with a property filter:
+
+```json
+{
+  "filter": {
+    "left": {
+      "left": {
+        "request_response_rmt": {
+          "request_created_at": {
+            "gte": "2024-08-01T00:00:00Z"
+          }
+        }
+      },
+      "operator": "and",
+      "right": {
+        "request_response_rmt": {
+          "request_created_at": {
+            "lte": "2024-08-31T23:59:59Z"
+          }
+        }
+      }
+    },
+    "operator": "and",
+    "right": {
+      "request_response_rmt": {
+        "properties": {
+          "appname": {
+            "equals": "LlamaCoder"
+          }
+        }
+      }
+    }
+  },
+  "limit": 100,
+  "offset": 0
+}
+```
+
+### Available Filter Operators
+
+Different fields support different operators:
+
+**Text fields** (`model`, `user_id`, `provider`, etc.):
+- `equals` / `not-equals`
+- `like` / `ilike` (case-insensitive)
+- `contains` / `not-contains`
+
+**Number fields** (`status`, `latency`, `cost`, etc.):
+- `equals` / `not-equals`
+- `gte` / `lte` / `gt` / `lt`
+
+**Timestamp fields** (`request_created_at`, `response_created_at`):
+- `equals`
+- `gte` / `lte` / `gt` / `lt`
