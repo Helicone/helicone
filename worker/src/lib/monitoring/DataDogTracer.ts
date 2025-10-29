@@ -29,6 +29,8 @@ interface Span {
   error?: number; // 1 if error, 0 otherwise
 }
 
+const MAX_SPANS = 1000; // Prevent excessive memory usage
+
 export class DataDogTracer {
   private config: DataDogTracerConfig;
   private spans: Map<string, Span> = new Map();
@@ -57,6 +59,9 @@ export class DataDogTracer {
     resource: string,
     tags?: Record<string, string>
   ): TraceContext | null {
+    if (this.spans.size >= MAX_SPANS) {
+      return null;
+    }
     // Check kill switch and config
     if (this.DISABLED || !this.config.enabled) {
       return null;
