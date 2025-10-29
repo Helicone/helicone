@@ -306,7 +306,9 @@ export class AttemptBuilder {
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Skip PTB if caller org is the master org (same keys as PTB)
+    // (BYOK and PTB keys are identical for the master organization)
     if (orgId === this.env.HELICONE_ORG_ID) {
+      console.debug(`Skipping PTB attempts for master org: ${orgId}`);
       return [];
     }
     // Check if we have PTB endpoints
