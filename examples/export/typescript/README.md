@@ -1,14 +1,26 @@
 # Helicone Data Export Tool
 
-A command-line tool to export request/response data from Helicone's API. This tool allows you to fetch and export your Helicone request history in various formats, with options to include full request and response bodies.
+A robust command-line tool to export request/response data from Helicone's API. This tool allows you to fetch and export your Helicone request history in various formats, with advanced features for reliability and monitoring.
 
-## Features
+## ✨ Key Features
 
-- Export data in multiple formats (JSON, JSONL, CSV)
-- Date range filtering
-- Rate limiting and batch processing
-- Full request/response body inclusion (optional)
-- Automatic pagination handling
+### Core Features
+- 📦 Export data in multiple formats (JSON, JSONL, CSV)
+- 📅 Date range filtering
+- 🔄 Automatic pagination handling
+- 📄 Full request/response body inclusion (optional)
+- 🚫 Automatic filtering of large `streamed_data` fields
+
+### Advanced Features (NEW!)
+- 💾 **Auto-recovery from crashes** - Checkpoint system saves progress automatically
+- 🔁 **Retry logic with exponential backoff** - Handles transient failures gracefully
+- 🛑 **Graceful shutdown** - Ctrl+C saves progress for later resume
+- 📊 **Progress tracking** - Real-time progress bar with ETA
+- 🔍 **Multiple log levels** - quiet, normal, or verbose output
+- ✅ **Pre-flight validation** - Checks API key, permissions, and disk space
+- ⚡ **Configurable batch sizes and retry attempts**
+- 🔒 **Overwrite protection** - Prompts before overwriting existing files
+- 🏷️ **Property filtering** - Filter exports by custom properties
 
 ## Prerequisites
 
@@ -36,42 +48,108 @@ export HELICONE_API_KEY="your-helicone-api-key"
 ts-node index.ts [options]
 ```
 
-### Options
+### Core Options
 
-- `--start-date <date>`: Start date (default: 30 days ago)
-- `--end-date <date>`: End date (default: now)
-- `--limit <number>`: Maximum number of records to fetch
-- `--format <format>`: Output format: json, jsonl, or csv (default: jsonl)
-- `--include-body`: Include full request/response bodies (default: false)
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--start-date <date>` | Start date (YYYY-MM-DD or ISO string) | 30 days ago |
+| `--end-date <date>` | End date (YYYY-MM-DD or ISO string) | now |
+| `--limit <number>` | Maximum number of records to fetch | unlimited |
+| `--format <format>` | Output format: json, jsonl, or csv | jsonl |
+| `--include-body` | Include full request/response bodies | false |
+| `--output, -o <path>` | Custom output file path | output.{format} |
+| `--property, -p <key=value>` | Filter by property (can use multiple times) | - |
+| `--help, -h` | Show help message and exit | - |
 
-### Date Format
+### Advanced Options
 
-Dates should be provided in YYYY-MM-DD format or as an ISO string.
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--log-level <level>` | Log level: quiet, normal, or verbose | normal |
+| `--max-retries <number>` | Maximum retry attempts for failed requests | 5 |
+| `--batch-size <number>` | Batch size for API requests | 1000 |
+| `--clean-state` | Remove checkpoint and start fresh export | - |
+| `--resume` | Explicitly resume from checkpoint | - |
 
 ### Examples
 
-1. Export last 30 days of data in JSONL format:
+#### Basic Usage
 
+1. **Export last 30 days of data** (default behavior):
 ```bash
 ts-node index.ts
 ```
 
-2. Export data for a specific date range in CSV format:
-
+2. **Export specific date range in CSV format**:
 ```bash
 ts-node index.ts --start-date 2024-01-01 --end-date 2024-02-01 --format csv
 ```
 
-3. Export limited number of records with full request/response bodies:
-
+3. **Export with full request/response bodies**:
 ```bash
 ts-node index.ts --limit 100 --include-body
 ```
 
-4. Export data in pretty-printed JSON format:
-
+4. **Custom output file**:
 ```bash
-ts-node index.ts --format json --limit 50
+ts-node index.ts --output my-export.jsonl
+```
+
+5. **Filter by property** (e.g., only export LlamaCoder requests):
+```bash
+ts-node index.ts --property appname=LlamaCoder
+```
+
+6. **Multiple property filters**:
+```bash
+ts-node index.ts --property appname=LlamaCoder --property environment=production
+```
+
+#### Advanced Usage
+
+7. **Quiet mode for automation**:
+```bash
+ts-node index.ts --log-level quiet --limit 10000
+```
+
+8. **Verbose logging for debugging**:
+```bash
+ts-node index.ts --log-level verbose --max-retries 10
+```
+
+9. **Large export with custom batch size**:
+```bash
+ts-node index.ts --limit 50000 --batch-size 500
+```
+
+10. **Clean state and start fresh**:
+```bash
+ts-node index.ts --clean-state
+```
+
+11. **Filter by property with other options**:
+```bash
+ts-node index.ts --property appname=LlamaCoder --format csv --limit 5000 --include-body
+```
+
+#### Recovery Scenarios
+
+12. **After a crash** (automatic resume prompt):
+```bash
+ts-node index.ts
+# Will detect checkpoint and ask: "Resume from checkpoint? (y/n)"
+```
+
+13. **Force resume from checkpoint**:
+```bash
+ts-node index.ts --resume
+```
+
+14. **Cancel and save progress** (during export):
+```
+Press Ctrl+C during export
+# Progress is saved automatically
+# Run the same command again to resume
 ```
 
 ## Output Formats
@@ -101,30 +179,89 @@ Tabular format with the following columns:
 - latency
 - cost
 
+## How It Works
+
+### Auto-Recovery System
+
+The tool automatically saves checkpoints after each batch of records:
+
+1. **Checkpoint file** (`.helicone-export-state.json`) tracks:
+   - Current offset in the export
+   - Total records processed
+   - Output file path
+   - Export configuration
+
+2. **On restart**, the tool:
+   - Detects existing checkpoint
+   - Validates it matches current configuration
+   - Prompts user to resume or start fresh
+
+3. **On crash/interrupt**:
+   - Checkpoint is saved before exit
+   - Output file is properly closed
+   - No data loss occurs
+
+### Retry Logic
+
+When API requests fail, the tool automatically retries with exponential backoff:
+
+- **Attempt 1**: Wait 1 second
+- **Attempt 2**: Wait 2 seconds
+- **Attempt 3**: Wait 4 seconds
+- **Attempt 4**: Wait 8 seconds
+- **Attempt 5**: Wait 16 seconds
+
+Special handling for rate limits (429):
+- Respects `Retry-After` header if present
+- Otherwise uses exponential backoff
+
+### Progress Tracking
+
+Three log levels available:
+
+- **quiet**: Only start/complete/error messages
+- **normal**: Progress bar with ETA and records/sec
+- **verbose**: Detailed logs of each API call and retry attempt
+
+Example progress bar:
+```
+[==================>           ] 62% (6,234/10,000) ETA: 3m 45s | 12.3 rec/s
+```
+
 ## Rate Limiting
 
-The tool implements automatic rate limiting:
+The tool implements intelligent rate limiting:
 
-- Processes records in batches of 1000
+- Processes records in configurable batches (default 1000)
 - Fetches signed bodies in chunks of 10
 - Adds delays between chunks to avoid API limits
+- Automatically handles 429 rate limit responses
 
 ## Error Handling
 
-- Validates command-line arguments
-- Handles API errors gracefully
-- Provides clear error messages
-- Ensures proper cleanup of file streams
+Comprehensive error handling:
 
-## Development
+- ✅ Pre-flight validation (API key, permissions, disk space)
+- ✅ Validates command-line arguments
+- ✅ Handles API errors with retry logic
+- ✅ Distinguishes retryable vs fatal errors
+- ✅ Provides clear, actionable error messages
+- ✅ Ensures proper cleanup of file streams and signal handlers
 
-The code is written in TypeScript and follows modern best practices:
+## Architecture
 
-- Strong typing
-- Error handling
-- Resource cleanup
-- Rate limiting
-- Progress tracking
+The code is structured into specialized classes:
+
+- **CheckpointManager**: Handles state persistence and recovery
+- **ProgressTracker**: Manages logging and progress display
+- **HeliconeClient**: API client with retry logic
+- **ExportWriter**: Handles file writing for different formats
+
+Benefits:
+- Strong TypeScript typing
+- Separation of concerns
+- Easy to test and maintain
+- Extensible for new features
 
 ## License
 
