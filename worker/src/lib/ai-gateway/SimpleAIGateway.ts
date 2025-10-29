@@ -80,13 +80,19 @@ export class SimpleAIGateway {
       REQUEST_CACHE_KEY_2: env.REQUEST_CACHE_KEY_2,
     });
 
-    this.attemptBuilder = new AttemptBuilder(providerKeysManager, env, tracer, traceContext);
+    this.attemptBuilder = new AttemptBuilder(
+      providerKeysManager,
+      env,
+      tracer,
+      traceContext
+    );
     this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider, tracer);
   }
 
   async handle(): Promise<Response> {
     // Step 1: Parse and prepare request
-    const bodyMapping: BodyMappingType = this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
+    const bodyMapping: BodyMappingType =
+      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
     const parseSpan = this.traceContext?.sampled
       ? this.tracer.startSpan(
           "ai_gateway.gateway.parse_request",
@@ -197,18 +203,14 @@ export class SimpleAIGateway {
       ) {
         errors.push({
           source: attempt.source,
-          message:
-            `The Responses API is only supported for the providers: ${ResponsesAPIEnabledProviders.join(", ")}`,
+          message: `The Responses API is only supported for the providers: ${ResponsesAPIEnabledProviders.join(", ")}`,
           type: "invalid_format",
           statusCode: 400,
         });
         continue;
       }
       // TODO: add validation schema for Responses API format
-      if (
-        attempt.authType === "ptb" &&
-        bodyMapping === "OPENAI"
-      ) {
+      if (attempt.authType === "ptb" && bodyMapping === "OPENAI") {
         const validationResult = validateOpenAIChatPayload(finalBody);
         if (isErr(validationResult)) {
           errors.push({
