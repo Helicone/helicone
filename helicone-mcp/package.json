@@ -1,6 +1,6 @@
 {
 	"name": "@helicone/mcp",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Model Context Protocol server for Helicone observability platform",
 	"type": "module",
 	"bin": "./dist/index.js",
