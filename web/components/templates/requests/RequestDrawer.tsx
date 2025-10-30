@@ -431,11 +431,6 @@ export default function RequestDrawer(props: RequestDivProps) {
       attemptedModel: props["helicone-stripe-attempted-model"] as
         | string
         | undefined,
-      inputTokens: props["helicone-stripe-input-tokens"] as string | undefined,
-      outputTokens: props["helicone-stripe-output-tokens"] as
-        | string
-        | undefined,
-      eventCount: props["helicone-stripe-event-count"] as string | undefined,
     };
   }, [request?.heliconeMetadata.customProperties]);
 
@@ -961,106 +956,70 @@ export default function RequestDrawer(props: RequestDivProps) {
 
             {/* Stripe Integration Status */}
             {hasStripeData && stripeProperties && (
-              <div className="mb-4 rounded-lg border border-border bg-sidebar-background">
-                {/* Header */}
-                <div className="flex h-12 flex-row items-center justify-between rounded-t-lg bg-white p-4 pr-2 shadow-sm dark:bg-black">
-                  <div className="flex items-center gap-2">
-                    <CreditCard size={16} className="text-primary" />
-                    <h2 className="text-sm font-medium">Stripe Integration</h2>
-                    {stripeProperties.status && (
-                      <>
-                        <div className="h-4 w-px bg-border" />
-                        <Badge
-                          variant="outline"
-                          className={getStripeStatusColor(
-                            stripeProperties.status,
-                          )}
-                        >
-                          {stripeProperties.status === "processed"
-                            ? "Processed"
-                            : stripeProperties.status === "skipped"
-                              ? "Skipped"
-                              : "Error"}
-                        </Badge>
-                      </>
-                    )}
-                  </div>
+              <div className="mb-4 rounded-lg border border-border bg-sidebar-background p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <CreditCard size={14} className="text-primary" />
+                  <h2 className="text-xs font-medium">Stripe Integration</h2>
+                  {stripeProperties.status && (
+                    <>
+                      <div className="h-3 w-px bg-border" />
+                      <Badge
+                        variant="outline"
+                        className={getStripeStatusColor(
+                          stripeProperties.status,
+                        )}
+                      >
+                        {stripeProperties.status === "processed"
+                          ? "Processed"
+                          : stripeProperties.status === "skipped"
+                            ? "Skipped"
+                            : "Error"}
+                      </Badge>
+                    </>
+                  )}
                 </div>
 
-                {/* Content */}
-                <div className="border-t border-border bg-sidebar-background p-4">
-                  <div className="flex flex-col gap-2">
-                    {stripeProperties.skipReason && (
-                      <div className="grid grid-cols-[auto,1fr] items-center gap-x-4">
-                        <XSmall className="text-nowrap text-muted-foreground">
-                          Skip Reason
-                        </XSmall>
-                        <XSmall className="min-w-0 text-right">
-                          {formatSkipReason(stripeProperties.skipReason)}
-                        </XSmall>
-                      </div>
-                    )}
-                    {stripeProperties.customerId && (
-                      <div className="grid grid-cols-[auto,1fr] items-center gap-x-4">
-                        <XSmall className="text-nowrap text-muted-foreground">
-                          Customer ID
-                        </XSmall>
-                        <XSmall className="min-w-0 truncate text-right font-mono">
-                          {stripeProperties.customerId}
-                        </XSmall>
-                      </div>
-                    )}
-                    {stripeProperties.model && (
-                      <div className="grid grid-cols-[auto,1fr] items-center gap-x-4">
-                        <XSmall className="text-nowrap text-muted-foreground">
-                          Model
-                        </XSmall>
-                        <XSmall className="min-w-0 truncate text-right font-mono">
-                          {stripeProperties.model}
-                        </XSmall>
-                      </div>
-                    )}
-                    {stripeProperties.attemptedModel && (
-                      <div className="grid grid-cols-[auto,1fr] items-center gap-x-4">
-                        <XSmall className="text-nowrap text-muted-foreground">
-                          Attempted Model
-                        </XSmall>
-                        <XSmall className="min-w-0 truncate text-right font-mono">
-                          {stripeProperties.attemptedModel}
-                        </XSmall>
-                      </div>
-                    )}
-                    {stripeProperties.inputTokens && (
-                      <div className="grid grid-cols-[auto,1fr] items-center gap-x-4">
-                        <XSmall className="text-nowrap text-muted-foreground">
-                          Input Tokens
-                        </XSmall>
-                        <XSmall className="min-w-0 text-right">
-                          {stripeProperties.inputTokens}
-                        </XSmall>
-                      </div>
-                    )}
-                    {stripeProperties.outputTokens && (
-                      <div className="grid grid-cols-[auto,1fr] items-center gap-x-4">
-                        <XSmall className="text-nowrap text-muted-foreground">
-                          Output Tokens
-                        </XSmall>
-                        <XSmall className="min-w-0 text-right">
-                          {stripeProperties.outputTokens}
-                        </XSmall>
-                      </div>
-                    )}
-                    {stripeProperties.eventCount && (
-                      <div className="grid grid-cols-[auto,1fr] items-center gap-x-4">
-                        <XSmall className="text-nowrap text-muted-foreground">
-                          Batch Count
-                        </XSmall>
-                        <XSmall className="min-w-0 text-right">
-                          {stripeProperties.eventCount}
-                        </XSmall>
-                      </div>
-                    )}
-                  </div>
+                <div className="flex flex-col gap-1">
+                  {stripeProperties.skipReason && (
+                    <div className="grid grid-cols-[auto,1fr] items-center gap-x-3">
+                      <XSmall className="text-nowrap text-muted-foreground">
+                        Reason
+                      </XSmall>
+                      <XSmall className="min-w-0 text-right">
+                        {formatSkipReason(stripeProperties.skipReason)}
+                      </XSmall>
+                    </div>
+                  )}
+                  {stripeProperties.customerId && (
+                    <div className="grid grid-cols-[auto,1fr] items-center gap-x-3">
+                      <XSmall className="text-nowrap text-muted-foreground">
+                        Customer
+                      </XSmall>
+                      <XSmall className="min-w-0 truncate text-right font-mono">
+                        {stripeProperties.customerId}
+                      </XSmall>
+                    </div>
+                  )}
+                  {stripeProperties.model && (
+                    <div className="grid grid-cols-[auto,1fr] items-center gap-x-3">
+                      <XSmall className="text-nowrap text-muted-foreground">
+                        Model
+                      </XSmall>
+                      <XSmall className="min-w-0 truncate text-right font-mono">
+                        {stripeProperties.model}
+                      </XSmall>
+                    </div>
+                  )}
+                  {stripeProperties.attemptedModel && (
+                    <div className="grid grid-cols-[auto,1fr] items-center gap-x-3">
+                      <XSmall className="text-nowrap text-muted-foreground">
+                        Attempted
+                      </XSmall>
+                      <XSmall className="min-w-0 truncate text-right font-mono">
+                        {stripeProperties.attemptedModel}
+                      </XSmall>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

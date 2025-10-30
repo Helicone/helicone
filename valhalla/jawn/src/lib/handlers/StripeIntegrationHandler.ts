@@ -266,8 +266,6 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
         "helicone-stripe-integration-status": "processed",
         "helicone-stripe-customer-id": stripeCustomerId,
         "helicone-stripe-model": formattedModel,
-        "helicone-stripe-input-tokens": promptTokens.toString(),
-        "helicone-stripe-output-tokens": completionTokens.toString(),
       };
     }
 
