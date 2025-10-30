@@ -34,7 +34,6 @@ import {
   DialogTitle,
   DialogHeader,
 } from "@/components/ui/dialog";
-// removed DialogTrigger (no openrouter button)
 import { Dialog } from "@/components/ui/dialog";
 import { providers } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
