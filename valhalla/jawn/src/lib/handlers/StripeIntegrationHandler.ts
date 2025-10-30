@@ -52,6 +52,21 @@ const AVAILABLE_MODELS_IN_STRIPE = [
   "openai/o3-mini",
   "openai/o3-pro",
   "openai/o4-mini",
+  "azure/gpt-4.1",
+  "azure/gpt-4.1-mini",
+  "azure/gpt-4.1-nano",
+  "azure/gpt-4o",
+  "azure/gpt-4o-mini",
+  "azure/gpt-5",
+  "azure/gpt-5-mini",
+  "azure/gpt-5-nano",
+  "azure/o1",
+  "azure/o1-mini",
+  "azure/o1-pro",
+  "azure/o3",
+  "azure/o3-mini",
+  "azure/o3-pro",
+  "azure/o4-mini",
 ];
 
 const DEFAULT_CACHE_REFERENCE_ID = "00000000-0000-0000-0000-000000000000";
