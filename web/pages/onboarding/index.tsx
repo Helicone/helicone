@@ -29,6 +29,13 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     updateCurrentStep("ORGANIZATION");
+
+    // Fire Google Ads conversion event for Sign Up
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag('event', 'ads_conversion_Sign_Up_1', {
+        // <event_parameters>
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
