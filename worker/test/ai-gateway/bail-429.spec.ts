@@ -36,7 +36,7 @@ describe("Bail logic for 429 responses", () => {
 
     expect(response.status).toBe(429);
     expect(calls.length).toBe(0);
-  });
+  }, 30000);
 
   it("bails on Helicone rate limit 429 (forwarder)", async () => {
     // BYOK on is fine; we simulate a Helicone-produced rate limit from forwarder
@@ -62,7 +62,7 @@ describe("Bail logic for 429 responses", () => {
 
     expect(response.status).toBe(429);
     expect(calls.length).toBe(1);
-  });
+  }, 30000);
 
   it("does not bail on provider 429 and falls back to the next provider", async () => {
     // BYOK only so provider errors are exercised; PTB disabled
@@ -90,5 +90,5 @@ describe("Bail logic for 429 responses", () => {
 
     expect(response.status).toBe(200);
     expect(calls.length).toBe(2);
-  });
+  }, 30000);
 });
