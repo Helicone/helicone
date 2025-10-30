@@ -8,10 +8,13 @@ A Model Context Protocol (MCP) server for querying Helicone observability platfo
 {
   "mcpServers": {
     "helicone": {
+      "type": "stdio",
       "command": "npx",
-      "args": ["-y", "helicone-mcp@latest"],
-      "headers": {
-        "Authorization": "your-helicone-api-key"
+      "args": [
+        "@helicone/mcp@latest"
+      ],
+      "env": {
+        "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
       }
     }
   }

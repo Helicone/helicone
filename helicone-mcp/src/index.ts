@@ -1,37 +1,21 @@
-import express, { Request, Response } from "express";
+#!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { IsomorphicHeaders } from "@modelcontextprotocol/sdk/types.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { fetchRequests, fetchSessions } from "./lib/helicone-client.js";
 import { requestFilterNodeSchema, sortLeafRequestSchema, sessionFilterNodeSchema } from "./types/generated-zod.js";
 
-const app = express();
-const PORT = process.env.PORT || 6969;
+const HELICONE_API_KEY = process.env.HELICONE_API_KEY;
 
-app.use(express.json());
+if (!HELICONE_API_KEY) {
+	console.error("Error: HELICONE_API_KEY environment variable is not set");
+	process.exit(1);
+}
 
 const server = new McpServer({
 	name: "Helicone MCP",
 	version: "1.0.0",
 });
-
-const NO_AUTH_ERROR_RESPONSE = {
-  content: [
-    {
-      type: "text",
-      text: "Error: Authorization header is required. Please provide 'Authorization: YOUR_HELICONE_API_KEY'",
-    },
-  ],
-};
-
-function getAuth(headers: IsomorphicHeaders): string | null {
-	const apiKey = headers["authorization"] || headers["Authorization"];
-	if (!apiKey || typeof apiKey !== "string") {
-		return null;
-	}
-	return apiKey;
-}
 
 server.tool(
 	"query_requests",
@@ -43,12 +27,9 @@ server.tool(
 		sort: sortLeafRequestSchema.optional().describe("Sort criteria"),
 		includeBodies: z.boolean().optional().describe("Fetch and include request/response bodies (default: false). If true, fetches content from signed URLs."),
 	},
-	async (params: any, extra) => {
-		const apiKey = getAuth(extra.requestInfo?.headers ?? {});
-		if (!apiKey) { return NO_AUTH_ERROR_RESPONSE as any; }
-
+	async (params: any) => {
 		try {
-			const requests = await fetchRequests(apiKey, {
+			const requests = await fetchRequests(HELICONE_API_KEY, {
 				filter: params.filter || {},
 				offset: params.offset ?? 0,
 				limit: params.limit ?? 100,
@@ -93,10 +74,7 @@ server.tool(
 		offset: z.number().optional().describe("Pagination offset (default: 0)"),
 		limit: z.number().optional().describe("Maximum number of results to return (default: 100)"),
 	},
-	async (params: any, extra) => {
-		const apiKey = getAuth(extra.requestInfo?.headers ?? {});
-		if (!apiKey) { return NO_AUTH_ERROR_RESPONSE as any; }
-
+	async (params: any) => {
 		if (!params.startTimeUnixMs || !params.endTimeUnixMs) {
 			return {
 				content: [
@@ -109,7 +87,7 @@ server.tool(
 		}
 
 		try {
-			const sessions = await fetchSessions(apiKey, {
+			const sessions = await fetchSessions(HELICONE_API_KEY, {
 				search: params.search,
 				timeFilter: {
 					startTimeUnixMs: params.startTimeUnixMs,
@@ -143,50 +121,12 @@ server.tool(
 	}
 );
 
-app.post("/mcp", async (req: Request, res: Response) => {
-	try {
-		const transport = new StreamableHTTPServerTransport({
-			sessionIdGenerator: undefined,
-		});
+async function main() {
+	const transport = new StdioServerTransport();
+	await server.connect(transport);
+}
 
-		await server.connect(transport);
-		await transport.handleRequest(req, res, req.body);
-
-		res.on("close", () => {
-			transport.close();
-		});
-	} catch (error) {
-		console.error("MCP request error:", error);
-		if (!res.headersSent) {
-			res.status(500).json({
-				jsonrpc: "2.0",
-				error: {
-					code: -32603,
-					message: "Internal server error",
-				},
-				id: null,
-			});
-		}
-	}
-});
-
-app.get("/health", (_req: Request, res: Response) => {
-	res.json({ status: "ok" });
-});
-
-const httpServer = app.listen(PORT, () => {
-	console.log(`Helicone MCP server running on http://localhost:${PORT}`);
-	console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);
-});
-
-httpServer.on("error", (error) => {
-	console.error("Server error:", error);
+main().catch((error) => {
+	console.error("Failed to start MCP server:", error);
 	process.exit(1);
-});
-
-process.on("SIGINT", () => {
-	console.log("\nShutting down...");
-	httpServer.close(() => {
-		process.exit(0);
-	});
 });

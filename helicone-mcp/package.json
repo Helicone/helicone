@@ -1,19 +1,21 @@
 {
 	"name": "@helicone/mcp",
-	"version": "0.1.1",
+	"version": "0.1.4",
 	"description": "Model Context Protocol server for Helicone observability platform",
 	"type": "module",
-	"bin": "./dist/index.js",
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"bin": {
+		"helicone-mcp": "./build/index.js"
+	},
+	"main": "./build/index.js",
+	"types": "./build/index.d.ts",
 	"repository": {
 		"type": "git",
 		"url": "git@github.com:Helicone/helicone.git",
 		"directory": "helicone-mcp"
 	},
 	"scripts": {
-		"build": "tsc",
-		"start": "node dist/index.js",
+		"build": "tsc && chmod 755 build/index.js",
+		"start": "node build/index.js",
 		"dev": "tsx src/index.ts",
 		"format": "biome format --write",
 		"lint:fix": "biome lint --fix",
@@ -34,16 +36,14 @@
 	"author": "Helicone, Inc.",
 	"license": "Apache-2.0",
 	"files": [
-		"dist"
+		"build"
 	],
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.20.2",
-		"express": "^4.18.2",
 		"zod": "^3.25.76"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.5",
-		"@types/express": "^4.17.21",
 		"@types/node": "^24.9.2",
 		"typescript": "5.9.3",
 		"tsx": "^4.7.0"
