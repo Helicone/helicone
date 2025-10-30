@@ -163,6 +163,9 @@ export interface paths {
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
   };
+  "/v1/organization/models": {
+    get: operations["GetModels"];
+  };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
   };
@@ -1143,6 +1146,14 @@ Json: JsonObject;
       };
     };
     OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
+    "ResultSuccess__model-string_-Array_": {
+      data: {
+          model: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -17175,6 +17186,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };
