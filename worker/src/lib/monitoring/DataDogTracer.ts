@@ -233,7 +233,9 @@ export class DataDogTracer {
           operation: span.name,
           operation_name: span.name, // Facet-friendly field for grouping in Datadog UI
           resource: span.resource,
-          duration_ms: span.duration ? span.duration / 1_000_000 : 0,
+          duration_num_ms: parseInt(
+            `${span.duration ? span.duration / 1_000_000 : 0}`
+          ),
           error: span.error === 1,
           // Include all meta tags as top-level fields for easier querying
           ...span.meta,
