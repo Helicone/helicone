@@ -476,11 +476,11 @@ export interface paths {
      */
     get: operations["GetModelRegistry"];
   };
-  "/v1/public/compare/models": {
-    post: operations["GetModelComparison"];
-  };
   "/v1/models": {
     get: operations["GetModels"];
+  };
+  "/v1/public/compare/models": {
+    post: operations["GetModelComparison"];
   };
   "/v1/public/security": {
     post: operations["GetSecurity"];
@@ -3395,6 +3395,19 @@ Json: JsonObject;
       error: null;
     };
     "Result_ModelRegistryResponse.string_": components["schemas"]["ResultSuccess_ModelRegistryResponse_"] | components["schemas"]["ResultError_string_"];
+    OAIModel: {
+      id: string;
+      /** @enum {string} */
+      object: "model";
+      /** Format: double */
+      created: number;
+      owned_by: string;
+    };
+    OAIModelsResponse: {
+      /** @enum {string} */
+      object: "list";
+      data: components["schemas"]["OAIModel"][];
+    };
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -3471,14 +3484,6 @@ Json: JsonObject;
       names: string[];
       parent: string;
     };
-    "ResultSuccess__model-string_-Array_": {
-      data: {
-          model: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__unsafe-boolean__": {
       data: {
         unsafe: boolean;
@@ -6945,6 +6950,16 @@ export interface operations {
       };
     };
   };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OAIModelsResponse"];
+        };
+      };
+    };
+  };
   GetModelComparison: {
     requestBody: {
       content: {
@@ -6956,16 +6971,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Model-Array.string_"];
-        };
-      };
-    };
-  };
-  GetModels: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };

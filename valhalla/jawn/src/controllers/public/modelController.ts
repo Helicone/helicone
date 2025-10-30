@@ -1,58 +1,75 @@
-import { Controller, Get, Request, Route, Security, Tags } from "tsoa";
-import { KVCache } from "../../lib/cache/kvCache";
-import { err, ok, Result } from "../../packages/common/result";
-import { ModelComparisonManager } from "../../managers/ModelComparisonManager";
-import { type JawnAuthenticatedRequest } from "../../types/request";
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { Model } from "openai/resources/models";
-import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { Controller, Get, Route, Tags } from "tsoa";
+import { registry } from "../../../../../packages/cost/models/registry";
 
-const kvCache = new KVCache(12 * 60 * 60 * 1000); // 12 hours
+interface OAIModel {
+  id: string;
+  object: "model";
+  created: number;
+  owned_by: string;
+}
+
+interface OAIModelsResponse {
+  object: "list";
+  data: OAIModel[];
+}
 
 @Route("/v1/models")
 @Tags("Models")
-@Security("api_key")
 export class ModelController extends Controller {
-  @Get("/")
-  public async getModels(@Request() request: JawnAuthenticatedRequest): Promise<
-    Result<
-      {
-        model: string;
-      }[],
-      string
-    >
-  > {
-    const result = await cacheResultCustom(
-      "v1/public/compare/models" + JSON.stringify(request.authParams),
-      async () => {
-        const result = await dbQueryClickhouse<{
-          model: string;
-          count: number;
-        }>(
-          `
-          SELECT 
-          model,
-          count() as count
-          FROM request_response_rmt
-          WHERE organization_id = {val_0: UUID}
-          GROUP BY model
-          ORDER BY count() DESC
-          `,
-          [request.authParams.organizationId]
-        );
-        return ok(result);
-      },
-      kvCache
-    );
+  private dateToUnixTimestamp(dateString?: string): number {
+    if (!dateString) {
+      return Math.floor(new Date("2024-01-01").getTime() / 1000);
+    }
+    return Math.floor(new Date(dateString).getTime() / 1000);
+  }
 
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      return err(
-        JSON.stringify(result.error) || "Failed to fetch model comparison"
-      );
-    } else {
+  @Get("/")
+  public async getModels(): Promise<OAIModelsResponse> {
+    try {
+      const allModelsResult = registry.getAllModelsWithIds();
+      if (allModelsResult.error) {
+        this.setStatus(500);
+        throw new Error("Failed to fetch models from registry");
+      }
+
+      const oaiModels: OAIModel[] = [];
+
+      for (const [modelId, modelConfig] of Object.entries(
+        allModelsResult.data!
+      )) {
+        const endpointsResult = registry.getEndpointsByModel(modelId);
+        if (
+          !endpointsResult.data ||
+          endpointsResult.data.length === 0 ||
+          endpointsResult.error
+        ) {
+          continue;
+        }
+
+        const allEndpointsRequireExplicitRouting = endpointsResult.data.every(
+          (ep) => ep.modelConfig.requireExplicitRouting === true
+        );
+        if (allEndpointsRequireExplicitRouting) {
+          continue;
+        }
+
+        oaiModels.push({
+          id: modelId,
+          object: "model",
+          created: this.dateToUnixTimestamp(modelConfig.created),
+          owned_by: modelConfig.author,
+        });
+      }
+
       this.setStatus(200);
-      return ok(result.data.data?.map((r) => ({ model: r.model })) ?? []);
+      return {
+        object: "list",
+        data: oaiModels,
+      };
+    } catch (error) {
+      console.error("Error fetching models:", error);
+      this.setStatus(500);
+      throw new Error("Internal server error while fetching models");
     }
   }
 }

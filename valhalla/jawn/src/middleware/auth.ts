@@ -72,6 +72,10 @@ export const authMiddleware = async (
     next();
     return;
   }
+  if (req.path === "/v1/models" && req.method === "GET") {
+    next();
+    return;
+  }
   if (req.path === "/v1/organization" && req.method === "GET") {
     next();
     return;
