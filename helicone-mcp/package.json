@@ -4,10 +4,10 @@
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",
-		"dev": "wrangler dev --port 8788",
+		"dev": "wrangler dev --port 6969",
 		"format": "biome format --write",
 		"lint:fix": "biome lint --fix",
-		"start": "wrangler dev --port 8788",
+		"start": "wrangler dev --port 6969",
 		"cf-typegen": "wrangler types",
 		"type-check": "tsc --noEmit"
 	},

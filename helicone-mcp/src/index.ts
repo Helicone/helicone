@@ -3,11 +3,9 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { components } from "./types/public";
 
-// Type definitions from the generated public.ts
 type RequestQueryParams = components["schemas"]["RequestQueryParams"];
 type Result = components["schemas"]["Result_HeliconeRequest-Array.string_"];
 
-// Define our Helicone MCP agent
 export class HeliconeMCP extends McpAgent {
 	server = new McpServer({
 		name: "Helicone Request Query",
@@ -15,7 +13,6 @@ export class HeliconeMCP extends McpAgent {
 	});
 
 	async init() {
-		// Query requests tool - allows users to query their Helicone requests
 		this.server.tool(
 			"query_requests",
 			{
@@ -29,21 +26,20 @@ export class HeliconeMCP extends McpAgent {
 				isScored: z.boolean().optional().describe("Filter for scored requests"),
 			},
 			async (params, extra) => {
-				// Get the HELICONE_API_KEY from environment
-				const apiKey = extra._meta?.HELICONE_API_KEY as string | undefined;
+				const headers = extra.requestInfo?.headers ?? {};
+				const apiKey = headers["authorization"] || headers["Authorization"];
 
-				if (!apiKey) {
+				if (!apiKey || typeof apiKey !== "string") {
 					return {
 						content: [
 							{
 								type: "text",
-								text: "Error: HELICONE_API_KEY environment variable is required. Please configure it when adding this MCP server.",
+								text: "Error: Authorization header is required. Please provide 'Authorization: YOUR_HELICONE_API_KEY'",
 							},
 						],
 					};
 				}
 
-				// Build the request body
 				const requestBody: RequestQueryParams = {
 					filter: params.filter || {},
 					offset: params.offset,
@@ -56,7 +52,6 @@ export class HeliconeMCP extends McpAgent {
 				} as RequestQueryParams;
 
 				try {
-					// Make the API request
 					const response = await fetch("https://api.helicone.ai/v1/request/query-clickhouse", {
 						method: "POST",
 						headers: {
@@ -80,12 +75,11 @@ export class HeliconeMCP extends McpAgent {
 
 					const result: Result = await response.json();
 
-					// Return the results as formatted JSON
 					return {
 						content: [
 							{
 								type: "text",
-								text: JSON.stringify(result, null, 2),
+								text: JSON.stringify(result.data, null, 2),
 							},
 						],
 					};
@@ -108,12 +102,10 @@ export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const url = new URL(request.url);
 
-		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
-			return HeliconeMCP.serveSSE("/sse").fetch(request, env, ctx);
-		}
-
-		if (url.pathname === "/mcp") {
-			return HeliconeMCP.serve("/mcp").fetch(request, env, ctx);
+		if (url.pathname === "/" || url.pathname === "/mcp") {
+			return HeliconeMCP.serve("/", {
+				transport: "streamable-http"
+			}).fetch(request, env, ctx);
 		}
 
 		return new Response("Not found", { status: 404 });
