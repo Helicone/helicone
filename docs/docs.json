@@ -365,6 +365,13 @@
           {
             "group": "Models",
             "pages": ["rest/models/get-v1public-model-registry-models"]
+          },
+          {
+            "group": "AI Gateway",
+            "pages": [
+              "rest/ai-gateway/post-v1-chat-completions",
+              "rest/ai-gateway/post-v1-responses"
+            ]
           }
         ]
       },
@@ -472,7 +479,7 @@
     "dark": "/logo/dark.svg"
   },
   "api": {
-    "openapi": ["swagger.json"]
+    "openapi": ["swagger.json", "ai-gateway.openapi.json"]
   },
   "appearance": {
     "default": "light"

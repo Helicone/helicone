@@ -14,7 +14,7 @@ import { Plugin } from "@helicone-package/cost/models/types";
 import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
-import { validateOpenAIChatPayload } from "./validators/openaiRequestValidator";
+import { validateOpenAIChatPayload, validateOpenAIResponsePayload } from "./validators/openaiRequestValidator";
 import {
   RequestParams,
   BodyMappingType,
@@ -204,12 +204,16 @@ export class SimpleAIGateway {
         });
         continue;
       }
-      // TODO: add validation schema for Responses API format
       if (
         attempt.authType === "ptb" &&
-        bodyMapping === "OPENAI"
+        (bodyMapping === "OPENAI" || bodyMapping === "RESPONSES")
       ) {
-        const validationResult = validateOpenAIChatPayload(finalBody);
+        let validationResult: Result<void, string>;
+        if (bodyMapping === "RESPONSES") {
+          validationResult = validateOpenAIResponsePayload(finalBody);
+        } else {
+          validationResult = validateOpenAIChatPayload(finalBody);
+        }
         if (isErr(validationResult)) {
           errors.push({
             type: "invalid_format",
