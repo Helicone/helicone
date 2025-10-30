@@ -17,7 +17,9 @@
 		"dev": "tsx src/index.ts",
 		"format": "biome format --write",
 		"lint:fix": "biome lint --fix",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"flatten-types": "tsx flatten-types.ts",
+		"generate-zod": "npm run flatten-types && ts-to-zod src/types/flat.ts src/types/generated-zod.ts && npm run build"
 	},
 	"keywords": [
 		"mcp",
