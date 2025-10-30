@@ -24,28 +24,73 @@ A robust command-line tool to export request/response data from Helicone's API. 
 
 ## Prerequisites
 
-- Node.js (v16 or later)
-- TypeScript
+- Node.js v18.0.0 or later (for native fetch API)
 - A Helicone API key
 
 ## Installation
 
-1. Install dependencies:
+### Option 1: NPX (Recommended - No Installation Required)
+
+Use the package directly without installing:
 
 ```bash
-npm install
+npx @helicone/export [options]
 ```
 
-2. Set your Helicone API key:
+### Option 2: Global Installation
+
+Install once and use anywhere:
+
+```bash
+npm install -g @helicone/export
+helicone-export [options]
+```
+
+### Option 3: Local Project Installation
+
+Add to your project:
+
+```bash
+npm install @helicone/export
+npx helicone-export [options]
+```
+
+### Option 4: Development (From Source)
+
+Clone and build from source:
+
+```bash
+git clone https://github.com/Helicone/helicone.git
+cd helicone/examples/export/typescript
+npm install
+npm run build
+node dist/cli.js [options]
+```
+
+## Setup
+
+Set your Helicone API key as an environment variable:
 
 ```bash
 export HELICONE_API_KEY="your-helicone-api-key"
 ```
 
+Or prefix each command:
+
+```bash
+HELICONE_API_KEY="your-key" npx @helicone/export [options]
+```
+
 ## Usage
 
 ```bash
-ts-node index.ts [options]
+npx @helicone/export [options]
+```
+
+Or if globally installed:
+
+```bash
+helicone-export [options]
 ```
 
 ### Core Options
@@ -77,72 +122,72 @@ ts-node index.ts [options]
 
 1. **Export last 30 days of data** (default behavior):
 ```bash
-ts-node index.ts
+npx @helicone/export
 ```
 
 2. **Export specific date range in CSV format**:
 ```bash
-ts-node index.ts --start-date 2024-01-01 --end-date 2024-02-01 --format csv
+npx @helicone/export --start-date 2024-01-01 --end-date 2024-02-01 --format csv
 ```
 
 3. **Export with full request/response bodies**:
 ```bash
-ts-node index.ts --limit 100 --include-body
+npx @helicone/export --limit 100 --include-body
 ```
 
 4. **Custom output file**:
 ```bash
-ts-node index.ts --output my-export.jsonl
+npx @helicone/export --output my-export.jsonl
 ```
 
 5. **Filter by property** (e.g., only export LlamaCoder requests):
 ```bash
-ts-node index.ts --property appname=LlamaCoder
+npx @helicone/export --property appname=LlamaCoder
 ```
 
 6. **Multiple property filters**:
 ```bash
-ts-node index.ts --property appname=LlamaCoder --property environment=production
+npx @helicone/export --property appname=LlamaCoder --property environment=production
 ```
 
 #### Advanced Usage
 
 7. **Quiet mode for automation**:
 ```bash
-ts-node index.ts --log-level quiet --limit 10000
+npx @helicone/export --log-level quiet --limit 10000
 ```
 
 8. **Verbose logging for debugging**:
 ```bash
-ts-node index.ts --log-level verbose --max-retries 10
+npx @helicone/export --log-level verbose --max-retries 10
 ```
 
 9. **Large export with custom batch size**:
 ```bash
-ts-node index.ts --limit 50000 --batch-size 500
+npx @helicone/export --limit 50000 --batch-size 500
 ```
 
 10. **Clean state and start fresh**:
 ```bash
-ts-node index.ts --clean-state
+npx @helicone/export --clean-state
 ```
 
 11. **Filter by property with other options**:
 ```bash
-ts-node index.ts --property appname=LlamaCoder --format csv --limit 5000 --include-body
+npx @helicone/export --property appname=LlamaCoder --format csv --limit 5000 --include-body
 ```
 
 #### Recovery Scenarios
 
 12. **After a crash** (automatic resume prompt):
 ```bash
-ts-node index.ts
+npx @helicone/export
 # Will detect checkpoint and ask: "Resume from checkpoint? (y/n)"
 ```
 
 13. **Force resume from checkpoint**:
 ```bash
-ts-node index.ts --resume
+npx @helicone/export --resume
 ```
 
 14. **Cancel and save progress** (during export):
