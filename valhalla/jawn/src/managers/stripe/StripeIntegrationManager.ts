@@ -85,11 +85,26 @@ export class StripeIntegrationManager extends BaseManager {
         return err("Invalid Stripe API key format");
       }
 
-      // 3. Create test meter event
-      const testEvent: StripeMeterEvent = {
-        identifier: `helicone-test-${Date.now()}`,
+      // 3. Create test meter events (input and output tokens)
+      const timestamp = Date.now();
+      const isoTimestamp = new Date().toISOString();
+
+      const inputTokenEvent: StripeMeterEvent = {
+        identifier: `helicone-test-${timestamp}-input`,
         event_name: eventName,
-        timestamp: new Date().toISOString(),
+        timestamp: isoTimestamp,
+        payload: {
+          stripe_customer_id: customerId,
+          value: "40",
+          token_type: "input",
+          model: "openai/gpt-4o",
+        },
+      };
+
+      const outputTokenEvent: StripeMeterEvent = {
+        identifier: `helicone-test-${timestamp}-output`,
+        event_name: eventName,
+        timestamp: isoTimestamp,
         payload: {
           stripe_customer_id: customerId,
           value: "60",
@@ -98,16 +113,20 @@ export class StripeIntegrationManager extends BaseManager {
         },
       };
 
-      // 4. Create Stripe client with user's key and send meter event
+      // 4. Create Stripe client with user's key and send meter events
       const stripe = new Stripe(stripeKey.provider_key);
 
       try {
-        await stripe.v2.billing.meterEvents.create(testEvent);
+        // Send both input and output token events
+        await stripe.v2.billing.meterEvents.create(inputTokenEvent);
+        await stripe.v2.billing.meterEvents.create(outputTokenEvent);
 
-        return ok("Test meter event sent successfully");
+        return ok(
+          "Test meter events sent successfully (40 input tokens + 60 output tokens)"
+        );
       } catch (stripeError) {
         const errorMessage = sanitizeStripeError(stripeError);
-        return err(`Failed to send meter event to Stripe: ${errorMessage}`);
+        return err(`Failed to send meter events to Stripe: ${errorMessage}`);
       }
     } catch (error) {
       return err(`Error testing meter event: ${error}`);

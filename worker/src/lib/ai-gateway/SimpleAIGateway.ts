@@ -138,13 +138,22 @@ export class SimpleAIGateway {
           this.traceContext
         )
       : null;
-    const attempts = await this.attemptBuilder.buildAttempts(
+    let attempts = await this.attemptBuilder.buildAttempts(
       modelStrings,
       this.orgId,
       bodyMapping,
       plugins
     );
     this.tracer.finishSpan(buildSpan);
+
+    // Filter out helicone provider attempts when x-stripe-customer-id is present
+    // to ensure Stripe meter events are only sent for actual external provider usage
+    if (this.requestWrapper.heliconeHeaders.stripeCustomerId) {
+      attempts = attempts.filter(
+        (attempt) => attempt.endpoint.provider !== "helicone"
+      );
+    }
+
     if (attempts.length === 0) {
       errors.push({
         source: "No available providers",
