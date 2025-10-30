@@ -567,7 +567,7 @@ async function promptUser(question: string): Promise<boolean> {
 /**
  * Validate pre-flight requirements
  */
-function validatePreFlight(options: QueryOptions): void {
+export function validatePreFlight(options: QueryOptions): void {
   // Check API key format
   if (!HELICONE_API_KEY || HELICONE_API_KEY.length < 10) {
     throw new Error("Invalid HELICONE_API_KEY format");
@@ -604,7 +604,7 @@ function validatePreFlight(options: QueryOptions): void {
   }
 }
 
-function parseArgs(): QueryOptions {
+export function parseArgs(): QueryOptions {
   const args = process.argv.slice(2);
   const options: QueryOptions = {};
 
@@ -722,7 +722,7 @@ function parseArgs(): QueryOptions {
 /**
  * Main export function with checkpoint support
  */
-async function exportData(options: QueryOptions): Promise<void> {
+export async function exportData(options: QueryOptions): Promise<void> {
   // Check API key is set
   if (!HELICONE_API_KEY) {
     throw new Error("HELICONE_API_KEY environment variable is required");
@@ -1127,12 +1127,12 @@ async function exportData(options: QueryOptions): Promise<void> {
 // Main Execution
 // ============================================================================
 
-function printUsage(): void {
+export function printUsage(): void {
   console.error("\nHelicone Data Export Tool");
   console.error("=========================\n");
   console.error("Usage:");
-  console.error("  ts-node index.ts [options]");
-  console.error("  ts-node index.ts --help\n");
+  console.error("  npx @helicone/export [options]");
+  console.error("  npx @helicone/export --help\n");
   console.error("Core Options:");
   console.error(
     "  --start-date <date>       Start date (default: 30 days ago)"
@@ -1178,33 +1178,17 @@ function printUsage(): void {
   console.error("  ✓ Pre-flight validation\n");
   console.error("Examples:");
   console.error("  # Basic export");
-  console.error("  ts-node index.ts --start-date 2024-01-01 --limit 5000\n");
+  console.error("  npx @helicone/export --start-date 2024-01-01 --limit 5000\n");
   console.error("  # Export with property filter (e.g., appname=LlamaCoder)");
   console.error(
-    "  ts-node index.ts --property appname=LlamaCoder --limit 1000\n"
+    "  npx @helicone/export --property appname=LlamaCoder --limit 1000\n"
   );
   console.error("  # Export with bodies in CSV format");
   console.error(
-    "  ts-node index.ts --format csv --include-body --output data.csv\n"
+    "  npx @helicone/export --format csv --include-body --output data.csv\n"
   );
   console.error("  # Verbose logging with custom retry settings");
-  console.error("  ts-node index.ts --log-level verbose --max-retries 10\n");
+  console.error("  npx @helicone/export --log-level verbose --max-retries 10\n");
   console.error("  # Clean state and start fresh");
-  console.error("  ts-node index.ts --clean-state\n");
+  console.error("  npx @helicone/export --clean-state\n");
 }
-
-(async () => {
-  try {
-    const options = parseArgs();
-    await exportData(options);
-    process.exit(0);
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error("Error:", err.message);
-    } else {
-      console.error("An unknown error occurred");
-    }
-    printUsage();
-    process.exit(1);
-  }
-})();
