@@ -3408,12 +3408,6 @@ Json: JsonObject;
       object: "list";
       data: components["schemas"]["OAIModel"][];
     };
-    ResultSuccess_OAIModelsResponse_: {
-      data: components["schemas"]["OAIModelsResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_OAIModelsResponse.string_": components["schemas"]["ResultSuccess_OAIModelsResponse_"] | components["schemas"]["ResultError_string_"];
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -6961,7 +6955,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_OAIModelsResponse.string_"];
+          "application/json": components["schemas"]["OAIModelsResponse"];
         };
       };
     };
