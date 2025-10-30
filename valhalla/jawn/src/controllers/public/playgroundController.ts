@@ -14,9 +14,7 @@ import { Message, Tool } from "@helicone-package/llm-mapper/types";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import OpenAI from "openai";
 import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { PlaygroundManager } from "../../managers/playgroundManager";
-import { SettingsManager } from "../../utils/settings";
 
 export interface GenerateParams {
   provider: any;
@@ -36,8 +34,6 @@ export interface GenerateParams {
   response_format?: { type: "json_schema"; json_schema?: object };
   stream?: object;
 }
-
-const isOnPrem = false;
 
 @Route("v1/playground")
 @Tags("Playground")
@@ -60,22 +56,6 @@ export class PlaygroundController extends Controller {
   > {
     try {
       const { ...params } = bodyParams;
-      const settingsManager = new SettingsManager();
-      const providerSecrets = await settingsManager.getSetting(
-        "secrets:provider-keys",
-      );
-      if (!providerSecrets || typeof providerSecrets !== "object") {
-        console.error("Invalid provider secrets configuration");
-        this.setStatus(503);
-        return err("Service temporarily unavailable");
-      }
-
-      const adminHeliconeKey = providerSecrets?.["helicone"];
-      if (!adminHeliconeKey) {
-        console.error("Admin Helicone API key not configured");
-        this.setStatus(503);
-        return err("Service temporarily unavailable");
-      }
 
       const isLocalDev =
         process.env.NODE_ENV === "development" ||
@@ -85,22 +65,13 @@ export class PlaygroundController extends Controller {
         ? "http://localhost:8793/v1"
         : "https://ai-gateway.helicone.ai/v1";
 
-      const orgIdForRateLimit = request.authParams.organizationId;
-
-      if (!orgIdForRateLimit) {
-        throw new Error("Organization ID not found");
-      }
-
-      const buildClient = (key: string, withRateLimit: boolean) =>
+      const buildClient = (key: string) =>
         new OpenAI({
           baseURL: aiGatewayBaseURL,
           apiKey: key,
           defaultHeaders: {
             "Helicone-User-Id": "helicone_playground",
-            "Helicone-Property-Playground_Org_ID": orgIdForRateLimit,
-            ...(withRateLimit && {
-              "Helicone-RateLimit-Policy": `30;w=${30 * 24 * 60 * 60};s=playground_org_id`, // 30 free messages per month, per org
-            }),
+            "Helicone-Property-Playground_User": request.authParams.userId,
           },
         });
 
@@ -116,8 +87,6 @@ export class PlaygroundController extends Controller {
           string
         >
       > => {
-        // Use Helicone AI Gateway with PTB (Pass-Through Billing)
-        // AI Gateway uses Helicone API key and Helicone provides the provider keys
         try {
           const response = await client.chat.completions.create(
             {
@@ -221,75 +190,49 @@ export class PlaygroundController extends Controller {
         }
       };
 
-      // 1) Try with Admin Helicone key (rate limited)
-      const adminClient = buildClient(adminHeliconeKey, true);
+      // Always use the user's Helicone key (no free admin messages)
       const isStreaming = Boolean(params.stream);
-      const adminResult = await send(adminClient, isStreaming);
+      try {
+        const tempKey = await generateTempHeliconeAPIKey(
+          request.authParams.organizationId,
+        );
+        if (tempKey.error || !tempKey.data) {
+          console.error("[API] Failed to generate temp key:", tempKey.error);
+          this.setStatus(400);
+          return err(
+            tempKey.error ||
+              "Failed to generate API key. Please try again later.",
+          );
+        }
 
-      // Check if admin client request failed
-      if (adminResult.error) {
-        // 2) If rate limited (429), fallback to a temp user Helicone key
-        const isRateLimited = adminResult.error.startsWith("[429]");
+        const result = await tempKey.data.with<
+          Result<
+            | OpenAI.Chat.Completions.ChatCompletion
+            | { content: string; reasoning: string; calls: any },
+            string
+          >
+        >(async (secretKey) => {
+          const userClient = buildClient(secretKey);
+          return await send(userClient, isStreaming);
+        });
 
-        if (isRateLimited) {
-          try {
-            const tempKey = await generateTempHeliconeAPIKey(
-              request.authParams.organizationId,
-            );
-            if (tempKey.error || !tempKey.data) {
-              console.error(
-                "[API] Failed to generate temp key:",
-                tempKey.error,
-              );
-              this.setStatus(429);
-              return err(
-                tempKey.error ||
-                  "Failed to generate temp key. Please try again later.",
-              );
-            }
-
-            const fallbackResult = await tempKey.data.with<
-              Result<
-                | OpenAI.Chat.Completions.ChatCompletion
-                | { content: string; reasoning: string; calls: any },
-                string
-              >
-            >(async (secretKey) => {
-              const userClient = buildClient(secretKey, false);
-              return await send(userClient, isStreaming);
-            });
-
-            // If fallback also failed, return rate limit message
-            if (fallbackResult.error) {
-              console.error(
-                "[API] Fallback after 429 failed:",
-                fallbackResult.error,
-              );
-              this.setStatus(429);
-              return err(fallbackResult.error);
-            }
-
-            return fallbackResult;
-          } catch (fallbackErr) {
-            console.error("[API] Fallback exception:", fallbackErr);
-            this.setStatus(429);
-            return err("Unknown error occurred. Please try again later.");
+        if (result.error) {
+          // Attempt to propagate status code to response
+          const statusMatch = result.error.match(/^\[(\d+)\]/);
+          if (statusMatch) {
+            const status = parseInt(statusMatch[1], 10);
+            this.setStatus(status >= 400 && status < 500 ? 400 : 500);
+          } else {
+            this.setStatus(500);
           }
         }
 
-        // Other errors - extract status code if present
-        const statusMatch = adminResult.error.match(/^\[(\d+)\]/);
-        if (statusMatch) {
-          const status = parseInt(statusMatch[1], 10);
-          this.setStatus(status >= 400 && status < 500 ? 400 : 500);
-        } else {
-          this.setStatus(500);
-        }
-
-        return adminResult;
+        return result;
+      } catch (e) {
+        console.error("[API] Exception creating user client:", e);
+        this.setStatus(500);
+        return err("Unknown error occurred. Please try again later.");
       }
-
-      return adminResult;
     } catch (error) {
       this.setStatus(500);
       return err("Failed to generate response: " + JSON.stringify(error));
