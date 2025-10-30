@@ -329,17 +329,25 @@ export class AttemptExecutor {
       }
 
       if (!response.ok) {
+        // Detect Helicone-generated rate limit responses
+        const heliconeError = response.headers.get("X-Helicone-Error");
         const errorMessageResult = await buildErrorMessage(endpoint, response);
         if (isErr(errorMessageResult)) {
           return err({
-            type: "request_failed",
+            type:
+              response.status === 429 && heliconeError === "rate_limited"
+                ? "rate_limited"
+                : "request_failed",
             message: errorMessageResult.error,
             statusCode: response.status,
           });
         }
 
         return err({
-          type: "request_failed",
+          type:
+            response.status === 429 && heliconeError === "rate_limited"
+              ? "rate_limited"
+              : "request_failed",
           message: errorMessageResult.data,
           statusCode: response.status,
         });

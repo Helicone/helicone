@@ -248,12 +248,16 @@ export class SimpleAIGateway {
 
       if (isErr(result)) {
         const attemptError = { ...result.error, source: attempt.source } as AttemptError;
-        // If first error is a 429 (credits/rate limit), bail early to avoid slow fallbacks
-        if (attemptError.statusCode === 429 && errors.length === 0) {
+        // Bail early only for Helicone-generated 429s: escrow failure or rate limit
+        const isHelicone429 =
+          attemptError.statusCode === 429 &&
+          (attemptError.type === "insufficient_credit_limit" ||
+            attemptError.type === "rate_limited");
+        if (isHelicone429 && errors.length === 0) {
           return this.createErrorResponse([attemptError]);
         }
         errors.push(attemptError);
-        // Continue to next attempt for other errors or subsequent 429s
+        // Continue to next attempt otherwise (e.g., provider 429)
       } else {
         const mappedResponse = await this.mapResponse(
           attempt,

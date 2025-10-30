@@ -859,6 +859,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           if (error.includes("Insufficient credits")) {
             setError("You are out of free messages for this month. Please add credits to continue using the playground.");
           }
+          else {
+            setError(error);
+          }
         }
       } catch (error) {
         if (error instanceof Error) {
