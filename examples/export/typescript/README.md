@@ -83,7 +83,9 @@ HELICONE_API_KEY="your-key" npx @helicone/export [options]
 
 ## Usage
 
+**With API key inline:**
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export [options]
 ```
 
@@ -91,7 +93,21 @@ Or if globally installed:
 
 ```bash
 helicone-export [options]
+=======
+<<<<<<< Updated upstream
+ts-node index.ts [options]
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export [options]
+>>>>>>> Stashed changes
 ```
+
+**Or if globally installed:**
+```bash
+HELICONE_API_KEY="your-key" helicone-export [options]
+>>>>>>> Stashed changes
+```
+
+**Note:** All examples below show the API key inline for clarity.
 
 ### Core Options
 
@@ -104,6 +120,7 @@ helicone-export [options]
 | `--include-body` | Include full request/response bodies | false |
 | `--output, -o <path>` | Custom output file path | output.{format} |
 | `--property, -p <key=value>` | Filter by property (can use multiple times) | - |
+| `--region <region>` | API region: `us` or `eu` | us |
 | `--help, -h` | Show help message and exit | - |
 
 ### Advanced Options
@@ -120,74 +137,178 @@ helicone-export [options]
 
 #### Basic Usage
 
-1. **Export last 30 days of data** (default behavior):
+1. **Export last 30 days of data with bodies**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export
+=======
+<<<<<<< Updated upstream
+ts-node index.ts
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --include-body
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
-2. **Export specific date range in CSV format**:
+2. **Export specific date range with bodies**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --start-date 2024-01-01 --end-date 2024-02-01 --format csv
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --start-date 2024-01-01 --end-date 2024-02-01 --format csv
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --start-date 2024-01-01 --end-date 2024-02-01 --include-body
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
-3. **Export with full request/response bodies**:
+3. **Export from EU region with bodies**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --limit 100 --include-body
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --limit 100 --include-body
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --region eu --include-body --limit 1000
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
-4. **Custom output file**:
+4. **Export with property filter**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --output my-export.jsonl
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --output my-export.jsonl
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --property appname=LlamaCoder --include-body
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
-5. **Filter by property** (e.g., only export LlamaCoder requests):
+5. **Export in CSV format with bodies**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --property appname=LlamaCoder
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --property appname=LlamaCoder
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --format csv --include-body --output my-export.csv
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
 6. **Multiple property filters**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --property appname=LlamaCoder --property environment=production
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --property appname=LlamaCoder --property environment=production
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --property appname=LlamaCoder --property environment=production --include-body
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
 #### Advanced Usage
 
 7. **Quiet mode for automation**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --log-level quiet --limit 10000
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --log-level quiet --limit 10000
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --log-level quiet --limit 10000 --include-body
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
 8. **Verbose logging for debugging**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --log-level verbose --max-retries 10
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --log-level verbose --max-retries 10
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --log-level verbose --max-retries 10 --include-body
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
 9. **Large export with custom batch size**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --limit 50000 --batch-size 500
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --limit 50000 --batch-size 500
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --limit 50000 --batch-size 500 --include-body
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
 10. **Clean state and start fresh**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --clean-state
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --clean-state
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --clean-state --include-body
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
-11. **Filter by property with other options**:
+11. **EU region with specific date range**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --property appname=LlamaCoder --format csv --limit 5000 --include-body
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --property appname=LlamaCoder --format csv --limit 5000 --include-body
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --region eu --start-date 2024-08-01 --end-date 2024-08-31 --include-body
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
 #### Recovery Scenarios
 
 12. **After a crash** (automatic resume prompt):
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export
+=======
+<<<<<<< Updated upstream
+ts-node index.ts
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 # Will detect checkpoint and ask: "Resume from checkpoint? (y/n)"
 ```
 
 13. **Force resume from checkpoint**:
 ```bash
+<<<<<<< Updated upstream
 npx @helicone/export --resume
+=======
+<<<<<<< Updated upstream
+ts-node index.ts --resume
+=======
+HELICONE_API_KEY="your-key" npx @helicone/export --resume
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 ```
 
 14. **Cancel and save progress** (during export):

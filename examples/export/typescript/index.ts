@@ -44,6 +44,7 @@ interface QueryOptions {
   cleanState?: boolean;
   resume?: boolean;
   propertyFilters?: Record<string, string>;
+  region?: "us" | "eu";
 }
 
 interface CheckpointState {
@@ -71,7 +72,16 @@ type LogLevel = "quiet" | "normal" | "verbose";
 
 const HELICONE_API_KEY = process.env.HELICONE_API_KEY;
 const CHECKPOINT_FILE = ".helicone-export-state.json";
-const API_ENDPOINT = "https://api.helicone.ai/v1/request/query-clickhouse";
+const API_ENDPOINTS = {
+  us: {
+    query: "https://api.helicone.ai/v1/request/query-clickhouse",
+    count: "https://api.helicone.ai/v1/request/count/query",
+  },
+  eu: {
+    query: "https://eu.api.helicone.ai/v1/request/query-clickhouse",
+    count: "https://eu.api.helicone.ai/v1/request/count/query",
+  },
+};
 const DEFAULT_BATCH_SIZE = 1000;
 const DEFAULT_MAX_RETRIES = 5;
 const DEFAULT_BASE_DELAY = 1000; // 1 second
@@ -273,15 +283,18 @@ class HeliconeClient {
   private apiKey: string;
   private retryOptions: RetryOptions;
   private progressTracker: ProgressTracker;
+  private region: "us" | "eu";
 
   constructor(
     apiKey: string,
     retryOptions: RetryOptions,
-    progressTracker: ProgressTracker
+    progressTracker: ProgressTracker,
+    region: "us" | "eu" = "us"
   ) {
     this.apiKey = apiKey;
     this.retryOptions = retryOptions;
     this.progressTracker = progressTracker;
+    this.region = region;
   }
 
   /**
@@ -325,7 +338,8 @@ class HeliconeClient {
           "verbose"
         );
 
-        const response = await fetch(API_ENDPOINT, {
+        const apiEndpoint = API_ENDPOINTS[this.region].query;
+        const response = await fetch(apiEndpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -380,6 +394,93 @@ class HeliconeClient {
     throw new Error(
       `API request failed after ${this.retryOptions.maxRetries + 1} attempts: ${lastError?.message}`
     );
+  }
+
+  /**
+   * Fetch count of records matching the filter
+   */
+  async fetchCount(filter: any): Promise<number | null> {
+    const requestBody = {
+      filter,
+      isCached: false,
+      includeInputs: false,
+      isScored: false,
+      isPartOfExperiment: false,
+    };
+
+    for (let attempt = 0; attempt <= this.retryOptions.maxRetries; attempt++) {
+      try {
+        this.progressTracker.log(
+          `Fetching count (attempt ${attempt + 1}/${this.retryOptions.maxRetries + 1})`,
+          "verbose"
+        );
+
+        const countEndpoint = API_ENDPOINTS[this.region].count;
+        const response = await fetch(countEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.apiKey}`,
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+
+          // Handle rate limiting specially
+          if (response.status === 429) {
+            const retryAfter = response.headers.get("Retry-After");
+            const waitTime = retryAfter
+              ? parseInt(retryAfter, 10) * 1000
+              : this.retryOptions.baseDelay * Math.pow(2, attempt);
+
+            this.progressTracker.log(
+              `Rate limited. Waiting ${waitTime / 1000}s before retry...`,
+              "normal"
+            );
+            await this.sleep(waitTime);
+            continue;
+          }
+
+          throw new Error(
+            `Count request failed: ${response.status} ${response.statusText} - ${errorText}`
+          );
+        }
+
+        const data = await response.json();
+        this.progressTracker.log(`Count response: ${JSON.stringify(data)}`, "verbose");
+        // The API returns { data: number, error: null } in Result format
+        let count: number;
+        if (typeof data === 'number') {
+          count = data;
+        } else if ((data as any).data !== undefined && typeof (data as any).data === 'number') {
+          count = (data as any).data;
+        } else {
+          this.progressTracker.log(`Unable to parse count from response`, "verbose");
+          return null;
+        }
+        this.progressTracker.log(`Parsed count: ${count} records`, "verbose");
+        return count;
+      } catch (error) {
+        this.progressTracker.log(
+          `Failed to fetch count: ${(error as Error).message}`,
+          "verbose"
+        );
+
+        if (attempt < this.retryOptions.maxRetries) {
+          const waitTime = this.retryOptions.baseDelay * Math.pow(2, attempt);
+          await this.sleep(waitTime);
+        }
+      }
+    }
+
+    // Return null if count fetch fails (non-critical)
+    this.progressTracker.log(
+      "Warning: Failed to fetch count after retries. Progress tracking will be less accurate.",
+      "normal"
+    );
+    return null;
   }
 
   /**
@@ -692,6 +793,13 @@ export function parseArgs(): QueryOptions {
           );
         }
         break;
+      case "--region":
+        if (value !== "us" && value !== "eu") {
+          throw new Error("Region must be 'us' or 'eu'");
+        }
+        options.region = value;
+        i++;
+        break;
     }
   }
 
@@ -706,6 +814,7 @@ export function parseArgs(): QueryOptions {
   options.maxRetries = options.maxRetries ?? DEFAULT_MAX_RETRIES;
   options.batchSize = options.batchSize || DEFAULT_BATCH_SIZE;
   options.outputPath = options.outputPath || `output.${options.format}`;
+  options.region = options.region || "us";
 
   // Swap dates if start is after end
   if (options.startDate > options.endDate) {
@@ -729,7 +838,7 @@ export async function exportData(options: QueryOptions): Promise<void> {
   }
 
   const checkpointManager = new CheckpointManager();
-  const progressTracker = new ProgressTracker(options.logLevel!, options.limit);
+  let progressTracker = new ProgressTracker(options.logLevel!, options.limit);
 
   // Handle clean state flag
   if (options.cleanState) {
@@ -823,7 +932,8 @@ export async function exportData(options: QueryOptions): Promise<void> {
       maxRetries: options.maxRetries!,
       baseDelay: DEFAULT_BASE_DELAY,
     },
-    progressTracker
+    progressTracker,
+    options.region!
   );
 
   const writer = new ExportWriter(
@@ -934,6 +1044,34 @@ export async function exportData(options: QueryOptions): Promise<void> {
     filter = dateRangeFilter;
   } else if (propertyFilter) {
     filter = propertyFilter;
+  }
+
+  // Fetch count of matching records (for accurate progress tracking)
+  progressTracker.log("Fetching count of matching records...", "normal");
+  const totalCount = await client.fetchCount(filter);
+
+  // Calculate effective limit: min(actualCount, userLimit)
+  let effectiveLimit: number | undefined;
+  if (totalCount !== null && options.limit) {
+    effectiveLimit = Math.min(totalCount, options.limit);
+    progressTracker.log(
+      `Found ${totalCount} matching records. Will export ${effectiveLimit} records (limit: ${options.limit}).`,
+      "normal"
+    );
+  } else if (totalCount !== null) {
+    effectiveLimit = totalCount;
+    progressTracker.log(`Found ${totalCount} matching records.`, "normal");
+  } else if (options.limit) {
+    effectiveLimit = options.limit;
+    progressTracker.log(
+      `Count unavailable. Will export up to ${options.limit} records.`,
+      "normal"
+    );
+  }
+
+  // Update progress tracker with accurate total
+  if (effectiveLimit) {
+    progressTracker = new ProgressTracker(options.logLevel!, effectiveLimit);
   }
 
   // Start export
@@ -1153,6 +1291,7 @@ export function printUsage(): void {
   console.error(
     "  --property, -p <key=val>  Filter by property (e.g., --property appname=LlamaCoder)"
   );
+  console.error("  --region <region>         API region: us or eu (default: us)");
   console.error("  --help, -h                Show this help message\n");
   console.error("Advanced Options:");
   console.error(
@@ -1177,18 +1316,51 @@ export function printUsage(): void {
   console.error("  ✓ Progress tracking with ETA");
   console.error("  ✓ Pre-flight validation\n");
   console.error("Examples:");
+<<<<<<< Updated upstream
   console.error("  # Basic export");
   console.error("  npx @helicone/export --start-date 2024-01-01 --limit 5000\n");
   console.error("  # Export with property filter (e.g., appname=LlamaCoder)");
   console.error(
+<<<<<<< Updated upstream
     "  npx @helicone/export --property appname=LlamaCoder --limit 1000\n"
   );
   console.error("  # Export with bodies in CSV format");
   console.error(
     "  npx @helicone/export --format csv --include-body --output data.csv\n"
+=======
+    "  ts-node index.ts --property appname=LlamaCoder --limit 1000\n"
+=======
+  console.error("  # Basic export with bodies");
+  console.error("  HELICONE_API_KEY='your-key' npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body\n");
+  console.error("  # Export with property filter");
+  console.error(
+    "  HELICONE_API_KEY='your-key' npx @helicone/export --property appname=LlamaCoder --limit 1000 --include-body\n"
+>>>>>>> Stashed changes
+  );
+  console.error("  # Export from EU region");
+  console.error(
+<<<<<<< Updated upstream
+    "  ts-node index.ts --format csv --include-body --output data.csv\n"
+>>>>>>> Stashed changes
   );
   console.error("  # Verbose logging with custom retry settings");
   console.error("  npx @helicone/export --log-level verbose --max-retries 10\n");
   console.error("  # Clean state and start fresh");
+<<<<<<< Updated upstream
   console.error("  npx @helicone/export --clean-state\n");
+=======
+  console.error("  ts-node index.ts --clean-state\n");
+=======
+    "  HELICONE_API_KEY='your-key' npx @helicone/export --region eu --include-body --limit 1000\n"
+  );
+  console.error("  # Export in CSV format with bodies");
+  console.error(
+    "  HELICONE_API_KEY='your-key' npx @helicone/export --format csv --include-body --output data.csv\n"
+  );
+  console.error("  # Export specific date range");
+  console.error(
+    "  HELICONE_API_KEY='your-key' npx @helicone/export --start-date 2024-08-01 --end-date 2024-08-31 --include-body\n"
+  );
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 }
