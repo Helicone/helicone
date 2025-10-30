@@ -111,6 +111,11 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
       context.message.log.request.cacheReferenceId !==
         DEFAULT_CACHE_REFERENCE_ID
     ) {
+      context.processedLog.request.properties = {
+        ...(context.processedLog.request.properties || {}),
+        "helicone-stripe-integration-status": "skipped",
+        "helicone-stripe-skip-reason": "cache-hit",
+      };
       return await super.handle(context);
     }
 
@@ -134,8 +139,11 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
 
     if (!stripeCustomerId) {
       // Skip processing if no Stripe customer ID provided
-
-      // TODO: Add logging for the user so that they know it was not processed
+      context.processedLog.request.properties = {
+        ...(context.processedLog.request.properties || {}),
+        "helicone-stripe-integration-status": "skipped",
+        "helicone-stripe-skip-reason": "no-customer-id",
+      };
       return await super.handle(context);
     }
 
@@ -178,7 +186,12 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
     ); // Limit length
 
     if (!AVAILABLE_MODELS_IN_STRIPE.includes(formattedModel)) {
-      // TODO: Add logging for the user so that they know it was not processed
+      context.processedLog.request.properties = {
+        ...(context.processedLog.request.properties || {}),
+        "helicone-stripe-integration-status": "skipped",
+        "helicone-stripe-skip-reason": "model-not-whitelisted",
+        "helicone-stripe-attempted-model": formattedModel,
+      };
       return await super.handle(context);
     }
 
@@ -191,7 +204,13 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
     if (
       this.stripeTraceUsages[organizationId].length >= this.maxEventsPerBatch
     ) {
-      // TODO: Add logging for the user so that they know it was not processed
+      context.processedLog.request.properties = {
+        ...(context.processedLog.request.properties || {}),
+        "helicone-stripe-integration-status": "skipped",
+        "helicone-stripe-skip-reason": "max-events-exceeded",
+        "helicone-stripe-event-count":
+          this.stripeTraceUsages[organizationId].length.toString(),
+      };
       return await super.handle(context);
     }
 
@@ -209,8 +228,6 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
         },
       };
       this.stripeTraceUsages[organizationId].push(promptEvent);
-    } else {
-      // TODO: Add logging for the user so that they know it was not processed
     }
 
     // Create events for completion tokens (output)
@@ -233,8 +250,23 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
         },
       };
       this.stripeTraceUsages[organizationId].push(completionEvent);
+    }
+
+    // Handle zero tokens case
+    if (promptTokens === 0 && completionTokens === 0) {
+      context.processedLog.request.properties = {
+        ...(context.processedLog.request.properties || {}),
+        "helicone-stripe-integration-status": "skipped",
+        "helicone-stripe-skip-reason": "zero-tokens",
+      };
     } else {
-      // TODO: Add logging for the user so that they know it was not processed
+      // Successfully processed - add success properties
+      context.processedLog.request.properties = {
+        ...(context.processedLog.request.properties || {}),
+        "helicone-stripe-integration-status": "processed",
+        "helicone-stripe-customer-id": stripeCustomerId,
+        "helicone-stripe-model": formattedModel,
+      };
     }
 
     return await super.handle(context);
