@@ -251,11 +251,17 @@ export class SimpleAIGateway {
       });
 
       if (isErr(result)) {
-        errors.push({
-          ...result.error,
-          source: attempt.source,
-        });
-        // Continue to next attempt
+        const attemptError = { ...result.error, source: attempt.source } as AttemptError;
+        // Bail early only for Helicone-generated 429s: escrow failure or rate limit
+        const isHelicone429 =
+          attemptError.statusCode === 429 &&
+          (attemptError.type === "insufficient_credit_limit" ||
+            attemptError.type === "rate_limited");
+        if (isHelicone429 && errors.length === 0) {
+          return this.createErrorResponse([attemptError]);
+        }
+        errors.push(attemptError);
+        // Continue to next attempt otherwise (e.g., provider 429)
       } else {
         const mappedResponse = await this.mapResponse(
           attempt,
@@ -560,8 +566,16 @@ export class SimpleAIGateway {
     } else if (all429) {
       // Only return 429 if ALL attempts failed with 429
       statusCode = 429;
-      message = "Insufficient credits";
-      code = "request_failed";
+      const insufficient = errors.some(
+        (e) => e.type === "insufficient_credit_limit"
+      );
+      if (insufficient) {
+        message = "Insufficient credits";
+        code = "request_failed";
+      } else {
+        message = "Rate limited";
+        code = "rate_limited";
+      }
     }
 
     const errorResponse = await errorForwarder(

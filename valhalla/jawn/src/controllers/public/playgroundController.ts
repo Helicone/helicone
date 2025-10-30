@@ -243,7 +243,8 @@ export class PlaygroundController extends Controller {
               );
               this.setStatus(429);
               return err(
-                "You have reached your free playground limit. To continue using the playground, add credits to your account.",
+                tempKey.error ||
+                  "Failed to generate temp key. Please try again later.",
               );
             }
 
@@ -265,18 +266,14 @@ export class PlaygroundController extends Controller {
                 fallbackResult.error,
               );
               this.setStatus(429);
-              return err(
-                "You have reached your free playground limit. To continue using the playground, add credits to your account.",
-              );
+              return err(fallbackResult.error);
             }
 
             return fallbackResult;
           } catch (fallbackErr) {
             console.error("[API] Fallback exception:", fallbackErr);
             this.setStatus(429);
-            return err(
-              "You have reached your free playground limit. To continue using the playground, add credits to your account.",
-            );
+            return err("Unknown error occurred. Please try again later.");
           }
         }
 

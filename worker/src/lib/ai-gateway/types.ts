@@ -28,6 +28,7 @@ export type AttemptError = {
     | "invalid_format"
     | "missing_provider_key"
     | "request_failed"
+    | "rate_limited"
     | "invalid_prompt"
     | "model_not_supported"
     | "insufficient_credit_limit"
