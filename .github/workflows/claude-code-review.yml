@@ -85,7 +85,7 @@ jobs:
           allowed_tools: "Bash(yarn build),Bash(yarn test),Bash(yarn lint)"
 
           # Optional: Allow specific bots to trigger this workflow
-          allowed_bots: "greptile-apps"
+          allowed_bots: "greptile-apps,codegen-sh"
 
           # Optional: Skip review for certain conditions
           if: |

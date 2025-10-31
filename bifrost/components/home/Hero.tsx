@@ -10,11 +10,11 @@ const Hero = () => {
   return (
     <div
       className={cn(
-        "flex flex-col justify-top h-auto lg:h-[500px] 2xl:h-[550px] relative lg:w-[1300px] 2xl:w-[1500px]",
+        "flex flex-col justify-top h-auto lg:h-[500px] 2xl:h-[550px] relative lg:w-[1300px] 2xl:w-[1500px] px-4 md:px-8",
         ISLAND_WIDTH
       )}
     >
-      <div className="flex flex-wrap gap-x-12 gap-y-4 items-center mt-12 lg:mt-0 mb-12">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-x-12 gap-y-4 items-center mt-8 lg:mt-0 mb-8 lg:mb-12">
         <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap">
           <p>Backed by</p>
           <Image
@@ -29,20 +29,20 @@ const Hero = () => {
         <Image
           src="/static/home/productoftheday.webp"
           alt="Product of the Day"
-          className="w-32 h-auto"
+          className="w-32 h-auto mt-2 sm:mt-0"
           width={128}
           height={32}
           priority
         />
       </div>
-      <h1 className="text-xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-4xl text-wrap text-black z-[10]">
+      <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[84px] font-semibold mb-3 w-full max-w-4xl text-wrap text-black z-[10]">
         Build Reliable
         <br />
         <span className="text-brand">AI Apps</span>
       </h1>
-      <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-12 z-[10]">
+      <p className="text-base sm:text-lg md:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-12 z-[10]">
         The world&apos;s fastest-growing AI companies rely on Helicone
-        <br />
+        <br className="hidden sm:block" />
         to route, debug, and analyze their applications.
       </p>
       <div className="flex flex-col md:flex-row gap-4">
