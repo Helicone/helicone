@@ -231,6 +231,11 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "n8n-helicone-node",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "migration-openrouter",
     },
   },
