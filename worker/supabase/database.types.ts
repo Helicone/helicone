@@ -42,6 +42,7 @@ export type Database = {
         Row: {
           created_at: string | null
           emails: string[]
+          filter: Json | null
           id: string
           metric: string
           minimum_request_count: number | null
@@ -58,6 +59,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           emails: string[]
+          filter?: Json | null
           id?: string
           metric: string
           minimum_request_count?: number | null
@@ -74,6 +76,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           emails?: string[]
+          filter?: Json | null
           id?: string
           metric?: string
           minimum_request_count?: number | null

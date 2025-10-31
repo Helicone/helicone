@@ -2634,6 +2634,73 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_AlertResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AllExpression": {
+        "dataType": "refObject",
+        "properties": {
+            "type": {"dataType":"enum","enums":["all"],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "FilterSubType": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["property"]},{"dataType":"enum","enums":["score"]},{"dataType":"enum","enums":["sessions"]},{"dataType":"enum","enums":["user"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BaseFieldSpec": {
+        "dataType": "refObject",
+        "properties": {
+            "subtype": {"ref":"FilterSubType"},
+            "valueMode": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["value"]},{"dataType":"enum","enums":["key"]}]},
+            "key": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "FieldSpec": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"intersection","subSchemas":[{"ref":"BaseFieldSpec"},{"dataType":"nestedObjectLiteral","nestedProperties":{"column":{"dataType":"enum","enums":["properties","user_id","model","country_code","response_id","status","latency","provider","time_to_first_token","request_created_at","response_created_at","organization_id","threat","request_id","prompt_tokens","completion_tokens","prompt_cache_read_tokens","prompt_cache_write_tokens","target_url","scores","request_body","response_body","assets","proxy_key_id","updated_at"],"required":true},"table":{"dataType":"enum","enums":["request_response_rmt"],"required":true}}}]},{"dataType":"intersection","subSchemas":[{"ref":"BaseFieldSpec"},{"dataType":"nestedObjectLiteral","nestedProperties":{"column":{"dataType":"enum","enums":["created_at","cost","prompt_tokens","completion_tokens","total_tokens","total_requests","latest_request_created_at"],"required":true},"table":{"dataType":"enum","enums":["sessions_request_response_rmt"],"required":true}}}]},{"dataType":"intersection","subSchemas":[{"ref":"BaseFieldSpec"},{"dataType":"nestedObjectLiteral","nestedProperties":{"column":{"dataType":"enum","enums":["user_id","cost","total_requests","active_for","first_active","last_active","average_requests_per_day_active","average_tokens_per_request","total_completion_tokens","total_prompt_tokens"],"required":true},"table":{"dataType":"enum","enums":["users_view"],"required":true}}}]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "FilterOperator": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["eq"]},{"dataType":"enum","enums":["neq"]},{"dataType":"enum","enums":["is"]},{"dataType":"enum","enums":["gt"]},{"dataType":"enum","enums":["gte"]},{"dataType":"enum","enums":["lt"]},{"dataType":"enum","enums":["lte"]},{"dataType":"enum","enums":["like"]},{"dataType":"enum","enums":["ilike"]},{"dataType":"enum","enums":["contains"]},{"dataType":"enum","enums":["not-contains"]},{"dataType":"enum","enums":["in"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ConditionExpression": {
+        "dataType": "refObject",
+        "properties": {
+            "type": {"dataType":"enum","enums":["condition"],"required":true},
+            "field": {"ref":"FieldSpec","required":true},
+            "operator": {"ref":"FilterOperator","required":true},
+            "value": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"double"},{"dataType":"boolean"}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "FilterExpression": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"AllExpression"},{"ref":"ConditionExpression"},{"ref":"AndExpression"},{"ref":"OrExpression"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AndExpression": {
+        "dataType": "refObject",
+        "properties": {
+            "type": {"dataType":"enum","enums":["and"],"required":true},
+            "expressions": {"dataType":"array","array":{"dataType":"refAlias","ref":"FilterExpression"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OrExpression": {
+        "dataType": "refObject",
+        "properties": {
+            "type": {"dataType":"enum","enums":["or"],"required":true},
+            "expressions": {"dataType":"array","array":{"dataType":"refAlias","ref":"FilterExpression"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AlertRequest": {
         "dataType": "refObject",
         "properties": {
@@ -2644,6 +2711,7 @@ const models: TsoaRoute.Models = {
             "emails": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "slack_channels": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "minimum_request_count": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"undefined"}],"required":true},
+            "filter": {"dataType":"union","subSchemas":[{"ref":"FilterExpression"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },

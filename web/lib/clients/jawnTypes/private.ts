@@ -3291,6 +3291,75 @@ Json: JsonObject;
       error: null;
     };
     "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @description Matches all records (no filtering) */
+    AllExpression: {
+      /** @enum {string} */
+      type: "all";
+    };
+    /** @enum {string} */
+    FilterSubType: "property" | "score" | "sessions" | "user";
+    /**
+     * @description Type for the field specification in a condition
+     * Describes what field is being filtered and how
+     */
+    BaseFieldSpec: {
+      subtype?: components["schemas"]["FilterSubType"];
+      /** @enum {string} */
+      valueMode?: "value" | "key";
+      key?: string;
+    };
+    FieldSpec: (components["schemas"]["BaseFieldSpec"] & ({
+      /** @enum {string} */
+      column: "properties" | "user_id" | "model" | "country_code" | "response_id" | "status" | "latency" | "provider" | "time_to_first_token" | "request_created_at" | "response_created_at" | "organization_id" | "threat" | "request_id" | "prompt_tokens" | "completion_tokens" | "prompt_cache_read_tokens" | "prompt_cache_write_tokens" | "target_url" | "scores" | "request_body" | "response_body" | "assets" | "proxy_key_id" | "updated_at";
+      /** @enum {string} */
+      table: "request_response_rmt";
+    })) | (components["schemas"]["BaseFieldSpec"] & ({
+      /** @enum {string} */
+      column: "created_at" | "cost" | "prompt_tokens" | "completion_tokens" | "total_tokens" | "total_requests" | "latest_request_created_at";
+      /** @enum {string} */
+      table: "sessions_request_response_rmt";
+    })) | (components["schemas"]["BaseFieldSpec"] & ({
+      /** @enum {string} */
+      column: "user_id" | "cost" | "total_requests" | "active_for" | "first_active" | "last_active" | "average_requests_per_day_active" | "average_tokens_per_request" | "total_completion_tokens" | "total_prompt_tokens";
+      /** @enum {string} */
+      table: "users_view";
+    }));
+    /**
+     * @description All supported filter operator types
+     * @enum {string}
+     */
+    FilterOperator: "eq" | "neq" | "is" | "gt" | "gte" | "lt" | "lte" | "like" | "ilike" | "contains" | "not-contains" | "in";
+    /** @description Single condition expression that compares a field against a value */
+    ConditionExpression: {
+      /** @enum {string} */
+      type: "condition";
+      field: components["schemas"]["FieldSpec"];
+      operator: components["schemas"]["FilterOperator"];
+      value: string | number | boolean;
+    };
+    /**
+     * @description Filter expression type union
+     * Represents all possible filter expression types in the AST
+     */
+    FilterExpression: components["schemas"]["AllExpression"] | components["schemas"]["ConditionExpression"] | components["schemas"]["AndExpression"] | components["schemas"]["OrExpression"];
+    /**
+     * @description Logical AND of multiple expressions
+     * All contained expressions must match for this to match
+     */
+    AndExpression: {
+      /** @enum {string} */
+      type: "and";
+      expressions: components["schemas"]["FilterExpression"][];
+    };
+    /**
+     * @description Logical OR of multiple expressions
+     * At least one contained expression must match for this to match
+     */
+    OrExpression: {
+      /** @enum {string} */
+      type: "or";
+      expressions: components["schemas"]["FilterExpression"][];
+    };
     AlertRequest: {
       name: string;
       metric: string;
@@ -3301,6 +3370,7 @@ Json: JsonObject;
       slack_channels: string[];
       /** Format: double */
       minimum_request_count?: number;
+      filter: components["schemas"]["FilterExpression"] | null;
     };
     "ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_": {
       data: {

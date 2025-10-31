@@ -1,6 +1,6 @@
 import React from "react";
 import { ConditionExpression, FilterOperator } from "@helicone-package/filters/types";
-import { useFilterStore } from "../store/filterStore";
+import { useFilterAST } from "../context/filterContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, Trash2, Loader2 } from "lucide-react";
@@ -175,7 +175,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
   isFirst = false,
   isLast = false,
 }) => {
-  const filterStore = useFilterStore();
+  const { store: filterStore } = useFilterAST();
   const { filterDefinitions: filterDefs, isLoading } = useFilterUIDefinitions();
 
   // Handle changing a field in a condition
@@ -310,6 +310,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         </div>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={handleRemove}
@@ -445,6 +446,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
       <div className="flex-grow">{renderValueInput()}</div>
 
       <Button
+        type="button"
         variant="ghost"
         size="icon"
         onClick={handleRemove}

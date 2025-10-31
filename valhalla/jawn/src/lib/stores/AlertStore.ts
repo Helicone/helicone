@@ -17,7 +17,7 @@ export class AlertStore extends BaseStore {
       const alertResult = await dbExecute<
         Database["public"]["Tables"]["alert"]["Row"]
       >(
-        `SELECT id, org_id, metric, threshold, time_window, time_block_duration, emails, status, name, soft_delete, created_at, updated_at, minimum_request_count, slack_channels
+        `SELECT id, org_id, metric, threshold, time_window, time_block_duration, emails, status, name, soft_delete, created_at, updated_at, minimum_request_count, slack_channels, filter
          FROM alert
          WHERE org_id = $1
          AND (soft_delete IS NULL OR soft_delete = false)`,
@@ -67,8 +67,8 @@ export class AlertStore extends BaseStore {
     }
 
     const query = `
-      INSERT INTO alert (name, metric, threshold, time_window, emails, slack_channels, org_id, minimum_request_count, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO alert (name, metric, threshold, time_window, emails, slack_channels, org_id, minimum_request_count, status, filter)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING id
     `;
     const parameters = [
@@ -81,6 +81,7 @@ export class AlertStore extends BaseStore {
       alert.org_id,
       alert.minimum_request_count,
       alert.status,
+      alert.filter ? JSON.stringify(alert.filter) : null,
     ];
 
     const result = await dbExecute<{ id: string }>(query, parameters);

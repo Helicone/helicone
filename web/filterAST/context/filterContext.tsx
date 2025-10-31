@@ -23,18 +23,16 @@ const FilterContext = createContext<FilterContextType | null>(null);
 // Props for the provider component
 interface FilterProviderProps {
   children: ReactNode;
-  options?: {
-    autoSaveDelay?: number;
-    defaultFilterName?: string;
-  };
+  store?: FilterState; // Optional custom store
 }
 
 // The provider component
 export const FilterProvider: React.FC<FilterProviderProps> = ({
   children,
-  options,
+  store,
 }) => {
-  const filterStore = useFilterStore();
+  const defaultFilterStore = useFilterStore();
+  const filterStore = store || defaultFilterStore;
   const searchParams = useSearchParams();
 
   const filterCrud = useFilterCrud();

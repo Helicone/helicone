@@ -29,6 +29,7 @@ export const EditAlertModal = (props: EditAlertModalProps) => {
         emails: req.emails,
         slack_channels: req.slack_channels,
         minimum_request_count: req.minimum_request_count,
+        filter: req.filter,
       },
     });
 
@@ -96,6 +97,7 @@ export const CreateAlertModal = (props: CreateAlertModalProps) => {
         emails: req.emails,
         slack_channels: req.slack_channels,
         minimum_request_count: req.minimum_request_count,
+        filter: req.filter,
       },
     });
 

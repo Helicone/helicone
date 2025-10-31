@@ -8,7 +8,7 @@ import {
   FilterAST,
   OrExpression,
 } from "@helicone-package/filters/types";
-import { useFilterStore } from "../store/filterStore";
+import { useFilterAST } from "../context/filterContext";
 import FilterConditionNode from "./FilterConditionNode";
 import { Row } from "@/components/layout/common/row";
 import SaveFilterButton from "./SaveFilterButton";
@@ -25,7 +25,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   path,
   isRoot = false,
 }) => {
-  const filterStore = useFilterStore();
+  const { store: filterStore } = useFilterAST();
 
   // Handle adding a new condition to this group with a sensible default
   const handleAddCondition = () => {
@@ -81,6 +81,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
           <XSmall className="font-normal">Match</XSmall>
 
           <Button
+            type="button"
             size="sm_sleek"
             onClick={handleToggleGroupOperator}
             variant={"secondary"}
@@ -141,6 +142,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
         {(!isRoot || !hasGroupAlready) && (
           <div className="flex justify-start">
             <Button
+              type="button"
               variant="ghost"
               onClick={handleAddCondition}
               size="sm_sleek"
@@ -155,6 +157,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
         {isRoot && (
           <Row className="w-full justify-between">
             <Button
+              type="button"
               variant="glass"
               size="xs"
               className="flex w-fit items-center gap-1"
