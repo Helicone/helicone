@@ -109,7 +109,7 @@ def make_request(start_time, end_time, offset) -> APIResponse:
     }
 
     response = requests.request(
-        "POST", url="https://api.helicone.ai/v1/request/query", json=payload, headers=headers)
+        "POST", url="https://api.helicone.ai/v1/request/query-clickhouse", json=payload, headers=headers)
     response_data = json.loads(response.text)
 
     # print(response_data)

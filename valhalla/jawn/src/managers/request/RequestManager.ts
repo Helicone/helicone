@@ -323,61 +323,6 @@ export class RequestManager extends BaseManager {
     }
   }
 
-  async getRequestsPostgres(
-    params: RequestQueryParams
-  ): Promise<Result<HeliconeRequest[], string>> {
-    const {
-      filter,
-      offset = 0,
-      limit = 10,
-      sort = {
-        created_at: "desc",
-      },
-      isCached,
-      isPartOfExperiment,
-      isScored,
-    } = params;
-
-    let newFilter = filter;
-
-    if (isScored !== undefined) {
-      newFilter = this.addScoreFilter(isScored, newFilter);
-    }
-
-    if (isPartOfExperiment !== undefined) {
-      newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
-    }
-
-    const requests = await getRequests(
-      this.authParams.organizationId,
-      newFilter,
-      offset,
-      limit,
-      sort
-    );
-
-    return resultMap(requests, (req) => {
-      return req.map((r) => {
-        const model =
-          r.model_override ?? r.response_model ?? r.request_model ?? "";
-        return {
-          ...r,
-          model: model,
-          costUSD: costOfPrompt({
-            model: model,
-            provider: r.provider ?? "",
-            completionTokens: r.completion_tokens ?? 0,
-            promptTokens: r.prompt_tokens ?? 0,
-            promptCacheWriteTokens: r.prompt_cache_write_tokens ?? 0,
-            promptCacheReadTokens: r.prompt_cache_read_tokens ?? 0,
-            promptAudioTokens: r.prompt_audio_tokens ?? 0,
-            completionAudioTokens: r.completion_audio_tokens ?? 0,
-          }),
-        };
-      });
-    });
-  }
-
   async getRequestCount(params: {
     filter: FilterNode;
   }): Promise<Result<number, string>> {
