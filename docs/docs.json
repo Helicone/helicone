@@ -291,6 +291,13 @@
         "icon": "code",
         "groups": [
           {
+            "group": "AI Gateway",
+            "pages": [
+              "rest/ai-gateway/post-v1-chat-completions",
+              "rest/ai-gateway/post-v1-responses"
+            ]
+          },
+          {
             "group": "Request",
             "pages": [
               "rest/request/post-v1requestquery-clickhouse",
@@ -365,13 +372,6 @@
           {
             "group": "Models",
             "pages": ["rest/models/get-v1public-model-registry-models"]
-          },
-          {
-            "group": "AI Gateway",
-            "pages": [
-              "rest/ai-gateway/post-v1-chat-completions",
-              "rest/ai-gateway/post-v1-responses"
-            ]
           }
         ]
       },
