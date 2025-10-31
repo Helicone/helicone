@@ -28,7 +28,7 @@ curl -X POST "$HELICONE_BASE_URL/v1/request/count/query" \
   }'
 
 echo -e "\n\n=== Get Latest Request ==="
-curl -X POST "$HELICONE_BASE_URL/v1/request/query" \
+curl -X POST "$HELICONE_BASE_URL/v1/request/query-clickhouse" \
   -H "Authorization: $HELICONE_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

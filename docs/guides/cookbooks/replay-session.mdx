@@ -159,13 +159,13 @@ Understanding how changes impact your AI agents in real-world interactions is cr
 
   <Step title="Retrieve Session Data">
 
-    Use Helicone's [Request API](/rest/request/post-v1requestquery) to fetch session data.
+    Use Helicone's [Request API](/rest/request/post-v1requestquery-clickhouse) to fetch session data.
 
     **Example: Querying Session Data**
 
     ````bash Querying Session Data
     curl --request POST \
-      --url https://api.helicone.ai/v1/request/query \
+      --url https://api.helicone.ai/v1/request/query-clickhouse \
       --header "Content-Type: application/json" \
       --header "authorization: Bearer $HELICONE_API_KEY" \
       --data '{

@@ -7,7 +7,7 @@ description: "Use the Request API to retrieve user-specific requests, allowing y
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-The [Request API](/rest/request/post-v1requestquery) allows you to build a request, where you can specify filtering criteria to retrieve all requests made by a user.
+The [Request API](/rest/request/post-v1requestquery-clickhouse) allows you to build a request, where you can specify filtering criteria to retrieve all requests made by a user.
 
 <Frame>
   <img
@@ -29,7 +29,7 @@ Here's an example to get all the requests where `user_id` is `abc@email.com`.
 
 ```bash
 curl --request POST \
-  --url https://api.helicone.ai/v1/request/query \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
   --header "Content-Type: application/json" \
   --header "authorization: Bearer $HELICONE_API_KEY" \
   --data '{
@@ -44,7 +44,7 @@ curl --request POST \
 ```
 
 <Tip>
-  By using the [Request API](/rest/request/post-v1requestquery), the code
+  By using the [Request API](/rest/request/post-v1requestquery-clickhouse), the code
   snippet will dynamically populate on the page, so you can copy and paste.{" "}
 </Tip>
 
@@ -56,7 +56,7 @@ You can structure your query to add any number of filters.
 
 ```bash
 curl --request POST \
-  --url https://api.helicone.ai/v1/request/query \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
   --header "Content-Type: application/json" \
   --header "authorization: Bearer $HELICONE_API_KEY" \
   --data '{
