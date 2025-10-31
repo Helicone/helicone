@@ -84,33 +84,6 @@ export class RequestController extends Controller {
     return count;
   }
 
-  @Post("query")
-  @Example<RequestQueryParams>({
-    filter: {},
-    isCached: false,
-    limit: 10,
-    offset: 0,
-    sort: {
-      created_at: "desc",
-    },
-    isScored: false,
-    isPartOfExperiment: false,
-  })
-  public async getRequests(
-    @Body()
-    requestBody: RequestQueryParams,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<HeliconeRequest[], string>> {
-    const reqManager = new RequestManager(request.authParams);
-    const requests = await reqManager.getRequestsPostgres(requestBody);
-    if (requests.error || !requests.data) {
-      this.setStatus(500);
-    } else {
-      this.setStatus(201);
-    }
-    return requests;
-  }
-
   @Post("query-clickhouse")
   @Example<RequestQueryParams>({
     filter: {},

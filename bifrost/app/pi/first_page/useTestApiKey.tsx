@@ -25,10 +25,10 @@ export const testAPIKey = async (apiKey: string) => {
   const getApiUrl = () => {
     const jawnService = process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE;
     if (jawnService) {
-      return `${jawnService}/v1/request/query`;
+      return `${jawnService}/v1/request/query-clickhouse`;
     }
     // Fallback to production API
-    return "https://api.helicone.ai/v1/request/query";
+    return "https://api.helicone.ai/v1/request/query-clickhouse";
   };
 
   const response = await fetch(getApiUrl(), options);

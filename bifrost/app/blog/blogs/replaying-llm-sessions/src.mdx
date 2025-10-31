@@ -148,7 +148,7 @@ _Read more about how to implement Helicone sessions <a href="https://docs.helico
 Use Helicone's API to fetch session data for analysis.
 
 ```javascript
-const response = await fetch("https://api.helicone.ai/v1/request/query", {
+const response = await fetch("https://api.helicone.ai/v1/request/query-clickhouse", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -156,9 +156,11 @@ const response = await fetch("https://api.helicone.ai/v1/request/query", {
   },
   body: JSON.stringify({
     filter: {
-      properties: {
-        "Helicone-Session-Id": {
-          equals: SESSION_ID_TO_REPLAY,
+      request_response_rmt: {
+        properties: {
+          "Helicone-Session-Id": {
+            equals: SESSION_ID_TO_REPLAY,
+          },
         },
       },
     },
@@ -167,7 +169,7 @@ const response = await fetch("https://api.helicone.ai/v1/request/query", {
 const data = await response.json();
 ```
 
-Read more about Helicone's API <a href="https://docs.helicone.ai/rest/request/post-v1requestquery" rel="noopener" target="_blank">here</a>.
+Read more about Helicone's API <a href="https://docs.helicone.ai/rest/request/post-v1requestquery-clickhouse" rel="noopener" target="_blank">here</a>.
 
 ### Step 3: Replaying and Modifying Sessions
 

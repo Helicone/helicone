@@ -73,7 +73,7 @@ echo -e "\n\n=== Wait for processing ==="
 sleep 2
 
 echo -e "\n=== Get Latest Requests ==="
-curl -X POST "$HELICONE_BASE_URL/v1/request/query" \
+curl -X POST "$HELICONE_BASE_URL/v1/request/query-clickhouse" \
   -H "Authorization: $HELICONE_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
