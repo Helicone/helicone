@@ -1,10 +1,41 @@
 ---
-title: "Export Script"
-description: "Use Helicone's GraphQL API to export all your data"
+title: "Export Data"
+description: "Export your Helicone request data with our CLI tool or REST API"
 ---
 
+## Recommended: NPM Export Tool
+
+The easiest way to export your data is using our official npm package:
+
+```bash
+# No installation required - use npx
+HELICONE_API_KEY="your-api-key" npx @helicone/export --start-date 2024-01-01 --limit 10000 --include-body
+
+# With property filter
+HELICONE_API_KEY="your-api-key" npx @helicone/export --property appname=MyApp --format csv --include-body
+
+# Export from EU region
+HELICONE_API_KEY="your-eu-api-key" npx @helicone/export --region eu --include-body
+```
+
+**Features:**
+- ✅ Auto-recovery from crashes (checkpoint system)
+- ✅ Retry logic with exponential backoff
+- ✅ Progress tracking with ETA
+- ✅ Multiple formats (JSON, JSONL, CSV)
+- ✅ Property and date filtering
+- ✅ Region support (US and EU)
+
+See the [full documentation](https://github.com/Helicone/helicone/tree/main/examples/export/typescript) for all options.
+
+## REST API Export
+
+You can also export data using the REST API directly. See the [Query Requests API](/rest/request/post-v1requestquery-clickhouse) documentation.
+
+## Alternative: GraphQL Export (Legacy)
+
 <Warning>
-This exporting script is not well tested. Please use with caution
+This GraphQL export script is deprecated. We recommend using the NPM tool above instead.
 </Warning>
 
 

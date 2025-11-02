@@ -40,14 +40,24 @@ The easiest way to export data is using our CLI tool:
 
 ```bash
 # Export with npx (no installation required)
-npx @helicone/export --start-date 2024-01-01 --limit 10000
+HELICONE_API_KEY="your-api-key" npx @helicone/export --start-date 2024-01-01 --limit 10000 --include-body
 
 # With property filter
-npx @helicone/export --property appname=MyApp --format csv
+HELICONE_API_KEY="your-api-key" npx @helicone/export --property appname=MyApp --format csv --include-body
 
 # With date range and full bodies
-npx @helicone/export --start-date 2024-08-01 --end-date 2024-08-31 --include-body
+HELICONE_API_KEY="your-api-key" npx @helicone/export --start-date 2024-08-01 --end-date 2024-08-31 --include-body
+
+# Export from EU region
+HELICONE_API_KEY="your-eu-api-key" npx @helicone/export --region eu --limit 10000 --include-body
 ```
+
+**Key Features:**
+- ✅ Auto-recovery from crashes with checkpoint system
+- ✅ Retry logic with exponential backoff
+- ✅ Progress tracking with ETA
+- ✅ Multiple output formats (JSON, JSONL, CSV)
+- ✅ Region support (US and EU)
 
 See the [full documentation](https://github.com/Helicone/helicone/tree/main/examples/export/typescript) for more options.
 
