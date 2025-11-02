@@ -83,15 +83,17 @@ HELICONE_API_KEY="your-key" npx @helicone/export [options]
 
 ## Usage
 
+**With API key inline:**
 ```bash
-npx @helicone/export [options]
+HELICONE_API_KEY="your-key" npx @helicone/export [options]
 ```
 
-Or if globally installed:
-
+**Or if globally installed:**
 ```bash
-helicone-export [options]
+HELICONE_API_KEY="your-key" helicone-export [options]
 ```
+
+**Note:** All examples below show the API key inline for clarity.
 
 ### Core Options
 
@@ -104,6 +106,7 @@ helicone-export [options]
 | `--include-body` | Include full request/response bodies | false |
 | `--output, -o <path>` | Custom output file path | output.{format} |
 | `--property, -p <key=value>` | Filter by property (can use multiple times) | - |
+| `--region <region>` | API region: `us` or `eu` | us |
 | `--help, -h` | Show help message and exit | - |
 
 ### Advanced Options
@@ -120,74 +123,74 @@ helicone-export [options]
 
 #### Basic Usage
 
-1. **Export last 30 days of data** (default behavior):
+1. **Export last 30 days of data with bodies**:
 ```bash
-npx @helicone/export
+HELICONE_API_KEY="your-key" npx @helicone/export --include-body
 ```
 
-2. **Export specific date range in CSV format**:
+2. **Export specific date range with bodies**:
 ```bash
-npx @helicone/export --start-date 2024-01-01 --end-date 2024-02-01 --format csv
+HELICONE_API_KEY="your-key" npx @helicone/export --start-date 2024-01-01 --end-date 2024-02-01 --include-body
 ```
 
-3. **Export with full request/response bodies**:
+3. **Export from EU region with bodies**:
 ```bash
-npx @helicone/export --limit 100 --include-body
+HELICONE_API_KEY="your-key" npx @helicone/export --region eu --include-body --limit 1000
 ```
 
-4. **Custom output file**:
+4. **Export with property filter**:
 ```bash
-npx @helicone/export --output my-export.jsonl
+HELICONE_API_KEY="your-key" npx @helicone/export --property appname=LlamaCoder --include-body
 ```
 
-5. **Filter by property** (e.g., only export LlamaCoder requests):
+5. **Export in CSV format with bodies**:
 ```bash
-npx @helicone/export --property appname=LlamaCoder
+HELICONE_API_KEY="your-key" npx @helicone/export --format csv --include-body --output my-export.csv
 ```
 
 6. **Multiple property filters**:
 ```bash
-npx @helicone/export --property appname=LlamaCoder --property environment=production
+HELICONE_API_KEY="your-key" npx @helicone/export --property appname=LlamaCoder --property environment=production --include-body
 ```
 
 #### Advanced Usage
 
 7. **Quiet mode for automation**:
 ```bash
-npx @helicone/export --log-level quiet --limit 10000
+HELICONE_API_KEY="your-key" npx @helicone/export --log-level quiet --limit 10000 --include-body
 ```
 
 8. **Verbose logging for debugging**:
 ```bash
-npx @helicone/export --log-level verbose --max-retries 10
+HELICONE_API_KEY="your-key" npx @helicone/export --log-level verbose --max-retries 10 --include-body
 ```
 
 9. **Large export with custom batch size**:
 ```bash
-npx @helicone/export --limit 50000 --batch-size 500
+HELICONE_API_KEY="your-key" npx @helicone/export --limit 50000 --batch-size 500 --include-body
 ```
 
 10. **Clean state and start fresh**:
 ```bash
-npx @helicone/export --clean-state
+HELICONE_API_KEY="your-key" npx @helicone/export --clean-state --include-body
 ```
 
-11. **Filter by property with other options**:
+11. **EU region with specific date range**:
 ```bash
-npx @helicone/export --property appname=LlamaCoder --format csv --limit 5000 --include-body
+HELICONE_API_KEY="your-key" npx @helicone/export --region eu --start-date 2024-08-01 --end-date 2024-08-31 --include-body
 ```
 
 #### Recovery Scenarios
 
 12. **After a crash** (automatic resume prompt):
 ```bash
-npx @helicone/export
+HELICONE_API_KEY="your-key" npx @helicone/export
 # Will detect checkpoint and ask: "Resume from checkpoint? (y/n)"
 ```
 
 13. **Force resume from checkpoint**:
 ```bash
-npx @helicone/export --resume
+HELICONE_API_KEY="your-key" npx @helicone/export --resume
 ```
 
 14. **Cancel and save progress** (during export):
