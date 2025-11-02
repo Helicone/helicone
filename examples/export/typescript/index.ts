@@ -1316,41 +1316,14 @@ export function printUsage(): void {
   console.error("  ✓ Progress tracking with ETA");
   console.error("  ✓ Pre-flight validation\n");
   console.error("Examples:");
-<<<<<<< Updated upstream
-  console.error("  # Basic export");
-  console.error("  npx @helicone/export --start-date 2024-01-01 --limit 5000\n");
-  console.error("  # Export with property filter (e.g., appname=LlamaCoder)");
-  console.error(
-<<<<<<< Updated upstream
-    "  npx @helicone/export --property appname=LlamaCoder --limit 1000\n"
-  );
-  console.error("  # Export with bodies in CSV format");
-  console.error(
-    "  npx @helicone/export --format csv --include-body --output data.csv\n"
-=======
-    "  ts-node index.ts --property appname=LlamaCoder --limit 1000\n"
-=======
   console.error("  # Basic export with bodies");
   console.error("  HELICONE_API_KEY='your-key' npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body\n");
   console.error("  # Export with property filter");
   console.error(
     "  HELICONE_API_KEY='your-key' npx @helicone/export --property appname=LlamaCoder --limit 1000 --include-body\n"
->>>>>>> Stashed changes
   );
   console.error("  # Export from EU region");
   console.error(
-<<<<<<< Updated upstream
-    "  ts-node index.ts --format csv --include-body --output data.csv\n"
->>>>>>> Stashed changes
-  );
-  console.error("  # Verbose logging with custom retry settings");
-  console.error("  npx @helicone/export --log-level verbose --max-retries 10\n");
-  console.error("  # Clean state and start fresh");
-<<<<<<< Updated upstream
-  console.error("  npx @helicone/export --clean-state\n");
-=======
-  console.error("  ts-node index.ts --clean-state\n");
-=======
     "  HELICONE_API_KEY='your-key' npx @helicone/export --region eu --include-body --limit 1000\n"
   );
   console.error("  # Export in CSV format with bodies");
@@ -1361,6 +1334,4 @@ export function printUsage(): void {
   console.error(
     "  HELICONE_API_KEY='your-key' npx @helicone/export --start-date 2024-08-01 --end-date 2024-08-31 --include-body\n"
   );
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 }
