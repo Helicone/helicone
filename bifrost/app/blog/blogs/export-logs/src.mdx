@@ -46,20 +46,7 @@ npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body
 5. Build regression models to predict which queries will be expensive or slow
 6. Create distribution plots to spot outliers and anomalies
 
-## 3. Build Real-Time Dashboards in Your BI Tool
-
-**The use case:** Your exec team wants to see LLM metrics alongside revenue, MAU, and support tickets. Your data team wants to slice usage by customer tier, geography, and product feature. You need LLM data in the same place as everything else.
-
-**How to do it:**
-
-1. Set up a daily cron job to export data every x amount of time: `npx @helicone/export --start-date $(date -d yesterday +%Y-%m-%d)`
-2. Write export directly to your data warehouse (Snowflake, BigQuery, Redshift) or object storage (S3, GCS)
-3. Create your schema with proper indexing on `user_id`, `timestamp`, `model`, and `custom properties`
-4. Build Tableau/Looker/Mode dashboards with calculated fields: cost per user, success rate by feature, p99 latency
-5. Set up alerts in your BI tool for anomalies (costs spike >50%, error rates >5%)
-6. Join with other tables: `LLM usage × revenue = unit economics`, `LLM usage × churn = engagement health`
-
-## 4. Calculate Unit Economics by Customer Segment
+## 3. Calculate Unit Economics by Customer Segment
 
 **The use case:** Not all users cost the same. Power users might generate 100x the requests of free users. Enterprise customers might prefer expensive models. What does each customer segment actually cost to serve? Which segments are profitable?
 
@@ -72,7 +59,7 @@ npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body
 5. Model scenarios: "If we limit free tier to 50 requests/month, we save $50k/year"
 6. Track over time to see if product changes improved unit economics
 
-## 5. Analyze Semantic Patterns in User Prompts
+## 4. Analyze Semantic Patterns in User Prompts
 
 **The use case:** You're getting thousands of prompts daily, but what are users actually asking for? Are there common themes? Are people using your AI feature in ways you didn't expect? Semantic analysis reveals user intent at scale.
 
@@ -86,7 +73,7 @@ npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body
 6. Use LLMs to auto-generate cluster labels: "These are all requests about data analysis"
 7. Track cluster sizes over time to see how usage evolves
 
-## 6. Create Synthetic Test Data for Edge Cases
+## 5. Create Synthetic Test Data for Edge Cases
 
 **The use case:** Your AI works great for common queries but breaks on edge cases. You need a comprehensive test suite but don't have enough real examples of rare scenarios (malicious prompts, unusual languages, extremely long inputs).
 
@@ -100,7 +87,7 @@ npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body
 6. Use the synthetic data to train guardrails or improve error handling
 7. Re-export monthly and update your synthetic dataset as new patterns emerge
 
-## 7. Develop Custom Embedding Models for Your Domain
+## 6. Develop Custom Embedding Models for Your Domain
 
 **The use case:** Generic embeddings (from OpenAI, Cohere) work okay, but they weren't trained on your domain. Custom embeddings trained on your data will improve search, clustering, and recommendations for your specific use case.
 
@@ -114,7 +101,7 @@ npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body
 6. Deploy your custom embedding model and use it for semantic search, recommendations, or RAG retrieval
 7. Track improvement in your application metrics (retrieval accuracy, user satisfaction)
 
-## 8. Build Automated Regression Testing Suites
+## 7. Build Automated Regression Testing Suites
 
 **The use case:** You're about to switch models, update a prompt, or change your RAG pipeline. How do you know you're not breaking things? Automated regression tests that run against real production scenarios tell you immediately.
 
@@ -128,7 +115,7 @@ npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body
 6. Track performance deltas: "This change increased average latency by 200ms and reduced cost by 30%"
 7. Build a dashboard showing test pass rates over time
 
-## 9. Build User Journey Maps Across Your Entire Product
+## 8. Build User Journey Maps Across Your Entire Product
 
 **The use case:** Your AI feature exists within a larger product. Users sign up, onboard, use AI features, use non-AI features, maybe churn. Where does AI fit in the journey? Do AI users retain better? What paths lead to AI activation?
 
@@ -142,7 +129,7 @@ npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body
 6. Identify drop-off points: "60% of users who try AI once never return—why?"
 7. A/B test interventions: Does better AI onboarding increase retention?
 
-## 10. Build Custom ROI and Payback Models
+## 9. Build Custom ROI and Payback Models
 
 **The use case:** Your product team needs to justify the cost of LLM features. You need to prove AI drives revenue, reduces churn, or improves efficiency.
 
@@ -155,6 +142,19 @@ npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body
 5. Build a financial model: AI cost per user vs incremental revenue per user
 6. Calculate payback period: How long until AI investment is profitable?
 7. Run sensitivity analysis: "If we reduce AI costs by 40% through caching, payback improves to 4 months"
+
+## 10. Build Real-Time Dashboards in Your BI Tool
+
+**The use case:** Your exec team wants to see LLM metrics alongside revenue, MAU, and support tickets. Your data team wants to slice usage by customer tier, geography, and product feature. You need LLM data in the same place as everything else.
+
+**How to do it:**
+
+1. Set up a daily cron job to export data every x amount of time: `npx @helicone/export --start-date $(date -d yesterday +%Y-%m-%d)`
+2. Write export directly to your data warehouse (Snowflake, BigQuery, Redshift) or object storage (S3, GCS)
+3. Create your schema with proper indexing on `user_id`, `timestamp`, `model`, and `custom properties`
+4. Build Tableau/Looker/Mode dashboards with calculated fields: cost per user, success rate by feature, p99 latency
+5. Set up alerts in your BI tool for anomalies (costs spike >50%, error rates >5%)
+6. Join with other tables: `LLM usage × revenue = unit economics`, `LLM usage × churn = engagement health`
 
 ## Conclusion
 
