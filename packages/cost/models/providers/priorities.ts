@@ -29,6 +29,7 @@ export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
   deepseek: 4,
   "google-ai-studio": 4,
   groq: 4,
+  mistralai: 4,
   nebius: 4,
   novita: 4,
 

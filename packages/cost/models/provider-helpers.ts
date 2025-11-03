@@ -49,6 +49,8 @@ export function heliconeProviderToModelProviderName(
       return "openrouter";
     case "DEEPINFRA":
       return "deepinfra";
+    case "MISTRALAI":
+      return "mistralai";
     case "NOVITA":
       return "novita";
     case "NEBIUS":
@@ -66,7 +68,6 @@ export function heliconeProviderToModelProviderName(
     case "LEMONFOX":
     case "FIREWORKS":
     case "WISDOMINANUTSHELL":
-    case "MISTRAL":
     case "QSTASH":
     case "FIRECRAWL":
     case "AVIAN":

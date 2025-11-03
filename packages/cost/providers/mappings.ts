@@ -55,7 +55,7 @@ const groq = /^https:\/\/api\.groq\.com/;
 // cohere.ai
 const cohere = /^https:\/\/api\.cohere\.ai/;
 // api.mistral.ai
-const mistral = /^https:\/\/api\.mistral\.ai/;
+const mistralai = /^https:\/\/api\.mistral\.ai/;
 // https://api.deepinfra.com
 const deepinfra = /^https:\/\/api\.deepinfra\.com/;
 //https://qstash.upstash.io/llm
@@ -106,7 +106,7 @@ export const providersNames = [
   "WISDOMINANUTSHELL",
   "GROQ",
   "COHERE",
-  "MISTRAL",
+  "MISTRALAI",
   "DEEPINFRA",
   "QSTASH",
   "FIRECRAWL",
@@ -249,8 +249,8 @@ export const providers: {
     costs: cohereCosts,
   },
   {
-    pattern: mistral,
-    provider: "MISTRAL",
+    pattern: mistralai,
+    provider: "MISTRALAI",
     costs: mistralCosts,
   },
   {

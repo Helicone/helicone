@@ -2672,6 +2672,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "mistralai/mistral-large": {
+    "mistral-large-2411:mistralai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "mistral-large-2411",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "mistralai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "mistralai/mistral-nemo": {
     "mistral-nemo:deepinfra": {
       "context": 128000,
@@ -4589,6 +4615,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
   ],
+  "mistralai/mistral-large": [
+    "mistralai",
+  ],
   "mistralai/mistral-nemo": [
     "deepinfra",
   ],
@@ -5785,6 +5814,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "mistralai/mistral-large": {
+    "mistralai": [
+      {
+        "input": 0.000002,
+        "output": 0.000006,
+        "threshold": 0,
+      },
+    ],
+  },
   "mistralai/mistral-nemo": {
     "deepinfra": [
       {
@@ -6587,6 +6625,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "mistral-large-2411",
+      "providers": [
+        "mistralai",
+      ],
+    },
+    {
       "model": "mistral-nemo",
       "providers": [
         "deepinfra",
@@ -6733,6 +6777,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "helicone",
     },
     {
+      "modelCount": 1,
+      "provider": "mistralai",
+    },
+    {
       "modelCount": 3,
       "provider": "nebius",
     },
@@ -6817,6 +6865,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "llama-guard-4",
     "llama-prompt-guard-2-22m",
     "llama-prompt-guard-2-86m",
+    "mistral-large-2411",
     "mistral-nemo",
     "mistral-small",
     "o1",
@@ -6843,9 +6892,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 196,
-  "totalModelProviderConfigs": 196,
-  "totalModelsWithPtb": 75,
-  "totalProviders": 15,
+  "totalEndpoints": 197,
+  "totalModelProviderConfigs": 197,
+  "totalModelsWithPtb": 76,
+  "totalProviders": 16,
 }
 `;

@@ -19,6 +19,7 @@ export function getUsageProcessor(
     case "chutes":
     case "deepinfra":
     case "helicone":
+    case "mistralai":
     case "nebius":
     case "novita":
       return new OpenAIUsageProcessor();

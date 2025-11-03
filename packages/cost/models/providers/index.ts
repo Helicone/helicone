@@ -8,6 +8,7 @@ import { DeepSeekProvider } from "./deepseek";
 import { GoogleProvider } from "./google";
 import { GroqProvider } from "./groq";
 import { HeliconeProvider } from "./helicone";
+import { MistralAIProvider } from "./mistralai";
 import { NebiusProvider } from "./nebius";
 import { NovitaProvider } from "./novita";
 import { OpenAIProvider } from "./openai";
@@ -28,6 +29,7 @@ export const providers = {
   "google-ai-studio": new GoogleProvider(),
   groq: new GroqProvider(),
   helicone: new HeliconeProvider(),
+  mistralai: new MistralAIProvider(),
   nebius: new NebiusProvider(),
   novita: new NovitaProvider(),
   openai: new OpenAIProvider(),
@@ -50,12 +52,13 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "cohere",
   "deepinfra",
   "deepseek",
-  
+
   // has known issues with returning structured JSONS
   // should be okay to enable, but its not stable enough to add without request
   // "google-ai-studio",
-  
+
   "groq",
+  "mistralai",
   "nebius",
   "novita",
   "openrouter",
