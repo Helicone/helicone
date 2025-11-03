@@ -1,6 +1,6 @@
 import { TemplateVariable, ValidationError, SubstitutionResult, PromptPartialVariable } from './types';
 export const TEMPLATE_REGEX = /\{\{\s*hc\s*:\s*([a-zA-Z_-][a-zA-Z0-9_-]*)\s*:\s*([a-zA-Z_-][a-zA-Z0-9_-]*)\s*\}\}/g;
-export const PROMPT_PARTIAL_REGEX = /\{\{\s*hcp\s*:\s*(\d{6})\s*:\s*(\d+)\s*(?::\s*([a-zA-Z_-][a-zA-Z0-9_-]*))?\s*\}\}/g;
+export const PROMPT_PARTIAL_REGEX = /\{\{\s*hcp\s*:\s*([a-zA-Z0-9]{6})\s*:\s*(\d+)\s*(?::\s*([a-zA-Z_-][a-zA-Z0-9_-]*))?\s*\}\}/g;
 export const BOOLEAN_VALUES = ['true', 'false', 'yes', 'no'];
 export class HeliconeTemplateManager {
 
