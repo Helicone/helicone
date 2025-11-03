@@ -89,6 +89,7 @@ export interface OnboardingState {
     evals: boolean;
   };
   hasCompletedQuickstart: boolean;
+  hasTrackedGoogleAdsConversion?: boolean;
 }
 
 const defaultOnboardingState: OnboardingState = {
@@ -104,6 +105,7 @@ const defaultOnboardingState: OnboardingState = {
     experiments: false,
     evals: false,
   },
+  hasTrackedGoogleAdsConversion: false,
 };
 
 export const useOrgOnboarding = (orgId: string) => {
@@ -205,6 +207,9 @@ export const useOrgOnboarding = (orgId: string) => {
         hasCompletedQuickstart:
           newState.hasCompletedQuickstart ??
           onboardingState?.hasCompletedQuickstart,
+        hasTrackedGoogleAdsConversion:
+          newState.hasTrackedGoogleAdsConversion ??
+          onboardingState?.hasTrackedGoogleAdsConversion,
         currentStep:
           newState.currentStep ??
           onboardingState?.currentStep ??
