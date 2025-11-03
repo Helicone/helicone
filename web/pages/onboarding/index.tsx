@@ -20,8 +20,16 @@ export default function OnboardingPage() {
   const router = useRouter();
   const org = useOrg();
   const { setNotification } = useNotification();
-  const { onboardingState, isLoading, draftName, draftMembers, setDraftMembers, updateCurrentStep, updateOnboardingStatus, saveOrganizationName } =
-    useOrgOnboarding(org?.currentOrg?.id ?? "");
+  const {
+    onboardingState,
+    isLoading,
+    draftName,
+    draftMembers,
+    setDraftMembers,
+    updateCurrentStep,
+    updateOnboardingStatus,
+    saveOrganizationName,
+  } = useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   const [isSendingInvites, setIsSendingInvites] = useState(false);
   const [hasCreatedOrg, setHasCreatedOrg] = useState(false);
@@ -30,11 +38,16 @@ export default function OnboardingPage() {
   useEffect(() => {
     updateCurrentStep("ORGANIZATION");
 
-    // Fire Google Ads conversion event for Sign Up
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag('event', 'ads_conversion_Sign_Up_1', {
+    if (
+      typeof window !== "undefined" &&
+      (window as any).gtag &&
+      !onboardingState?.hasTrackedGoogleAdsConversion
+    ) {
+      (window as any).gtag("event", "ads_conversion_Sign_Up_1", {
         // <event_parameters>
       });
+
+      updateOnboardingStatus({ hasTrackedGoogleAdsConversion: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -197,10 +210,12 @@ export default function OnboardingPage() {
           {hasCreatedOrg && (
             <>
               <div className="flex flex-col gap-2 pt-4">
-                <h3 className="text-sm font-medium">Invite team members (optional)</h3>
+                <h3 className="text-sm font-medium">
+                  Invite team members (optional)
+                </h3>
                 <Muted className="text-xs">
-                  Add team members to collaborate on your Helicone organization. You
-                  can always do this later from your organization settings.
+                  Add team members to collaborate on your Helicone organization.
+                  You can always do this later from your organization settings.
                 </Muted>
               </div>
 
