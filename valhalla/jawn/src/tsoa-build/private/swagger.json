@@ -8648,6 +8648,14 @@
 								"id": {
 									"type": "string"
 								},
+								"filter": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/Json"
+										}
+									],
+									"nullable": true
+								},
 								"emails": {
 									"items": {
 										"type": "string"
@@ -8672,6 +8680,7 @@
 								"minimum_request_count",
 								"metric",
 								"id",
+								"filter",
 								"emails",
 								"created_at"
 							],
@@ -8778,6 +8787,308 @@
 					}
 				]
 			},
+			"AllExpression": {
+				"description": "Matches all records (no filtering)",
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"all"
+						],
+						"nullable": false
+					}
+				},
+				"required": [
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FilterSubType": {
+				"type": "string",
+				"enum": [
+					"property",
+					"score",
+					"sessions",
+					"user"
+				]
+			},
+			"BaseFieldSpec": {
+				"description": "Type for the field specification in a condition\nDescribes what field is being filtered and how",
+				"properties": {
+					"subtype": {
+						"$ref": "#/components/schemas/FilterSubType"
+					},
+					"valueMode": {
+						"type": "string",
+						"enum": [
+							"value",
+							"key"
+						]
+					},
+					"key": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FieldSpec": {
+				"anyOf": [
+					{
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/BaseFieldSpec"
+							},
+							{
+								"properties": {
+									"column": {
+										"type": "string",
+										"enum": [
+											"properties",
+											"user_id",
+											"model",
+											"country_code",
+											"response_id",
+											"status",
+											"latency",
+											"provider",
+											"time_to_first_token",
+											"request_created_at",
+											"response_created_at",
+											"organization_id",
+											"threat",
+											"request_id",
+											"prompt_tokens",
+											"completion_tokens",
+											"prompt_cache_read_tokens",
+											"prompt_cache_write_tokens",
+											"target_url",
+											"scores",
+											"request_body",
+											"response_body",
+											"assets",
+											"proxy_key_id",
+											"updated_at"
+										],
+										"nullable": false
+									},
+									"table": {
+										"type": "string",
+										"enum": [
+											"request_response_rmt"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"column",
+									"table"
+								],
+								"type": "object"
+							}
+						]
+					},
+					{
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/BaseFieldSpec"
+							},
+							{
+								"properties": {
+									"column": {
+										"type": "string",
+										"enum": [
+											"created_at",
+											"cost",
+											"prompt_tokens",
+											"completion_tokens",
+											"total_tokens",
+											"total_requests",
+											"latest_request_created_at"
+										],
+										"nullable": false
+									},
+									"table": {
+										"type": "string",
+										"enum": [
+											"sessions_request_response_rmt"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"column",
+									"table"
+								],
+								"type": "object"
+							}
+						]
+					},
+					{
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/BaseFieldSpec"
+							},
+							{
+								"properties": {
+									"column": {
+										"type": "string",
+										"enum": [
+											"user_id",
+											"cost",
+											"total_requests",
+											"active_for",
+											"first_active",
+											"last_active",
+											"average_requests_per_day_active",
+											"average_tokens_per_request",
+											"total_completion_tokens",
+											"total_prompt_tokens"
+										],
+										"nullable": false
+									},
+									"table": {
+										"type": "string",
+										"enum": [
+											"users_view"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"column",
+									"table"
+								],
+								"type": "object"
+							}
+						]
+					}
+				]
+			},
+			"FilterOperator": {
+				"type": "string",
+				"enum": [
+					"eq",
+					"neq",
+					"is",
+					"gt",
+					"gte",
+					"lt",
+					"lte",
+					"like",
+					"ilike",
+					"contains",
+					"not-contains",
+					"in"
+				],
+				"description": "All supported filter operator types"
+			},
+			"ConditionExpression": {
+				"description": "Single condition expression that compares a field against a value",
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"condition"
+						],
+						"nullable": false
+					},
+					"field": {
+						"$ref": "#/components/schemas/FieldSpec"
+					},
+					"operator": {
+						"$ref": "#/components/schemas/FilterOperator"
+					},
+					"value": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number",
+								"format": "double"
+							},
+							{
+								"type": "boolean"
+							}
+						]
+					}
+				},
+				"required": [
+					"type",
+					"field",
+					"operator",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FilterExpression": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/AllExpression"
+					},
+					{
+						"$ref": "#/components/schemas/ConditionExpression"
+					},
+					{
+						"$ref": "#/components/schemas/AndExpression"
+					},
+					{
+						"$ref": "#/components/schemas/OrExpression"
+					}
+				],
+				"description": "Filter expression type union\nRepresents all possible filter expression types in the AST"
+			},
+			"AndExpression": {
+				"description": "Logical AND of multiple expressions\nAll contained expressions must match for this to match",
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"and"
+						],
+						"nullable": false
+					},
+					"expressions": {
+						"items": {
+							"$ref": "#/components/schemas/FilterExpression"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"type",
+					"expressions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"OrExpression": {
+				"description": "Logical OR of multiple expressions\nAt least one contained expression must match for this to match",
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"or"
+						],
+						"nullable": false
+					},
+					"expressions": {
+						"items": {
+							"$ref": "#/components/schemas/FilterExpression"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"type",
+					"expressions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"AlertRequest": {
 				"properties": {
 					"name": {
@@ -8808,6 +9119,14 @@
 					"minimum_request_count": {
 						"type": "number",
 						"format": "double"
+					},
+					"filter": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/FilterExpression"
+							}
+						],
+						"nullable": true
 					}
 				},
 				"required": [
@@ -8816,7 +9135,8 @@
 					"threshold",
 					"time_window",
 					"emails",
-					"slack_channels"
+					"slack_channels",
+					"filter"
 				],
 				"type": "object",
 				"additionalProperties": false

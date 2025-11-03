@@ -47,7 +47,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({ }) => {
               </Badge>
             )}
             {filterStore.filter !== null && (
-              <Button variant="ghost" size="xs" onClick={helpers.clearFilter}>
+              <Button type="button" variant="ghost" size="xs" onClick={helpers.clearFilter}>
                 Clear
               </Button>
             )}
@@ -64,6 +64,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({ }) => {
           />
         ) : (
           <Button
+            type="button"
             variant="glass"
             size="xs"
             className="flex w-fit items-center gap-1"
