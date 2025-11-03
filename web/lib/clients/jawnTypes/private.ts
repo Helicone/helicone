@@ -3267,6 +3267,7 @@ Json: JsonObject;
           minimum_request_count: number | null;
           metric: string;
           id: string;
+          filter: components["schemas"]["Json"] | null;
           emails: string[];
           created_at: string | null;
         })[];

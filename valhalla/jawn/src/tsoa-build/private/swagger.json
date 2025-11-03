@@ -8648,6 +8648,14 @@
 								"id": {
 									"type": "string"
 								},
+								"filter": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/Json"
+										}
+									],
+									"nullable": true
+								},
 								"emails": {
 									"items": {
 										"type": "string"
@@ -8672,6 +8680,7 @@
 								"minimum_request_count",
 								"metric",
 								"id",
+								"filter",
 								"emails",
 								"created_at"
 							],
