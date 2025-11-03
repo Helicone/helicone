@@ -17,6 +17,13 @@ export interface TemplateVariable {
   raw: string;
 }
 
+export interface PromptPartialVariable {
+  prompt_id: string;
+  index: number;
+  environment?: string;
+  raw: string;
+}
+
 export interface ValidationError {
   variable: string;
   expected: string;

@@ -1,7 +1,38 @@
-import { TemplateVariable, ValidationError, SubstitutionResult } from './types';
+import { TemplateVariable, ValidationError, SubstitutionResult, PromptPartialVariable } from './types';
 export const TEMPLATE_REGEX = /\{\{\s*hc\s*:\s*([a-zA-Z_-][a-zA-Z0-9_-]*)\s*:\s*([a-zA-Z_-][a-zA-Z0-9_-]*)\s*\}\}/g;
+export const PROMPT_PARTIAL_REGEX = /\{\{\s*hcp\s*:\s*(\d{6})\s*:\s*(\d+)\s*(?::\s*([a-zA-Z_-][a-zA-Z0-9_-]*))?\s*\}\}/g;
 export const BOOLEAN_VALUES = ['true', 'false', 'yes', 'no'];
 export class HeliconeTemplateManager {
+
+
+  /**
+   * Extract all distinct prompt partial variables from a template string.
+   * @param template - The template string containing {{hcp:prompt_id:index:environment}} patterns
+   * @returns Array of unique prompt partial variables with their prompt_id, index, and optional environment
+   */
+  static extractPromptPartialVariables(template: string): PromptPartialVariable[] {
+    const variables = new Map<string, PromptPartialVariable>();
+    let match: RegExpExecArray | null;
+    
+    PROMPT_PARTIAL_REGEX.lastIndex = 0;
+    
+    while ((match = PROMPT_PARTIAL_REGEX.exec(template)) !== null) {
+      const [fullMatch, promptId, index, environment] = match;
+      const key = `${promptId}:${index}:${environment || ''}`;
+      
+      if (!variables.has(key)) {
+        variables.set(key, {
+          prompt_id: promptId.trim(),
+          index: parseInt(index.trim(), 10),
+          environment: environment ? environment.trim() : undefined,
+          raw: fullMatch
+        });
+      }
+    }
+    
+    return Array.from(variables.values());
+  }
+
   /**
    * Extract all distinct variables and their types from a template string
    * @param template - The template string containing {{hc:NAME:type}} patterns
@@ -54,11 +85,13 @@ export class HeliconeTemplateManager {
    * Substitute variables in template with provided inputs after type validation
    * @param template - The template string containing {{hc:NAME:type}} patterns
    * @param inputs - Hash map of input values
+   * @param promptPartialInputs - Hash map of prompt partial replacement values (keyed by raw template string)
    * @returns Result object with success status and either result string or errors
    */
   static substituteVariables(
     template: string, 
-    inputs: Record<string, any>
+    inputs: Record<string, any>,
+    promptPartialInputs: Record<string, any>
   ): SubstitutionResult {
     const variables = this.extractVariables(template);
     const errors: ValidationError[] = [];
@@ -86,9 +119,15 @@ export class HeliconeTemplateManager {
     }
     
     TEMPLATE_REGEX.lastIndex = 0;
-    const result = template.replace(TEMPLATE_REGEX, (match, name) => {
+    let result = template.replace(TEMPLATE_REGEX, (match, name) => {
       const value = name.trim() in inputs ? inputs[name.trim()] : undefined;
       return value ? String(value) : match;
+    });
+    
+    PROMPT_PARTIAL_REGEX.lastIndex = 0;
+    result = result.replace(PROMPT_PARTIAL_REGEX, (match) => {
+      const value = promptPartialInputs[match];
+      return value !== undefined && value !== null ? String(value) : match;
     });
     
     return {
