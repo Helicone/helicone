@@ -117,17 +117,19 @@ export class HeliconeTemplateManager {
         errors
       };
     }
-    
-    TEMPLATE_REGEX.lastIndex = 0;
-    let result = template.replace(TEMPLATE_REGEX, (match, name) => {
-      const value = name.trim() in inputs ? inputs[name.trim()] : undefined;
-      return value ? String(value) : match;
-    });
-    
+
+    // we first replace prompt partials, since they contain variables
     PROMPT_PARTIAL_REGEX.lastIndex = 0;
-    result = result.replace(PROMPT_PARTIAL_REGEX, (match) => {
+    let result = template.replace(PROMPT_PARTIAL_REGEX, (match) => {
       const value = promptPartialInputs[match];
       return value !== undefined && value !== null ? String(value) : match;
+    });
+    
+    // now result contains prompt partials replaced, so a full prompt with all variables
+    TEMPLATE_REGEX.lastIndex = 0;
+    result = result.replace(TEMPLATE_REGEX, (match, name) => {
+      const value = name.trim() in inputs ? inputs[name.trim()] : undefined;
+      return value ? String(value) : match;
     });
     
     return {
