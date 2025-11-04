@@ -122,6 +122,7 @@ export class AttemptBuilder {
         const ptbAttempts = await this.buildPtbAttempts(
           modelSpec,
           data,
+          bodyMapping,
           plugins
         );
         return [...byokAttempts, ...ptbAttempts];
@@ -170,6 +171,7 @@ export class AttemptBuilder {
     const ptbAttempts = await this.buildPtbAttempts(
       modelSpec,
       providerData,
+      bodyMapping,
       plugins
     );
     return [...byokAttempts, ...ptbAttempts];
@@ -300,6 +302,7 @@ export class AttemptBuilder {
   private async buildPtbAttempts(
     modelSpec: ModelSpec,
     providerData: ModelProviderEntry,
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Check if we have PTB endpoints
@@ -346,6 +349,7 @@ export class AttemptBuilder {
       providerData.provider,
       providerData.ptbEndpoints,
       heliconeKey,
+      bodyMapping,
       processedPlugins
     );
   }
@@ -355,6 +359,7 @@ export class AttemptBuilder {
     provider: ModelProviderName,
     endpoints: Endpoint[],
     providerKey: ProviderKey,
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Attempt[] {
     // This is where dynamically injected config is applied
@@ -366,6 +371,7 @@ export class AttemptBuilder {
           projectId:
             (providerKey.config as UserEndpointConfig)?.projectId ||
             endpoint.userConfig.projectId,
+          gatewayMapping: bodyMapping,
         },
       };
     });
