@@ -1003,8 +1003,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             .response_format as ResponseFormat,
         );
 
-        console.log("openaiRequest", JSON.stringify(openaiRequest, null, 2));
-
         const stream = await generateStream({
           ...openaiRequest,
           signal: abortController.current.signal,
