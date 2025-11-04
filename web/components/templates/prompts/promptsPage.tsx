@@ -93,7 +93,7 @@ const PromptsPage = (props: PromptsPageProps) => {
         <div className="flex h-full flex-1">
           <EmptyStateCard
             feature="prompts"
-            onPrimaryClick={handleCreatePrompt}
+            onPrimaryClick={() => router.push("/playground")}
           />
         </div>
       </div>
