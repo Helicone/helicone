@@ -7,7 +7,7 @@ export const models = {
     description: "Mistral Large 2.1",
     contextLength: 128_000,
     maxOutputTokens: 32_768,
-    created: "2025-11-17T00:00:00.000Z",
+    created: "2024-07-24T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "Mistral",
   },

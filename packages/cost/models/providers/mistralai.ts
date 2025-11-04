@@ -1,7 +1,7 @@
 import { BaseProvider } from "./base";
 
 export class MistralAIProvider extends BaseProvider {
-  readonly displayName = "DeepInfra";
+  readonly displayName = "Mistral AI";
   readonly baseUrl = "https://api.mistral.ai/";
   readonly auth = "api-key" as const;
   readonly pricingPages = ["https://mistral.ai/pricing"];
