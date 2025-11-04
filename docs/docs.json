@@ -68,19 +68,21 @@
               "features/datasets",
               "features/alerts",
               "features/reports",
-              "features/hql"
-            ]
-          },
-          {
-            "group": "Prompt Management",
-            "pages": [
-              "features/advanced-usage/prompts",
+              "features/hql",
               "features/advanced-usage/scores",
               "features/advanced-usage/feedback",
               {
                 "group": "Webhooks",
                 "pages": ["features/webhooks", "features/webhooks-testing"]
               }
+            ]
+          },
+          {
+            "group": "Prompt Management",
+            "pages": [
+              "features/advanced-usage/prompts/overview",
+              "features/advanced-usage/prompts/assembly",
+              "features/advanced-usage/prompts/sdk"
             ]
           },
           {
@@ -670,6 +672,10 @@
     {
       "source": "/ai-gateway/prompt-integration",
       "destination": "/gateway/prompt-integration"
+    },
+    {
+      "source": "/features/advanced-usage/prompts",
+      "destination": "/features/advanced-usage/prompts/overview"
     }
   ]
 }
