@@ -253,15 +253,6 @@ export class AutoTopoffManager {
         `Auto topoff initiated for org ${orgId}: ${creditsCents} cents + ${stripeFeeCents} cents fee = ${totalCents} cents total. PaymentIntent: ${paymentIntent.id}`
       );
 
-      // Update timestamp after successful payment creation
-      const timestampResult = await this.updateLastTopoffTimestamp(orgId);
-      if (timestampResult.error) {
-        // Log error but don't fail the operation since payment was successful
-        console.error(
-          `Warning: Could not update topoff timestamp after successful payment: ${timestampResult.error}`
-        );
-      }
-
       return ok(paymentIntent.id);
     } catch (error) {
       // Determine error message

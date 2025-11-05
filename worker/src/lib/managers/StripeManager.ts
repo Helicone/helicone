@@ -242,6 +242,14 @@ export class StripeManager {
       if (paymentIntent.metadata.autoTopoff === "true") {
         const autoTopoffManager = new AutoTopoffManager(this.env);
         await autoTopoffManager.resetFailureCounter(orgId);
+
+        // Update timestamp after confirmed successful payment
+        const timestampResult = await autoTopoffManager.updateLastTopoffTimestamp(orgId);
+        if (timestampResult.error) {
+          console.error(
+            `Warning: Could not update topoff timestamp after successful payment for org ${orgId}: ${timestampResult.error}`
+          );
+        }
       }
       return ok(undefined);
     } catch (e) {

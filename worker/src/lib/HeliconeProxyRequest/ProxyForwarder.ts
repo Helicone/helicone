@@ -623,9 +623,6 @@ async function log(
       const walletManager = new WalletManager(env, ctx, walletStub);
 
       if (proxyRequest.escrowInfo) {
-        const walletId = env.WALLET.idFromName(orgData.organizationId);
-        const walletStub = env.WALLET.get(walletId);
-        const walletManager = new WalletManager(env, ctx, walletStub);
         // Convert cost from USD to cents (cost is in USD dollars, wallet expects cents)
         const costInCents = cost !== undefined ? cost * 100 : undefined;
 
