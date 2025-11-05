@@ -156,7 +156,7 @@ export class AutoTopoffManager {
   /**
    * Updates the last topoff timestamp to prevent race conditions
    */
-  private async updateLastTopoffTimestamp(
+  async updateLastTopoffTimestamp(
     orgId: string
   ): Promise<Result<void, string>> {
     try {
@@ -339,9 +339,7 @@ export class AutoTopoffManager {
   /**
    * Resets the consecutive failure counter (called on successful payment)
    */
-  private async resetFailureCounter(
-    orgId: string
-  ): Promise<Result<void, string>> {
+  async resetFailureCounter(orgId: string): Promise<Result<void, string>> {
     try {
       const { error } = await this.supabaseClient
         .from("organization_auto_topoff")
