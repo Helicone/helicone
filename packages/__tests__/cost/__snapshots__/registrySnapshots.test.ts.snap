@@ -5596,8 +5596,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "deepseek/r1-distill": {
     "deepinfra": [
       {
-        "input": 2e-7,
-        "output": 6e-7,
+        "input": 6e-7,
+        "output": 0.0000012,
         "threshold": 0,
       },
     ],

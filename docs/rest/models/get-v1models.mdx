@@ -1,0 +1,16 @@
+---
+title: "Get Models"
+sidebarTitle: "Get Models (OpenAI Compatible)"
+description: "Returns all available models supported by Helicone AI Gateway (OpenAI-compatible endpoint)"
+openapi: get /v1/models
+---
+
+This endpoint returns a list of all AI models supported by the Helicone AI Gateway. This is an OpenAI-compatible endpoint that follows the same response format as OpenAI's `/v1/models` endpoint.
+
+Use this endpoint to discover which models are available for routing through the AI Gateway.
+
+## Use Cases
+
+- **OpenAI Compatibility**: Use this endpoint as a drop-in replacement for OpenAI's `/v1/models` endpoint
+- **Model Discovery**: Discover which models are available through Helicone AI Gateway
+- **Integration Testing**: Verify model availability for your applications
