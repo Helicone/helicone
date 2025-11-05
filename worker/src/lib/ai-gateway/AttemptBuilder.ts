@@ -40,7 +40,8 @@ export class AttemptBuilder {
     modelStrings: string[],
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    globalIgnoreProviders?: string[]
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
 
@@ -74,6 +75,12 @@ export class AttemptBuilder {
         const sortedAttempts = sortAttemptsByPriority(attempts);
         allAttempts.push(...sortedAttempts);
       }
+    }
+
+    if (globalIgnoreProviders && globalIgnoreProviders.length > 0) {
+      return allAttempts.filter(
+        (attempt) => !globalIgnoreProviders.includes(attempt.endpoint.provider)
+      );
     }
 
     return allAttempts;
