@@ -326,12 +326,14 @@ export class AutoTopoffManager {
         }
 
         // Send disabled notification (critical email)
-        await this.sendDisabledNotification(orgId).catch((notificationError) => {
-          console.error(
-            `Failed to send auto topoff disabled notification for org ${orgId}:`,
-            notificationError
-          );
-        });
+        await this.sendDisabledNotification(orgId).catch(
+          (notificationError) => {
+            console.error(
+              `Failed to send auto topoff disabled notification for org ${orgId}:`,
+              notificationError
+            );
+          }
+        );
       }
 
       return ok(undefined);
@@ -372,7 +374,9 @@ export class AutoTopoffManager {
   /**
    * Disables auto topoff for an organization (called after too many failures)
    */
-  async disableAutoTopoff(orgId: string): Promise<Result<void, string>> {
+  private async disableAutoTopoff(
+    orgId: string
+  ): Promise<Result<void, string>> {
     try {
       const { error } = await this.supabaseClient
         .from("organization_auto_topoff")
@@ -398,7 +402,7 @@ export class AutoTopoffManager {
   /**
    * Sends failure notification email to org owner and engineering team
    */
-  async sendFailureNotification(
+  private async sendFailureNotification(
     orgId: string,
     errorMessage: string
   ): Promise<void> {
@@ -550,7 +554,7 @@ If you need assistance, please contact us at support@helicone.ai
   /**
    * Sends notification when auto top-off is disabled after max failures
    */
-  async sendDisabledNotification(orgId: string): Promise<void> {
+  private async sendDisabledNotification(orgId: string): Promise<void> {
     try {
       // Get settings
       const settingsResult = await this.getAutoTopoffSettings(orgId);
