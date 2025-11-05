@@ -407,24 +407,6 @@ export class DBWrapper {
     return { data: data, error: null };
   }
 
-  async getRequestById(
-    requestId: string
-  ): Promise<Result<Database["public"]["Tables"]["request"]["Row"], string>> {
-    const { data, error } = await this.supabaseClient
-      .from("request")
-      .select("*")
-      .match({
-        id: requestId,
-      })
-      .eq("helicone_org_id", await this.orgId())
-      .single();
-
-    if (error) {
-      return { data: null, error: error.message };
-    }
-    return { data: data, error: null };
-  }
-
   async insertAlert(
     alert: Database["public"]["Tables"]["alert"]["Insert"]
   ): Promise<Result<Database["public"]["Tables"]["alert"]["Row"], string>> {
