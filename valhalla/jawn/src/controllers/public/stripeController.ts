@@ -561,6 +561,11 @@ export class StripeController extends Controller {
       throw new Error(result.error);
     }
 
+    if (!result.data) {
+      this.setStatus(500);
+      throw new Error("Failed to update auto topoff settings");
+    }
+
     return result.data;
   }
 
@@ -589,6 +594,11 @@ export class StripeController extends Controller {
     if (result.error) {
       this.setStatus(500);
       throw new Error(result.error);
+    }
+
+    if (!result.data) {
+      this.setStatus(500);
+      throw new Error("Failed to fetch payment methods");
     }
 
     return result.data;
@@ -628,6 +638,11 @@ export class StripeController extends Controller {
     if (result.error) {
       this.setStatus(400);
       throw new Error(result.error);
+    }
+
+    if (!result.data) {
+      this.setStatus(500);
+      throw new Error("Failed to create setup session");
     }
 
     return { setupUrl: result.data };
