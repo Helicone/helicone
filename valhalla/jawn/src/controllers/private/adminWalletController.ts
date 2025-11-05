@@ -95,6 +95,7 @@ export class AdminWalletController extends Controller {
         sortOrder
       );
     }
+
     return adminWalletManager.getDashboardWithPostgresSort(
       search || "",
       tokenUsageProductId,

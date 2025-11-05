@@ -629,6 +629,15 @@ export interface paths {
     /** @description Update a saved query for admin (stored under admin org ID) */
     patch: operations["UpdateAdminSavedQuery"];
   };
+  "/v1/admin/pricing-analytics/segments": {
+    get: operations["GetPricingSegments"];
+  };
+  "/v1/admin/pricing-analytics/cohorts": {
+    get: operations["GetPricingCohorts"];
+  };
+  "/v1/admin/pricing-analytics/revenue-summary": {
+    get: operations["GetRevenueSummary"];
+  };
   "/v1/admin/wallet/gateway/dashboard_data": {
     post: operations["GetGatewayDashboardData"];
   };
@@ -16200,6 +16209,76 @@ Json: JsonObject;
       error: null;
     };
     "Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_": components["schemas"]["ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__"] | components["schemas"]["ResultError_string_"];
+    OrganizationSegment: {
+      id: string;
+      name: string;
+      tier: string;
+      created_at: string;
+      /** Format: double */
+      seats: number;
+      /** Format: double */
+      active_users_30d: number;
+      /** Format: double */
+      requests_30d: number;
+      /** Format: double */
+      llm_cost_30d: number;
+      /** Format: double */
+      prompts_created: number;
+      /** Format: double */
+      prompts_used_30d: number;
+      /** Format: double */
+      mrr: number;
+      stripe_customer_id: string;
+      is_ptb: boolean;
+      is_byok: boolean;
+    };
+    "ResultSuccess_OrganizationSegment-Array_": {
+      data: components["schemas"]["OrganizationSegment"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrganizationSegment-Array.string_": components["schemas"]["ResultSuccess_OrganizationSegment-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__high_inference_low_seats-Array_any_--low_inference_high_seats-Array_any_--ptb_customers-Array_any_--byok_customers-Array_any_--free_power_users-Array_any___": {
+      data: {
+        free_power_users: unknown[];
+        byok_customers: unknown[];
+        ptb_customers: unknown[];
+        low_inference_high_seats: unknown[];
+        high_inference_low_seats: unknown[];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__high_inference_low_seats-Array_any_--low_inference_high_seats-Array_any_--ptb_customers-Array_any_--byok_customers-Array_any_--free_power_users-Array_any__.string_": components["schemas"]["ResultSuccess__high_inference_low_seats-Array_any_--low_inference_high_seats-Array_any_--ptb_customers-Array_any_--byok_customers-Array_any_--free_power_users-Array_any___"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__mrr_by_tier_58__free-number--pro-number--team-number--enterprise-number_--total_mrr-number--addon_adoption_58__prompts-number--experiments-number--evals-number_--gross_margin-number__": {
+      data: {
+        /** Format: double */
+        gross_margin: number;
+        addon_adoption: {
+          /** Format: double */
+          evals: number;
+          /** Format: double */
+          experiments: number;
+          /** Format: double */
+          prompts: number;
+        };
+        /** Format: double */
+        total_mrr: number;
+        mrr_by_tier: {
+          /** Format: double */
+          enterprise: number;
+          /** Format: double */
+          team: number;
+          /** Format: double */
+          pro: number;
+          /** Format: double */
+          free: number;
+        };
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__mrr_by_tier_58__free-number--pro-number--team-number--enterprise-number_--total_mrr-number--addon_adoption_58__prompts-number--experiments-number--evals-number_--gross_margin-number_.string_": components["schemas"]["ResultSuccess__mrr_by_tier_58__free-number--pro-number--team-number--enterprise-number_--total_mrr-number--addon_adoption_58__prompts-number--experiments-number--evals-number_--gross_margin-number__"] | components["schemas"]["ResultError_string_"];
     DashboardData: {
       organizations: ({
           /** Format: double */
@@ -20094,6 +20173,41 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  GetPricingSegments: {
+    parameters: {
+      query?: {
+        bustCache?: boolean;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrganizationSegment-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPricingCohorts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__high_inference_low_seats-Array_any_--low_inference_high_seats-Array_any_--ptb_customers-Array_any_--byok_customers-Array_any_--free_power_users-Array_any__.string_"];
+        };
+      };
+    };
+  };
+  GetRevenueSummary: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__mrr_by_tier_58__free-number--pro-number--team-number--enterprise-number_--total_mrr-number--addon_adoption_58__prompts-number--experiments-number--evals-number_--gross_margin-number_.string_"];
         };
       };
     };

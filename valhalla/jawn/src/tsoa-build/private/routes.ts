@@ -14664,6 +14664,69 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OrganizationSegment": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "tier": {"dataType":"string","required":true},
+            "created_at": {"dataType":"string","required":true},
+            "seats": {"dataType":"double","required":true},
+            "active_users_30d": {"dataType":"double","required":true},
+            "requests_30d": {"dataType":"double","required":true},
+            "llm_cost_30d": {"dataType":"double","required":true},
+            "prompts_created": {"dataType":"double","required":true},
+            "prompts_used_30d": {"dataType":"double","required":true},
+            "mrr": {"dataType":"double","required":true},
+            "stripe_customer_id": {"dataType":"string","required":true},
+            "is_ptb": {"dataType":"boolean","required":true},
+            "is_byok": {"dataType":"boolean","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_OrganizationSegment-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"OrganizationSegment"},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_OrganizationSegment-Array.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_OrganizationSegment-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__high_inference_low_seats-Array_any_--low_inference_high_seats-Array_any_--ptb_customers-Array_any_--byok_customers-Array_any_--free_power_users-Array_any___": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"free_power_users":{"dataType":"array","array":{"dataType":"any"},"required":true},"byok_customers":{"dataType":"array","array":{"dataType":"any"},"required":true},"ptb_customers":{"dataType":"array","array":{"dataType":"any"},"required":true},"low_inference_high_seats":{"dataType":"array","array":{"dataType":"any"},"required":true},"high_inference_low_seats":{"dataType":"array","array":{"dataType":"any"},"required":true}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__high_inference_low_seats-Array_any_--low_inference_high_seats-Array_any_--ptb_customers-Array_any_--byok_customers-Array_any_--free_power_users-Array_any__.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__high_inference_low_seats-Array_any_--low_inference_high_seats-Array_any_--ptb_customers-Array_any_--byok_customers-Array_any_--free_power_users-Array_any___"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__mrr_by_tier_58__free-number--pro-number--team-number--enterprise-number_--total_mrr-number--addon_adoption_58__prompts-number--experiments-number--evals-number_--gross_margin-number__": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"gross_margin":{"dataType":"double","required":true},"addon_adoption":{"dataType":"nestedObjectLiteral","nestedProperties":{"evals":{"dataType":"double","required":true},"experiments":{"dataType":"double","required":true},"prompts":{"dataType":"double","required":true}},"required":true},"total_mrr":{"dataType":"double","required":true},"mrr_by_tier":{"dataType":"nestedObjectLiteral","nestedProperties":{"enterprise":{"dataType":"double","required":true},"team":{"dataType":"double","required":true},"pro":{"dataType":"double","required":true},"free":{"dataType":"double","required":true}},"required":true}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__mrr_by_tier_58__free-number--pro-number--team-number--enterprise-number_--total_mrr-number--addon_adoption_58__prompts-number--experiments-number--evals-number_--gross_margin-number_.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__mrr_by_tier_58__free-number--pro-number--team-number--enterprise-number_--total_mrr-number--addon_adoption_58__prompts-number--experiments-number--evals-number_--gross_margin-number__"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "DashboardData": {
         "dataType": "refObject",
         "properties": {
@@ -21499,6 +21562,100 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deleteAdminSavedQuery',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminController_getPricingSegments: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                bustCache: {"in":"query","name":"bustCache","dataType":"boolean"},
+        };
+        app.get('/v1/admin/pricing-analytics/segments',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getPricingSegments)),
+
+            async function AdminController_getPricingSegments(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_getPricingSegments, request, response });
+
+                const controller = new AdminController();
+
+              await templateService.apiHandler({
+                methodName: 'getPricingSegments',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminController_getPricingCohorts: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/admin/pricing-analytics/cohorts',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getPricingCohorts)),
+
+            async function AdminController_getPricingCohorts(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_getPricingCohorts, request, response });
+
+                const controller = new AdminController();
+
+              await templateService.apiHandler({
+                methodName: 'getPricingCohorts',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminController_getRevenueSummary: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/admin/pricing-analytics/revenue-summary',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminController.prototype.getRevenueSummary)),
+
+            async function AdminController_getRevenueSummary(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminController_getRevenueSummary, request, response });
+
+                const controller = new AdminController();
+
+              await templateService.apiHandler({
+                methodName: 'getRevenueSummary',
                 controller,
                 response,
                 next,
