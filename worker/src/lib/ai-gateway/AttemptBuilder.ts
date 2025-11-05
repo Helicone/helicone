@@ -41,7 +41,7 @@ export class AttemptBuilder {
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[],
-    globalIgnoreProviders?: string[]
+    globalIgnoreProviders?: Set<ModelProviderName>
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
 
@@ -70,16 +70,18 @@ export class AttemptBuilder {
           modelSpec.data,
           orgId,
           bodyMapping,
-          plugins
+          plugins,
+          globalIgnoreProviders
         );
         const sortedAttempts = sortAttemptsByPriority(attempts);
         allAttempts.push(...sortedAttempts);
       }
     }
 
-    if (globalIgnoreProviders && globalIgnoreProviders.length > 0) {
+    // Filter explicit provider routing attempts (not filtered in buildAttemptsForAllProviders)
+    if (globalIgnoreProviders && globalIgnoreProviders.size > 0) {
       return allAttempts.filter(
-        (attempt) => !globalIgnoreProviders.includes(attempt.endpoint.provider)
+        (attempt) => !globalIgnoreProviders.has(attempt.endpoint.provider)
       );
     }
 
@@ -90,15 +92,19 @@ export class AttemptBuilder {
     modelSpec: ModelSpec,
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    globalIgnoreProviders?: Set<ModelProviderName>
   ): Promise<Attempt[]> {
     // Get all provider data in one query
     const providerDataResult = registry.getModelProviderEntriesByModel(
       modelSpec.modelName
     );
     // Filter out providers that require explicit routing (e.g., helicone)
+    // and globally ignored providers
     const providerData = (providerDataResult.data || []).filter(
-      (data) => !data.config.requireExplicitRouting
+      (data) =>
+        !data.config.requireExplicitRouting &&
+        (!globalIgnoreProviders || !globalIgnoreProviders.has(data.provider))
     );
 
     // Process all providers in parallel (we know model exists because parseModelString validated it)

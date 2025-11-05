@@ -144,7 +144,6 @@ describe("parseModelString", () => {
       expect(result.error).toBeNull();
     });
 
-
     it("should preserve model names that don't need mapping", () => {
       const result = parseModelString("gpt-4o");
 
@@ -168,5 +167,4 @@ describe("parseModelString", () => {
       expect(result.error).toBeNull();
     });
   });
-
 });

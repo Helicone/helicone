@@ -33,6 +33,7 @@ import { ResponsesAPIEnabledProviders } from "@helicone-package/cost/models/prov
 import { oaiChat2responsesResponse } from "../clients/llmmapper/router/oaiChat2responses/nonStream";
 import { oaiChat2responsesStreamResponse } from "../clients/llmmapper/router/oaiChat2responses/stream";
 import { validateProvider } from "@helicone-package/cost/models/provider-helpers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
 export interface AuthContext {
   orgId: string;
@@ -318,7 +319,7 @@ export class SimpleAIGateway {
         modelStrings: string[];
         body: any;
         plugins?: Plugin[];
-        globalIgnoreProviders?: string[];
+        globalIgnoreProviders?: Set<ModelProviderName>;
       },
       Response
     >
@@ -365,7 +366,7 @@ export class SimpleAIGateway {
       .split(",")
       .map((m: string) => m.trim());
 
-    const globalIgnoreProviders: string[] = [];
+    const globalIgnoreProvidersSet = new Set<ModelProviderName>();
     const modelStrings: string[] = [];
 
     for (const modelString of rawModelStrings) {
@@ -389,7 +390,7 @@ export class SimpleAIGateway {
             )
           );
         }
-        globalIgnoreProviders.push(provider);
+        globalIgnoreProvidersSet.add(provider);
       } else {
         modelStrings.push(modelString);
       }
@@ -401,8 +402,7 @@ export class SimpleAIGateway {
       modelStrings,
       body: parsedBody,
       plugins,
-      globalIgnoreProviders:
-        globalIgnoreProviders.length > 0 ? globalIgnoreProviders : undefined,
+      globalIgnoreProviders: globalIgnoreProvidersSet.size > 0 ? globalIgnoreProvidersSet : undefined,
     });
   }
 
