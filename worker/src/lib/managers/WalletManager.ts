@@ -11,7 +11,7 @@ import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 
 export class WalletManager {
   private env: Env;
-  private walletStub: DurableObjectStub<Wallet>;
+  walletStub: DurableObjectStub<Wallet>;
   private ctx: ExecutionContext;
 
   constructor(
@@ -41,9 +41,6 @@ export class WalletManager {
         proxyRequest.escrowInfo.escrowId,
         cost ?? 0
       );
-
-      const scheduledAutoTopoff =
-        await this.walletStub.checkAndScheduleAutoTopoffAlarm(organizationId);
 
       if (
         cost === undefined &&

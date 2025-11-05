@@ -630,6 +630,10 @@ async function log(
       }
 
       // Handle escrow finalization if needed
+      const walletId = env.WALLET.idFromName(orgData.organizationId);
+      const walletStub = env.WALLET.get(walletId);
+      const walletManager = new WalletManager(env, ctx, walletStub);
+
       if (proxyRequest.escrowInfo) {
         const walletId = env.WALLET.idFromName(orgData.organizationId);
         const walletStub = env.WALLET.get(walletId);
@@ -652,6 +656,10 @@ async function log(
           );
         }
       }
+
+      await walletManager.walletStub.checkAndScheduleAutoTopoffAlarm(
+        orgData.organizationId
+      );
 
       // Update rate limit counters if not a cached response
       if (
