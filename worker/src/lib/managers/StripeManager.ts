@@ -3,6 +3,7 @@ import { ok, err, Result } from "../util/results";
 import { Wallet } from "../durable-objects/Wallet";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
+import { AutoTopoffManager } from "./AutoTopoffManager";
 
 export class StripeManager {
   private webhookSecret: string;
@@ -238,6 +239,10 @@ export class StripeManager {
       console.log(
         `Added ${creditsCents} cents of credits (total collected ${totalCents} cents) to wallet for org ${orgId} for payment intent ${paymentIntent.id} event ${eventId}`
       );
+      if (paymentIntent.metadata.autoTopoff === "true") {
+        const autoTopoffManager = new AutoTopoffManager(this.env);
+        await autoTopoffManager.resetFailureCounter(orgId);
+      }
       return ok(undefined);
     } catch (e) {
       const errorMessage = `Failed to process payment intent ${paymentIntent.id} for org ${orgId} with credits amount ${creditsCents}: ${e instanceof Error ? e.message : "Unknown error"}`;
