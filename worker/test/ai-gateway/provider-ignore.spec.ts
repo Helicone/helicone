@@ -1,4 +1,5 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import { env, runInDurableObject } from "cloudflare:test";
 import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { setSupabaseTestCase } from "../setup";
