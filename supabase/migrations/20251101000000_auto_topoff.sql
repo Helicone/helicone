@@ -22,7 +22,6 @@ ALTER TABLE "public"."organization_auto_topoff" ENABLE ROW LEVEL SECURITY;
 
 REVOKE ALL PRIVILEGES ON TABLE "public"."organization_auto_topoff" FROM anon;
 REVOKE ALL PRIVILEGES ON TABLE "public"."organization_auto_topoff" FROM authenticated;
-REVOKE ALL PRIVILEGES ON TABLE "public"."organization_auto_topoff" FROM service_role;
 
 -- Add trigger to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_organization_auto_topoff_updated_at()

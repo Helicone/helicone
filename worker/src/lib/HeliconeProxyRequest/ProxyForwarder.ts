@@ -622,6 +622,11 @@ async function log(
       const walletStub = env.WALLET.get(walletId);
       const walletManager = new WalletManager(env, ctx, walletStub);
 
+      const checkTopOffPromise =
+        walletManager.walletStub.checkAndScheduleAutoTopoffAlarm(
+          orgData.organizationId
+        );
+
       if (proxyRequest.escrowInfo) {
         // Convert cost from USD to cents (cost is in USD dollars, wallet expects cents)
         const costInCents = cost !== undefined ? cost * 100 : undefined;
@@ -642,9 +647,8 @@ async function log(
         }
       }
 
-      await walletManager.walletStub.checkAndScheduleAutoTopoffAlarm(
-        orgData.organizationId
-      );
+      // Wait for top-off check to complete
+      await checkTopOffPromise;
 
       // Update rate limit counters if not a cached response
       if (

@@ -191,7 +191,7 @@ export class AutoTopoffManager {
   /**
    * Initiates an auto topoff by creating a Stripe PaymentIntent
    */
-  private async initiateTopoff(orgId: string): Promise<Result<string, string>> {
+  async initiateTopoff(orgId: string): Promise<Result<string, string>> {
     try {
       // Get settings
       const settingsResult = await this.getAutoTopoffSettings(orgId);
