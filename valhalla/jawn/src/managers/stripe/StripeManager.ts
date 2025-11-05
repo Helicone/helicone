@@ -394,15 +394,13 @@ WHERE (${builtFilter.filter})`,
     origin: string
   ): Promise<Result<string, string>> {
     try {
-      const subscriptionResult = await this.getSubscription();
-      if (!subscriptionResult.data) {
-        return err("No existing subscription found");
+      const customerIdResult = await this.getOrCreateStripeCustomer();
+      if (customerIdResult.error || !customerIdResult.data) {
+        return err(`Error getting customer: ${customerIdResult.error}`);
       }
 
-      const subscription = subscriptionResult.data;
-
       const session = await this.stripe.billingPortal.sessions.create({
-        customer: subscription.customer as string,
+        customer: customerIdResult.data,
         return_url: origin,
       });
 

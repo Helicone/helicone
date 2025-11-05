@@ -1,6 +1,7 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import PaymentModal from "@/components/templates/settings/PaymentModal";
-import { AutoTopoffSettings } from "@/components/templates/settings/AutoTopoffSettings";
+import { AutoTopoffModal } from "@/components/templates/settings/AutoTopoffModal";
+import { LastTopoffDetailsModal } from "@/components/templates/settings/LastTopoffDetailsModal";
 import Header from "@/components/shared/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import {
   useCreditTransactions,
   type PurchasedCredits,
 } from "@/services/hooks/useCredits";
+import { useAutoTopoffSettings } from "@/services/hooks/useAutoTopoff";
 import { formatDate } from "@/utils/date";
 import {
   ChevronLeft,
@@ -33,30 +35,23 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  ExternalLink,
   Wallet,
   CreditCard,
+  Settings,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { ReactElement, useState } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import { NextPageWithLayout } from "./_app";
 
-// Utility functions for Stripe dashboard links
-const isStripeTestMode = () => {
-  return process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.startsWith("pk_test_");
-};
-
-const getStripePaymentUrl = (paymentIntentId: string) => {
-  const mode = isStripeTestMode() ? "test/" : "";
-  return `https://dashboard.stripe.com/${mode}payments/${paymentIntentId}`;
-};
-
 const Credits: NextPageWithLayout<void> = () => {
   const [currentPageToken, setCurrentPageToken] = useState<string | null>(null);
   const [pageTokenHistory, setPageTokenHistory] = useState<string[]>([]);
   const [pageSize, setPageSize] = useState(5);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isAutoTopoffModalOpen, setIsAutoTopoffModalOpen] = useState(false);
+  const [isLastTopoffModalOpen, setIsLastTopoffModalOpen] = useState(false);
 
   const org = useOrg();
 
@@ -75,6 +70,7 @@ const Credits: NextPageWithLayout<void> = () => {
     limit: pageSize,
     page: currentPageToken,
   });
+  const { data: autoTopoffSettings } = useAutoTopoffSettings();
 
   const transactions = transactionsData?.purchases || [];
   const hasMore = transactionsData?.hasMore || false;
@@ -176,8 +172,73 @@ const Credits: NextPageWithLayout<void> = () => {
                   </CardContent>
                 </Card>
 
-                {/* Auto Top-Up - wrapped in its own component */}
-                <AutoTopoffSettings />
+                {/* Auto Top-Up Card */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Zap size={20} className="text-muted-foreground" />
+                        <CardTitle className="text-base">Auto Top-Up</CardTitle>
+                      </div>
+                      {autoTopoffSettings && (
+                        <Badge
+                          variant={
+                            autoTopoffSettings.enabled ? "default" : "secondary"
+                          }
+                        >
+                          {autoTopoffSettings.enabled ? "Active" : "Inactive"}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-3">
+                    <Muted className="text-xs">
+                      Automatically purchase credits when your balance falls below a threshold.
+                    </Muted>
+
+                    {autoTopoffSettings?.enabled && (
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2 text-sm text-foreground">
+                          <Wallet size={14} className="text-muted-foreground" />
+                          <span>
+                            Triggers at $
+                            {(autoTopoffSettings.thresholdCents / 100).toFixed(
+                              0
+                            )}{" "}
+                            • Tops up $
+                            {(autoTopoffSettings.topoffAmountCents / 100).toFixed(
+                              0
+                            )}
+                          </span>
+                        </div>
+                        {autoTopoffSettings.lastTopoffAt && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock size={14} />
+                            <span>
+                              Last top-off:{" "}
+                              <span
+                                onClick={() => setIsLastTopoffModalOpen(true)}
+                                className="underline cursor-pointer hover:text-foreground"
+                              >
+                                {formatDate(autoTopoffSettings.lastTopoffAt)}
+                              </span>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => setIsAutoTopoffModalOpen(true)}
+                    >
+                      <Settings size={16} className="mr-2" />
+                      Configure Auto Top-Up
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Recent Transactions Card */}
@@ -326,15 +387,10 @@ const Credits: NextPageWithLayout<void> = () => {
                                 transaction.refundedAmount ?? 0;
                               const netCents = amount - refundedAmountCents;
 
-                              const stripeUrl = getStripePaymentUrl(transaction.id);
-
                               return (
-                                <a
+                                <div
                                   key={transaction.id || index}
-                                  href={stripeUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="group flex items-center justify-between border-b border-border py-4 transition-colors hover:bg-muted/50 last:border-b-0"
+                                  className="flex items-center justify-between border-b border-border py-4 last:border-b-0"
                                 >
                                   <div className="flex items-start gap-3">
                                     <StatusIcon
@@ -418,11 +474,7 @@ const Credits: NextPageWithLayout<void> = () => {
                                         )}
                                     </div>
                                   )}
-                                  <ExternalLink
-                                    size={16}
-                                    className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-                                  />
-                                </a>
+                                </div>
                               );
                             },
                           )}
@@ -491,6 +543,18 @@ const Credits: NextPageWithLayout<void> = () => {
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
+      />
+
+      {/* Auto Top-Off Modal */}
+      <AutoTopoffModal
+        isOpen={isAutoTopoffModalOpen}
+        onClose={() => setIsAutoTopoffModalOpen(false)}
+      />
+
+      {/* Last Top-Off Details Modal */}
+      <LastTopoffDetailsModal
+        isOpen={isLastTopoffModalOpen}
+        onClose={() => setIsLastTopoffModalOpen(false)}
       />
     </div>
   );
