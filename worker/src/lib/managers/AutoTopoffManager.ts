@@ -47,7 +47,7 @@ export class AutoTopoffManager {
    * Fetches auto topoff settings for an organization
    * Results are cached for 10 minutes
    */
-  async getAutoTopoffSettings(
+  private async getAutoTopoffSettings(
     orgId: string
   ): Promise<Result<AutoTopoffSettings | null, string>> {
     // Check cache first
@@ -164,7 +164,7 @@ export class AutoTopoffManager {
   /**
    * Updates the last topoff timestamp to prevent race conditions
    */
-  async updateLastTopoffTimestamp(
+  private async updateLastTopoffTimestamp(
     orgId: string
   ): Promise<Result<void, string>> {
     try {
@@ -191,7 +191,7 @@ export class AutoTopoffManager {
   /**
    * Initiates an auto topoff by creating a Stripe PaymentIntent
    */
-  async initiateTopoff(orgId: string): Promise<Result<string, string>> {
+  private async initiateTopoff(orgId: string): Promise<Result<string, string>> {
     try {
       // Get settings
       const settingsResult = await this.getAutoTopoffSettings(orgId);
@@ -296,11 +296,12 @@ export class AutoTopoffManager {
       }
 
       const currentFailures = settingsResult.data.consecutiveFailures;
+      const newFailureCount = currentFailures + 1;
 
       // Simple update - no race conditions due to Durable Object alarm guarantee
       const { error } = await this.supabaseClient
         .from("organization_auto_topoff")
-        .update({ consecutive_failures: currentFailures + 1 })
+        .update({ consecutive_failures: newFailureCount })
         .eq("organization_id", orgId);
 
       if (error) {
@@ -309,6 +310,29 @@ export class AutoTopoffManager {
 
       // Invalidate cache after successful update
       this.invalidateCache(orgId);
+
+      // Check if we hit the threshold - disable and notify
+      if (newFailureCount >= MAX_CONSECUTIVE_FAILURES) {
+        console.log(
+          `Auto topoff hit ${MAX_CONSECUTIVE_FAILURES} failures for org ${orgId}, disabling...`
+        );
+
+        // Disable auto topoff
+        const disableResult = await this.disableAutoTopoff(orgId);
+        if (disableResult.error) {
+          console.error(
+            `Failed to disable auto topoff for org ${orgId}: ${disableResult.error}`
+          );
+        }
+
+        // Send disabled notification (critical email)
+        await this.sendDisabledNotification(orgId).catch((notificationError) => {
+          console.error(
+            `Failed to send auto topoff disabled notification for org ${orgId}:`,
+            notificationError
+          );
+        });
+      }
 
       return ok(undefined);
     } catch (error) {
@@ -321,7 +345,9 @@ export class AutoTopoffManager {
   /**
    * Resets the consecutive failure counter (called on successful payment)
    */
-  async resetFailureCounter(orgId: string): Promise<Result<void, string>> {
+  private async resetFailureCounter(
+    orgId: string
+  ): Promise<Result<void, string>> {
     try {
       const { error } = await this.supabaseClient
         .from("organization_auto_topoff")
@@ -516,6 +542,153 @@ If you need assistance, please contact us at support@helicone.ai
     } catch (error) {
       console.error(
         `Unexpected error sending auto topoff failure notification:`,
+        error
+      );
+    }
+  }
+
+  /**
+   * Sends notification when auto top-off is disabled after max failures
+   */
+  async sendDisabledNotification(orgId: string): Promise<void> {
+    try {
+      // Get settings
+      const settingsResult = await this.getAutoTopoffSettings(orgId);
+      if (settingsResult.error || !settingsResult.data) {
+        console.error(
+          `Failed to fetch auto topoff settings for disabled notification: ${settingsResult.error}`
+        );
+        return;
+      }
+
+      const settings = settingsResult.data;
+
+      // Get organization details including owner email
+      const { data: org, error: orgError } = await this.supabaseClient
+        .from("organization")
+        .select("name, owner")
+        .eq("id", orgId)
+        .single();
+
+      if (orgError || !org) {
+        console.error(
+          `Failed to fetch organization for auto topoff disabled notification: ${orgError?.message}`
+        );
+        return;
+      }
+
+      // Get owner's email
+      const { data: ownerData, error: ownerError } =
+        await this.supabaseClient.auth.admin.getUserById(org.owner);
+
+      if (ownerError || !ownerData?.user?.email) {
+        console.error(
+          `Failed to fetch owner email for auto topoff disabled notification: ${ownerError?.message}`
+        );
+        return;
+      }
+
+      const ownerEmail = ownerData.user.email;
+
+      // Format email
+      const subject = `🚨 Auto Top-off DISABLED - ${org.name} - Action Required`;
+
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #991b1b;">🚨 Auto Top-off Has Been Disabled</h2>
+
+          <div style="background-color: #fee2e2; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+            <p style="margin: 0; color: #991b1b; font-weight: bold;">
+              Auto top-off has been automatically disabled after ${MAX_CONSECUTIVE_FAILURES} consecutive payment failures.
+            </p>
+          </div>
+
+          <p><strong>Impact:</strong> Your account will no longer automatically recharge when your balance is low. You may experience service interruptions if your balance reaches zero.</p>
+
+          <div style="background-color: #f3f4f6; padding: 16px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Account Details</h3>
+            <p><strong>Organization:</strong> ${org.name}</p>
+            <p><strong>Organization ID:</strong> ${orgId}</p>
+            <p><strong>Threshold:</strong> $${settings.thresholdCents / 100}</p>
+            <p><strong>Top-off Amount:</strong> $${settings.topoffAmountCents / 100}</p>
+            <p><strong>Total Failures:</strong> ${settings.consecutiveFailures}</p>
+          </div>
+
+          <h3>Required Actions</h3>
+          <ol>
+            <li><strong>Fix your payment method:</strong> Update your card details or add a new payment method in your <a href="https://helicone.ai/settings" style="color: #0ea5e9;">Helicone settings</a></li>
+            <li><strong>Check your balance:</strong> If your balance is low, manually purchase credits to avoid service interruption</li>
+            <li><strong>Re-enable auto top-off:</strong> Once your payment method is working, go to <a href="https://helicone.ai/credits" style="color: #0ea5e9;">Credits Settings</a> to re-enable auto top-off</li>
+          </ol>
+
+          <div style="background-color: #fef3c7; padding: 12px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; color: #92400e; font-size: 14px;">
+              <strong>Note:</strong> Auto top-off will remain disabled until you manually re-enable it in your settings, even after updating your payment method.
+            </p>
+          </div>
+
+          <p style="color: #6b7280; font-size: 14px; margin-top: 32px;">
+            If you need assistance, please reply to this email or contact us at support@helicone.ai
+          </p>
+        </div>
+      `;
+
+      const text = `
+🚨 Auto Top-off Has Been DISABLED
+
+Auto top-off has been automatically disabled after ${MAX_CONSECUTIVE_FAILURES} consecutive payment failures.
+
+IMPACT: Your account will no longer automatically recharge when your balance is low. You may experience service interruptions if your balance reaches zero.
+
+Account Details:
+- Organization: ${org.name}
+- Organization ID: ${orgId}
+- Threshold: $${settings.thresholdCents / 100}
+- Top-off Amount: $${settings.topoffAmountCents / 100}
+- Total Failures: ${settings.consecutiveFailures}
+
+Required Actions:
+1. Fix your payment method: Update your card details or add a new payment method in your Helicone settings (https://helicone.ai/settings)
+2. Check your balance: If your balance is low, manually purchase credits to avoid service interruption
+3. Re-enable auto top-off: Once your payment method is working, go to Credits Settings (https://helicone.ai/credits) to re-enable auto top-off
+
+Note: Auto top-off will remain disabled until you manually re-enable it in your settings, even after updating your payment method.
+
+If you need assistance, please contact us at support@helicone.ai
+      `;
+
+      // Send email via Resend
+      const recipients = [ownerEmail, ENGINEERING_EMAIL];
+
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "Helicone Billing <billing@helicone.ai>",
+          to: recipients,
+          subject: subject,
+          html: html,
+          text: text,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          `Failed to send auto topoff disabled email: ${response.status} ${response.statusText} ${errorText}`
+        );
+        return;
+      }
+
+      console.log(
+        `Auto topoff disabled notification sent to ${recipients.join(", ")} for org ${orgId}`
+      );
+    } catch (error) {
+      console.error(
+        `Unexpected error sending auto topoff disabled notification:`,
         error
       );
     }
