@@ -2,9 +2,10 @@ import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
 import { Result, err, ok } from "../util/results";
 import Stripe from "stripe";
+import { getAndStoreInCache, removeFromCache } from "../util/cache/secureCache";
 
 // Constants
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes cache for auto-topoff settings
+const CACHE_TTL_MS = 60 * 1000; // 1 minutes cache for auto-topoff settings
 const RATE_LIMIT_HOURS = 1; // Minimum hours between auto top-offs
 const RATE_LIMIT_MS = RATE_LIMIT_HOURS * 60 * 60 * 1000;
 const MAX_CONSECUTIVE_FAILURES = 3; // Auto-disable after this many failures
@@ -25,10 +26,6 @@ export class AutoTopoffManager {
   private supabaseClient;
   private stripe: Stripe;
   private env: Env;
-  private cache: Map<
-    string,
-    { data: AutoTopoffSettings | null; timestamp: number }
-  > = new Map();
   private readonly CACHE_TTL_MS = CACHE_TTL_MS;
 
   constructor(env: Env) {
@@ -50,62 +47,57 @@ export class AutoTopoffManager {
   private async getAutoTopoffSettings(
     orgId: string
   ): Promise<Result<AutoTopoffSettings | null, string>> {
-    // Check cache first
-    const cached = this.cache.get(orgId);
-    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS) {
-      return ok(cached.data);
-    }
+    return await getAndStoreInCache(
+      "AutoTopoffSettings-" + orgId,
+      this.env,
+      async () => {
+        try {
+          const { data, error } = await this.supabaseClient
+            .from("organization_auto_topoff")
+            .select("*")
+            .eq("organization_id", orgId)
+            .single();
 
-    try {
-      const { data, error } = await this.supabaseClient
-        .from("organization_auto_topoff")
-        .select("*")
-        .eq("organization_id", orgId)
-        .single();
+          if (error) {
+            // If no row exists, return null (not an error)
+            if (error.code === "PGRST116") {
+              return ok(null);
+            }
+            return err(`Error fetching auto topoff settings: ${error.message}`);
+          }
 
-      if (error) {
-        // If no row exists, return null (not an error)
-        if (error.code === "PGRST116") {
-          // Cache the null result
-          this.cache.set(orgId, { data: null, timestamp: Date.now() });
-          return ok(null);
+          if (!data) {
+            // Cache the null result
+            return ok(null);
+          }
+
+          const settings: AutoTopoffSettings = {
+            enabled: data.enabled,
+            thresholdCents: Number(data.threshold_cents),
+            topoffAmountCents: Number(data.topoff_amount_cents),
+            stripePaymentMethodId: data.stripe_payment_method_id,
+            lastTopoffAt: data.last_topoff_at
+              ? new Date(data.last_topoff_at)
+              : null,
+            consecutiveFailures: data.consecutive_failures,
+          };
+
+          return ok(settings);
+        } catch (error) {
+          return err(
+            `Error fetching auto topoff settings: ${error instanceof Error ? error.message : "Unknown error"}`
+          );
         }
-        return err(`Error fetching auto topoff settings: ${error.message}`);
-      }
-
-      if (!data) {
-        // Cache the null result
-        this.cache.set(orgId, { data: null, timestamp: Date.now() });
-        return ok(null);
-      }
-
-      const settings: AutoTopoffSettings = {
-        enabled: data.enabled,
-        thresholdCents: Number(data.threshold_cents),
-        topoffAmountCents: Number(data.topoff_amount_cents),
-        stripePaymentMethodId: data.stripe_payment_method_id,
-        lastTopoffAt: data.last_topoff_at
-          ? new Date(data.last_topoff_at)
-          : null,
-        consecutiveFailures: data.consecutive_failures,
-      };
-
-      // Cache the result
-      this.cache.set(orgId, { data: settings, timestamp: Date.now() });
-
-      return ok(settings);
-    } catch (error) {
-      return err(
-        `Error fetching auto topoff settings: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    }
+      },
+      CACHE_TTL_MS
+    );
   }
 
   /**
    * Invalidates the cache for an organization
    */
   private invalidateCache(orgId: string): void {
-    this.cache.delete(orgId);
+    removeFromCache("AutoTopoffSettings-" + orgId, this.env);
   }
 
   /**
