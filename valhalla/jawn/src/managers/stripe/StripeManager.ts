@@ -6,6 +6,9 @@ import {
   StripePaymentIntentsResponse,
   PaymentIntentSearchKind,
   PaymentIntentRecord,
+  AutoTopoffSettings,
+  UpdateAutoTopoffSettingsRequest,
+  PaymentMethod,
 } from "../../controllers/public/stripeController";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { Database } from "../../lib/db/database.types";
@@ -1242,8 +1245,12 @@ WHERE (${builtFilter.filter})`,
         const stripeFeeCents = percentageFeeCents + FIXED_FEE_CENTS;
         const totalAmountCents = creditsAmountCents + stripeFeeCents;
 
-        const successUrl = returnUrl ? `${origin}${returnUrl}` : `${origin}/credits`;
-        const cancelUrl = returnUrl ? `${origin}${returnUrl}` : `${origin}/credits`;
+        const successUrl = returnUrl
+          ? `${origin}${returnUrl}`
+          : `${origin}/credits`;
+        const cancelUrl = returnUrl
+          ? `${origin}${returnUrl}`
+          : `${origin}/credits`;
 
         const checkoutResult = await this.stripe.checkout.sessions.create({
           customer: customerId.data,
@@ -1500,6 +1507,240 @@ WHERE (${builtFilter.filter})`,
     } catch (error: any) {
       console.error("Error searching payment intents:", error);
       return err("Failed to search payment intents");
+    }
+  }
+
+  async getAutoTopoffSettings(): Promise<
+    Result<AutoTopoffSettings | null, string>
+  > {
+    try {
+      const org = await this.getOrganization();
+      if (org.error || !org.data) {
+        return err("Failed to get organization");
+      }
+
+      const result = await dbExecute<
+        Database["public"]["Tables"]["organization_auto_topoff"]["Row"]
+      >(`SELECT * FROM organization_auto_topoff WHERE organization_id = $1`, [
+        org.data.id,
+      ]);
+
+      if (result.error) {
+        return err(`Error fetching auto topoff settings: ${result.error}`);
+      }
+
+      if (!result.data || result.data.length === 0) {
+        return ok(null);
+      }
+
+      const data = result.data[0];
+
+      return ok({
+        enabled: data.enabled,
+        thresholdCents: Number(data.threshold_cents),
+        topoffAmountCents: Number(data.topoff_amount_cents),
+        stripePaymentMethodId: data.stripe_payment_method_id,
+        lastTopoffAt: data.last_topoff_at,
+        consecutiveFailures: data.consecutive_failures,
+      });
+    } catch (error) {
+      return err(`Error fetching auto topoff settings: ${error}`);
+    }
+  }
+
+  async updateAutoTopoffSettings(
+    settings: UpdateAutoTopoffSettingsRequest
+  ): Promise<Result<AutoTopoffSettings, string>> {
+    try {
+      const org = await this.getOrganization();
+      if (org.error || !org.data) {
+        return err("Failed to get organization");
+      }
+
+      // Verify payment method exists and belongs to customer
+      if (org.data.stripe_customer_id) {
+        try {
+          await this.stripe.paymentMethods.retrieve(
+            settings.stripePaymentMethodId
+          );
+        } catch (error) {
+          return err("Invalid payment method");
+        }
+      } else {
+        return err("Organization does not have a Stripe customer");
+      }
+
+      const upsertResult = await dbExecute<
+        Database["public"]["Tables"]["organization_auto_topoff"]["Row"]
+      >(
+        `INSERT INTO organization_auto_topoff
+          (organization_id, enabled, threshold_cents, topoff_amount_cents, stripe_payment_method_id, consecutive_failures)
+         VALUES ($1, $2, $3, $4, $5, 0)
+         ON CONFLICT (organization_id)
+         DO UPDATE SET
+           enabled = $2,
+           threshold_cents = $3,
+           topoff_amount_cents = $4,
+           stripe_payment_method_id = $5,
+           consecutive_failures = 0,
+           updated_at = NOW()
+         RETURNING *`,
+        [
+          org.data.id,
+          settings.enabled,
+          settings.thresholdCents,
+          settings.topoffAmountCents,
+          settings.stripePaymentMethodId,
+        ]
+      );
+
+      if (
+        upsertResult.error ||
+        !upsertResult.data ||
+        upsertResult.data.length === 0
+      ) {
+        return err(
+          `Error updating auto topoff settings: ${upsertResult.error}`
+        );
+      }
+
+      const data = upsertResult.data[0];
+
+      return ok({
+        enabled: data.enabled,
+        thresholdCents: Number(data.threshold_cents),
+        topoffAmountCents: Number(data.topoff_amount_cents),
+        stripePaymentMethodId: data.stripe_payment_method_id,
+        lastTopoffAt: data.last_topoff_at,
+        consecutiveFailures: data.consecutive_failures,
+      });
+    } catch (error) {
+      return err(`Error updating auto topoff settings: ${error}`);
+    }
+  }
+
+  async disableAutoTopoff(): Promise<Result<void, string>> {
+    try {
+      const org = await this.getOrganization();
+      if (org.error || !org.data) {
+        return err("Failed to get organization");
+      }
+
+      const result = await dbExecute(
+        `UPDATE organization_auto_topoff SET enabled = false WHERE organization_id = $1`,
+        [org.data.id]
+      );
+
+      if (result.error) {
+        return err(`Error disabling auto topoff: ${result.error}`);
+      }
+
+      return ok(undefined);
+    } catch (error) {
+      return err(`Error disabling auto topoff: ${error}`);
+    }
+  }
+
+  async getPaymentMethods(): Promise<Result<PaymentMethod[], string>> {
+    try {
+      const org = await this.getOrganization();
+      if (org.error || !org.data) {
+        return err("Failed to get organization");
+      }
+
+      if (!org.data.stripe_customer_id) {
+        return ok([]);
+      }
+
+      const paymentMethods = await this.stripe.paymentMethods.list({
+        customer: org.data.stripe_customer_id,
+        type: "card",
+      });
+
+      return ok(
+        paymentMethods.data.map((pm) => ({
+          id: pm.id,
+          brand: pm.card?.brand || "unknown",
+          last4: pm.card?.last4 || "****",
+          exp_month: pm.card?.exp_month || 0,
+          exp_year: pm.card?.exp_year || 0,
+        }))
+      );
+    } catch (error) {
+      return err(`Error fetching payment methods: ${error}`);
+    }
+  }
+
+  async createSetupSession(
+    origin: string,
+    returnUrl?: string
+  ): Promise<Result<string, string>> {
+    try {
+      const customerIdResult = await this.getOrCreateStripeCustomer();
+      const userEmail = await dbExecute<{ email: string }>(
+        `SELECT email FROM auth.users where id = $1 LIMIT 1`,
+        [this.authParams.userId]
+      );
+
+      if (customerIdResult.error || !customerIdResult.data) {
+        return err(
+          `Failed to get or create Stripe customer: ${customerIdResult.error}`
+        );
+      }
+      const customerId = customerIdResult.data;
+
+      const successUrl = returnUrl
+        ? `${origin}${returnUrl}?setup=success`
+        : `${origin}/credits?setup=success`;
+      const cancelUrl = returnUrl
+        ? `${origin}${returnUrl}?setup=cancelled`
+        : `${origin}/credits?setup=cancelled`;
+
+      const session = await this.stripe.checkout.sessions.create({
+        mode: "setup",
+        customer: customerId,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        payment_method_types: ["card"],
+      });
+
+      if (!session.url) {
+        return err("Failed to create setup session URL");
+      }
+
+      return ok(session.url);
+    } catch (error) {
+      return err(`Error creating setup session: ${error}`);
+    }
+  }
+
+  async removePaymentMethod(
+    paymentMethodId: string
+  ): Promise<Result<void, string>> {
+    try {
+      const org = await this.getOrganization();
+      if (org.error || !org.data) {
+        return err("Failed to get organization");
+      }
+
+      if (!org.data.stripe_customer_id) {
+        return err("Organization does not have a Stripe customer");
+      }
+
+      // Verify the payment method belongs to this customer
+      const paymentMethod =
+        await this.stripe.paymentMethods.retrieve(paymentMethodId);
+
+      if (paymentMethod.customer !== org.data.stripe_customer_id) {
+        return err("Payment method does not belong to this customer");
+      }
+
+      // Detach the payment method
+      await this.stripe.paymentMethods.detach(paymentMethodId);
+
+      return ok(undefined);
+    } catch (error) {
+      return err(`Error removing payment method: ${error}`);
     }
   }
 }

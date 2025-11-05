@@ -37,6 +37,10 @@ export interface CreateCloudGatewayCheckoutSessionRequest {
   returnUrl?: string;
 }
 
+export interface CreateSetupSessionRequest {
+  returnUrl?: string;
+}
+
 export enum PaymentIntentSearchKind {
   CREDIT_PURCHASES = "credit_purchases",
 }
@@ -62,6 +66,30 @@ export interface StripePaymentIntentsResponse {
   has_more: boolean;
   next_page: string | null;
   count: number;
+}
+
+export interface AutoTopoffSettings {
+  enabled: boolean;
+  thresholdCents: number;
+  topoffAmountCents: number;
+  stripePaymentMethodId: string | null;
+  lastTopoffAt: string | null;
+  consecutiveFailures: number;
+}
+
+export interface UpdateAutoTopoffSettingsRequest {
+  enabled: boolean;
+  thresholdCents: number;
+  topoffAmountCents: number;
+  stripePaymentMethodId: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  brand: string;
+  last4: string;
+  exp_month: number;
+  exp_year: number;
 }
 
 
@@ -485,5 +513,139 @@ export class StripeController extends Controller {
         },
       })),
     };
+  }
+
+  @Get("/auto-topoff/settings")
+  public async getAutoTopoffSettings(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<AutoTopoffSettings | null> {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.getAutoTopoffSettings();
+
+    if (result.error) {
+      console.error(result.error);
+      return null;
+    }
+
+    return result.data;
+  }
+
+  @Post("/auto-topoff/settings")
+  public async updateAutoTopoffSettings(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: UpdateAutoTopoffSettingsRequest
+  ): Promise<AutoTopoffSettings> {
+    // Validation
+    if (body.thresholdCents < 0) {
+      this.setStatus(400);
+      throw new Error("Threshold must be non-negative");
+    }
+    if (body.topoffAmountCents <= 0) {
+      this.setStatus(400);
+      throw new Error("Top-off amount must be positive");
+    }
+    if (body.topoffAmountCents < 500) {
+      this.setStatus(400);
+      throw new Error("Top-off amount must be at least $5");
+    }
+    if (body.topoffAmountCents > 1000000) {
+      this.setStatus(400);
+      throw new Error("Top-off amount must not exceed $10,000");
+    }
+
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.updateAutoTopoffSettings(body);
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
+  @Delete("/auto-topoff/settings")
+  public async disableAutoTopoff(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<{ success: boolean }> {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.disableAutoTopoff();
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return { success: true };
+  }
+
+  @Get("/payment-methods")
+  public async getPaymentMethods(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<PaymentMethod[]> {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.getPaymentMethods();
+
+    if (result.error) {
+      this.setStatus(500);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
+  @Post("/payment-methods/setup-session")
+  public async createSetupSession(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: CreateSetupSessionRequest
+  ): Promise<{ setupUrl: string }> {
+    // Validate returnUrl to prevent open redirect attacks
+    if (body.returnUrl) {
+      if (!body.returnUrl.startsWith("/")) {
+        this.setStatus(400);
+        throw new Error("returnUrl must be a relative path starting with /");
+      }
+      if (body.returnUrl.includes("..")) {
+        this.setStatus(400);
+        throw new Error("returnUrl contains invalid characters");
+      }
+      // Whitelist allowed paths
+      const allowedPaths = ["/credits", "/settings"];
+      if (!allowedPaths.some((path) => body.returnUrl?.startsWith(path))) {
+        this.setStatus(400);
+        throw new Error(
+          "returnUrl must start with one of: " + allowedPaths.join(", ")
+        );
+      }
+    }
+
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.createSetupSession(
+      request.headers.origin ?? "",
+      body.returnUrl
+    );
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return { setupUrl: result.data };
+  }
+
+  @Delete("/payment-methods/{paymentMethodId}")
+  public async removePaymentMethod(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() paymentMethodId: string
+  ): Promise<{ success: boolean }> {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.removePaymentMethod(paymentMethodId);
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return { success: true };
   }
 }

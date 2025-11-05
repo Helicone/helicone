@@ -74,7 +74,12 @@
       "mcp__chrome-devtools__wait_for",
       "Bash(git fetch:*)",
       "Bash(gh pr checks:*)",
-      "WebFetch(domain:docs.helicone.ai)"
+      "WebFetch(domain:docs.helicone.ai)",
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__chrome-devtools__list_network_requests",
+      "Bash(stripe:*)",
+      "mcp__chrome-devtools__get_network_request",
+      "mcp__chrome-devtools__handle_dialog"
     ],
     "deny": []
   },

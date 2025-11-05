@@ -1,8 +1,16 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import PaymentModal from "@/components/templates/settings/PaymentModal";
+import { AutoTopoffSettings } from "@/components/templates/settings/AutoTopoffSettings";
 import Header from "@/components/shared/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -10,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import {
   useCredits,
@@ -26,11 +33,24 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  ExternalLink,
+  Wallet,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 import { ReactElement, useState } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import { NextPageWithLayout } from "./_app";
+
+// Utility functions for Stripe dashboard links
+const isStripeTestMode = () => {
+  return process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.startsWith("pk_test_");
+};
+
+const getStripePaymentUrl = (paymentIntentId: string) => {
+  const mode = isStripeTestMode() ? "test/" : "";
+  return `https://dashboard.stripe.com/${mode}payments/${paymentIntentId}`;
+};
 
 const Credits: NextPageWithLayout<void> = () => {
   const [currentPageToken, setCurrentPageToken] = useState<string | null>(null);
@@ -85,15 +105,21 @@ const Credits: NextPageWithLayout<void> = () => {
       />
 
       <div className="flex flex-1 justify-center">
-        <div className="flex w-full flex-col">
-          <div className="flex-1 overflow-auto">
-            <div>
-              {/* Current Balance Section */}
-              <div className="border-b border-border bg-slate-100 px-6 py-8 dark:bg-slate-900">
-                  <Small className="text-muted-foreground">
-                    Current Balance
-                  </Small>
-                  <div className="mt-2 text-3xl font-bold">
+        <div className="flex w-full max-w-7xl flex-col">
+          <div className="flex-1 overflow-auto p-6">
+            <div className="flex flex-col gap-6">
+              {/* Current Balance Card */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Wallet size={20} className="text-muted-foreground" />
+                    <CardTitle className="text-sm font-medium">
+                      Current Balance
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="font-mono text-3xl font-bold">
                     {isLoading ? (
                       <span className="text-muted-foreground">Loading...</span>
                     ) : creditError ? (
@@ -117,69 +143,50 @@ const Credits: NextPageWithLayout<void> = () => {
                       })()}`
                     )}
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Buy Credits and Auto Top-Up Cards */}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {/* Buy Credits Card */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <CreditCard size={20} className="text-muted-foreground" />
+                      <CardTitle className="text-base">Buy Credits</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-3">
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      onClick={() => setIsPaymentModalOpen(true)}
+                    >
+                      Add Credits
+                    </Button>
+                    <Link href="/requests" className="w-full">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                      >
+                        View Usage
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+
+                {/* Auto Top-Up - wrapped in its own component */}
+                <AutoTopoffSettings />
               </div>
 
-              {/* Buy Credits and Auto Top-Up Section */}
-              <div className="border-b border-border px-6 py-8">
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                    {/* Buy Credits */}
-                    <div>
-                      <Small className="mb-4 font-semibold text-slate-900 dark:text-slate-100">
-                        Buy Credits
-                      </Small>
-                      <div className="mt-2 flex flex-col gap-3">
-                        <Button
-                          size="sm"
-                          className="w-full"
-                          onClick={() => setIsPaymentModalOpen(true)}
-                        >
-                          Add Credits
-                        </Button>
-                        <Link href="/requests" className="w-full">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full"
-                          >
-                            View Usage
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Auto Top-Up */}
-                    <div>
-                      <div className="mb-3 flex items-center justify-between">
-                        <Small className="font-semibold text-slate-900 dark:text-slate-100">
-                          Auto Top-Up
-                        </Small>
-                        <div className="opacity-50">
-                          <Switch checked={false} disabled />
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <Small className="text-xs text-muted-foreground">
-                          <span className="italic">
-                            Auto Top-Up is still in development and not yet
-                            available.
-                          </span>
-                        </Small>
-                        <Muted className="text-xs">
-                          Automatically purchase credits when your balance is
-                          below a certain threshold. Your most recent payment
-                          method will be used.
-                        </Muted>
-                      </div>
-                    </div>
-                  </div>
-              </div>
-
-              {/* Recent Transactions Section */}
-              <div className="px-6 py-8">
-                <div className="mb-6 flex items-center justify-between">
-                    <Small className="font-semibold text-slate-900 dark:text-slate-100">
+              {/* Recent Transactions Card */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">
                       Recent Transactions
-                    </Small>
+                    </CardTitle>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">
                         Page size
@@ -205,7 +212,8 @@ const Credits: NextPageWithLayout<void> = () => {
                       </Select>
                     </div>
                   </div>
-
+                </CardHeader>
+                <CardContent>
                   <div>
                     <div>
                       {transactionsLoading ? (
@@ -318,14 +326,20 @@ const Credits: NextPageWithLayout<void> = () => {
                                 transaction.refundedAmount ?? 0;
                               const netCents = amount - refundedAmountCents;
 
+                              const stripeUrl = getStripePaymentUrl(transaction.id);
+
                               return (
-                                <div
+                                <a
                                   key={transaction.id || index}
-                                  className="flex items-center justify-between border-b border-border py-4 last:border-b-0"
+                                  href={stripeUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="group flex items-center justify-between border-b border-border py-4 transition-colors hover:bg-muted/50 last:border-b-0"
                                 >
                                   <div className="flex items-start gap-3">
                                     <StatusIcon
-                                      className={`mt-0.5 h-4 w-4 ${statusDisplay.className}`}
+                                      size={16}
+                                      className={`mt-0.5 ${statusDisplay.className}`}
                                     />
                                     <div className="flex flex-col gap-1">
                                       <div
@@ -404,7 +418,11 @@ const Credits: NextPageWithLayout<void> = () => {
                                         )}
                                     </div>
                                   )}
-                                </div>
+                                  <ExternalLink
+                                    size={16}
+                                    className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                                  />
+                                </a>
                               );
                             },
                           )}
@@ -462,7 +480,8 @@ const Credits: NextPageWithLayout<void> = () => {
                       </div>
                     )}
                 </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>

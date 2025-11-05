@@ -42,6 +42,9 @@ export class WalletManager {
         cost ?? 0
       );
 
+      const scheduledAutoTopoff =
+        await this.walletStub.checkAndScheduleAutoTopoffAlarm(organizationId);
+
       if (
         cost === undefined &&
         statusCode >= 200 &&
