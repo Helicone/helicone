@@ -3,6 +3,9 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Result, err, ok } from "../util/results";
 import { Database } from "../../../supabase/database.types";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import { toFilterNode } from "@helicone-package/filters/toFilterNode";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { FilterExpression } from "@helicone-package/filters/types";
 
 type AlertStatus = "triggered" | "resolved";
 export type Alert = Database["public"]["Tables"]["alert"]["Row"] & {
@@ -101,9 +104,10 @@ export class AlertStore {
 
   public async getCost(
     organizationId: string,
-    timeWindowMs: number
+    timeWindowMs: number,
+    filter?: FilterExpression | null
   ): Promise<Result<AlertState, string>> {
-    const query = `SELECT 
+    let query = `SELECT
     sum(cost) / ${COST_PRECISION_MULTIPLIER} as totalCount,
     COUNT() AS requestCount
     FROM request_response_rmt
@@ -111,11 +115,21 @@ export class AlertStore {
     organization_id = {val_0: UUID} AND
     request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_1: Int64} MILLISECOND`;
 
+    let params: any[] = [organizationId, timeWindowMs];
+
+    if (filter) {
+      const filterNode = toFilterNode(filter);
+      const builtFilter = await buildFilterWithAuthClickHouse({
+        org_id: organizationId,
+        filter: filterNode,
+        argsAcc: params,
+      });
+      query += ` AND (${builtFilter.filter})`;
+      params = builtFilter.argsAcc;
+    }
+
     const { data: cost, error: alertStateErr } =
-      await this.clickhouseClient.dbQuery<AlertState>(query, [
-        organizationId,
-        timeWindowMs,
-      ]);
+      await this.clickhouseClient.dbQuery<AlertState>(query, params);
 
     if (alertStateErr || !cost || cost.length === 0) {
       return err(
@@ -128,22 +142,33 @@ export class AlertStore {
 
   public async getErrorRate(
     organizationId: string,
-    timeWindowMs: number
+    timeWindowMs: number,
+    filter?: FilterExpression | null
   ): Promise<Result<AlertState, string>> {
-    const query = `SELECT
+    let query = `SELECT
     COUNT() AS totalCount,
     COUNTIf(status BETWEEN 400 AND 599) AS errorCount,
     COUNT() AS requestCount
   FROM request_response_rmt
-  WHERE 
+  WHERE
     organization_id = {val_0: UUID} AND
-    request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_1: Int64} MILLISECOND
-  `;
+    request_created_at >= toDateTime64(now(), 3) - INTERVAL {val_1: Int64} MILLISECOND`;
+
+    let params: any[] = [organizationId, timeWindowMs];
+
+    if (filter) {
+      const filterNode = toFilterNode(filter);
+      const builtFilter = await buildFilterWithAuthClickHouse({
+        org_id: organizationId,
+        filter: filterNode,
+        argsAcc: params,
+      });
+      query += ` AND (${builtFilter.filter})`;
+      params = builtFilter.argsAcc;
+    }
+
     const { data: alertState, error: alertStateErr } =
-      await this.clickhouseClient.dbQuery<AlertState>(query, [
-        organizationId,
-        timeWindowMs,
-      ]);
+      await this.clickhouseClient.dbQuery<AlertState>(query, params);
 
     if (alertStateErr || !alertState || alertState.length === 0) {
       return err(

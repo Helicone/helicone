@@ -10,7 +10,14 @@ import EUAPIWarning from "/snippets/eu-api-warning.mdx";
 
 <EUAPIWarning />
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
+  <Card
+    title="NPM Package (Recommended)"
+    href="https://www.npmjs.com/package/@helicone/export"
+    icon="npm"
+  >
+    Use our CLI tool: `npx @helicone/export` - No installation required!
+  </Card>
   <Card
     title="Python Example"
     href="https://github.com/Helicone/helicone/tree/main/examples/export/python"
@@ -26,6 +33,33 @@ import EUAPIWarning from "/snippets/eu-api-warning.mdx";
     Learn to fetch requests with TypeScript/JavaScript.
   </Card>
 </CardGroup>
+
+## Quick Start with NPM
+
+The easiest way to export data is using our CLI tool:
+
+```bash
+# Export with npx (no installation required)
+HELICONE_API_KEY="your-api-key" npx @helicone/export --start-date 2024-01-01 --limit 10000 --include-body
+
+# With property filter
+HELICONE_API_KEY="your-api-key" npx @helicone/export --property appname=MyApp --format csv --include-body
+
+# With date range and full bodies
+HELICONE_API_KEY="your-api-key" npx @helicone/export --start-date 2024-08-01 --end-date 2024-08-31 --include-body
+
+# Export from EU region
+HELICONE_API_KEY="your-eu-api-key" npx @helicone/export --region eu --limit 10000 --include-body
+```
+
+**Key Features:**
+- ✅ Auto-recovery from crashes with checkpoint system
+- ✅ Retry logic with exponential backoff
+- ✅ Progress tracking with ETA
+- ✅ Multiple output formats (JSON, JSONL, CSV)
+- ✅ Region support (US and EU)
+
+See the [full documentation](https://github.com/Helicone/helicone/tree/main/examples/export/typescript) for more options.
 
 The following API is the same as the [Get Requests](/rest/request/post-v1requestquery) API, but it is optimized for speed when querying large amount of data. This endpoint will timeout for point queries and is really slow when querying just a few requests.
 
