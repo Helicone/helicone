@@ -364,7 +364,7 @@ export function AutoTopoffModal({ isOpen, onClose }: AutoTopoffModalProps) {
             </div>
           ) : (
             <>
-              {settings?.consecutiveFailures >= 2 && (
+              {settings?.consecutiveFailures && settings.consecutiveFailures >= 2 && (
                 <div className="flex items-start gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3">
                   <AlertCircle size={16} className="mt-0.5 text-destructive" />
                   <div className="flex flex-col gap-1">

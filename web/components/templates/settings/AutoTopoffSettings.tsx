@@ -214,7 +214,7 @@ export function AutoTopoffSettings() {
             threshold.
           </Muted>
 
-          {settings?.consecutiveFailures >= 2 && (
+          {settings?.consecutiveFailures && settings.consecutiveFailures >= 2 && (
             <div className="flex items-start gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3">
               <AlertCircle
                 size={16}
