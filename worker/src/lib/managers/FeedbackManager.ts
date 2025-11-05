@@ -57,36 +57,3 @@ export async function handleFeedback(request: RequestWrapper) {
     }
   );
 }
-
-export async function getResponse(
-  dbClient: SupabaseClient<Database>,
-  dbQueryTimer: DBQueryTimer,
-  heliconeId: string
-): Promise<Result<Database["public"]["Tables"]["response"]["Row"], string>> {
-  const maxRetries = 3;
-
-  for (let i = 0; i < maxRetries; i++) {
-    const { data: response, error: responseError } =
-      await dbQueryTimer.withTiming(
-        dbClient.from("response").select("*").eq("request", heliconeId),
-        {
-          queryName: "select_response_by_request",
-          percentLogging: FREQUENT_PRECENT_LOGGING,
-        }
-      );
-
-    if (responseError) {
-      console.error("Error fetching response:", responseError.message);
-      return { error: responseError.message, data: null };
-    }
-
-    if (response && response.length > 0) {
-      return { error: null, data: response[0] };
-    }
-
-    const sleepDuration = i === 0 ? 100 : 1000;
-    await new Promise((resolve) => setTimeout(resolve, sleepDuration));
-  }
-
-  return { error: "Response not found.", data: null };
-}

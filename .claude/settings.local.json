@@ -83,12 +83,14 @@
       "mcp__chrome-devtools__select_page",
       "Bash(yarn tsc:*)",
       "Bash(db/database.types.ts)",
-      "Bash(supabase/database.types.ts)"
+      "Bash(supabase/database.types.ts)",
+      "Bash(git log:*)",
+      "Bash(git grep:*)",
+      "Bash(xargs git grep -l \"request\\|response\")",
+      "Bash(cat:*)"
     ],
     "deny": []
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "playwright"
-  ]
+  "enabledMcpjsonServers": ["playwright"]
 }
