@@ -9,6 +9,41 @@ This endpoint returns a list of all AI models supported by the Helicone AI Gatew
 
 Use this endpoint to discover which models are available for routing through the AI Gateway.
 
+## Endpoint URL
+
+```
+https://ai-gateway.helicone.ai/v1/models
+```
+
+## Example Request
+
+```bash
+curl https://ai-gateway.helicone.ai/v1/models
+```
+
+## Example Response
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "claude-opus-4",
+      "object": "model",
+      "created": 1747180800,
+      "owned_by": "anthropic"
+    },
+    {
+      "id": "gpt-4o",
+      "object": "model",
+      "created": 1715558400,
+      "owned_by": "openai"
+    },
+    ...
+  ]
+}
+```
+
 ## Use Cases
 
 - **OpenAI Compatibility**: Use this endpoint as a drop-in replacement for OpenAI's `/v1/models` endpoint
