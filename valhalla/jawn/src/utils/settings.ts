@@ -46,6 +46,8 @@ export interface SettingsType {
   "sqs:request-response-logs-dlq": SqsSettings;
   "sqs:helicone-scores-dlq": SqsSettings;
   "stripe:products": StripeProductSettings;
+  // Stores provider/admin secrets; expected to include { helicone: string, ... }
+  "secrets:provider-keys": Record<string, string>;
 }
 
 export type SettingName = keyof SettingsType;

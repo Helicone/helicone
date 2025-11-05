@@ -1,14 +1,17 @@
 const { Project, SyntaxKind } = require('ts-morph');
 
 /**
- * Extract CreateChatCompletionRequest and all its dependencies from the generated OpenAPI file
+ * Extract a specific type and all its dependencies from the generated OpenAPI file
+ * @param {string} rootTypeName - The name of the type to extract (e.g., 'CreateChatCompletionRequest', 'CreateResponse')
+ * @param {string} outputFile - The output file path (e.g., './chat-completion-types.ts', './responses-types.ts')
+ * @param {string} sourceFilePath - The source file path (default: './openai.chat.zod.ts')
  */
-async function extractChatCompletionTypes() {
+async function extractTypes(rootTypeName, outputFile, sourceFilePath = './openai.chat.zod.ts') {
   // Initialize ts-morph project
   const project = new Project();
 
   // Add the generated file
-  const sourceFile = project.addSourceFileAtPath('./openai.chat.zod.ts');
+  const sourceFile = project.addSourceFileAtPath(sourceFilePath);
 
   // Track all dependencies we need to extract
   const dependencies = new Set();
@@ -81,10 +84,10 @@ async function extractChatCompletionTypes() {
     }
   }
 
-  // Start with CreateChatCompletionRequest
-  findDependencies('CreateChatCompletionRequest');
+  // Start with the root type
+  findDependencies(rootTypeName);
 
-  console.log(`Found ${dependencies.size} dependencies:`, Array.from(dependencies).sort());
+  console.log(`Found ${dependencies.size} dependencies for ${rootTypeName}:`, Array.from(dependencies).sort());
 
   // Extract all dependencies in dependency order using topological sort
   const sortedDependencies = [];
@@ -159,17 +162,45 @@ async function extractChatCompletionTypes() {
       }
     });
 
-  // Add export for CreateChatCompletionRequest
-  output += `\nexport { CreateChatCompletionRequest };\n`;
+  // Add export for the root type
+  output += `\nexport { ${rootTypeName} };\n`;
 
   return output;
 }
 
-// Run the extraction
-extractChatCompletionTypes()
-  .then(output => {
-    const fs = require('fs');
-    fs.writeFileSync('./chat-completion-types.ts', output);
+/**
+ * Extract CreateChatCompletionRequest and all its dependencies
+ */
+async function extractChatCompletionTypes() {
+  return extractTypes('CreateChatCompletionRequest', './chat-completion-types.ts');
+}
+
+/**
+ * Extract CreateResponse and all its dependencies
+ */
+async function extractResponseTypes() {
+  return extractTypes('CreateResponse', './responses-types.ts');
+}
+
+// Run extractions
+async function main() {
+  const fs = require('fs');
+  
+  try {
+    // Extract CreateChatCompletionRequest
+    const chatCompletionOutput = await extractChatCompletionTypes();
+    fs.writeFileSync('./chat-completion-types.ts', chatCompletionOutput);
     console.log('✅ Successfully extracted CreateChatCompletionRequest and dependencies to chat-completion-types.ts');
-  })
-  .catch(console.error);
+    
+    // Extract CreateResponse
+    const responseOutput = await extractResponseTypes();
+    fs.writeFileSync('./responses-types.ts', responseOutput);
+    console.log('✅ Successfully extracted CreateResponse and dependencies to responses-types.ts');
+  } catch (error) {
+    console.error('❌ Error during extraction:', error);
+    throw error;
+  }
+}
+
+// Run the extraction
+main().catch(console.error);

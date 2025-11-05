@@ -46,10 +46,10 @@ export const useFilterUIDefinitions = () => {
   });
 
   const models = useQuery({
-    queryKey: ["/v1/models", org?.currentOrg?.id],
+    queryKey: ["/v1/organization/models", org?.currentOrg?.id],
     queryFn: async (query) => {
       const jawn = getJawnClient(query.queryKey[1]);
-      const res = await jawn.GET("/v1/models");
+      const res = await jawn.GET("/v1/organization/models");
       return res.data;
     },
     refetchOnWindowFocus: false,

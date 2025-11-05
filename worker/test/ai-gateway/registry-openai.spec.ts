@@ -1642,9 +1642,7 @@ describe("OpenAI Registry Tests", () => {
         model: "gpt-oss-20b/novita",
         request: {
           body: {
-            messages: [
-              { role: "user", content: "Generate structured data" },
-            ],
+            messages: [{ role: "user", content: "Generate structured data" }],
             response_format: {
               type: "json_schema",
               json_schema: {
@@ -1670,11 +1668,7 @@ describe("OpenAI Registry Tests", () => {
               data: createOpenAIMockResponse("openai/gpt-oss-20b"),
               expects: {
                 ...novitaAuthExpectations,
-                bodyContains: [
-                  "response_format",
-                  "json_schema",
-                  "user_data",
-                ],
+                bodyContains: ["response_format", "json_schema", "user_data"],
               },
             },
           ],
@@ -1703,10 +1697,7 @@ describe("OpenAI Registry Tests", () => {
               data: createOpenAIMockResponse("openai/gpt-oss-20b"),
               expects: {
                 ...novitaAuthExpectations,
-                bodyContains: [
-                  "reasoning",
-                  "max_tokens",
-                ],
+                bodyContains: ["reasoning", "max_tokens"],
               },
             },
           ],

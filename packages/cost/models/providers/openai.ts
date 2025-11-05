@@ -1,5 +1,5 @@
 import { BaseProvider } from "./base";
-import type { Endpoint, RequestParams } from "../types";
+import type { Endpoint, RequestParams, RequestBodyContext } from "../types";
 
 export class OpenAIProvider extends BaseProvider {
   readonly displayName = "OpenAI";
@@ -15,5 +15,19 @@ export class OpenAIProvider extends BaseProvider {
       default:
         return "https://api.openai.com/v1/chat/completions";
     }
+  }
+
+  buildRequestBody(
+    endpoint: Endpoint,
+    context: RequestBodyContext
+  ): string | Promise<string> {
+    if (context.bodyMapping === "RESPONSES") {
+      return JSON.stringify({
+        ...context.parsedBody,
+        model: endpoint.providerModelId,
+      });
+    }
+
+    return super.buildRequestBody(endpoint, context);
   }
 }

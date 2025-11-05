@@ -36,6 +36,7 @@ const llamaApiPattern = /^https:\/\/api\.llama\.com/;
 const nvidiaApiPattern = /^https:\/\/integrate\.api\.nvidia\.com/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
 const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
+const heliconeInferencePattern = /^https:\/\/inference\.helicone\.ai/;
 const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
 const anyscalePattern = /^https:\/\/api\.endpoints\.anyscale\.com/;
 const cloudflareAiGatewayPattern = /^https:\/\/gateway\.ai\.cloudflare\.com/;
@@ -174,6 +175,10 @@ export const providers: {
     provider: "HELICONE",
   },
   {
+    pattern: heliconeInferencePattern,
+    provider: "HELICONE",
+  },
+  {
     pattern: amdbartekPattern,
     provider: "AMDBARTEK",
   },
@@ -303,12 +308,9 @@ export const providers: {
   },
 ];
 
-export const playgroundModels =
-  openRouterCosts.map((cost) => cost.model.value) ?? [];
-
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const defaultProvider = providers.find(
-  (provider) => provider.provider === "OPENAI"
+  (provider) => provider.provider === "OPENAI",
 )!;
 
 export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
@@ -324,5 +326,5 @@ export const parentModelNames = providers.reduce(
     }
     return acc;
   },
-  {} as Record<ProviderName, string[]>
+  {} as Record<ProviderName, string[]>,
 );

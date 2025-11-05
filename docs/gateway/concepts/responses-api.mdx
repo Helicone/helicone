@@ -4,7 +4,7 @@ description: "Use the OpenAI Responses API format through Helicone AI Gateway wi
 ---
 
 <Info>
-Currently, the Responses API is supported for the OpenAI provider.
+Currently, the Responses API is not supported for Anthropic models.
 </Info>
 
 ## Quick Start
@@ -13,7 +13,7 @@ Use your Helicone API key and the AI Gateway base URL. Then call the OpenAI SDK'
 
 <CodeGroup>
 
-```typescript
+```typescript TypeScript
 import OpenAI from "openai";
 
 const client = new OpenAI({
@@ -29,7 +29,7 @@ const response = await client.responses.create({
 console.log(response.output_text);
 ```
 
-```python
+```python Python
 import os
 from openai import OpenAI
 
@@ -46,7 +46,7 @@ response = client.responses.create(
 print(response.output_text)
 ```
 
-```bash
+```bash curl
 curl https://ai-gateway.helicone.ai/v1/responses \
   -H "Authorization: Bearer $HELICONE_API_KEY" \
   -H "Content-Type: application/json" \

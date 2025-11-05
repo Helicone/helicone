@@ -39,8 +39,8 @@ export class BedrockProvider extends BaseProvider {
     const modelId = this.getModelId(endpoint.modelConfig, endpoint.userConfig);
     const isStreaming = requestParams.isStreaming === true;
     const endpointMethod = isStreaming
-        ? "invoke-with-response-stream"
-        : "invoke";
+      ? "invoke-with-response-stream"
+      : "invoke";
     return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/${endpointMethod}`;
   }
 
@@ -113,9 +113,13 @@ export class BedrockProvider extends BaseProvider {
     if (endpoint.providerModelId.includes("claude-")) {
       const anthropicBody =
         context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
+          ? context.toAnthropic(
+              context.parsedBody,
+              endpoint.providerModelId,
+              { includeCacheBreakpoints: false }
+            )
           : context.parsedBody;
-      
+
       const updatedBody = {
         ...anthropicBody,
         anthropic_version: "bedrock-2023-05-31",

@@ -334,7 +334,7 @@ describe("XAI/Grok specific features", () => {
     expect(result.error).toBeNull();
     expect(result.data).toEqual({
       input: 45, // text_tokens (45)
-      output: 35, // completion_tokens (120) - XAI excludes reasoning from this (new behavior)
+      output: 120, // completion_tokens (120) - XAI doesn't include reasoning in completion_tokens
       cacheDetails: {
         cachedInput: 5,
       },

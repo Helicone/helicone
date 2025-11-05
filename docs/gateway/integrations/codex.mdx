@@ -1,0 +1,156 @@
+---
+title: "OpenAI Codex"
+sidebarTitle: "Codex"
+description: "Use OpenAI Codex CLI and SDK with Helicone AI Gateway to log your coding agent interactions."
+"twitter:title": "OpenAI Codex Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+
+<Info>
+This integration uses the [AI Gateway](/gateway/overview), which provides a unified API for multiple LLM providers. The AI Gateway is currently in beta.
+</Info>
+
+## CLI Integration
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title="Configure Codex config file">
+    Update your `$CODEX_HOME/.codex/config.toml` file to include the Helicone provider configuration:
+
+    <Note>
+      `$CODEX_HOME` is typically `~/.codex` on Mac or Linux.
+    </Note>
+
+    ```toml config.toml
+    model_provider = "helicone"
+
+    [model_providers.helicone]
+    name = "Helicone"
+    base_url = "https://ai-gateway.helicone.ai/v1"
+    env_key = "HELICONE_API_KEY"
+    wire_api = "chat"
+    ```
+  </Step>
+
+  <Step title="Set your Helicone API key">
+    Set the `HELICONE_API_KEY` environment variable:
+
+    ```bash
+    export HELICONE_API_KEY=<your-helicone-api-key>
+    ```
+  </Step>
+
+  <Step title="Run Codex with Helicone">
+    Use Codex as normal. Your requests will automatically be logged to Helicone:
+
+    ```bash
+    # If you set model_provider in config.toml
+    codex "What files are in the current directory?"
+
+    # Or specify the provider explicitly
+    codex -c model_provider="helicone" "What files are in the current directory?"
+    ```
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Codex CLI") }} />
+  </Step>
+</Steps>
+
+## SDK Integration
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title="Install the Codex SDK">
+    ```bash
+    npm install @openai/codex-sdk
+    ```
+  </Step>
+
+  <Step title="Configure the SDK with Helicone">
+    Initialize the Codex SDK with the AI Gateway base URL:
+
+    ```typescript
+    import { Codex } from "@openai/codex-sdk";
+
+    const codex = new Codex({
+      baseUrl: "https://ai-gateway.helicone.ai/v1",
+      apiKey: process.env.HELICONE_API_KEY,
+    });
+
+    const thread = codex.startThread({
+      model: "gpt-5" // 100+ models supported
+    });
+    const turn = await thread.run("What files are in the current directory?");
+
+    console.log(turn.finalResponse);
+    console.log(turn.items);
+    ```
+
+    <Note>
+      The Codex SDK doesn't currently support specifying the wire API, so it will use the Responses API by default. This works with the AI Gateway with limited model and provider support. See the [Responses API documentation](/gateway/concepts/responses-api) for more details.
+    </Note>
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Codex SDK") }} />
+  </Step>
+</Steps>
+
+## Additional Features
+
+Once integrated with Helicone AI Gateway, you can take advantage of:
+
+- **Unified Observability**: Monitor all your Codex usage alongside other LLM providers
+- **Cost Tracking**: Track costs across different models and providers
+- **Custom Properties**: Add metadata to your requests for better organization
+- **Rate Limiting**: Control usage and prevent abuse
+
+## {strings.relatedGuides}
+
+<CardGroup cols={2}>
+  <Card
+    title="AI Gateway Overview"
+    icon="book-open"
+    href="/gateway/overview"
+    iconType="light"
+    vertical
+  >
+    Learn more about Helicone's AI Gateway and its features
+  </Card>
+  <Card
+    title="Responses API Support"
+    icon="code"
+    href="/gateway/concepts/responses-api"
+    iconType="light"
+    vertical
+  >
+    Use the OpenAI Responses API format through Helicone AI Gateway
+  </Card>
+  <Card
+    title="Provider Routing"
+    icon="route"
+    href="/gateway/provider-routing"
+    iconType="light"
+    vertical
+  >
+    Configure automatic routing and fallbacks for reliability
+  </Card>
+  <Card
+    title="Custom Properties"
+    icon="tag"
+    href="/features/advanced-usage/custom-properties"
+    iconType="light"
+    vertical
+  >
+    Add metadata to your requests for better tracking and organization
+  </Card>
+</CardGroup>
