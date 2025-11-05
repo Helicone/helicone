@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +17,22 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Small, Muted, XSmall } from "@/components/ui/typography";
 import { AlertCircle, CreditCard, Zap } from "lucide-react";
 import {
@@ -37,48 +59,97 @@ export function AutoTopoffModal({ isOpen, onClose }: AutoTopoffModalProps) {
 
   const [enabled, setEnabled] = useState(settings?.enabled ?? false);
   const [threshold, setThreshold] = useState(
-    settings?.thresholdCents ? (settings.thresholdCents / 100).toString() : ""
+    settings?.thresholdCents
+      ? (settings.thresholdCents / 100).toString()
+      : "10",
   );
   const [topoffAmount, setTopoffAmount] = useState(
     settings?.topoffAmountCents
       ? (settings.topoffAmountCents / 100).toString()
-      : ""
+      : "50",
   );
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
-    settings?.stripePaymentMethodId ?? ""
+    settings?.stripePaymentMethodId ?? "",
   );
+  const [alertDialog, setAlertDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    type: "alert" | "confirm";
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "alert",
+  });
 
   // Update local state when settings load
   useEffect(() => {
     if (settings) {
       setEnabled(settings.enabled);
-      setThreshold((settings.thresholdCents / 100).toString());
-      setTopoffAmount((settings.topoffAmountCents / 100).toString());
+      setThreshold(
+        settings.thresholdCents
+          ? (settings.thresholdCents / 100).toString()
+          : "10",
+      );
+      setTopoffAmount(
+        settings.topoffAmountCents
+          ? (settings.topoffAmountCents / 100).toString()
+          : "50",
+      );
       setSelectedPaymentMethod(settings.stripePaymentMethodId ?? "");
     }
   }, [settings]);
+
+  // Auto-select first payment method if available and none selected
+  useEffect(() => {
+    if (paymentMethods && paymentMethods.length > 0 && !selectedPaymentMethod) {
+      setSelectedPaymentMethod(paymentMethods[0].id);
+    }
+  }, [paymentMethods, selectedPaymentMethod]);
 
   const handleSave = async () => {
     const thresholdCents = Math.round(parseFloat(threshold || "0") * 100);
     const topoffAmountCents = Math.round(parseFloat(topoffAmount || "0") * 100);
 
     if (!selectedPaymentMethod) {
-      alert("Please select a payment method");
+      setAlertDialog({
+        isOpen: true,
+        title: "Payment Method Required",
+        description: "Please select a payment method",
+        type: "alert",
+      });
       return;
     }
 
     if (thresholdCents < 0) {
-      alert("Threshold must be non-negative");
+      setAlertDialog({
+        isOpen: true,
+        title: "Invalid Threshold",
+        description: "Threshold must be non-negative",
+        type: "alert",
+      });
       return;
     }
 
     if (topoffAmountCents < 500) {
-      alert("Top-off amount must be at least $5");
+      setAlertDialog({
+        isOpen: true,
+        title: "Amount Too Low",
+        description: "Top-off amount must be at least $5",
+        type: "alert",
+      });
       return;
     }
 
     if (topoffAmountCents > 1000000) {
-      alert("Top-off amount must not exceed $10,000");
+      setAlertDialog({
+        isOpen: true,
+        title: "Amount Too High",
+        description: "Top-off amount must not exceed $10,000",
+        type: "alert",
+      });
       return;
     }
 
@@ -125,21 +196,32 @@ export function AutoTopoffModal({ isOpen, onClose }: AutoTopoffModalProps) {
   const handleRemovePaymentMethod = async (paymentMethodId: string) => {
     // Check if it's the last payment method and auto top-off is enabled
     if (paymentMethods && paymentMethods.length === 1 && enabled) {
-      alert(
-        "Cannot remove the last payment method while auto top-off is enabled. Please disable auto top-off first."
-      );
+      setAlertDialog({
+        isOpen: true,
+        title: "Cannot Remove Payment Method",
+        description:
+          "Cannot remove the last payment method while auto top-off is enabled. Please disable auto top-off first.",
+        type: "alert",
+      });
       return;
     }
 
-    if (confirm("Are you sure you want to remove this payment method?")) {
-      await removePaymentMethod.mutateAsync({
-        params: { path: { paymentMethodId } },
-      });
-    }
+    setAlertDialog({
+      isOpen: true,
+      title: "Remove Payment Method",
+      description: "Are you sure you want to remove this payment method?",
+      type: "confirm",
+      onConfirm: async () => {
+        await removePaymentMethod.mutateAsync({
+          params: { path: { paymentMethodId } },
+        });
+      },
+    });
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
@@ -157,92 +239,124 @@ export function AutoTopoffModal({ isOpen, onClose }: AutoTopoffModalProps) {
         <div className="flex flex-col gap-4">
           {/* Auto Top-Up Toggle */}
           <div className="flex items-center justify-between">
-            <Small className="font-semibold text-foreground">
-              Auto Top-Up
-            </Small>
-            <Switch
-              checked={enabled}
-              onCheckedChange={setEnabled}
-              disabled={!hasPaymentMethods}
-            />
+            <Small className="font-semibold text-foreground">Auto Top-Up</Small>
+            <div className="flex items-center gap-2">
+              <Small className="text-muted-foreground">
+                {enabled ? "Enabled" : "Disabled"}
+              </Small>
+              <Switch
+                checked={enabled}
+                onCheckedChange={setEnabled}
+                disabled={!hasPaymentMethods}
+              />
+            </div>
           </div>
 
           {/* Payment Methods Management */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <Small className="font-semibold text-foreground">
-                Payment Methods
-              </Small>
-              <Button
-                onClick={handleAddPaymentMethod}
-                disabled={createSetupSession.isPending}
-                variant="outline"
-                size="sm"
+          {paymentMethods && paymentMethods.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {/* Payment Method Dropdown */}
+              <Select
+                value={selectedPaymentMethod}
+                onValueChange={setSelectedPaymentMethod}
               >
-                {createSetupSession.isPending ? "Loading..." : "Add Card"}
-              </Button>
-            </div>
+                <SelectTrigger id="payment-method" className="w-full">
+                  <SelectValue placeholder="Select a payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentMethods.map((pm) => (
+                    <SelectItem key={pm.id} value={pm.id}>
+                      <div className="flex items-center gap-2">
+                        <CreditCard size={14} />
+                        <span className="capitalize">{pm.brand}</span>
+                        <span>•••• {pm.last4}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {pm.exp_month}/{pm.exp_year}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {paymentMethods && paymentMethods.length > 0 ? (
-              <div className="flex flex-col gap-2">
-                {paymentMethods.map((pm) => {
-                  const isSelected = pm.id === selectedPaymentMethod;
-                  return (
-                    <div
-                      key={pm.id}
-                      onClick={() => setSelectedPaymentMethod(pm.id)}
-                      className={`flex items-center justify-between rounded-md border p-3 cursor-pointer transition-colors ${
-                        isSelected
-                          ? "border-primary bg-primary/5"
-                          : "border-border bg-card hover:bg-muted/50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <CreditCard size={16} className="text-muted-foreground" />
-                        <div className="flex flex-col">
-                          <XSmall className="font-medium">
-                            <span className="capitalize">{pm.brand}</span> •••• {pm.last4}
-                          </XSmall>
-                          <XSmall className="text-muted-foreground">
-                            Expires {pm.exp_month}/{pm.exp_year}
-                          </XSmall>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {isSelected && (
-                          <Badge variant="default" className="text-xs">
-                            Selected
-                          </Badge>
-                        )}
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemovePaymentMethod(pm.id);
-                          }}
-                          disabled={removePaymentMethod.isPending}
-                          variant="ghost"
-                          size="sm"
+              {/* Saved Cards Accordion */}
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="saved-cards" className="border-none">
+                  <AccordionTrigger className="w-fit justify-start py-0 pt-1 hover:no-underline">
+                    <XSmall className="text-muted-foreground hover:text-foreground">
+                      Saved Cards
+                    </XSmall>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4">
+                    <div className="flex flex-col gap-2">
+                      {paymentMethods.map((pm) => (
+                        <div
+                          key={pm.id}
+                          className="flex items-center justify-between rounded-md border border-border bg-card p-2"
                         >
-                          Remove
-                        </Button>
-                      </div>
+                          <div className="flex items-center gap-2">
+                            <CreditCard
+                              size={14}
+                              className="text-muted-foreground"
+                            />
+                            <XSmall className="font-medium">
+                              <span className="capitalize">{pm.brand}</span>{" "}
+                              •••• {pm.last4}
+                            </XSmall>
+                          </div>
+                          <Button
+                            onClick={() => handleRemovePaymentMethod(pm.id)}
+                            disabled={removePaymentMethod.isPending}
+                            variant="ghost"
+                            size="sm"
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
+
+                      {/* Add Card Button */}
+                      <Button
+                        onClick={handleAddPaymentMethod}
+                        disabled={createSetupSession.isPending}
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 w-full"
+                      >
+                        {createSetupSession.isPending
+                          ? "Loading..."
+                          : "Add Card"}
+                      </Button>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <Muted className="text-xs">No payment methods saved</Muted>
-            )}
-          </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          ) : (
+            <Button
+              onClick={handleAddPaymentMethod}
+              disabled={createSetupSession.isPending}
+              variant="outline"
+              className="w-full"
+            >
+              {createSetupSession.isPending ? "Loading..." : "Add Card"}
+            </Button>
+          )}
 
           {!hasPaymentMethods ? (
             <div className="flex flex-col gap-2 rounded-md border border-border bg-muted p-3">
               <div className="flex items-start gap-2">
-                <AlertCircle size={16} className="mt-0.5 text-muted-foreground" />
+                <AlertCircle
+                  size={16}
+                  className="mt-0.5 text-muted-foreground"
+                />
                 <div className="flex flex-col gap-1">
-                  <XSmall className="font-medium">No payment method found</XSmall>
+                  <XSmall className="font-medium">
+                    No payment method found
+                  </XSmall>
                   <XSmall className="text-muted-foreground">
-                    Purchase credits first to save a payment method for auto top-up.
+                    Purchase credits first to save a payment method for auto
+                    top-up.
                   </XSmall>
                 </div>
               </div>
@@ -251,17 +365,14 @@ export function AutoTopoffModal({ isOpen, onClose }: AutoTopoffModalProps) {
             <>
               {settings?.consecutiveFailures >= 2 && (
                 <div className="flex items-start gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3">
-                  <AlertCircle
-                    size={16}
-                    className="mt-0.5 text-destructive"
-                  />
+                  <AlertCircle size={16} className="mt-0.5 text-destructive" />
                   <div className="flex flex-col gap-1">
                     <XSmall className="font-medium text-destructive">
                       Payment failures detected
                     </XSmall>
                     <XSmall className="text-destructive/80">
-                      Auto top-up has failed {settings.consecutiveFailures} times.
-                      Please check your payment method.
+                      Auto top-up has failed {settings.consecutiveFailures}{" "}
+                      times. Please check your payment method.
                     </XSmall>
                   </div>
                 </div>
@@ -271,7 +382,10 @@ export function AutoTopoffModal({ isOpen, onClose }: AutoTopoffModalProps) {
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-4">
-                      <Label htmlFor="threshold" className="text-sm whitespace-nowrap">
+                      <Label
+                        htmlFor="threshold"
+                        className="whitespace-nowrap text-sm"
+                      >
                         When balance falls below:
                       </Label>
                       <div className="flex items-center gap-1">
@@ -295,7 +409,10 @@ export function AutoTopoffModal({ isOpen, onClose }: AutoTopoffModalProps) {
 
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-4">
-                      <Label htmlFor="topoff-amount" className="text-sm whitespace-nowrap">
+                      <Label
+                        htmlFor="topoff-amount"
+                        className="whitespace-nowrap text-sm"
+                      >
                         Amount to purchase:
                       </Label>
                       <div className="flex items-center gap-1">
@@ -320,9 +437,13 @@ export function AutoTopoffModal({ isOpen, onClose }: AutoTopoffModalProps) {
 
                   {/* Rate Limit Warning */}
                   <div className="flex items-start gap-2 rounded-md border border-border bg-muted p-3">
-                    <AlertCircle size={16} className="mt-0.5 text-muted-foreground" />
+                    <AlertCircle
+                      size={16}
+                      className="mt-0.5 text-muted-foreground"
+                    />
                     <XSmall className="text-muted-foreground">
-                      For your protection, auto top-up is limited to once per hour.
+                      For your protection, auto top-up is limited to once per
+                      hour.
                     </XSmall>
                   </div>
 
@@ -351,5 +472,34 @@ export function AutoTopoffModal({ isOpen, onClose }: AutoTopoffModalProps) {
         </div>
       </DialogContent>
     </Dialog>
+
+    <AlertDialog
+      open={alertDialog.isOpen}
+      onOpenChange={(open) =>
+        !open && setAlertDialog({ ...alertDialog, isOpen: false })
+      }
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{alertDialog.title}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {alertDialog.description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          {alertDialog.type === "confirm" && (
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          )}
+          <AlertDialogAction
+            onClick={
+              alertDialog.type === "confirm" ? alertDialog.onConfirm : undefined
+            }
+          >
+            {alertDialog.type === "confirm" ? "Remove" : "OK"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
