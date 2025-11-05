@@ -107,7 +107,8 @@ export function AutoTopoffModal({ isOpen, onClose }: AutoTopoffModalProps) {
     if (paymentMethods && paymentMethods.length > 0 && !selectedPaymentMethod) {
       setSelectedPaymentMethod(paymentMethods[0].id);
     }
-  }, [paymentMethods, selectedPaymentMethod]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentMethods]); // Only run when paymentMethods changes, not when selectedPaymentMethod changes
 
   const handleSave = async () => {
     const thresholdCents = Math.round(parseFloat(threshold || "0") * 100);

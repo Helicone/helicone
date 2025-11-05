@@ -16,8 +16,13 @@ CREATE INDEX IF NOT EXISTS "organization_auto_topoff_enabled_idx"
   ON "public"."organization_auto_topoff"("enabled")
   WHERE "enabled" = true;
 
--- Note: RLS policies will be added in a future migration once auth structure is confirmed
--- For now, access is controlled via backend API endpoints
+-- Enable Row Level Security
+ALTER TABLE "public"."organization_auto_topoff" ENABLE ROW LEVEL SECURITY;
+
+
+REVOKE ALL PRIVILEGES ON TABLE "public"."organization_auto_topoff" FROM anon;
+REVOKE ALL PRIVILEGES ON TABLE "public"."organization_auto_topoff" FROM authenticated;
+REVOKE ALL PRIVILEGES ON TABLE "public"."organization_auto_topoff" FROM service_role;
 
 -- Add trigger to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_organization_auto_topoff_updated_at()
@@ -27,6 +32,11 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+
+ALTER FUNCTION public.update_organization_auto_topoff_updated_at()
+    OWNER TO postgres;
+
 
 CREATE TRIGGER update_organization_auto_topoff_updated_at
   BEFORE UPDATE ON "public"."organization_auto_topoff"

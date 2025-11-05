@@ -1558,9 +1558,14 @@ WHERE (${builtFilter.filter})`,
       // Verify payment method exists and belongs to customer
       if (org.data.stripe_customer_id) {
         try {
-          await this.stripe.paymentMethods.retrieve(
+          const paymentMethod = await this.stripe.paymentMethods.retrieve(
             settings.stripePaymentMethodId
           );
+
+          // Validate payment method belongs to this organization's customer
+          if (paymentMethod.customer !== org.data.stripe_customer_id) {
+            return err("Payment method does not belong to this organization");
+          }
         } catch (error) {
           return err("Invalid payment method");
         }

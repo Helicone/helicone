@@ -3,6 +3,15 @@ import { Database } from "../../../supabase/database.types";
 import { Result, err, ok } from "../util/results";
 import Stripe from "stripe";
 
+// Constants
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes cache for auto-topoff settings
+const RATE_LIMIT_HOURS = 1; // Minimum hours between auto top-offs
+const RATE_LIMIT_MS = RATE_LIMIT_HOURS * 60 * 60 * 1000;
+const MAX_CONSECUTIVE_FAILURES = 3; // Auto-disable after this many failures
+const STRIPE_FEE_PERCENT = 0.03; // 3% Stripe fee
+const STRIPE_FEE_FIXED_CENTS = 30; // $0.30 fixed Stripe fee
+const ENGINEERING_EMAIL = "engineering@helicone.ai";
+
 export interface AutoTopoffSettings {
   enabled: boolean;
   thresholdCents: number;
@@ -20,7 +29,7 @@ export class AutoTopoffManager {
     string,
     { data: AutoTopoffSettings | null; timestamp: number }
   > = new Map();
-  private readonly CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+  private readonly CACHE_TTL_MS = CACHE_TTL_MS;
 
   constructor(env: Env) {
     this.env = env;
@@ -29,8 +38,7 @@ export class AutoTopoffManager {
       env.SUPABASE_SERVICE_ROLE_KEY
     );
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY!, {
-      // @ts-ignore
-      apiVersion: "2025-07-30.basil",
+      apiVersion: "2024-06-20",
       httpClient: Stripe.createFetchHttpClient(),
     });
   }
@@ -132,23 +140,23 @@ export class AutoTopoffManager {
     }
 
     // Don't trigger if too many consecutive failures
-    if (settings.consecutiveFailures >= 3) {
+    if (settings.consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
       console.log(
         `Auto topoff disabled for org due to ${settings.consecutiveFailures} consecutive failures`
       );
       return false;
     }
 
-    // Don't trigger if last topoff was less than 1 hour ago (rate limiting)
-    // if (settings.lastTopoffAt) {
-    //   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    //   if (settings.lastTopoffAt > oneHourAgo) {
-    //     console.log(
-    //       `Auto topoff rate limited - last topoff was at ${settings.lastTopoffAt.toISOString()}`
-    //     );
-    //     return false;
-    //   }
-    // }
+    // Don't trigger if last topoff was less than the rate limit (rate limiting)
+    if (settings.lastTopoffAt) {
+      const rateLimitTime = new Date(Date.now() - RATE_LIMIT_MS);
+      if (settings.lastTopoffAt > rateLimitTime) {
+        console.log(
+          `Auto topoff rate limited - last topoff was at ${settings.lastTopoffAt.toISOString()}`
+        );
+        return false;
+      }
+    }
 
     return true;
   }
@@ -197,14 +205,6 @@ export class AutoTopoffManager {
         return err("No payment method configured");
       }
 
-      // Update timestamp immediately (acts as distributed lock)
-      const timestampResult = await this.updateLastTopoffTimestamp(orgId);
-      if (timestampResult.error) {
-        return err(
-          `Could not update topoff timestamp: ${timestampResult.error}`
-        );
-      }
-
       // Get customer ID from organization
       const { data: org, error: orgError } = await this.supabaseClient
         .from("organization")
@@ -221,8 +221,8 @@ export class AutoTopoffManager {
 
       // Calculate fees (same as manual purchases)
       const creditsCents = settings.topoffAmountCents;
-      const percentFee = Math.ceil(creditsCents * 0.03);
-      const fixedFeeCents = 30;
+      const percentFee = Math.ceil(creditsCents * STRIPE_FEE_PERCENT);
+      const fixedFeeCents = STRIPE_FEE_FIXED_CENTS;
       const stripeFeeCents = percentFee + fixedFeeCents;
       const totalCents = creditsCents + stripeFeeCents;
 
@@ -252,6 +252,15 @@ export class AutoTopoffManager {
       console.log(
         `Auto topoff initiated for org ${orgId}: ${creditsCents} cents + ${stripeFeeCents} cents fee = ${totalCents} cents total. PaymentIntent: ${paymentIntent.id}`
       );
+
+      // Update timestamp after successful payment creation
+      const timestampResult = await this.updateLastTopoffTimestamp(orgId);
+      if (timestampResult.error) {
+        // Log error but don't fail the operation since payment was successful
+        console.error(
+          `Warning: Could not update topoff timestamp after successful payment: ${timestampResult.error}`
+        );
+      }
 
       return ok(paymentIntent.id);
     } catch (error) {
@@ -435,10 +444,10 @@ export class AutoTopoffManager {
           </div>
 
           ${
-            settings.consecutiveFailures + 1 >= 3
+            settings.consecutiveFailures + 1 >= MAX_CONSECUTIVE_FAILURES
               ? `
           <div style="background-color: #fee2e2; padding: 16px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; color: #991b1b;"><strong>⚠️ Warning:</strong> Auto top-off will be disabled after 3 consecutive failures.</p>
+            <p style="margin: 0; color: #991b1b;"><strong>⚠️ Warning:</strong> Auto top-off will be disabled after ${MAX_CONSECUTIVE_FAILURES} consecutive failures.</p>
           </div>
           `
               : ""
@@ -471,8 +480,8 @@ Details:
 - Consecutive Failures: ${settings.consecutiveFailures + 1}
 
 ${
-  settings.consecutiveFailures + 1 >= 3
-    ? "⚠️ Warning: Auto top-off will be disabled after 3 consecutive failures.\n"
+  settings.consecutiveFailures + 1 >= MAX_CONSECUTIVE_FAILURES
+    ? `⚠️ Warning: Auto top-off will be disabled after ${MAX_CONSECUTIVE_FAILURES} consecutive failures.\n`
     : ""
 }
 
@@ -485,7 +494,7 @@ If you need assistance, please contact us at support@helicone.ai
       `;
 
       // Send email via Resend
-      const recipients = [ownerEmail, "engineering@helicone.ai"];
+      const recipients = [ownerEmail, ENGINEERING_EMAIL];
 
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
