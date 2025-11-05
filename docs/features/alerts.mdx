@@ -4,110 +4,77 @@ sidebarTitle: "Alerts"
 description: "Get notified when your LLM applications hit error thresholds or cost limits"
 ---
 
-Monitor error rates and costs to catch issues before they impact users. Helicone's alert system provides real-time notifications when your LLM applications experience problems, helping you maintain reliability and control costs.
+Helicone Alerts let you monitor error rates and costs on LLM requests to catch issues before they impact users. Each alert can be configured with filters and automatically notify through channels like Slack or email.
 
 ## Alert Types
 
-### Error Rate Alerts
-Track the percentage of failed requests over a time window. Essential for maintaining application reliability.
-
-**Use cases:**
-- Detect provider outages or rate limiting issues
-- Catch breaking changes in prompts or model behavior  
-- Monitor deployment health after updates
-- Identify patterns in user inputs causing failures
-
-**Example:** Alert when error rate exceeds 5% over 30 minutes with at least 20 requests.
-
-### Cost Alerts
-Monitor spending to prevent budget overruns and detect unusual usage patterns.
-
-**Use cases:**
-- Prevent unexpected bills from runaway processes
-- Track per-environment spending (dev/staging/prod)
-- Detect potential abuse or misconfiguration
-- Monitor cost trends for specific features or users
-
-**Example:** Alert when daily spending exceeds \$1000 or when hourly spending exceeds \$100.
+| Alert Type | Description | Use Cases |
+|------------|-------------|-----------|
+| **Error Rate** | Track the percentage of failed requests (4XX/5XX errors or timeouts) over a time window | Detect provider outages, catch breaking changes in prompts, monitor deployment health, identify patterns in user inputs causing failures |
+| **Cost** | Monitor spending to prevent budget overruns and detect unusual usage patterns | Prevent unexpected bills, track per-environment spending, detect potential abuse, monitor cost trends for specific features or users |
 
 ## Creating Alerts
 
 Navigate to **Settings → Alerts** in your Helicone dashboard to create new alerts.
 
-<Frame caption="Helicone Alerts Dashboard showing configured alerts and their status">
-  <img
-    src="/images/alerts/alert-page.webp"
-    alt="Helicone alerts dashboard with list of configured alerts"
-  />
-</Frame>
-
 <Steps>
-<Step title="Select alert type and threshold">
-  <Frame caption="Creating a new alert in Helicone">
-    <img
-      src="/images/alerts/alert-create.webp"
-      alt="Alert creation interface showing configuration options"
-    />
+<Step title="Create and Configure">
+  <Frame caption="Configuring an alert in Helicone">
+    <div style={{ width: "70%", margin: "0 auto" }}>
+      <img
+        src="/images/alerts/alert-configured.webp"
+        alt="Alert configuration interface showing metric, threshold, time window, and filter options"
+        style={{ width: "100%" }}
+      />
+    </div>
   </Frame>
   
-  **Error Rate Alerts:**
-  - Percentage threshold: 1-100% (5-10% recommended for production)
-  - Tracks ratio of failed requests to total requests
-  - Failed requests include 4xx/5xx errors and timeouts
-  
-  **Cost Alerts:**
-  - Dollar amount threshold (e.g., $50, $500, $1000)
-  - Tracks cumulative spend within time window
-  - Includes all model costs across providers
-  - Optional filters let you scope the alert to a subset of traffic (e.g provider-specific requests, or certain properties)
-</Step>
-
-<Step title="Configure time window">  
-  Choose how long to evaluate the metric:
-  
-  - **5-15 minutes**: Immediate detection, higher false positive rate
-  - **30-60 minutes**: Balanced approach (recommended for most apps)
-  - **2-4 hours**: Sustained issues only, fewer false positives
-  - **Daily/Weekly**: Budget tracking and long-term trends
-  
-  <Note>
-  Shorter windows detect issues faster but may trigger during brief spikes. Longer windows reduce noise but delay detection.
-  </Note>
-</Step>
-
-<Step title="Set minimum request threshold">
-  Prevent false positives during low traffic periods:
-  
-  - **Development**: 5-10 requests minimum
-  - **Staging**: 10-20 requests minimum  
-  - **Production**: 20-50 requests minimum
-  
-  Alerts only trigger when both the threshold AND minimum requests are met.
-  
-  <Warning>
-  Always set a minimum request count to avoid alert fatigue. A single failed request during low traffic shouldn't trigger a 100% error rate alert.
-  </Warning>
+  Select the alert type (error rate or cost), set your threshold, choose a time window, optionally add filters, and configure minimum request thresholds.
 </Step>
 
 <Step title="Configure notifications">
+  <Frame caption="Setting up alert notifications">
+    <div style={{ width: "70%", margin: "0 auto" }}>
+      <img
+        src="/images/alerts/alert-notify.webp"
+        alt="Alert notification configuration showing email and Slack options"
+        style={{ width: "100%" }}
+      />
+    </div>
+  </Frame>
+  
   Choose where alerts are sent:
   
   - **Email**: Add any email address (immediate delivery)
   - **Slack**: Select connected channels (#alerts, #engineering, etc.)
   - **Multiple recipients**: Add several emails or channels per alert
+  
+  <Tip>
+  Start with conservative thresholds (higher error %, longer windows) and tighten based on actual patterns. This prevents alert fatigue while you learn your app's normal behavior.
+  </Tip>
+</Step>
+
+<Step title="Monitor">
+  <Frame caption="Helicone Alerts Dashboard showing configured alerts and their status">
+    <img
+      src="/images/alerts/alert-page.webp"
+      alt="Helicone alerts dashboard with list of configured alerts"
+    />
+  </Frame>
+  
+  View all configured alerts, their current status, and recent trigger history in the dashboard. When an alert triggers, you can immediately see affected requests and investigate the issue.
 </Step>
 </Steps>
 
-<Tip>
-Start with conservative thresholds (higher error %, longer windows) and tighten based on actual patterns. This prevents alert fatigue while you learn your app's normal behavior.
-</Tip>
+## Configuration
 
-<Frame caption="Example of a configured cost alert">
-  <img
-    src="/images/alerts/alert-cost-configured.webp"
-    alt="Cost alert configuration showing threshold and time window settings"
-  />
-</Frame>
+Each alert can be configured with the following options:
+
+- **Metric** - Choose between error rate or cost
+- **Threshold** - Percentage for error rate (e.g., 5-10% for production), dollar amount for cost (e.g., $100, $1000)
+- **Time Frame** - Evaluation window (e.g., last 30 minutes, last 24 hours, last 30 days)
+- **Min Requests** - Optional minimum request count to prevent false positives during low traffic periods
+- **Filter** - Allows for complex alerts with full control over properties and all available metadata. Uses the same filter system as the Requests page. Examples: filter by model, token counts, custom properties, provider, endpoint, and more
 
 ## Targeted Monitoring with Filters
 
@@ -116,16 +83,6 @@ Each alert can watch a specific slice of your traffic. Use the filter builder wh
 You can also filter the Alerts list itself to quickly review production-critical rules versus experimental ones.
 
 ## Notification Channels
-
-### Dashboard
-All alerts appear in your Helicone dashboard with real-time status updates. When an alert triggers, you can immediately see affected requests and investigate the issue.
-
-<Frame caption="Alert triggered view in the dashboard">
-  <img
-    src="/images/alerts/alert-triggered.webp"
-    alt="Dashboard view when an alert has been triggered showing affected requests"
-  />
-</Frame>
 
 ### Email Notifications
 Add any email address to receive alerts. Emails include:
@@ -193,17 +150,6 @@ time_window: 7d
 notify: #dev-alerts
 ```
 
-
-## Advanced Features (Coming Soon)
-
-Soon you'll be able to create massively customizable alerts:
-
-- **Custom aggregations** - Alert on any metric (P95 latency, token usage, specific error codes)
-- **Advanced filters** - Combine multiple [custom properties](/observability/custom-properties) with AND/OR logic
-- **Complex thresholds** - Percentage changes, rolling averages, anomaly detection
-- **Custom webhooks** - Send alerts to any endpoint
-
-These features will enable precise monitoring for specific user segments, features, or any custom criteria you define.
 
 ## Related Features
 
