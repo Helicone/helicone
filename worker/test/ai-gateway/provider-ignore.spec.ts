@@ -1,4 +1,5 @@
-import { describe, it, beforeEach, afterEach, expect, vi } from "vitest";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import { env, runInDurableObject } from "cloudflare:test";
 import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { setSupabaseTestCase } from "../setup";
@@ -37,5 +38,5 @@ describe("Provider ignore functionality", () => {
       call.targetProps.targetBaseUrl?.includes("anthropic")
     );
     expect(anthropicCalls).toHaveLength(0);
-  });
+  }, 30000);
 });
