@@ -106,19 +106,12 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         context.processedLog.response.model
       );
 
-      const { body: responseBodyFinal, assets: responseBodyAssets } =
-        this.processResponseBodyImages(
-          context.message.log.response.id,
-          omittedResponseBody,
-          definedModel
-        );
+      const { body: responseBodyFinal } = this.processResponseBodyImages(
+        context.message.log.response.id,
+        omittedResponseBody,
+        definedModel
+      );
 
-      // Set processed response body
-      context.processedLog.response.assets = responseBodyAssets;
-      context.processedLog.assets = new Map([
-        ...(context.processedLog.request.assets ?? []),
-        ...(context.processedLog.response.assets ?? []),
-      ]);
       context.processedLog.response.body = responseBodyFinal;
 
       const { responseModel, model } = this.determineAssistantModel(
@@ -203,7 +196,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
             const providerModelId =
               context.message.heliconeMeta.providerModelId ??
-              (!isAIGateway ? context.processedLog.model : "") ?? "";
+              (!isAIGateway ? context.processedLog.model : "") ??
+              "";
 
             const breakdown = modelCostBreakdownFromRegistry({
               modelUsage: parsedUsage.data,
@@ -253,7 +247,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   ): ImageModelParsingResponse {
     let imageModelParsingResponse: ImageModelParsingResponse = {
       body: responseBody,
-      assets: new Map<string, string>(),
     };
 
     if (model && isResponseImageModel(model)) {

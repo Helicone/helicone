@@ -29,14 +29,12 @@ export class RequestBodyHandler extends AbstractLogHandler {
       const { body: processedBody, model: requestModel } =
         this.processRequestBody(context);
 
-      const { body: requestBodyFinal, assets: requestBodyAssets } =
-        this.processRequestBodyImages(
-          context.message.log.request.id,
-          processedBody,
-          requestModel
-        );
+      const { body: requestBodyFinal } = this.processRequestBodyImages(
+        context.message.log.request.id,
+        processedBody,
+        requestModel
+      );
 
-      context.processedLog.request.assets = requestBodyAssets;
       context.processedLog.request.body = requestBodyFinal;
       context.processedLog.request.model = requestModel;
 
@@ -58,10 +56,13 @@ export class RequestBodyHandler extends AbstractLogHandler {
       try {
         context.processedLog.request.properties = Object.entries(
           context.message.log.request.properties
-        ).reduce((acc, [key, value]) => {
-          acc[key] = this.cleanRequestBody(value);
-          return acc;
-        }, {} as Record<string, string>);
+        ).reduce(
+          (acc, [key, value]) => {
+            acc[key] = this.cleanRequestBody(value);
+            return acc;
+          },
+          {} as Record<string, string>
+        );
       } catch (error: any) {
         context.processedLog.request.properties =
           context.message.log.request.properties;

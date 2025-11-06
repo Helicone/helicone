@@ -36,7 +36,6 @@ type S3Record = {
   organizationId: string;
   requestBody: string;
   responseBody: string;
-  assets: Map<string, string>;
 };
 
 // Legacy type definitions for deleted tables
@@ -310,20 +309,7 @@ export class LoggingHandler extends AbstractLogHandler {
         );
       }
 
-      // Optionally upload assets if they exist
-      if (s3Record.assets && s3Record.assets.size > 0) {
-        const imageUploadRes = await this.storeRequestResponseImage(
-          s3Record.organizationId,
-          s3Record.requestId,
-          s3Record.assets
-        );
-
-        if (imageUploadRes.error) {
-          return err(
-            `Failed to store request response images: ${imageUploadRes.error}`
-          );
-        }
-      }
+      // Note: Assets are no longer uploaded to S3, they remain in request/response bodies
 
       return ok(`S3 upload successful for request ID ${s3Record.requestId}`);
     });
@@ -333,94 +319,6 @@ export class LoggingHandler extends AbstractLogHandler {
     // TODO: How to handle errors here?
 
     return ok("All S3 uploads successful");
-  }
-
-  private async storeRequestResponseImage(
-    organizationId: string,
-    requestId: string,
-    assets: Map<string, string>
-  ): PromiseGenericResult<string> {
-    const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
-      ([assetId, imageUrl]) =>
-        this.handleImageUpload(assetId, imageUrl, requestId, organizationId)
-    );
-
-    await Promise.allSettled(uploadPromises);
-
-    return ok("Images uploaded successfully");
-  }
-
-  private isBase64Image(imageUrl: string): boolean {
-    const MIN_BASE64_LENGTH = 24;
-    const dataUriPattern = /^\s*data:image\/[a-zA-Z]+;base64,/;
-    const base64OnlyPattern = /^[A-Za-z0-9+/=]+\s*$/;
-
-    if (dataUriPattern.test(imageUrl)) {
-      return true;
-    }
-
-    return (
-      base64OnlyPattern.test(imageUrl) && imageUrl.length >= MIN_BASE64_LENGTH
-    );
-  }
-
-  private async handleImageUpload(
-    assetId: string,
-    imageUrl: string,
-    requestId: string,
-    organizationId: string
-  ): Promise<void> {
-    try {
-      if (this.isBase64Image(imageUrl)) {
-        const [assetType, base64Data] = this.extractBase64Data(imageUrl);
-        const buffer = Buffer.from(base64Data, "base64");
-        await this.s3Client.uploadBase64ToS3(
-          buffer,
-          assetType,
-          requestId,
-          organizationId,
-          assetId
-        );
-      } else {
-        const response = await fetch(imageUrl, {
-          headers: {
-            "User-Agent": "Helicone-Worker (https://helicone.ai)",
-          },
-        });
-        if (!response.ok) {
-          throw new Error(`Failed to download image: ${response.statusText}`);
-        }
-        const blob = await response.blob();
-        await this.s3Client.uploadImageToS3(
-          blob,
-          requestId,
-          organizationId,
-          assetId
-        );
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      // If we fail to upload an image, we don't want to fail logging the request
-    }
-  }
-
-  private extractBase64Data(dataUri: string): [string, string] {
-    const dataUriRegex =
-      /^data:(image\/(?:png|jpeg|jpg|gif|webp|svg\+xml));base64,([A-Za-z0-9+/=]+)$/;
-    const base64Regex = /^([A-Za-z0-9+/=]+)$/;
-
-    let matches = dataUri.match(dataUriRegex);
-    if (matches && matches.length === 3) {
-      return [matches[1], matches[2]];
-    }
-
-    matches = dataUri.match(base64Regex);
-    if (matches && matches.length === 2) {
-      return ["image/jpeg", matches[1]];
-    }
-
-    console.error("Invalid or unsupported base64 image data:", dataUri);
-    return ["", ""];
   }
 
   async logToClickhouse(): PromiseGenericResult<string> {
@@ -460,7 +358,6 @@ export class LoggingHandler extends AbstractLogHandler {
   mapS3Records(context: HandlerContext): S3Record | null {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
-    const assets = context.processedLog.assets;
 
     if (!orgParams?.id) {
       return null;
@@ -471,31 +368,9 @@ export class LoggingHandler extends AbstractLogHandler {
       organizationId: orgParams.id,
       requestBody: context.processedLog.request.body,
       responseBody: context.processedLog.response.body,
-      assets: assets ?? new Map(),
     };
 
     return s3Record;
-  }
-
-  mapAssets(context: HandlerContext): AssetInsert[] {
-    const request = context.message.log.request;
-    const orgParams = context.orgParams;
-    const assets = context.processedLog.assets;
-
-    if (!orgParams?.id || !assets || assets.size === 0) {
-      return [];
-    }
-
-    const assetInserts: AssetInsert[] = Array.from(assets.entries()).map(
-      ([assetId]) => ({
-        id: assetId,
-        request_id: request.id,
-        organization_id: orgParams.id,
-        created_at: request.requestCreatedAt.toISOString(),
-      })
-    );
-
-    return assetInserts;
   }
 
   mapExperimentCellValues(context: HandlerContext): ExperimentCellValue | null {
@@ -600,11 +475,11 @@ export class LoggingHandler extends AbstractLogHandler {
     // set cost to zero if we cannot calculate it from the new usage processor+registry
     // rather than falling back to legacy usage cost
     if (context.message.heliconeMeta.providerModelId) {
-      rawCost = atLeastZero(
-        context.costBreakdown?.totalCost ?? 0
-      );
+      rawCost = atLeastZero(context.costBreakdown?.totalCost ?? 0);
     } else {
-      rawCost = atLeastZero(context.costBreakdown?.totalCost ?? context.legacyUsage.cost ?? 0);
+      rawCost = atLeastZero(
+        context.costBreakdown?.totalCost ?? context.legacyUsage.cost ?? 0
+      );
     }
     const cost = Math.round(rawCost * COST_PRECISION_MULTIPLIER);
 
@@ -650,9 +525,7 @@ export class LoggingHandler extends AbstractLogHandler {
         context.message.heliconeMeta.gatewayProvider ?? request.provider ?? "",
       country_code: request.countryCode ?? "",
       properties: context.processedLog.request.properties ?? {},
-      assets: context.processedLog.assets
-        ? Array.from(context.processedLog.assets.keys())
-        : [],
+      assets: [],
       scores: Object.fromEntries(
         Object.entries(context.processedLog.request.scores ?? {}).map(
           ([key, value]) => [key, +(value ?? 0)]
