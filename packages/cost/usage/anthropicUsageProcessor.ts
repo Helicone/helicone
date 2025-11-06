@@ -4,7 +4,7 @@ import { Result } from "../../common/result";
 
 export class AnthropicUsageProcessor implements IUsageProcessor {
   public async parse(
-    parseInput: ParseInput
+    parseInput: ParseInput,
   ): Promise<Result<ModelUsage, string>> {
     try {
       if (parseInput.isStream) {
@@ -21,10 +21,10 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
   }
 
   private parseNonStreamResponse(
-    responseBody: string
+    responseBody: string,
   ): Result<ModelUsage, string> {
     try {
-      const parsedResponse = JSON.parse(responseBody);
+      const parsedResponse: any = JSON.parse(responseBody);
       const usage = this.extractUsageFromResponse(parsedResponse);
 
       return {
@@ -40,7 +40,7 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
   }
 
   private parseStreamResponse(
-    responseBody: string
+    responseBody: string,
   ): Result<ModelUsage, string> {
     try {
       const lines = responseBody
@@ -94,54 +94,79 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
 
   protected extractUsageFromResponse(parsedResponse: any): ModelUsage {
     if (!parsedResponse || typeof parsedResponse !== "object") {
-      return {
-        input: 0,
-        output: 0,
-      };
+      return { input: 0, output: 0 };
     }
 
-    const usage = parsedResponse.usage || {};
+    // Case 1: Standard Anthropic response with a usage object
+    if (parsedResponse.usage && typeof parsedResponse.usage === "object") {
+      const usage = parsedResponse.usage;
+      const inputTokens = usage.input_tokens ?? 0;
+      const outputTokens = usage.output_tokens ?? 0;
+      const cacheReadInputTokens = usage.cache_read_input_tokens ?? 0;
 
-    const inputTokens = usage.input_tokens ?? 0;
-    const outputTokens = usage.output_tokens ?? 0;
-    const cacheReadInputTokens = usage.cache_read_input_tokens ?? 0;
+      const cacheCreation = usage.cache_creation || {};
+      const ephemeral5mTokens = cacheCreation.ephemeral_5m_input_tokens ?? 0;
+      const ephemeral1hTokens = cacheCreation.ephemeral_1h_input_tokens ?? 0;
 
-    const cacheCreation = usage.cache_creation || {};
-    const ephemeral5mTokens = cacheCreation.ephemeral_5m_input_tokens ?? 0;
-    const ephemeral1hTokens = cacheCreation.ephemeral_1h_input_tokens ?? 0;
+      const serverToolUse = usage.server_tool_use || {};
+      const webSearchRequests = serverToolUse.web_search_requests ?? 0;
 
-    // Extract web search usage
-    const serverToolUse = usage.server_tool_use || {};
-    const webSearchRequests = serverToolUse.web_search_requests ?? 0;
+      const modelUsage: ModelUsage = {
+        input: inputTokens,
+        output: outputTokens,
+      };
 
-    const modelUsage: ModelUsage = {
-      input: inputTokens,
-      output: outputTokens,
-    };
+      if (
+        cacheReadInputTokens > 0 ||
+        ephemeral5mTokens > 0 ||
+        ephemeral1hTokens > 0
+      ) {
+        modelUsage.cacheDetails = { cachedInput: cacheReadInputTokens };
+        if (ephemeral5mTokens > 0)
+          modelUsage.cacheDetails.write5m = ephemeral5mTokens;
+        if (ephemeral1hTokens > 0)
+          modelUsage.cacheDetails.write1h = ephemeral1hTokens;
+      }
 
+      if (webSearchRequests > 0) modelUsage.web_search = webSearchRequests;
+      return modelUsage;
+    }
+
+    // Case 2: Claude “tool-only” token summary at the root
+    // Example: { input_tokens: 12470, output_tokens?: 0, cache_read_input_tokens?: 0, cache_creation?: { ... } }
     if (
-      cacheReadInputTokens > 0 ||
-      ephemeral5mTokens > 0 ||
-      ephemeral1hTokens > 0
+      Object.prototype.hasOwnProperty.call(parsedResponse, "input_tokens") ||
+      Object.prototype.hasOwnProperty.call(parsedResponse, "output_tokens")
     ) {
-      modelUsage.cacheDetails = {
-        cachedInput: cacheReadInputTokens,
+      const inputTokens = parsedResponse.input_tokens ?? 0;
+      const outputTokens = parsedResponse.output_tokens ?? 0;
+      const cacheReadInputTokens = parsedResponse.cache_read_input_tokens ?? 0;
+
+      const cacheCreation = parsedResponse.cache_creation || {};
+      const ephemeral5mTokens = cacheCreation.ephemeral_5m_input_tokens ?? 0;
+      const ephemeral1hTokens = cacheCreation.ephemeral_1h_input_tokens ?? 0;
+
+      const modelUsage: ModelUsage = {
+        input: inputTokens,
+        output: outputTokens,
       };
 
-      if (ephemeral5mTokens > 0) {
-        modelUsage.cacheDetails.write5m = ephemeral5mTokens;
+      if (
+        cacheReadInputTokens > 0 ||
+        ephemeral5mTokens > 0 ||
+        ephemeral1hTokens > 0
+      ) {
+        modelUsage.cacheDetails = { cachedInput: cacheReadInputTokens };
+        if (ephemeral5mTokens > 0)
+          modelUsage.cacheDetails.write5m = ephemeral5mTokens;
+        if (ephemeral1hTokens > 0)
+          modelUsage.cacheDetails.write1h = ephemeral1hTokens;
       }
 
-      if (ephemeral1hTokens > 0) {
-        modelUsage.cacheDetails.write1h = ephemeral1hTokens;
-      }
+      return modelUsage;
     }
 
-    // Add web search usage if present
-    if (webSearchRequests > 0) {
-      modelUsage.web_search = webSearchRequests;
-    }
-
-    return modelUsage;
+    // Fallback: no recognizable usage
+    return { input: 0, output: 0 };
   }
 }
