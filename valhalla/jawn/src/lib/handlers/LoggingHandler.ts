@@ -307,7 +307,7 @@ export class LoggingHandler extends AbstractLogHandler {
         );
       }
 
-      // Note: Assets are no longer uploaded to S3, they remain in request/response bodies
+      // Note: Assets are no longer uploaded to S3, they remain in request/response bodies as raw data
 
       return ok(`S3 upload successful for request ID ${s3Record.requestId}`);
     });
