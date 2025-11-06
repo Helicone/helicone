@@ -307,7 +307,7 @@ export async function buildErrorMessage(
   return ok(await provider.buildErrorMessage(response));
 }
 
-function validateProvider(provider: string): provider is ModelProviderName {
+export function validateProvider(provider: string): provider is ModelProviderName {
   return provider in providers;
 }
 
