@@ -4,15 +4,6 @@ import { getModelFromRequest } from "../../utils/modelMapper";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
-export const MAX_ASSETS = 100;
-
-function truncMap(
-  map: Map<string, string>,
-  maxSize: number
-): Map<string, string> {
-  return new Map(Array.from(map.entries()).slice(0, maxSize));
-}
-
 export class RequestBodyHandler extends AbstractLogHandler {
   async handle(context: HandlerContext): PromiseGenericResult<string> {
     const start = performance.now();
