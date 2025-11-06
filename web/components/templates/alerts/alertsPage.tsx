@@ -20,6 +20,8 @@ import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import "@/styles/settings-tables.css";
 import { SettingsContainer } from "@/components/ui/settings-container";
 import "@/styles/settings.css";
+import { AlertMetric } from "@helicone-package/filters/alerts";
+import { PencilIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const AlertsPage = () => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
@@ -61,6 +63,45 @@ const AlertsPage = () => {
     return closest;
   }
 
+  function formatThreshold(metric: string, threshold: number): string {
+    if (metric === "response.status") {
+      return `${threshold}%`;
+    }
+    if (metric === "cost") {
+      return `$${Number(threshold).toFixed(2)}`;
+    }
+    // For all other metrics (latency, tokens, count), just show the number
+    return threshold.toString();
+  }
+
+  function formatAggregation(
+    metric: string,
+    aggregation: string | null,
+  ): string {
+    if (metric === "response.status") {
+      return "rate";
+    }
+    if (metric === "count") {
+      return "count";
+    }
+    return aggregation || "sum";
+  }
+
+  function formatMetric(metric: string): string {
+    const metricLabels: Record<AlertMetric, string> = {
+      "response.status": "Status",
+      cost: "Cost",
+      latency: "Latency (ms)",
+      total_tokens: "Total Tokens",
+      prompt_tokens: "Prompt Tokens",
+      completion_tokens: "Completion Tokens",
+      prompt_cache_read_tokens: "Prompt Cache Read Tokens",
+      prompt_cache_write_tokens: "Prompt Cache Write Tokens",
+      count: "Count",
+    };
+    return metricLabels[metric as AlertMetric] || metric;
+  }
+
   const handleCreateAlert = () => {
     setCreateNewAlertModal(true);
   };
@@ -89,7 +130,7 @@ const AlertsPage = () => {
   }
 
   return (
-    <SettingsContainer>
+    <SettingsContainer className="!max-w-full">
       {!canCreateAlert && (
         <div className="border-b border-border p-4">
           <FreeTierLimitBanner
@@ -104,11 +145,7 @@ const AlertsPage = () => {
       <div className="border-b border-border p-4">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex flex-col gap-1">
-            <h1 className="text-sm font-semibold">Active Alerts</h1>
-            <p className="text-xs text-muted-foreground">
-              These are the alerts that are currently active for your
-              organization
-            </p>
+            <h1 className="text-base font-semibold">Alerts</h1>
           </div>
 
           <div className="flex flex-col items-end gap-1">
@@ -119,28 +156,33 @@ const AlertsPage = () => {
                 className="text-xs"
                 onClick={handleCreateAlert}
               >
-                Create a new alert
+                <PlusIcon className="mr-1 h-4 w-4" />
+                Create
               </Button>
             </FreeTierLimitWrapper>
           </div>
         </div>
       </div>
 
-      <div className="border-b border-border">
-        <div className="settings-table border-t border-border">
+      <div className="border-b border-border overflow-x-auto">
+        <div className="settings-table border-t border-border min-w-[1200px]">
           <ThemedTable
             columns={[
+              { name: "Actions", key: "actions", hidden: false },
               { name: "Name", key: "key_name", hidden: false },
               { name: "Status", key: "status", hidden: false },
               { name: "Created", key: "created_at", hidden: false },
-              { name: "Threshold", key: "threshold", hidden: false },
               { name: "Metric", key: "metric", hidden: false },
+              { name: "Aggregation", key: "aggregation", hidden: false },
+              { name: "Threshold", key: "threshold", hidden: false },
+              { name: "Grouping", key: "grouping", hidden: false },
               { name: "Time Window", key: "time_window", hidden: false },
               {
                 name: "Min Requests",
                 key: "minimum_request_count",
                 hidden: false,
               },
+              { name: "Filter", key: "filter", hidden: false },
               { name: "Emails", key: "emails", hidden: false },
               {
                 name: "Slack Channels",
@@ -151,6 +193,33 @@ const AlertsPage = () => {
             rows={alerts?.map((key) => {
               return {
                 ...key,
+                actions: (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="inline-flex items-center rounded-md bg-muted p-1.5 text-xs text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-30 transition-colors"
+                      onClick={() => {
+                        setEditAlertOpen(true);
+                        const alertToEdit = alerts.find(
+                          (alert) => alert.id === key.id,
+                        );
+                        setSelectedAlert(alertToEdit);
+                      }}
+                    >
+                      <PencilIcon className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex items-center rounded-md bg-destructive/10 p-1.5 text-xs text-destructive shadow-sm hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-30 transition-colors"
+                      onClick={() => {
+                        setDeleteAlertOpen(true);
+                        setSelectedAlert(key);
+                      }}
+                    >
+                      <TrashIcon className="h-3 w-3" />
+                    </button>
+                  </div>
+                ),
                 key_name: <p className="text-xs font-semibold">{key.name}</p>,
                 status: (
                   <div>
@@ -175,26 +244,41 @@ const AlertsPage = () => {
                     {getUSDate(new Date(key.created_at || ""))}
                   </p>
                 ),
-                threshold: (
+                metric: (
+                  <Badge variant="helicone">
+                    {formatMetric(key.metric)}
+                  </Badge>
+                ),
+                aggregation: (
                   <p className="text-xs">
-                    {key.metric === "response.status" && (
-                      <span>{`${key.threshold}%`}</span>
-                    )}
-                    {key.metric === "cost" && (
-                      <span>{`$${Number(key.threshold).toFixed(2)}`}</span>
+                    {formatAggregation(
+                      key.metric,
+                      (key as any).aggregation as string | null,
                     )}
                   </p>
                 ),
-                metric: (
-                  <Badge variant="helicone">
-                    {key.metric === "response.status" ? "status" : key.metric}
-                  </Badge>
+                threshold: (
+                  <p className="text-xs">
+                    {formatThreshold(key.metric, key.threshold)}
+                  </p>
+                ),
+                grouping: (
+                  <p className="text-xs">
+                    {(key as any).grouping
+                      ? (key as any).grouping
+                      : "—"}
+                  </p>
                 ),
                 time_window: (
                   <p className="text-xs">{formatTimeWindow(key.time_window)}</p>
                 ),
                 minimum_request_count: (
-                  <p className="text-xs">{key.minimum_request_count}</p>
+                  <p className="text-xs">{key.minimum_request_count || 0}</p>
+                ),
+                filter: (
+                  <p className="text-xs">
+                    {key.filter ? "Yes" : "No"}
+                  </p>
                 ),
                 emails: <div className="flex">{key.emails.join(", ")}</div>,
                 slack_channels: (
@@ -211,15 +295,6 @@ const AlertsPage = () => {
                 ),
               };
             })}
-            editHandler={(row) => {
-              setEditAlertOpen(true);
-              const alertToEdit = alerts.find((alert) => alert.id === row.id);
-              setSelectedAlert(alertToEdit);
-            }}
-            deleteHandler={(row) => {
-              setDeleteAlertOpen(true);
-              setSelectedAlert(row);
-            }}
           />
         </div>
       </div>
@@ -227,10 +302,7 @@ const AlertsPage = () => {
       {/* Alert History Section */}
       <div className="border-b border-border p-4">
         <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">Alert History</h2>
-          <p className="text-xs text-muted-foreground">
-            These are the alerts that have been triggered for your organization
-          </p>
+          <h2 className="text-sm font-semibold">History</h2>
         </div>
       </div>
 
@@ -285,16 +357,10 @@ const AlertsPage = () => {
                   alertName: <p className="text-xs">{key.alert_name}</p>,
                   triggered_value: (
                     <p className="text-xs">
-                      {key.alert_metric === "response.status" && (
-                        <span>{`${key.triggered_value}%`}</span>
+                      {formatThreshold(
+                        key.alert_metric,
+                        Number(key.triggered_value),
                       )}
-                      {key.alert_metric === "cost" && (
-                        <span>{`$${key.triggered_value}`}</span>
-                      )}
-                      {key.alert_metric !== "response.status" &&
-                        key.alert_metric !== "cost" && (
-                          <span>{key.triggered_value}</span>
-                        )}
                     </p>
                   ),
                   status: (
