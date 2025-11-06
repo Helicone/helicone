@@ -1,11 +1,6 @@
-import { tryParse } from "../../utils/helpers";
-import {
-  getModelFromRequest,
-  isRequestImageModel,
-} from "../../utils/modelMapper";
-import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
-import { getRequestImageModelParser } from "../shared/imageParsers/parserMapper";
 import { PromiseGenericResult, err } from "../../packages/common/result";
+import { tryParse } from "../../utils/helpers";
+import { getModelFromRequest } from "../../utils/modelMapper";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
@@ -26,14 +21,8 @@ export class RequestBodyHandler extends AbstractLogHandler {
       start,
     });
     try {
-      const { body: processedBody, model: requestModel } =
+      const { body: requestBodyFinal, model: requestModel } =
         this.processRequestBody(context);
-
-      const { body: requestBodyFinal } = this.processRequestBodyImages(
-        context.message.log.request.id,
-        processedBody,
-        requestModel
-      );
 
       context.processedLog.request.body = requestBodyFinal;
       context.processedLog.request.model = requestModel;
@@ -149,33 +138,6 @@ export class RequestBodyHandler extends AbstractLogHandler {
       body: parsedRequestBody,
       model: requestModel,
     };
-  }
-
-  private processRequestBodyImages(
-    requestId: string,
-    requestBody: any,
-    model?: string
-  ): ImageModelParsingResponse {
-    let imageModelParsingResponse: ImageModelParsingResponse = {
-      body: requestBody,
-      assets: new Map<string, string>(),
-    };
-    if (model && isRequestImageModel(model)) {
-      const imageModelParser = getRequestImageModelParser(model, requestId);
-      if (imageModelParser) {
-        imageModelParsingResponse =
-          imageModelParser.processRequestBody(requestBody);
-      }
-    }
-
-    if (imageModelParsingResponse.assets.size > MAX_ASSETS) {
-      imageModelParsingResponse.assets = truncMap(
-        imageModelParsingResponse.assets,
-        MAX_ASSETS
-      );
-    }
-
-    return imageModelParsingResponse;
   }
 
   cleanRequestBody(requestBodyStr: string): string {
