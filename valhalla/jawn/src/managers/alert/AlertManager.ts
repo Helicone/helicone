@@ -9,6 +9,10 @@ export interface AlertRequest {
   name: string;
   metric: string;
   threshold: number;
+  aggregation: string | null;
+  percentile: number | null;
+  grouping: string | null;
+  grouping_is_property: boolean | null;
   time_window: string;
   emails: string[];
   slack_channels: string[];

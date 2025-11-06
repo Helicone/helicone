@@ -9101,6 +9101,23 @@
 						"type": "number",
 						"format": "double"
 					},
+					"aggregation": {
+						"type": "string",
+						"nullable": true
+					},
+					"percentile": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"grouping": {
+						"type": "string",
+						"nullable": true
+					},
+					"grouping_is_property": {
+						"type": "boolean",
+						"nullable": true
+					},
 					"time_window": {
 						"type": "string"
 					},
@@ -9133,6 +9150,10 @@
 					"name",
 					"metric",
 					"threshold",
+					"aggregation",
+					"percentile",
+					"grouping",
+					"grouping_is_property",
 					"time_window",
 					"emails",
 					"slack_channels",

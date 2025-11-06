@@ -3366,6 +3366,11 @@ Json: JsonObject;
       metric: string;
       /** Format: double */
       threshold: number;
+      aggregation: string | null;
+      /** Format: double */
+      percentile: number | null;
+      grouping: string | null;
+      grouping_is_property: boolean | null;
       time_window: string;
       emails: string[];
       slack_channels: string[];
