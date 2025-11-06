@@ -4,14 +4,19 @@ import { Result } from "../../packages/common/result";
 import { AlertStore } from "../../lib/stores/AlertStore";
 import { BaseManager } from "../BaseManager";
 import { FilterExpression } from "@helicone-package/filters/types";
+import {
+  AlertMetric,
+  AlertAggregation,
+  AlertGrouping,
+} from "@helicone-package/filters/alerts";
 
 export interface AlertRequest {
   name: string;
-  metric: string;
+  metric: AlertMetric;
   threshold: number;
-  aggregation: string | null;
+  aggregation: AlertAggregation | null;
   percentile: number | null;
-  grouping: string | null;
+  grouping: AlertGrouping | null;
   grouping_is_property: boolean | null;
   time_window: string;
   emails: string[];

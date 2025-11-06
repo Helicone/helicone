@@ -8787,6 +8787,48 @@
 					}
 				]
 			},
+			"AlertMetric": {
+				"type": "string",
+				"enum": [
+					"latency",
+					"cost",
+					"prompt_tokens",
+					"completion_tokens",
+					"prompt_cache_read_tokens",
+					"prompt_cache_write_tokens",
+					"total_tokens",
+					"response.status",
+					"count"
+				]
+			},
+			"AlertAggregation": {
+				"type": "string",
+				"enum": [
+					"sum",
+					"avg",
+					"min",
+					"max",
+					"percentile"
+				]
+			},
+			"AlertStandardGrouping": {
+				"type": "string",
+				"enum": [
+					"model",
+					"provider",
+					"user"
+				]
+			},
+			"AlertGrouping": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/AlertStandardGrouping"
+					},
+					{
+						"type": "string"
+					}
+				]
+			},
 			"AllExpression": {
 				"description": "Matches all records (no filtering)",
 				"properties": {
@@ -9095,14 +9137,18 @@
 						"type": "string"
 					},
 					"metric": {
-						"type": "string"
+						"$ref": "#/components/schemas/AlertMetric"
 					},
 					"threshold": {
 						"type": "number",
 						"format": "double"
 					},
 					"aggregation": {
-						"type": "string",
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AlertAggregation"
+							}
+						],
 						"nullable": true
 					},
 					"percentile": {
@@ -9111,7 +9157,11 @@
 						"nullable": true
 					},
 					"grouping": {
-						"type": "string",
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AlertGrouping"
+							}
+						],
 						"nullable": true
 					},
 					"grouping_is_property": {

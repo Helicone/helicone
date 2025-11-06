@@ -51,17 +51,24 @@ import { FilterProvider, useFilterAST } from "@/filterAST/context/filterContext"
 import { useImpersistentFilterStore } from "@/filterAST/store/filterStore";
 import FilterASTEditor from "@/filterAST/FilterASTEditor";
 import { FilterExpression } from "@helicone-package/filters/types";
-import { AlertMetric, ALERT_METRICS } from "@helicone-package/filters/alerts";
+import {
+  AlertMetric,
+  AlertAggregation,
+  AlertGrouping,
+  ALERT_METRICS,
+  ALERT_AGGREGATIONS,
+  ALERT_STANDARD_GROUPINGS,
+} from "@helicone-package/filters/alerts";
 import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "../../../lib/clients/jawn";
 
 export type AlertRequest = {
   name: string;
-  metric: string;
+  metric: AlertMetric;
   threshold: number;
-  aggregation: string | null;
+  aggregation: AlertAggregation | null;
   percentile: number | null;
-  grouping: string | null;
+  grouping: AlertGrouping | null;
   grouping_is_property: boolean | null;
   time_window: string;
   emails: string[];
@@ -93,11 +100,11 @@ const AlertFormContent = (props: AlertFormProps) => {
   const [selectedMetric, setSelectedMetric] = useState<AlertMetric>(
     (initialValues?.metric as AlertMetric) || "response.status",
   );
-  const [selectedGrouping, setSelectedGrouping] = useState<string | null>(
+  const [selectedGrouping, setSelectedGrouping] = useState<AlertGrouping | null>(
     ((initialValues as any)?.grouping as string) || null,
   );
-  const [selectedAggregation, setSelectedAggregation] = useState<string>(
-    ((initialValues as any)?.aggregation as string) || "sum",
+  const [selectedAggregation, setSelectedAggregation] = useState<AlertAggregation>(
+    ((initialValues as any)?.aggregation as AlertAggregation) || "sum",
   );
   const [groupingOpen, setGroupingOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -137,11 +144,10 @@ const AlertFormContent = (props: AlertFormProps) => {
   });
 
   const groupingOptions = useMemo(() => {
-    const baseOptions = [
-      { label: "User", value: "user" },
-      { label: "Model", value: "model" },
-      { label: "Provider", value: "provider" },
-    ];
+    const baseOptions = ALERT_STANDARD_GROUPINGS.map((grouping) => ({
+      label: grouping.charAt(0).toUpperCase() + grouping.slice(1),
+      value: grouping,
+    }));
 
     const propertyOptions =
       properties.data?.data?.map((property: { property: string }) => ({
@@ -602,17 +608,19 @@ const AlertFormContent = (props: AlertFormProps) => {
               ) : (
                 <Select
                   value={selectedAggregation}
-                  onValueChange={setSelectedAggregation}
+                  onValueChange={(value) =>
+                    setSelectedAggregation(value as AlertAggregation)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select aggregation" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="sum">Sum</SelectItem>
-                    <SelectItem value="avg">Avg</SelectItem>
-                    <SelectItem value="min">Min</SelectItem>
-                    <SelectItem value="max">Max</SelectItem>
-                    <SelectItem value="percentile">Percentile</SelectItem>
+                    {ALERT_AGGREGATIONS.map((agg) => (
+                      <SelectItem key={agg} value={agg}>
+                        {agg.charAt(0).toUpperCase() + agg.slice(1)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               )}

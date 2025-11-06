@@ -20,7 +20,10 @@ import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import "@/styles/settings-tables.css";
 import { SettingsContainer } from "@/components/ui/settings-container";
 import "@/styles/settings.css";
-import { AlertMetric } from "@helicone-package/filters/alerts";
+import {
+  AlertMetric,
+  AlertAggregation,
+} from "@helicone-package/filters/alerts";
 import { PencilIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const AlertsPage = () => {
@@ -76,7 +79,7 @@ const AlertsPage = () => {
 
   function formatAggregation(
     metric: string,
-    aggregation: string | null,
+    aggregation: AlertAggregation | null,
   ): string {
     if (metric === "response.status") {
       return "rate";
@@ -253,7 +256,7 @@ const AlertsPage = () => {
                   <p className="text-xs">
                     {formatAggregation(
                       key.metric,
-                      (key as any).aggregation as string | null,
+                      (key as any).aggregation as AlertAggregation | null,
                     )}
                   </p>
                 ),
