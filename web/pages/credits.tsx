@@ -1,17 +1,11 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
-import PaymentModal from "@/components/templates/settings/PaymentModal";
+import Header from "@/components/shared/Header";
 import { AutoTopoffModal } from "@/components/templates/settings/AutoTopoffModal";
 import { LastTopoffDetailsModal } from "@/components/templates/settings/LastTopoffDetailsModal";
-import Header from "@/components/shared/Header";
+import PaymentModal from "@/components/templates/settings/PaymentModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -19,29 +13,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Muted, Small, XSmall } from "@/components/ui/typography";
+import { Muted, XSmall } from "@/components/ui/typography";
+import { useAutoTopoffSettings } from "@/services/hooks/useAutoTopoff";
 import {
   useCredits,
   useCreditTransactions,
   type PurchasedCredits,
 } from "@/services/hooks/useCredits";
-import { useAutoTopoffSettings } from "@/services/hooks/useAutoTopoff";
 import { formatDate } from "@/utils/date";
 import {
+  AlertCircle,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
-  RefreshCcw,
-  AlertCircle,
   Clock,
-  CheckCircle,
-  XCircle,
-  Wallet,
   CreditCard,
+  RefreshCcw,
   Settings,
+  Wallet,
+  XCircle,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { ReactElement, useState } from "react";
+import { useRouter } from "next/router";
+import { ReactElement, useEffect, useState } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import { NextPageWithLayout } from "./_app";
 
@@ -53,7 +48,7 @@ const Credits: NextPageWithLayout<void> = () => {
   const [isAutoTopoffModalOpen, setIsAutoTopoffModalOpen] = useState(false);
   const [isLastTopoffModalOpen, setIsLastTopoffModalOpen] = useState(false);
 
-  const org = useOrg();
+  const router = useRouter();
 
   const {
     data: creditData,
@@ -71,6 +66,13 @@ const Credits: NextPageWithLayout<void> = () => {
     page: currentPageToken,
   });
   const { data: autoTopoffSettings } = useAutoTopoffSettings();
+
+  // Auto-open auto top-up modal when returning from Stripe setup
+  useEffect(() => {
+    if (router.query.setup === "success") {
+      setIsAutoTopoffModalOpen(true);
+    }
+  }, [router, router.query.setup]);
 
   const transactions = transactionsData?.purchases || [];
   const hasMore = transactionsData?.hasMore || false;
@@ -161,11 +163,7 @@ const Credits: NextPageWithLayout<void> = () => {
                       Add Credits
                     </Button>
                     <Link href="/requests" className="w-full">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                      >
+                      <Button variant="outline" size="sm" className="w-full">
                         View Usage
                       </Button>
                     </Link>
@@ -193,7 +191,8 @@ const Credits: NextPageWithLayout<void> = () => {
                   </CardHeader>
                   <CardContent className="flex flex-col gap-3">
                     <Muted className="text-xs">
-                      Automatically purchase credits when your balance falls below a threshold.
+                      Automatically purchase credits when your balance falls
+                      below a threshold.
                     </Muted>
 
                     {autoTopoffSettings?.enabled && (
@@ -203,12 +202,12 @@ const Credits: NextPageWithLayout<void> = () => {
                           <span>
                             Triggers at $
                             {(autoTopoffSettings.thresholdCents / 100).toFixed(
-                              0
+                              0,
                             )}{" "}
                             • Tops up $
-                            {(autoTopoffSettings.topoffAmountCents / 100).toFixed(
-                              0
-                            )}
+                            {(
+                              autoTopoffSettings.topoffAmountCents / 100
+                            ).toFixed(0)}
                           </span>
                         </div>
                         {autoTopoffSettings.lastTopoffAt && (
@@ -218,7 +217,7 @@ const Credits: NextPageWithLayout<void> = () => {
                               Last top-off:{" "}
                               <span
                                 onClick={() => setIsLastTopoffModalOpen(true)}
-                                className="underline cursor-pointer hover:text-foreground"
+                                className="cursor-pointer underline hover:text-foreground"
                               >
                                 {formatDate(autoTopoffSettings.lastTopoffAt)}
                               </span>
@@ -531,7 +530,7 @@ const Credits: NextPageWithLayout<void> = () => {
                         </Button>
                       </div>
                     )}
-                </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
