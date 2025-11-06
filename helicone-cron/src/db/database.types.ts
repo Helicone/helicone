@@ -1729,6 +1729,50 @@ export type Database = {
           },
         ]
       }
+      organization_auto_topoff: {
+        Row: {
+          consecutive_failures: number
+          created_at: string
+          enabled: boolean
+          last_topoff_at: string | null
+          organization_id: string
+          stripe_payment_method_id: string | null
+          threshold_cents: number
+          topoff_amount_cents: number
+          updated_at: string
+        }
+        Insert: {
+          consecutive_failures?: number
+          created_at?: string
+          enabled?: boolean
+          last_topoff_at?: string | null
+          organization_id: string
+          stripe_payment_method_id?: string | null
+          threshold_cents: number
+          topoff_amount_cents: number
+          updated_at?: string
+        }
+        Update: {
+          consecutive_failures?: number
+          created_at?: string
+          enabled?: boolean
+          last_topoff_at?: string | null
+          organization_id?: string
+          stripe_payment_method_id?: string | null
+          threshold_cents?: number
+          topoff_amount_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_auto_topoff_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_layout: {
         Row: {
           created_at: string

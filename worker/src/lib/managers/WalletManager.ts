@@ -11,7 +11,7 @@ import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 
 export class WalletManager {
   private env: Env;
-  private walletStub: DurableObjectStub<Wallet>;
+  walletStub: DurableObjectStub<Wallet>;
   private ctx: ExecutionContext;
 
   constructor(
