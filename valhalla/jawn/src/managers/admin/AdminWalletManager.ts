@@ -181,7 +181,9 @@ export class AdminWalletManager extends BaseManager {
     search: string,
     tokenUsageProductId: string,
     _sortBy: "total_spend",
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
+    page: number = 0,
+    pageSize: number = 100
   ): Promise<Result<DashboardData, string>> {
     const clickhouseSpendResult = await clickhouseDb.dbQuery<{
       organization_id: string;
@@ -287,9 +289,9 @@ export class AdminWalletManager extends BaseManager {
     }
 
     // Get org IDs for wallet state fetching
-    const orgIds = allOrgsResult.data.map((org) => org.org_id);
+    const allOrgIds = allOrgsResult.data.map((org) => org.org_id);
 
-    if (orgIds.length === 0) {
+    if (allOrgIds.length === 0) {
       return ok({
         organizations: [],
         isProduction: ENVIRONMENT === "production",
@@ -301,13 +303,8 @@ export class AdminWalletManager extends BaseManager {
       });
     }
 
-    // Fetch wallet states for all organizations in parallel
-    const walletStateMap = await this.fetchWalletStates(orgIds);
-
-    // Transform all orgs into the final format
+    // Transform all orgs with spend data (no wallet states yet)
     const organizations = allOrgsResult.data.map((org) => {
-      const walletState = walletStateMap.get(org.org_id) || {};
-
       return {
         orgId: org.org_id,
         orgName: org.org_name || "Unknown",
@@ -322,12 +319,6 @@ export class AdminWalletManager extends BaseManager {
         ownerEmail: org.owner_email || "Unknown",
         allowNegativeBalance: org.allow_negative_balance,
         creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0,
-        walletBalance: walletState.balance,
-        walletEffectiveBalance: walletState.effectiveBalance,
-        walletTotalCredits: walletState.totalCredits,
-        walletTotalDebits: walletState.totalDebits,
-        walletDisallowedModelCount: walletState.disallowedModelCount,
-        walletProcessedEventsCount: walletState.processedEventsCount,
       };
     });
 
@@ -338,6 +329,29 @@ export class AdminWalletManager extends BaseManager {
       } else {
         return b.clickhouseTotalSpend - a.clickhouseTotalSpend;
       }
+    });
+
+    // Apply pagination AFTER sorting to get the page we need
+    const totalOrgs = organizations.length;
+    const offset = page * pageSize;
+    const paginatedOrganizations = organizations.slice(offset, offset + pageSize);
+
+    // NOW fetch wallet states ONLY for the paginated organizations
+    const paginatedOrgIds = paginatedOrganizations.map(org => org.orgId);
+    const walletStateMap = await this.fetchWalletStates(paginatedOrgIds);
+
+    // Add wallet states to paginated organizations
+    const organizationsWithWalletStates = paginatedOrganizations.map((org) => {
+      const walletState = walletStateMap.get(org.orgId) || {};
+      return {
+        ...org,
+        walletBalance: walletState.balance,
+        walletEffectiveBalance: walletState.effectiveBalance,
+        walletTotalCredits: walletState.totalCredits,
+        walletTotalDebits: walletState.totalDebits,
+        walletDisallowedModelCount: walletState.disallowedModelCount,
+        walletProcessedEventsCount: walletState.processedEventsCount,
+      };
     });
 
     // Calculate summary
@@ -351,9 +365,9 @@ export class AdminWalletManager extends BaseManager {
     );
 
     return ok({
-      organizations,
+      organizations: organizationsWithWalletStates,
       summary: {
-        totalOrgsWithCredits: organizations.length,
+        totalOrgsWithCredits: totalOrgs,
         totalCreditsIssued,
         totalCreditsSpent,
       },
@@ -369,7 +383,9 @@ export class AdminWalletManager extends BaseManager {
       | "total_payments"
       | "credit_limit"
       | "amount_received",
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
+    page: number = 0,
+    pageSize: number = 100
   ): Promise<Result<DashboardData, string>> {
     // Build search filter
     const searchFilter = search
@@ -458,7 +474,7 @@ export class AdminWalletManager extends BaseManager {
           organization.credit_limit,
           organization.created_at
         ${orderClause}
-        LIMIT 100
+        LIMIT ${pageSize} OFFSET ${page * pageSize}
         `,
       queryParams
     );

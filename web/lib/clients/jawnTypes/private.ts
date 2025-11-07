@@ -20230,6 +20230,8 @@ export interface operations {
         search?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
+        page?: number;
+        pageSize?: number;
       };
     };
     responses: {
