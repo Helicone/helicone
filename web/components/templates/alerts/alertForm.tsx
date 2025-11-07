@@ -355,7 +355,7 @@ const AlertFormContent = (props: AlertFormProps) => {
                   <SelectContent>
                     {ALERT_METRICS.map((metric) => {
                       const metricLabels: Record<AlertMetric, string> = {
-                        "response.status": "Status",
+                        "response.status": "Status (Error Rate)",
                         cost: "Cost",
                         latency: "Latency (ms)",
                         total_tokens: "Total Tokens",
