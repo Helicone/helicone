@@ -34,6 +34,12 @@ const novitaAuthExpectations = {
   },
 };
 
+const cerebrasAuthExpectations = {
+  headers: {
+    "api-key": "test-cerebras-api-key",
+  },
+};
+
 describe("OpenAI Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -1048,6 +1054,154 @@ describe("OpenAI Registry Tests", () => {
         }));
     });
 
+    describe("gpt-oss-120b with cerebras provider", () => {
+      it("should handle cerebras provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b/cerebras",
+          expected: {
+            providers: [
+              {
+                url: "https://api.cerebras.ai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-120b",
+                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                expects: cerebrasAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with cerebras provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b/cerebras",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.cerebras.ai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-120b",
+                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                expects: {
+                  ...cerebrasAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle response format with cerebras provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b/cerebras",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Generate JSON data" }],
+              response_format: { type: "json_object" },
+              temperature: 0.1,
+              top_p: 0.9,
+              frequency_penalty: 0.5,
+              presence_penalty: 0.3,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.cerebras.ai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-120b",
+                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                expects: {
+                  ...cerebrasAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_object",
+                    "temperature",
+                    "top_p",
+                    "frequency_penalty",
+                    "presence_penalty",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters with cerebras provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b/cerebras",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test comprehensive parameters" },
+              ],
+              max_tokens: 1000,
+              temperature: 0.8,
+              top_p: 0.95,
+              stop: ["STOP"],
+              frequency_penalty: 0.2,
+              presence_penalty: 0.1,
+              seed: 12345,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.cerebras.ai/v1/chat/completions",
+                response: "success",
+                model: "openai/gpt-oss-120b",
+                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                expects: {
+                  ...cerebrasAuthExpectations,
+                  bodyContains: [
+                    "max_tokens",
+                    "temperature",
+                    "top_p",
+                    "stop",
+                    "frequency_penalty",
+                    "presence_penalty",
+                    "seed",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
     describe("gpt-oss-20b", () => {
       it("should handle groq provider", () =>
         runGatewayTest({
@@ -1376,6 +1530,89 @@ describe("OpenAI Registry Tests", () => {
       }));
   });
 
+  // Error scenarios and edge cases for gpt-oss-120b with Cerebras
+  describe("Error scenarios - gpt-oss-120b with Cerebras Provider", () => {
+    it("should handle Cerebras provider failure", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/cerebras",
+        expected: {
+          providers: [
+            {
+              url: "https://api.cerebras.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Cerebras service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Cerebras", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/cerebras",
+        expected: {
+          providers: [
+            {
+              url: "https://api.cerebras.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Cerebras", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/cerebras",
+        expected: {
+          providers: [
+            {
+              url: "https://api.cerebras.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+
+    it("should handle model not found error from Cerebras", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/cerebras",
+        expected: {
+          providers: [
+            {
+              url: "https://api.cerebras.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 404,
+              errorMessage: "Model not found",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle timeout from Cerebras", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/cerebras",
+        expected: {
+          providers: [
+            {
+              url: "https://api.cerebras.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 408,
+              errorMessage: "Request timeout",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+  });
+
   // Error scenarios and edge cases for gpt-oss-20b with Novita
   describe("Error scenarios - gpt-oss-20b with Novita Provider", () => {
     it("should handle Novita provider failure", () =>
@@ -1472,7 +1709,7 @@ describe("OpenAI Registry Tests", () => {
               model: "openai/gpt-oss-120b",
               data: createOpenAIMockResponse("openai/gpt-oss-120b"),
               expects: deepinfraAuthExpectations,
-              customVerify: (call) => {
+              customVerify: (_call) => {
                 // Verify that the URL is correctly constructed
                 // Base URL: https://api.deepinfra.com/
                 // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
@@ -1574,6 +1811,114 @@ describe("OpenAI Registry Tests", () => {
       }));
   });
 
+  // Provider URL validation and model mapping for gpt-oss-120b with Cerebras
+  describe("Provider validation - gpt-oss-120b with Cerebras", () => {
+    it("should construct correct Cerebras URL for gpt-oss-120b", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/cerebras",
+        expected: {
+          providers: [
+            {
+              url: "https://api.cerebras.ai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b",
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: cerebrasAuthExpectations,
+              customVerify: (_call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://api.cerebras.ai/
+                // Built URL: https://api.cerebras.ai/v1/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for Cerebras", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/cerebras",
+        expected: {
+          providers: [
+            {
+              url: "https://api.cerebras.ai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: cerebrasAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for Cerebras", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/cerebras",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.cerebras.ai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b",
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: {
+                ...cerebrasAuthExpectations,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle all supported parameters with Cerebras", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/cerebras",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Test comprehensive parameters" },
+            ],
+            max_tokens: 1000,
+            temperature: 0.8,
+            top_p: 0.95,
+            stop: ["STOP"],
+            frequency_penalty: 0.2,
+            presence_penalty: 0.1,
+            seed: 12345,
+            response_format: { type: "text" },
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.cerebras.ai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b",
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: {
+                ...cerebrasAuthExpectations,
+                bodyContains: [
+                  "max_tokens",
+                  "temperature",
+                  "top_p",
+                  "stop",
+                  "frequency_penalty",
+                  "presence_penalty",
+                  "seed",
+                  "response_format",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
   // Provider URL validation and model mapping for gpt-oss-20b with Novita
   describe("Provider validation - gpt-oss-20b with Novita", () => {
     it("should construct correct Novita URL for gpt-oss-20b", () =>
@@ -1587,7 +1932,7 @@ describe("OpenAI Registry Tests", () => {
               model: "openai/gpt-oss-20b",
               data: createOpenAIMockResponse("openai/gpt-oss-20b"),
               expects: novitaAuthExpectations,
-              customVerify: (call) => {
+              customVerify: (_call) => {
                 // Verify that the URL is correctly constructed
                 // Base URL: https://api.novita.ai/
                 // Built URL: https://api.novita.ai/openai/v1/chat/completions
