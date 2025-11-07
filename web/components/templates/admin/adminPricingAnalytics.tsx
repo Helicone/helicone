@@ -3,7 +3,7 @@ import { getJawnClient } from "../../../lib/clients/jawn";
 import { H2, H3, P, Small } from "@/components/ui/typography";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCw, Download, ArrowUpDown } from "lucide-react";
+import { Loader2, RefreshCw, Download, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -64,11 +64,36 @@ const AdminPricingAnalytics = () => {
   const [displayCount, setDisplayCount] = useState(100);
   const observerTarget = useRef<HTMLDivElement>(null);
 
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ArrowUpDown size={14} className="text-muted-foreground" />;
+    }
+    return sortDirection === "asc" ? (
+      <ArrowUp size={14} className="text-primary" />
+    ) : (
+      <ArrowDown size={14} className="text-primary" />
+    );
+  };
+
   const { data: segments, isLoading } = useQuery({
     queryKey: ["admin", "pricing-segments"],
     queryFn: async () => {
       const response = await jawn.GET("/v1/admin/pricing-analytics/segments");
-      return response.data?.data || [];
+      const rawData = response.data?.data || [];
+
+      // Normalize all numeric fields to actual numbers
+      const normalizedData = rawData.map((segment: any) => ({
+        ...segment,
+        seats: Number(segment.seats) || 0,
+        active_users_30d: Number(segment.active_users_30d) || 0,
+        requests_30d: Number(segment.requests_30d) || 0,
+        llm_cost_30d: Number(segment.llm_cost_30d) || 0,
+        prompts_created: Number(segment.prompts_created) || 0,
+        prompts_used_30d: Number(segment.prompts_used_30d) || 0,
+        mrr: Number(segment.mrr) || 0,
+      }));
+
+      return normalizedData;
     },
     staleTime: 60 * 60 * 1000, // 1 hour
     refetchOnWindowFocus: false,
@@ -81,15 +106,25 @@ const AdminPricingAnalytics = () => {
       const aVal = a[sortField];
       const bVal = b[sortField];
 
+      // Handle null/undefined
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return sortDirection === "asc" ? -1 : 1;
+      if (bVal == null) return sortDirection === "asc" ? 1 : -1;
+
+      // String comparison
       if (typeof aVal === "string" && typeof bVal === "string") {
         return sortDirection === "asc"
           ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
 
+      // Numeric comparison (should always be numbers now after normalization)
+      const aNum = Number(aVal);
+      const bNum = Number(bVal);
+
       return sortDirection === "asc"
-        ? (aVal as number) - (bVal as number)
-        : (bVal as number) - (aVal as number);
+        ? aNum - bNum
+        : bNum - aNum;
     });
   }, [segments, sortField, sortDirection]);
 
@@ -104,6 +139,64 @@ const AdminPricingAnalytics = () => {
       setSortDirection("desc");
     }
     setDisplayCount(100); // Reset to initial count
+  };
+
+  // Export to CSV
+  const handleExportCSV = () => {
+    if (!sortedSegments || sortedSegments.length === 0) return;
+
+    // Define CSV headers
+    const headers = [
+      "Organization",
+      "Tier",
+      "Seats",
+      "Active Users (30d)",
+      "Requests (30d)",
+      "LLM Cost (30d)",
+      "Prompts Created",
+      "Prompts Used (30d)",
+      "MRR",
+      "PTB",
+      "BYOK",
+      "Created At",
+      "Stripe Customer ID"
+    ];
+
+    // Convert data to CSV rows
+    const csvRows = [
+      headers.join(","),
+      ...sortedSegments.map(org => [
+        `"${org.name.replace(/"/g, '""')}"`, // Escape quotes in names
+        org.tier,
+        org.seats,
+        org.active_users_30d,
+        org.requests_30d,
+        org.llm_cost_30d.toFixed(2),
+        org.prompts_created,
+        org.prompts_used_30d,
+        org.mrr.toFixed(2),
+        org.is_ptb ? "Yes" : "No",
+        org.is_byok ? "Yes" : "No",
+        org.created_at,
+        `"${org.stripe_customer_id || ""}"`
+      ].join(","))
+    ];
+
+    // Create CSV content
+    const csvContent = csvRows.join("\n");
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute("download", `pricing-analytics-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Infinite scroll observer
@@ -188,13 +281,11 @@ const AdminPricingAnalytics = () => {
             <Button
               variant="default"
               size="sm"
-              onClick={() => {
-                // TODO: Implement CSV export
-                alert("Export coming soon!");
-              }}
+              onClick={handleExportCSV}
+              disabled={!segments || segments.length === 0}
             >
               <Download size={14} />
-              Export
+              Export CSV
             </Button>
           </div>
         </div>
@@ -203,103 +294,103 @@ const AdminPricingAnalytics = () => {
       {/* Scrollable Table Container */}
       <div className="flex-1 overflow-auto px-6 pt-4">
             <div className="overflow-x-auto">
-            <Table>
+            <Table className="table-fixed min-w-[1470px]">
               <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow>
-                  <TableHead onClick={() => handleSort("name")} className="cursor-pointer w-[200px]">
-                    <div className="flex items-center gap-1">
+                  <TableHead onClick={() => handleSort("name")} className="cursor-pointer w-[200px] min-w-[200px]">
+                    <div className={`flex items-center gap-1 ${sortField === "name" ? "text-primary font-semibold" : ""}`}>
                       Organization
-                      <ArrowUpDown size={14} />
+                      {getSortIcon("name")}
                     </div>
                   </TableHead>
-                  <TableHead onClick={() => handleSort("tier")} className="cursor-pointer w-[100px]">
-                    <div className="flex items-center gap-1">
+                  <TableHead onClick={() => handleSort("tier")} className="cursor-pointer w-[100px] min-w-[100px]">
+                    <div className={`flex items-center gap-1 ${sortField === "tier" ? "text-primary font-semibold" : ""}`}>
                       Tier
-                      <ArrowUpDown size={14} />
+                      {getSortIcon("tier")}
                     </div>
                   </TableHead>
-                  <TableHead onClick={() => handleSort("seats")} className="cursor-pointer text-right w-[100px]">
-                    <div className="flex items-center gap-1 justify-end">
+                  <TableHead onClick={() => handleSort("seats")} className="cursor-pointer text-right w-[100px] min-w-[100px]">
+                    <div className={`flex items-center gap-1 justify-end ${sortField === "seats" ? "text-primary font-semibold" : ""}`}>
                       Seats
-                      <ArrowUpDown size={14} />
+                      {getSortIcon("seats")}
                     </div>
                   </TableHead>
-                  <TableHead onClick={() => handleSort("active_users_30d")} className="cursor-pointer text-right w-[120px]">
-                    <div className="flex items-center gap-1 justify-end">
+                  <TableHead onClick={() => handleSort("active_users_30d")} className="cursor-pointer text-right w-[120px] min-w-[120px]">
+                    <div className={`flex items-center gap-1 justify-end ${sortField === "active_users_30d" ? "text-primary font-semibold" : ""}`}>
                       Active Users
-                      <ArrowUpDown size={14} />
+                      {getSortIcon("active_users_30d")}
                     </div>
                   </TableHead>
-                  <TableHead onClick={() => handleSort("requests_30d")} className="cursor-pointer text-right w-[150px]">
-                    <div className="flex items-center gap-1 justify-end">
+                  <TableHead onClick={() => handleSort("requests_30d")} className="cursor-pointer text-right w-[150px] min-w-[150px]">
+                    <div className={`flex items-center gap-1 justify-end ${sortField === "requests_30d" ? "text-primary font-semibold" : ""}`}>
                       Requests (30d)
-                      <ArrowUpDown size={14} />
+                      {getSortIcon("requests_30d")}
                     </div>
                   </TableHead>
-                  <TableHead onClick={() => handleSort("llm_cost_30d")} className="cursor-pointer text-right w-[150px]">
-                    <div className="flex items-center gap-1 justify-end">
+                  <TableHead onClick={() => handleSort("llm_cost_30d")} className="cursor-pointer text-right w-[150px] min-w-[150px]">
+                    <div className={`flex items-center gap-1 justify-end ${sortField === "llm_cost_30d" ? "text-primary font-semibold" : ""}`}>
                       LLM Cost (30d)
-                      <ArrowUpDown size={14} />
+                      {getSortIcon("llm_cost_30d")}
                     </div>
                   </TableHead>
-                  <TableHead onClick={() => handleSort("prompts_created")} className="cursor-pointer text-right w-[130px]">
-                    <div className="flex items-center gap-1 justify-end">
+                  <TableHead onClick={() => handleSort("prompts_created")} className="cursor-pointer text-right w-[130px] min-w-[130px]">
+                    <div className={`flex items-center gap-1 justify-end ${sortField === "prompts_created" ? "text-primary font-semibold" : ""}`}>
                       Prompts
-                      <ArrowUpDown size={14} />
+                      {getSortIcon("prompts_created")}
                     </div>
                   </TableHead>
-                  <TableHead onClick={() => handleSort("prompts_used_30d")} className="cursor-pointer text-right w-[130px]">
-                    <div className="flex items-center gap-1 justify-end">
+                  <TableHead onClick={() => handleSort("prompts_used_30d")} className="cursor-pointer text-right w-[130px] min-w-[130px]">
+                    <div className={`flex items-center gap-1 justify-end ${sortField === "prompts_used_30d" ? "text-primary font-semibold" : ""}`}>
                       Prompts Used
-                      <ArrowUpDown size={14} />
+                      {getSortIcon("prompts_used_30d")}
                     </div>
                   </TableHead>
-                  <TableHead onClick={() => handleSort("mrr")} className="cursor-pointer text-right w-[120px]">
-                    <div className="flex items-center gap-1 justify-end">
+                  <TableHead onClick={() => handleSort("mrr")} className="cursor-pointer text-right w-[120px] min-w-[120px]">
+                    <div className={`flex items-center gap-1 justify-end ${sortField === "mrr" ? "text-primary font-semibold" : ""}`}>
                       MRR
-                      <ArrowUpDown size={14} />
+                      {getSortIcon("mrr")}
                     </div>
                   </TableHead>
-                  <TableHead className="text-center w-[80px]">PTB</TableHead>
-                  <TableHead className="text-center w-[80px]">BYOK</TableHead>
+                  <TableHead className="text-center w-[80px] min-w-[80px]">PTB</TableHead>
+                  <TableHead className="text-center w-[80px] min-w-[80px]">BYOK</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {visibleSegments.map((org) => (
                   <TableRow key={org.id}>
-                    <TableCell className="font-medium w-[200px] max-w-[200px] truncate" title={org.name}>
+                    <TableCell className="font-medium w-[200px] min-w-[200px] max-w-[200px] truncate" title={org.name}>
                       {org.name}
                     </TableCell>
-                    <TableCell className="w-[100px]">
+                    <TableCell className="w-[100px] min-w-[100px]">
                       <Badge className={getTierBadgeColor(org.tier)}>
                         {org.tier}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right w-[100px]">
+                    <TableCell className="text-right w-[100px] min-w-[100px]">
                       {formatNumber(org.seats)}
                     </TableCell>
-                    <TableCell className="text-right w-[120px]">
+                    <TableCell className="text-right w-[120px] min-w-[120px]">
                       {formatNumber(org.active_users_30d)}
                     </TableCell>
-                    <TableCell className="text-right w-[150px]">
+                    <TableCell className="text-right w-[150px] min-w-[150px]">
                       {formatNumber(org.requests_30d)}
                     </TableCell>
-                    <TableCell className="text-right w-[150px]">
+                    <TableCell className="text-right w-[150px] min-w-[150px]">
                       {formatCurrency(org.llm_cost_30d)}
                     </TableCell>
-                    <TableCell className="text-right w-[130px]">
+                    <TableCell className="text-right w-[130px] min-w-[130px]">
                       {formatNumber(org.prompts_created)}
                     </TableCell>
-                    <TableCell className="text-right w-[130px]">
+                    <TableCell className="text-right w-[130px] min-w-[130px]">
                       {formatNumber(org.prompts_used_30d)}
                     </TableCell>
-                    <TableCell className="text-right w-[120px]">
+                    <TableCell className="text-right w-[120px] min-w-[120px]">
                       {formatCurrency(org.mrr)}
                     </TableCell>
-                    <TableCell className="text-center w-[80px]">
+                    <TableCell className="text-center w-[80px] min-w-[80px]">
                       {org.is_ptb ? "✓" : ""}
                     </TableCell>
-                    <TableCell className="text-center w-[80px]">
+                    <TableCell className="text-center w-[80px] min-w-[80px]">
                       {org.is_byok ? "✓" : ""}
                     </TableCell>
                   </TableRow>
