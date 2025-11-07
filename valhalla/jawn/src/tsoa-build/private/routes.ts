@@ -21748,6 +21748,8 @@ export function RegisterRoutes(app: Router) {
                 search: {"in":"query","name":"search","dataType":"string"},
                 sortBy: {"in":"query","name":"sortBy","dataType":"string"},
                 sortOrder: {"in":"query","name":"sortOrder","dataType":"union","subSchemas":[{"dataType":"enum","enums":["asc"]},{"dataType":"enum","enums":["desc"]}]},
+                page: {"in":"query","name":"page","dataType":"double"},
+                pageSize: {"in":"query","name":"pageSize","dataType":"double"},
         };
         app.post('/v1/admin/wallet/gateway/dashboard_data',
             authenticateMiddleware([{"api_key":[]}]),
