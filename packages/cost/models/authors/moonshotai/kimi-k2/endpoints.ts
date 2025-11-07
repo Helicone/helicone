@@ -121,7 +121,7 @@ export const endpoints = {
       "top_k",
       "seed",
       "min_p",
-      "response_format"
+      "response_format",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -256,6 +256,37 @@ export const endpoints = {
       "top_p",
       "functions",
       "structured_outputs",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-thinking:novita": {
+    provider: "novita",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2-thinking",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.6/1M
+        output: 0.0000025, // $2.5/1M
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "tool_choice",
+      "tools",
+      "structured_outputs",
+      "response_format"
     ],
     ptbEnabled: true,
     endpointConfigs: {

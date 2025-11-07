@@ -50,6 +50,7 @@ export type Tokenizer =
   | "Llama4"
   | "Gemini"
   | "Mistral"
+  | "MoonshotAI"
   | "Qwen"
   | "DeepSeek"
   | "Cohere"

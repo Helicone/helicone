@@ -2861,6 +2861,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "kimi-k2-thinking:novita": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-thinking",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2:groq": {
       "context": 131072,
       "crossRegion": false,
@@ -4601,6 +4624,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "novita",
     "novita",
+    "novita",
     "openrouter",
     "openrouter",
   ],
@@ -5830,8 +5854,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "novita": [
       {
-        "input": 5.7e-7,
-        "output": 0.0000023,
+        "input": 6e-7,
+        "output": 0.0000025,
         "threshold": 0,
       },
     ],
@@ -6516,6 +6540,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "kimi-k2-thinking",
+      "providers": [
+        "novita",
+      ],
+    },
+    {
       "model": "llama-3.1-8b-instant",
       "providers": [
         "groq",
@@ -6737,7 +6767,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 14,
+      "modelCount": 15,
       "provider": "novita",
     },
     {
@@ -6807,6 +6837,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "kimi-k2",
     "kimi-k2-0905",
     "kimi-k2-instruct",
+    "kimi-k2-thinking",
     "llama-3.1-8b-instant",
     "llama-3.1-8b-instruct",
     "llama-3.1-8b-instruct-turbo",
@@ -6843,9 +6874,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 196,
-  "totalModelProviderConfigs": 196,
-  "totalModelsWithPtb": 75,
+  "totalEndpoints": 197,
+  "totalModelProviderConfigs": 197,
+  "totalModelsWithPtb": 76,
   "totalProviders": 15,
 }
 `;
