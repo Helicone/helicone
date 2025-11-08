@@ -1599,9 +1599,9 @@ export interface components {
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS";
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+    ModelProviderName: "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -4530,7 +4530,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+            providerName: "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
           }) | {
             error: string;
           };

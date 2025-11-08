@@ -33,6 +33,14 @@ class TemplateVariable:
 
 
 @dataclass
+class PromptPartialVariable:
+    prompt_id: str
+    index: int
+    raw: str
+    environment: Optional[str] = None
+
+
+@dataclass
 class Prompt2025Version:
     id: str
     model: str
