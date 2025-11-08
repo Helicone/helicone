@@ -333,7 +333,7 @@ async function modifyEnvBasedOnPath(
       return {
         ...env,
         WORKER_TYPE: "GATEWAY_API",
-        GATEWAY_TARGET: "https://api.studio.nebius.com",
+        GATEWAY_TARGET: "https://api.tokenfactory.nebius.com",
       };
     } else if (hostParts[0] === "novita") {
       return {

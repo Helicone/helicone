@@ -72,8 +72,8 @@ const deepseek = /^https:\/\/api\.deepseek\.com/;
 const x = /^https:\/\/api\.x\.ai/;
 const avianPattern = /^https:\/\/api\.avian\.io/;
 
-//https://api.studio.nebius.ai
-const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
+//https://api.tokenfactory.nebius.com
+const nebius = /^https:\/\/api\.tokenfactory\.nebius\.com/;
 
 // https://ai-gateway.vercel.sh
 const vercelGateway = /^https:\/\/ai-gateway\.vercel\.sh/;

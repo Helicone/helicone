@@ -2693,7 +2693,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -2710,7 +2710,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -2733,7 +2733,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -2761,7 +2761,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -2787,7 +2787,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -2832,7 +2832,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -2878,7 +2878,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -2904,7 +2904,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -2930,7 +2930,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -2947,7 +2947,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -2971,7 +2971,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Nebius service unavailable",
@@ -2987,7 +2987,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -3003,7 +3003,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 401,
                 errorMessage: "Invalid API key",
@@ -3019,7 +3019,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 404,
                 errorMessage: "Model not found",
@@ -3035,7 +3035,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 403,
                 errorMessage: "Quota exceeded",
@@ -3051,7 +3051,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Invalid request parameters",
@@ -3067,7 +3067,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 408,
                 errorMessage: "Request timeout",
@@ -3088,7 +3088,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 422,
                 errorMessage: "Content filtering violation",
@@ -3113,7 +3113,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -3141,7 +3141,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -3163,7 +3163,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -3187,7 +3187,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -3206,15 +3206,15 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
                 expects: nebiusAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the URL is correctly constructed
-                  // Base URL: https://api.studio.nebius.com/
-                  // Built URL: https://api.studio.nebius.com/v1
+                  // Base URL: https://api.tokenfactory.nebius.com/
+                  // Built URL: https://api.tokenfactory.nebius.com/v1
                 },
               },
             ],
@@ -3228,7 +3228,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -3250,7 +3250,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Messages array cannot be empty",
@@ -3274,7 +3274,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -3299,7 +3299,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -3316,7 +3316,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Invalid JSON in request body",
@@ -3332,7 +3332,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 502,
                 errorMessage: "Bad gateway - upstream server error",
@@ -3360,7 +3360,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -3391,7 +3391,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -3422,7 +3422,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -3452,7 +3452,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen3-Coder-30B-A3B-Instruct",
                 data: createOpenAIMockResponse("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
@@ -3471,7 +3471,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3488,7 +3488,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3511,7 +3511,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3539,7 +3539,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3565,7 +3565,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3593,7 +3593,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3616,7 +3616,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3642,7 +3642,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3659,7 +3659,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3683,7 +3683,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Nebius service unavailable",
@@ -3699,7 +3699,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -3715,7 +3715,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 401,
                 errorMessage: "Invalid API key",
@@ -3731,7 +3731,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 404,
                 errorMessage: "Model not found",
@@ -3747,7 +3747,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 403,
                 errorMessage: "Quota exceeded",
@@ -3763,7 +3763,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Invalid request parameters",
@@ -3779,7 +3779,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 408,
                 errorMessage: "Request timeout",
@@ -3800,7 +3800,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 422,
                 errorMessage: "Content filtering violation",
@@ -3825,7 +3825,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3853,7 +3853,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3875,7 +3875,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -3893,15 +3893,15 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
                 expects: nebiusAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the URL is correctly constructed
-                  // Base URL: https://api.studio.nebius.com/v1/
-                  // Built URL: https://api.studio.nebius.com/v1/chat/completions
+                  // Base URL: https://api.tokenfactory.nebius.com/v1/
+                  // Built URL: https://api.tokenfactory.nebius.com/v1/chat/completions
                 },
               },
             ],
@@ -3915,7 +3915,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast", // Should map to the correct provider model ID
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3937,7 +3937,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Messages array cannot be empty",
@@ -3961,7 +3961,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -3986,7 +3986,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),
@@ -4003,7 +4003,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 400,
                 errorMessage: "Invalid JSON in request body",
@@ -4019,7 +4019,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "failure",
                 statusCode: 502,
                 errorMessage: "Bad gateway - upstream server error",
@@ -4045,7 +4045,7 @@ describe("Alibaba Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "Qwen/Qwen2.5-Coder-7B-fast",
                 data: createOpenAIMockResponse("Qwen/Qwen2.5-Coder-7B-fast"),

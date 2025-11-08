@@ -1,4 +1,4 @@
 {
-  "title": "Nebius AI + Helicone",
-  "description": "Introducing the integration of Nebius AI with Helicone's observability platform. This integration enables comprehensive monitoring and analytics for Nebius's powerful image generation models, including Flux and Stability AI's SDXL. Leverage Helicone's advanced observability features to track costs, monitor performance, and optimize your Nebius AI implementations while maintaining full visibility into your model interactions and usage patterns."
+  "title": "Nebius Token Factory + Helicone",
+  "description": "Introducing the integration of Nebius Token Factory with Helicone's observability platform. This integration enables comprehensive monitoring and analytics for Nebius's powerful AI models including text and multimodal models (Deepseek R1/V3, Llama-3.3-70B, Mistral-Nemo, Qwen2.5-72B, QwQ-32B, Gemma-2-27B, GPT OSS), embeddings and guardrails (BAAI/bge models, E5-mistral, Llama-Guard-3-8B, Qwen3-Embedding), and text-to-image models (Flux, SDXL). Leverage Helicone's advanced observability features to track costs, monitor performance, and optimize your Nebius Token Factory implementations while maintaining full visibility into your model interactions and usage patterns."
 }
