@@ -26,13 +26,18 @@
             "pages": [
               "gateway/overview",
               "gateway/provider-routing",
+              "gateway/prompt-integration",
               "features/advanced-usage/caching",
               "features/advanced-usage/custom-rate-limits",
-              "gateway/prompt-integration",
               "features/advanced-usage/llm-security",
-              "gateway/concepts/prompt-caching",
-              "gateway/web-search",
-              "gateway/concepts/error-handling",
+              {
+                "group": "Provider Concepts",
+                "pages": [
+                  "gateway/concepts/prompt-caching",
+                  "gateway/web-search",
+                  "gateway/concepts/error-handling"
+                ]
+              },
               {
                 "group": "Integrations",
                 "pages": [
@@ -54,7 +59,21 @@
               "features/datasets",
               "features/alerts",
               "features/reports",
-              "features/hql"
+              "features/hql",
+              {
+                "group": "Tools",
+                "pages": [
+                  "integrations/tools/curl",
+                  "integrations/tools/logger-sdk"
+                ]
+              },
+              {
+                "group": "Vector DB",
+                "pages": [
+                  "integrations/vectordb/curl",
+                  "integrations/vectordb/logger-sdk"
+                ]
+              }
             ]
           },
           {
@@ -225,20 +244,6 @@
                     "pages": [
                       "integrations/data/logger-sdk",
                       "integrations/data/curl"
-                    ]
-                  },
-                  {
-                    "group": "Tools",
-                    "pages": [
-                      "integrations/tools/curl",
-                      "integrations/tools/logger-sdk"
-                    ]
-                  },
-                  {
-                    "group": "Vector DB",
-                    "pages": [
-                      "integrations/vectordb/curl",
-                      "integrations/vectordb/logger-sdk"
                     ]
                   }
                 ]
