@@ -1,8 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart, Select, SelectItem } from "@tremor/react";
+import { BarChart } from "@tremor/react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrg } from "../../layout/org/organizationContext";
+import { H1, H2 } from "@/components/ui/typography";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface AdminStatsProps {}
 
@@ -45,39 +54,51 @@ const AdminMetrics = (props: AdminStatsProps) => {
     },
   });
   return (
-    <div className="flex flex-col space-y-4">
-      <h1 className="text-2xl font-semibold">Admin Metrics</h1>
-      <div className="flex flex-col space-y-4">
-        <div className="flex flex-col space-y-4">
-          <h2 className="text-xl font-semibold">Time Filter</h2>
+    <div className="flex flex-col gap-8 p-4 md:p-6">
+      <H1>Admin Metrics</H1>
+
+      <div className="flex flex-col gap-4 md:flex-row md:gap-6">
+        <div className="flex flex-col gap-2 flex-1 md:max-w-xs">
+          <Label className="font-semibold">Time Filter</Label>
           <Select
             value={timeFilter}
             onValueChange={(value) => setTimeFilter(value as any)}
           >
-            {timeFilters.map((timeFilter) => (
-              <SelectItem value={timeFilter} key={timeFilter}>
-                {timeFilter}
-              </SelectItem>
-            ))}
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {timeFilters.map((timeFilter) => (
+                <SelectItem value={timeFilter} key={timeFilter}>
+                  {timeFilter}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
-        <div className="flex flex-col space-y-4">
-          <h2 className="text-xl font-semibold">Group By</h2>
+
+        <div className="flex flex-col gap-2 flex-1 md:max-w-xs">
+          <Label className="font-semibold">Group By</Label>
           <Select
             value={groupBy}
             onValueChange={(value) => setGroupBy(value as any)}
           >
-            {groupBys.map((groupBy) => (
-              <SelectItem value={groupBy} key={groupBy}>
-                {groupBy}
-              </SelectItem>
-            ))}
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {groupBys.map((groupBy) => (
+                <SelectItem value={groupBy} key={groupBy}>
+                  {groupBy}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
       </div>
-      <ul className="flex max-w-6xl flex-col space-y-8">
-        <li className="bg-gray-5000 flex h-full w-full flex-col space-y-4 rounded-lg p-4">
-          <h2 className="text-xl font-semibold">Orgs Over Time</h2>
+      <div className="flex max-w-6xl flex-col gap-6">
+        <div className="flex h-full w-full flex-col gap-4 rounded-lg border border-border bg-card p-6 shadow-sm">
+          <H2>Orgs Over Time</H2>
           <BarChart
             data={
               metricsOverTime.data?.newOrgsOvertime.map((ot) => ({
@@ -89,11 +110,12 @@ const AdminMetrics = (props: AdminStatsProps) => {
             index={"day"}
             showYAxis={true}
           />
-        </li>
-        <li className="bg-gray-5000 flex h-full w-full flex-col space-y-4 rounded-lg p-4">
-          <h2 className="text-xl font-semibold">
+        </div>
+
+        <div className="flex h-full w-full flex-col gap-4 rounded-lg border border-border bg-card p-6 shadow-sm">
+          <H2>
             New Users/{groupBy} (Since {timeFilter} ago)
-          </h2>
+          </H2>
           <BarChart
             data={
               metricsOverTime.data?.newUsersOvertime.map((ot) => ({
@@ -105,9 +127,10 @@ const AdminMetrics = (props: AdminStatsProps) => {
             index={"day"}
             showYAxis={true}
           />
-        </li>
-        <li className="bg-gray-5000 flex h-full w-full flex-col space-y-4 rounded-lg p-4">
-          <h2 className="text-xl font-semibold">Users Over Time</h2>
+        </div>
+
+        <div className="flex h-full w-full flex-col gap-4 rounded-lg border border-border bg-card p-6 shadow-sm">
+          <H2>Users Over Time</H2>
           <BarChart
             data={
               metricsOverTime.data?.usersOverTime.map((ot) => ({
@@ -119,8 +142,8 @@ const AdminMetrics = (props: AdminStatsProps) => {
             index={"day"}
             showYAxis={true}
           />
-        </li>
-      </ul>
+        </div>
+      </div>
     </div>
   );
 };
