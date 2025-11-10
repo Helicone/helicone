@@ -57,6 +57,8 @@ export function heliconeProviderToModelProviderName(
       return "nebius";
     case "CHUTES":
       return "chutes";
+    case "CEREBRAS":
+      return "cerebras";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -308,7 +310,7 @@ export async function buildErrorMessage(
   return ok(await provider.buildErrorMessage(response));
 }
 
-function validateProvider(provider: string): provider is ModelProviderName {
+export function validateProvider(provider: string): provider is ModelProviderName {
   return provider in providers;
 }
 

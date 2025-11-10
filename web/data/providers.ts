@@ -225,6 +225,16 @@ export const providers: Provider[] = [
     relevanceScore: 10,
   },
   {
+    id: "cerebras",
+    name: "Cerebras",
+    logoUrl: "/assets/home/providers/cerebras.webp",
+    description: "Configure your Cerebras API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Cerebras API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 7,
+  },
+  {
     id: "nebius",
     name: "Nebius",
     logoUrl: "/assets/home/providers/nebius.webp",

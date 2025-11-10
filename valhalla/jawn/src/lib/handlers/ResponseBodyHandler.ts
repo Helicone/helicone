@@ -1,35 +1,3 @@
-import {
-  calculateModel,
-  getModelFromResponse,
-  isResponseImageModel,
-} from "../../utils/modelMapper";
-import {
-  IBodyProcessor,
-  ParseOutput,
-} from "../shared/bodyProcessors/IBodyProcessor";
-import { AnthropicBodyProcessor } from "../shared/bodyProcessors/anthropicBodyProcessor";
-import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropicStreamBodyProcessor";
-import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
-import { LlamaBodyProcessor } from "../shared/bodyProcessors/llamaBodyProcessor";
-import { LlamaStreamBodyProcessor } from "../shared/bodyProcessors/llamaStreamBodyProcessor";
-import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
-import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
-import { GroqStreamProcessor } from "../shared/bodyProcessors/groqStreamProcessor";
-import { BedrockStreamProcessor } from "../shared/bodyProcessors/bedrockStreamProcessor";
-import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
-import { TogetherAIStreamProcessor } from "../shared/bodyProcessors/togetherAIStreamProcessor";
-import { VercelBodyProcessor } from "../shared/bodyProcessors/vercelBodyProcessor";
-import { VercelStreamProcessor } from "../shared/bodyProcessors/vercelStreamProcessor";
-import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
-import { getResponseImageModelParser } from "../shared/imageParsers/parserMapper";
-import {
-  PromiseGenericResult,
-  Result,
-  err,
-  ok,
-} from "../../packages/common/result";
-import { AbstractLogHandler } from "./AbstractLogHandler";
-import { HandlerContext } from "./HandlerContext";
 import { getUsageProcessor } from "@helicone-package/cost";
 import {
   modelCost,
@@ -38,6 +6,32 @@ import {
 import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
 import { IUsageProcessor } from "@helicone-package/cost/usage/IUsageProcessor";
 import { OpenAIUsageProcessor } from "@helicone-package/cost/usage/openAIUsageProcessor";
+import {
+  PromiseGenericResult,
+  Result,
+  err,
+  ok,
+} from "../../packages/common/result";
+import { calculateModel, getModelFromResponse } from "../../utils/modelMapper";
+import {
+  IBodyProcessor,
+  ParseOutput,
+} from "../shared/bodyProcessors/IBodyProcessor";
+import { AnthropicBodyProcessor } from "../shared/bodyProcessors/anthropicBodyProcessor";
+import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropicStreamBodyProcessor";
+import { BedrockStreamProcessor } from "../shared/bodyProcessors/bedrockStreamProcessor";
+import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
+import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
+import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
+import { GroqStreamProcessor } from "../shared/bodyProcessors/groqStreamProcessor";
+import { LlamaBodyProcessor } from "../shared/bodyProcessors/llamaBodyProcessor";
+import { LlamaStreamBodyProcessor } from "../shared/bodyProcessors/llamaStreamBodyProcessor";
+import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
+import { TogetherAIStreamProcessor } from "../shared/bodyProcessors/togetherAIStreamProcessor";
+import { VercelBodyProcessor } from "../shared/bodyProcessors/vercelBodyProcessor";
+import { VercelStreamProcessor } from "../shared/bodyProcessors/vercelStreamProcessor";
+import { AbstractLogHandler } from "./AbstractLogHandler";
+import { HandlerContext } from "./HandlerContext";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -100,25 +94,12 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       if (typeof context.processedLog.response.model !== "string") {
         context.processedLog.response.model = "unknown";
       }
-      const omittedResponseBody = this.handleOmitResponseBody(
+      const responseBodyFinal = this.handleOmitResponseBody(
         context,
         processedResponseBody,
         context.processedLog.response.model
       );
 
-      const { body: responseBodyFinal, assets: responseBodyAssets } =
-        this.processResponseBodyImages(
-          context.message.log.response.id,
-          omittedResponseBody,
-          definedModel
-        );
-
-      // Set processed response body
-      context.processedLog.response.assets = responseBodyAssets;
-      context.processedLog.assets = new Map([
-        ...(context.processedLog.request.assets ?? []),
-        ...(context.processedLog.response.assets ?? []),
-      ]);
       context.processedLog.response.body = responseBodyFinal;
 
       const { responseModel, model } = this.determineAssistantModel(
@@ -203,7 +184,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
             const providerModelId =
               context.message.heliconeMeta.providerModelId ??
-              (!isAIGateway ? context.processedLog.model : "") ?? "";
+              (!isAIGateway ? context.processedLog.model : "") ??
+              "";
 
             const breakdown = modelCostBreakdownFromRegistry({
               modelUsage: parsedUsage.data,
@@ -245,26 +227,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     }
 
     return "";
-  }
-  private processResponseBodyImages(
-    responseId: string,
-    responseBody: any,
-    model?: string
-  ): ImageModelParsingResponse {
-    let imageModelParsingResponse: ImageModelParsingResponse = {
-      body: responseBody,
-      assets: new Map<string, string>(),
-    };
-
-    if (model && isResponseImageModel(model)) {
-      const imageModelParser = getResponseImageModelParser(model, responseId);
-      if (imageModelParser) {
-        imageModelParsingResponse =
-          imageModelParser.processResponseBody(responseBody);
-      }
-    }
-
-    return imageModelParsingResponse;
   }
 
   private handleOmitResponseBody(

@@ -440,16 +440,4 @@ export class AttemptExecutor {
       console.error(`Failed to cancel escrow ${escrowId}:`, error);
     }
   }
-
-  private async getTotalDebits(orgId: string): Promise<number> {
-    try {
-      const walletId = this.env.WALLET.idFromName(orgId);
-      const walletStub = this.env.WALLET.get(walletId);
-      const result = await walletStub.getTotalDebits(orgId);
-      return result.totalDebits;
-    } catch (error) {
-      console.error(`Failed to get total debits for org ${orgId}:`, error);
-      return 0;
-    }
-  }
 }

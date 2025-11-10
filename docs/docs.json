@@ -68,19 +68,21 @@
               "features/datasets",
               "features/alerts",
               "features/reports",
-              "features/hql"
-            ]
-          },
-          {
-            "group": "Prompt Management",
-            "pages": [
-              "features/advanced-usage/prompts",
+              "features/hql",
               "features/advanced-usage/scores",
               "features/advanced-usage/feedback",
               {
                 "group": "Webhooks",
                 "pages": ["features/webhooks", "features/webhooks-testing"]
               }
+            ]
+          },
+          {
+            "group": "Prompt Management",
+            "pages": [
+              "features/advanced-usage/prompts/overview",
+              "features/advanced-usage/prompts/assembly",
+              "features/advanced-usage/prompts/sdk"
             ]
           },
           {
@@ -242,7 +244,8 @@
                 "group": "Tools",
                 "pages": [
                   "integrations/tools/curl",
-                  "integrations/tools/logger-sdk"
+                  "integrations/tools/logger-sdk",
+                  "integrations/tools/xcode"
                 ]
               },
               {
@@ -372,7 +375,7 @@
           {
             "group": "Models",
             "pages": [
-              "rest/models/get-v1models",
+              "rest/ai-gateway/get-v1models",
               "rest/models/get-v1public-model-registry-models"
             ]
           }
@@ -673,6 +676,10 @@
     {
       "source": "/ai-gateway/prompt-integration",
       "destination": "/gateway/prompt-integration"
+    },
+    {
+      "source": "/features/advanced-usage/prompts",
+      "destination": "/features/advanced-usage/prompts/overview"
     }
   ]
 }

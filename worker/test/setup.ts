@@ -238,6 +238,15 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
+          cerebras: {
+            org_id: "test-org-id",
+            provider_name: "cerebras",
+            decrypted_provider_key: "test-cerebras-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
           openrouter: {
             org_id: "test-org-id",
             provider_name: "openrouter",

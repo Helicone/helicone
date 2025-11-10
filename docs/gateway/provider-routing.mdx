@@ -113,18 +113,43 @@ The gateway only tries providers where you've configured API keys. See [Provider
   
   <Tab title="Fallback Chain">
     **Format:** `model: "model1,model2,model3"`
-    
+
     **Best for:**
     - Custom deployments that need fallbacks
     - Full control over fallback sequence
     - Mixing specific providers in exact order
     - Compliance with backup options
-    
+
     **How it works:**
     Tries each model/provider in your exact order. Unlike automatic routing, YOU control the sequence.
-    
+
     **Example scenario:**
     Your primary Azure EU deployment for compliance, but need fallbacks: `"gpt-4o/azure/eu-deployment,gpt-4o/azure/us-deployment,gpt-4o/openai"`.
+  </Tab>
+
+  <Tab title="Provider Ignore">
+    **Format:** `model: "!providerName,gpt-4o-mini"`
+
+    **Best for:**
+    - Excluding specific providers from automatic routing
+    - Avoiding providers with known issues
+    - Testing without certain providers
+    - Compliance restrictions against specific providers
+
+    **How it works:**
+    Use the `!` prefix to exclude specific providers from automatic routing. The gateway will try all other available providers except those you've ignored. You can ignore multiple providers by chaining them with commas.
+
+    **Examples:**
+    ```typescript
+    // Ignore a single provider
+    model: "!anthropic,gpt-4o-mini"
+
+    // Ignore multiple providers
+    model: "!anthropic,!deepinfra,gpt-4o-mini"
+    ```
+
+    **Example scenario:**
+    You know OpenAI is having issues today, so you want automatic routing but specifically avoid OpenAI: `"!openai,gpt-4o-mini"`. The gateway tries Azure, AWS Bedrock, and other providers instead.
   </Tab>
 </Tabs>
 
@@ -260,6 +285,20 @@ await client.chat.completions.create({
 ```
 
 **What happens:** Requests ONLY go through your Frankfurt deployment. No data leaves the EU.
+
+### Scenario: Avoiding Provider Issues
+
+You notice one provider is experiencing higher latency or errors today.
+
+```typescript
+// Exclude the problematic provider from automatic routing
+const response = await client.chat.completions.create({
+  model: "!openai,gpt-4o-mini",
+  messages: [{ role: "user", content: "Analyze this data" }]
+});
+```
+
+**What happens:** Gateway automatically routes to all available providers except OpenAI. If you also want to exclude another provider, use `"!openai,!anthropic,gpt-4o-mini"`.
 
 ## Next Steps
 

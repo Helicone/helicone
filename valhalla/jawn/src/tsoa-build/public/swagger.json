@@ -6049,6 +6049,108 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"AutoTopoffSettings": {
+				"properties": {
+					"enabled": {
+						"type": "boolean"
+					},
+					"thresholdCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"topoffAmountCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"stripePaymentMethodId": {
+						"type": "string",
+						"nullable": true
+					},
+					"lastTopoffAt": {
+						"type": "string",
+						"nullable": true
+					},
+					"consecutiveFailures": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"enabled",
+					"thresholdCents",
+					"topoffAmountCents",
+					"stripePaymentMethodId",
+					"lastTopoffAt",
+					"consecutiveFailures"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateAutoTopoffSettingsRequest": {
+				"properties": {
+					"enabled": {
+						"type": "boolean"
+					},
+					"thresholdCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"topoffAmountCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"stripePaymentMethodId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"enabled",
+					"thresholdCents",
+					"topoffAmountCents",
+					"stripePaymentMethodId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaymentMethod": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"brand": {
+						"type": "string"
+					},
+					"last4": {
+						"type": "string"
+					},
+					"exp_month": {
+						"type": "number",
+						"format": "double"
+					},
+					"exp_year": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"brand",
+					"last4",
+					"exp_month",
+					"exp_year"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateSetupSessionRequest": {
+				"properties": {
+					"returnUrl": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IntegrationCreateParams": {
 				"properties": {
 					"integration_name": {
@@ -18401,6 +18503,219 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/stripe/auto-topoff/settings": {
+			"get": {
+				"operationId": "GetAutoTopoffSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/AutoTopoffSettings"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "UpdateAutoTopoffSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AutoTopoffSettings"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateAutoTopoffSettingsRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DisableAutoTopoff",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/payment-methods": {
+			"get": {
+				"operationId": "GetPaymentMethods",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/PaymentMethod"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/payment-methods/setup-session": {
+			"post": {
+				"operationId": "CreateSetupSession",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"setupUrl": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"setupUrl"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSetupSessionRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/stripe/payment-methods/{paymentMethodId}": {
+			"delete": {
+				"operationId": "RemovePaymentMethod",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "paymentMethodId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/integration": {

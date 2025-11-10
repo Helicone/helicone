@@ -40,7 +40,8 @@ export class AttemptBuilder {
     modelStrings: string[],
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    globalIgnoreProviders?: Set<ModelProviderName>
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
 
@@ -69,11 +70,19 @@ export class AttemptBuilder {
           modelSpec.data,
           orgId,
           bodyMapping,
-          plugins
+          plugins,
+          globalIgnoreProviders
         );
         const sortedAttempts = sortAttemptsByPriority(attempts);
         allAttempts.push(...sortedAttempts);
       }
+    }
+
+    // Filter explicit provider routing attempts (not filtered in buildAttemptsForAllProviders)
+    if (globalIgnoreProviders && globalIgnoreProviders.size > 0) {
+      return allAttempts.filter(
+        (attempt) => !globalIgnoreProviders.has(attempt.endpoint.provider)
+      );
     }
 
     return allAttempts;
@@ -83,15 +92,19 @@ export class AttemptBuilder {
     modelSpec: ModelSpec,
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    globalIgnoreProviders?: Set<ModelProviderName>
   ): Promise<Attempt[]> {
     // Get all provider data in one query
     const providerDataResult = registry.getModelProviderEntriesByModel(
       modelSpec.modelName
     );
     // Filter out providers that require explicit routing (e.g., helicone)
+    // and globally ignored providers
     const providerData = (providerDataResult.data || []).filter(
-      (data) => !data.config.requireExplicitRouting
+      (data) =>
+        !data.config.requireExplicitRouting &&
+        (!globalIgnoreProviders || !globalIgnoreProviders.has(data.provider))
     );
 
     // Process all providers in parallel (we know model exists because parseModelString validated it)
@@ -122,6 +135,7 @@ export class AttemptBuilder {
         const ptbAttempts = await this.buildPtbAttempts(
           modelSpec,
           data,
+          bodyMapping,
           plugins
         );
         return [...byokAttempts, ...ptbAttempts];
@@ -170,6 +184,7 @@ export class AttemptBuilder {
     const ptbAttempts = await this.buildPtbAttempts(
       modelSpec,
       providerData,
+      bodyMapping,
       plugins
     );
     return [...byokAttempts, ...ptbAttempts];
@@ -300,6 +315,7 @@ export class AttemptBuilder {
   private async buildPtbAttempts(
     modelSpec: ModelSpec,
     providerData: ModelProviderEntry,
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Check if we have PTB endpoints
@@ -346,6 +362,7 @@ export class AttemptBuilder {
       providerData.provider,
       providerData.ptbEndpoints,
       heliconeKey,
+      bodyMapping,
       processedPlugins
     );
   }
@@ -355,6 +372,7 @@ export class AttemptBuilder {
     provider: ModelProviderName,
     endpoints: Endpoint[],
     providerKey: ProviderKey,
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Attempt[] {
     // This is where dynamically injected config is applied
@@ -366,6 +384,7 @@ export class AttemptBuilder {
           projectId:
             (providerKey.config as UserEndpointConfig)?.projectId ||
             endpoint.userConfig.projectId,
+          gatewayMapping: bodyMapping,
         },
       };
     });

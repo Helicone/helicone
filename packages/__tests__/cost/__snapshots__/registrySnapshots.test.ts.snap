@@ -3984,6 +3984,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/oss": {
+    "gpt-oss-120b:cerebras": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 40000,
+      "modelId": "openai/gpt-oss-120b",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "cerebras",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-oss-120b:deepinfra": {
       "context": 131072,
       "crossRegion": false,
@@ -4700,6 +4724,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/oss": [
+    "cerebras",
     "deepinfra",
     "groq",
     "groq",
@@ -6086,6 +6111,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "openai/oss": {
+    "cerebras": [
+      {
+        "input": 3.5e-7,
+        "output": 7.5e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "audio": 0,
@@ -6472,6 +6504,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-oss-120b",
       "providers": [
+        "cerebras",
         "deepinfra",
         "groq",
         "openrouter",
@@ -6753,6 +6786,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
+      "modelCount": 1,
+      "provider": "cerebras",
+    },
+    {
       "modelCount": 2,
       "provider": "chutes",
     },
@@ -6892,9 +6929,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 197,
-  "totalModelProviderConfigs": 197,
+  "totalEndpoints": 198,
+  "totalModelProviderConfigs": 198,
   "totalModelsWithPtb": 76,
-  "totalProviders": 16,
+  "totalProviders": 17,
 }
 `;

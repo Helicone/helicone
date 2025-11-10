@@ -9,11 +9,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { logger } from "@/lib/telemetry/logger";
 import { Input } from "@/components/ui/input";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { cn } from "@/lib/utils";
-import { LLMRequestBody } from "@helicone-package/llm-mapper/types";
 import {
   DocumentTextIcon,
   EyeIcon,
@@ -23,11 +21,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { PiPlusBold, PiSpinnerGapBold } from "react-icons/pi";
-import {
-  useCreatePrompt,
-  usePrompts,
-} from "../../../services/hooks/prompts/prompts";
+import { PiPlusBold } from "react-icons/pi";
+import { usePrompts } from "../../../services/hooks/prompts/prompts";
 import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { SimpleTable } from "../../shared/table/simpleTable";
@@ -48,7 +43,6 @@ const PromptsPage = (props: PromptsPageProps) => {
   const { prompts, isLoading, refetch } = usePrompts();
   const [searchName, setSearchName] = useState<string>("");
   const router = useRouter();
-  const { createPrompt, isCreating } = useCreatePrompt();
   const searchParams = useSearchParams();
   const promptCount = prompts?.length ?? 0;
   const { canCreate, freeLimit } = useFeatureLimit("prompts", promptCount);
@@ -56,44 +50,13 @@ const PromptsPage = (props: PromptsPageProps) => {
     prompt.user_defined_id.toLowerCase().includes(searchName.toLowerCase()),
   );
 
-  const handleCreatePrompt = async () => {
-    try {
-      const basePrompt: LLMRequestBody = {
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            _type: "message",
-            role: "system",
-            content: "You are a helpful assistant.",
-          },
-          {
-            _type: "message",
-            role: "user",
-            content: 'What is 2+<helicone-prompt-input key="number" />?',
-          },
-        ],
-      };
-      const metadata = {
-        provider: "OPENAI",
-        createdFromUi: true,
-      };
-
-      const newPrompt = await createPrompt(basePrompt, metadata);
-      if (newPrompt?.id) {
-        router.push(`/prompts/${newPrompt.id}`);
-      }
-    } catch (error) {
-      logger.error({ error }, "Error creating prompt");
-    }
-  };
-
   if (!isLoading && promptCount === 0) {
     return (
       <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
         <div className="flex h-full flex-1">
           <EmptyStateCard
             feature="prompts"
-            onPrimaryClick={handleCreatePrompt}
+            onPrimaryClick={() => router.push("/playground")}
           />
         </div>
       </div>
@@ -110,15 +73,10 @@ const PromptsPage = (props: PromptsPageProps) => {
             <FreeTierLimitWrapper feature="prompts" itemCount={promptCount}>
               <Button
                 variant="action"
-                onClick={handleCreatePrompt}
-                disabled={isCreating}
+                onClick={() => router.push("/playground")}
               >
-                {isCreating ? (
-                  <PiSpinnerGapBold className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <PiPlusBold className="mr-2 h-4 w-4" />
-                )}
-                {isCreating ? "Creating..." : "New Prompt"}
+                <PiPlusBold className="mr-2 h-4 w-4" />
+                New Prompt
               </Button>
             </FreeTierLimitWrapper>
 
