@@ -40,51 +40,42 @@ All through a single endpoint: `https://ai-gateway.helicone.ai`
 
 ## Quick Example
 
-**❌ Old way - manage your own OpenAI account**
+Add two lines to your existing OpenAI code to unlock 100+ models with automatic observability:
 
 ```typescript
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  baseURL: "https://ai-gateway.helicone.ai", // [!code ++]
+  apiKey: process.env.HELICONE_API_KEY, // [!code ++]
 });
 
 const response = await client.chat.completions.create({
-  model: "gpt-4o",
-  messages: [{ role: "user", content: "Hello!" }]
-});
-```
-
-**✅ With Helicone - access any provider, no rate limits**
-
-```typescript
-import { OpenAI } from "openai";
-
-const client = new OpenAI({
-  baseURL: "https://ai-gateway.helicone.ai",
-  apiKey: process.env.HELICONE_API_KEY,
-});
-
-const response = await client.chat.completions.create({
-  model: "gpt-4o",  // Or: claude-sonnet-4, gemini-2.5-flash, etc.
+  model: "gpt-4o",  // Or: claude-sonnet-4, gemini-2.0-flash, etc.
   messages: [{ role: "user", content: "Hello!" }]
 });
 ```
 
 ## Helicone vs OpenRouter
 
+Helicone offers a complete platform for production AI applications, while OpenRouter focuses on simple model access.
+
 | Feature | Helicone | OpenRouter |
 |---------|----------|------------|
-| **Observability Dashboard** | ✅ Full-featured with sessions, users, custom properties | ❌ Extremely basic (requests/costs per model only) |
-| **Pricing** | ✅ 0% markup on credits | ❌ 5.5% markup |
-| **Session Tracking** | ✅ Debug multi-step AI workflows | ❌ Not available |
-| **Prompt Management** | ✅ Version control and deploy without code changes | ❌ Not available |
-| **Caching** | ✅ Built-in request caching | ❌ Not available |
-| **Rate Limiting** | ✅ Custom rate limits per user/key | ❌ Not available |
-| **Self-Hostable** | ✅ Open source | ❌ Closed source |
-| **BYOK** | ✅ Bring your own provider keys | ✅ Bring your own keys |
-| **Automatic Fallbacks** | ✅ Configure fallback chains | ✅ Available |
-| **Best for** | Production apps needing observability & debugging | Simple model access |
+| **Pricing** | 0% markup | 5.5% markup |
+| **Observability** | Full-featured (sessions, users, custom properties, cost tracking) | Basic (requests/costs per model only) |
+| **Session Tracking** | ✅ | ❌ |
+| **Prompt Management** | ✅ | ❌ |
+| **Caching** | ✅ | ❌ |
+| **Custom Rate Limits** | ✅ | ❌ |
+| **LLM Security** | ✅ | ❌ |
+| **Open Source** | ✅ | ❌ |
+| **BYOK** | ✅ | ✅ |
+| **Automatic Fallbacks** | ✅ | ✅ |
+
+<Accordion title="Migrating from OpenRouter?">
+  See our [OpenRouter migration guide](https://www.helicone.ai/blog/migration-openrouter) for step-by-step instructions.
+</Accordion>
 
 ## Next Steps
 

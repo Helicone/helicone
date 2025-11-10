@@ -13,20 +13,11 @@ Now that your requests are flowing through Helicone, let's explore what you can 
   />
 </Frame>
 
-## How It Works
+## What is Helicone?
 
-Helicone's **AI Gateway** gives you access to 100+ LLM models through a single unified API:
+We built Helicone to solve the hardest problems in production LLM applications: provider outages that break your app, unpredictable costs, and debugging issues that are impossible to reproduce. Our platform combines observability with intelligent routing to give you complete visibility and reliability.
 
-1. **Add Credits** - Top up your Helicone account (0% markup)
-2. **Single Integration** - Point your OpenAI SDK to our gateway URL
-3. **Use Any Model** - Switch between providers by just changing the model name
-4. **Automatic Observability** - Every request is logged with costs, latency, and errors tracked
-
-No need to sign up for OpenAI, Anthropic, Google, or any other provider. We manage the API keys and you get complete observability built in.
-
-<Accordion title="Advanced: Bring your own provider keys">
-  Prefer to use your own API keys? You can configure your own provider keys at [Provider Keys](https://us.helicone.ai/providers) for direct control over billing and provider accounts.
-</Accordion>
+In short: **monitor everything, route intelligently, never go down.**
 
 ## The Problems We Solve
 
@@ -44,6 +35,25 @@ No need to sign up for OpenAI, Anthropic, Google, or any other provider. We mana
   Every prompt change requires a deployment. No version control for prompts. Can't iterate quickly based on user feedback.
 </Card>
 </CardGroup>
+
+## How It Works
+
+Helicone works in two ways: use our **AI Gateway** with pass-through billing (easiest), or bring your own API keys for observability-only mode.
+
+### Option 1: AI Gateway (Recommended)
+
+Access 100+ LLM models through a single unified API with zero markup:
+
+1. **Add Credits** - Top up your Helicone account (0% markup)
+2. **Single Integration** - Point your OpenAI SDK to our gateway URL
+3. **Use Any Model** - Switch between providers by just changing the model name
+4. **Automatic Observability** - Every request is logged with costs, latency, and errors tracked
+
+No need to sign up for OpenAI, Anthropic, Google, or any other provider. We manage the API keys and you get complete observability built in.
+
+<Accordion title="Option 2: Bring your own provider keys (Advanced)">
+  Prefer to use your own API keys? You can configure your own provider keys at [Provider Keys](https://us.helicone.ai/providers) for direct control over billing and provider accounts. You'll still get full observability, but you'll manage provider relationships directly.
+</Accordion>
 
 ## Our Principles
 
@@ -113,6 +123,32 @@ When production breaks and everyone's panicking, we're rock solid. Built for whe
     - Pinpoint the root cause in the chain of reasoning
 
     **Real impact:** Discovered agent was hitting context limits on step 3. Adjusted prompt strategy and fixed cascading failures.
+  </Accordion>
+</AccordionGroup>
+
+## Comparisons
+
+Helicone is unique in offering both AI Gateway and full observability in one platform. Here's how we compare:
+
+| Feature | Helicone | OpenRouter | LangSmith | Langfuse |
+|---------|----------|------------|-----------|----------|
+| **Pricing** | 0% markup / $20/seat | 5.5% markup | $39/seat | $59/mo |
+| **AI Gateway** | ✅ | ✅ | ❌ | ❌ |
+| **Full Observability** | ✅ | ❌ | ✅ | ✅ |
+| **Caching** | ✅ | ❌ | ❌ | ❌ |
+| **Custom Rate Limits** | ✅ | ❌ | ❌ | ❌ |
+| **LLM Security** | ✅ | ❌ | ❌ | ❌ |
+| **Session Debugging** | ✅ | ❌ | ✅ | ✅ |
+| **Prompt Management** | ✅ | ❌ | ✅ | ✅ |
+| **Integration** | Proxy or SDK | Proxy | SDK only | SDK only |
+| **Open Source** | ✅ | ❌ | ❌ | ✅ |
+
+<AccordionGroup>
+  <Accordion title="Migrating from OpenRouter?">
+    See our [OpenRouter migration guide](https://www.helicone.ai/blog/migration-openrouter) for a detailed comparison and step-by-step instructions.
+  </Accordion>
+  <Accordion title="Comparing observability platforms?">
+    See our [LLM observability platforms guide](https://www.helicone.ai/blog/the-complete-guide-to-LLM-observability-platforms) for an in-depth feature breakdown.
   </Accordion>
 </AccordionGroup>
 
