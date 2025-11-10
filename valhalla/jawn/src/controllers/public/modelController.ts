@@ -87,17 +87,12 @@ export class ModelController extends Controller {
       for (const [modelId, modelConfig] of Object.entries(
         allModelsResult.data!
       )) {
-        // Filter for multimodal models: inputs other than "text" OR outputs other than "text"
-        const hasMultimodalInputs =
+        // Filter for multimodal models: more than one input OR more than one output
+        const isMultimodal =
           modelConfig.modality.inputs.length > 1 ||
-          (modelConfig.modality.inputs.length === 1 &&
-            modelConfig.modality.inputs[0] !== "text");
-        const hasMultimodalOutputs =
-          modelConfig.modality.outputs.length > 1 ||
-          (modelConfig.modality.outputs.length === 1 &&
-            modelConfig.modality.outputs[0] !== "text");
+          modelConfig.modality.outputs.length > 1;
 
-        if (!hasMultimodalInputs && !hasMultimodalOutputs) {
+        if (!isMultimodal) {
           continue;
         }
 
