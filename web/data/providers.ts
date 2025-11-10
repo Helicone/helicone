@@ -225,6 +225,16 @@ export const providers: Provider[] = [
     relevanceScore: 10,
   },
   {
+    id: "baseten",
+    name: "Baseten",
+    logoUrl: "/assets/home/providers/baseten.jpeg",
+    description: "Configure your Baseten API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Baseten API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 10,
+  },
+  {
     id: "cerebras",
     name: "Cerebras",
     logoUrl: "/assets/home/providers/cerebras.webp",

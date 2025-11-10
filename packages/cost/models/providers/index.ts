@@ -1,5 +1,6 @@
 import { AnthropicProvider } from "./anthropic";
 import { AzureOpenAIProvider } from "./azure";
+import { BasetenProvider } from "./baseten";
 import { BedrockProvider } from "./bedrock";
 import { CerebrasProvider } from "./cerebras";
 import { ChutesProvider } from "./chutes";
@@ -19,6 +20,7 @@ import { XAIProvider } from "./xai";
 
 // Create singleton instances (stateless, so safe to share)
 export const providers = {
+  baseten: new BasetenProvider(),
   anthropic: new AnthropicProvider(),
   azure: new AzureOpenAIProvider(),
   bedrock: new BedrockProvider(),
@@ -63,6 +65,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "openrouter",
   "perplexity",
   "xai",
+  "baseten",
 
   // anthropic and chat completions provider
   "vertex"
