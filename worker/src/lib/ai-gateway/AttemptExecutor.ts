@@ -293,7 +293,9 @@ export class AttemptExecutor {
       // Start provider request span
       const providerSpanId = traceContext?.sampled
         ? this.tracer.startSpan(
-            "ai_gateway.ptb.provider.llm_request",
+            `ai_gateway.${
+              endpoint.ptbEnabled ? "ptb" : "byok"
+            }.provider.llm_request`,
             `${endpoint.provider} ${endpoint.providerModelId}`,
             "llm-provider",
             {
