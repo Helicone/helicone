@@ -22,6 +22,7 @@ export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
 
   // Priority 4: All other providers (default)
   azure: 4,
+  baseten: 4,
   bedrock: 4,
   cerebras: 4,
   chutes: 4,

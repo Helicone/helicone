@@ -121,7 +121,7 @@ export const endpoints = {
       "top_k",
       "seed",
       "min_p",
-      "response_format"
+      "response_format",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -221,6 +221,34 @@ export const endpoints = {
       "min_p",
       "repetition_penalty",
       "logit_bias",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-0905:baseten": {
+    provider: "baseten",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2-0905",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.60/1M
+        output: 0.0000025, // $2.50/1M
+      },
+    ],
+    contextLength: 262_000,
+    maxCompletionTokens: 163_800,
+    quantization: "fp4",
+    supportedParameters: [
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "stop",
+      "tools",
+      "tool_choice",
     ],
     ptbEnabled: true,
     endpointConfigs: {

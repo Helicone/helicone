@@ -4,19 +4,7 @@ sidebarTitle: "Overview"
 description: "Use any LLM provider through a single OpenAI-compatible API with intelligent routing, fallbacks, and unified observability"
 ---
 
-<Info>
-**Beta**: The AI Gateway is in beta. For production observability, see our [standard integrations](/integrations/overview).
-</Info>
-
-<Accordion title="How does AI Gateway differ from standard integrations?">
-  Our standard integrations provide production-ready observability by adding monitoring to your existing LLM setup. The AI Gateway goes further by replacing multiple provider SDKs with a single unified API, enabling automatic failover, intelligent routing, and seamless provider switching without code changes. We're actively developing the AI Gateway as the future of Helicone, with migration paths planned for existing users when it reaches general availability.
-</Accordion>
-
-Helicone AI Gateway provides a unified API for 100+ LLM providers through the OpenAI SDK format. Instead of learning different SDKs and APIs for each provider, use one familiar interface to access any model with intelligent routing, automatic fallbacks, and complete observability.
-
-<Note>
-Supports BYOK (Bring Your Own Keys), passthrough routing, and pass-through billing (PTB). To enable pass-through billing with Helicone's API keys, request access in Settings → Credits.
-</Note>
+Helicone AI Gateway provides a unified API for 100+ LLM providers through the OpenAI SDK format. Instead of learning different SDKs and APIs for each provider, use one familiar interface to access any model with intelligent routing, automatic fallbacks, and **complete observability built-in**.
 
 ## Why Use AI Gateway?
 
@@ -24,53 +12,70 @@ Supports BYOK (Bring Your Own Keys), passthrough routing, and pass-through billi
 <Card title="One SDK for All Models" icon="code">
   Use OpenAI SDK to access GPT, Claude, Gemini, and 100+ other models
 </Card>
-<Card title="Intelligent Routing" icon="route">
-  Automatic model fallbacks, cost optimization, and load balancing
+<Card title="No Rate Limits" icon="gauge">
+  Skip provider tier restrictions - use credits with 0% markup
+</Card>
+<Card title="Always Online" icon="shield-check">
+  Automatic failover across providers keeps your app running
 </Card>
 <Card title="Unified Observability" icon="chart-line">
   Track usage, costs, and performance across all providers in one dashboard
 </Card>
-<Card title="Prompt Management" icon="wand-magic-sparkles">
-  Deploy and iterate prompts without code changes
-</Card>
 </CardGroup>
+
+## How It Works
+
+The AI Gateway sits between your application and LLM providers, acting as a unified translation layer:
+
+1. **You make one request** - Use the OpenAI SDK format, regardless of which provider you want
+2. **We translate & route** - Helicone converts your request to the correct provider format (Anthropic, Google, etc.)
+3. **Provider responds** - The LLM provider processes your request
+4. **We log & return** - You get the response back while we capture metrics, costs, and errors
+
+All through a single endpoint: `https://ai-gateway.helicone.ai`
+
+<Note>
+  With credits, we manage provider API keys for you. Your requests automatically work with OpenAI, Anthropic, Google, and 100+ other providers without signing up for each one.
+</Note>
 
 ## Quick Example
 
-Instead of managing multiple SDKs:
+Add two lines to your existing OpenAI code to unlock 100+ models with automatic observability:
 
 ```typescript
-// ❌ Old way - multiple SDKs and endpoints
-const openai = new OpenAI({ baseURL: "https://oai.helicone.ai/v1" });
-const anthropic = new Anthropic({ baseURL: "https://anthropic.helicone.ai" });
+import { OpenAI } from "openai";
 
-// Switch providers = code changes
-const openaiResponse = await openai.chat.completions.create({
-  model: "gpt-4o",
-  messages: [...]
-});
-
-const anthropicResponse = await anthropic.messages.create({
-  model: "claude-3.5-sonnet",
-  messages: [...] // Different message format!
-});
-```
-
-Use one SDK for everything:
-
-```typescript
-// ✅ New way - one SDK, all providers
 const client = new OpenAI({
-  baseURL: "https://ai-gateway.helicone.ai",
-  apiKey: process.env.HELICONE_API_KEY,
+  baseURL: "https://ai-gateway.helicone.ai", // [!code ++]
+  apiKey: process.env.HELICONE_API_KEY, // [!code ++]
 });
 
-// Switch providers = change model string
 const response = await client.chat.completions.create({
-  model: "gpt-4o-mini",  // Works with any model: claude-sonnet-4, gemini-2.5-flash, etc.
+  model: "gpt-4o",  // Or: claude-sonnet-4, gemini-2.0-flash, etc.
   messages: [{ role: "user", content: "Hello!" }]
 });
 ```
+
+## Helicone vs OpenRouter
+
+Helicone offers a complete platform for production AI applications, while OpenRouter focuses on simple model access.
+
+| Feature | Helicone | OpenRouter |
+|---------|----------|------------|
+| **Pricing** | 0% markup | 5.5% markup |
+| **Observability** | Full-featured (sessions, users, custom properties, cost tracking) | Basic (requests/costs per model only) |
+| **Session Tracking** | ✅ | ❌ |
+| **Prompt Management** | ✅ | ❌ |
+| **Caching** | ✅ | ❌ |
+| **Custom Rate Limits** | ✅ | ❌ |
+| **LLM Security** | ✅ | ❌ |
+| **Open Source** | ✅ | ❌ |
+| **BYOK** | ✅ | ✅ |
+| **Automatic Fallbacks** | ✅ | ✅ |
+
+<Accordion title="Migrating from OpenRouter?">
+  See our [OpenRouter migration guide](https://www.helicone.ai/blog/migration-openrouter) for step-by-step instructions.
+</Accordion>
 
 ## Next Steps
 
@@ -86,15 +91,6 @@ const response = await client.chat.completions.create({
 </Card>
 <Card title="Prompt Integration" icon="wand-magic-sparkles" href="/gateway/prompt-integration">
   Deploy and manage prompts through the gateway
-</Card>
-</CardGroup>
-
-<CardGroup cols={2}>
-<Card title="Rate Limiting" icon="gauge" href="/features/advanced-usage/custom-rate-limits">
-  Control usage and prevent abuse
-</Card>
-<Card title="Security Features" icon="lock" href="/features/advanced-usage/llm-security">
-  Protect your applications with built-in security
 </Card>
 </CardGroup>
 

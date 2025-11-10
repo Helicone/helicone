@@ -2751,6 +2751,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "moonshotai/kimi-k2": {
+    "kimi-k2-0905:baseten": {
+      "context": 262000,
+      "crossRegion": false,
+      "maxTokens": 163800,
+      "modelId": "moonshotai/kimi-k2-0905",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "baseten",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2-0905:deepinfra": {
       "context": 256000,
       "crossRegion": false,
@@ -4649,6 +4669,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
   ],
   "moonshotai/kimi-k2": [
+    "baseten",
     "deepinfra",
     "groq",
     "groq",
@@ -5867,6 +5888,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "moonshotai/kimi-k2": {
+    "baseten": [
+      {
+        "input": 6e-7,
+        "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "cacheMultipliers": {
@@ -6574,6 +6602,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "kimi-k2-0905",
       "providers": [
+        "baseten",
         "deepinfra",
         "groq",
         "novita",
@@ -6782,6 +6811,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "azure",
     },
     {
+      "modelCount": 1,
+      "provider": "baseten",
+    },
+    {
       "modelCount": 11,
       "provider": "bedrock",
     },
@@ -6929,9 +6962,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 198,
-  "totalModelProviderConfigs": 198,
+  "totalEndpoints": 199,
+  "totalModelProviderConfigs": 199,
   "totalModelsWithPtb": 76,
-  "totalProviders": 17,
+  "totalProviders": 18,
 }
 `;
