@@ -3235,7 +3235,8 @@
 					"CHUTES",
 					"LLAMA",
 					"NVIDIA",
-					"VERCEL"
+					"VERCEL",
+					"CEREBRAS"
 				]
 			},
 			"ModelProviderName": {
@@ -3244,6 +3245,7 @@
 					"anthropic",
 					"azure",
 					"bedrock",
+					"cerebras",
 					"chutes",
 					"cohere",
 					"deepinfra",
@@ -13577,6 +13579,7 @@
 														"anthropic",
 														"azure",
 														"bedrock",
+														"cerebras",
 														"chutes",
 														"cohere",
 														"deepinfra",

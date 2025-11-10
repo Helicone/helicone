@@ -4137,7 +4137,8 @@
 					"CHUTES",
 					"LLAMA",
 					"NVIDIA",
-					"VERCEL"
+					"VERCEL",
+					"CEREBRAS"
 				]
 			},
 			"ModelProviderName": {
@@ -4146,6 +4147,7 @@
 					"anthropic",
 					"azure",
 					"bedrock",
+					"cerebras",
 					"chutes",
 					"cohere",
 					"deepinfra",
@@ -49120,6 +49122,7 @@
 														"anthropic",
 														"azure",
 														"bedrock",
+														"cerebras",
 														"chutes",
 														"cohere",
 														"deepinfra",
@@ -58985,6 +58988,24 @@
 								"asc",
 								"desc"
 							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
 						}
 					}
 				]
