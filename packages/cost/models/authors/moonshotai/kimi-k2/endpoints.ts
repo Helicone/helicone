@@ -255,6 +255,41 @@ export const endpoints = {
       "*": {},
     },
   },
+  "kimi-k2-0905:fireworks": {
+    provider: "fireworks",
+    author: "moonshotai",
+    providerModelId: "accounts/fireworks/models/kimi-k2-instruct-0905",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.60/1M
+        output: 0.0000025, // $2.50/1M
+      },
+    ],
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "top_k",
+      "repetition_penalty",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "response_format",
+      "structured_outputs",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "kimi-k2-instruct:novita": {
     provider: "novita",
     author: "moonshotai",
