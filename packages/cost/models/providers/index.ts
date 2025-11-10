@@ -1,6 +1,8 @@
 import { AnthropicProvider } from "./anthropic";
 import { AzureOpenAIProvider } from "./azure";
+import { BasetenProvider } from "./baseten";
 import { BedrockProvider } from "./bedrock";
+import { CerebrasProvider } from "./cerebras";
 import { ChutesProvider } from "./chutes";
 import { CohereProvider } from "./cohere";
 import { DeepInfraProvider } from "./deepinfra";
@@ -18,9 +20,11 @@ import { XAIProvider } from "./xai";
 
 // Create singleton instances (stateless, so safe to share)
 export const providers = {
+  baseten: new BasetenProvider(),
   anthropic: new AnthropicProvider(),
   azure: new AzureOpenAIProvider(),
   bedrock: new BedrockProvider(),
+  cerebras: new CerebrasProvider(),
   chutes: new ChutesProvider(),
   cohere: new CohereProvider(),
   deepinfra: new DeepInfraProvider(),
@@ -50,17 +54,18 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "cohere",
   "deepinfra",
   "deepseek",
-  
+
   // has known issues with returning structured JSONS
   // should be okay to enable, but its not stable enough to add without request
   // "google-ai-studio",
-  
+  "cerebras",
   "groq",
   "nebius",
   "novita",
   "openrouter",
   "perplexity",
   "xai",
+  "baseten",
 
   // anthropic and chat completions provider
   "vertex"

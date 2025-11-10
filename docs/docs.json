@@ -26,20 +26,12 @@
             "pages": [
               "gateway/overview",
               "gateway/provider-routing",
-
+              "gateway/prompt-integration",
+              "features/advanced-usage/caching",
+              "features/advanced-usage/custom-rate-limits",
+              "features/advanced-usage/llm-security",
               {
-                "group": "Features",
-                "pages": [
-                  "features/advanced-usage/caching",
-                  "features/advanced-usage/custom-rate-limits",
-                  "gateway/prompt-integration",
-                  "features/advanced-usage/llm-security",
-                  "features/advanced-usage/moderations",
-                  "features/advanced-usage/retries"
-                ]
-              },
-              {
-                "group": "Concepts",
+                "group": "Provider Concepts",
                 "pages": [
                   "gateway/concepts/prompt-caching",
                   "gateway/web-search",
@@ -74,6 +66,21 @@
               {
                 "group": "Webhooks",
                 "pages": ["features/webhooks", "features/webhooks-testing"]
+              },
+              {
+                "group": "Tools",
+                "pages": [
+                  "integrations/tools/curl",
+                  "integrations/tools/logger-sdk",
+                  "integrations/tools/xcode"
+                ]
+              },
+              {
+                "group": "Vector DB",
+                "pages": [
+                  "integrations/vectordb/curl",
+                  "integrations/vectordb/logger-sdk"
+                ]
               }
             ]
           },
@@ -239,25 +246,9 @@
                   "integrations/data/logger-sdk",
                   "integrations/data/curl"
                 ]
-              },
-              {
-                "group": "Tools",
-                "pages": [
-                  "integrations/tools/curl",
-                  "integrations/tools/logger-sdk",
-                  "integrations/tools/xcode"
-                ]
-              },
-              {
-                "group": "Vector DB",
-                "pages": [
-                  "integrations/vectordb/curl",
-                  "integrations/vectordb/logger-sdk"
-                ]
               }
             ]
           },
-
           {
             "group": "References",
             "pages": [
@@ -282,7 +273,8 @@
                 "group": "Legacy Features",
                 "pages": [
                   "features/prompts-legacy/editor",
-                  "features/prompts-legacy/generate"
+                  "features/prompts-legacy/generate",
+                  "features/advanced-usage/moderations"
                 ]
               }
             ]

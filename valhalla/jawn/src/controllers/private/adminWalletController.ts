@@ -68,7 +68,9 @@ export class AdminWalletController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Query() search?: string,
     @Query() sortBy?: string,
-    @Query() sortOrder?: "asc" | "desc"
+    @Query() sortOrder?: "asc" | "desc",
+    @Query() page?: number,
+    @Query() pageSize?: number
   ): Promise<Result<DashboardData, string>> {
     await authCheckThrow(request.authParams.userId);
 
@@ -85,6 +87,10 @@ export class AdminWalletController extends Controller {
       return err("Cloud gateway token usage product ID not configured");
     }
 
+    // Validate pagination parameters
+    const validatedPage = Math.max(0, page ?? 0);
+    const validatedPageSize = Math.min(Math.max(1, pageSize ?? 100), 100);
+
     const adminWalletManager = new AdminWalletManager(request.authParams);
 
     if (sortBy === "total_spend") {
@@ -92,14 +98,18 @@ export class AdminWalletController extends Controller {
         search || "",
         tokenUsageProductId,
         sortBy as any,
-        sortOrder
+        sortOrder,
+        validatedPage,
+        validatedPageSize
       );
     }
     return adminWalletManager.getDashboardWithPostgresSort(
       search || "",
       tokenUsageProductId,
       sortBy as any,
-      sortOrder
+      sortOrder,
+      validatedPage,
+      validatedPageSize
     );
   }
 

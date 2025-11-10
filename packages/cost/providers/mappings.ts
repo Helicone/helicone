@@ -87,6 +87,9 @@ const openpipe = /^https:\/\/api\.openpipe\.ai/;
 // llm.chutes.com and chutes.com
 const chutes = /^https:\/\/(llm\.)?chutes\.com/;
 
+// https://api.cerebras.ai
+const cerebras = /^https:\/\/api\.cerebras\.ai/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -122,6 +125,8 @@ export const providersNames = [
   "LLAMA",
   "NVIDIA",
   "VERCEL",
+  "CEREBRAS",
+  "BASETEN",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -305,6 +310,11 @@ export const providers: {
     pattern: vercelGateway,
     provider: "VERCEL",
     costs: vercelCosts,
+  },
+  {
+    pattern: cerebras,
+    provider: "CEREBRAS",
+    costs: [],
   },
 ];
 
