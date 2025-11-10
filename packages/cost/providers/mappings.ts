@@ -126,6 +126,7 @@ export const providersNames = [
   "NVIDIA",
   "VERCEL",
   "CEREBRAS",
+  "BASETEN",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
