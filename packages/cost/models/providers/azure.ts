@@ -4,6 +4,7 @@ import type {
   AuthResult,
   RequestParams,
   Endpoint,
+  RequestBodyContext,
 } from "../types";
 
 export class AzureOpenAIProvider extends BaseProvider {
@@ -30,24 +31,26 @@ export class AzureOpenAIProvider extends BaseProvider {
       throw new Error("Azure OpenAI requires baseUri");
     }
 
-    // Get deployment name - fallback chain: deploymentName -> providerModelId -> modelName
-    const deploymentName = endpoint.userConfig.deploymentName?.trim();
-    const deployment =
-      deploymentName ||
-      endpoint.providerModelId ||
-      endpoint.userConfig.modelName;
-
-    if (!deployment) {
-      throw new Error(
-        "Azure OpenAI requires a deployment name, provider model ID, or model name"
-      );
+    let deploymentName: string;
+    if (endpoint.ptbEnabled) {
+      deploymentName = endpoint.providerModelId;
+    } else {
+      const deployment = endpoint.userConfig.deploymentName?.trim();
+      if (!deployment) {
+        throw new Error(
+          "Azure OpenAI requires a deployment name, provider model ID, or model name"
+        );
+      }
+      deploymentName = deployment || endpoint.providerModelId;
     }
 
     // Build URL with normalized base URI and API version
     const normalizedBaseUri = baseUri.endsWith("/") ? baseUri : `${baseUri}/`;
     const apiVersion = endpoint.userConfig.apiVersion || "2025-01-01-preview";
 
-    return `${normalizedBaseUri}openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`;
+    // Note: Azure does support Responses API, but it doesn't work with this kind of URI, so 
+    // we're using converted chat completions.
+    return `${normalizedBaseUri}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
   }
 
   authenticate(authContext: AuthContext): AuthResult {
