@@ -1,6 +1,7 @@
 import { AnthropicProvider } from "./anthropic";
 import { AzureOpenAIProvider } from "./azure";
 import { BedrockProvider } from "./bedrock";
+import { CerebrasProvider } from "./cerebras";
 import { ChutesProvider } from "./chutes";
 import { CohereProvider } from "./cohere";
 import { DeepInfraProvider } from "./deepinfra";
@@ -21,6 +22,7 @@ export const providers = {
   anthropic: new AnthropicProvider(),
   azure: new AzureOpenAIProvider(),
   bedrock: new BedrockProvider(),
+  cerebras: new CerebrasProvider(),
   chutes: new ChutesProvider(),
   cohere: new CohereProvider(),
   deepinfra: new DeepInfraProvider(),
@@ -38,6 +40,36 @@ export const providers = {
 } as const;
 
 export type ModelProviderName = keyof typeof providers;
+
+// TODO: temporarily whitelist responses API providers until all mappings are done
+export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
+  "openai",
+  "helicone",
+
+  // chat completions only
+  "azure",
+  "chutes",
+  "cohere",
+  "deepinfra",
+  "deepseek",
+
+  // has known issues with returning structured JSONS
+  // should be okay to enable, but its not stable enough to add without request
+  // "google-ai-studio",
+  "cerebras",
+  "groq",
+  "nebius",
+  "novita",
+  "openrouter",
+  "perplexity",
+  "xai",
+
+  // anthropic and chat completions provider
+  "vertex"
+
+  // anthropic only
+  // none right now, need anthropic mapper
+];
 
 // Re-export base for extending
 export { BaseProvider } from "./base";

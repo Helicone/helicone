@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create, StateCreator } from "zustand";
 import { persist } from "zustand/middleware";
 import {
   AndExpression,
@@ -55,6 +55,7 @@ export interface FilterState {
     filterId: string;
     filterName: string;
   }) => void;
+  setAlreadyLoadedOnce: () => void;
 }
 
 const _getFilterNodeCount = (filter: FilterExpression): number => {
@@ -67,9 +68,12 @@ const _getFilterNodeCount = (filter: FilterExpression): number => {
   return 1;
 };
 
-export const useFilterStore = create<FilterState>()(
-  persist(
-    (set, get) => ({
+// Factory function to create filter stores
+export const createFilterStore = (options?: {
+  persist?: boolean;
+  persistKey?: string;
+}) => {
+  const storeCreator: StateCreator<FilterState> = (set, get) => ({
       filter: EMPTY_FILTER_GROUP_EXPRESSION,
       activeFilterId: null,
       initialFilterId: null,
@@ -284,15 +288,32 @@ export const useFilterStore = create<FilterState>()(
       setActiveFilterName: (name) => {
         set({ activeFilterName: name, hasUnsavedChanges: true });
       },
-    }),
-    {
-      name: "helicone-filter-storage",
-      partialize: (state) => ({
-        filter: state.filter,
-        activeFilterId: state.activeFilterId,
-        activeFilterName: state.activeFilterName,
-        hasUnsavedChanges: state.hasUnsavedChanges,
+    });
+
+  if (options?.persist) {
+    return create<FilterState>()(
+      persist(storeCreator, {
+        name: options.persistKey || "helicone-filter-storage",
+        partialize: (state) => ({
+          filter: state.filter,
+          activeFilterId: state.activeFilterId,
+          activeFilterName: state.activeFilterName,
+          hasUnsavedChanges: state.hasUnsavedChanges,
+        }),
       }),
-    },
-  ),
-);
+    );
+  }
+
+  return create<FilterState>()(storeCreator);
+};
+
+// default global filter
+export const useFilterStore = createFilterStore({
+  persist: true,
+  persistKey: "helicone-filter-storage",
+});
+
+// Impersistent store for isolated filter state (e.g., forms, modals)
+export const useImpersistentFilterStore = createFilterStore({
+  persist: false,
+});

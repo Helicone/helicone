@@ -156,7 +156,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -189,7 +188,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -260,7 +258,6 @@ export const endpoints = {
       "structured_outputs",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },

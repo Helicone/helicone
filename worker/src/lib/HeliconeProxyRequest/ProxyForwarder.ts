@@ -483,18 +483,6 @@ async function log(
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: supabase,
       dbWrapper: new DBWrapper(env, auth),
-      queue: new RequestResponseStore(
-        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        new DBQueryTimer(ctx, {
-          enabled: (env.DATADOG_ENABLED ?? "false") === "true",
-          apiKey: env.DATADOG_API_KEY,
-          endpoint: env.DATADOG_ENDPOINT,
-        }),
-        new Valhalla(env.VALHALLA_URL, auth),
-        new ClickhouseClientWrapper(env),
-        env.FALLBACK_QUEUE,
-        env.REQUEST_AND_RESPONSE_QUEUE_KV
-      ),
       requestResponseManager: new RequestResponseManager(
         new S3Client(
           env.S3_ACCESS_KEY ?? "",
@@ -630,10 +618,16 @@ async function log(
       }
 
       // Handle escrow finalization if needed
+      const walletId = env.WALLET.idFromName(orgData.organizationId);
+      const walletStub = env.WALLET.get(walletId);
+      const walletManager = new WalletManager(env, ctx, walletStub);
+
+      const checkTopOffPromise =
+        walletManager.walletStub.checkAndScheduleAutoTopoffAlarm(
+          orgData.organizationId
+        );
+
       if (proxyRequest.escrowInfo) {
-        const walletId = env.WALLET.idFromName(orgData.organizationId);
-        const walletStub = env.WALLET.get(walletId);
-        const walletManager = new WalletManager(env, ctx, walletStub);
         // Convert cost from USD to cents (cost is in USD dollars, wallet expects cents)
         const costInCents = cost !== undefined ? cost * 100 : undefined;
 
@@ -652,6 +646,9 @@ async function log(
           );
         }
       }
+
+      // Wait for top-off check to complete
+      await checkTopOffPromise;
 
       // Update rate limit counters if not a cached response
       if (

@@ -55,6 +55,8 @@ export function heliconeProviderToModelProviderName(
       return "nebius";
     case "CHUTES":
       return "chutes";
+    case "CEREBRAS":
+      return "cerebras";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -307,9 +309,20 @@ export async function buildErrorMessage(
   return ok(await provider.buildErrorMessage(response));
 }
 
-function validateProvider(provider: string): provider is ModelProviderName {
+export function validateProvider(provider: string): provider is ModelProviderName {
   return provider in providers;
 }
+
+/**
+ * Model name mapping for backward compatibility
+ * Maps deprecated/incorrect model names to their correct counterparts
+ */
+const MODEL_NAME_MAPPINGS: Record<string, string> = {
+  "gemini-1.5-flash": "gemini-2.5-flash-lite",
+  "claude-3.5-sonnet": "claude-3.5-sonnet-v2",
+  "claude-3.5-sonnet-20240620": "claude-3.5-sonnet-v2",
+  "deepseek-r1": "deepseek-reasoner",
+};
 
 export function parseModelString(
   modelString: string
@@ -323,6 +336,9 @@ export function parseModelString(
     isOnline = true;
     modelName = modelName.slice(0, -7);
   }
+
+  // Apply model name mapping for backward compatibility
+  modelName = MODEL_NAME_MAPPINGS[modelName] || modelName;
 
   // Just model name: "gpt-4"
   if (parts.length === 1) {

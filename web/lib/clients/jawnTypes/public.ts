@@ -360,6 +360,20 @@ export interface paths {
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
   };
+  "/v1/stripe/auto-topoff/settings": {
+    get: operations["GetAutoTopoffSettings"];
+    post: operations["UpdateAutoTopoffSettings"];
+    delete: operations["DisableAutoTopoff"];
+  };
+  "/v1/stripe/payment-methods": {
+    get: operations["GetPaymentMethods"];
+  };
+  "/v1/stripe/payment-methods/setup-session": {
+    post: operations["CreateSetupSession"];
+  };
+  "/v1/stripe/payment-methods/{paymentMethodId}": {
+    delete: operations["RemovePaymentMethod"];
+  };
   "/v1/integration": {
     get: operations["GetIntegrations"];
     post: operations["CreateIntegration"];
@@ -476,11 +490,11 @@ export interface paths {
      */
     get: operations["GetModelRegistry"];
   };
-  "/v1/public/compare/models": {
-    post: operations["GetModelComparison"];
-  };
   "/v1/models": {
     get: operations["GetModels"];
+  };
+  "/v1/public/compare/models": {
+    post: operations["GetModelComparison"];
   };
   "/v1/public/security": {
     post: operations["GetSecurity"];
@@ -1585,9 +1599,9 @@ export interface components {
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS";
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+    ModelProviderName: "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1841,7 +1855,7 @@ export interface components {
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
-      gateway_endpoint_version: string | null;
+      ai_gateway_body_mapping: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2267,6 +2281,37 @@ Json: JsonObject;
       next_page: string | null;
       /** Format: double */
       count: number;
+    };
+    AutoTopoffSettings: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string | null;
+      lastTopoffAt: string | null;
+      /** Format: double */
+      consecutiveFailures: number;
+    };
+    UpdateAutoTopoffSettingsRequest: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string;
+    };
+    PaymentMethod: {
+      id: string;
+      brand: string;
+      last4: string;
+      /** Format: double */
+      exp_month: number;
+      /** Format: double */
+      exp_year: number;
+    };
+    CreateSetupSessionRequest: {
+      returnUrl?: string;
     };
     IntegrationCreateParams: {
       integration_name: string;
@@ -3198,7 +3243,7 @@ Json: JsonObject;
     /** @enum {string} */
     AuthorName: "anthropic" | "cohere" | "deepseek" | "openai" | "perplexity" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "zai" | "baidu" | "passthrough";
     /** @enum {string} */
-    StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
+    StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity" | "n";
     /** @enum {string} */
     PluginId: "web";
     RateLimits: {
@@ -3293,6 +3338,7 @@ Json: JsonObject;
       quantization?: "fp4" | "fp8" | "fp16" | "bf16";
       responseFormat?: components["schemas"]["ResponseFormat"];
       requireExplicitRouting?: boolean;
+      providerModelIdAliases?: string[];
     };
     UserEndpointConfig: {
       region?: string;
@@ -3394,6 +3440,19 @@ Json: JsonObject;
       error: null;
     };
     "Result_ModelRegistryResponse.string_": components["schemas"]["ResultSuccess_ModelRegistryResponse_"] | components["schemas"]["ResultError_string_"];
+    OAIModel: {
+      id: string;
+      /** @enum {string} */
+      object: "model";
+      /** Format: double */
+      created: number;
+      owned_by: string;
+    };
+    OAIModelsResponse: {
+      /** @enum {string} */
+      object: "list";
+      data: components["schemas"]["OAIModel"][];
+    };
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -3470,14 +3529,6 @@ Json: JsonObject;
       names: string[];
       parent: string;
     };
-    "ResultSuccess__model-string_-Array_": {
-      data: {
-          model: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__unsafe-boolean__": {
       data: {
         unsafe: boolean;
@@ -4479,7 +4530,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+            providerName: "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
           }) | {
             error: string;
           };
@@ -6333,6 +6384,87 @@ export interface operations {
       };
     };
   };
+  GetAutoTopoffSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTopoffSettings"] | null;
+        };
+      };
+    };
+  };
+  UpdateAutoTopoffSettings: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateAutoTopoffSettingsRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTopoffSettings"];
+        };
+      };
+    };
+  };
+  DisableAutoTopoff: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
+  GetPaymentMethods: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PaymentMethod"][];
+        };
+      };
+    };
+  };
+  CreateSetupSession: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSetupSessionRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            setupUrl: string;
+          };
+        };
+      };
+    };
+  };
+  RemovePaymentMethod: {
+    parameters: {
+      path: {
+        paymentMethodId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
   GetIntegrations: {
     responses: {
       /** @description Ok */
@@ -6944,6 +7076,16 @@ export interface operations {
       };
     };
   };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OAIModelsResponse"];
+        };
+      };
+    };
+  };
   GetModelComparison: {
     requestBody: {
       content: {
@@ -6955,16 +7097,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Model-Array.string_"];
-        };
-      };
-    };
-  };
-  GetModels: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };

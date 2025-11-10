@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState, useEffect } from "react";
 import { useOrg } from "../../layout/org/organizationContext";
 import {
   useGetOrgMembers,
@@ -39,6 +39,10 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Check, ChevronsUpDown, X } from "lucide-react";
+import { FilterProvider, useFilterAST } from "@/filterAST/context/filterContext";
+import { useImpersistentFilterStore } from "@/filterAST/store/filterStore";
+import FilterASTEditor from "@/filterAST/FilterASTEditor";
+import { FilterExpression } from "@helicone-package/filters/types";
 
 export type AlertRequest = {
   name: string;
@@ -49,6 +53,7 @@ export type AlertRequest = {
   slack_channels: string[];
   org_id: string;
   minimum_request_count: number | undefined;
+  filter: FilterExpression | null;
 };
 
 interface AlertFormProps {
@@ -57,8 +62,9 @@ interface AlertFormProps {
   initialValues?: Database["public"]["Tables"]["alert"]["Row"];
 }
 
-const AlertForm = (props: AlertFormProps) => {
+const AlertFormContent = (props: AlertFormProps) => {
   const { handleSubmit, onCancel, initialValues } = props;
+  const { store: filterStore } = useFilterAST();
 
   const slackRedirectUrl = useMemo(() => {
     if (window) {
@@ -112,6 +118,13 @@ const AlertForm = (props: AlertFormProps) => {
     id: string;
     name: string;
   }[] = [...(slackChannelsData?.data || [])];
+
+  useEffect(() => {
+    if (initialValues?.filter) {
+      filterStore.setFilter(initialValues.filter as unknown as FilterExpression);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValues?.filter]);
 
   const handleCreateAlert = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -171,6 +184,7 @@ const AlertForm = (props: AlertFormProps) => {
       minimum_request_count: isNaN(alertMinRequests)
         ? undefined
         : alertMinRequests,
+      filter: filterStore.filter,
     });
   };
 
@@ -332,6 +346,16 @@ const AlertForm = (props: AlertFormProps) => {
           min={0}
           step={1}
         />
+      </div>
+
+      <div className="col-span-4 w-full space-y-1.5">
+        <label className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-200">
+          Filter (optional){" "}
+          <Tooltip title="Add filters to narrow down which requests trigger this alert. For example, filter by specific models, users, or properties.">
+            <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
+          </Tooltip>
+        </label>
+        <FilterASTEditor />
       </div>
 
       <div className="col-span-4 w-full space-y-1.5 rounded-md bg-gray-100 p-6 dark:bg-gray-900">
@@ -567,6 +591,17 @@ const AlertForm = (props: AlertFormProps) => {
         </button>
       </div>
     </form>
+  );
+};
+
+// to provider isolated filter store for alerts
+const AlertForm = (props: AlertFormProps) => {
+  const impersistentFilterStore = useImpersistentFilterStore();
+
+  return (
+    <FilterProvider store={impersistentFilterStore}>
+      <AlertFormContent {...props} />
+    </FilterProvider>
   );
 };
 

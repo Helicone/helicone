@@ -229,6 +229,15 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
+          cerebras: {
+            org_id: "test-org-id",
+            provider_name: "cerebras",
+            decrypted_provider_key: "test-cerebras-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
           openrouter: {
             org_id: "test-org-id",
             provider_name: "openrouter",
@@ -254,6 +263,15 @@ vi.mock("@supabase/supabase-js", () => ({
 
         // Helicone provider keys (for PTB when BYOK is disabled)
         const mockHeliconeProviderKeys: Record<string, any> = {
+          helicone: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "helicone",
+            decrypted_provider_key: "helicone-ptb-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: true,
+          },
           anthropic: {
             org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
             provider_name: "anthropic",

@@ -23,7 +23,6 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -48,7 +47,6 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },

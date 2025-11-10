@@ -545,7 +545,7 @@ export default function AdminWallet() {
                   <TableHeader className="sticky top-0 z-10 bg-background">
                     <TableRow>
                       <TableHead
-                        className="cursor-pointer select-none hover:bg-muted/50"
+                        className="cursor-pointer select-none hover:bg-muted/50 w-48"
                         onClick={() => handleSort("org_created_at")}
                       >
                         <div className="flex items-center">
@@ -553,13 +553,13 @@ export default function AdminWallet() {
                           <SortIcon column="org_created_at" />
                         </div>
                       </TableHead>
-                      <TableHead>Owner</TableHead>
+                      <TableHead className="w-48">Owner</TableHead>
                       <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("total_payments")}
                       >
                         <div className="flex items-center">
-                          Total Net
+                          Deposited
                           <SortIcon column="total_payments" />
                         </div>
                       </TableHead>
@@ -568,18 +568,27 @@ export default function AdminWallet() {
                         onClick={() => handleSort("total_spend")}
                       >
                         <div className="flex items-center">
-                          Total Spent
+                          Spent (CH)
                           <SortIcon column="total_spend" />
                         </div>
                       </TableHead>
-                      <TableHead>Balance</TableHead>
-                      <TableHead>Wallet Balance</TableHead>
+                      <TableHead
+                        className="cursor-pointer select-none hover:bg-muted/50"
+                        onClick={() => handleSort("total_payments")}
+                      >
+                        <div className="flex items-center">
+                          Net Balance
+                          <SortIcon column="total_payments" />
+                        </div>
+                      </TableHead>
+                      <TableHead>Wallet (Live)</TableHead>
+                      <TableHead>Drift</TableHead>
                       <TableHead
                         className="cursor-pointer select-none hover:bg-muted/50"
                         onClick={() => handleSort("credit_limit")}
                       >
                         <div className="flex items-center">
-                          Settings
+                          Credit Limit
                           <SortIcon column="credit_limit" />
                         </div>
                       </TableHead>
@@ -596,9 +605,17 @@ export default function AdminWallet() {
                       );
                       const totalNetDollars = totalNetCents / 100;
 
-                      const balance =
+                      const netBalance =
                         totalNetDollars - org.clickhouseTotalSpend;
-                      const isNegativeBalance = balance < 0;
+                      const isNegativeBalance = netBalance < 0;
+
+                      // Calculate drift between net balance and wallet
+                      const drift = org.walletBalance !== undefined
+                        ? netBalance - org.walletBalance
+                        : undefined;
+                      const absDrift = drift !== undefined ? Math.abs(drift) : 0;
+                      const driftWarning = absDrift > 100;
+                      const driftCritical = absDrift > 500;
 
                       return [
                         <TableRow
@@ -606,13 +623,13 @@ export default function AdminWallet() {
                           className={`cursor-pointer ${selectedOrg === org.orgId ? "bg-muted" : ""}`}
                           onClick={() => handleOrgClick(org.orgId)}
                         >
-                          <TableCell>
+                          <TableCell className="max-w-48">
                             <div className="flex items-center gap-2">
-                              <span className="font-medium">{org.orgName}</span>
+                              <span className="font-medium truncate" title={org.orgName}>{org.orgName}</span>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-6 w-6 p-0"
+                                className="h-6 w-6 p-0 flex-shrink-0"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigator.clipboard.writeText(org.orgId);
@@ -628,18 +645,21 @@ export default function AdminWallet() {
                               </Button>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <Small className="text-muted-foreground">
+                          <TableCell className="max-w-48">
+                            <Small className="text-muted-foreground truncate block" title={org.ownerEmail}>
                               {org.ownerEmail}
                             </Small>
                           </TableCell>
-                          <TableCell>
+                          {/* Deposited */}
+                          <TableCell className="whitespace-nowrap">
                             {formatCurrency(totalNetDollars)}
                           </TableCell>
-                          <TableCell>
+                          {/* Spent (CH) */}
+                          <TableCell className="whitespace-nowrap">
                             {formatCurrency(org.clickhouseTotalSpend)}
                           </TableCell>
-                          <TableCell>
+                          {/* Net Balance */}
+                          <TableCell className="whitespace-nowrap">
                             <span
                               className={
                                 isNegativeBalance
@@ -647,10 +667,11 @@ export default function AdminWallet() {
                                   : ""
                               }
                             >
-                              {formatCurrency(balance)}
+                              {formatCurrency(netBalance)}
                             </span>
                           </TableCell>
-                          <TableCell>
+                          {/* Wallet (Live) */}
+                          <TableCell className="whitespace-nowrap">
                             {org.walletBalance !== undefined ? (
                               <span
                                 className={
@@ -667,22 +688,46 @@ export default function AdminWallet() {
                               </Small>
                             )}
                           </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <Small className="text-muted-foreground">
-                                {formatCurrency(org.creditLimit || 0)}
-                              </Small>
-                              <Small
+                          {/* Drift */}
+                          <TableCell className="whitespace-nowrap">
+                            {drift !== undefined ? (
+                              <span
                                 className={
-                                  org.allowNegativeBalance
+                                  driftCritical
+                                    ? "font-medium text-red-500"
+                                    : driftWarning
+                                    ? "font-medium text-yellow-600"
+                                    : absDrift < 10
                                     ? "text-green-600"
-                                    : "text-muted-foreground"
+                                    : ""
                                 }
                               >
-                                {org.allowNegativeBalance ? "Allow Neg" : "No Neg"}
+                                {drift > 0 ? "+" : ""}{formatCurrency(drift)}
+                              </span>
+                            ) : (
+                              <Small className="text-muted-foreground">
+                                N/A
                               </Small>
+                            )}
+                          </TableCell>
+                          {/* Credit Limit */}
+                          <TableCell className="whitespace-nowrap">
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm">
+                                {formatCurrency(org.creditLimit || 0)}
+                              </span>
+                              <span
+                                className={
+                                  org.allowNegativeBalance
+                                    ? "text-xs text-green-600"
+                                    : "text-xs text-muted-foreground"
+                                }
+                              >
+                                ({org.allowNegativeBalance ? "✓" : "✗"})
+                              </span>
                             </div>
                           </TableCell>
+                          {/* Actions */}
                           <TableCell>
                             <div className="flex items-center justify-end gap-2">
                               {org.stripeCustomerId && (
@@ -691,8 +736,7 @@ export default function AdminWallet() {
                                   variant="ghost"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const stripeUrl = dashboardData?.data
-                                      ?.isProduction
+                                    const stripeUrl = dashboardData?.data?.isProduction
                                       ? `https://dashboard.stripe.com/customers/${org.stripeCustomerId}`
                                       : `https://dashboard.stripe.com/test/customers/${org.stripeCustomerId}`;
                                     window.open(stripeUrl, "_blank");
@@ -720,7 +764,7 @@ export default function AdminWallet() {
                         </TableRow>,
                         selectedOrg === org.orgId && walletDetails && (
                           <TableRow key={`${org.orgId}-details`}>
-                            <TableCell colSpan={8} className="bg-muted/30 p-6">
+                            <TableCell colSpan={9} className="bg-muted/30 p-6">
                               {walletLoading ? (
                                 <div className="flex h-32 items-center justify-center">
                                   <Loader2 size={20} className="animate-spin" />
@@ -844,9 +888,9 @@ export default function AdminWallet() {
                                   </div>
 
                                   {/* Disallow List */}
-                                  {(walletDetails.data.disallowList?.length ?? 0) > 0 && (
+                                  {(walletDetails.data?.disallowList?.length ?? 0) > 0 && (
                                     <div className="flex flex-col gap-2">
-                                      <H4>Disallow List ({walletDetails.data.disallowList?.length ?? 0})</H4>
+                                      <H4>Disallow List ({walletDetails.data?.disallowList?.length ?? 0})</H4>
                                       <div className="border">
                                         <table className="w-full text-sm">
                                           <thead className="bg-muted">
@@ -929,14 +973,14 @@ export default function AdminWallet() {
                     {/* Loading indicator for next page */}
                     {isFetchingNextPage && (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-4">
+                        <TableCell colSpan={9} className="text-center py-4">
                           <Loader2 size={20} className="animate-spin inline-block text-muted-foreground" />
                         </TableCell>
                       </TableRow>
                     )}
                     {/* Intersection observer target */}
                     <tr ref={observerTarget} style={{ height: '1px' }}>
-                      <td colSpan={8} />
+                      <td colSpan={9} />
                     </tr>
                   </TableBody>
                 </table>

@@ -14,7 +14,10 @@ import { Plugin } from "@helicone-package/cost/models/types";
 import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
-import { validateOpenAIChatPayload } from "./validators/openaiRequestValidator";
+import {
+  validateOpenAIChatPayload,
+  validateOpenAIResponsePayload,
+} from "./validators/openaiRequestValidator";
 import {
   RequestParams,
   BodyMappingType,
@@ -25,6 +28,12 @@ import {
   toOpenAIResponse,
   toOpenAIStreamResponse,
 } from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
+import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
+import { ResponsesAPIEnabledProviders } from "@helicone-package/cost/models/providers";
+import { oaiChat2responsesResponse } from "../clients/llmmapper/router/oaiChat2responses/nonStream";
+import { oaiChat2responsesStreamResponse } from "../clients/llmmapper/router/oaiChat2responses/stream";
+import { validateProvider } from "@helicone-package/cost/models/provider-helpers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
 export interface AuthContext {
   orgId: string;
@@ -44,19 +53,25 @@ export class SimpleAIGateway {
   private readonly supabaseClient: any;
   private readonly metrics: GatewayMetrics;
   private readonly orgMeta: AuthContext["orgMeta"];
+  private readonly tracer: DataDogTracer;
+  private readonly traceContext: TraceContext | null;
 
   constructor(
     private readonly requestWrapper: RequestWrapper,
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
     authContext: AuthContext,
-    metrics: GatewayMetrics
+    metrics: GatewayMetrics,
+    tracer: DataDogTracer,
+    traceContext: TraceContext | null
   ) {
     this.orgId = authContext.orgId;
     this.apiKey = authContext.apiKey;
     this.supabaseClient = authContext.supabaseClient;
     this.orgMeta = authContext.orgMeta;
     this.metrics = metrics;
+    this.tracer = tracer;
+    this.traceContext = traceContext;
 
     const providerKeysManager = new ProviderKeysManager(
       new ProviderKeysStore(this.supabaseClient),
@@ -70,26 +85,54 @@ export class SimpleAIGateway {
       REQUEST_CACHE_KEY_2: env.REQUEST_CACHE_KEY_2,
     });
 
-    this.attemptBuilder = new AttemptBuilder(providerKeysManager, env);
-    this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider);
+    this.attemptBuilder = new AttemptBuilder(
+      providerKeysManager,
+      env,
+      tracer,
+      traceContext
+    );
+    this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider, tracer);
   }
 
   async handle(): Promise<Response> {
     // Step 1: Parse and prepare request
+    const bodyMapping: BodyMappingType =
+      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
+    const parseSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.parse_request",
+          "parseAndPrepareRequest",
+          "ai-gateway",
+          {},
+          this.traceContext
+        )
+      : null;
     const parseResult = await this.parseAndPrepareRequest();
+    this.tracer.finishSpan(parseSpan);
     if (isErr(parseResult)) {
       return parseResult.error;
     }
-    const { modelStrings, body: parsedBody, plugins } = parseResult.data;
+    const {
+      modelStrings,
+      body: parsedBody,
+      plugins,
+      globalIgnoreProviders,
+    } = parseResult.data;
 
     const requestParams: RequestParams = {
       isStreaming: parsedBody.stream === true,
-      bodyMapping:
-        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+      bodyMapping: bodyMapping,
     };
 
     let finalBody = parsedBody;
-    if (this.hasPromptFields(parsedBody)) {
+    // TODO: add prompt merging support for Responses API format
+    if (this.hasPromptFields(parsedBody) && bodyMapping !== "NO_MAPPING") {
+      if (bodyMapping === "RESPONSES") {
+        return new Response(
+          "Helicone Prompts is not supported for Responses API format on the AI Gateway",
+          { status: 400 }
+        );
+      }
       this.metrics.markPromptRequestStart();
       const expandResult = await this.expandPrompt(parsedBody);
       if (isErr(expandResult)) {
@@ -102,12 +145,32 @@ export class SimpleAIGateway {
     const errors: Array<AttemptError> = [];
 
     // Step 3: Build all attempts
-    const attempts = await this.attemptBuilder.buildAttempts(
+    const buildSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.build_attempts",
+          "attemptBuilder.buildAttempts",
+          "ai-gateway",
+          {},
+          this.traceContext
+        )
+      : null;
+    let attempts = await this.attemptBuilder.buildAttempts(
       modelStrings,
       this.orgId,
-      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-      plugins
+      bodyMapping,
+      plugins,
+      globalIgnoreProviders
     );
+    this.tracer.finishSpan(buildSpan);
+
+    // Filter out helicone provider attempts when x-stripe-customer-id is present
+    // to ensure Stripe meter events are only sent for actual external provider usage
+    if (this.requestWrapper.heliconeHeaders.stripeCustomerId) {
+      attempts = attempts.filter(
+        (attempt) => attempt.endpoint.provider !== "helicone"
+      );
+    }
+
     if (attempts.length === 0) {
       errors.push({
         source: "No available providers",
@@ -120,7 +183,17 @@ export class SimpleAIGateway {
     }
 
     // Step 4: Get disallow list
+    const disallowSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.get_disallow_list",
+          "getDisallowList",
+          "ai-gateway",
+          {},
+          this.traceContext
+        )
+      : null;
     const disallowList = await this.getDisallowList(this.orgId);
+    this.tracer.finishSpan(disallowSpan);
 
     // Step 5: Create forwarder function
     const forwarder = (
@@ -145,27 +218,27 @@ export class SimpleAIGateway {
     for (const attempt of attempts) {
       // temporarily disable Responses API calls for non-OpenAI endpoints
       if (
-        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping ===
-          "RESPONSES" &&
-        attempt.endpoint.provider !== "openai" &&
-        attempt.endpoint.provider !== "helicone"
+        bodyMapping === "RESPONSES" &&
+        !ResponsesAPIEnabledProviders.includes(attempt.endpoint.provider)
       ) {
         errors.push({
           source: attempt.source,
-          message:
-            "The Responses API is only supported for OpenAI provider endpoints.",
+          message: `The Responses API is only supported for the providers: ${ResponsesAPIEnabledProviders.join(", ")}`,
           type: "invalid_format",
           statusCode: 400,
         });
         continue;
       }
-
       if (
         attempt.authType === "ptb" &&
-        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping ===
-          "OPENAI"
+        (bodyMapping === "OPENAI" || bodyMapping === "RESPONSES")
       ) {
-        const validationResult = validateOpenAIChatPayload(finalBody);
+        let validationResult: Result<void, string>;
+        if (bodyMapping === "RESPONSES") {
+          validationResult = validateOpenAIResponsePayload(finalBody);
+        } else {
+          validationResult = validateOpenAIChatPayload(finalBody);
+        }
         if (isErr(validationResult)) {
           errors.push({
             type: "invalid_format",
@@ -199,19 +272,29 @@ export class SimpleAIGateway {
         forwarder,
         metrics: this.metrics,
         orgMeta: this.orgMeta,
+        traceContext: this.traceContext,
       });
 
       if (isErr(result)) {
-        errors.push({
+        const attemptError = {
           ...result.error,
           source: attempt.source,
-        });
-        // Continue to next attempt
+        } as AttemptError;
+        // Bail early only for Helicone-generated 429s: escrow failure or rate limit
+        const isHelicone429 =
+          attemptError.statusCode === 429 &&
+          (attemptError.type === "insufficient_credit_limit" ||
+            attemptError.type === "rate_limited");
+        if (isHelicone429 && errors.length === 0) {
+          return this.createErrorResponse([attemptError]);
+        }
+        errors.push(attemptError);
+        // Continue to next attempt otherwise (e.g., provider 429)
       } else {
         const mappedResponse = await this.mapResponse(
           attempt,
           result.data,
-          this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping
+          bodyMapping
         );
 
         if (isErr(mappedResponse)) {
@@ -231,7 +314,15 @@ export class SimpleAIGateway {
   }
 
   private async parseAndPrepareRequest(): Promise<
-    Result<{ modelStrings: string[]; body: any; plugins?: Plugin[] }, Response>
+    Result<
+      {
+        modelStrings: string[];
+        body: any;
+        plugins?: Plugin[];
+        globalIgnoreProviders?: Set<ModelProviderName>;
+      },
+      Response
+    >
   > {
     // Get raw text body once
     // TODO: change to use safelyGetBody
@@ -271,13 +362,48 @@ export class SimpleAIGateway {
 
     const plugins = parsedBody.plugins || [];
 
-    const modelStrings = parsedBody.model
+    const rawModelStrings = parsedBody.model
       .split(",")
       .map((m: string) => m.trim());
 
+    const globalIgnoreProvidersSet = new Set<ModelProviderName>();
+    const modelStrings: string[] = [];
+
+    for (const modelString of rawModelStrings) {
+      if (modelString.startsWith("!")) {
+        // Global ignore provider
+        const provider = modelString.slice(1);
+        if (!provider) {
+          return err(
+            new Response(
+              "Invalid global ignore syntax. Use !provider (e.g., !openai)",
+              { status: 400 }
+            )
+          );
+        }
+        // Validate provider name
+        if (!validateProvider(provider)) {
+          return err(
+            new Response(
+              `Invalid provider in global ignore list: ${provider}. See supported providers at https://helicone.ai/models`,
+              { status: 400 }
+            )
+          );
+        }
+        globalIgnoreProvidersSet.add(provider);
+      } else {
+        modelStrings.push(modelString);
+      }
+    }
+
     delete parsedBody.plugins;
 
-    return ok({ modelStrings, body: parsedBody, plugins });
+    return ok({
+      modelStrings,
+      body: parsedBody,
+      plugins,
+      globalIgnoreProviders: globalIgnoreProvidersSet.size > 0 ? globalIgnoreProvidersSet : undefined,
+    });
   }
 
   private hasPromptFields(body: any): boolean {
@@ -386,10 +512,22 @@ export class SimpleAIGateway {
 
     try {
       if (mappingType === "OPENAI") {
-        // Response is already in OpenAI format, just normalize usage
+        // If the request body mapping is Responses, convert Chat Completions
+        // output to Responses API output for non-OpenAI providers.
         const provider = attempt.endpoint.provider;
         const providerModelId = attempt.endpoint.providerModelId;
 
+        if (bodyMapping === "RESPONSES" && provider !== "openai") {
+          if (isStream) {
+            const mapped = oaiChat2responsesStreamResponse(response);
+            return ok(mapped);
+          } else {
+            const mapped = await oaiChat2responsesResponse(response);
+            return ok(mapped);
+          }
+        }
+
+        // Otherwise, response is already in OpenAI format; normalize usage
         if (isStream) {
           const normalizedResponse = toOpenAIStreamResponse(
             response,
@@ -499,8 +637,16 @@ export class SimpleAIGateway {
     } else if (all429) {
       // Only return 429 if ALL attempts failed with 429
       statusCode = 429;
-      message = "Insufficient credits";
-      code = "request_failed";
+      const insufficient = errors.some(
+        (e) => e.type === "insufficient_credit_limit"
+      );
+      if (insufficient) {
+        message = "Insufficient credits";
+        code = "request_failed";
+      } else {
+        message = "Rate limited";
+        code = "rate_limited";
+      }
     }
 
     const errorResponse = await errorForwarder(

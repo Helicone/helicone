@@ -36,6 +36,7 @@ const llamaApiPattern = /^https:\/\/api\.llama\.com/;
 const nvidiaApiPattern = /^https:\/\/integrate\.api\.nvidia\.com/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
 const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
+const heliconeInferencePattern = /^https:\/\/inference\.helicone\.ai/;
 const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
 const anyscalePattern = /^https:\/\/api\.endpoints\.anyscale\.com/;
 const cloudflareAiGatewayPattern = /^https:\/\/gateway\.ai\.cloudflare\.com/;
@@ -86,6 +87,9 @@ const openpipe = /^https:\/\/api\.openpipe\.ai/;
 // llm.chutes.com and chutes.com
 const chutes = /^https:\/\/(llm\.)?chutes\.com/;
 
+// https://api.cerebras.ai
+const cerebras = /^https:\/\/api\.cerebras\.ai/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -121,6 +125,7 @@ export const providersNames = [
   "LLAMA",
   "NVIDIA",
   "VERCEL",
+  "CEREBRAS",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -171,6 +176,10 @@ export const providers: {
   },
   {
     pattern: heliconeProxyPattern,
+    provider: "HELICONE",
+  },
+  {
+    pattern: heliconeInferencePattern,
     provider: "HELICONE",
   },
   {
@@ -301,14 +310,16 @@ export const providers: {
     provider: "VERCEL",
     costs: vercelCosts,
   },
+  {
+    pattern: cerebras,
+    provider: "CEREBRAS",
+    costs: [],
+  },
 ];
-
-export const playgroundModels =
-  openRouterCosts.map((cost) => cost.model.value) ?? [];
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const defaultProvider = providers.find(
-  (provider) => provider.provider === "OPENAI"
+  (provider) => provider.provider === "OPENAI",
 )!;
 
 export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
@@ -324,5 +335,5 @@ export const parentModelNames = providers.reduce(
     }
     return acc;
   },
-  {} as Record<ProviderName, string[]>
+  {} as Record<ProviderName, string[]>,
 );

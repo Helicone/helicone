@@ -25,7 +25,6 @@ import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import PlaygroundVariablesPanel from "./components/PlaygroundVariablesPanel";
-import { playgroundModels } from "@helicone-package/cost/providers/mappings";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
@@ -35,10 +34,11 @@ import {
   useGetPromptVersion,
   useGetPromptInputs,
 } from "@/services/hooks/prompts";
+import { $JAWN_API } from "@/lib/clients/jawn";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
-import { TemplateVariable } from "@helicone-package/prompts/types";
+import { TemplateVariable, PromptPartialVariable } from "@helicone-package/prompts/types";
 import { Message } from "@helicone-package/llm-mapper/types";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
 import { ResponseFormat, ResponseFormatType, VariableInput } from "./types";
@@ -64,7 +64,7 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
       },
     ],
   },
-  model: "gpt-4.1-mini",
+  model: "gpt-4o-mini",
   raw: {
     request: {},
     response: {},
@@ -168,7 +168,7 @@ const convertOpenAIChatRequestToMappedLLMRequest = (
       response: "",
       concatenatedMessages: internalRequest.messages || [],
     },
-    model: openaiRequest.model || "gpt-4.1-mini",
+    model: openaiRequest.model || "gpt-4o-mini",
     raw: {
       request: openaiRequest,
       response: {},
@@ -252,9 +252,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     requestId || "",
   );
 
-  const [selectedModel, setSelectedModel] = useState<string>(
-    "openai/gpt-4.1-mini",
-  );
+  const [selectedModel, setSelectedModel] = useState<string>("gpt-4o-mini");
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
     null,
@@ -351,19 +349,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       );
 
       const model = promptVersionData.promptBody.model;
-      if (model && playgroundModels.includes(model)) {
-        setSelectedModel(model);
-      } else if (model) {
-        const similarities = playgroundModels.map((m) => ({
-          target: m,
-          similarity: findBestMatch(model, m),
-        }));
-
-        const closestMatch = similarities.reduce((best, current) =>
-          current.similarity > best.similarity ? current : best,
-        );
-        setSelectedModel(closestMatch.target);
-      }
+      // Model will be set when registry loads
+      setSelectedModel(model || "");
 
       setMappedContent(convertedContent);
       setDefaultContent(convertedContent);
@@ -416,9 +403,15 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [templateVariables, setTemplateVariables] = useState<
     Map<string, TemplateVariable>
   >(new Map());
+  const [promptBodyCache, setPromptBodyCache] = useState<
+    Map<string, OpenAIChatRequest>
+  >(new Map());
   const [variableInputs, setVariableInputs] = useLocalStorage<
     Record<string, VariableInput>
   >("variableInputs", {});
+  const [promptPartialInputs, setPromptPartialInputs] = useLocalStorage<
+    Record<string, string>
+  >("promptPartialInputs", {});
 
   // Initial check for if we are loading a request that is associated with a prompt
   // then we should be editing that prompt instead.
@@ -479,19 +472,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
     if (requestData?.data && !isRequestLoading && !requestPromptVersionId) {
       const model = requestData.data.model;
-      if (model && playgroundModels.includes(model)) {
-        setSelectedModel(model);
-      } else if (model) {
-        const similarities = playgroundModels.map((m) => ({
-          target: m,
-          similarity: findBestMatch(model, m),
-        }));
-
-        const closestMatch = similarities.reduce((best, current) =>
-          current.similarity > best.similarity ? current : best,
-        );
-        setSelectedModel(closestMatch.target);
-      }
+      // Model will be set when registry loads
+      setSelectedModel(model || "");
 
       const content = heliconeRequestToMappedContent(requestData.data);
       let contentWithIds = {
@@ -556,7 +538,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [error, setError] = useState<string | null>(null);
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsLoading] = useState<boolean>(false);
-  const [useAIGateway, setUseAIGateway] = useState<boolean>(false);
 
   useEffect(() => {
     if (response) {
@@ -669,15 +650,27 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
   };
 
-  // Watch changes to mappedContent, to update template variables
+  // Watch changes to mappedContent, to update template variables and prompt partials
   useEffect(() => {
     const allVariables = new Map<string, TemplateVariable>();
+    const allPromptPartials: PromptPartialVariable[] = [];
+    const seenPartials = new Set<string>();
 
     const processContent = (content: string) => {
       const variables = HeliconeTemplateManager.extractVariables(content);
       variables.forEach((variable: TemplateVariable) =>
         allVariables.set(variable.name, variable),
       );
+      
+      // Also extract prompt partials
+      const partials = HeliconeTemplateManager.extractPromptPartialVariables(content);
+      partials.forEach((partial) => {
+        if (!seenPartials.has(partial.raw)) {
+          seenPartials.add(partial.raw);
+          allPromptPartials.push(partial);
+        }
+      });
+      
       return variables;
     };
 
@@ -712,12 +705,170 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       }
     }
 
-    initializeColorMap(Array.from(allVariables.keys()));
     setTemplateVariables(allVariables);
-  }, [mappedContent]);
+    
+    // Fetch prompt bodies for partials and extract variables from specific message indices
+    const fetchPartialVariables = async () => {
+      const partialVariablesMap = new Map<string, TemplateVariable>();
+      const newCacheEntries = new Map<string, OpenAIChatRequest>();
+      
+      for (const partial of allPromptPartials) {
+        const cacheKey = partial.environment
+          ? `${partial.prompt_id}:${partial.index}:${partial.environment}`
+          : `${partial.prompt_id}:${partial.index}`;
+        
+        // check session cache for prompt body of the partial first
+        let promptBody = promptBodyCache.get(cacheKey);
+        
+        if (!promptBody) {
+          try {
+            // Fetch the prompt version
+            let versionResult;
+            if (partial.environment) {
+              versionResult = await $JAWN_API.POST("/v1/prompt-2025/query/environment-version", {
+                body: {
+                  promptId: partial.prompt_id,
+                  environment: partial.environment,
+                },
+              });
+            } else {
+              versionResult = await $JAWN_API.POST("/v1/prompt-2025/query/production-version", {
+                body: {
+                  promptId: partial.prompt_id,
+                },
+              });
+            }
+
+            if (versionResult.error || !versionResult.data?.data?.s3_url) {
+              continue;
+            }
+
+            // Fetch the prompt body
+            const s3Response = await fetch(versionResult.data.data.s3_url);
+            if (!s3Response.ok) {
+              continue;
+            }
+
+            promptBody = (await s3Response.json()) as OpenAIChatRequest;
+            
+            newCacheEntries.set(cacheKey, promptBody);
+          } catch (error) {
+            console.error(`Error fetching prompt body for partial ${partial.raw}:`, error);
+            continue;
+          }
+        }
+
+        if (!promptBody) {
+          continue;
+        }
+
+        const messages = promptBody.messages || [];
+        
+        if (partial.index >= 0 && partial.index < messages.length) {
+          const targetMessage = messages[partial.index];
+          
+          if (typeof targetMessage.content === "string") {
+            const variables = HeliconeTemplateManager.extractVariables(targetMessage.content);
+            variables.forEach((variable) => {
+              const key = variable.name;
+              if (!partialVariablesMap.has(key)) {
+                partialVariablesMap.set(key, {
+                  ...variable,
+                  from_prompt_partial: true,
+                });
+              }
+            });
+          } else if (Array.isArray(targetMessage.content)) {
+            for (const contentPart of targetMessage.content) {
+              if (contentPart.type === "text" && contentPart.text) {
+                const variables = HeliconeTemplateManager.extractVariables(contentPart.text);
+                variables.forEach((variable) => {
+                  const key = variable.name;
+                  if (!partialVariablesMap.has(key)) {
+                    partialVariablesMap.set(key, {
+                      ...variable,
+                      from_prompt_partial: true,
+                    });
+                  }
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // update session cache with new entries
+      if (newCacheEntries.size > 0) {
+        setPromptBodyCache((prevCache) => {
+          const updatedCache = new Map(prevCache);
+          newCacheEntries.forEach((body, key) => {
+            updatedCache.set(key, body);
+          });
+          return updatedCache;
+        });
+      }
+
+      // Populate promptPartialInputs from cached prompt bodies
+      const updatedPartialInputs: Record<string, string> = {};
+      for (const partial of allPromptPartials) {
+        const cacheKey = partial.environment
+          ? `${partial.prompt_id}:${partial.index}:${partial.environment}`
+          : `${partial.prompt_id}:${partial.index}`;
+        
+        const promptBody = promptBodyCache.get(cacheKey) || newCacheEntries.get(cacheKey);
+        
+        if (promptBody && promptBody.messages && partial.index >= 0 && partial.index < promptBody.messages.length) {
+          const targetMessage = promptBody.messages[partial.index];
+          let substitutionValue = "";
+          
+          if (typeof targetMessage.content === "string") {
+            substitutionValue = targetMessage.content;
+          } else if (Array.isArray(targetMessage.content)) {
+            substitutionValue = targetMessage.content
+              .map((contentPart) => {
+                if (contentPart.type === "text" && contentPart.text) {
+                  return contentPart.text;
+                }
+                return "";
+              })
+              .filter((text) => text.length > 0)
+              .join(" ");
+          }
+          
+          if (substitutionValue) {
+            updatedPartialInputs[partial.raw] = substitutionValue;
+          }
+        }
+      }
+
+      if (Object.keys(updatedPartialInputs).length > 0) {
+        setPromptPartialInputs({
+          ...promptPartialInputs,
+          ...updatedPartialInputs,
+        });
+      }
+
+      partialVariablesMap.forEach((variable, key) => {
+        if (!allVariables.has(key)) {
+          allVariables.set(key, variable);
+        }
+      });
+
+      initializeColorMap(Array.from(allVariables.keys()));
+      setTemplateVariables(new Map(allVariables));
+    };
+
+    if (allPromptPartials.length > 0) {
+      fetchPartialVariables();
+    } else {
+      initializeColorMap(Array.from(allVariables.keys()));
+      setTemplateVariables(allVariables);
+    }
+  }, [mappedContent, modelParameters, selectedModel, responseFormat, tools]);
 
   const createTemplatedMessages = (
     substitutionValues: Record<string, any>,
+    promptPartialInputs: Record<string, any>,
     messages: Message[],
   ): { hasSubstitutionFailure: boolean; templatedMessages: Message[] } => {
     const templatedMessages: Message[] = [];
@@ -730,6 +881,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             const substituted = HeliconeTemplateManager.substituteVariables(
               item.content,
               substitutionValues,
+              promptPartialInputs,
             );
             if (!substituted.success) hasSubstitutionFailure = true;
             return {
@@ -747,6 +899,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         const substituted = HeliconeTemplateManager.substituteVariables(
           message.content,
           substitutionValues,
+          promptPartialInputs,
         );
         if (!substituted.success) hasSubstitutionFailure = true;
         templatedMessages.push({
@@ -777,9 +930,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           return [name, value];
         }),
       );
+      
       const { hasSubstitutionFailure, templatedMessages } =
         createTemplatedMessages(
           substitutionValues,
+          promptPartialInputs,
           mappedContent.schema.request.messages || [],
         );
       if (hasSubstitutionFailure) {
@@ -851,7 +1006,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         const stream = await generateStream({
           ...openaiRequest,
           signal: abortController.current.signal,
-          useAIGateway,
         } as any);
 
         const result = await processStream(
@@ -882,8 +1036,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               setError(result.error.message);
             }
           }
-          // setError(result.error.message || result.error?.error?.message);
-          console.error("error", result.error);
+          const error = result.error.message || result.error?.error?.message;
+          if (error.includes("Insufficient credits")) {
+            setError("Insufficient credits. Please add credits to continue using the playground.");
+          } else {
+            setError(error);
+          }
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -1037,8 +1195,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 onCreatePrompt={onCreatePrompt}
                 onSavePrompt={onSavePrompt}
                 onRun={onRun}
-                useAIGateway={useAIGateway}
-                setUseAIGateway={setUseAIGateway}
                 error={error}
                 isLoading={isStreaming}
                 createPrompt={createPrompt}

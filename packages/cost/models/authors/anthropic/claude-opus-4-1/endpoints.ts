@@ -8,7 +8,6 @@ export const endpoints = {
     provider: "anthropic",
     author: "anthropic",
     version: "20250805",
-    priority: 2,
     pricing: [
       {
         threshold: 0,
@@ -48,7 +47,6 @@ export const endpoints = {
     version: "vertex-2023-10-16",
     ptbEnabled: true,
     crossRegion: true,
-    priority: 3,
     pricing: [
       {
         threshold: 0,
@@ -85,7 +83,6 @@ export const endpoints = {
     providerModelId: "anthropic.claude-opus-4-1-20250805-v1:0",
     version: "20250805",
     crossRegion: true,
-    priority: 3,
     pricing: [
       {
         threshold: 0,
@@ -141,7 +138,6 @@ export const endpoints = {
       "top_k",
     ],
     ptbEnabled: true,
-    priority: 100,
     endpointConfigs: {
       "*": {},
     },
@@ -175,7 +171,6 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},

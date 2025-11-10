@@ -1,25 +1,69 @@
 ---
 title: "ETL / Data Extraction"
 sidebarTitle: "ETL / Data Extraction"
-description: "Extract, transform, and load data from Helicone into your data warehouse using our robust REST API."
+description: "Extract, transform, and load data from Helicone into your data warehouse using our CLI tool or REST API."
 "twitter:title": "ETL / Data Extraction - Helicone OSS LLM Observability"
 ---
 
-Our [REST API](rest) provides a robust solution for Extracting, Transforming, and Loading (ETL) data from Helicone into your personal data warehouse.
+## Quick Start: Export with CLI
 
-Here are some key advantages of our ETL API compared to traditional logging tools:
+The easiest way to extract your data is using our official npm package:
 
-- Advanced User Metrics
-- Custom Properties with Segmentation Metrics
-- Comprehensive Request and Response Parsing
-  - Model
-  - Prompt
-  - Response
-- Detailed Latency Metrics
-- Feedback Results (coming soon)
+```bash
+# Export to JSONL (recommended for large datasets)
+HELICONE_API_KEY="your-api-key" npx @helicone/export --start-date 2024-01-01 --include-body
 
-## ETL Connectors (coming soon)
+# Export to CSV for analysis in spreadsheets
+HELICONE_API_KEY="your-api-key" npx @helicone/export --format csv --output data.csv --include-body
 
-At present, we do not offer any pre-built connectors. However, we are receptive to suggestions and committed to meeting our users' needs. If there is a specific connector you would like us to develop, please let us know. You can reach us on [Discord](https://discord.com/invite/zsSTcH2qhG) or submit a [Github issue](https://github.com/Helicone/helicone/issues).
+# Export with property filters (e.g., by environment)
+HELICONE_API_KEY="your-api-key" npx @helicone/export --property environment=production --include-body
 
-In the interim, you can design your own ETL process using our [REST API](rest).
+# Export from EU region
+HELICONE_API_KEY="your-eu-api-key" npx @helicone/export --region eu --include-body
+```
+
+**Key Features:**
+- ✅ Auto-recovery from crashes with checkpoint system
+- ✅ Retry logic with exponential backoff
+- ✅ Progress tracking with ETA
+- ✅ Multiple output formats (JSON, JSONL, CSV)
+- ✅ Property and date filtering
+- ✅ Region support (US and EU)
+
+See the [export tool documentation](/tools/export) for all available options.
+
+## What Data You Can Extract
+
+Our export tool provides comprehensive access to your LLM data:
+
+- **Request Metadata**: User IDs, session IDs, custom properties
+- **Model Information**: Model names, versions, providers
+- **Request/Response Bodies**: Full prompts and completions (with `--include-body`)
+- **Performance Metrics**: Latency, token counts, cache hits
+- **Cost Data**: Per-request costs in USD
+- **Feedback**: User ratings and feedback (when available)
+
+## Using the REST API
+
+For custom integrations or programmatic access, use our [REST API](/rest/request/post-v1requestquery-clickhouse):
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+    "filter": "all",
+    "limit": 1000,
+    "offset": 0
+  }'
+```
+
+## ETL Connectors
+
+We currently provide:
+- **CLI tool** for direct export to JSON/JSONL/CSV
+- **REST API** for custom integrations
+
+Looking for a specific connector? We're receptive to suggestions! Reach us on [Discord](https://discord.com/invite/zsSTcH2qhG) or submit a [Github issue](https://github.com/Helicone/helicone/issues).

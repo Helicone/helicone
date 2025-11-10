@@ -40,6 +40,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
       const lines = responseBody
         .split("\n")
         .filter((line) => line.trim() !== "" && !line.includes("OPENROUTER PROCESSING"))
+        .filter((line) => !line.startsWith("event:")) // Filter out SSE event lines (Responses API)
         .map((line) => {
           if (line === "data: [DONE]") return null;
           try {
@@ -66,9 +67,22 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
   }
 
   protected consolidateStreamData(streamData: any[]): any {
-    const lastChunkWithUsage = [...streamData].reverse().find(chunk => chunk?.usage);
-    if (lastChunkWithUsage?.usage) {
-      return lastChunkWithUsage;
+    // Check for Responses API format (chunk.response.usage)
+    const responsesAPIChunk = [...streamData].reverse()
+      .find(chunk => chunk?.response?.usage);
+    if (responsesAPIChunk?.response?.usage) {
+      return {
+        usage: responsesAPIChunk.response.usage,
+        model: responsesAPIChunk.response.model,
+        id: responsesAPIChunk.response.id,
+      };
+    }
+
+    // Check for Chat Completions format (chunk.usage)
+    const chatCompletionsChunk = [...streamData].reverse()
+      .find(chunk => chunk?.usage);
+    if (chatCompletionsChunk?.usage) {
+      return chatCompletionsChunk;
     }
 
     const consolidated: any = {
@@ -77,14 +91,23 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     };
 
     for (const chunk of streamData) {
+      // Check both formats
       if (chunk?.usage) {
         consolidated.usage = chunk.usage;
+      } else if (chunk?.response?.usage) {
+        consolidated.usage = chunk.response.usage;
       }
+
       if (chunk?.id) {
         consolidated.id = chunk.id;
+      } else if (chunk?.response?.id) {
+        consolidated.id = chunk.response.id;
       }
+
       if (chunk?.model) {
         consolidated.model = chunk.model;
+      } else if (chunk?.response?.model) {
+        consolidated.model = chunk.response.model;
       }
     }
 

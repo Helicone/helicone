@@ -114,6 +114,18 @@ Add your provider API keys in [Provider Settings](https://us.helicone.ai/provide
 The gateway forwards **any** model/provider combination, even models not yet in our registry. Unknown models only route through your BYOK deployments.
 </Note>
 
+### Exclude Specific Providers
+
+Prevent automatic routing from using specific providers:
+
+```typescript
+model: "!openai,gpt-4o-mini"  // Use any provider EXCEPT OpenAI
+```
+
+**When to use:** Known provider issues, compliance restrictions, or testing without certain providers.
+
+**What happens:** The gateway tries all available providers except those you've excluded. Exclude multiple providers with commas: `"!openai,!anthropic,gpt-4o-mini"`.
+
 ## Failover Triggers
 
 The gateway automatically tries the next provider when encountering these errors:
@@ -169,6 +181,20 @@ await client.chat.completions.create({
 ```
 
 **What happens:** Requests ONLY go through your Frankfurt deployment. No data leaves the EU.
+
+### Scenario: Avoiding Provider Issues
+
+You notice one provider is experiencing higher latency or errors today.
+
+```typescript
+// Exclude the problematic provider from automatic routing
+const response = await client.chat.completions.create({
+  model: "!openai,gpt-4o-mini",
+  messages: [{ role: "user", content: "Analyze this data" }]
+});
+```
+
+**What happens:** Gateway automatically routes to all available providers except OpenAI. If you also want to exclude another provider, use `"!openai,!anthropic,gpt-4o-mini"`.
 
 ## Next Steps
 

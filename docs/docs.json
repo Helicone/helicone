@@ -35,7 +35,8 @@
                 "pages": [
                   "gateway/concepts/prompt-caching",
                   "gateway/web-search",
-                  "gateway/concepts/error-handling"
+                  "gateway/concepts/error-handling",
+                  "gateway/concepts/responses-api"
                 ]
               },
               {
@@ -44,7 +45,7 @@
                   "gateway/integrations/langchain",
                   "gateway/integrations/langgraph",
                   "gateway/integrations/semantic-kernel",
-                  "gateway/concepts/responses-api"
+                  "gateway/integrations/codex"
                 ]
               }
             ]
@@ -60,11 +61,18 @@
               "features/alerts",
               "features/reports",
               "features/hql",
+              "features/advanced-usage/scores",
+              "features/advanced-usage/feedback",
+              {
+                "group": "Webhooks",
+                "pages": ["features/webhooks", "features/webhooks-testing"]
+              },
               {
                 "group": "Tools",
                 "pages": [
                   "integrations/tools/curl",
-                  "integrations/tools/logger-sdk"
+                  "integrations/tools/logger-sdk",
+                  "integrations/tools/xcode"
                 ]
               },
               {
@@ -79,175 +87,171 @@
           {
             "group": "Prompt Management",
             "pages": [
-              "features/advanced-usage/prompts",
-              "features/advanced-usage/scores",
-              "features/advanced-usage/feedback",
+              "features/advanced-usage/prompts/overview",
+              "features/advanced-usage/prompts/assembly",
+              "features/advanced-usage/prompts/sdk"
+            ]
+          },
+          {
+            "group": "Alternative Integrations",
+            "pages": [
+              "integrations/overview",
               {
-                "group": "Webhooks",
-                "pages": ["features/webhooks", "features/webhooks-testing"]
+                "group": "Provider-Specific",
+                "pages": [
+                  {
+                    "group": "Anthropic",
+                    "pages": [
+                      "integrations/anthropic/curl",
+                      "integrations/anthropic/javascript",
+                      "integrations/anthropic/langchain",
+                      "integrations/anthropic/python",
+                      "integrations/anthropic/claude-code"
+                    ]
+                  },
+                  "getting-started/integration-method/anyscale",
+                  {
+                    "group": "AWS Bedrock",
+                    "pages": [
+                      "integrations/bedrock/javascript",
+                      "integrations/bedrock/python"
+                    ]
+                  },
+                  {
+                    "group": "Azure OpenAI",
+                    "pages": [
+                      "integrations/azure/curl",
+                      "integrations/azure/javascript",
+                      "integrations/azure/langchain",
+                      "integrations/azure/python"
+                    ]
+                  },
+                  "getting-started/integration-method/deepinfra",
+                  "getting-started/integration-method/deepseek",
+                  {
+                    "group": "Gemini",
+                    "pages": [
+                      {
+                        "group": "API",
+                        "pages": [
+                          "integrations/gemini/api/curl",
+                          "integrations/gemini/api/javascript",
+                          "integrations/gemini/api/python"
+                        ]
+                      },
+                      {
+                        "group": "Vertex AI (Enterprise)",
+                        "pages": [
+                          "integrations/gemini/vertex/curl",
+                          "integrations/gemini/vertex/javascript",
+                          "integrations/gemini/vertex/python"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "group": "Groq",
+                    "pages": [
+                      "integrations/groq/curl",
+                      "integrations/groq/javascript",
+                      "integrations/groq/python"
+                    ]
+                  },
+                  {
+                    "group": "Instructor",
+                    "pages": [
+                      "integrations/instructor/javascript",
+                      "integrations/instructor/python"
+                    ]
+                  },
+                  {
+                    "group": "Llama",
+                    "pages": [
+                      "integrations/llama/curl",
+                      "integrations/llama/javascript",
+                      "integrations/llama/python"
+                    ]
+                  },
+                  "getting-started/integration-method/hyperbolic",
+                  "getting-started/integration-method/mistral",
+                  "getting-started/integration-method/nebius",
+                  "getting-started/integration-method/novita",
+                  {
+                    "group": "Nvidia",
+                    "pages": [
+                      "integrations/nvidia/curl",
+                      "integrations/nvidia/javascript",
+                      "integrations/nvidia/python",
+                      "integrations/nvidia/dynamo"
+                    ]
+                  },
+                  {
+                    "group": "Ollama",
+                    "pages": ["integrations/ollama/javascript"]
+                  },
+                  {
+                    "group": "OpenAI",
+                    "pages": [
+                      "integrations/openai/curl",
+                      "integrations/openai/javascript",
+                      "integrations/openai/langchain",
+                      "integrations/openai/llamaindex",
+                      "integrations/openai/python",
+                      "integrations/openai/realtime",
+                      "integrations/openai/responses"
+                    ]
+                  },
+                  "getting-started/integration-method/openrouter",
+                  "getting-started/integration-method/perplexity",
+                  "getting-started/integration-method/together",
+                  {
+                    "group": "xAI",
+                    "pages": [
+                      "integrations/xai/curl",
+                      "integrations/xai/javascript",
+                      "integrations/xai/python"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Frameworks",
+                "pages": [
+                  "other-integrations/langgraph",
+                  "getting-started/integration-method/litellm",
+                  "getting-started/integration-method/vercelai",
+                  "getting-started/integration-method/crewai",
+                  "other-integrations/dify",
+                  "other-integrations/ragas"
+                ]
+              },
+              {
+                "group": "Async Logging",
+                "pages": [
+                  "getting-started/integration-method/openllmetry",
+                  {
+                    "group": "Manual Logger",
+                    "pages": [
+                      "getting-started/integration-method/manual-logger-curl",
+                      "getting-started/integration-method/manual-logger-typescript",
+                      "getting-started/integration-method/manual-logger-python",
+                      "getting-started/integration-method/manual-logger-go"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Custom Logs",
+                "pages": [
+                  "integrations/data/logger-sdk",
+                  "integrations/data/curl"
+                ]
               }
             ]
           },
           {
             "group": "References",
             "pages": [
-              {
-                "group": "Alternative Integrations",
-                "pages": [
-                  "integrations/overview",
-                  {
-                    "group": "Provider-Specific",
-                    "pages": [
-                      {
-                        "group": "Anthropic",
-                        "pages": [
-                          "integrations/anthropic/curl",
-                          "integrations/anthropic/javascript",
-                          "integrations/anthropic/langchain",
-                          "integrations/anthropic/python",
-                          "integrations/anthropic/claude-code"
-                        ]
-                      },
-                      "getting-started/integration-method/anyscale",
-                      {
-                        "group": "AWS Bedrock",
-                        "pages": [
-                          "integrations/bedrock/javascript",
-                          "integrations/bedrock/python"
-                        ]
-                      },
-                      {
-                        "group": "Azure OpenAI",
-                        "pages": [
-                          "integrations/azure/curl",
-                          "integrations/azure/javascript",
-                          "integrations/azure/langchain",
-                          "integrations/azure/python"
-                        ]
-                      },
-                      "getting-started/integration-method/deepinfra",
-                      "getting-started/integration-method/deepseek",
-                      {
-                        "group": "Gemini",
-                        "pages": [
-                          {
-                            "group": "API",
-                            "pages": [
-                              "integrations/gemini/api/curl",
-                              "integrations/gemini/api/javascript",
-                              "integrations/gemini/api/python"
-                            ]
-                          },
-                          {
-                            "group": "Vertex AI (Enterprise)",
-                            "pages": [
-                              "integrations/gemini/vertex/curl",
-                              "integrations/gemini/vertex/javascript",
-                              "integrations/gemini/vertex/python"
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "group": "Groq",
-                        "pages": [
-                          "integrations/groq/curl",
-                          "integrations/groq/javascript",
-                          "integrations/groq/python"
-                        ]
-                      },
-                      {
-                        "group": "Instructor",
-                        "pages": [
-                          "integrations/instructor/javascript",
-                          "integrations/instructor/python"
-                        ]
-                      },
-                      {
-                        "group": "Llama",
-                        "pages": [
-                          "integrations/llama/curl",
-                          "integrations/llama/javascript",
-                          "integrations/llama/python"
-                        ]
-                      },
-                      "getting-started/integration-method/hyperbolic",
-                      "getting-started/integration-method/mistral",
-                      "getting-started/integration-method/nebius",
-                      "getting-started/integration-method/novita",
-                      {
-                        "group": "Nvidia",
-                        "pages": [
-                          "integrations/nvidia/curl",
-                          "integrations/nvidia/javascript",
-                          "integrations/nvidia/python",
-                          "integrations/nvidia/dynamo"
-                        ]
-                      },
-                      {
-                        "group": "Ollama",
-                        "pages": ["integrations/ollama/javascript"]
-                      },
-                      {
-                        "group": "OpenAI",
-                        "pages": [
-                          "integrations/openai/curl",
-                          "integrations/openai/javascript",
-                          "integrations/openai/langchain",
-                          "integrations/openai/llamaindex",
-                          "integrations/openai/python",
-                          "integrations/openai/realtime",
-                          "integrations/openai/responses"
-                        ]
-                      },
-                      "getting-started/integration-method/openrouter",
-                      "getting-started/integration-method/perplexity",
-                      "getting-started/integration-method/together",
-                      {
-                        "group": "xAI",
-                        "pages": [
-                          "integrations/xai/curl",
-                          "integrations/xai/javascript",
-                          "integrations/xai/python"
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "group": "Frameworks",
-                    "pages": [
-                      "other-integrations/langgraph",
-                      "getting-started/integration-method/litellm",
-                      "getting-started/integration-method/vercelai",
-                      "getting-started/integration-method/crewai",
-                      "other-integrations/dify",
-                      "other-integrations/ragas"
-                    ]
-                  },
-                  {
-                    "group": "Async Logging",
-                    "pages": [
-                      "getting-started/integration-method/openllmetry",
-                      {
-                        "group": "Manual Logger",
-                        "pages": [
-                          "getting-started/integration-method/manual-logger-curl",
-                          "getting-started/integration-method/manual-logger-typescript",
-                          "getting-started/integration-method/manual-logger-python",
-                          "getting-started/integration-method/manual-logger-go"
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "group": "Custom Logs",
-                    "pages": [
-                      "integrations/data/logger-sdk",
-                      "integrations/data/curl"
-                    ]
-                  }
-                ]
-              },
               {
                 "group": "Self-Hosting",
                 "pages": [
@@ -281,6 +285,13 @@
         "anchor": "API Reference",
         "icon": "code",
         "groups": [
+          {
+            "group": "AI Gateway",
+            "pages": [
+              "rest/ai-gateway/post-v1-chat-completions",
+              "rest/ai-gateway/post-v1-responses"
+            ]
+          },
           {
             "group": "Request",
             "pages": [
@@ -355,7 +366,10 @@
           },
           {
             "group": "Models",
-            "pages": ["rest/models/get-v1public-model-registry-models"]
+            "pages": [
+              "rest/ai-gateway/get-v1models",
+              "rest/models/get-v1public-model-registry-models"
+            ]
           }
         ]
       },
@@ -463,7 +477,7 @@
     "dark": "/logo/dark.svg"
   },
   "api": {
-    "openapi": ["swagger.json"]
+    "openapi": ["swagger.json", "ai-gateway.openapi.json"]
   },
   "appearance": {
     "default": "light"
@@ -654,6 +668,10 @@
     {
       "source": "/ai-gateway/prompt-integration",
       "destination": "/gateway/prompt-integration"
+    },
+    {
+      "source": "/features/advanced-usage/prompts",
+      "destination": "/features/advanced-usage/prompts/overview"
     }
   ]
 }
