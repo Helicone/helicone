@@ -35,7 +35,9 @@ export class AzureOpenAIProvider extends BaseProvider {
     if (endpoint.ptbEnabled) {
       deploymentName = endpoint.providerModelId;
     } else {
-      const deployment = endpoint.userConfig.deploymentName?.trim();
+      const deployment = endpoint.userConfig.deploymentName?.trim() 
+        || endpoint.userConfig.modelName 
+        || endpoint.providerModelId;
       if (!deployment) {
         throw new Error(
           "Azure OpenAI requires a deployment name, provider model ID, or model name"
