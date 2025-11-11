@@ -14,10 +14,13 @@ import {
   buildFilterWithAuthClickHouse,
   buildFilterWithAuthClickHouseOrganizationProperties,
 } from "@helicone-package/filters/filters";
-import { resultMap } from "../../packages/common/result";
+import { resultMap, Result } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
-import { getXOverTime } from "../../managers/helpers/getXOverTime";
+import {
+  type DataOverTimeRequest,
+  getXOverTime,
+} from "../../managers/helpers/getXOverTime";
 
 export interface Property {
   property: string;
