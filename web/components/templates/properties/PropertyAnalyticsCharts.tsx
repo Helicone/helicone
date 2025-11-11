@@ -299,16 +299,16 @@ export function PropertyAnalyticsCharts({
           className="flex h-full flex-col"
         >
           <div className="flex items-start justify-between">
-            <div className="flex flex-col space-y-0.5">
-              <TabsList variant="default" className="h-auto p-0">
-                <TabsTrigger value="cost" className="text-sm">
+            <div className="flex flex-col space-y-2">
+              <TabsList variant="default" asPill size="sm">
+                <TabsTrigger value="cost" asPill>
                   Cost
                 </TabsTrigger>
-                <TabsTrigger value="top-costs" className="text-sm">
+                <TabsTrigger value="top-costs" asPill>
                   Top Costs
                 </TabsTrigger>
               </TabsList>
-              <p className="mt-2 text-xl font-semibold text-foreground">
+              <p className="text-xl font-semibold text-foreground">
                 {formatCurrency(totalCost)}
               </p>
             </div>
@@ -434,13 +434,13 @@ export function PropertyAnalyticsCharts({
           className="flex h-full flex-col"
         >
           <div className="flex items-start justify-between">
-            <div className="flex flex-col space-y-0.5">
-              <TabsList variant="default" className="h-auto p-0">
-                <TabsTrigger value="requests" className="text-sm">
+            <div className="flex flex-col space-y-2">
+              <TabsList variant="default" asPill size="sm">
+                <TabsTrigger value="requests" asPill>
                   Requests
                 </TabsTrigger>
               </TabsList>
-              <p className="mt-2 text-xl font-semibold text-foreground">
+              <p className="text-xl font-semibold text-foreground">
                 {formatNumber(totalRequests)}
               </p>
             </div>

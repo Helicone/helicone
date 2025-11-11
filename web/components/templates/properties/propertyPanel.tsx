@@ -113,7 +113,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   return (
     <div className="mb-1 w-full">
       <div className="flex flex-col">
-        <div className="flex flex-col items-center justify-between p-4 md:flex-row">
+        <div className="flex flex-col items-center justify-between p-2 md:flex-row">
           <Row className="flex-wrap items-center gap-2">
             <ThemedTableHeader
               isFetching={false}
@@ -170,10 +170,10 @@ const PropertyPanel = (props: PropertyPanelProps) => {
             </div>
           </div>
         ) : (
-          <div className="flex w-full flex-col pt-6">
+          <div className="flex w-full flex-col pt-2">
             <div className="flex flex-col pt-0">
               {/* Analytics Charts with Tabs */}
-              <div className="px-4 pb-6">
+              <div className="pb-0">
                 <PropertyAnalyticsCharts
                   property={property}
                   timeFilter={timeFilter}
@@ -182,7 +182,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
               </div>
 
               {isAnyLoading ? (
-                <div className="w-full border-t border-border pt-6">
+                <div className="w-full border-t border-border pt-0">
                   <div className="space-y-3 px-4">
                     <div className="flex items-center gap-4">
                       {[
@@ -214,7 +214,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </div>
                 </div>
               ) : (
-                <div className="overflow-x-auto border-t border-border pt-6">
+                <div className="overflow-x-auto border-t border-border pt-0">
                   <SimpleTable
                     className="w-full px-4"
                     data={cleanedValueData}
@@ -333,7 +333,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
               )}
 
               {propertyValueData.length > 10 && (
-                <div className="flex justify-center p-4">
+                <div className="flex justify-center p-2">
                   <Button
                     variant="outline"
                     size="sm"
