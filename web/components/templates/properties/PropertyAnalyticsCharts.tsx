@@ -1,20 +1,21 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
-import { H4, Muted, Small } from "@/components/ui/typography";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Small } from "@/components/ui/typography";
 import { useFilterStore } from "@/filterAST/store/filterStore";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
-import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import React from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import PropertyTopCosts from "./propertyTopCosts";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 
 const formatCurrency = (amount: number) => {
   if (amount === 0) return "$0.00";
@@ -87,6 +88,15 @@ export function PropertyAnalyticsCharts({
   const userFilters = filterStore.filter
     ? toFilterNode(filterStore.filter)
     : "all";
+
+  const [selectedCostTab, setSelectedCostTab] = useLocalStorage<string>(
+    "property-analytics-cost-tab",
+    "cost",
+  );
+  const [selectedRequestsTab, setSelectedRequestsTab] = useLocalStorage<string>(
+    "property-analytics-requests-tab",
+    "requests",
+  );
 
   const dbIncrement = getTimeIncrement(timeFilter.start, timeFilter.end);
 
@@ -252,277 +262,298 @@ export function PropertyAnalyticsCharts({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Card className="border-border bg-card">
-          <CardHeader>
-            <Skeleton className="h-6 w-48 bg-muted" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-[300px] w-full bg-muted" />
-          </CardContent>
-        </Card>
-        <Card className="border-border bg-card">
-          <CardHeader>
-            <Skeleton className="h-6 w-48 bg-muted" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-[300px] w-full bg-muted" />
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2">
+        <div className="border-b border-r border-border bg-card p-6">
+          <Skeleton className="h-10 w-48 bg-muted" />
+          <Skeleton className="mt-4 h-[300px] w-full bg-muted" />
+        </div>
+        <div className="border-b border-r border-border bg-card p-6">
+          <Skeleton className="h-10 w-48 bg-muted" />
+          <Skeleton className="mt-4 h-[300px] w-full bg-muted" />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Card className="border-border bg-card">
-          <CardContent className="flex h-[300px] items-center justify-center p-6">
-            <Small className="text-destructive">
-              {error instanceof Error
-                ? error.message
-                : "Error loading cost data"}
-            </Small>
-          </CardContent>
-        </Card>
-        <Card className="border-border bg-card">
-          <CardContent className="flex h-[300px] items-center justify-center p-6">
-            <Small className="text-destructive">
-              {error instanceof Error
-                ? error.message
-                : "Error loading request data"}
-            </Small>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2">
+        <div className="flex h-[400px] items-center justify-center border-b border-r border-border bg-card p-6">
+          <Small className="text-destructive">
+            {error instanceof Error
+              ? error.message
+              : "Error loading analytics data"}
+          </Small>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      {/* Cost Chart */}
-      <Card className="border-border bg-card">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <H4>Cost Over Time</H4>
-            <div className="flex flex-col items-end">
-              <Muted className="text-xs">Total</Muted>
-              <span className="text-base font-semibold">
+    <div className="grid grid-cols-1 md:grid-cols-2">
+      {/* Cost Analytics Card */}
+      <div className="flex flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
+        <Tabs
+          value={selectedCostTab}
+          onValueChange={setSelectedCostTab}
+          className="flex h-full flex-col"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col space-y-0.5">
+              <TabsList variant="default" className="h-auto p-0">
+                <TabsTrigger value="cost" className="text-sm">
+                  Cost
+                </TabsTrigger>
+                <TabsTrigger value="top-costs" className="text-sm">
+                  Top Costs
+                </TabsTrigger>
+              </TabsList>
+              <p className="mt-2 text-xl font-semibold text-foreground">
                 {formatCurrency(totalCost)}
-              </span>
+              </p>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          {transformedData.costData.length === 0 ? (
-            <div className="flex h-[300px] items-center justify-center">
-              <Small className="text-muted-foreground">
-                No cost data available
-              </Small>
-            </div>
-          ) : (
-            <ChartContainer
-              config={costChartConfig}
-              className="h-[300px] w-full"
-            >
-              <LineChart
-                data={transformedData.costData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  className="stroke-muted"
-                />
-                <XAxis
-                  dataKey="date"
-                  type="number"
-                  domain={["dataMin", "dataMax"]}
-                  tickFormatter={(timestamp) =>
-                    format(new Date(timestamp), "MMM d")
-                  }
-                  scale="time"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  minTickGap={50}
-                  className="text-xs text-muted-foreground"
-                />
-                <YAxis
-                  tickFormatter={(value) => formatAxisCurrency(value)}
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  className="text-xs text-muted-foreground"
-                />
-                <ChartTooltip
-                  content={({ active, payload }) => {
-                    if (!active || !payload || payload.length === 0)
-                      return null;
 
-                    const date = payload[0]?.payload?.dateLabel || "";
+          <div className="flex-grow py-4">
+            {/* Cost Tab */}
+            <TabsContent value="cost" className="mt-0 h-full">
+              {transformedData.costData.length === 0 ? (
+                <div className="flex h-[300px] items-center justify-center">
+                  <Small className="text-muted-foreground">
+                    No cost data available
+                  </Small>
+                </div>
+              ) : (
+                <ChartContainer
+                  config={costChartConfig}
+                  className="h-[300px] w-full"
+                >
+                  <LineChart
+                    data={transformedData.costData}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      className="stroke-muted"
+                    />
+                    <XAxis
+                      dataKey="date"
+                      type="number"
+                      domain={["dataMin", "dataMax"]}
+                      tickFormatter={(timestamp) =>
+                        format(new Date(timestamp), "MMM d")
+                      }
+                      scale="time"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      minTickGap={50}
+                      className="text-xs text-muted-foreground"
+                    />
+                    <YAxis
+                      tickFormatter={(value) => formatAxisCurrency(value)}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      className="text-xs text-muted-foreground"
+                    />
+                    <ChartTooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload || payload.length === 0)
+                          return null;
 
-                    return (
-                      <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
-                        <p className="mb-2 text-sm font-medium text-foreground">
-                          {date}
-                        </p>
-                        <div className="flex flex-col gap-1">
-                          {payload
-                            .filter((item) => Number(item.value) > 0)
-                            .sort((a, b) => Number(b.value) - Number(a.value))
-                            .map((item, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between gap-4"
-                              >
-                                <div className="flex items-center gap-2">
+                        const date = payload[0]?.payload?.dateLabel || "";
+
+                        return (
+                          <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
+                            <p className="mb-2 text-sm font-medium text-foreground">
+                              {date}
+                            </p>
+                            <div className="flex flex-col gap-1">
+                              {payload
+                                .filter((item) => Number(item.value) > 0)
+                                .sort(
+                                  (a, b) => Number(b.value) - Number(a.value),
+                                )
+                                .map((item, index) => (
                                   <div
-                                    className="h-2 w-2 rounded-full"
-                                    style={{ backgroundColor: item.color }}
-                                  />
-                                  <span className="text-xs text-muted-foreground">
-                                    {String(item.name)}
-                                  </span>
-                                </div>
-                                <span className="text-xs font-semibold text-foreground">
-                                  {formatCurrency(Number(item.value))}
-                                </span>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    );
-                  }}
-                />
-                {transformedData.topPropertiesByCost?.map((prop, index) => (
-                  <Line
-                    key={prop}
-                    type="monotone"
-                    dataKey={prop}
-                    stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                    strokeWidth={2}
-                    dot={false}
-                    name={prop}
-                  />
-                ))}
-              </LineChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+                                    key={index}
+                                    className="flex items-center justify-between gap-4"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div
+                                        className="h-2 w-2 rounded-full"
+                                        style={{
+                                          backgroundColor: item.color,
+                                        }}
+                                      />
+                                      <span className="text-xs text-muted-foreground">
+                                        {String(item.name)}
+                                      </span>
+                                    </div>
+                                    <span className="text-xs font-semibold text-foreground">
+                                      {formatCurrency(Number(item.value))}
+                                    </span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        );
+                      }}
+                    />
+                    {transformedData.topPropertiesByCost?.map((prop, index) => (
+                      <Line
+                        key={prop}
+                        type="monotone"
+                        dataKey={prop}
+                        stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                        strokeWidth={2}
+                        dot={false}
+                        name={prop}
+                      />
+                    ))}
+                  </LineChart>
+                </ChartContainer>
+              )}
+            </TabsContent>
 
-      {/* Requests Chart */}
-      <Card className="border-border bg-card">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <H4>Requests Over Time</H4>
-            <div className="flex flex-col items-end">
-              <Muted className="text-xs">Total</Muted>
-              <span className="text-base font-semibold">
+            {/* Top Costs Tab */}
+            <TabsContent value="top-costs" className="mt-0 h-full">
+              <PropertyTopCosts property={property} timeFilter={timeFilter} />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
+
+      {/* Requests Analytics Card */}
+      <div className="flex flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
+        <Tabs
+          value={selectedRequestsTab}
+          onValueChange={setSelectedRequestsTab}
+          className="flex h-full flex-col"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col space-y-0.5">
+              <TabsList variant="default" className="h-auto p-0">
+                <TabsTrigger value="requests" className="text-sm">
+                  Requests
+                </TabsTrigger>
+              </TabsList>
+              <p className="mt-2 text-xl font-semibold text-foreground">
                 {formatNumber(totalRequests)}
-              </span>
+              </p>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          {transformedData.requestsData.length === 0 ? (
-            <div className="flex h-[300px] items-center justify-center">
-              <Small className="text-muted-foreground">
-                No request data available
-              </Small>
-            </div>
-          ) : (
-            <ChartContainer
-              config={requestsChartConfig}
-              className="h-[300px] w-full"
-            >
-              <LineChart
-                data={transformedData.requestsData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  className="stroke-muted"
-                />
-                <XAxis
-                  dataKey="date"
-                  type="number"
-                  domain={["dataMin", "dataMax"]}
-                  tickFormatter={(timestamp) =>
-                    format(new Date(timestamp), "MMM d")
-                  }
-                  scale="time"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  minTickGap={50}
-                  className="text-xs text-muted-foreground"
-                />
-                <YAxis
-                  tickFormatter={(value) => formatNumber(value)}
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  className="text-xs text-muted-foreground"
-                />
-                <ChartTooltip
-                  content={({ active, payload }) => {
-                    if (!active || !payload || payload.length === 0)
-                      return null;
 
-                    const date = payload[0]?.payload?.dateLabel || "";
+          <div className="flex-grow py-4">
+            {/* Requests Tab */}
+            <TabsContent value="requests" className="mt-0 h-full">
+              {transformedData.requestsData.length === 0 ? (
+                <div className="flex h-[300px] items-center justify-center">
+                  <Small className="text-muted-foreground">
+                    No request data available
+                  </Small>
+                </div>
+              ) : (
+                <ChartContainer
+                  config={requestsChartConfig}
+                  className="h-[300px] w-full"
+                >
+                  <LineChart
+                    data={transformedData.requestsData}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      className="stroke-muted"
+                    />
+                    <XAxis
+                      dataKey="date"
+                      type="number"
+                      domain={["dataMin", "dataMax"]}
+                      tickFormatter={(timestamp) =>
+                        format(new Date(timestamp), "MMM d")
+                      }
+                      scale="time"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      minTickGap={50}
+                      className="text-xs text-muted-foreground"
+                    />
+                    <YAxis
+                      tickFormatter={(value) => formatNumber(value)}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      className="text-xs text-muted-foreground"
+                    />
+                    <ChartTooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload || payload.length === 0)
+                          return null;
 
-                    return (
-                      <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
-                        <p className="mb-2 text-sm font-medium text-foreground">
-                          {date}
-                        </p>
-                        <div className="flex flex-col gap-1">
-                          {payload
-                            .filter((item) => Number(item.value) > 0)
-                            .sort((a, b) => Number(b.value) - Number(a.value))
-                            .map((item, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between gap-4"
-                              >
-                                <div className="flex items-center gap-2">
+                        const date = payload[0]?.payload?.dateLabel || "";
+
+                        return (
+                          <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
+                            <p className="mb-2 text-sm font-medium text-foreground">
+                              {date}
+                            </p>
+                            <div className="flex flex-col gap-1">
+                              {payload
+                                .filter((item) => Number(item.value) > 0)
+                                .sort(
+                                  (a, b) => Number(b.value) - Number(a.value),
+                                )
+                                .map((item, index) => (
                                   <div
-                                    className="h-2 w-2 rounded-full"
-                                    style={{ backgroundColor: item.color }}
-                                  />
-                                  <span className="text-xs text-muted-foreground">
-                                    {String(item.name)}
-                                  </span>
-                                </div>
-                                <span className="text-xs font-semibold text-foreground">
-                                  {formatNumber(Number(item.value))}
-                                </span>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    );
-                  }}
-                />
-                {transformedData.topPropertiesByRequests?.map((prop, index) => (
-                  <Line
-                    key={prop}
-                    type="monotone"
-                    dataKey={prop}
-                    stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                    strokeWidth={2}
-                    dot={false}
-                    name={prop}
-                  />
-                ))}
-              </LineChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+                                    key={index}
+                                    className="flex items-center justify-between gap-4"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div
+                                        className="h-2 w-2 rounded-full"
+                                        style={{
+                                          backgroundColor: item.color,
+                                        }}
+                                      />
+                                      <span className="text-xs text-muted-foreground">
+                                        {String(item.name)}
+                                      </span>
+                                    </div>
+                                    <span className="text-xs font-semibold text-foreground">
+                                      {formatNumber(Number(item.value))}
+                                    </span>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        );
+                      }}
+                    />
+                    {transformedData.topPropertiesByRequests?.map(
+                      (prop, index) => (
+                        <Line
+                          key={prop}
+                          type="monotone"
+                          dataKey={prop}
+                          stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                          strokeWidth={2}
+                          dot={false}
+                          name={prop}
+                        />
+                      ),
+                    )}
+                  </LineChart>
+                </ChartContainer>
+              )}
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </div>
   );
 }

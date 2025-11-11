@@ -22,7 +22,6 @@ import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tag, ExternalLink } from "lucide-react";
-import PropertyTopCosts from "./propertyTopCosts";
 import { Row } from "@/components/layout/common";
 import { SimpleTable } from "../../shared/table/simpleTable";
 import { Small, XSmall, Muted } from "@/components/ui/typography";
@@ -173,7 +172,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
         ) : (
           <div className="flex w-full flex-col pt-6">
             <div className="flex flex-col pt-0">
-              {/* Analytics Charts */}
+              {/* Analytics Charts with Tabs */}
               <div className="px-4 pb-6">
                 <PropertyAnalyticsCharts
                   property={property}
@@ -182,14 +181,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                 />
               </div>
 
-              {/* Top Costs Pie Chart */}
-              <div className="px-4 pb-6">
-                <PropertyTopCosts property={property} timeFilter={timeFilter} />
-              </div>
-
               {isAnyLoading ? (
-                <div className="w-full">
-                  <div className="space-y-3">
+                <div className="w-full border-t border-border pt-6">
+                  <div className="space-y-3 px-4">
                     <div className="flex items-center gap-4">
                       {[
                         "Value",
@@ -220,9 +214,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </div>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto border-t border-border pt-6">
                   <SimpleTable
-                    className="w-full"
+                    className="w-full px-4"
                     data={cleanedValueData}
                     columns={[
                       {
