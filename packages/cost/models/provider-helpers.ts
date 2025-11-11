@@ -61,6 +61,8 @@ export function heliconeProviderToModelProviderName(
       return "cerebras";
     case "BASETEN":
       return "baseten";
+    case "FIREWORKS":
+      return "fireworks";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -70,7 +72,6 @@ export function heliconeProviderToModelProviderName(
     case "2YFV":
     case "TOGETHER":
     case "LEMONFOX":
-    case "FIREWORKS":
     case "WISDOMINANUTSHELL":
     case "QSTASH":
     case "FIRECRAWL":
@@ -140,6 +141,21 @@ export const dbProviderToProvider = (
   }
   if (provider === "deepinfra" || provider === "DeepInfra") {
     return "deepinfra";
+  }
+  if (provider === "fireworks" || provider === "Fireworks") {
+    return "fireworks";
+  }
+  if (provider === "baseten" || provider === "Baseten") {
+    return "baseten";
+  }
+  if (provider === "cerebras" || provider === "Cerebras") {
+    return "cerebras";
+  }
+  if (provider === "chutes" || provider === "Chutes") {
+    return "chutes";
+  }
+  if (provider === "nebius" || provider === "Nebius") {
+    return "nebius";
   }
   return null;
 };

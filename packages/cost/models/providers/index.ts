@@ -7,6 +7,7 @@ import { ChutesProvider } from "./chutes";
 import { CohereProvider } from "./cohere";
 import { DeepInfraProvider } from "./deepinfra";
 import { DeepSeekProvider } from "./deepseek";
+import { FireworksProvider } from "./fireworks";
 import { GoogleProvider } from "./google";
 import { GroqProvider } from "./groq";
 import { HeliconeProvider } from "./helicone";
@@ -30,6 +31,7 @@ export const providers = {
   cohere: new CohereProvider(),
   deepinfra: new DeepInfraProvider(),
   deepseek: new DeepSeekProvider(),
+  fireworks: new FireworksProvider(),
   "google-ai-studio": new GoogleProvider(),
   groq: new GroqProvider(),
   helicone: new HeliconeProvider(),
@@ -69,6 +71,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "perplexity",
   "xai",
   "baseten",
+  "fireworks",
 
   // anthropic and chat completions provider
   "vertex"

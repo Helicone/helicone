@@ -3337,6 +3337,13 @@ Json: JsonObject;
       error: null;
     };
     "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    AlertMetric: "latency" | "cost" | "prompt_tokens" | "completion_tokens" | "prompt_cache_read_tokens" | "prompt_cache_write_tokens" | "total_tokens" | "response.status" | "count";
+    /** @enum {string} */
+    AlertAggregation: "sum" | "avg" | "min" | "max" | "percentile";
+    /** @enum {string} */
+    AlertStandardGrouping: "model" | "provider" | "user";
+    AlertGrouping: components["schemas"]["AlertStandardGrouping"] | string;
     /** @description Matches all records (no filtering) */
     AllExpression: {
       /** @enum {string} */
@@ -3408,9 +3415,14 @@ Json: JsonObject;
     };
     AlertRequest: {
       name: string;
-      metric: string;
+      metric: components["schemas"]["AlertMetric"];
       /** Format: double */
       threshold: number;
+      aggregation: components["schemas"]["AlertAggregation"] | null;
+      /** Format: double */
+      percentile: number | null;
+      grouping: components["schemas"]["AlertGrouping"] | null;
+      grouping_is_property: boolean | null;
       time_window: string;
       emails: string[];
       slack_channels: string[];

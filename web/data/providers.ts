@@ -235,6 +235,16 @@ export const providers: Provider[] = [
     relevanceScore: 10,
   },
   {
+    id: "fireworks",
+    name: "Fireworks",
+    logoUrl: "/assets/home/providers/fireworks.png",
+    description: "Configure your Fireworks API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Fireworks API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 10,
+  },
+  {
     id: "cerebras",
     name: "Cerebras",
     logoUrl: "/assets/home/providers/cerebras.webp",

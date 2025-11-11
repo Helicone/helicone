@@ -40,14 +40,18 @@ export type Database = {
       }
       alert: {
         Row: {
+          aggregation: string | null
           created_at: string | null
           emails: string[]
           filter: Json | null
+          grouping: string | null
+          grouping_is_property: boolean | null
           id: string
           metric: string
           minimum_request_count: number | null
           name: string
           org_id: string
+          percentile: number | null
           slack_channels: string[]
           soft_delete: boolean
           status: string
@@ -57,14 +61,18 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          aggregation?: string | null
           created_at?: string | null
           emails: string[]
           filter?: Json | null
+          grouping?: string | null
+          grouping_is_property?: boolean | null
           id?: string
           metric: string
           minimum_request_count?: number | null
           name: string
           org_id: string
+          percentile?: number | null
           slack_channels?: string[]
           soft_delete?: boolean
           status?: string
@@ -74,14 +82,18 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          aggregation?: string | null
           created_at?: string | null
           emails?: string[]
           filter?: Json | null
+          grouping?: string | null
+          grouping_is_property?: boolean | null
           id?: string
           metric?: string
           minimum_request_count?: number | null
           name?: string
           org_id?: string
+          percentile?: number | null
           slack_channels?: string[]
           soft_delete?: boolean
           status?: string

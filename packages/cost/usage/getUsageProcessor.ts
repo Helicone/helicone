@@ -23,6 +23,7 @@ export function getUsageProcessor(
     case "mistralai":
     case "nebius":
     case "novita":
+    case "fireworks":
     case "cerebras":
       return new OpenAIUsageProcessor();
     case "anthropic":

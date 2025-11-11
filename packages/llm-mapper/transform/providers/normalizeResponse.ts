@@ -1,10 +1,12 @@
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { mapModelUsageToOpenAI } from "@helicone-package/cost/usage/mapModelUsageToOpenAI";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
-import { ResponseFormat } from "@helicone-package/cost/models/types";
+import { ResponseFormat, BodyMappingType } from "@helicone-package/cost/models/types";
 import { OpenAIResponseBody, ChatCompletionChunk } from "../types/openai";
 import { toOpenAI } from "./anthropic/response/toOpenai";
 import { AnthropicToOpenAIStreamConverter } from "./anthropic/streamedResponse/toOpenai";
+import { toResponses } from "./responses/openai/response/toResponses";
+import { ChatToResponsesStreamConverter } from "./responses/streamedResponse/toResponses";
 
 function decodeBase64(base64: string): string {
   if (typeof atob === "function") {
@@ -349,6 +351,41 @@ export async function normalizeOpenAIStreamText(
 }
 
 /**
+ * Converts OpenAI Chat Completions SSE stream to Responses API SSE stream.
+ */
+function convertOpenAIStreamToResponses(sseText: string): string {
+  const converter = new ChatToResponsesStreamConverter();
+  const lines = sseText.split("\n");
+  const outputLines: string[] = [];
+
+  for (const line of lines) {
+    if (line.startsWith("data: ")) {
+      const jsonStr = line.slice(6);
+
+      // Skip the [DONE] message
+      if (jsonStr.trim() === "[DONE]") {
+        continue;
+      }
+
+      try {
+        const chunk: ChatCompletionChunk = JSON.parse(jsonStr);
+        const events = converter.convert(chunk);
+        for (const ev of events) {
+          const type = (ev as any).type;
+          // Include the type field inside data to match OpenAI SDK expectations
+          const sseMessage = `event: ${type}\ndata: ${JSON.stringify(ev)}`;
+          outputLines.push(sseMessage);
+        }
+      } catch (error) {
+        // Skip invalid json
+      }
+    }
+  }
+
+  return outputLines.join("\n\n") + "\n\n";
+}
+
+/**
  * Transforms an OpenAI SSE stream to normalize usage in chunks.
  */
 function normalizeOpenAIStream(
@@ -422,6 +459,8 @@ async function processBuffer(
  * Handles both streaming and non-streaming responses, converting from
  * provider-native format to OpenAI format when needed, and normalizing
  * usage fields for all providers.
+ *
+ * If bodyMapping is "RESPONSES", converts the response to Responses API format.
  */
 export async function normalizeAIGatewayResponse(params: {
   responseText: string;
@@ -429,40 +468,47 @@ export async function normalizeAIGatewayResponse(params: {
   provider: ModelProviderName;
   providerModelId: string;
   responseFormat: ResponseFormat;
+  bodyMapping?: BodyMappingType;
 }): Promise<string> {
-  const { responseText, isStream, provider, providerModelId, responseFormat } =
+  const { responseText, isStream, provider, providerModelId, responseFormat, bodyMapping } =
     params;
 
   try {
     if (isStream) {
       // Streaming responses
+      let normalizedOpenAIText = responseText;
+
       if (responseFormat === "ANTHROPIC") {
         if (isBedrockEventStreamResponse(responseText)) {
           const normalized =
             await convertBedrockAnthropicStreamToOpenAI(responseText);
           if (normalized) {
-            return normalized;
+            normalizedOpenAIText = normalized;
           }
+        } else {
+          const converter = new AnthropicToOpenAIStreamConverter();
+          const openAIChunks: ChatCompletionChunk[] = [];
+
+          converter.processLines(responseText, (chunk) => {
+            openAIChunks.push(chunk);
+          });
+
+          normalizedOpenAIText = serializeOpenAIChunks(openAIChunks);
         }
-
-        const converter = new AnthropicToOpenAIStreamConverter();
-        const openAIChunks: ChatCompletionChunk[] = [];
-
-        converter.processLines(responseText, (chunk) => {
-          openAIChunks.push(chunk);
-        });
-
-        return serializeOpenAIChunks(openAIChunks);
-      }
-
-      if (responseFormat === "OPENAI") {
+      } else if (responseFormat === "OPENAI") {
         // Already in OpenAI format, just normalize usage
-        return await normalizeOpenAIStreamText(
+        normalizedOpenAIText = await normalizeOpenAIStreamText(
           responseText,
           provider,
           providerModelId
         );
       }
+
+      if (bodyMapping === "RESPONSES" && provider !== "openai") {
+        return convertOpenAIStreamToResponses(normalizedOpenAIText);
+      }
+
+      return normalizedOpenAIText;
     } else {
       // Non-streaming responses
       const providerBody = JSON.parse(responseText);
@@ -487,13 +533,15 @@ export async function normalizeAIGatewayResponse(params: {
         }
       }
 
+      if (bodyMapping === "RESPONSES") {
+        const responsesBody = toResponses(openAIBody);
+        return JSON.stringify(responsesBody);
+      }
+
       return JSON.stringify(openAIBody);
     }
   } catch (error) {
     console.error("Failed to normalize AI Gateway response:", error);
     throw error;
   }
-
-  // Fallback: return original response
-  return responseText;
 }
