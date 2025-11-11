@@ -1,3 +1,8 @@
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import {
+  buildFilterWithAuthClickHouse,
+  buildFilterWithAuthClickHouseOrganizationProperties,
+} from "@helicone-package/filters/filters";
 import {
   Body,
   Controller,
@@ -8,19 +13,14 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import {
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHouseOrganizationProperties,
-} from "@helicone-package/filters/filters";
-import { resultMap, Result } from "../../packages/common/result";
-import type { JawnAuthenticatedRequest } from "../../types/request";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
   type DataOverTimeRequest,
   getXOverTime,
 } from "../../managers/helpers/getXOverTime";
+import { Result, resultMap } from "../../packages/common/result";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 
 export interface Property {
   property: string;
