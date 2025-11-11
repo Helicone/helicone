@@ -43,7 +43,7 @@ export class AzureOpenAIProvider extends BaseProvider {
           "Azure OpenAI requires a deployment name, provider model ID, or model name"
         );
       }
-      deploymentName = deployment || endpoint.providerModelId;
+      deploymentName = deployment;
     }
 
     // Build URL with normalized base URI and API version
