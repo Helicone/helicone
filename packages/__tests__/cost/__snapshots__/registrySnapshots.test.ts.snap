@@ -2729,7 +2729,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 262000,
       "crossRegion": false,
       "maxTokens": 163800,
-      "modelId": "moonshotai/kimi-k2-0905",
+      "modelId": "moonshotai/Kimi-K2-Instruct-0905",
       "parameters": [
         "max_tokens",
         "response_format",
