@@ -5,7 +5,7 @@ import { WalletState } from "../../types/wallet";
 const WORKER_API_URL =
   process.env.HELICONE_WORKER_API ||
   process.env.WORKER_API_URL ||
-  "https://api.helicone.ai";
+  "https://api.worker.helicone.ai";
 
 const ADMIN_ACCESS_KEY = process.env.HELICONE_MANUAL_ACCESS_KEY;
 
