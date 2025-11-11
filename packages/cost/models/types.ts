@@ -240,6 +240,7 @@ export interface UserEndpointConfig {
   crossRegion?: boolean;
   gatewayMapping?: BodyMappingType;
   modelName?: string;
+  heliconeModelId?: string; // Azure OpenAI
 }
 
 export interface ModelSpec {

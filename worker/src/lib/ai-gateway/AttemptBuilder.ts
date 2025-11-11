@@ -213,6 +213,7 @@ export class AttemptBuilder {
 
     const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
+      modelSpec.modelName,
       orgId,
       modelSpec.customUid
     );
@@ -268,6 +269,7 @@ export class AttemptBuilder {
     // Get user's provider key for passthrough
     const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
       modelSpec.provider as ModelProviderName,
+      modelSpec.modelName,
       orgId,
       modelSpec.customUid
     );
@@ -339,6 +341,7 @@ export class AttemptBuilder {
 
     const heliconeKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
+      providerData.config.providerModelId,
       this.env.HELICONE_ORG_ID
     );
 
