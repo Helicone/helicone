@@ -8891,6 +8891,48 @@
 					}
 				]
 			},
+			"AlertMetric": {
+				"type": "string",
+				"enum": [
+					"latency",
+					"cost",
+					"prompt_tokens",
+					"completion_tokens",
+					"prompt_cache_read_tokens",
+					"prompt_cache_write_tokens",
+					"total_tokens",
+					"response.status",
+					"count"
+				]
+			},
+			"AlertAggregation": {
+				"type": "string",
+				"enum": [
+					"sum",
+					"avg",
+					"min",
+					"max",
+					"percentile"
+				]
+			},
+			"AlertStandardGrouping": {
+				"type": "string",
+				"enum": [
+					"model",
+					"provider",
+					"user"
+				]
+			},
+			"AlertGrouping": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/AlertStandardGrouping"
+					},
+					{
+						"type": "string"
+					}
+				]
+			},
 			"AllExpression": {
 				"description": "Matches all records (no filtering)",
 				"properties": {
@@ -9199,11 +9241,36 @@
 						"type": "string"
 					},
 					"metric": {
-						"type": "string"
+						"$ref": "#/components/schemas/AlertMetric"
 					},
 					"threshold": {
 						"type": "number",
 						"format": "double"
+					},
+					"aggregation": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AlertAggregation"
+							}
+						],
+						"nullable": true
+					},
+					"percentile": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"grouping": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AlertGrouping"
+							}
+						],
+						"nullable": true
+					},
+					"grouping_is_property": {
+						"type": "boolean",
+						"nullable": true
 					},
 					"time_window": {
 						"type": "string"
@@ -9237,6 +9304,10 @@
 					"name",
 					"metric",
 					"threshold",
+					"aggregation",
+					"percentile",
+					"grouping",
+					"grouping_is_property",
 					"time_window",
 					"emails",
 					"slack_channels",
