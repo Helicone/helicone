@@ -158,9 +158,6 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
       completionTokens - completionAudioTokens - reasoningTokens,
     );
 
-    const serverToolUse = usage.server_tool_use || {};
-    const webSearchRequests = serverToolUse.web_search_requests ?? 0;
-
     const modelUsage: ModelUsage = {
       input: effectivePromptTokens,
       output: effectiveCompletionTokens,
@@ -189,11 +186,12 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
 
     // Add web search usage if present
-    if (webSearchRequests > 0) {
-      modelUsage.web_search = webSearchRequests;
+    for (const output_item of parsedResponse.output || []) {
+      if (output_item.type == "web_search_call") {
+        modelUsage.web_search = (modelUsage.web_search || 0) + 1;
+      }
     }
 
     return modelUsage;
   }
 }
-
