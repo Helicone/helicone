@@ -17,6 +17,7 @@ import {
 import { resultMap } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import { getXOverTime } from "../../managers/helpers/getXOverTime";
 
 export interface Property {
   property: string;
@@ -35,11 +36,60 @@ export interface TimeFilterRequest {
 @Tags("Property")
 @Security("api_key")
 export class PropertyController extends Controller {
+  @Post("/properties/over-time")
+  public async getPropertiesOverTime(
+    @Body()
+    requestBody: DataOverTimeRequest & {
+      propertyKey: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        property: string;
+        total_cost: number;
+        request_count: number;
+        created_at_trunc: string;
+      }[],
+      string
+    >
+  > {
+    return await getXOverTime<{
+      property: string;
+      total_cost: number;
+      request_count: number;
+    }>(
+      {
+        ...requestBody,
+        userFilter: {
+          left: {
+            request_response_rmt: {
+              property_key: {
+                equals: requestBody.propertyKey,
+              },
+            },
+          },
+          operator: "and",
+          right: requestBody.userFilter,
+        },
+      },
+      {
+        orgId: request.authParams.organizationId,
+        countColumns: [
+          `sum(cost) / ${COST_PRECISION_MULTIPLIER} AS total_cost`,
+          "count(*) as request_count",
+        ],
+        groupByColumns: ["properties[{val_0: String}] AS property"],
+      },
+      [requestBody.propertyKey]
+    );
+  }
+
   @Post("query")
   public async getProperties(
     @Body()
     requestBody: {},
-    @Request() request: JawnAuthenticatedRequest,
+    @Request() request: JawnAuthenticatedRequest
   ) {
     const builtFilter =
       await buildFilterWithAuthClickHouseOrganizationProperties({
@@ -62,7 +112,7 @@ export class PropertyController extends Controller {
 
     const properties = await dbQueryClickhouse<Property>(
       query,
-      builtFilter.argsAcc,
+      builtFilter.argsAcc
     );
 
     return properties;
@@ -72,7 +122,7 @@ export class PropertyController extends Controller {
   public async hideProperty(
     @Body()
     requestBody: { key: string },
-    @Request() request: JawnAuthenticatedRequest,
+    @Request() request: JawnAuthenticatedRequest
   ) {
     const orgId = request.authParams.organizationId;
     const key = requestBody.key;
@@ -93,7 +143,7 @@ export class PropertyController extends Controller {
 
     const insRes = await clickhouseDb.dbInsertClickhouse(
       "hidden_property_keys",
-      [{ organization_id: orgId, key, is_hidden: 1 }],
+      [{ organization_id: orgId, key, is_hidden: 1 }]
     );
     if (insRes.error) {
       return insRes;
@@ -104,7 +154,7 @@ export class PropertyController extends Controller {
 
   @Post("hidden/query")
   public async getHiddenProperties(
-    @Request() request: JawnAuthenticatedRequest,
+    @Request() request: JawnAuthenticatedRequest
   ) {
     const orgId = request.authParams.organizationId;
 
@@ -123,7 +173,7 @@ export class PropertyController extends Controller {
   public async restoreProperty(
     @Body()
     requestBody: { key: string },
-    @Request() request: JawnAuthenticatedRequest,
+    @Request() request: JawnAuthenticatedRequest
   ) {
     const orgId = request.authParams.organizationId;
     const key = requestBody.key;
@@ -143,7 +193,7 @@ export class PropertyController extends Controller {
 
     const insRes = await clickhouseDb.dbInsertClickhouse(
       "hidden_property_keys",
-      [{ organization_id: orgId, key, is_hidden: 0 }],
+      [{ organization_id: orgId, key, is_hidden: 0 }]
     );
     if (insRes.error) {
       return insRes;
@@ -160,7 +210,7 @@ export class PropertyController extends Controller {
     @Body()
     requestBody: {
       searchTerm: string;
-    },
+    }
   ) {
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: request.authParams.organizationId,
@@ -188,7 +238,7 @@ export class PropertyController extends Controller {
 
     const res = await dbQueryClickhouse<{ property: string }>(
       query,
-      builtFilter.argsAcc,
+      builtFilter.argsAcc
     );
 
     return resultMap(res, (data) => data.map((r) => r.property));
@@ -198,7 +248,7 @@ export class PropertyController extends Controller {
   public async getTopCosts(
     @Request() request: JawnAuthenticatedRequest,
     @Path() propertyKey: string,
-    @Body() requestBody: TimeFilterRequest,
+    @Body() requestBody: TimeFilterRequest
   ) {
     if (!propertyKey) {
       throw new Error("Property key is required");

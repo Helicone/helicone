@@ -3819,6 +3819,17 @@
 					"target_url": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
+					"property_key": {
+						"properties": {
+							"equals": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"equals"
+						],
+						"type": "object"
+					},
 					"properties": {
 						"properties": {},
 						"additionalProperties": {
@@ -4138,12 +4149,14 @@
 					"LLAMA",
 					"NVIDIA",
 					"VERCEL",
-					"CEREBRAS"
+					"CEREBRAS",
+					"BASETEN"
 				]
 			},
 			"ModelProviderName": {
 				"type": "string",
 				"enum": [
+					"baseten",
 					"anthropic",
 					"azure",
 					"bedrock",
@@ -49190,6 +49203,7 @@
 												"providerName": {
 													"type": "string",
 													"enum": [
+														"baseten",
 														"anthropic",
 														"azure",
 														"bedrock",
