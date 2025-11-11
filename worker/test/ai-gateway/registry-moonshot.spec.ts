@@ -27,7 +27,7 @@ const basetenAuthExpectations = {
 // Define auth expectations for Fireworks provider
 const fireworksAuthExpectations = {
   headers: {
-    "api-key": "test-fireworks-api-key",
+    Authorization: /^Bearer /,
   },
 };
 
