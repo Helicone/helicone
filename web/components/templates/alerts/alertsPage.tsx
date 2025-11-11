@@ -6,7 +6,6 @@ import DeleteAlertModal from "./deleteAlertModal";
 import { SimpleTable } from "@/components/shared/table/simpleTable";
 import { Database } from "../../../db/database.types";
 import { getUSDate } from "../../shared/utils/utils";
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { useGetOrgSlackChannels } from "@/services/hooks/organizations";
 import { alertTimeWindows } from "./constant";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
@@ -26,6 +25,7 @@ import Header from "@/components/shared/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import TableFooter from "../requests/tableFooter";
+import AlertStatusPill from "./alertStatusPill";
 
 const TABS = [
   { id: "alerts", label: "Alerts" },
@@ -167,13 +167,6 @@ const AlertsPage = () => {
         <Header
           title="Alerts"
           rightActions={[
-            <TabsList key="tabs">
-              {TABS.map((tab) => (
-                <TabsTrigger key={tab.id} value={tab.id}>
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>,
             <FreeTierLimitWrapper key="create-alert" feature="alerts" itemCount={alertCount}>
               <Button
                 variant="default"
@@ -185,6 +178,13 @@ const AlertsPage = () => {
                 Create
               </Button>
             </FreeTierLimitWrapper>,
+            <TabsList key="tabs">
+              {TABS.map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>,
           ]}
         />
 
@@ -246,22 +246,10 @@ const AlertsPage = () => {
                 key: "status",
                 header: "Status",
                 render: (alert) => (
-                  <div>
-                    {alert.status === "resolved" ? (
-                      <Tooltip title={"Healthy"}>
-                        <Badge
-                          variant="outline"
-                          className="border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900"
-                        >
-                          Healthy
-                        </Badge>
-                      </Tooltip>
-                    ) : (
-                      <Tooltip title={"Triggered"}>
-                        <Badge variant="destructive">Triggered</Badge>
-                      </Tooltip>
-                    )}
-                  </div>
+                  <AlertStatusPill
+                    status={alert.status as "resolved" | "triggered"}
+                    displayText={alert.status === "resolved" ? "Healthy" : "Triggered"}
+                  />
                 ),
                 sortable: true,
               },
@@ -408,10 +396,26 @@ const AlertsPage = () => {
                 data={alertHistory ?? []}
                 columns={[
                   {
-                    key: "alert_start_time",
-                    header: "Alert Start Time",
+                    key: "status",
+                    header: "Status",
                     render: (history) => (
-                      <p className="text-xs font-semibold">
+                      <AlertStatusPill status={history.status as "resolved" | "triggered"} />
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "alert_name",
+                    header: "Name",
+                    render: (history) => (
+                      <p className="text-xs font-semibold">{history.alert_name}</p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "alert_start_time",
+                    header: "Start Time",
+                    render: (history) => (
+                      <p className="text-xs">
                         {getUSDate(new Date(history.alert_start_time))}
                       </p>
                     ),
@@ -419,21 +423,13 @@ const AlertsPage = () => {
                   },
                   {
                     key: "alert_end_time",
-                    header: "Alert End Time",
+                    header: "End Time",
                     render: (history) => (
-                      <p className="text-xs font-semibold">
+                      <p className="text-xs">
                         {history.alert_end_time
                           ? getUSDate(new Date(history.alert_end_time))
-                          : ""}
+                          : "—"}
                       </p>
-                    ),
-                    sortable: true,
-                  },
-                  {
-                    key: "alert_name",
-                    header: "Alert Name",
-                    render: (history) => (
-                      <p className="text-xs">{history.alert_name}</p>
                     ),
                     sortable: true,
                   },
@@ -447,20 +443,6 @@ const AlertsPage = () => {
                           Number(history.triggered_value),
                         )}
                       </p>
-                    ),
-                    sortable: true,
-                  },
-                  {
-                    key: "status",
-                    header: "Status",
-                    render: (history) => (
-                      <Badge
-                        variant={
-                          history.status === "resolved" ? "secondary" : "destructive"
-                        }
-                      >
-                        {history.status}
-                      </Badge>
                     ),
                     sortable: true,
                   },
