@@ -2771,6 +2771,34 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "kimi-k2-0905:fireworks": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "accounts/fireworks/models/kimi-k2-instruct-0905",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "fireworks",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2-0905:groq": {
       "context": 262144,
       "crossRegion": false,
@@ -4642,6 +4670,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "moonshotai/kimi-k2": [
     "baseten",
     "deepinfra",
+    "fireworks",
     "groq",
     "groq",
     "novita",
@@ -5867,6 +5896,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "fireworks": [
+      {
+        "input": 6e-7,
+        "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
     "groq": [
       {
         "audio": 0,
@@ -6566,6 +6602,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "baseten",
         "deepinfra",
+        "fireworks",
         "groq",
         "novita",
         "openrouter",
@@ -6791,6 +6828,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "deepseek",
     },
     {
+      "modelCount": 1,
+      "provider": "fireworks",
+    },
+    {
       "modelCount": 3,
       "provider": "google-ai-studio",
     },
@@ -6913,9 +6954,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 198,
-  "totalModelProviderConfigs": 198,
+  "totalEndpoints": 199,
+  "totalModelProviderConfigs": 199,
   "totalModelsWithPtb": 75,
-  "totalProviders": 17,
+  "totalProviders": 18,
 }
 `;
