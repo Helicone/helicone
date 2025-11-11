@@ -4138,12 +4138,14 @@
 					"LLAMA",
 					"NVIDIA",
 					"VERCEL",
-					"CEREBRAS"
+					"CEREBRAS",
+					"BASETEN"
 				]
 			},
 			"ModelProviderName": {
 				"type": "string",
 				"enum": [
+					"baseten",
 					"anthropic",
 					"azure",
 					"bedrock",
@@ -49190,6 +49192,7 @@
 												"providerName": {
 													"type": "string",
 													"enum": [
+														"baseten",
 														"anthropic",
 														"azure",
 														"bedrock",
