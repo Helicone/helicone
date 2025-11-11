@@ -99,8 +99,9 @@ export class ProviderKeysManager {
     keyCuid?: string
   ): Promise<ProviderKey | null> {
     const keys = await this.getProviderKeys(orgId);
+    const validKey = this.chooseProviderKey(keys ?? [], provider, providerModelId, keyCuid);
 
-    if (!keys) {
+    if (!validKey) {
       const keys = await this.store.getProviderKeysWithFetch(
         provider,
         orgId,
@@ -133,6 +134,6 @@ export class ProviderKeysManager {
       }
       return this.chooseProviderKey(keys, provider, providerModelId, keyCuid);
     }
-    return this.chooseProviderKey(keys, provider, providerModelId, keyCuid);
+    return validKey;
   }
 }
