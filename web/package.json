@@ -34,10 +34,10 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@headlessui/react": "^1.7.18",
+    "@helicone-package/common": "*",
     "@helicone-package/cost": "*",
     "@helicone-package/filters": "*",
     "@helicone-package/llm-mapper": "*",
-    "@helicone-package/common": "*",
     "@helicone/prompts": "1.0.15",
     "@heroicons/react": "^2.0.13",
     "@intercom/messenger-js-sdk": "^0.0.14",
@@ -142,6 +142,7 @@
     "stripe": "^17.7.0",
     "tailwind-merge": "^2.5.2",
     "vaul": "^1.1.2",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
@@ -153,6 +154,7 @@
     "@types/dateformat": "^5.0.0",
     "@types/js-cookie": "^3.0.3",
     "@types/js-yaml": "^4.0.9",
+    "@types/jszip": "^3.4.1",
     "@types/lodash": "^4.17.17",
     "@types/node": "^20.17.24",
     "@types/papaparse": "^5.3.15",

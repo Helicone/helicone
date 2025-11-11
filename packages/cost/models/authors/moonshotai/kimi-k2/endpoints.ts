@@ -230,7 +230,7 @@ export const endpoints = {
   "kimi-k2-0905:baseten": {
     provider: "baseten",
     author: "moonshotai",
-    providerModelId: "moonshotai/kimi-k2-0905",
+    providerModelId: "moonshotai/Kimi-K2-Instruct-0905",
     pricing: [
       {
         threshold: 0,

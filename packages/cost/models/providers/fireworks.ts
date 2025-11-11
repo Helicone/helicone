@@ -1,5 +1,4 @@
 import { BaseProvider } from "./base";
-import type { AuthContext, AuthResult } from "../types";
 
 export class FireworksProvider extends BaseProvider {
   readonly displayName = "Fireworks";
@@ -10,13 +9,5 @@ export class FireworksProvider extends BaseProvider {
 
   buildUrl(): string {
     return `${this.baseUrl}inference/v1/chat/completions`;
-  }
-
-  authenticate(authContext: AuthContext): AuthResult {
-    return {
-      headers: {
-        "api-key": authContext.apiKey || "",
-      },
-    };
   }
 }

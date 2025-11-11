@@ -65,6 +65,7 @@ import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
 import DashboardChartTooltipContent from "./DashboardChartTooltipContent";
 import { CHART_COLORS, TREMOR_COLOR_PALETTE } from "../../../lib/chartColors";
+import DashboardExportButton from "./DashboardExportButton";
 const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
   ResponsiveProps & { children?: React.ReactNode }
 >;
@@ -368,6 +369,19 @@ const DashboardPage = (props: DashboardPageProps) => {
             }
             rightActions={
               <div className="flex items-center gap-2">
+                {/* Export button */}
+                {!shouldShowMockData && (
+                  <DashboardExportButton
+                    data={{
+                      metrics,
+                      overTimeData,
+                      models: realModels,
+                      providers: realProviders,
+                    }}
+                    timeFilter={timeFilter}
+                    disabled={isAnyLoading}
+                  />
+                )}
                 {/* Live pill */}
                 <LivePill
                   isLive={isLive}
