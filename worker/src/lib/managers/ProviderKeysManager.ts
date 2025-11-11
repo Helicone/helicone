@@ -51,6 +51,9 @@ export class ProviderKeysManager {
   ): ProviderKey | null {
     if (keyCuid) {
       const cuidKey = keys.filter(key => key.cuid === keyCuid);
+      if (cuidKey.length === 0) {
+        return null;
+      }
       return cuidKey[0];
     }
     let filteredKeys = keys.filter(key => key.provider === provider);
