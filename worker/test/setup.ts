@@ -247,6 +247,15 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
+          fireworks: {
+            org_id: "test-org-id",
+            provider_name: "fireworks",
+            decrypted_provider_key: "test-fireworks-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
           openrouter: {
             org_id: "test-org-id",
             provider_name: "openrouter",

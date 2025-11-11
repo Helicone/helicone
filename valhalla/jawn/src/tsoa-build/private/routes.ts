@@ -2678,6 +2678,26 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_AlertResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AlertMetric": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["latency"]},{"dataType":"enum","enums":["cost"]},{"dataType":"enum","enums":["prompt_tokens"]},{"dataType":"enum","enums":["completion_tokens"]},{"dataType":"enum","enums":["prompt_cache_read_tokens"]},{"dataType":"enum","enums":["prompt_cache_write_tokens"]},{"dataType":"enum","enums":["total_tokens"]},{"dataType":"enum","enums":["response.status"]},{"dataType":"enum","enums":["count"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AlertAggregation": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["sum"]},{"dataType":"enum","enums":["avg"]},{"dataType":"enum","enums":["min"]},{"dataType":"enum","enums":["max"]},{"dataType":"enum","enums":["percentile"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AlertStandardGrouping": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["model"]},{"dataType":"enum","enums":["provider"]},{"dataType":"enum","enums":["user"]}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AlertGrouping": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"AlertStandardGrouping"},{"dataType":"string"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "AllExpression": {
         "dataType": "refObject",
         "properties": {
@@ -2749,8 +2769,12 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "name": {"dataType":"string","required":true},
-            "metric": {"dataType":"string","required":true},
+            "metric": {"ref":"AlertMetric","required":true},
             "threshold": {"dataType":"double","required":true},
+            "aggregation": {"dataType":"union","subSchemas":[{"ref":"AlertAggregation"},{"dataType":"enum","enums":[null]}],"required":true},
+            "percentile": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "grouping": {"dataType":"union","subSchemas":[{"ref":"AlertGrouping"},{"dataType":"enum","enums":[null]}],"required":true},
+            "grouping_is_property": {"dataType":"union","subSchemas":[{"dataType":"boolean"},{"dataType":"enum","enums":[null]}],"required":true},
             "time_window": {"dataType":"string","required":true},
             "emails": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "slack_channels": {"dataType":"array","array":{"dataType":"string"},"required":true},

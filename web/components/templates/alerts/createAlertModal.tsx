@@ -25,6 +25,10 @@ export const EditAlertModal = (props: EditAlertModalProps) => {
         name: req.name,
         metric: req.metric,
         threshold: req.threshold,
+        aggregation: req.aggregation,
+        percentile: req.percentile,
+        grouping: req.grouping,
+        grouping_is_property: req.grouping_is_property,
         time_window: req.time_window,
         emails: req.emails,
         slack_channels: req.slack_channels,
@@ -60,7 +64,7 @@ export const EditAlertModal = (props: EditAlertModalProps) => {
   };
 
   return (
-    <ThemedModal open={open} setOpen={setOpen}>
+    <ThemedModal open={open} setOpen={setOpen} className="max-h-[90vh] w-fit max-w-[90vw] overflow-visible">
       <AlertForm
         handleSubmit={(alertReq) => handleEditAlert(alertReq)}
         onCancel={() => setOpen(false)}
@@ -93,6 +97,10 @@ export const CreateAlertModal = (props: CreateAlertModalProps) => {
         name: req.name,
         metric: req.metric,
         threshold: req.threshold,
+        aggregation: req.aggregation,
+        percentile: req.percentile,
+        grouping: req.grouping,
+        grouping_is_property: req.grouping_is_property,
         time_window: req.time_window,
         emails: req.emails,
         slack_channels: req.slack_channels,
@@ -112,7 +120,7 @@ export const CreateAlertModal = (props: CreateAlertModalProps) => {
   };
 
   return (
-    <ThemedModal open={open} setOpen={setOpen}>
+    <ThemedModal open={open} setOpen={setOpen} className="max-h-[90vh] w-fit max-w-[90vw] overflow-visible">
       <AlertForm
         handleSubmit={(alertReq) => handleCreateAlert(alertReq)}
         onCancel={() => setOpen(false)}

@@ -30,6 +30,10 @@
 .settings-table .min-w-full.divide-y.divide-gray-300 td {
   font-size: 0.75rem !important;
   padding: 0.75rem !important;
+  border-bottom: none !important;
+}
+
+.settings-table .min-w-full.divide-y.divide-gray-300 tr {
   border-bottom: 1px solid hsl(var(--border)) !important;
 }
 
