@@ -1192,7 +1192,7 @@ describe("Moonshot AI Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://inference.baseten.co/chat/completions",
+                url: "https://inference.baseten.co/v1/chat/completions",
                 response: "success",
                 model: "moonshotai/Kimi-K2-Instruct-0905",
                 data: createOpenAIMockResponse(
@@ -1235,7 +1235,7 @@ describe("Moonshot AI Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://inference.baseten.co/chat/completions",
+                url: "https://inference.baseten.co/v1/chat/completions",
                 response: "success",
                 model: "moonshotai/Kimi-K2-Instruct-0905",
                 data: createOpenAIMockResponse(
@@ -1272,7 +1272,7 @@ describe("Moonshot AI Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://inference.baseten.co/chat/completions",
+                url: "https://inference.baseten.co/v1/chat/completions",
                 response: "success",
                 model: "moonshotai/Kimi-K2-Instruct-0905",
                 data: createOpenAIMockResponse(
@@ -1319,7 +1319,7 @@ describe("Moonshot AI Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://inference.baseten.co/chat/completions",
+                url: "https://inference.baseten.co/v1/chat/completions",
                 response: "success",
                 model: "moonshotai/Kimi-K2-Instruct-0905",
                 data: createOpenAIMockResponse(
@@ -1358,7 +1358,7 @@ describe("Moonshot AI Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://inference.baseten.co/chat/completions",
+                url: "https://inference.baseten.co/v1/chat/completions",
                 response: "success",
                 model: "moonshotai/Kimi-K2-Instruct-0905",
                 data: createOpenAIMockResponse(
@@ -1390,7 +1390,7 @@ describe("Moonshot AI Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://inference.baseten.co/chat/completions",
+              url: "https://inference.baseten.co/v1/chat/completions",
               response: "failure",
               statusCode: 500,
               errorMessage: "Baseten service unavailable",
@@ -1406,7 +1406,7 @@ describe("Moonshot AI Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://inference.baseten.co/chat/completions",
+              url: "https://inference.baseten.co/v1/chat/completions",
               response: "failure",
               statusCode: 429,
               errorMessage: "Rate limit exceeded",
@@ -1422,7 +1422,7 @@ describe("Moonshot AI Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://inference.baseten.co/chat/completions",
+              url: "https://inference.baseten.co/v1/chat/completions",
               response: "failure",
               statusCode: 401,
               errorMessage: "Invalid API key",
@@ -1438,7 +1438,7 @@ describe("Moonshot AI Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://inference.baseten.co/chat/completions",
+              url: "https://inference.baseten.co/v1/chat/completions",
               response: "failure",
               statusCode: 404,
               errorMessage: "Model not found",
@@ -1454,7 +1454,7 @@ describe("Moonshot AI Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://inference.baseten.co/chat/completions",
+              url: "https://inference.baseten.co/v1/chat/completions",
               response: "failure",
               statusCode: 408,
               errorMessage: "Request timeout",
@@ -1472,7 +1472,7 @@ describe("Moonshot AI Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://inference.baseten.co/chat/completions",
+              url: "https://inference.baseten.co/v1/chat/completions",
               response: "success",
               model: "moonshotai/Kimi-K2-Instruct-0905",
               data: createOpenAIMockResponse(
@@ -1496,7 +1496,7 @@ describe("Moonshot AI Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://inference.baseten.co/chat/completions",
+              url: "https://inference.baseten.co/v1/chat/completions",
               response: "success",
               model: "moonshotai/Kimi-K2-Instruct-0905", // Should map to the correct provider model ID
               data: createOpenAIMockResponse(
@@ -1518,7 +1518,7 @@ describe("Moonshot AI Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://inference.baseten.co/chat/completions",
+              url: "https://inference.baseten.co/v1/chat/completions",
               response: "success",
               model: "moonshotai/Kimi-K2-Instruct-0905",
               data: createOpenAIMockResponse(
