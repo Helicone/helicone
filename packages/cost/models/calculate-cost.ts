@@ -39,12 +39,6 @@ export function calculateModelCostBreakdown(params: {
 }): CostBreakdown | null {
   const { modelUsage, providerModelId, provider, requestCount = 1 } = params;
 
-  console.log(
-    `Calculating cost breakdown for model ${providerModelId} from provider ${provider}`,
-  );
-  console.log("Model usage:", modelUsage);
-  console.log("Web searches:", modelUsage.web_search || 0);
-
   const configResult = registry.getModelProviderConfigByProviderModelId(
     providerModelId,
     provider,
@@ -54,9 +48,6 @@ export function calculateModelCostBreakdown(params: {
   const config: ModelProviderConfig = configResult.data;
 
   const pricing = getPricingTier(config.pricing, modelUsage.input);
-
-  console.log("Using pricing tier:", pricing);
-
   if (!pricing) return null;
 
   const breakdown: CostBreakdown = {
@@ -114,13 +105,7 @@ export function calculateModelCostBreakdown(params: {
   }
 
   if (modelUsage.web_search && pricing.web_search) {
-    console.log(
-      "Calculating web search cost:",
-      modelUsage.web_search,
-      pricing.web_search,
-    );
     breakdown.webSearchCost = modelUsage.web_search * pricing.web_search;
-    console.log("Web search cost:", breakdown.webSearchCost);
   }
 
   if (modelUsage.image && pricing.image) {
