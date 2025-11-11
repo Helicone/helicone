@@ -50,8 +50,9 @@ export default function DashboardExportButton({
       const excelBlob = await exportDashboardToExcel(data, timeFilter);
 
       // Create download link
+      const objectUrl = URL.createObjectURL(excelBlob);
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(excelBlob);
+      link.href = objectUrl;
 
       // Format filename with date range
       const startDate = timeFilter.start.toISOString().split("T")[0];
@@ -61,6 +62,9 @@ export default function DashboardExportButton({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // Clean up blob URL to prevent memory leak
+      URL.revokeObjectURL(objectUrl);
 
       setNotification("Dashboard data exported successfully!", "success");
       setOpen(false);
