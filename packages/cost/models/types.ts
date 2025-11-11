@@ -146,6 +146,7 @@ export interface ModelConfig {
   created: string;
   modality: Modality;
   tokenizer: Tokenizer;
+  stripeModelId?: string;
 }
 
 interface BaseConfig {
