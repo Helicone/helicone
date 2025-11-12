@@ -3336,6 +3336,8 @@ Json: JsonObject;
           alert_id: string;
           alert_end_time: string | null;
         })[];
+      /** Format: double */
+      historyTotalCount: number;
     };
     ResultSuccess_AlertResponse_: {
       data: components["schemas"]["AlertResponse"];
@@ -19165,6 +19167,12 @@ export interface operations {
     };
   };
   GetAlerts: {
+    parameters: {
+      query?: {
+        historyPage?: number;
+        historyPageSize?: number;
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
