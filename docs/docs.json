@@ -311,12 +311,22 @@
             "pages": [
               "rest/prompts/post-v1prompt-2025",
               "rest/prompts/get-v1prompt-2025-id-promptid",
-              "rest/prompts/post-v1prompt-2025-update",
+              "rest/prompts/post-v1prompt-2025-id-promptid-rename",
+              "rest/prompts/patch-v1prompt-2025-id-promptid-tags",
               "rest/prompts/delete-v1prompt-2025-promptid",
+              "rest/prompts/post-v1prompt-2025-update",
+              "rest/prompts/post-v1prompt-2025-update-environment",
+              "rest/prompts/delete-v1prompt-2025-promptid-versionid",
               "rest/prompts/post-v1prompt-2025-query",
+              "rest/prompts/post-v1prompt-2025-query-version",
+              "rest/prompts/post-v1prompt-2025-query-environment-version",
               "rest/prompts/post-v1prompt-2025-query-versions",
-              "rest/prompts/post-v1prompt-2025-update-production-version",
-              "rest/prompts/delete-v1prompt-2025-promptid-versionid"
+              "rest/prompts/post-v1prompt-2025-query-production-version",
+              "rest/prompts/post-v1prompt-2025-query-total-versions",
+              "rest/prompts/get-v1prompt-2025-id-promptid-versionid-inputs",
+              "rest/prompts/get-v1prompt-2025-tags",
+              "rest/prompts/get-v1prompt-2025-environments",
+              "rest/prompts/get-v1prompt-2025-count"
             ]
           },
           {
