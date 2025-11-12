@@ -187,7 +187,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
 
     // Add web search usage if present
     for (const output_item of parsedResponse.output || []) {
-      if (output_item.type == "web_search_call") {
+      if (output_item.type === "web_search_call") {
         modelUsage.web_search = (modelUsage.web_search || 0) + 1;
       }
     }
