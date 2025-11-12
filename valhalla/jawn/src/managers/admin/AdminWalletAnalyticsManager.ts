@@ -87,7 +87,7 @@ export class AdminWalletAnalyticsManager extends BaseManager {
 
       const query = `
         SELECT
-          DATE_TRUNC('${validGranularity}', TO_TIMESTAMP(created)) as period_timestamp,
+          DATE_TRUNC($4, TO_TIMESTAMP(created)) as period_timestamp,
           COALESCE(SUM(amount_received), 0) as total_amount
         FROM stripe.payment_intents
         WHERE
@@ -102,7 +102,7 @@ export class AdminWalletAnalyticsManager extends BaseManager {
       const result = await dbExecute<{
         period_timestamp: Date;
         total_amount: string;
-      }>(query, [startEpoch, endEpoch, tokenUsageProductId]);
+      }>(query, [startEpoch, endEpoch, tokenUsageProductId, validGranularity]);
 
       if (result.error) {
         return err(`Failed to fetch deposits: ${result.error}`);
