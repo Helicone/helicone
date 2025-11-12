@@ -2,6 +2,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { useKeys } from "@/components/templates/keys/useKeys";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useAutoTopoffSettings } from "@/services/hooks/useAutoTopoff";
 import { useCredits } from "@/services/hooks/useCredits";
 import {
   ArrowRight,
@@ -48,6 +49,7 @@ import {
 } from "../../ui/tooltip";
 import { H2, H3, P } from "../../ui/typography";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
+import { AutoTopoffModal } from "../settings/AutoTopoffModal";
 import PaymentModal from "../settings/PaymentModal";
 import { ProviderKeySettings } from "../settings/providerKeySettings";
 import HelixIntegrationDialog from "./HelixIntegrationDialog";
@@ -64,6 +66,7 @@ const QuickstartPage = () => {
   const [isProviderSheetOpen, setIsProviderSheetOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isHelixDialogOpen, setIsHelixDialogOpen] = useState(false);
+  const [isAutoTopoffModalOpen, setIsAutoTopoffModalOpen] = useState(false);
   const [isTestLoading, setIsTestLoading] = useState(false);
   const [testResponse, setTestResponse] = useState<string | null>(null);
   const [testRequestId, setTestRequestId] = useState<string | null>(null);
@@ -76,6 +79,7 @@ const QuickstartPage = () => {
   const { data: creditData } = useCredits();
   const hasCredits = (creditData?.balance ?? 0) > 0;
   const hasBillingSetup = hasCredits || hasProviderKeys;
+  const { data: autoTopoffSettings } = useAutoTopoffSettings();
 
   const {
     setAgentChatOpen,
@@ -327,6 +331,52 @@ const QuickstartPage = () => {
                       onClick={() => setIsPaymentModalOpen(true)}
                     >
                       {hasCredits ? "Add More" : "Add Credits"}
+                    </Button>
+                  </div>
+
+                  {/* Auto Top-Up Suggestion */}
+                  <div
+                    className={`mt-4 flex items-center justify-between rounded-lg border border-border p-4 ${
+                      autoTopoffSettings?.enabled
+                        ? "bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-900"
+                        : hasCredits
+                          ? "bg-muted/50"
+                          : "bg-muted/30 opacity-60"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Zap
+                        size={20}
+                        className={
+                          autoTopoffSettings?.enabled
+                            ? "text-green-600 dark:text-green-400"
+                            : hasCredits
+                              ? "text-primary"
+                              : "text-muted-foreground"
+                        }
+                      />
+                      <div>
+                        <p className="text-sm font-medium">
+                          {autoTopoffSettings?.enabled
+                            ? "Auto Top-Up Enabled"
+                            : "Enable Auto Top-Up"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {autoTopoffSettings?.enabled
+                            ? `Recharge $${((autoTopoffSettings.topoffAmountCents ?? 0) / 100).toFixed(2)} when balance drops below $${((autoTopoffSettings.thresholdCents ?? 0) / 100).toFixed(2)}`
+                            : hasCredits
+                              ? "Never run out of credits - automatically recharge when balance is low"
+                              : "Add credits first to enable auto top-up"}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsAutoTopoffModalOpen(true)}
+                      disabled={!hasCredits && !autoTopoffSettings?.enabled}
+                    >
+                      {autoTopoffSettings?.enabled ? "Manage" : "Configure"}
                     </Button>
                   </div>
 
@@ -628,6 +678,11 @@ const QuickstartPage = () => {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         returnUrl="/quickstart"
+      />
+
+      <AutoTopoffModal
+        isOpen={isAutoTopoffModalOpen}
+        onClose={() => setIsAutoTopoffModalOpen(false)}
       />
 
       <HelixIntegrationDialog

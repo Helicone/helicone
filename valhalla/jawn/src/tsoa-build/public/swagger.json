@@ -3247,12 +3247,14 @@
 					"LLAMA",
 					"NVIDIA",
 					"VERCEL",
-					"CEREBRAS"
+					"CEREBRAS",
+					"BASETEN"
 				]
 			},
 			"ModelProviderName": {
 				"type": "string",
 				"enum": [
+					"baseten",
 					"anthropic",
 					"azure",
 					"bedrock",
@@ -3261,6 +3263,7 @@
 					"cohere",
 					"deepinfra",
 					"deepseek",
+					"fireworks",
 					"google-ai-studio",
 					"groq",
 					"helicone",
@@ -9164,6 +9167,9 @@
 					"modelName": {
 						"type": "string"
 					},
+					"heliconeModelId": {
+						"type": "string"
+					},
 					"providerModelId": {
 						"type": "string"
 					},
@@ -9341,6 +9347,9 @@
 						"$ref": "#/components/schemas/BodyMappingType"
 					},
 					"modelName": {
+						"type": "string"
+					},
+					"heliconeModelId": {
 						"type": "string"
 					}
 				},
@@ -13642,6 +13651,7 @@
 												"providerName": {
 													"type": "string",
 													"enum": [
+														"baseten",
 														"anthropic",
 														"azure",
 														"bedrock",
@@ -13650,6 +13660,7 @@
 														"cohere",
 														"deepinfra",
 														"deepseek",
+														"fireworks",
 														"google-ai-studio",
 														"groq",
 														"helicone",

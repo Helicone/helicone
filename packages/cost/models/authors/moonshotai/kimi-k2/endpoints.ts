@@ -230,7 +230,7 @@ export const endpoints = {
   "kimi-k2-0905:baseten": {
     provider: "baseten",
     author: "moonshotai",
-    providerModelId: "moonshotai/kimi-k2-0905",
+    providerModelId: "moonshotai/Kimi-K2-Instruct-0905",
     pricing: [
       {
         threshold: 0,
@@ -247,6 +247,41 @@ export const endpoints = {
       "max_tokens",
       "temperature",
       "stop",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-0905:fireworks": {
+    provider: "fireworks",
+    author: "moonshotai",
+    providerModelId: "accounts/fireworks/models/kimi-k2-instruct-0905",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.60/1M
+        output: 0.0000025, // $2.50/1M
+      },
+    ],
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "top_k",
+      "repetition_penalty",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "response_format",
+      "structured_outputs",
       "tools",
       "tool_choice",
     ],
@@ -284,6 +319,37 @@ export const endpoints = {
       "top_p",
       "functions",
       "structured_outputs",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-thinking:novita": {
+    provider: "novita",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2-thinking",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.6/1M
+        output: 0.0000025, // $2.5/1M
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "tool_choice",
+      "tools",
+      "structured_outputs",
+      "response_format"
     ],
     ptbEnabled: true,
     endpointConfigs: {

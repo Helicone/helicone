@@ -12,9 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { Row } from "@/components/layout/common";
 import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
 
-interface FilterASTButtonProps { }
+interface FilterASTButtonProps {
+  showCurlButton?: boolean;
+}
 
-export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ }) => {
+export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ showCurlButton = false }) => {
   const { store } = useFilterAST();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +60,7 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ }) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto min-w-[800px] max-w-[90vw] p-0">
-          <FilterASTEditor />
+          <FilterASTEditor showCurlButton={showCurlButton} />
         </PopoverContent>
       </Popover>
       <SavedFiltersDropdown />

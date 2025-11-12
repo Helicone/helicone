@@ -2729,7 +2729,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 262000,
       "crossRegion": false,
       "maxTokens": 163800,
-      "modelId": "moonshotai/kimi-k2-0905",
+      "modelId": "moonshotai/Kimi-K2-Instruct-0905",
       "parameters": [
         "max_tokens",
         "response_format",
@@ -2766,6 +2766,34 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-0905:fireworks": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "accounts/fireworks/models/kimi-k2-instruct-0905",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "fireworks",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2873,6 +2901,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tool_choice",
         "tools",
         "top_logprobs",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-thinking:novita": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-thinking",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
         "top_p",
       ],
       "provider": "novita",
@@ -3982,7 +4033,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 131072,
       "crossRegion": false,
       "maxTokens": 40000,
-      "modelId": "openai/gpt-oss-120b",
+      "modelId": "gpt-oss-120b",
       "parameters": [
         "logprobs",
         "max_tokens",
@@ -4642,8 +4693,10 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "moonshotai/kimi-k2": [
     "baseten",
     "deepinfra",
+    "fireworks",
     "groq",
     "groq",
+    "novita",
     "novita",
     "novita",
     "openrouter",
@@ -5867,6 +5920,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "fireworks": [
+      {
+        "input": 6e-7,
+        "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
     "groq": [
       {
         "audio": 0,
@@ -5883,8 +5943,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "novita": [
       {
-        "input": 5.7e-7,
-        "output": 0.0000023,
+        "input": 6e-7,
+        "output": 0.0000025,
         "threshold": 0,
       },
     ],
@@ -6566,6 +6626,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "baseten",
         "deepinfra",
+        "fireworks",
         "groq",
         "novita",
         "openrouter",
@@ -6573,6 +6634,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
     },
     {
       "model": "kimi-k2-instruct",
+      "providers": [
+        "novita",
+      ],
+    },
+    {
+      "model": "kimi-k2-thinking",
       "providers": [
         "novita",
       ],
@@ -6791,6 +6858,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "deepseek",
     },
     {
+      "modelCount": 1,
+      "provider": "fireworks",
+    },
+    {
       "modelCount": 3,
       "provider": "google-ai-studio",
     },
@@ -6807,7 +6878,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 14,
+      "modelCount": 15,
       "provider": "novita",
     },
     {
@@ -6877,6 +6948,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "kimi-k2",
     "kimi-k2-0905",
     "kimi-k2-instruct",
+    "kimi-k2-thinking",
     "llama-3.1-8b-instant",
     "llama-3.1-8b-instruct",
     "llama-3.1-8b-instruct-turbo",
@@ -6913,9 +6985,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 198,
-  "totalModelProviderConfigs": 198,
-  "totalModelsWithPtb": 75,
-  "totalProviders": 17,
+  "totalEndpoints": 200,
+  "totalModelProviderConfigs": 200,
+  "totalModelsWithPtb": 76,
+  "totalProviders": 18,
 }
 `;

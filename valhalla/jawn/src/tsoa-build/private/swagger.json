@@ -4165,6 +4165,7 @@
 					"cohere",
 					"deepinfra",
 					"deepseek",
+					"fireworks",
 					"google-ai-studio",
 					"groq",
 					"helicone",
@@ -48719,6 +48720,75 @@
 					}
 				]
 			},
+			"TimeSeriesDataPoint": {
+				"properties": {
+					"timestamp": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"timestamp",
+					"amount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TimeSeriesResponse": {
+				"properties": {
+					"deposits": {
+						"items": {
+							"$ref": "#/components/schemas/TimeSeriesDataPoint"
+						},
+						"type": "array"
+					},
+					"spend": {
+						"items": {
+							"$ref": "#/components/schemas/TimeSeriesDataPoint"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"deposits",
+					"spend"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_TimeSeriesResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/TimeSeriesResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_TimeSeriesResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_TimeSeriesResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ConvertToWavResponse": {
 				"properties": {
 					"data": {
@@ -49212,6 +49282,7 @@
 														"cohere",
 														"deepinfra",
 														"deepseek",
+														"fireworks",
 														"google-ai-studio",
 														"groq",
 														"helicone",
@@ -59354,6 +59425,64 @@
 						"required": true,
 						"schema": {
 							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/analytics/time-series": {
+			"post": {
+				"operationId": "GetTimeSeriesData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_TimeSeriesResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "startDate",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "endDate",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "groupBy",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"minute",
+								"hour",
+								"day",
+								"week",
+								"month"
+							]
 						}
 					}
 				]

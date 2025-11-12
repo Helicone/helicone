@@ -75,6 +75,34 @@ that would be visible in the request table at
 
 ### Filter Structure
 
+<Warning>
+  **Common Mistake:** When filtering by **custom properties**, you MUST wrap them in a `request_response_rmt` object. Forgetting this wrapper will return empty results `{"data":[],"error":null}` even when data exists.
+
+  ```json
+  // ❌ WRONG - Missing request_response_rmt wrapper
+  {
+    "filter": {
+      "properties": {
+        "ticket-id": { "equals": "..." }
+      }
+    }
+  }
+
+  // ✅ CORRECT - Properties wrapped in request_response_rmt
+  {
+    "filter": {
+      "request_response_rmt": {
+        "properties": {
+          "ticket-id": { "equals": "..." }
+        }
+      }
+    }
+  }
+  ```
+
+  See the [Filtering by Properties](#filtering-by-properties) section below for complete examples.
+</Warning>
+
 <Note>
   **Important:** Filters use an AST (Abstract Syntax Tree) structure where **each condition must be a separate leaf node**. You cannot combine multiple conditions in a single `request_response_rmt` object.
 </Note>
@@ -308,3 +336,65 @@ Different fields support different operators:
 **Timestamp fields** (`request_created_at`, `response_created_at`):
 - `equals`
 - `gte` / `lte` / `gt` / `lt`
+
+## Troubleshooting
+
+### Getting Empty Results `{"data":[],"error":null}`
+
+If you're getting empty results when you know data exists, check these common issues:
+
+**1. Missing `request_response_rmt` wrapper for properties**
+
+<Accordion title="❌ WRONG - Properties without wrapper">
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "filter": {
+    "properties": {
+      "ticket-id": {
+        "equals": "ba9bf8b3-c04f-41ad-9362-37f8feff7e57"
+      }
+    }
+  }
+}'
+```
+**Result:** Empty data even though the property exists
+</Accordion>
+
+<Accordion title="✅ CORRECT - Properties with request_response_rmt wrapper">
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "filter": {
+    "request_response_rmt": {
+      "properties": {
+        "ticket-id": {
+          "equals": "ba9bf8b3-c04f-41ad-9362-37f8feff7e57"
+        }
+      }
+    }
+  }
+}'
+```
+**Result:** Returns all requests with that property value
+</Accordion>
+
+**2. Using wrong API endpoint structure**
+
+This endpoint (`/query-clickhouse`) requires `request_response_rmt` wrapper for ALL filters including properties. If you're using the legacy `/query` endpoint, the filter structure is different - see [Get Requests (Legacy)](/rest/request/post-v1requestquery).
+
+**3. Wrong region**
+
+Make sure you're using the correct regional endpoint:
+- US: `https://api.helicone.ai/v1/request/query-clickhouse`
+- EU: `https://eu.api.helicone.ai/v1/request/query-clickhouse`
+
+**4. Property name doesn't match**
+
+Property names are case-sensitive. Check your exact property name in the [Helicone dashboard](https://helicone.ai/requests).
