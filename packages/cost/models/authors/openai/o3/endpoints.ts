@@ -11,6 +11,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000002,
         output: 0.000008,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.25,
         },
@@ -44,6 +45,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00002,
         output: 0.00008,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     rateLimits: {
@@ -74,6 +76,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000011,
         output: 0.0000044,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5,
         },
@@ -107,6 +110,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000011,
         output: 0.0000044,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5,
         },
@@ -139,6 +143,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000211, // $2.11/1M - worst-case: $2.00/1M (OpenAI) * 1.055
         output: 0.00000844, // $8.44/1M - worst-case: $8.00/1M (OpenAI) * 1.055
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 200_000,
@@ -164,6 +169,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000116, // $1.16/1M - worst-case: $1.10/1M (OpenAI) * 1.055
         output: 0.00000464, // $4.64/1M - worst-case: $4.40/1M (OpenAI) * 1.055
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 200_000,
@@ -189,6 +195,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000211, // $21.10/1M - worst-case: $20.00/1M (OpenAI) * 1.055
         output: 0.0000844, // $84.40/1M - worst-case: $80.00/1M (OpenAI) * 1.055
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 200_000,
@@ -214,6 +221,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000002, // $2.00 per 1M tokens
         output: 0.000008, // $8.00 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.25, // $0.50 per 1M tokens
         },
@@ -238,6 +246,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000011, // $1.10 per 1M tokens
         output: 0.0000044, // $4.40 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5, // $0.55 per 1M tokens
         },
@@ -262,6 +271,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00002, // $20.00 per 1M tokens
         output: 0.00008, // $80.00 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 200000,

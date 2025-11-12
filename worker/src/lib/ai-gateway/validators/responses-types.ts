@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-
 // Metadata was removed
 const ServiceTier = z.union([
   z.enum(["auto", "default", "flex", "scale", "priority"]),
@@ -26,10 +25,7 @@ const CreateModelResponseProperties = ModelResponseProperties.and(
 );
 const ChatModel = z.string();
 const ModelIdsShared = z.union([z.string(), ChatModel]);
-const ModelIdsResponses = z.union([
-  ModelIdsShared,
-  z.string(),
-]);
+const ModelIdsResponses = z.union([ModelIdsShared, z.string()]);
 const ReasoningEffort = z.union([
   z.enum(["minimal", "low", "medium", "high"]),
   z.null(),
@@ -45,9 +41,7 @@ const Reasoning = z
   })
   .partial()
   .passthrough();
-const ResponseFormatText = z
-  .object({ type: z.literal("text") })
-  .passthrough();
+const ResponseFormatText = z.object({ type: z.literal("text") }).passthrough();
 const ResponseFormatJsonSchemaSchema = z.object({}).partial().passthrough();
 const TextResponseFormatJsonSchema = z
   .object({
@@ -177,6 +171,43 @@ const ImageGenTool = z
     partial_images: z.number().int().gte(0).lte(3).optional().default(0),
   })
   .passthrough();
+const WebSearchUserLocation = z
+  .object({
+    city: z.string().optional(),
+    country: z.string().optional(),
+    region: z.string().optional(),
+    timezone: z.string().optional(),
+    // The type of location approximation. Always approximate.
+    type: z.literal("approximate").optional().default("approximate"),
+  })
+  .partial()
+  .passthrough();
+
+const WebSearchFilters = z
+  .object({
+    // Allowed domains for the search. If not provided, all domains are allowed.
+    // Subdomains of the provided domains are allowed as well.
+    allowed_domains: z.array(z.string()).optional().default([]),
+  })
+  .partial()
+  .passthrough();
+
+const WebSearchTool = z
+  .object({
+    // The type of the web search tool. One of web_search or web_search_2025_08_26.
+    type: z.enum(["web_search", "web_search_2025_08_26"]),
+    // Optional filters for the search.
+    filters: WebSearchFilters.optional(),
+    // High level guidance for the amount of context window space to use.
+    // One of low, medium, or high. medium is the default.
+    search_context_size: z
+      .enum(["low", "medium", "high"])
+      .optional()
+      .default("medium"),
+    // The approximate location of the user.
+    user_location: WebSearchUserLocation.optional(),
+  })
+  .passthrough();
 // LocalShellToolParam was removed
 const CustomTextFormatParam = z
   .object({ type: z.literal("text").default("text") })
@@ -210,6 +241,7 @@ const Tool = z.union([
   MCPTool,
   CodeInterpreterTool,
   ImageGenTool,
+  WebSearchTool,
   // LocalShellToolParam was removed
   CustomToolParam,
   // WebSearchPreviewTool was removed
@@ -231,6 +263,7 @@ const ToolChoiceTypes = z
       // "computer_use_preview" was removed
       // "web_search_preview_2025_03_11" was removed
       "image_generation",
+      "web_search",
       "code_interpreter",
     ]),
   })
@@ -445,13 +478,13 @@ const InputTextContentParam = z
   .passthrough();
 const DetailEnum = z.enum(["low", "high", "auto"]);
 const InputImageContentParamAutoParam = z
-    .object({
-      type: z.literal("input_image").default("input_image"),
-      image_url: z.union([z.string(), z.null()]).optional(),
-      file_id: z.union([z.string(), z.null()]).optional(),
-      detail: z.union([DetailEnum, z.null()]).optional(),
-    })
-    .passthrough();
+  .object({
+    type: z.literal("input_image").default("input_image"),
+    image_url: z.union([z.string(), z.null()]).optional(),
+    file_id: z.union([z.string(), z.null()]).optional(),
+    detail: z.union([DetailEnum, z.null()]).optional(),
+  })
+  .passthrough();
 const InputFileContentParam = z
   .object({
     type: z.literal("input_file").default("input_file"),
@@ -661,20 +694,22 @@ const ResponseStreamOptions = z.union([
 ]);
 // ConversationParam_2 was removed
 // ConversationParam was removed
-const CreateResponse = CreateModelResponseProperties.and(ResponseProperties).and(
-    z
-      .object({
-        input: InputParam,
-        include: z.union([z.array(IncludeEnum), z.null()]),
-        parallel_tool_calls: z.union([z.boolean(), z.null()]),
-        // store was removed
-        instructions: z.union([z.string(), z.null()]),
-        stream: z.union([z.boolean(), z.null()]),
-        stream_options: ResponseStreamOptions,
-        // conversation was removed
-      })
-      .partial()
-      .passthrough()
-  );
+const CreateResponse = CreateModelResponseProperties.and(
+  ResponseProperties
+).and(
+  z
+    .object({
+      input: InputParam,
+      include: z.union([z.array(IncludeEnum), z.null()]),
+      parallel_tool_calls: z.union([z.boolean(), z.null()]),
+      // store was removed
+      instructions: z.union([z.string(), z.null()]),
+      stream: z.union([z.boolean(), z.null()]),
+      stream_options: ResponseStreamOptions,
+      // conversation was removed
+    })
+    .partial()
+    .passthrough()
+);
 
 export { CreateResponse };
