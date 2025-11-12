@@ -172,7 +172,6 @@ export default function AdminWallet() {
   const allOrganizations =
     data?.pages.flatMap((page: any) => page.data?.organizations || []) || [];
 
-
   // Fetch wallet details (lazy loaded when org is selected)
   const {
     data: walletDetailsResponse,
@@ -502,7 +501,7 @@ export default function AdminWallet() {
               value={groupBy}
               onValueChange={(value) =>
                 setGroupBy(
-                  value as "minute" | "hour" | "day" | "week" | "month"
+                  value as "minute" | "hour" | "day" | "week" | "month",
                 )
               }
             >
@@ -531,9 +530,7 @@ export default function AdminWallet() {
           spend={timeSeriesData?.spend || []}
           isLoading={timeSeriesLoading}
           error={
-            timeSeriesError instanceof Error
-              ? timeSeriesError.message
-              : null
+            timeSeriesError instanceof Error ? timeSeriesError.message : null
           }
         />
 

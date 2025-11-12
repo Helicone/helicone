@@ -21,7 +21,11 @@ export interface BannerType {
 
 const MainContent = ({ children, banner, pathname }: MainContentProps) => {
   return (
-    <div className={clsx("scrollbar-auto-hide flex h-full flex-col overflow-y-auto")}>
+    <div
+      className={clsx(
+        "scrollbar-auto-hide flex h-full flex-col overflow-y-auto",
+      )}
+    >
       <main className="flex-1">
         {banner && (
           <div>

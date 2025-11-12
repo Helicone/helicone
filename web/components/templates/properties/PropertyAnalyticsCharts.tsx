@@ -281,7 +281,7 @@ export function PropertyAnalyticsCharts({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2">
       {/* Cost Over Time Chart */}
-      <div className="flex flex-col border-b border-r border-border bg-card px-6 pt-6 pb-2 text-card-foreground">
+      <div className="flex flex-col border-b border-r border-border bg-card px-6 pb-2 pt-6 text-card-foreground">
         <div className="mb-4">
           <Small className="text-muted-foreground">Cost Over Time</Small>
           <p className="text-2xl font-semibold text-foreground">
@@ -295,96 +295,90 @@ export function PropertyAnalyticsCharts({
             </Small>
           </div>
         ) : (
-          <ChartContainer
-            config={costChartConfig}
-            className="h-[240px] w-full"
-          >
-                  <LineChart
-                    data={transformedData.costData}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      className="stroke-muted"
-                    />
-                    <XAxis
-                      dataKey="date"
-                      type="number"
-                      domain={["dataMin", "dataMax"]}
-                      tickFormatter={(timestamp) =>
-                        format(new Date(timestamp), "MMM d")
-                      }
-                      scale="time"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      minTickGap={50}
-                      className="text-xs text-muted-foreground"
-                    />
-                    <YAxis hide domain={[0, "auto"]} />
-                    <ChartTooltip
-                      content={({ active, payload }) => {
-                        if (!active || !payload || payload.length === 0)
-                          return null;
+          <ChartContainer config={costChartConfig} className="h-[240px] w-full">
+            <LineChart
+              data={transformedData.costData}
+              margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                className="stroke-muted"
+              />
+              <XAxis
+                dataKey="date"
+                type="number"
+                domain={["dataMin", "dataMax"]}
+                tickFormatter={(timestamp) =>
+                  format(new Date(timestamp), "MMM d")
+                }
+                scale="time"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={50}
+                className="text-xs text-muted-foreground"
+              />
+              <YAxis hide domain={[0, "auto"]} />
+              <ChartTooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload || payload.length === 0) return null;
 
-                        const date = payload[0]?.payload?.dateLabel || "";
+                  const date = payload[0]?.payload?.dateLabel || "";
 
-                        return (
-                          <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
-                            <p className="mb-2 text-sm font-medium text-foreground">
-                              {date}
-                            </p>
-                            <div className="flex flex-col gap-1">
-                              {payload
-                                .filter((item) => Number(item.value) > 0)
-                                .sort(
-                                  (a, b) => Number(b.value) - Number(a.value),
-                                )
-                                .map((item, index) => (
-                                  <div
-                                    key={index}
-                                    className="flex items-center justify-between gap-4"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <div
-                                        className="h-2 w-2 rounded-full"
-                                        style={{
-                                          backgroundColor: item.color,
-                                        }}
-                                      />
-                                      <span className="text-xs text-muted-foreground">
-                                        {String(item.name)}
-                                      </span>
-                                    </div>
-                                    <span className="text-xs font-semibold text-foreground">
-                                      {formatCurrency(Number(item.value))}
-                                    </span>
-                                  </div>
-                                ))}
+                  return (
+                    <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
+                      <p className="mb-2 text-sm font-medium text-foreground">
+                        {date}
+                      </p>
+                      <div className="flex flex-col gap-1">
+                        {payload
+                          .filter((item) => Number(item.value) > 0)
+                          .sort((a, b) => Number(b.value) - Number(a.value))
+                          .map((item, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between gap-4"
+                            >
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="h-2 w-2 rounded-full"
+                                  style={{
+                                    backgroundColor: item.color,
+                                  }}
+                                />
+                                <span className="text-xs text-muted-foreground">
+                                  {String(item.name)}
+                                </span>
+                              </div>
+                              <span className="text-xs font-semibold text-foreground">
+                                {formatCurrency(Number(item.value))}
+                              </span>
                             </div>
-                          </div>
-                        );
-                      }}
-                    />
-                    {transformedData.topPropertiesByCost?.map((prop, index) => (
-                      <Line
-                        key={prop}
-                        type="monotone"
-                        dataKey={prop}
-                        stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                        strokeWidth={2}
-                        dot={false}
-                        name={prop}
-                      />
-                    ))}
-                  </LineChart>
-                </ChartContainer>
+                          ))}
+                      </div>
+                    </div>
+                  );
+                }}
+              />
+              {transformedData.topPropertiesByCost?.map((prop, index) => (
+                <Line
+                  key={prop}
+                  type="monotone"
+                  dataKey={prop}
+                  stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                  strokeWidth={2}
+                  dot={false}
+                  name={prop}
+                />
+              ))}
+            </LineChart>
+          </ChartContainer>
         )}
       </div>
 
       {/* Top Costs Chart */}
-      <div className="flex flex-col border-b border-r border-border bg-card px-6 pt-6 pb-2 text-card-foreground">
+      <div className="flex flex-col border-b border-r border-border bg-card px-6 pb-2 pt-6 text-card-foreground">
         <div className="mb-4">
           <Small className="text-muted-foreground">Top Costs</Small>
         </div>
@@ -412,89 +406,84 @@ export function PropertyAnalyticsCharts({
             config={requestsChartConfig}
             className="h-[240px] w-full"
           >
-                  <LineChart
-                    data={transformedData.requestsData}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      className="stroke-muted"
-                    />
-                    <XAxis
-                      dataKey="date"
-                      type="number"
-                      domain={["dataMin", "dataMax"]}
-                      tickFormatter={(timestamp) =>
-                        format(new Date(timestamp), "MMM d")
-                      }
-                      scale="time"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      minTickGap={50}
-                      className="text-xs text-muted-foreground"
-                    />
-                    <YAxis hide domain={[0, "auto"]} />
-                    <ChartTooltip
-                      content={({ active, payload }) => {
-                        if (!active || !payload || payload.length === 0)
-                          return null;
+            <LineChart
+              data={transformedData.requestsData}
+              margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                className="stroke-muted"
+              />
+              <XAxis
+                dataKey="date"
+                type="number"
+                domain={["dataMin", "dataMax"]}
+                tickFormatter={(timestamp) =>
+                  format(new Date(timestamp), "MMM d")
+                }
+                scale="time"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={50}
+                className="text-xs text-muted-foreground"
+              />
+              <YAxis hide domain={[0, "auto"]} />
+              <ChartTooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload || payload.length === 0) return null;
 
-                        const date = payload[0]?.payload?.dateLabel || "";
+                  const date = payload[0]?.payload?.dateLabel || "";
 
-                        return (
-                          <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
-                            <p className="mb-2 text-sm font-medium text-foreground">
-                              {date}
-                            </p>
-                            <div className="flex flex-col gap-1">
-                              {payload
-                                .filter((item) => Number(item.value) > 0)
-                                .sort(
-                                  (a, b) => Number(b.value) - Number(a.value),
-                                )
-                                .map((item, index) => (
-                                  <div
-                                    key={index}
-                                    className="flex items-center justify-between gap-4"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <div
-                                        className="h-2 w-2 rounded-full"
-                                        style={{
-                                          backgroundColor: item.color,
-                                        }}
-                                      />
-                                      <span className="text-xs text-muted-foreground">
-                                        {String(item.name)}
-                                      </span>
-                                    </div>
-                                    <span className="text-xs font-semibold text-foreground">
-                                      {formatNumber(Number(item.value))}
-                                    </span>
-                                  </div>
-                                ))}
+                  return (
+                    <div className="rounded-lg border border-border bg-card p-3 shadow-lg">
+                      <p className="mb-2 text-sm font-medium text-foreground">
+                        {date}
+                      </p>
+                      <div className="flex flex-col gap-1">
+                        {payload
+                          .filter((item) => Number(item.value) > 0)
+                          .sort((a, b) => Number(b.value) - Number(a.value))
+                          .map((item, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between gap-4"
+                            >
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="h-2 w-2 rounded-full"
+                                  style={{
+                                    backgroundColor: item.color,
+                                  }}
+                                />
+                                <span className="text-xs text-muted-foreground">
+                                  {String(item.name)}
+                                </span>
+                              </div>
+                              <span className="text-xs font-semibold text-foreground">
+                                {formatNumber(Number(item.value))}
+                              </span>
                             </div>
-                          </div>
-                        );
-                      }}
-                    />
-                    {transformedData.topPropertiesByRequests?.map(
-                      (prop, index) => (
-                        <Line
-                          key={prop}
-                          type="monotone"
-                          dataKey={prop}
-                          stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                          strokeWidth={2}
-                          dot={false}
-                          name={prop}
-                        />
-                      ),
-                    )}
-                  </LineChart>
-                </ChartContainer>
+                          ))}
+                      </div>
+                    </div>
+                  );
+                }}
+              />
+              {transformedData.topPropertiesByRequests?.map((prop, index) => (
+                <Line
+                  key={prop}
+                  type="monotone"
+                  dataKey={prop}
+                  stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                  strokeWidth={2}
+                  dot={false}
+                  name={prop}
+                />
+              ))}
+            </LineChart>
+          </ChartContainer>
         )}
       </div>
 

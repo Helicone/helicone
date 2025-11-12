@@ -167,8 +167,8 @@ const AlertsPage = () => {
         </div>
       </div>
 
-      <div className="border-b border-border overflow-x-auto">
-        <div className="settings-table border-t border-border min-w-[1200px]">
+      <div className="overflow-x-auto border-b border-border">
+        <div className="settings-table min-w-[1200px] border-t border-border">
           <ThemedTable
             columns={[
               { name: "Actions", key: "actions", hidden: false },
@@ -200,7 +200,7 @@ const AlertsPage = () => {
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="inline-flex items-center rounded-md bg-muted p-1.5 text-xs text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-30 transition-colors"
+                      className="inline-flex items-center rounded-md bg-muted p-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => {
                         setEditAlertOpen(true);
                         const alertToEdit = alerts.find(
@@ -213,7 +213,7 @@ const AlertsPage = () => {
                     </button>
                     <button
                       type="button"
-                      className="inline-flex items-center rounded-md bg-destructive/10 p-1.5 text-xs text-destructive shadow-sm hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-30 transition-colors"
+                      className="inline-flex items-center rounded-md bg-destructive/10 p-1.5 text-xs text-destructive shadow-sm transition-colors hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-30"
                       onClick={() => {
                         setDeleteAlertOpen(true);
                         setSelectedAlert(key);
@@ -248,9 +248,7 @@ const AlertsPage = () => {
                   </p>
                 ),
                 metric: (
-                  <Badge variant="helicone">
-                    {formatMetric(key.metric)}
-                  </Badge>
+                  <Badge variant="helicone">{formatMetric(key.metric)}</Badge>
                 ),
                 aggregation: (
                   <p className="text-xs">
@@ -267,9 +265,7 @@ const AlertsPage = () => {
                 ),
                 grouping: (
                   <p className="text-xs">
-                    {(key as any).grouping
-                      ? (key as any).grouping
-                      : "—"}
+                    {(key as any).grouping ? (key as any).grouping : "—"}
                   </p>
                 ),
                 time_window: (
@@ -278,11 +274,7 @@ const AlertsPage = () => {
                 minimum_request_count: (
                   <p className="text-xs">{key.minimum_request_count || 0}</p>
                 ),
-                filter: (
-                  <p className="text-xs">
-                    {key.filter ? "Yes" : "No"}
-                  </p>
-                ),
+                filter: <p className="text-xs">{key.filter ? "Yes" : "No"}</p>,
                 emails: <div className="flex">{key.emails.join(", ")}</div>,
                 slack_channels: (
                   <div className="flex">

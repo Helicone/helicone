@@ -300,7 +300,7 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
             After saving your configuration, add the following header to your
             Helicone requests to track usage in Stripe:
           </p>
-          <div className="rounded-md bg-muted p-3 font-mono text-xs">
+          <div className="font-mono rounded-md bg-muted p-3 text-xs">
             <code>x-stripe-customer-id: cus_12345678</code>
           </div>
           <p>

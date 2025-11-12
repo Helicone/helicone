@@ -19,16 +19,16 @@ interface PropertyTopRequestsProps {
 
 // Chart colors - matching the dashboard bar lists
 const BAR_COLORS = [
-  "hsl(217, 100%, 55%)",   // blue
-  "hsl(271, 100%, 60%)",   // purple
-  "hsl(185, 100%, 40%)",   // cyan
-  "hsl(145, 80%, 42%)",    // green
-  "hsl(330, 100%, 55%)",   // pink
-  "hsl(25, 100%, 50%)",    // orange
-  "hsl(48, 100%, 50%)",    // yellow
-  "hsl(160, 100%, 40%)",   // teal
-  "hsl(280, 100%, 65%)",   // violet
-  "hsl(10, 100%, 55%)",    // red
+  "hsl(217, 100%, 55%)", // blue
+  "hsl(271, 100%, 60%)", // purple
+  "hsl(185, 100%, 40%)", // cyan
+  "hsl(145, 80%, 42%)", // green
+  "hsl(330, 100%, 55%)", // pink
+  "hsl(25, 100%, 50%)", // orange
+  "hsl(48, 100%, 50%)", // yellow
+  "hsl(160, 100%, 40%)", // teal
+  "hsl(280, 100%, 65%)", // violet
+  "hsl(10, 100%, 55%)", // red
 ];
 
 const formatNumber = (num: number) => {
@@ -38,7 +38,10 @@ const formatNumber = (num: number) => {
   return num.toFixed(0);
 };
 
-const PropertyTopRequests = ({ property, timeFilter }: PropertyTopRequestsProps) => {
+const PropertyTopRequests = ({
+  property,
+  timeFilter,
+}: PropertyTopRequestsProps) => {
   const jawn = useJawnClient();
   const topRequests = useQuery({
     queryKey: ["topRequests", property, timeFilter?.start, timeFilter?.end],
@@ -61,7 +64,9 @@ const PropertyTopRequests = ({ property, timeFilter }: PropertyTopRequestsProps)
 
   const chartData = topRequests.data?.data?.data || [];
   const displayedData = chartData.filter((item: any) => item.value !== "Other");
-  const maxRequests = Math.max(...displayedData.map((item: any) => Number(item.count || 0)));
+  const maxRequests = Math.max(
+    ...displayedData.map((item: any) => Number(item.count || 0)),
+  );
 
   if (!property) {
     return null;
@@ -81,7 +86,9 @@ const PropertyTopRequests = ({ property, timeFilter }: PropertyTopRequestsProps)
   if (!chartData || chartData.length === 0) {
     return (
       <div className="flex h-[240px] items-center justify-center">
-        <Small className="text-muted-foreground">No request data available</Small>
+        <Small className="text-muted-foreground">
+          No request data available
+        </Small>
       </div>
     );
   }

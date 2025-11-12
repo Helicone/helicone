@@ -206,8 +206,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     [router],
   );
 
-  const isSessionsLoading =
-    isLoading || allNames.isLoading || names.isLoading;
+  const isSessionsLoading = isLoading || allNames.isLoading || names.isLoading;
 
   // Helper function to get TimeFilter object
   const getTimeFilterObject = (start: Date, end: Date): TimeFilter => ({

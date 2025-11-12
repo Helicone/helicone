@@ -1,5 +1,4 @@
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -20,11 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { XSmall } from "@/components/ui/typography";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { ClientType, getJawnClient } from "@/lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, LockIcon, Search, Tag, Trash2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";

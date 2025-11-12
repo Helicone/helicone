@@ -26,7 +26,9 @@ export interface DashboardExportData {
   overTimeData: {
     requests: { data: Result<RequestsOverTime[], string> | undefined };
     requestsWithStatus: {
-      data: Result<(RequestsOverTime & { status: number })[], string> | undefined;
+      data:
+        | Result<(RequestsOverTime & { status: number })[], string>
+        | undefined;
     };
     costs: { data: Result<CostOverTime[], string> | undefined };
     latency: { data: Result<LatencyOverTime[], string> | undefined };
@@ -34,7 +36,9 @@ export interface DashboardExportData {
     timeToFirstToken: { data: Result<TimeToFirstToken[], string> | undefined };
     threats: { data: Result<ThreatsOverTime[], string> | undefined };
     errors: { data: Result<ErrorOverTime[], string> | undefined };
-    promptTokensOverTime: { data: Result<TokensOverTime[], string> | undefined };
+    promptTokensOverTime: {
+      data: Result<TokensOverTime[], string> | undefined;
+    };
   };
   models: Result<
     Array<{

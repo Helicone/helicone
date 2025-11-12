@@ -20,16 +20,16 @@ interface PropertyTopCostsProps {
 
 // Chart colors - matching the dashboard bar lists
 const BAR_COLORS = [
-  "hsl(217, 100%, 55%)",   // blue
-  "hsl(271, 100%, 60%)",   // purple
-  "hsl(185, 100%, 40%)",   // cyan
-  "hsl(145, 80%, 42%)",    // green
-  "hsl(330, 100%, 55%)",   // pink
-  "hsl(25, 100%, 50%)",    // orange
-  "hsl(48, 100%, 50%)",    // yellow
-  "hsl(160, 100%, 40%)",   // teal
-  "hsl(280, 100%, 65%)",   // violet
-  "hsl(10, 100%, 55%)",    // red
+  "hsl(217, 100%, 55%)", // blue
+  "hsl(271, 100%, 60%)", // purple
+  "hsl(185, 100%, 40%)", // cyan
+  "hsl(145, 80%, 42%)", // green
+  "hsl(330, 100%, 55%)", // pink
+  "hsl(25, 100%, 50%)", // orange
+  "hsl(48, 100%, 50%)", // yellow
+  "hsl(160, 100%, 40%)", // teal
+  "hsl(280, 100%, 65%)", // violet
+  "hsl(10, 100%, 55%)", // red
 ];
 
 const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
@@ -55,7 +55,9 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
 
   const chartData = topCosts.data?.data?.data || [];
   const displayedData = chartData.filter((item: any) => item.value !== "Other");
-  const maxCost = Math.max(...displayedData.map((item: any) => Number(item.cost || 0)));
+  const maxCost = Math.max(
+    ...displayedData.map((item: any) => Number(item.cost || 0)),
+  );
 
   if (!property) {
     return null;

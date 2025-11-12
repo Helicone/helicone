@@ -16,7 +16,9 @@ interface FilterASTButtonProps {
   showCurlButton?: boolean;
 }
 
-export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ showCurlButton = false }) => {
+export const FilterASTButton: React.FC<FilterASTButtonProps> = ({
+  showCurlButton = false,
+}) => {
   const { store } = useFilterAST();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -39,7 +41,7 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ showCurlButton
   const numFilters = store.getFilterNodeCount();
 
   return (
-    <Row className="space-x-2 mr-4">
+    <Row className="mr-4 space-x-2">
       <Popover onOpenChange={setIsOpen} open={isOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -51,7 +53,7 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ showCurlButton
             {numFilters > 0 ? (
               <>
                 Filters
-                <Badge className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs font-semibold text-slate-900 hover:bg-white/90 p-0">
+                <Badge className="flex h-5 w-5 items-center justify-center rounded-full bg-white p-0 text-xs font-semibold text-slate-900 hover:bg-white/90">
                   {numFilters}
                 </Badge>
               </>
@@ -66,7 +68,7 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ showCurlButton
             {numFilters > 0 && (
               <X
                 size={14}
-                className="ml-1 hover:opacity-70 transition-opacity"
+                className="ml-1 transition-opacity hover:opacity-70"
                 onClick={(e) => {
                   e.stopPropagation();
                   store.clearActiveFilter();
