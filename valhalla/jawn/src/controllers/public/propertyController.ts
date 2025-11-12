@@ -1,3 +1,8 @@
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import {
+  buildFilterWithAuthClickHouse,
+  buildFilterWithAuthClickHouseOrganizationProperties,
+} from "@helicone-package/filters/filters";
 import {
   Body,
   Controller,
@@ -8,19 +13,14 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHouseOrganizationProperties,
-} from "@helicone-package/filters/filters";
-import { Result, resultMap } from "../../packages/common/result";
-import type { JawnAuthenticatedRequest } from "../../types/request";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
-import {
-  DataOverTimeRequest,
+  type DataOverTimeRequest,
   getXOverTime,
 } from "../../managers/helpers/getXOverTime";
+import { Result, resultMap } from "../../packages/common/result";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 
 export interface Property {
   property: string;
@@ -39,6 +39,55 @@ export interface TimeFilterRequest {
 @Tags("Property")
 @Security("api_key")
 export class PropertyController extends Controller {
+  @Post("/properties/over-time")
+  public async getPropertiesOverTime(
+    @Body()
+    requestBody: DataOverTimeRequest & {
+      propertyKey: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        property: string;
+        total_cost: number;
+        request_count: number;
+        created_at_trunc: string;
+      }[],
+      string
+    >
+  > {
+    return await getXOverTime<{
+      property: string;
+      total_cost: number;
+      request_count: number;
+    }>(
+      {
+        ...requestBody,
+        userFilter: {
+          left: {
+            request_response_rmt: {
+              property_key: {
+                equals: requestBody.propertyKey,
+              },
+            },
+          },
+          operator: "and",
+          right: requestBody.userFilter,
+        },
+      },
+      {
+        orgId: request.authParams.organizationId,
+        countColumns: [
+          `sum(cost) / ${COST_PRECISION_MULTIPLIER} AS total_cost`,
+          "count(*) as request_count",
+        ],
+        groupByColumns: ["properties[{val_0: String}] AS property"],
+      },
+      [requestBody.propertyKey]
+    );
+  }
+
   @Post("query")
   public async getProperties(
     @Body()
