@@ -157,7 +157,7 @@ export class SimpleAIGateway {
     }
 
     // Step 4: Get disallow list (only if there are PTB attempts)
-    const hasPtbAttempts = attempts.some((a) => a.source === "ptb");
+    const hasPtbAttempts = attempts.some((a) => a.authType === "ptb");
     const disallowSpan = this.traceContext?.sampled && hasPtbAttempts
       ? this.tracer.startSpan(
           "ai_gateway.gateway.get_disallow_list",
