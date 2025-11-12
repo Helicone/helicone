@@ -56,14 +56,15 @@ export class AttemptBuilder {
       }
 
       if (modelSpec.data.provider) {
-        // Explicit provider specified - preserve user's order
+        // Explicit provider specified - sort within this model's attempts to prioritize BYOK over PTB
         const providerAttempts = await this.getProviderAttempts(
           modelSpec.data,
           orgId,
           bodyMapping,
           plugins
         );
-        allAttempts.push(...providerAttempts);
+        // Sort this model's attempts (BYOK first), but preserve order relative to other models
+        allAttempts.push(...sortAttemptsByPriority(providerAttempts));
       } else {
         // No provider specified - get all providers and sort by priority
         const attempts = await this.buildAttemptsForAllProviders(
@@ -73,8 +74,7 @@ export class AttemptBuilder {
           plugins,
           globalIgnoreProviders
         );
-        const sortedAttempts = sortAttemptsByPriority(attempts);
-        allAttempts.push(...sortedAttempts);
+        allAttempts.push(...sortAttemptsByPriority(attempts));
       }
     }
 

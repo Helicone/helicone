@@ -10,7 +10,8 @@ export type AllOperators =
   | "contains"
   | "not-contains"
   | "gin-contains"
-  | "vector-contains";
+  | "vector-contains"
+  | "has";
 
 export type TextOperators = Record<
   "not-equals" | "equals" | "like" | "ilike" | "contains" | "not-contains",
@@ -200,6 +201,9 @@ interface RequestResponseRMTToOperators {
   prompt_cache_write_tokens: SingleKey<NumberOperators>;
   total_tokens: SingleKey<NumberOperators>;
   target_url: SingleKey<TextOperators>;
+  property_key: {
+    equals: string;
+  };
   properties: {
     [key: string]: SingleKey<TextOperators>;
   };

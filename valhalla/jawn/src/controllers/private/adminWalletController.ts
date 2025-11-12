@@ -18,6 +18,7 @@ import { ENVIRONMENT } from "../../lib/clients/constant";
 import { SettingsManager } from "../../utils/settings";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { AdminWalletManager } from "../../managers/admin/AdminWalletManager";
+import { AdminWalletAnalyticsManager } from "../../managers/admin/AdminWalletAnalyticsManager";
 import { WalletState } from "../../types/wallet";
 import { WalletManager } from "../../managers/wallet/WalletManager";
 
@@ -57,6 +58,16 @@ interface TableDataResponse {
     page: number;
     message?: string;
   };
+}
+
+interface TimeSeriesDataPoint {
+  timestamp: string;
+  amount: number;
+}
+
+interface TimeSeriesResponse {
+  deposits: TimeSeriesDataPoint[];
+  spend: TimeSeriesDataPoint[];
 }
 
 @Route("v1/admin/wallet")
@@ -475,5 +486,62 @@ export class AdminWalletController extends Controller {
       console.error("Error removing from disallow list:", error);
       return err(`Error removing from disallow list: ${error}`);
     }
+  }
+
+  @Post("/analytics/time-series")
+  public async getTimeSeriesData(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() startDate: string,
+    @Query() endDate: string,
+    @Query() groupBy?: "minute" | "hour" | "day" | "week" | "month"
+  ): Promise<Result<TimeSeriesResponse, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Get the token usage product ID from settings
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    if (!stripeProductSettings) {
+      return err("Stripe product settings not configured");
+    }
+
+    const tokenUsageProductId =
+      stripeProductSettings.cloudGatewayTokenUsageProduct;
+    if (!tokenUsageProductId) {
+      return err("Cloud gateway token usage product ID not configured");
+    }
+
+    // Validate date parameters
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return err("Invalid date parameters");
+    }
+
+    if (start >= end) {
+      return err("Start date must be before end date");
+    }
+
+    // Validate date range (max 90 days)
+    const maxDays = 90;
+    const daysDiff = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
+    if (daysDiff > maxDays) {
+      return err(`Date range cannot exceed ${maxDays} days`);
+    }
+
+    const analyticsManager = new AdminWalletAnalyticsManager(
+      request.authParams
+    );
+
+    // Default to day if not specified
+    const timeGranularity = groupBy || "day";
+
+    return analyticsManager.getTimeSeriesData(
+      start,
+      end,
+      tokenUsageProductId,
+      timeGranularity
+    );
   }
 }
