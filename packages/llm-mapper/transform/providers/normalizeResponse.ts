@@ -1,7 +1,10 @@
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { mapModelUsageToOpenAI } from "@helicone-package/cost/usage/mapModelUsageToOpenAI";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
-import { ResponseFormat, BodyMappingType } from "@helicone-package/cost/models/types";
+import {
+  ResponseFormat,
+  BodyMappingType,
+} from "@helicone-package/cost/models/types";
 import { OpenAIResponseBody, ChatCompletionChunk } from "../types/openai";
 import { toOpenAI } from "./anthropic/response/toOpenai";
 import { AnthropicToOpenAIStreamConverter } from "./anthropic/streamedResponse/toOpenai";
@@ -79,7 +82,7 @@ function extractBedrockEventPayloads(text: string): Array<{ bytes?: string }> {
 
 function serializeOpenAIChunks(
   chunks: ChatCompletionChunk[],
-  includeDone: boolean = true
+  includeDone: boolean = true,
 ): string {
   const lines = chunks.map((chunk) => `data: ${JSON.stringify(chunk)}`);
 
@@ -91,20 +94,18 @@ function serializeOpenAIChunks(
 }
 
 async function convertBedrockAnthropicStreamToOpenAI(
-  responseText: string
+  responseText: string,
 ): Promise<string> {
   const converter = new AnthropicToOpenAIStreamConverter();
   const openAIChunks: ChatCompletionChunk[] = [];
   const payloads = extractBedrockEventPayloads(responseText);
   // as of 2025-10-16 bedrock does not include 1h cache buckets
-  let messageStartUsage:
-    | {
-        input_tokens?: number;
-        cache_creation_input_tokens?: number;
-        cache_read_input_tokens?: number;
-        output_tokens?: number;
-      }
-    | null = null;
+  let messageStartUsage: {
+    input_tokens?: number;
+    cache_creation_input_tokens?: number;
+    cache_read_input_tokens?: number;
+    output_tokens?: number;
+  } | null = null;
 
   for (const payload of payloads) {
     if (!payload?.bytes) {
@@ -194,7 +195,7 @@ export async function toOpenAIResponse(
   response: Response,
   provider: ModelProviderName,
   providerModelId: string,
-  isStream: boolean = false
+  isStream: boolean = false,
 ): Promise<Response> {
   try {
     // Step 1: Parse response body (already in OpenAI format)
@@ -235,7 +236,7 @@ export async function toOpenAIResponse(
 export function toOpenAIStreamResponse(
   response: Response,
   provider: ModelProviderName,
-  providerModelId: string
+  providerModelId: string,
 ): Response {
   if (!response.body) {
     return response;
@@ -244,7 +245,7 @@ export function toOpenAIStreamResponse(
   const transformedStream = normalizeOpenAIStream(
     response.body,
     provider,
-    providerModelId
+    providerModelId,
   );
 
   return new Response(transformedStream, {
@@ -277,7 +278,7 @@ export class OpenAIStreamUsageNormalizer {
 
   async processLines(
     raw: string,
-    onChunk: (chunk: ChatCompletionChunk) => void
+    onChunk: (chunk: ChatCompletionChunk) => void,
   ): Promise<void> {
     const lines = raw.split("\n");
 
@@ -338,7 +339,7 @@ export class OpenAIStreamUsageNormalizer {
 export async function normalizeOpenAIStreamText(
   sseText: string,
   provider: ModelProviderName,
-  providerModelId: string
+  providerModelId: string,
 ): Promise<string> {
   const normalizer = new OpenAIStreamUsageNormalizer(provider, providerModelId);
   const normalizedChunks: any[] = [];
@@ -391,7 +392,7 @@ function convertOpenAIStreamToResponses(sseText: string): string {
 function normalizeOpenAIStream(
   stream: ReadableStream<Uint8Array>,
   provider: ModelProviderName,
-  providerModelId: string
+  providerModelId: string,
 ): ReadableStream<Uint8Array> {
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
@@ -427,7 +428,7 @@ function normalizeOpenAIStream(
                 message + "\n\n",
                 controller,
                 encoder,
-                normalizer
+                normalizer,
               );
             }
           }
@@ -445,7 +446,7 @@ async function processBuffer(
   buffer: string,
   controller: ReadableStreamDefaultController<Uint8Array>,
   encoder: TextEncoder,
-  normalizer: OpenAIStreamUsageNormalizer
+  normalizer: OpenAIStreamUsageNormalizer,
 ) {
   await normalizer.processLines(buffer, (chunk) => {
     const sseMessage = `data: ${JSON.stringify(chunk)}\n\n`;
@@ -470,8 +471,14 @@ export async function normalizeAIGatewayResponse(params: {
   responseFormat: ResponseFormat;
   bodyMapping?: BodyMappingType;
 }): Promise<string> {
-  const { responseText, isStream, provider, providerModelId, responseFormat, bodyMapping } =
-    params;
+  const {
+    responseText,
+    isStream,
+    provider,
+    providerModelId,
+    responseFormat,
+    bodyMapping,
+  } = params;
 
   try {
     if (isStream) {
@@ -500,7 +507,7 @@ export async function normalizeAIGatewayResponse(params: {
         normalizedOpenAIText = await normalizeOpenAIStreamText(
           responseText,
           provider,
-          providerModelId
+          providerModelId,
         );
       }
 
@@ -533,7 +540,7 @@ export async function normalizeAIGatewayResponse(params: {
         }
       }
 
-      if (bodyMapping === "RESPONSES") {
+      if (bodyMapping === "RESPONSES" && provider !== "openai") {
         const responsesBody = toResponses(openAIBody);
         return JSON.stringify(responsesBody);
       }
