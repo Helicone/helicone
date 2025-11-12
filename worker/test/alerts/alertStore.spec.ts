@@ -104,25 +104,22 @@ describe("AlertStore", () => {
         error: null,
       });
 
-    const res = await store.getErrorRate("org", 60000);
+    const alert = {
+      id: "a1",
+      org_id: "org",
+      time_window: 60000,
+      metric: "response.status",
+      grouping: null,
+      grouping_is_property: false,
+      filter: null,
+      threshold: 0,
+      minimum_request_count: null,
+      organization: { integrations: [] },
+    } as any;
+
+    const res = await store.getErrorRate(alert);
     expect(res.error).toBeNull();
     expect(res.data).toEqual({ totalCount: 100, errorCount: 10, requestCount: 100 });
-    expect(mock).toHaveBeenCalled();
-  });
-
-  it("getCost queries clickhouse and maps data", async () => {
-    const mock = vi
-      .spyOn(clickhouse, "dbQuery")
-      .mockResolvedValue({
-        data: [
-          { totalCount: 5.5, requestCount: 42 },
-        ],
-        error: null,
-      });
-
-    const res = await store.getCost("org", 60000);
-    expect(res.error).toBeNull();
-    expect(res.data).toEqual({ totalCount: 5.5, requestCount: 42 });
     expect(mock).toHaveBeenCalled();
   });
 });

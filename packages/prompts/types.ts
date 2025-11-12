@@ -15,6 +15,16 @@ export interface TemplateVariable {
   name: string;
   type: string;
   raw: string;
+
+  // optional, just for visibility
+  from_prompt_partial?: boolean;
+}
+
+export interface PromptPartialVariable {
+  prompt_id: string;
+  index: number;
+  environment?: string;
+  raw: string;
 }
 
 export interface ValidationError {

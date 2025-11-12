@@ -50,6 +50,7 @@ export type Tokenizer =
   | "Llama4"
   | "Gemini"
   | "Mistral"
+  | "MoonshotAI"
   | "Qwen"
   | "DeepSeek"
   | "Cohere"
@@ -240,6 +241,7 @@ export interface UserEndpointConfig {
   crossRegion?: boolean;
   gatewayMapping?: BodyMappingType;
   modelName?: string;
+  heliconeModelId?: string; // Azure OpenAI
 }
 
 export interface ModelSpec {

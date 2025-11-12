@@ -2,6 +2,7 @@ import { AlertRequest, AlertResponse } from "../../managers/alert/AlertManager";
 import { err, ok, Result } from "../../packages/common/result";
 import { Database } from "../db/database.types";
 import { dbExecute } from "../shared/db/dbExecute";
+import { ALERT_METRICS } from "@helicone-package/filters/alerts";
 
 import { BaseStore } from "./baseStore";
 
@@ -17,7 +18,7 @@ export class AlertStore extends BaseStore {
       const alertResult = await dbExecute<
         Database["public"]["Tables"]["alert"]["Row"]
       >(
-        `SELECT id, org_id, metric, threshold, time_window, time_block_duration, emails, status, name, soft_delete, created_at, updated_at, minimum_request_count, slack_channels
+        `SELECT id, org_id, metric, threshold, time_window, time_block_duration, emails, status, name, soft_delete, created_at, updated_at, minimum_request_count, slack_channels, filter, percentile, grouping, grouping_is_property, aggregation
          FROM alert
          WHERE org_id = $1
          AND (soft_delete IS NULL OR soft_delete = false)`,
@@ -67,20 +68,25 @@ export class AlertStore extends BaseStore {
     }
 
     const query = `
-      INSERT INTO alert (name, metric, threshold, time_window, emails, slack_channels, org_id, minimum_request_count, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO alert (name, metric, threshold, aggregation, percentile, grouping, grouping_is_property, time_window, emails, slack_channels, org_id, minimum_request_count, status, filter)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING id
     `;
     const parameters = [
       alert.name,
       alert.metric,
       alert.threshold,
+      alert.aggregation,
+      alert.percentile,
+      alert.grouping,
+      alert.grouping_is_property,
       alert.time_window,
       alert.emails,
       alert.slack_channels,
       alert.org_id,
       alert.minimum_request_count,
       alert.status,
+      alert.filter ? JSON.stringify(alert.filter) : null,
     ];
 
     const result = await dbExecute<{ id: string }>(query, parameters);
@@ -143,8 +149,9 @@ export class AlertStore extends BaseStore {
     if (!isValidTimePeriod(parseInt(alert.time_window)))
       return { data: null, error: "Invalid time_window" };
 
-    if (alert.metric !== "response.status" && alert.metric !== "cost")
+    if (!(ALERT_METRICS).includes(alert.metric)) {
       return { data: null, error: "Invalid metric" };
+    }
 
     if (!isValidEmailArray(alert.emails))
       return { data: null, error: "Invalid emails" };

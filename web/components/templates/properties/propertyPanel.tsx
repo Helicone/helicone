@@ -21,12 +21,11 @@ import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tag, DollarSign, Table2, Clock, ExternalLink } from "lucide-react";
-import PropertyTopCosts from "./propertyTopCosts";
+import { Tag, ExternalLink } from "lucide-react";
 import { Row } from "@/components/layout/common";
 import { SimpleTable } from "../../shared/table/simpleTable";
 import { Small, XSmall, Muted } from "@/components/ui/typography";
+import { PropertyAnalyticsCharts } from "./PropertyAnalyticsCharts";
 
 interface PropertyPanelProps {
   property: string;
@@ -38,7 +37,6 @@ const PropertyPanel = (props: PropertyPanelProps) => {
 
   const [showMore, setShowMore] = useState(false);
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("overview");
 
   const getInterval = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -113,24 +111,10 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   const cleanedValueData = getPropertyValueData();
 
   return (
-    <Tabs
-      defaultValue="overview"
-      value={activeTab}
-      onValueChange={setActiveTab}
-      className="mb-1 w-full"
-    >
+    <div className="mb-1 w-full">
       <div className="flex flex-col">
-        <div className="flex flex-col items-center justify-between p-4 md:flex-row">
+        <div className="flex flex-col items-center justify-between p-2 md:flex-row">
           <Row className="flex-wrap items-center gap-2">
-            <TabsList variant={"default"} className="mb-2 sm:mb-0">
-              <TabsTrigger value="overview" className="text-sm font-medium">
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="metrics" className="text-sm font-medium">
-                Metrics
-              </TabsTrigger>
-            </TabsList>
-
             <ThemedTableHeader
               isFetching={false}
               timeFilter={{
@@ -186,73 +170,20 @@ const PropertyPanel = (props: PropertyPanelProps) => {
             </div>
           </div>
         ) : (
-          <div className="flex w-full flex-col pt-6">
-            <TabsContent value="overview" className="flex flex-col pt-0">
-              <div className="flex">
-                <div className="flex min-w-[140px] flex-1 items-center gap-2 border-y border-r border-border bg-background p-3">
-                  <div className="rounded bg-emerald-50 p-1 dark:bg-emerald-950">
-                    <DollarSign className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <XSmall className="text-muted-foreground">Cost</XSmall>
-                    {isAnyLoading ? (
-                      <Skeleton className="mt-1 h-5 w-16 bg-muted" />
-                    ) : (
-                      <div className="mt-0.5 text-lg font-semibold">
-                        {keyMetrics.totalCost.data?.data
-                          ? `$${keyMetrics.totalCost.data?.data.toFixed(5)}`
-                          : "$0.00"}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex min-w-[140px] flex-1 items-center gap-2 border-y border-r border-border bg-background p-3">
-                  <div className="rounded bg-blue-50 p-1 dark:bg-blue-950">
-                    <Table2 className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <XSmall className="text-muted-foreground">Requests</XSmall>
-                    {isAnyLoading ? (
-                      <Skeleton className="mt-1 h-5 w-16 bg-muted" />
-                    ) : (
-                      <div className="mt-0.5 text-lg font-semibold">
-                        {
-                          +(
-                            keyMetrics.totalRequests?.data?.data?.toFixed(2) ??
-                            0
-                          )
-                        }
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex min-w-[140px] flex-1 items-center gap-2 border-y border-border bg-background p-3">
-                  <div className="rounded bg-purple-50 p-1 dark:bg-purple-950">
-                    <Clock className="h-3 w-3 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <XSmall className="text-muted-foreground">
-                      Avg Latency
-                    </XSmall>
-                    {isAnyLoading ? (
-                      <Skeleton className="mt-1 h-5 w-16 bg-muted" />
-                    ) : (
-                      <div className="mt-0.5 text-lg font-semibold">
-                        {keyMetrics.averageLatency.data?.data
-                          ? (
-                              keyMetrics.averageLatency.data.data / 1000
-                            ).toFixed(2)
-                          : "0.00"}
-                      </div>
-                    )}
-                  </div>
-                </div>
+          <div className="flex w-full flex-col pt-2">
+            <div className="flex flex-col pt-0">
+              {/* Analytics Charts with Tabs */}
+              <div className="pb-0">
+                <PropertyAnalyticsCharts
+                  property={property}
+                  timeFilter={timeFilter}
+                  propertyValueData={propertyValueData}
+                />
               </div>
+
               {isAnyLoading ? (
-                <div className="w-full">
-                  <div className="space-y-3">
+                <div className="w-full border-t border-border pt-0">
+                  <div className="space-y-3 px-4">
                     <div className="flex items-center gap-4">
                       {[
                         "Value",
@@ -283,9 +214,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </div>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto border-t border-border pt-0">
                   <SimpleTable
-                    className="w-full"
+                    className="w-full px-4"
                     data={cleanedValueData}
                     columns={[
                       {
@@ -402,7 +333,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
               )}
 
               {propertyValueData.length > 10 && (
-                <div className="flex justify-center p-4">
+                <div className="flex justify-center p-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -412,15 +343,11 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </Button>
                 </div>
               )}
-            </TabsContent>
-
-            <TabsContent value="metrics" className="flex flex-col gap-6 pt-0">
-              <PropertyTopCosts property={property} timeFilter={timeFilter} />
-            </TabsContent>
+            </div>
           </div>
         )}
       </div>
-    </Tabs>
+    </div>
   );
 };
 

@@ -34,11 +34,9 @@ import {
   DialogTitle,
   DialogHeader,
 } from "@/components/ui/dialog";
-import { DialogTrigger } from "@/components/ui/dialog";
 import { Dialog } from "@/components/ui/dialog";
 import { providers } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
-import Image from "next/image";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { ResponseFormat, ResponseFormatType } from "../types";
 
@@ -145,7 +143,7 @@ export default function ModelParametersForm({
     logger.error({ error }, "Error occurred");
     if (
       error &&
-      (error.includes("You have reached your free playground limit") ||
+      (
         error.includes("Insufficient credits") ||
         (error.includes("No") && error.includes("API key found")))
     ) {
@@ -587,22 +585,6 @@ export default function ModelParametersForm({
               open={isProviderKeyDialogOpen}
               onOpenChange={setIsProviderKeyDialogOpen}
             >
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Image
-                    src="/assets/home/providers/openrouter.jpg"
-                    alt="OpenRouter"
-                    className="h-4 w-4 rounded-sm"
-                    width={16}
-                    height={16}
-                  />
-                  Configure OpenRouter
-                </Button>
-              </DialogTrigger>
               <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
                   <DialogTitle>Configure OpenRouter</DialogTitle>

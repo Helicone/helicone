@@ -6,8 +6,8 @@ import { SimpleAIGateway } from "../lib/ai-gateway/SimpleAIGateway";
 import { GatewayMetrics } from "../lib/ai-gateway/GatewayMetrics";
 import { getDataDogClient } from "../lib/monitoring/DataDogClient";
 import { DBWrapper } from "../lib/db/DBWrapper";
-import { HeliconeHeaders } from "../lib/models/HeliconeHeaders";
 import { createDataDogTracer } from "../lib/monitoring/DataDogTracer";
+import { registry } from "@helicone-package/cost/models/registry";
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
   router.post(
@@ -21,15 +21,21 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       requestWrapper.setRequestReferrer("ai-gateway");
 
       try {
-        const pathLower = new URL(requestWrapper.getUrl()).pathname.toLowerCase();
+        const pathLower = new URL(
+          requestWrapper.getUrl()
+        ).pathname.toLowerCase();
         const existingMapping = requestWrapper.headers.get(
           "Helicone-Gateway-Body-Mapping"
         );
-        if ((!existingMapping || existingMapping === "OPENAI") && pathLower.includes("v1/responses")) {
+        if (
+          (!existingMapping || existingMapping === "OPENAI") &&
+          pathLower.includes("v1/responses")
+        ) {
           const headers = new Headers(requestWrapper.headers);
           headers.set("Helicone-Gateway-Body-Mapping", "RESPONSES");
           requestWrapper.remapHeaders(headers);
-          requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping = "RESPONSES";
+          requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping =
+            "RESPONSES";
         }
       } catch (_e) {
         // ignore URL parsing issues
@@ -147,6 +153,95 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
     }
   );
 
+  // GET /v1/models endpoint - OpenAI compatible
+  router.get("/v1/models", async () => {
+    try {
+      const allModelsResult = registry.getAllModelsWithIds();
+      if (allModelsResult.error) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              message: "Failed to fetch models from registry",
+              type: "internal_error",
+            },
+          }),
+          {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      interface OAIModel {
+        id: string;
+        object: "model";
+        created: number;
+        owned_by: string;
+      }
+
+      const dateToUnixTimestamp = (dateString?: string): number => {
+        if (!dateString) {
+          return Math.floor(new Date("2024-01-01").getTime() / 1000);
+        }
+        return Math.floor(new Date(dateString).getTime() / 1000);
+      };
+
+      const oaiModels: OAIModel[] = [];
+
+      for (const [modelId, modelConfig] of Object.entries(
+        allModelsResult.data!
+      )) {
+        const endpointsResult = registry.getEndpointsByModel(modelId);
+        if (
+          !endpointsResult.data ||
+          endpointsResult.data.length === 0 ||
+          endpointsResult.error
+        ) {
+          continue;
+        }
+
+        const allEndpointsRequireExplicitRouting = endpointsResult.data.every(
+          (ep: any) => ep.modelConfig.requireExplicitRouting === true
+        );
+        if (allEndpointsRequireExplicitRouting) {
+          continue;
+        }
+
+        oaiModels.push({
+          id: modelId,
+          object: "model",
+          created: dateToUnixTimestamp((modelConfig as any).created),
+          owned_by: (modelConfig as any).author,
+        });
+      }
+
+      return new Response(
+        JSON.stringify({
+          object: "list",
+          data: oaiModels,
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    } catch (error) {
+      console.error("Error fetching models:", error);
+      return new Response(
+        JSON.stringify({
+          error: {
+            message: "Internal server error while fetching models",
+            type: "internal_error",
+          },
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+  });
+
   // Catch-all for non-POST methods
   router.all("*", async () => {
     return new Response(
@@ -154,7 +249,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       {
         status: 405,
         headers: {
-          Allow: "POST",
+          Allow: "POST, GET",
         },
       }
     );

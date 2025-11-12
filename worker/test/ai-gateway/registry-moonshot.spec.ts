@@ -17,6 +17,20 @@ const deepinfraAuthExpectations = {
   },
 };
 
+// Define auth expectations for Baseten provider
+const basetenAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
+// Define auth expectations for Fireworks provider
+const fireworksAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Moonshot AI Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -819,7 +833,9 @@ describe("Moonshot AI Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "moonshotai/Kimi-K2-Instruct-0905",
-                data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+                data: createOpenAIMockResponse(
+                  "moonshotai/Kimi-K2-Instruct-0905"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -860,7 +876,9 @@ describe("Moonshot AI Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "moonshotai/Kimi-K2-Instruct-0905",
-                data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+                data: createOpenAIMockResponse(
+                  "moonshotai/Kimi-K2-Instruct-0905"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: [
@@ -896,7 +914,9 @@ describe("Moonshot AI Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "moonshotai/Kimi-K2-Instruct-0905",
-                data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+                data: createOpenAIMockResponse(
+                  "moonshotai/Kimi-K2-Instruct-0905"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: [
@@ -942,7 +962,9 @@ describe("Moonshot AI Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "moonshotai/Kimi-K2-Instruct-0905",
-                data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+                data: createOpenAIMockResponse(
+                  "moonshotai/Kimi-K2-Instruct-0905"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: [
@@ -984,7 +1006,9 @@ describe("Moonshot AI Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "moonshotai/Kimi-K2-Instruct-0905",
-                data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+                data: createOpenAIMockResponse(
+                  "moonshotai/Kimi-K2-Instruct-0905"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: [
@@ -1101,7 +1125,9 @@ describe("Moonshot AI Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "moonshotai/Kimi-K2-Instruct-0905",
-              data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+              data: createOpenAIMockResponse(
+                "moonshotai/Kimi-K2-Instruct-0905"
+              ),
               expects: deepinfraAuthExpectations,
               customVerify: (call) => {
                 // Verify that the URL is correctly constructed
@@ -1123,7 +1149,9 @@ describe("Moonshot AI Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "moonshotai/Kimi-K2-Instruct-0905", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+              data: createOpenAIMockResponse(
+                "moonshotai/Kimi-K2-Instruct-0905"
+              ),
               expects: deepinfraAuthExpectations,
             },
           ],
@@ -1143,9 +1171,703 @@ describe("Moonshot AI Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "moonshotai/Kimi-K2-Instruct-0905",
-              data: createOpenAIMockResponse("moonshotai/Kimi-K2-Instruct-0905"),
+              data: createOpenAIMockResponse(
+                "moonshotai/Kimi-K2-Instruct-0905"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+  describe("BYOK Tests - kimi-k2-0905 with Baseten", () => {
+    describe("kimi-k2-0905/baseten", () => {
+      it("should handle baseten provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/baseten",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.baseten.co/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/Kimi-K2-Instruct-0905",
+                data: createOpenAIMockResponse(
+                  "moonshotai/Kimi-K2-Instruct-0905"
+                ),
+                expects: basetenAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with baseten provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/baseten",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.baseten.co/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/Kimi-K2-Instruct-0905",
+                data: createOpenAIMockResponse(
+                  "moonshotai/Kimi-K2-Instruct-0905"
+                ),
+                expects: {
+                  ...basetenAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle response format with baseten provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/baseten",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Generate JSON data" }],
+              response_format: { type: "json_object" },
+              temperature: 0.1,
+              frequency_penalty: 0.5,
+              presence_penalty: 0.3,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.baseten.co/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/Kimi-K2-Instruct-0905",
+                data: createOpenAIMockResponse(
+                  "moonshotai/Kimi-K2-Instruct-0905"
+                ),
+                expects: {
+                  ...basetenAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_object",
+                    "temperature",
+                    "frequency_penalty",
+                    "presence_penalty",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle structured outputs with baseten provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/baseten",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Extract data" }],
+              response_format: {
+                type: "json_schema",
+                json_schema: {
+                  name: "data_extraction",
+                  schema: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      age: { type: "number" },
+                    },
+                    required: ["name", "age"],
+                  },
+                },
+              },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.baseten.co/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/Kimi-K2-Instruct-0905",
+                data: createOpenAIMockResponse(
+                  "moonshotai/Kimi-K2-Instruct-0905"
+                ),
+                expects: {
+                  ...basetenAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_schema",
+                    "data_extraction",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters with baseten provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/baseten",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test comprehensive parameters" },
+              ],
+              max_tokens: 1000,
+              temperature: 0.8,
+              stop: ["STOP"],
+              frequency_penalty: 0.2,
+              presence_penalty: 0.1,
+              response_format: { type: "text" },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.baseten.co/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/Kimi-K2-Instruct-0905",
+                data: createOpenAIMockResponse(
+                  "moonshotai/Kimi-K2-Instruct-0905"
+                ),
+                expects: {
+                  ...basetenAuthExpectations,
+                  bodyContains: [
+                    "max_tokens",
+                    "temperature",
+                    "stop",
+                    "frequency_penalty",
+                    "presence_penalty",
+                    "response_format",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
+
+  describe("Error scenarios - kimi-k2-0905 with Baseten Provider", () => {
+    it("should handle Baseten provider failure", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Baseten service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Baseten", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Baseten", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+
+    it("should handle model not found error from Baseten", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "failure",
+              statusCode: 404,
+              errorMessage: "Model not found",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle timeout from Baseten", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "failure",
+              statusCode: 408,
+              errorMessage: "Request timeout",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+  });
+
+  describe("Provider validation - kimi-k2-0905 with Baseten", () => {
+    it("should construct correct Baseten URL for kimi-k2-0905", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "success",
+              model: "moonshotai/Kimi-K2-Instruct-0905",
+              data: createOpenAIMockResponse(
+                "moonshotai/Kimi-K2-Instruct-0905"
+              ),
+              expects: basetenAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://inference.baseten.co/
+                // Built URL: https://inference.baseten.co/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for Baseten", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "success",
+              model: "moonshotai/Kimi-K2-Instruct-0905", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse(
+                "moonshotai/Kimi-K2-Instruct-0905"
+              ),
+              expects: basetenAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for Baseten", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/baseten",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "success",
+              model: "moonshotai/Kimi-K2-Instruct-0905",
+              data: createOpenAIMockResponse(
+                "moonshotai/Kimi-K2-Instruct-0905"
+              ),
+              expects: {
+                ...basetenAuthExpectations,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+  describe("BYOK Tests - kimi-k2-0905 with Fireworks", () => {
+    describe("kimi-k2-0905/fireworks", () => {
+      it("should handle fireworks provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/fireworks",
+          expected: {
+            providers: [
+              {
+                url: "https://api.fireworks.ai/inference/v1/chat/completions",
+                response: "success",
+                model: "accounts/fireworks/models/kimi-k2-instruct-0905",
+                data: createOpenAIMockResponse(
+                  "accounts/fireworks/models/kimi-k2-instruct-0905"
+                ),
+                expects: fireworksAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with fireworks provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/fireworks",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.fireworks.ai/inference/v1/chat/completions",
+                response: "success",
+                model: "accounts/fireworks/models/kimi-k2-instruct-0905",
+                data: createOpenAIMockResponse(
+                  "accounts/fireworks/models/kimi-k2-instruct-0905"
+                ),
+                expects: {
+                  ...fireworksAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle response format with fireworks provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/fireworks",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Generate JSON data" }],
+              response_format: { type: "json_object" },
+              temperature: 0.1,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.fireworks.ai/inference/v1/chat/completions",
+                response: "success",
+                model: "accounts/fireworks/models/kimi-k2-instruct-0905",
+                data: createOpenAIMockResponse(
+                  "accounts/fireworks/models/kimi-k2-instruct-0905"
+                ),
+                expects: {
+                  ...fireworksAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_object",
+                    "temperature",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle structured outputs with fireworks provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/fireworks",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Extract data" }],
+              response_format: {
+                type: "json_schema",
+                json_schema: {
+                  name: "data_extraction",
+                  schema: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      age: { type: "number" },
+                    },
+                    required: ["name", "age"],
+                  },
+                },
+              },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.fireworks.ai/inference/v1/chat/completions",
+                response: "success",
+                model: "accounts/fireworks/models/kimi-k2-instruct-0905",
+                data: createOpenAIMockResponse(
+                  "accounts/fireworks/models/kimi-k2-instruct-0905"
+                ),
+                expects: {
+                  ...fireworksAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_schema",
+                    "data_extraction",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters with fireworks provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-0905/fireworks",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test comprehensive parameters" },
+              ],
+              max_tokens: 1000,
+              temperature: 0.8,
+              stop: ["STOP"],
+              response_format: { type: "text" },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.fireworks.ai/inference/v1/chat/completions",
+                response: "success",
+                model: "accounts/fireworks/models/kimi-k2-instruct-0905",
+                data: createOpenAIMockResponse(
+                  "accounts/fireworks/models/kimi-k2-instruct-0905"
+                ),
+                expects: {
+                  ...fireworksAuthExpectations,
+                  bodyContains: [
+                    "max_tokens",
+                    "temperature",
+                    "stop",
+                    "response_format",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
+
+  describe("Error scenarios - kimi-k2-0905 with Fireworks Provider", () => {
+    it("should handle Fireworks provider failure", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/fireworks",
+        expected: {
+          providers: [
+            {
+              url: "https://api.fireworks.ai/inference/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Fireworks service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Fireworks", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/fireworks",
+        expected: {
+          providers: [
+            {
+              url: "https://api.fireworks.ai/inference/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Fireworks", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/fireworks",
+        expected: {
+          providers: [
+            {
+              url: "https://api.fireworks.ai/inference/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+
+    it("should handle model not found error from Fireworks", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/fireworks",
+        expected: {
+          providers: [
+            {
+              url: "https://api.fireworks.ai/inference/v1/chat/completions",
+              response: "failure",
+              statusCode: 404,
+              errorMessage: "Model not found",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle timeout from Fireworks", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/fireworks",
+        expected: {
+          providers: [
+            {
+              url: "https://api.fireworks.ai/inference/v1/chat/completions",
+              response: "failure",
+              statusCode: 408,
+              errorMessage: "Request timeout",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+  });
+
+  describe("Provider validation - kimi-k2-0905 with Fireworks", () => {
+    it("should construct correct Fireworks URL for kimi-k2-0905", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/fireworks",
+        expected: {
+          providers: [
+            {
+              url: "https://api.fireworks.ai/inference/v1/chat/completions",
+              response: "success",
+              model: "accounts/fireworks/models/kimi-k2-instruct-0905",
+              data: createOpenAIMockResponse(
+                "accounts/fireworks/models/kimi-k2-instruct-0905"
+              ),
+              expects: fireworksAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://api.fireworks.ai/
+                // Built URL: https://api.fireworks.ai/inference/v1/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for Fireworks", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/fireworks",
+        expected: {
+          providers: [
+            {
+              url: "https://api.fireworks.ai/inference/v1/chat/completions",
+              response: "success",
+              model: "accounts/fireworks/models/kimi-k2-instruct-0905", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse(
+                "accounts/fireworks/models/kimi-k2-instruct-0905"
+              ),
+              expects: fireworksAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for Fireworks", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/fireworks",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.fireworks.ai/inference/v1/chat/completions",
+              response: "success",
+              model: "accounts/fireworks/models/kimi-k2-instruct-0905",
+              data: createOpenAIMockResponse(
+                "accounts/fireworks/models/kimi-k2-instruct-0905"
+              ),
+              expects: {
+                ...fireworksAuthExpectations,
               },
             },
           ],

@@ -1,0 +1,401 @@
+---
+title: "Prompt Management Overview"
+sidebarTitle: "Overview"
+description: "Compose and iterate prompts, then easily deploy them in any LLM call with the AI Gateway."
+"twitter:title": "Prompt Management Overview | Helicone OSS LLM Observability"
+---
+
+When building LLM applications, you need to manage prompt templates, handle variable substitution, and deploy changes without code deployments. Prompt Management solves this by providing a centralized system for composing, versioning, and deploying prompts with dynamic variables.
+
+## Why Prompt Management?
+
+Traditional prompt development involves hardcoded prompts in application code, messy string substitution, and frustrating and rebuilding deployments for every iteration. This creates friction that slows down experimentation and your team's ability to ship.
+
+<CardGroup cols={2}>
+<Card title="Iterate Without Code Changes" icon="rocket">
+  Test and deploy prompt changes instantly without rebuilding or redeploying your application
+</Card>
+<Card title="Version Control Built-In" icon="code-branch">
+  Track every change, compare versions, and rollback instantly if something goes wrong
+</Card>
+<Card title="Dynamic Variables" icon="brackets-curly">
+  Use variables anywhere - system prompts, messages, even tool schemas - for truly reusable prompts
+</Card>
+<Card title="Environment Management" icon="server">
+  Deploy different versions to production, staging, and development environments independently
+</Card>
+</CardGroup>
+
+## Quick Start
+
+<Steps>
+  <Step title="Create a Prompt">
+    Build a prompt in the Playground. Save any prompt with clear commit histories and tags.
+
+    <Frame>
+      <video width="100%" autoPlay loop muted playsInline>
+        <source
+          src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Prompts2025-A.mp4"
+          type="video/mp4"
+        />
+        <img
+          src="/static/features/prompts/create_prompt_placeholder.png"
+          alt="Creating a prompt in Helicone dashboard"
+        />
+      </video>
+    </Frame>
+  </Step>
+
+  <Step title="Test and Iterate">
+    Experiment with different variables, inputs, and models until you reach desired output. Variables can be used anywhere, even in tool schemas.
+
+    <Frame>
+      <video width="100%" autoPlay loop muted playsInline>
+        <source
+          src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Prompts2025-B.mp4"
+          type="video/mp4"
+        />
+        <img
+          src="/static/features/prompts/test_prompt_placeholder.png"
+          alt="Testing prompts with variables and different models"
+        />
+      </video>
+    </Frame>
+  </Step>
+
+  <Step title="Run Prompt with AI Gateway">
+    Use your prompt instantly by referencing its ID in your [AI Gateway](/gateway/prompt-integration). No code changes, no rebuilds.
+
+    <Note>
+      **Prompt Management** is available for Chat Completions on the AI Gateway. Simply include `prompt_id` and `inputs` in your chat completion requests.
+    </Note>
+
+    <CodeGroup>
+      ```typescript TypeScript
+      import { OpenAI } from "openai";
+      import { HeliconeChatCreateParams } from "@helicone/helpers";
+
+      const openai = new OpenAI({
+        baseURL: "https://ai-gateway.helicone.ai",
+        apiKey: process.env.HELICONE_API_KEY,
+      });
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        prompt_id: "abc123", // Reference your saved prompt
+        environment: "production", // Optional: specify environment
+        messages: [
+          {
+            role: "user",
+            content: "Hello there!"
+          }
+        ], // optional: saved prompt also provides messages
+        inputs: {
+          customer_name: "John Doe",
+          product: "AI Gateway"
+        }
+      } as HeliconeChatCreateParams);
+      ```
+
+      ```python Python
+      import openai
+      import os
+
+      client = openai.OpenAI(
+          base_url="https://ai-gateway.helicone.ai",
+          api_key=os.environ.get("HELICONE_API_KEY")
+      )
+
+      response = client.chat.completions.create(
+          model="gpt-4o-mini",
+          prompt_id="abc123",  # Reference your saved prompt
+          environment="production",  # Optional: specify environment
+          inputs={
+              "customer_name": "John Doe",
+              "product": "AI Gateway"
+          }
+      )
+      ```
+
+      ```bash cURL
+      curl https://ai-gateway.helicone.ai/chat/completions \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $HELICONE_API_KEY" \
+        -d '{
+          "model": "gpt-4o-mini",
+          "prompt_id": "abc123",
+          "environment": "production",
+          "inputs": {
+            "customer_name": "John Doe",
+            "product": "AI Gateway"
+          }
+        }'
+      ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+<Tip>
+  Your prompt is automatically compiled with the provided inputs and sent to your chosen model. Update prompts in the dashboard and changes take effect immediately!
+</Tip>
+
+## Variables
+
+Variables make your prompts dynamic and reusable. Define them once in your prompt template, then provide different values at runtime without changing your code.
+
+### Variable Syntax
+
+Variables use the format `{{hc:name:type}}` where:
+- `name` is your variable identifier
+- `type` defines the expected data type
+
+<CodeGroup>
+  ```text Basic Examples
+  {{hc:customer_name:string}}
+  {{hc:age:number}}
+  {{hc:is_premium:boolean}}
+  {{hc:context:any}}
+  ```
+
+  ```text In Prompt Templates
+  You are a helpful assistant for {{hc:company:string}}.
+
+  The customer {{hc:customer_name:string}} is {{hc:age:number}} years old.
+  Premium status: {{hc:is_premium:boolean}}
+
+  Additional context: {{hc:context:any}}
+  ```
+</CodeGroup>
+
+### Supported Types
+
+| Type | Description | Example Values | Validation |
+|------|-------------|----------------|------------|
+| `string` | Text values | `"John Doe"`, `"Hello world"` | None |
+| `number` | Numeric values | `25`, `3.14`, `-10` | AI Gateway type-checking |
+| `boolean` | True/false values | `true`, `false`, `"yes"`, `"no"` | AI Gateway type-checking |
+| `your_type_name` | Any data type | Objects, arrays, strings | None |
+
+<Warning>
+  Only `number` and `boolean` types are validated by the Helicone AI Gateway, which will accept strings for any input as long as they can be converted to valid values.
+</Warning>
+
+Boolean variables accept multiple formats:
+- `true` / `false` (boolean)
+- `"yes"` / `"no"` (string)
+- `"true"` / `"false"` (string)
+
+### Schema Variables
+
+Variables can be used within JSON schemas for tools and response formatting. This enables dynamic schema generation based on runtime inputs.
+
+<CodeGroup>
+  ```json Response Schema Example
+  {
+    "name": "moviebot_response",
+    "strict": true,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "markdown_response": {
+          "type": "string"
+        },
+        "tools_used": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": "{{hc:tools:array}}"
+          }
+        },
+        "user_tier": {
+          "type": "string",
+          "enum": "{{hc:tiers:array}}"
+        }
+      },
+      "required": [
+        "markdown_response",
+        "tools_used",
+        "user_tier"
+      ],
+      "additionalProperties": false
+    }
+  }
+  ```
+
+  ```json Runtime Input
+  {
+    "tools": ["search", "calculator", "weather"],
+    "tiers": ["basic", "premium", "enterprise"]
+  }
+  ```
+
+  ```json Compiled Schema
+  {
+    "name": "moviebot_response",
+    "strict": true,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "markdown_response": {
+          "type": "string"
+        },
+        "tools_used": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["search", "calculator", "weather"]
+          }
+        },
+        "user_tier": {
+          "type": "string",
+          "enum": ["basic", "premium", "enterprise"]
+        }
+      },
+      "required": [
+        "markdown_response",
+        "tools_used",
+        "user_tier"
+      ],
+      "additionalProperties": false
+    }
+  }
+  ```
+</CodeGroup>
+
+#### Replacement Behavior
+
+**Value Replacement**: When a variable tag is the only content in a string, it gets replaced with the actual data type:
+```json
+"enum": "{{hc:tools:array}}" → "enum": ["search", "calculator", "weather"]
+```
+
+**String Substitution**: When variables are part of a larger string, normal regex replacement occurs:
+```json
+"description": "Available for {{hc:name:string}} users" → "description": "Available for premium users"
+```
+
+**Keys and Values**: Variables work in both JSON keys and values throughout tool schemas and response schemas.
+
+## Managing Environments
+
+You can easily manage different deployment environments for your prompts directly in the Helicone dashboard. Create and deploy prompts to production, staging, development, or any custom environment you need.
+
+<Frame>
+  <video width="100%" autoPlay loop muted playsInline>
+    <source
+      src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Prompts2025-Environment.mp4"
+      type="video/mp4"
+    />
+    <img
+      src="/static/features/prompts/environment_placeholder.png"
+      alt="Managing prompt environments in Helicone dashboard"
+    />
+  </video>
+</Frame>
+
+## Prompt Partials
+
+When building multiple prompts, you often need to reuse the same message blocks across different prompts. Prompt partials allow you to reference messages from other prompts, eliminating duplication and making your prompt library more maintainable.
+
+### Syntax
+
+Prompt partials use the format `{{hcp:prompt_id:index:environment}}` where:
+- `prompt_id` - The 6-character alphanumeric identifier of the prompt to reference
+- `index` - The message index (0-based) to extract from that prompt
+- `environment` - Optional environment identifier (defaults to production if omitted)
+
+<CodeGroup>
+  ```text Basic Examples
+  {{hcp:abc123:0}}                   // Message 0 from prompt abc123 (production)
+  {{hcp:abc123:1:staging}}           // Message 1 from prompt abc123 (staging)
+  {{hcp:xyz789:2:development}}       // Message 2 from prompt xyz789 (development)
+  ```
+
+  ```text In Prompt Templates
+  {{hcp:abc123:0}}
+  
+  {{hc:user_name:string}}, here's your personalized response:
+  ```
+</CodeGroup>
+
+### How It Works
+
+When a prompt containing a partial is compiled:
+
+1. **Partial Resolution**: The partial tag `{{hcp:prompt_id:index:environment}}` is replaced with the actual message content from the referenced prompt at the specified index
+2. **Variable Substitution**: After partials are resolved, variables in both the main prompt and the resolved partials are substituted with their values
+
+This order matters: since partials are resolved before variables, you can control variables that exist within the partial from the main prompt's inputs.
+
+<CodeGroup>
+  ```json Prompt A (abc123)
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant for {{hc:company:string}}."
+      }
+    ]
+  }
+  ```
+
+  ```json Prompt B (xyz789) - Uses Partial
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "{{hcp:abc123:0}} Please help me with my account."
+      }
+    ]
+  }
+  ```
+
+  ```json Runtime Input
+  {
+    "company": "Acme Corp"
+  }
+  ```
+
+  ```json Final Compiled Message
+  {
+    "role": "user",
+    "content": "You are a helpful assistant for Acme Corp. Please help me with my account."
+  }
+  ```
+</CodeGroup>
+
+<Tip>
+  Variables from partials are automatically extracted and shown in the prompt editor. You can provide values for these variables just like any other prompt variable, giving you full control over the partial's content.
+</Tip>
+
+## Using Prompts
+
+Helicone provides two ways to use prompts:
+
+1. **[AI Gateway Integration](/gateway/prompt-integration)** - The recommended approach. Use prompts through the Helicone AI Gateway for automatic compilation, input tracing, and lower latency.
+
+2. **[SDK Integration](/features/advanced-usage/prompts/sdk)** - Alternative integration method for users that need direct interaction with compiled prompt bodies without using the AI Gateway.
+
+<Note>
+  **Prompt Management** is available for Chat Completions on the AI Gateway. Simply include `prompt_id` and `inputs` in your chat completion requests to use saved prompts.
+</Note>
+
+Learn more about how prompts are assembled and compiled in the [Prompt Assembly](/features/advanced-usage/prompts/assembly) guide.
+
+## Related Documentation
+
+<CardGroup cols={2}>
+<Card title="Prompt Assembly" icon="puzzle-piece" href="/features/advanced-usage/prompts/assembly">
+  Understand how prompts are compiled from templates and runtime parameters
+</Card>
+<Card title="SDK Integration" icon="code" href="/features/advanced-usage/prompts/sdk">
+  Use prompts directly via SDK without the AI Gateway
+</Card>
+<Card title="AI Gateway" icon="server" href="/gateway/prompt-integration">
+  Learn about prompt integration with the AI Gateway
+</Card>
+<Card title="Playground" icon="wand-magic-sparkles" href="/features/advanced-usage/prompts">
+  Create and test prompts in the Helicone dashboard
+</Card>
+</CardGroup>
+

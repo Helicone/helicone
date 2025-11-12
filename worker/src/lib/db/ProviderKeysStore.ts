@@ -73,11 +73,11 @@ export class ProviderKeysStore {
     return finalData;
   }
 
-  async getProviderKeyWithFetch(
+  async getProviderKeysWithFetch(
     provider: ModelProviderName,
     orgId: string,
     keyCuid?: string
-  ): Promise<ProviderKey | null> {
+  ): Promise<ProviderKey[] | null> {
     let query = this.supabaseClient
       .from("decrypted_provider_keys_v2")
       .select(
@@ -97,18 +97,15 @@ export class ProviderKeysStore {
       return null;
     }
 
-    const mappedProvider = dbProviderToProvider(data[0].provider_name ?? "");
-
-    return {
-      provider: mappedProvider ?? provider,
+    return data.map((key) => ({
+      provider: dbProviderToProvider(key.provider_name ?? "") ?? provider,
       org_id: orgId,
-      decrypted_provider_key: data[0].decrypted_provider_key ?? "",
-      decrypted_provider_secret_key:
-        data[0].decrypted_provider_secret_key ?? null,
-      auth_type: data[0].auth_type as "key" | "session_token",
-      byok_enabled: data[0].byok_enabled ?? null,
-      config: data[0].config,
-      cuid: data[0].cuid,
-    };
+      decrypted_provider_key: key.decrypted_provider_key ?? "",
+      decrypted_provider_secret_key: key.decrypted_provider_secret_key ?? null,
+      auth_type: key.auth_type as "key" | "session_token",
+      byok_enabled: key.byok_enabled ?? null,
+      config: key.config,
+      cuid: key.cuid,
+    }));
   }
 }

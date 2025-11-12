@@ -710,7 +710,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               />
 
               {/* Filter AST Button */}
-              <FilterASTButton />
+              <FilterASTButton showCurlButton={true} />
             </div>
           }
           rightActions={

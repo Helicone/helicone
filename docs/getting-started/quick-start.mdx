@@ -5,37 +5,18 @@ description: "Get your first LLM request logged with Helicone in under 2 minutes
 "twitter:title": "Quickstart - Helicone Open Source LLM Observability"
 ---
 
-Use the OpenAI SDK to access 100+ LLM models with automatic logging and observability.
-
-<Accordion title="Using a third-party SDK?">
-  The AI Gateway is our **recommended integration**, you get automatic fallbacks, 100+ models through one SDK, and seamless model switching.
-  
-  However, we understand you might already be deeply integrated with a third-party SDK.
-  
-  We support [direct integrations](/integrations/overview) for OpenAI, Anthropic, Azure, and 20+ other providers. You'll still get full observability, just without the unified API benefits.
-</Accordion>
-
-## Quick Integration
-
-Two steps to your first logged request:
+Use the familiar OpenAI SDK to access 100+ LLM models across OpenAI, Anthropic, Google, and more with automatic logging, observability, and fallbacks built in.
 
 <Steps>
 
-  <Step title="Set up your keys">
-  1. **Create an account**: [Sign up for free](https://helicone.ai/signup)
-  2. **Helicone API Key**: Go to [API Keys](https://us.helicone.ai/settings/api-keys) and generate a new key
-  3. **Provider Keys**: Add your LLM API keys (OpenAI, Anthropic, etc.) at [Provider Keys](https://us.helicone.ai/providers)
-    
-    <Note>
-      The Helicone key authenticates with our gateway. Provider keys let you access the actual LLMs.
-    </Note>
+  <Step title="Set up your account">
+  1. [Sign up for free](https://helicone.ai/signup) and complete the onboarding flow
+  2. Generate your Helicone API key at [API Keys](https://us.helicone.ai/settings/api-keys)
   </Step>
 
   <Step title="Send your first request">
 
     Helicone's AI Gateway is an OpenAI-compatible, unified API with access to 100+ models, including OpenAI, Anthropic, Vertex, Groq, and more.
-
-    **Bring your own key:** Go to [Provider Keys](https://us.helicone.ai/providers) to securely store API keys for the providers you want to use.
 
     <Tabs>
       <Tab title="TypeScript">
@@ -86,14 +67,25 @@ Two steps to your first logged request:
     </Tabs>
     
     Once you run this code, you'll see your request appear in the [Requests](https://us.helicone.ai/requests) tab within seconds.
-    
-    <Note>
-      See [all supported models](https://helicone.ai/models) or configure [provider routing](/gateway/provider-routing) for reliability.
-    </Note>
 
   </Step>
 
 </Steps>
+
+<AccordionGroup>
+  <Accordion title="How do credits work?">
+    Instead of managing API keys for each provider (OpenAI, Anthropic, Google, etc.), Helicone maintains the keys for you. You simply add credits to your account, and we handle the rest.
+
+    **Benefits:**
+    - **0% markup** - Pay exactly what providers charge, no hidden fees
+    - No need to sign up for multiple LLM providers
+    - Switch between [100+ models](https://helicone.ai/models) by just changing the model name
+    - Automatic fallbacks if a provider is down
+    - Unified billing across all providers
+
+    Want more control? You can [bring your own provider keys](https://us.helicone.ai/providers) instead.
+  </Accordion>
+</AccordionGroup>
 
 ## What's Next?
 

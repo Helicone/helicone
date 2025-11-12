@@ -228,6 +228,37 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-oss-120b:cerebras": {
+    providerModelId: "gpt-oss-120b",
+    provider: "cerebras",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000035, // $0.35/1M tokens
+        output: 0.00000075, // $0.75/1M tokens
+      },
+    ],
+    contextLength: 131_072, // Paid tiers: 131k tokens, Free tier: 65k tokens
+    maxCompletionTokens: 40_000, // Paid tiers: 40k tokens, Free tier: 32k tokens
+    supportedParameters: [
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "seed",
+      "logprobs",
+      "top_logprobs",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPTOSSModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

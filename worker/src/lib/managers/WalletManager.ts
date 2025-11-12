@@ -11,7 +11,7 @@ import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 
 export class WalletManager {
   private env: Env;
-  private walletStub: DurableObjectStub<Wallet>;
+  walletStub: DurableObjectStub<Wallet>;
   private ctx: ExecutionContext;
 
   constructor(
@@ -85,51 +85,52 @@ export class WalletManager {
     organizationId: string,
     rawAPIKey: string
   ): Promise<void> {
-    try {
-      // get the totaldebit spent according to clickhouse
-      const response = await fetch(
-        `${this.env.VALHALLA_URL}/v1/credits/totalSpend`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${rawAPIKey}`,
-          },
-        }
-      );
-      const clickhouseResponse: Result<{ totalSpend: number }, string> =
-        await response.json();
-      if (isError(clickhouseResponse)) {
-        console.error("Error getting total spend", clickhouseResponse.error);
-        throw new Error(clickhouseResponse.error);
-      }
-      const clickhouseTotalSpend = clickhouseResponse.data;
-      const { totalDebits: walletTotalSpend, alertState } =
-        await this.walletStub.getTotalDebits(organizationId);
-      const delta = Math.abs(
-        clickhouseTotalSpend.totalSpend - walletTotalSpend
-      );
+    return;
+    // try {
+    //   // get the totaldebit spent according to clickhouse
+    //   const response = await fetch(
+    //     `${this.env.VALHALLA_URL}/v1/credits/totalSpend`,
+    //     {
+    //       method: "GET",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         Authorization: `Bearer ${rawAPIKey}`,
+    //       },
+    //     }
+    //   );
+    //   const clickhouseResponse: Result<{ totalSpend: number }, string> =
+    //     await response.json();
+    //   if (isError(clickhouseResponse)) {
+    //     console.error("Error getting total spend", clickhouseResponse.error);
+    //     throw new Error(clickhouseResponse.error);
+    //   }
+    //   const clickhouseTotalSpend = clickhouseResponse.data;
+    //   const { totalDebits: walletTotalSpend, alertState } =
+    //     await this.walletStub.getTotalDebits(organizationId);
+    //   const delta = Math.abs(
+    //     clickhouseTotalSpend.totalSpend - walletTotalSpend
+    //   );
 
-      // Update the ClickHouse values in the wallet
-      await this.walletStub.updateClickhouseValues(
-        organizationId,
-        clickhouseTotalSpend.totalSpend
-      );
+    //   // Update the ClickHouse values in the wallet
+    //   await this.walletStub.updateClickhouseValues(
+    //     organizationId,
+    //     clickhouseTotalSpend.totalSpend
+    //   );
 
-      // if alert state is on, and the delta is less than the threshold, reset the state
-      if (alertState && delta < ALERT_THRESHOLD) {
-        await this.walletStub.setAlertState(ALERT_ID, false);
-      } else if (!alertState && delta > ALERT_THRESHOLD) {
-        // set the alert state to on
-        await this.walletStub.setAlertState(ALERT_ID, true);
-        const slackAlertManager = new SlackAlertManager(this.env);
-        await slackAlertManager.sendSlackMessageToChannel(
-          this.env.SLACK_ALERT_CHANNEL,
-          `Total spend delta is greater than ${ALERT_THRESHOLD} USD. Current total spend: ${clickhouseTotalSpend.totalSpend} USD. Wallet total spend: ${walletTotalSpend} USD. Delta: ${delta} USD. Org ID: ${organizationId}`
-        );
-      }
-    } catch (error) {
-      console.error("Error getting total spend", error);
-    }
+    //   // if alert state is on, and the delta is less than the threshold, reset the state
+    //   if (alertState && delta < ALERT_THRESHOLD) {
+    //     await this.walletStub.setAlertState(ALERT_ID, false);
+    //   } else if (!alertState && delta > ALERT_THRESHOLD) {
+    //     // set the alert state to on
+    //     await this.walletStub.setAlertState(ALERT_ID, true);
+    //     const slackAlertManager = new SlackAlertManager(this.env);
+    //     await slackAlertManager.sendSlackMessageToChannel(
+    //       this.env.SLACK_ALERT_CHANNEL,
+    //       `Total spend delta is greater than ${ALERT_THRESHOLD} USD. Current total spend: ${clickhouseTotalSpend.totalSpend} USD. Wallet total spend: ${walletTotalSpend} USD. Delta: ${delta} USD. Org ID: ${organizationId}`
+    //     );
+    //   }
+    // } catch (error) {
+    //   console.error("Error getting total spend", error);
+    // }
   }
 }

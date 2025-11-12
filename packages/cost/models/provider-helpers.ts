@@ -55,6 +55,12 @@ export function heliconeProviderToModelProviderName(
       return "nebius";
     case "CHUTES":
       return "chutes";
+    case "CEREBRAS":
+      return "cerebras";
+    case "BASETEN":
+      return "baseten";
+    case "FIREWORKS":
+      return "fireworks";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -64,7 +70,6 @@ export function heliconeProviderToModelProviderName(
     case "2YFV":
     case "TOGETHER":
     case "LEMONFOX":
-    case "FIREWORKS":
     case "WISDOMINANUTSHELL":
     case "MISTRAL":
     case "QSTASH":
@@ -135,6 +140,21 @@ export const dbProviderToProvider = (
   }
   if (provider === "deepinfra" || provider === "DeepInfra") {
     return "deepinfra";
+  }
+  if (provider === "fireworks" || provider === "Fireworks") {
+    return "fireworks";
+  }
+  if (provider === "baseten" || provider === "Baseten") {
+    return "baseten";
+  }
+  if (provider === "cerebras" || provider === "Cerebras") {
+    return "cerebras";
+  }
+  if (provider === "chutes" || provider === "Chutes") {
+    return "chutes";
+  }
+  if (provider === "nebius" || provider === "Nebius") {
+    return "nebius";
   }
   return null;
 };
@@ -307,7 +327,7 @@ export async function buildErrorMessage(
   return ok(await provider.buildErrorMessage(response));
 }
 
-function validateProvider(provider: string): provider is ModelProviderName {
+export function validateProvider(provider: string): provider is ModelProviderName {
   return provider in providers;
 }
 

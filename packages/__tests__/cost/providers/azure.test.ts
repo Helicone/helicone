@@ -160,7 +160,7 @@ describe("AzureOpenAIProvider", () => {
         const url = provider.buildUrl(ptbEndpoint, { isStreaming: false });
 
         expect(url).toBe(
-          "https://east1-gateway-resource.cognitiveservices.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview"
+          "https://east1-gateway-resource.cognitiveservices.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"
         );
       });
 
@@ -176,7 +176,7 @@ describe("AzureOpenAIProvider", () => {
         const url = provider.buildUrl(ptbEndpoint, { isStreaming: false });
 
         expect(url).toBe(
-          "https://custom.openai.azure.com/openai/deployments/test-deployment/chat/completions?api-version=2025-01-01-preview"
+          "https://custom.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview"
         );
       });
 
