@@ -420,7 +420,7 @@ export class PropertyController extends Controller {
       }));
 
       // Get the total count
-      const totalCount = totalRes.data?.[0]?.count || 0;
+      const totalCount = +(totalRes.data?.[0]?.count || 0);
 
       // Calculate the "other" category count (total minus sum of top 10)
       const topRequestsSum = topRequests.reduce((sum, item) => sum + item.count, 0);
