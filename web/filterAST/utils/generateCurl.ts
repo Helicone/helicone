@@ -74,6 +74,7 @@ export function generateCurlCommand(
   // Create the request body
   const requestBody = {
     filter: combinedFilter,
+    limit: 100,
   };
 
   // Format the cURL command with proper escaping
