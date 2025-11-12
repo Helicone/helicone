@@ -1,4 +1,3 @@
-import AuthHeader from "@/components/shared/authHeader";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
@@ -223,30 +222,8 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
   if (isPropertiesLoading) {
     return (
       <div className="flex h-screen flex-col bg-background">
-        <AuthHeader title="Properties" />
-
-        <div className="flex flex-1 flex-col overflow-hidden px-4 py-4">
-          <div className="flex flex-1 flex-col border border-border bg-background lg:flex-row">
-            <div className="flex w-full flex-col border-b border-border bg-background lg:w-72 lg:border-b-0 lg:border-r">
-              <div className="border-b border-border p-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search properties..."
-                    disabled
-                    className="h-8 pl-10 text-sm"
-                  />
-                </div>
-              </div>
-              <div className="flex-1 space-y-2 overflow-y-auto p-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-4 bg-muted" />
-                    <Skeleton className="h-5 flex-1 bg-muted" />
-                  </div>
-                ))}
-              </div>
-            </div>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex flex-1 flex-col border-t border-border bg-background">
             <div className="flex flex-1 items-center justify-center overflow-y-auto p-8">
               <div className="text-center">
                 <Skeleton className="mx-auto mb-4 h-8 w-48 bg-muted" />
@@ -262,7 +239,6 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
   if (properties.length === 0) {
     return (
       <div className="flex h-screen w-full flex-col bg-background">
-        <AuthHeader title="Properties" />
         <div className="flex flex-1 items-center justify-center">
           <EmptyStateCard feature="properties" />
         </div>
@@ -272,8 +248,6 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <AuthHeader title="Properties" />
-
       {!canCreate && (
         <FreeTierLimitBanner
           feature="properties"
@@ -284,85 +258,24 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
       )}
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex flex-1 flex-col border border-border bg-background lg:h-full lg:flex-row">
-          <div className="flex w-full flex-col border-b border-border bg-background lg:w-72 lg:border-b-0 lg:border-r">
-            <div className="border-b border-border p-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search properties..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-8 pl-10 text-sm"
-                />
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              {filteredProperties.map((property, i) => {
-                const originalIndex = properties.indexOf(property);
-                const requiresPremium =
-                  !hasAccess && originalIndex >= freeLimit;
-                const isSelected = selectedProperty === property;
-
-                return (
-                  <div key={i}>
-                    {requiresPremium ? (
-                      <FreeTierLimitWrapper
-                        feature="properties"
-                        itemCount={properties.length}
-                      >
-                        <div className="flex items-center gap-2 px-4 py-3 text-muted-foreground">
-                          <LockIcon className="h-3 w-3 flex-shrink-0" />
-                          <XSmall className="truncate">{property}</XSmall>
-                        </div>
-                      </FreeTierLimitWrapper>
-                    ) : (
-                      <div
-                        className={`group flex w-full items-center justify-between px-4 py-3 transition-colors ${
-                          isSelected
-                            ? "bg-muted text-foreground"
-                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                        }`}
-                      >
-                        <button
-                          className="flex items-center gap-2 text-left"
-                          onClick={() => handlePropertySelect(property)}
-                        >
-                          <Tag className="h-3 w-3 flex-shrink-0" />
-                          <XSmall className="truncate">{property}</XSmall>
-                        </button>
-                        <button
-                          className={`ml-2 text-destructive opacity-0 transition-opacity hover:text-destructive/90 disabled:opacity-50 group-hover:opacity-100`}
-                          title="Delete property"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPendingDelete(property);
-                            setConfirmOpen(true);
-                          }}
-                          disabled={hidingKey === property}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <div className="border-t border-border p-2">
-              <Button
-                variant="default"
-                size="sm"
-                className="w-full"
-                onClick={handleOpenRestoreModal}
-              >
-                Restore Deleted Properties
-              </Button>
-            </div>
-          </div>
-
+        <div className="flex flex-1 flex-col border-t border-border bg-background">
           <div className="flex-1 overflow-y-auto">
-            <PropertyPanel property={selectedProperty} />
+            <PropertyPanel
+              property={selectedProperty}
+              properties={filteredProperties}
+              allProperties={properties}
+              onPropertySelect={handlePropertySelect}
+              onDeleteProperty={(property) => {
+                setPendingDelete(property);
+                setConfirmOpen(true);
+              }}
+              onRestoreProperties={handleOpenRestoreModal}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              hasAccess={hasAccess}
+              freeLimit={freeLimit}
+              hidingKey={hidingKey}
+            />
           </div>
         </div>
       </div>

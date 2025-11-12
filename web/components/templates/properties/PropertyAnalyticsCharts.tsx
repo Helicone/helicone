@@ -4,7 +4,6 @@ import {
   ChartTooltip,
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Small } from "@/components/ui/typography";
 import { useFilterStore } from "@/filterAST/store/filterStore";
 import { useJawnClient } from "@/lib/clients/jawnHook";
@@ -15,7 +14,7 @@ import { format } from "date-fns";
 import React from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import PropertyTopCosts from "./propertyTopCosts";
-import { useLocalStorage } from "@/services/hooks/localStorage";
+import PropertyTopRequests from "./propertyTopRequests";
 
 const formatCurrency = (amount: number) => {
   if (amount === 0) return "$0.00";
@@ -30,15 +29,6 @@ const formatNumber = (num: number) => {
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
   if (num < 1) return num.toFixed(2);
   return num.toFixed(0);
-};
-
-const formatAxisCurrency = (value: number) => {
-  if (value === 0) return "$0";
-  if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
-  if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
-  if (value < 0.01) return `$${value.toFixed(4)}`;
-  if (value < 1) return `$${value.toFixed(2)}`;
-  return `$${value.toFixed(0)}`;
 };
 
 interface PropertyAnalyticsChartsProps {
@@ -88,15 +78,6 @@ export function PropertyAnalyticsCharts({
   const userFilters = filterStore.filter
     ? toFilterNode(filterStore.filter)
     : "all";
-
-  const [selectedCostTab, setSelectedCostTab] = useLocalStorage<string>(
-    "property-analytics-cost-tab",
-    "cost",
-  );
-  const [selectedRequestsTab, setSelectedRequestsTab] = useLocalStorage<string>(
-    "property-analytics-requests-tab",
-    "requests",
-  );
 
   const dbIncrement = getTimeIncrement(timeFilter.start, timeFilter.end);
 
@@ -265,11 +246,19 @@ export function PropertyAnalyticsCharts({
       <div className="grid grid-cols-1 md:grid-cols-2">
         <div className="border-b border-r border-border bg-card p-6">
           <Skeleton className="h-10 w-48 bg-muted" />
-          <Skeleton className="mt-4 h-[300px] w-full bg-muted" />
+          <Skeleton className="mt-4 h-[240px] w-full bg-muted" />
         </div>
         <div className="border-b border-r border-border bg-card p-6">
           <Skeleton className="h-10 w-48 bg-muted" />
-          <Skeleton className="mt-4 h-[300px] w-full bg-muted" />
+          <Skeleton className="mt-4 h-[200px] w-full bg-muted" />
+        </div>
+        <div className="border-b border-r border-border bg-card p-6">
+          <Skeleton className="h-10 w-48 bg-muted" />
+          <Skeleton className="mt-4 h-[240px] w-full bg-muted" />
+        </div>
+        <div className="border-b border-r border-border bg-card p-6">
+          <Skeleton className="h-10 w-48 bg-muted" />
+          <Skeleton className="mt-4 h-[200px] w-full bg-muted" />
         </div>
       </div>
     );
@@ -278,7 +267,7 @@ export function PropertyAnalyticsCharts({
   if (error) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2">
-        <div className="flex h-[400px] items-center justify-center border-b border-r border-border bg-card p-6">
+        <div className="flex h-[240px] items-center justify-center border-b border-r border-border bg-card p-6">
           <Small className="text-destructive">
             {error instanceof Error
               ? error.message
@@ -291,46 +280,28 @@ export function PropertyAnalyticsCharts({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2">
-      {/* Cost Analytics Card */}
-      <div className="flex flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
-        <Tabs
-          value={selectedCostTab}
-          onValueChange={setSelectedCostTab}
-          className="flex h-full flex-col"
-        >
-          <div className="flex items-start justify-between">
-            <div className="flex flex-col space-y-2">
-              <TabsList variant="default" asPill size="sm">
-                <TabsTrigger value="cost" asPill>
-                  Cost
-                </TabsTrigger>
-                <TabsTrigger value="top-costs" asPill>
-                  Top Costs
-                </TabsTrigger>
-              </TabsList>
-              <p className="text-xl font-semibold text-foreground">
-                {formatCurrency(totalCost)}
-              </p>
-            </div>
+      {/* Cost Over Time Chart */}
+      <div className="flex flex-col border-b border-r border-border bg-card px-6 pt-6 pb-2 text-card-foreground">
+        <div className="mb-4">
+          <Small className="text-muted-foreground">Cost Over Time</Small>
+          <p className="text-2xl font-semibold text-foreground">
+            {formatCurrency(totalCost)}
+          </p>
+        </div>
+        {transformedData.costData.length === 0 ? (
+          <div className="flex h-[240px] items-center justify-center">
+            <Small className="text-muted-foreground">
+              No cost data available
+            </Small>
           </div>
-
-          <div className="flex-grow py-4">
-            {/* Cost Tab */}
-            <TabsContent value="cost" className="mt-0 h-full">
-              {transformedData.costData.length === 0 ? (
-                <div className="flex h-[300px] items-center justify-center">
-                  <Small className="text-muted-foreground">
-                    No cost data available
-                  </Small>
-                </div>
-              ) : (
-                <ChartContainer
-                  config={costChartConfig}
-                  className="h-[300px] w-full"
-                >
+        ) : (
+          <ChartContainer
+            config={costChartConfig}
+            className="h-[240px] w-full"
+          >
                   <LineChart
                     data={transformedData.costData}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
@@ -351,13 +322,7 @@ export function PropertyAnalyticsCharts({
                       minTickGap={50}
                       className="text-xs text-muted-foreground"
                     />
-                    <YAxis
-                      tickFormatter={(value) => formatAxisCurrency(value)}
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      className="text-xs text-muted-foreground"
-                    />
+                    <YAxis hide domain={[0, "auto"]} />
                     <ChartTooltip
                       content={({ active, payload }) => {
                         if (!active || !payload || payload.length === 0)
@@ -415,54 +380,41 @@ export function PropertyAnalyticsCharts({
                     ))}
                   </LineChart>
                 </ChartContainer>
-              )}
-            </TabsContent>
-
-            {/* Top Costs Tab */}
-            <TabsContent value="top-costs" className="mt-0 h-full">
-              <PropertyTopCosts property={property} timeFilter={timeFilter} />
-            </TabsContent>
-          </div>
-        </Tabs>
+        )}
       </div>
 
-      {/* Requests Analytics Card */}
-      <div className="flex flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
-        <Tabs
-          value={selectedRequestsTab}
-          onValueChange={setSelectedRequestsTab}
-          className="flex h-full flex-col"
-        >
-          <div className="flex items-start justify-between">
-            <div className="flex flex-col space-y-2">
-              <TabsList variant="default" asPill size="sm">
-                <TabsTrigger value="requests" asPill>
-                  Requests
-                </TabsTrigger>
-              </TabsList>
-              <p className="text-xl font-semibold text-foreground">
-                {formatNumber(totalRequests)}
-              </p>
-            </div>
-          </div>
+      {/* Top Costs Chart */}
+      <div className="flex flex-col border-b border-r border-border bg-card px-6 pt-6 pb-2 text-card-foreground">
+        <div className="mb-4">
+          <Small className="text-muted-foreground">Top Costs</Small>
+        </div>
+        <div className="w-full">
+          <PropertyTopCosts property={property} timeFilter={timeFilter} />
+        </div>
+      </div>
 
-          <div className="flex-grow py-4">
-            {/* Requests Tab */}
-            <TabsContent value="requests" className="mt-0 h-full">
-              {transformedData.requestsData.length === 0 ? (
-                <div className="flex h-[300px] items-center justify-center">
-                  <Small className="text-muted-foreground">
-                    No request data available
-                  </Small>
-                </div>
-              ) : (
-                <ChartContainer
-                  config={requestsChartConfig}
-                  className="h-[300px] w-full"
-                >
+      {/* Requests Over Time Chart */}
+      <div className="flex flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
+        <div className="mb-4">
+          <Small className="text-muted-foreground">Requests Over Time</Small>
+          <p className="text-2xl font-semibold text-foreground">
+            {formatNumber(totalRequests)}
+          </p>
+        </div>
+        {transformedData.requestsData.length === 0 ? (
+          <div className="flex h-[240px] items-center justify-center">
+            <Small className="text-muted-foreground">
+              No request data available
+            </Small>
+          </div>
+        ) : (
+          <ChartContainer
+            config={requestsChartConfig}
+            className="h-[240px] w-full"
+          >
                   <LineChart
                     data={transformedData.requestsData}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
@@ -483,13 +435,7 @@ export function PropertyAnalyticsCharts({
                       minTickGap={50}
                       className="text-xs text-muted-foreground"
                     />
-                    <YAxis
-                      tickFormatter={(value) => formatNumber(value)}
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      className="text-xs text-muted-foreground"
-                    />
+                    <YAxis hide domain={[0, "auto"]} />
                     <ChartTooltip
                       content={({ active, payload }) => {
                         if (!active || !payload || payload.length === 0)
@@ -549,10 +495,17 @@ export function PropertyAnalyticsCharts({
                     )}
                   </LineChart>
                 </ChartContainer>
-              )}
-            </TabsContent>
-          </div>
-        </Tabs>
+        )}
+      </div>
+
+      {/* Top Requests Chart */}
+      <div className="flex flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
+        <div className="mb-4">
+          <Small className="text-muted-foreground">Top Requests</Small>
+        </div>
+        <div className="w-full">
+          <PropertyTopRequests property={property} timeFilter={timeFilter} />
+        </div>
       </div>
     </div>
   );

@@ -13,7 +13,6 @@ import {
 } from "@helicone-package/filters/frontendFilterDefs";
 import ExportButton from "../../shared/themed/table/exportButton";
 import { UIFilterRow } from "@helicone-package/filters/types";
-import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";
 import { useFilterStore } from "@/filterAST/store/filterStore";
@@ -21,21 +20,96 @@ import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tag, ExternalLink } from "lucide-react";
+import { Tag, ExternalLink, ChevronDown, ChevronUp, Trash2, Search, LockIcon, MoreVertical, Table, PieChart } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Row } from "@/components/layout/common";
 import { SimpleTable } from "../../shared/table/simpleTable";
 import { Small, XSmall, Muted } from "@/components/ui/typography";
 import { PropertyAnalyticsCharts } from "./PropertyAnalyticsCharts";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import FoldedHeader from "@/components/shared/FoldedHeader";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
+import { FilterASTButton } from "@/filterAST/FilterASTButton";
+import Link from "next/link";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 
 interface PropertyPanelProps {
   property: string;
+  properties: string[];
+  allProperties: string[];
+  onPropertySelect: (property: string) => void;
+  onDeleteProperty: (property: string) => void;
+  onRestoreProperties: () => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  hasAccess: boolean;
+  freeLimit: number;
+  hidingKey: string | null;
 }
 
+const TABS = [
+  {
+    id: "table",
+    label: "Table",
+    icon: <Table size={16} />,
+  },
+  {
+    id: "charts",
+    label: "Charts",
+    icon: <PieChart size={16} />,
+  },
+];
+
 const PropertyPanel = (props: PropertyPanelProps) => {
-  const { property } = props;
+  const {
+    property,
+    properties,
+    allProperties,
+    onPropertySelect,
+    onDeleteProperty,
+    onRestoreProperties,
+    searchQuery,
+    onSearchChange,
+    hasAccess,
+    freeLimit,
+    hidingKey,
+  } = props;
   const searchParams = useSearchParams();
 
   const [showMore, setShowMore] = useState(false);
+  const [propertyDropdownOpen, setPropertyDropdownOpen] = useState(false);
+  const [currentTab, setCurrentTab] = useLocalStorage<
+    (typeof TABS)[number]["id"]
+  >("property-view-tab", "table");
   const router = useRouter();
 
   const getInterval = () => {
@@ -50,13 +124,31 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   const [interval, setInterval] = useState<TimeInterval>(
     getInterval() as TimeInterval,
   );
+
+  const getInitialTimeFilter = () => {
+    const currentTimeFilter = searchParams.get("t");
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const [, startDate, endDate] = currentTimeFilter.split("_");
+      return {
+        start: new Date(startDate),
+        end: new Date(endDate),
+      };
+    } else if (currentTimeFilter) {
+      return {
+        start: getTimeIntervalAgo(currentTimeFilter as TimeInterval),
+        end: new Date(),
+      };
+    }
+    return {
+      start: getTimeIntervalAgo("1m"),
+      end: new Date(),
+    };
+  };
+
   const [timeFilter, setTimeFilter] = useState<{
     start: Date;
     end: Date;
-  }>({
-    start: getTimeIntervalAgo("1m"),
-    end: new Date(),
-  });
+  }>(getInitialTimeFilter());
 
   // Add state for sorting
   const [sortConfig, setSortConfig] = useState<{
@@ -110,52 +202,217 @@ const PropertyPanel = (props: PropertyPanelProps) => {
 
   const cleanedValueData = getPropertyValueData();
 
+  // Helper function to get TimeFilter object
+  const getTimeFilterObject = (start: Date, end: Date) => ({
+    start,
+    end,
+  });
+
+  // Callback for ThemedTimeFilter
+  const onTimeSelectHandler = (key: string, value: string) => {
+    if (key === "custom") {
+      const [startDate, endDate] = value.split("_");
+      setTimeFilter({
+        start: new Date(startDate),
+        end: new Date(endDate),
+      });
+      setInterval(key as TimeInterval);
+
+      // Update URL with custom time range
+      router.push({
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          t: `custom_${startDate}_${endDate}`,
+        },
+      }, undefined, { shallow: true });
+    } else {
+      setTimeFilter({
+        start: getTimeIntervalAgo(key as TimeInterval),
+        end: new Date(),
+      });
+      setInterval(key as TimeInterval);
+
+      // Update URL with predefined interval
+      router.push({
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          t: key,
+        },
+      }, undefined, { shallow: true });
+    }
+  };
+
   return (
-    <div className="mb-1 w-full">
-      <div className="flex flex-col">
-        <div className="flex flex-col items-center justify-between p-2 md:flex-row">
-          <Row className="flex-wrap items-center gap-2">
-            <ThemedTableHeader
-              isFetching={false}
-              timeFilter={{
-                currentTimeFilter: timeFilter,
-                customTimeFilter: true,
-                timeFilterOptions: [],
-                defaultTimeFilter: interval,
-                onTimeSelectHandler: (key: TimeInterval, value: string) => {
-                  if ((key as string) === "custom") {
-                    value = value.replace("custom:", "");
-                    const start = new Date(value.split("_")[0]);
-                    const end = new Date(value.split("_")[1]);
-                    setInterval(key);
-                    setTimeFilter({
-                      start,
-                      end,
-                    });
-                  } else {
-                    setInterval(key);
-                    setTimeFilter({
-                      start: getTimeIntervalAgo(key),
-                      end: new Date(),
-                    });
-                  }
-                },
-              }}
-            />
-          </Row>
-          <ExportButton
-            rows={cleanedValueData.map((propertyValue) => ({
-              Value: propertyValue.property_value,
-              Requests: propertyValue.total_requests,
-              Cost: propertyValue.total_cost,
-              "Avg Prompt Tokens": propertyValue.avg_prompt_tokens_per_request,
-              "Avg Comp Tokens":
-                propertyValue.avg_completion_tokens_per_request,
-              "Avg Latency": propertyValue.avg_latency_per_request,
-              "Avg Cost": propertyValue.average_cost_per_request,
-            }))}
-          />
-        </div>
+    <Tabs
+      value={currentTab}
+      onValueChange={(value) => setCurrentTab(value)}
+      className="flex h-full w-full flex-col"
+    >
+      <div className="mb-1 w-full">
+        <div className="flex flex-col">
+          <FoldedHeader
+          leftSection={
+            <section className="flex flex-row items-center gap-2">
+              <Link href="/properties" className="no-underline">
+                <Small className="font-semibold">Properties</Small>
+              </Link>
+              <Small className="font-semibold">/</Small>
+
+              <Popover open={propertyDropdownOpen} onOpenChange={setPropertyDropdownOpen}>
+                <PopoverTrigger
+                  asChild
+                  className={cn(
+                    "flex h-8 w-[180px] items-center justify-between rounded-md border border-sky-200 bg-white px-3 py-2 text-xs ring-offset-white placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sidebar-background",
+                    "focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:focus:ring-slate-300"
+                  )}
+                >
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={propertyDropdownOpen}
+                  >
+                    {property || "Select property"}
+                    <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[180px] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search properties..."
+                      onChangeCapture={(
+                        e: React.ChangeEvent<HTMLInputElement>
+                      ) => {
+                        onSearchChange(e.target.value);
+                      }}
+                    />
+                    <CommandEmpty>No results found.</CommandEmpty>
+
+                    <CommandList>
+                      {properties.map((prop, i) => {
+                        const originalIndex = allProperties.indexOf(prop);
+                        const requiresPremium = !hasAccess && originalIndex >= freeLimit;
+
+                        if (requiresPremium) {
+                          return (
+                            <FreeTierLimitWrapper
+                              key={i}
+                              feature="properties"
+                              itemCount={allProperties.length}
+                            >
+                              <div className="flex items-center gap-2 px-2 py-2 text-muted-foreground">
+                                <LockIcon className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate text-sm">{prop}</span>
+                              </div>
+                            </FreeTierLimitWrapper>
+                          );
+                        }
+
+                        return (
+                          <CommandItem
+                            key={i}
+                            value={prop}
+                            onSelect={() => {
+                              setPropertyDropdownOpen(false);
+                              onPropertySelect(prop);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-3 w-3",
+                                property === prop ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {prop}
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+
+              <ThemedTimeFilter
+                currentTimeFilter={getTimeFilterObject(
+                  timeFilter.start,
+                  timeFilter.end
+                )}
+                timeFilterOptions={[]}
+                onSelect={onTimeSelectHandler}
+                isFetching={isAnyLoading}
+                defaultValue={interval}
+                custom={true}
+              />
+
+              <FilterASTButton />
+            </section>
+          }
+          rightSection={
+            <section className="flex flex-row items-center gap-2">
+              <div className="flex h-8 flex-row items-center divide-x divide-border overflow-hidden rounded-lg border border-border shadow-sm">
+                <label className="px-2 py-1 text-xs">Views</label>
+
+                <TabsList
+                  size={"sm"}
+                  variant={"secondary"}
+                  asPill={"none"}
+                  className="divide-x divide-border"
+                >
+                  {TABS.map((tab) => (
+                    <TabsTrigger
+                      variant={"secondary"}
+                      asPill={"none"}
+                      key={tab.id}
+                      value={tab.id}
+                      className="flex items-center gap-2 bg-sidebar-background dark:bg-sidebar-foreground"
+                    >
+                      {tab.icon}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <MoreVertical size={16} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => onDeleteProperty(property)}
+                    disabled={!property || hidingKey === property}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 size={14} className="mr-2" />
+                    Delete {property ? `"${property}"` : "property"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onRestoreProperties}>
+                    Restore deleted properties
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <ExportButton
+                rows={cleanedValueData.map((propertyValue) => ({
+                  Value: propertyValue.property_value,
+                  Requests: propertyValue.total_requests,
+                  Cost: propertyValue.total_cost,
+                  "Avg Prompt Tokens": propertyValue.avg_prompt_tokens_per_request,
+                  "Avg Comp Tokens":
+                    propertyValue.avg_completion_tokens_per_request,
+                  "Avg Latency": propertyValue.avg_latency_per_request,
+                  "Avg Cost": propertyValue.average_cost_per_request,
+                }))}
+              />
+            </section>
+          }
+          showFold={false}
+        />
 
         {property === "" ? (
           <div className="flex h-full items-center justify-center p-8">
@@ -170,19 +427,10 @@ const PropertyPanel = (props: PropertyPanelProps) => {
             </div>
           </div>
         ) : (
-          <div className="flex w-full flex-col pt-2">
-            <div className="flex flex-col pt-0">
-              {/* Analytics Charts with Tabs */}
-              <div className="pb-0">
-                <PropertyAnalyticsCharts
-                  property={property}
-                  timeFilter={timeFilter}
-                  propertyValueData={propertyValueData}
-                />
-              </div>
-
+          <>
+            <TabsContent value="table" className="flex-1 min-h-0">
               {isAnyLoading ? (
-                <div className="w-full border-t border-border pt-0">
+                <div className="w-full pt-0">
                   <div className="space-y-3 px-4">
                     <div className="flex items-center gap-4">
                       {[
@@ -214,7 +462,7 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </div>
                 </div>
               ) : (
-                <div className="overflow-x-auto border-t border-border pt-0">
+                <div className="overflow-x-auto pt-0">
                   <SimpleTable
                     className="w-full px-4"
                     data={cleanedValueData}
@@ -343,11 +591,20 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                   </Button>
                 </div>
               )}
-            </div>
-          </div>
+            </TabsContent>
+
+            <TabsContent value="charts" className="flex-1 min-h-0">
+              <PropertyAnalyticsCharts
+                property={property}
+                timeFilter={timeFilter}
+                propertyValueData={propertyValueData}
+              />
+            </TabsContent>
+          </>
         )}
+        </div>
       </div>
-    </div>
+    </Tabs>
   );
 };
 
