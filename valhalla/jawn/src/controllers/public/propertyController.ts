@@ -16,24 +16,11 @@ import {
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
-<<<<<<< HEAD
   type DataOverTimeRequest,
   getXOverTime,
 } from "../../managers/helpers/getXOverTime";
 import { Result, resultMap } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
-=======
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHouseOrganizationProperties,
-} from "@helicone-package/filters/filters";
-import { Result, resultMap } from "../../packages/common/result";
-import type { JawnAuthenticatedRequest } from "../../types/request";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
-import {
-  DataOverTimeRequest,
-  getXOverTime,
-} from "../../managers/helpers/getXOverTime";
->>>>>>> main
 
 export interface Property {
   property: string;
