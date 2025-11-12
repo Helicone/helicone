@@ -7,7 +7,7 @@ import { persist } from "zustand/middleware";
 import { useKeys } from "@/components/templates/keys/useKeys";
 import { useProvider } from "@/hooks/useProvider";
 
-export type OnboardingStep = "ORGANIZATION" | "MEMBERS" | "REQUEST";
+export type OnboardingStep = "ORGANIZATION" | "BILLING" | "REQUEST";
 
 export type PlanType = "free" | "pro" | "team";
 
@@ -80,7 +80,7 @@ export interface OnboardingState {
   name: string;
   hasOnboarded: boolean;
   hasIntegrated: boolean;
-  currentStep: "ORGANIZATION" | "MEMBERS" | "REQUEST";
+  currentStep: "ORGANIZATION" | "BILLING" | "REQUEST";
   selectedTier: "free" | "pro" | "team";
   members: { email: string; role: "admin" | "member" }[];
   addons: {
@@ -89,6 +89,7 @@ export interface OnboardingState {
     evals: boolean;
   };
   hasCompletedQuickstart: boolean;
+  hasTrackedGoogleAdsConversion?: boolean;
 }
 
 const defaultOnboardingState: OnboardingState = {
@@ -104,6 +105,7 @@ const defaultOnboardingState: OnboardingState = {
     experiments: false,
     evals: false,
   },
+  hasTrackedGoogleAdsConversion: false,
 };
 
 export const useOrgOnboarding = (orgId: string) => {
@@ -205,6 +207,9 @@ export const useOrgOnboarding = (orgId: string) => {
         hasCompletedQuickstart:
           newState.hasCompletedQuickstart ??
           onboardingState?.hasCompletedQuickstart,
+        hasTrackedGoogleAdsConversion:
+          newState.hasTrackedGoogleAdsConversion ??
+          onboardingState?.hasTrackedGoogleAdsConversion,
         currentStep:
           newState.currentStep ??
           onboardingState?.currentStep ??
@@ -259,6 +264,16 @@ export const useOrgOnboarding = (orgId: string) => {
     });
   };
 
+  const saveOrganizationName = async () => {
+    await saveOnboardingChangesAsync({});
+    await queryClient.invalidateQueries({
+      queryKey: ["org", orgId, "onboarding"],
+    });
+    await queryClient.refetchQueries({
+      queryKey: ["org", orgId, "onboarding"],
+    });
+  };
+
   return {
     onboardingState: currentState,
     isLoading,
@@ -270,6 +285,7 @@ export const useOrgOnboarding = (orgId: string) => {
     setDraftMembers,
     updateCurrentStep,
     updateOnboardingStatus,
+    saveOrganizationName,
     hasKeys,
     hasProviderKeys,
     refetchProviderKeys,

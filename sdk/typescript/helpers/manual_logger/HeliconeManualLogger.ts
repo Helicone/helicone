@@ -238,6 +238,7 @@ export class HeliconeManualLogger {
             ...response,
             _type: request._type,
             toolName: request.toolName,
+            name: request.name,
           },
       textBody: isResponseString ? response : undefined,
     };

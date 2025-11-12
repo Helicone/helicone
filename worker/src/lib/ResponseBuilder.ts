@@ -62,6 +62,8 @@ export class ResponseBuilder {
 
   buildRateLimitedResponse(): Response {
     this.setHeader("content-type", "application/json;charset=UTF-8");
+    // Mark as a Helicone-generated rate limit for upstream logic
+    this.setHeader("X-Helicone-Error", "rate_limited");
 
     return this.build({
       body: JSON.stringify({

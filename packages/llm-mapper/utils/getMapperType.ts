@@ -33,8 +33,17 @@ export const getMapperTypeFromHeliconeRequest = (
     return "tool";
   }
 
-  if (heliconeRequest.gateway_endpoint_version) {
-    return "ai-gateway";
+  if (heliconeRequest.request_body?._type === "data") {
+    return "data";
+  }
+
+  if (heliconeRequest.request_referrer === "ai-gateway") {
+    const bodyMapping = heliconeRequest.ai_gateway_body_mapping;
+    if (bodyMapping === "RESPONSES") {
+      return "ai-gateway-responses";
+    } else if (bodyMapping === "OPENAI") {
+      return "ai-gateway-chat";
+    }
   }
 
   // Check for OpenAI Assistant responses
@@ -106,6 +115,14 @@ export const getMapperType = ({
 
   if (model === "vector_db") {
     return "vector-db";
+  }
+
+  if (model.startsWith("tool:")) {
+    return "tool";
+  }
+
+  if (model.startsWith("data:")) {
+    return "data";
   }
 
   if (/^gpt-3\.5-turbo-instruct/.test(model)) {

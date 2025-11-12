@@ -9,6 +9,14 @@ import QuestionsSection from "/snippets/questions-section.mdx";
 
 The [Request API](/rest/request/post-v1requestquery) allows you to build a request, where you can specify filtering criteria to retrieve all requests made by a user.
 
+<Note>
+  **API Endpoint Note:** This guide uses the `/v1/request/query` endpoint which is optimized for small to medium datasets.
+
+  For **large datasets or bulk exports**, use the [/v1/request/query-clickhouse](/rest/request/post-v1requestquery-clickhouse) endpoint instead, which has a different filter structure:
+  - `/query` uses `request` wrapper: `{"filter": {"request": {"user_id": {...}}}}`
+  - `/query-clickhouse` uses `request_response_rmt` wrapper: `{"filter": {"request_response_rmt": {"user_id": {...}}}}`
+</Note>
+
 <Frame>
   <img
     src="/images/use-cases/example-user-request.png"

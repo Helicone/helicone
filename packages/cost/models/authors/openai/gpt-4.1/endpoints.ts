@@ -253,7 +253,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -284,7 +283,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -315,7 +313,91 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-4.1:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gt-4.1",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000002, // $2.00 per 1M tokens
+        output: 0.000008, // $8.00 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.25, // $0.50 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-4.1-nano:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gt-4.1-n",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000001, // $0.10 per 1M tokens
+        output: 0.0000004, // $0.40 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.25, // $0.025 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 8192,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-4.1-mini:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gt-4.1-m",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000004, // $0.40 per 1M tokens
+        output: 0.0000016, // $1.60 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.25, // $0.10 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+    ],
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

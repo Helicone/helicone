@@ -138,7 +138,40 @@ export const endpoints = {
       "top_k",
     ],
     ptbEnabled: true,
-    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "claude-opus-4-1:helicone": {
+    provider: "helicone",
+    author: "anthropic",
+    providerModelId: "pa/claude-opus-4-1-20250805",
+    version: "20250805",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000015,
+        output: 0.000075,
+        cacheMultipliers: {
+          cachedInput: 0.1,
+          write5m: 1.25,
+          write1h: 2.0,
+        },
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 32000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "stop",
+      "reasoning",
+      "include_reasoning",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
     },

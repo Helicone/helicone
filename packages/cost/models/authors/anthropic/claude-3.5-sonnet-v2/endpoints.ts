@@ -133,7 +133,39 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
-    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "claude-3.5-sonnet-v2:helicone": {
+    provider: "helicone",
+    author: "anthropic",
+    providerModelId: "pa/cd-3-5-st-20241022",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000003,
+        output: 0.000015,
+        cacheMultipliers: {
+          cachedInput: 0.1,
+          write5m: 1.25,
+          write1h: 2.0,
+        },
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 8192,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "stop",
+    ],
+    ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
     },

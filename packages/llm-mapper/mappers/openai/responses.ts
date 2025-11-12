@@ -1,5 +1,6 @@
 import { MapperBuilder } from "../../path-mapper/builder";
-import { LlmSchema, Message, Response, LLMPreview } from "../../types";
+import { LlmSchema, Message, LLMPreview } from "../../types";
+import { parseFunctionArguments } from "./chat_helpers";
 
 const typeMap: Record<string, Message["_type"]> = {
   input_text: "message",
@@ -105,12 +106,28 @@ export const getRequestText = (requestBody: OpenAIResponseRequest): string => {
 
     if (Array.isArray(input) && input.length > 0) {
       const lastItem = input[input.length - 1];
-      
+
       // Handle function_call_output items - they don't have extractable text
       if ((lastItem as any)?.type === "function_call_output") {
         return "";
       }
-      
+
+      // Handle reasoning items - extract summary text
+      if ((lastItem as any)?.type === "reasoning") {
+        const summary = (lastItem as any)?.summary;
+        if (Array.isArray(summary)) {
+          const textItems = summary
+            .filter((s: any) => s?.type === "summary_text" && s?.text)
+            .map((s: any) => s.text);
+          if (textItems.length > 0) {
+            return textItems.join(" ");
+          }
+        } else if (typeof summary === "string") {
+          return summary;
+        }
+        return "";
+      }
+
       const content = (lastItem as any)?.content;
 
       // Content can be a string or an array of typed items
@@ -161,14 +178,17 @@ export const getResponseText = (
     if (statusCode === 0 || statusCode === null) {
       return "";
     }
-    
+
     // Handle null/undefined inputs
     if (responseBody === null || responseBody === undefined) {
       return "";
     }
-    
+
     // Handle empty objects
-    if (typeof responseBody === "object" && Object.keys(responseBody).length === 0) {
+    if (
+      typeof responseBody === "object" &&
+      Object.keys(responseBody).length === 0
+    ) {
       return "";
     }
 
@@ -210,6 +230,28 @@ export const getResponseText = (
       }
     }
 
+    // streaming
+    if (
+      responseBody?.type === "response.completed" &&
+      Array.isArray(responseBody?.response?.output) &&
+      responseBody?.response?.output.length &&
+      responseBody?.response?.output[0]?.content &&
+      Array.isArray(responseBody?.response?.output[0]?.content) &&
+      responseBody?.response?.output[0]?.content.length
+    ) {
+      const contentArray = responseBody?.response?.output[0]?.content;
+      const textContent = contentArray.find(
+        (c: any) => c?.type === "output_text"
+      );
+      if (textContent?.text) {
+        return textContent.text;
+      }
+      const firstItemType = contentArray[0]?.type;
+      if (typeof firstItemType === "string" && firstItemType) {
+        return `[${firstItemType}]`;
+      }
+    }
+
     // Fallbacks
     if (typeof responseBody?.text === "string") {
       return responseBody.text;
@@ -219,7 +261,10 @@ export const getResponseText = (
     try {
       return JSON.stringify(responseBody);
     } catch (stringifyError) {
-      if (stringifyError instanceof Error && stringifyError.message.includes('circular')) {
+      if (
+        stringifyError instanceof Error &&
+        stringifyError.message.includes("circular")
+      ) {
         return "error_circular_reference";
       }
       throw stringifyError;
@@ -256,7 +301,7 @@ const convertRequestInputToMessages = (
       const toolCall = {
         id: msg.id || msg.call_id || `req-tool-${msgIdx}`,
         name: msg.name,
-        arguments: msg.arguments,
+        arguments: parseFunctionArguments(msg.arguments),
         type: "function",
       };
 
@@ -285,6 +330,34 @@ const convertRequestInputToMessages = (
         role: "tool",
         id: `req-msg-tool-${msgIdx}`,
       } as Message);
+      return;
+    }
+
+    // Handle reasoning messages from reasoning models (o1, o3, etc.)
+    if (msg.type === "reasoning") {
+      let reasoningContent = "";
+      if (Array.isArray(msg.summary)) {
+        reasoningContent = msg.summary
+          .map((s: any) => {
+            if (s.type === "summary_text" && s.text) {
+              return s.text;
+            }
+            return typeof s === "string" ? s : JSON.stringify(s);
+          })
+          .join(" ");
+      } else if (typeof msg.summary === "string") {
+        reasoningContent = msg.summary;
+      } else if (msg.summary) {
+        reasoningContent = JSON.stringify(msg.summary);
+      }
+
+      messages.push({
+        _type: "message",
+        role: "assistant",
+        reasoning: reasoningContent,
+        content: "", // Reasoning messages don't have regular content
+        id: msg.id || `req-msg-reasoning-${msgIdx}`,
+      });
       return;
     }
 
@@ -478,11 +551,12 @@ const convertTools = (
   tools?: OpenAIResponseRequest["tools"]
 ): LlmSchema["request"]["tools"] => {
   if (!tools) return [];
-  return tools.map((tool) => ({
+  return tools.map((tool: any) => ({
     type: "function",
-    name: tool.function?.name,
-    description: tool.function?.description,
-    parameters: tool.function?.parameters,
+    // Support both Chat API (nested) and Responses API (flat) formats
+    name: tool.function?.name ?? tool.name,
+    description: tool.function?.description ?? tool.description,
+    parameters: tool.function?.parameters ?? tool.parameters,
   }));
 };
 
@@ -645,6 +719,7 @@ const convertResponse = (responseBody: any): Message[] => {
   if (responseBody?.item?.content && Array.isArray(responseBody.item.content)) {
     const item = responseBody.item;
     let messageText = "";
+    let reasoningText = "";
 
     // Find the 'output_text' item in the content array
     const textContent = item.content.find((c: any) => c.type === "output_text");
@@ -652,10 +727,19 @@ const convertResponse = (responseBody: any): Message[] => {
       messageText = textContent.text;
     }
 
+    // Extract reasoning if present
+    const reasoningContent = item.content.find(
+      (c: any) => c.type === "output_reasoning"
+    );
+    if (reasoningContent && reasoningContent.text) {
+      reasoningText = reasoningContent.text;
+    }
+
     messages.push({
       _type: "message",
       role: item.role || "assistant",
       content: messageText,
+      reasoning: reasoningText || undefined,
       id: item.id || "resp-msg-0",
     });
 
@@ -663,31 +747,92 @@ const convertResponse = (responseBody: any): Message[] => {
   }
 
   // Check for the 'output' array specific to the Responses API
-  if (!responseBody || !Array.isArray(responseBody.output)) return [];
+  if (
+    !responseBody ||
+    !Array.isArray(responseBody.output ?? responseBody.response?.output)
+  )
+    return [];
 
   // Iterate through the output array
-  responseBody.output.forEach((outputItem: any, index: number) => {
-    // Look for items of type 'message'
-    if (outputItem.type === "message" && outputItem.content) {
-      let messageText = "";
-      // The content is an array, find the 'output_text' item
-      if (Array.isArray(outputItem.content)) {
-        const textContent = outputItem.content.find(
-          (c: any) => c.type === "output_text"
-        );
-        if (textContent && textContent.text) {
-          messageText = textContent.text;
+  (responseBody.output ?? responseBody.response?.output).forEach(
+    (outputItem: any, index: number) => {
+      // Look for items of type 'message'
+      if (outputItem.type === "message" && outputItem.content) {
+        let messageText = "";
+        let reasoningText = "";
+        // The content is an array, find the 'output_text' item
+        if (Array.isArray(outputItem.content)) {
+          const textContent = outputItem.content.find(
+            (c: any) => c.type === "output_text"
+          );
+          if (textContent && textContent.text) {
+            messageText = textContent.text;
+          }
+
+          // Extract reasoning if present
+          const reasoningContent = outputItem.content.find(
+            (c: any) => c.type === "output_reasoning"
+          );
+          if (reasoningContent && reasoningContent.text) {
+            reasoningText = reasoningContent.text;
+          }
         }
+
+        messages.push({
+          _type: "message",
+          role: outputItem.role || "assistant", // Get role from the message item
+          content: messageText,
+          reasoning: reasoningText || undefined,
+          id: outputItem.id || `resp-msg-${index}`, // Use ID from the output item if available
+        });
       }
 
-      messages.push({
-        _type: "message",
-        role: outputItem.role || "assistant", // Get role from the message item
-        content: messageText,
-        id: outputItem.id || `resp-msg-${index}`, // Use ID from the output item if available
-      });
+      // Handle standalone reasoning items (e.g., from reasoning models like o1, o3)
+      if (outputItem.type === "reasoning") {
+        let reasoningContent = "";
+
+        if (Array.isArray(outputItem.summary)) {
+          reasoningContent = outputItem.summary
+            .map((s: any) => {
+              if (s.type === "summary_text" && s.text) {
+                return s.text;
+              }
+              return typeof s === "string" ? s : JSON.stringify(s);
+            })
+            .join(" ");
+        } else if (typeof outputItem.summary === "string") {
+          reasoningContent = outputItem.summary;
+        } else if (outputItem.summary) {
+          reasoningContent = JSON.stringify(outputItem.summary);
+        }
+
+        messages.push({
+          _type: "message",
+          role: "assistant",
+          reasoning: reasoningContent,
+          content: "",
+          id: outputItem.id || `resp-msg-reasoning-${index}`,
+        });
+      }
+
+      // Handle function_call items (assistant tool calls in responses)
+      if (outputItem.type === "function_call") {
+        const toolCall = {
+          id: outputItem.id || outputItem.call_id || `resp-tool-${index}`,
+          name: outputItem.name,
+          arguments: parseFunctionArguments(outputItem.arguments),
+        };
+
+        messages.push({
+          _type: "functionCall",
+          role: "assistant",
+          tool_calls: [toolCall],
+          content: "",
+          id: outputItem.id || `resp-msg-${index}`,
+        });
+      }
     }
-  });
+  );
 
   return messages;
 };
@@ -729,15 +874,38 @@ export const mapOpenAIResponse = ({
     if (!requestMessages || requestMessages.length === 0) {
       return getRequestText(request); // Fallback to original method
     }
-    
+
     // Look for the last user message or any message with content
     for (let i = requestMessages.length - 1; i >= 0; i--) {
       const message = requestMessages[i];
-      if (message?.content && typeof message.content === "string" && message.content.trim().length > 0) {
+
+      // Handle contentArray type messages (messages with array content)
+      if (
+        message?._type === "contentArray" &&
+        Array.isArray(message.contentArray)
+      ) {
+        for (const item of message.contentArray) {
+          if (
+            item?._type === "message" &&
+            item.content &&
+            typeof item.content === "string" &&
+            item.content.trim().length > 0
+          ) {
+            return item.content;
+          }
+        }
+      }
+
+      // Handle regular messages with string content
+      if (
+        message?.content &&
+        typeof message.content === "string" &&
+        message.content.trim().length > 0
+      ) {
         return message.content;
       }
     }
-    
+
     return "";
   };
 

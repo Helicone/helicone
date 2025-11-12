@@ -67,19 +67,26 @@ const useSessions = ({
     refetchIntervalInBackground: false,
     refetchInterval: false,
   });
+  const properties = useQuery({
+    queryKey: ["/v1/property/query", org?.currentOrg?.id],
+    queryFn: async (query) => {
+      const jawn = getJawnClient(query.queryKey[1]);
+      const res = await jawn.POST("/v1/property/query", {
+        body: {},
+      });
+      return res.data;
+    },
+    refetchOnWindowFocus: false,
+  });
 
   return {
     sessions: data?.data?.data || [],
     refetch,
-    isLoading,
+    isLoading: isLoading || properties.isLoading,
     isRefetching,
-    hasSessions: useQuery({
-      queryKey: ["has-sessions", org?.currentOrg?.id],
-      queryFn: async () => {
-        const jawnClient = getJawnClient(org?.currentOrg?.id);
-        return await jawnClient.GET("/v1/session/has-session");
-      },
-    }),
+    hasSessions: !!properties.data?.data?.find((p) =>
+      p.property.toLowerCase().includes("helicone-session"),
+    ),
   };
 };
 

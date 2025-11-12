@@ -51,6 +51,16 @@ export function heliconeProviderToModelProviderName(
       return "deepinfra";
     case "NOVITA":
       return "novita";
+    case "NEBIUS":
+      return "nebius";
+    case "CHUTES":
+      return "chutes";
+    case "CEREBRAS":
+      return "cerebras";
+    case "BASETEN":
+      return "baseten";
+    case "FIREWORKS":
+      return "fireworks";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -60,15 +70,12 @@ export function heliconeProviderToModelProviderName(
     case "2YFV":
     case "TOGETHER":
     case "LEMONFOX":
-    case "FIREWORKS":
     case "WISDOMINANUTSHELL":
     case "MISTRAL":
     case "QSTASH":
     case "FIRECRAWL":
     case "AVIAN":
-    case "NEBIUS":
     case "OPENPIPE":
-    case "CHUTES":
     case "LLAMA":
     case "NVIDIA":
     case "VERCEL":
@@ -133,6 +140,21 @@ export const dbProviderToProvider = (
   }
   if (provider === "deepinfra" || provider === "DeepInfra") {
     return "deepinfra";
+  }
+  if (provider === "fireworks" || provider === "Fireworks") {
+    return "fireworks";
+  }
+  if (provider === "baseten" || provider === "Baseten") {
+    return "baseten";
+  }
+  if (provider === "cerebras" || provider === "Cerebras") {
+    return "cerebras";
+  }
+  if (provider === "chutes" || provider === "Chutes") {
+    return "chutes";
+  }
+  if (provider === "nebius" || provider === "Nebius") {
+    return "nebius";
   }
   return null;
 };
@@ -305,9 +327,20 @@ export async function buildErrorMessage(
   return ok(await provider.buildErrorMessage(response));
 }
 
-function validateProvider(provider: string): provider is ModelProviderName {
+export function validateProvider(provider: string): provider is ModelProviderName {
   return provider in providers;
 }
+
+/**
+ * Model name mapping for backward compatibility
+ * Maps deprecated/incorrect model names to their correct counterparts
+ */
+const MODEL_NAME_MAPPINGS: Record<string, string> = {
+  "gemini-1.5-flash": "gemini-2.5-flash-lite",
+  "claude-3.5-sonnet": "claude-3.5-sonnet-v2",
+  "claude-3.5-sonnet-20240620": "claude-3.5-sonnet-v2",
+  "deepseek-r1": "deepseek-reasoner",
+};
 
 export function parseModelString(
   modelString: string
@@ -321,6 +354,9 @@ export function parseModelString(
     isOnline = true;
     modelName = modelName.slice(0, -7);
   }
+
+  // Apply model name mapping for backward compatibility
+  modelName = MODEL_NAME_MAPPINGS[modelName] || modelName;
 
   // Just model name: "gpt-4"
   if (parts.length === 1) {

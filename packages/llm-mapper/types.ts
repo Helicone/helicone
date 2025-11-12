@@ -4,7 +4,8 @@ import { ModelProviderName } from "../cost/models/providers";
 export const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
 export type MapperType =
-  | "ai-gateway"
+  | "ai-gateway-chat"
+  | "ai-gateway-responses"
   | "openai-chat"
   | "openai-response"
   | "anthropic-chat"
@@ -20,6 +21,7 @@ export type MapperType =
   | "openai-realtime"
   | "vector-db"
   | "tool"
+  | "data"
   | "unknown";
 // Legacy and AI Gateway type for Provider slugs
 export type Provider = ProviderName | "CUSTOM" | ModelProviderName;
@@ -89,6 +91,7 @@ export interface LLMRequestBody {
   // External Tools
   toolDetails?: HeliconeEventTool;
   vectorDBDetails?: HeliconeEventVectorDB;
+  dataDetails?: HeliconeEventData;
 
   // Embedding models
   input?: string | string[];
@@ -131,6 +134,17 @@ type LLMResponseBody = {
       timestamp: string;
     };
     _type: "vector_db";
+  };
+  dataDetailsResponse?: {
+    status: string;
+    message: string;
+    metadata: {
+      timestamp: string;
+      [key: string]: any;
+    };
+    _type: "data";
+    name: string;
+    [key: string]: any;
   };
 };
 
@@ -315,9 +329,16 @@ export interface HeliconeEventVectorDB {
   databaseName?: string;
   [key: string]: any;
 }
+export interface HeliconeEventData {
+  _type: "data";
+  name: string;
+  meta?: Record<string, any>;
+  [key: string]: any;
+}
 export type HeliconeCustomEventRequest =
   | HeliconeEventTool
-  | HeliconeEventVectorDB;
+  | HeliconeEventVectorDB
+  | HeliconeEventData;
 
 export type HeliconeLogRequest = ILogRequest | HeliconeCustomEventRequest;
 
@@ -368,5 +389,5 @@ export interface HeliconeRequest {
   cache_enabled: boolean;
   updated_at?: string;
   request_referrer?: string | null;
-  gateway_endpoint_version: string | null;
+  ai_gateway_body_mapping: string | null;
 }

@@ -17,7 +17,6 @@ import { parseJSXObject } from "@helicone/prompts";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
 import { DataDogClient, getDataDogClient } from "./monitoring/DataDogClient";
-import { RequestBodyBuffer_InMemory } from "../RequestBodyBuffer/RequestBodyBuffer_InMemory";
 import {
   IRequestBodyBuffer,
   ValidRequestBody,
@@ -107,11 +106,11 @@ export class RequestWrapper {
           return headers;
         } catch (error) {
           console.error(`Failed retrieving API key from path: ${error}`);
-          return request.headers;
+          return headers;
         }
       }
 
-      return request.headers;
+      return headers;
     }
 
     if (headers.has("helicone-auth")) {
@@ -580,7 +579,8 @@ export class RequestWrapper {
       `getProxy-CP-${authKey}`,
       env,
       async () =>
-        await getProviderKeyFromPortalKey(authKey, env, supabaseClient)
+        await getProviderKeyFromPortalKey(authKey, env, supabaseClient),
+      43200 // 12 hours
     );
   }
 
@@ -647,7 +647,8 @@ export async function getProviderKeyFromProxyCache(
   return await getAndStoreInCache(
     `getProxyKey-${authKey}`,
     env,
-    async () => await getProviderKeyFromProxy(authKey, env, supabaseClient)
+    async () => await getProviderKeyFromProxy(authKey, env, supabaseClient),
+    43200 // 12 hours
   );
 }
 

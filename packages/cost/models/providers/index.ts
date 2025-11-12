@@ -1,37 +1,81 @@
 import { AnthropicProvider } from "./anthropic";
-import { OpenAIProvider } from "./openai";
-import { BedrockProvider } from "./bedrock";
-import { VertexProvider } from "./vertex";
 import { AzureOpenAIProvider } from "./azure";
-import { PerplexityProvider } from "./perplexity";
-import { GroqProvider } from "./groq";
-import { DeepSeekProvider } from "./deepseek";
+import { BasetenProvider } from "./baseten";
+import { BedrockProvider } from "./bedrock";
+import { CerebrasProvider } from "./cerebras";
+import { ChutesProvider } from "./chutes";
 import { CohereProvider } from "./cohere";
-import { XAIProvider } from "./xai";
-import { GoogleProvider } from "./google";
 import { DeepInfraProvider } from "./deepinfra";
-import { OpenRouterProvider } from "./openrouter";
+import { DeepSeekProvider } from "./deepseek";
+import { FireworksProvider } from "./fireworks";
+import { GoogleProvider } from "./google";
+import { GroqProvider } from "./groq";
+import { HeliconeProvider } from "./helicone";
+import { NebiusProvider } from "./nebius";
 import { NovitaProvider } from "./novita";
+import { OpenAIProvider } from "./openai";
+import { OpenRouterProvider } from "./openrouter";
+import { PerplexityProvider } from "./perplexity";
+import { VertexProvider } from "./vertex";
+import { XAIProvider } from "./xai";
 
 // Create singleton instances (stateless, so safe to share)
 export const providers = {
+  baseten: new BasetenProvider(),
   anthropic: new AnthropicProvider(),
-  openai: new OpenAIProvider(),
-  bedrock: new BedrockProvider(),
-  vertex: new VertexProvider(),
   azure: new AzureOpenAIProvider(),
-  perplexity: new PerplexityProvider(),
-  groq: new GroqProvider(),
-  deepseek: new DeepSeekProvider(),
+  bedrock: new BedrockProvider(),
+  cerebras: new CerebrasProvider(),
+  chutes: new ChutesProvider(),
   cohere: new CohereProvider(),
-  xai: new XAIProvider(),
   deepinfra: new DeepInfraProvider(),
+  deepseek: new DeepSeekProvider(),
+  fireworks: new FireworksProvider(),
   "google-ai-studio": new GoogleProvider(),
-  openrouter: new OpenRouterProvider(),
+  groq: new GroqProvider(),
+  helicone: new HeliconeProvider(),
+  nebius: new NebiusProvider(),
   novita: new NovitaProvider(),
+  openai: new OpenAIProvider(),
+  openrouter: new OpenRouterProvider(),
+  perplexity: new PerplexityProvider(),
+  vertex: new VertexProvider(),
+  xai: new XAIProvider()
 } as const;
 
 export type ModelProviderName = keyof typeof providers;
+
+// TODO: temporarily whitelist responses API providers until all mappings are done
+export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
+  "openai",
+  "helicone",
+
+  // chat completions only
+  "azure",
+  "chutes",
+  "cohere",
+  "deepinfra",
+  "deepseek",
+
+  // has known issues with returning structured JSONS
+  // should be okay to enable, but its not stable enough to add without request
+  // "google-ai-studio",
+  "cerebras",
+  "groq",
+  "nebius",
+  "novita",
+  "openrouter",
+  "perplexity",
+  "xai",
+  "baseten",
+  "fireworks",
+
+  // anthropic and chat completions provider
+  "vertex"
+
+  // anthropic only
+  // none right now, need anthropic mapper
+];
 
 // Re-export base for extending
 export { BaseProvider } from "./base";

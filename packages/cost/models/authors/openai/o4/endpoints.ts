@@ -88,7 +88,30 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
-    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "o4-mini:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/o4-mini",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011, // $1.10 per 1M tokens
+        output: 0.0000044, // $4.40 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.25, // $0.275 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 100000,
+    supportedParameters: [
+      "max_tokens",
+    ],
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

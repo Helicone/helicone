@@ -207,7 +207,7 @@ const SessionsPage = (props: SessionsPageProps) => {
   );
 
   const isSessionsLoading =
-    isLoading || allNames.isLoading || names.isLoading || hasSessions.isLoading;
+    isLoading || allNames.isLoading || names.isLoading;
 
   // Helper function to get TimeFilter object
   const getTimeFilterObject = (start: Date, end: Date): TimeFilter => ({

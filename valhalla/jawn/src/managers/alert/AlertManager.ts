@@ -3,14 +3,26 @@ import { AuthParams } from "../../packages/common/auth/types";
 import { Result } from "../../packages/common/result";
 import { AlertStore } from "../../lib/stores/AlertStore";
 import { BaseManager } from "../BaseManager";
+import { FilterExpression } from "@helicone-package/filters/types";
+import {
+  AlertMetric,
+  AlertAggregation,
+  AlertGrouping,
+} from "@helicone-package/filters/alerts";
+
 export interface AlertRequest {
   name: string;
-  metric: string;
+  metric: AlertMetric;
   threshold: number;
+  aggregation: AlertAggregation | null;
+  percentile: number | null;
+  grouping: AlertGrouping | null;
+  grouping_is_property: boolean | null;
   time_window: string;
   emails: string[];
   slack_channels: string[];
   minimum_request_count: number | undefined;
+  filter: FilterExpression | null;
 }
 
 export interface AlertHistory {

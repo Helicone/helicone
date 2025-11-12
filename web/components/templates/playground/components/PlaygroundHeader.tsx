@@ -13,15 +13,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { playgroundModels as PLAYGROUND_MODELS } from "@helicone-package/cost/providers/mappings";
 import { MappedLLMRequest, Tool } from "@helicone-package/llm-mapper/types";
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
+import { CheckIcon, ChevronsUpDownIcon, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import ModelParametersForm from "./ModelParametersForm";
 import ToolsConfigurationModal from "./ToolsConfigurationModal";
 import PlaygroundActions from "./PlaygroundActions";
 import { ResponseFormat } from "../types";
+import { useModelRegistry } from "@/services/hooks/useModelRegistry";
 
 interface PlaygroundHeaderProps {
   selectedModel: string;
@@ -44,8 +44,6 @@ interface PlaygroundHeaderProps {
   ) => void;
   onRun: () => void;
   isScrolled: boolean;
-  useAIGateway: boolean;
-  setUseAIGateway: (_useAIGateway: boolean) => void;
   error: string | null;
   isLoading?: boolean;
   createPrompt?: boolean;
@@ -68,13 +66,18 @@ const PlaygroundHeader = ({
   onSavePrompt,
   onRun,
   isScrolled,
-  useAIGateway,
-  setUseAIGateway,
   error,
   isLoading,
   createPrompt,
 }: PlaygroundHeaderProps) => {
   const [modelListOpen, setModelListOpen] = useState<boolean>(false);
+  const { data: playgroundModels, isLoading: modelsLoading } = useModelRegistry();
+
+  // Get display name for selected model
+  const selectedModelData = playgroundModels?.find(
+    (m) => m.id === selectedModel,
+  );
+  const displayName = selectedModelData?.name || selectedModel || "Select model...";
   return (
     <div
       className={cn(
@@ -104,41 +107,63 @@ const PlaygroundHeader = ({
                     "bg-slate-100 hover:bg-slate-200 dark:bg-slate-950 dark:hover:bg-slate-900",
                 )}
               >
-                <span className="max-w-[150px] truncate">
-                  {selectedModel || "Select model..."}
+                <span className="max-w-[150px] truncate" title={displayName}>
+                  {displayName}
                 </span>
                 <ChevronsUpDownIcon className="h-4 w-4 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
+            <PopoverContent className="w-[250px] p-0">
               <Command>
                 <CommandInput placeholder="Search model..." />
                 <CommandList>
-                  <CommandEmpty>No framework found.</CommandEmpty>
-                  <CommandGroup>
-                    {PLAYGROUND_MODELS.map((model) => (
-                      <CommandItem
-                        key={model}
-                        value={model}
-                        onSelect={(currentValue) => {
-                          setSelectedModel(
-                            currentValue === selectedModel ? "" : currentValue,
-                          );
-                          setModelListOpen(false);
-                        }}
-                      >
-                        {model}
-                        <CheckIcon
-                          className={cn(
-                            "ml-auto",
-                            model === selectedModel
-                              ? "opacity-100"
-                              : "opacity-0",
-                          )}
-                        />
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
+                  {modelsLoading ? (
+                    <div className="flex items-center justify-center p-4">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="ml-2 text-sm text-muted-foreground">
+                        Loading models...
+                      </span>
+                    </div>
+                  ) : !playgroundModels || playgroundModels.length === 0 ? (
+                    <CommandEmpty>No models found.</CommandEmpty>
+                  ) : (
+                    <>
+                      <CommandEmpty>No model found.</CommandEmpty>
+                      <CommandGroup>
+                        {playgroundModels.map((model) => (
+                          <CommandItem
+                            key={model.id}
+                            value={model.id}
+                            onSelect={(currentValue) => {
+                              setSelectedModel(
+                                currentValue === selectedModel
+                                  ? ""
+                                  : currentValue,
+                              );
+                              setModelListOpen(false);
+                            }}
+                          >
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-sm">{model.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {model.provider}
+                                {model.supportsPtb && " • PTB"}
+                              </span>
+                            </div>
+                            <CheckIcon
+                              className={cn(
+                                "ml-auto flex-shrink-0",
+                                model.id === selectedModel
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                              size={16}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </>
+                  )}
                 </CommandList>
               </Command>
             </PopoverContent>
@@ -156,8 +181,6 @@ const PlaygroundHeader = ({
               onResponseFormatChange={setResponseFormat}
               parameters={modelParameters}
               onParametersChange={setModelParameters}
-              useAIGateway={useAIGateway}
-              setUseAIGateway={setUseAIGateway}
               error={error}
             />
           </div>

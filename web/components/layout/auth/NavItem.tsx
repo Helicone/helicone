@@ -55,8 +55,10 @@ const NavItem: React.FC<NavItemProps> = ({
             {link.icon && (
               <link.icon
                 className={cn(
-                  "h-4 w-4 text-slate-500",
-                  link.current && "text-blue-600 dark:text-blue-400",
+                  "h-4 w-4",
+                  link.current
+                    ? "text-slate-700 dark:text-slate-300"
+                    : "text-slate-500"
                 )}
               />
             )}
@@ -88,10 +90,10 @@ const NavItem: React.FC<NavItemProps> = ({
                 "flex items-center justify-start rounded-md px-3 transition-colors",
                 deep && deep > 1 ? "h-6" : "h-8",
                 "w-full font-normal",
-                "text-[12px] text-slate-500",
+                "text-[12px]",
                 link.current
-                  ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
-                  : "hover:bg-slate-200 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100",
+                  ? "bg-blue-100 text-slate-900 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-slate-100 dark:hover:bg-blue-900/50"
+                  : "text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-slate-100",
               ),
         )}
       >
@@ -99,8 +101,10 @@ const NavItem: React.FC<NavItemProps> = ({
           {link.icon && (
             <link.icon
               className={cn(
-                "mr-2 h-3.5 w-3.5 text-slate-500",
-                link.current && "text-blue-700 dark:text-blue-300",
+                "mr-2 h-3.5 w-3.5",
+                link.current
+                  ? "text-slate-700 dark:text-slate-300"
+                  : "text-slate-500"
               )}
             />
           )}

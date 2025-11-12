@@ -17,7 +17,7 @@ interface StripeConfigProps {
 const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
   const [apiKey, setApiKey] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
-  const [eventName, setEventName] = useState("helicone_request");
+  const [eventName, setEventName] = useState("token-billing-tokens");
   const [testCustomerId, setTestCustomerId] = useState("");
   const [testResult, setTestResult] = useState<{
     type: "success" | "error";
@@ -214,7 +214,7 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
             type="text"
             value={eventName}
             onChange={(e) => setEventName(e.target.value)}
-            placeholder="helicone_request"
+            placeholder="token-billing-tokens"
             disabled={isLoading}
           />
           <p className="text-xs text-muted-foreground">
@@ -291,6 +291,35 @@ const StripeConfig: React.FC<StripeConfigProps> = ({ onClose }) => {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="space-y-4 rounded-lg border border-border bg-card p-4">
+        <h3 className="text-sm font-medium">Next Steps</h3>
+        <div className="space-y-3 text-sm text-muted-foreground">
+          <p>
+            After saving your configuration, add the following header to your
+            Helicone requests to track usage in Stripe:
+          </p>
+          <div className="rounded-md bg-muted p-3 font-mono text-xs">
+            <code>x-stripe-customer-id: cus_12345678</code>
+          </div>
+          <p>
+            Replace <code className="rounded bg-muted px-1">cus_12345678</code>{" "}
+            with your actual Stripe customer ID. This will link your Helicone
+            usage to the correct Stripe customer for billing.
+          </p>
+          <p className="text-xs">
+            <span className="font-medium text-foreground">Learn more:</span>{" "}
+            <a
+              href="https://docs.helicone.ai/getting-started/integration-method/gateway-headers"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Helicone Headers Documentation
+            </a>
+          </p>
+        </div>
       </div>
 
       <div className="space-y-2">

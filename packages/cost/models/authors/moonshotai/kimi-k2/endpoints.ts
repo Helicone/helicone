@@ -91,6 +91,43 @@ export const endpoints = {
       "*": {},
     },
   },
+  "kimi-k2-0905:deepinfra": {
+    providerModelId: "moonshotai/Kimi-K2-Instruct-0905",
+    provider: "deepinfra",
+    author: "moonshotai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000005, // $0.50/1M tokens
+        output: 0.000002, // $2.00/1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.8, // $0.40/1M tokens (0.8x of input)
+        },
+      },
+    ],
+    quantization: "fp4",
+    contextLength: 256_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "kimi-k2:openrouter": {
     provider: "openrouter",
     author: "moonshotai",
@@ -119,7 +156,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -152,7 +188,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -185,7 +220,70 @@ export const endpoints = {
       "top_k",
       "min_p",
       "repetition_penalty",
-      "logit_bias"
+      "logit_bias",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-0905:baseten": {
+    provider: "baseten",
+    author: "moonshotai",
+    providerModelId: "moonshotai/Kimi-K2-Instruct-0905",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.60/1M
+        output: 0.0000025, // $2.50/1M
+      },
+    ],
+    contextLength: 262_000,
+    maxCompletionTokens: 163_800,
+    quantization: "fp4",
+    supportedParameters: [
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "stop",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-0905:fireworks": {
+    provider: "fireworks",
+    author: "moonshotai",
+    providerModelId: "accounts/fireworks/models/kimi-k2-instruct-0905",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.60/1M
+        output: 0.0000025, // $2.50/1M
+      },
+    ],
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "top_k",
+      "repetition_penalty",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "response_format",
+      "structured_outputs",
+      "tools",
+      "tool_choice",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -223,7 +321,37 @@ export const endpoints = {
       "structured_outputs",
     ],
     ptbEnabled: true,
-    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-thinking:novita": {
+    provider: "novita",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2-thinking",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.6/1M
+        output: 0.0000025, // $2.5/1M
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "tool_choice",
+      "tools",
+      "structured_outputs",
+      "response_format"
+    ],
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

@@ -156,7 +156,45 @@ export const endpoints = {
       "top_k",
     ],
     ptbEnabled: true,
-    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "claude-sonnet-4:helicone": {
+    provider: "helicone",
+    author: "anthropic",
+    providerModelId: "pa/cd-st-4-20250514",
+    version: "20250514",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000003,
+        output: 0.000015,
+        cacheMultipliers: {
+          cachedInput: 0.1,
+          write5m: 1.25,
+          write1h: 2.0,
+        },
+      },
+      {
+        threshold: 200000,
+        input: 0.000006,
+        output: 0.0000225,
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 64000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "stop",
+      "reasoning",
+      "include_reasoning",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
     },

@@ -195,7 +195,7 @@ export async function storeInCache(
       expirationTtl,
       useMemoryCache,
     }),
-    await storeInCacheWithHmac({
+    storeInCacheWithHmac({
       key,
       value,
       env,

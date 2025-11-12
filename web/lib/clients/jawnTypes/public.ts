@@ -360,6 +360,20 @@ export interface paths {
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
   };
+  "/v1/stripe/auto-topoff/settings": {
+    get: operations["GetAutoTopoffSettings"];
+    post: operations["UpdateAutoTopoffSettings"];
+    delete: operations["DisableAutoTopoff"];
+  };
+  "/v1/stripe/payment-methods": {
+    get: operations["GetPaymentMethods"];
+  };
+  "/v1/stripe/payment-methods/setup-session": {
+    post: operations["CreateSetupSession"];
+  };
+  "/v1/stripe/payment-methods/{paymentMethodId}": {
+    delete: operations["RemovePaymentMethod"];
+  };
   "/v1/integration": {
     get: operations["GetIntegrations"];
     post: operations["CreateIntegration"];
@@ -395,8 +409,8 @@ export interface paths {
   "/v1/trace/log-python": {
     post: operations["LogPythonTrace"];
   };
-  "/v1/session/has-session": {
-    get: operations["HasSession"];
+  "/v1/test/gateway-request": {
+    post: operations["SendTestRequest"];
   };
   "/v1/session/query": {
     post: operations["GetSessions"];
@@ -423,8 +437,20 @@ export interface paths {
   "/v1/public/status/provider/{provider}": {
     get: operations["GetProviderStatus"];
   };
+  "/v1/providers": {
+    post: operations["GetProviders"];
+  };
   "/v1/property/query": {
     post: operations["GetProperties"];
+  };
+  "/v1/property/hide": {
+    post: operations["HideProperty"];
+  };
+  "/v1/property/hidden/query": {
+    post: operations["GetHiddenProperties"];
+  };
+  "/v1/property/restore": {
+    post: operations["RestoreProperty"];
   };
   "/v1/property/{propertyKey}/search": {
     post: operations["SearchProperties"];
@@ -464,11 +490,11 @@ export interface paths {
      */
     get: operations["GetModelRegistry"];
   };
-  "/v1/public/compare/models": {
-    post: operations["GetModelComparison"];
-  };
   "/v1/models": {
     get: operations["GetModels"];
+  };
+  "/v1/public/compare/models": {
+    post: operations["GetModelComparison"];
   };
   "/v1/public/security": {
     post: operations["GetSecurity"];
@@ -1573,9 +1599,9 @@ export interface components {
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS" | "BASETEN";
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita";
+    ModelProviderName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1645,6 +1671,13 @@ export interface components {
       databaseName?: string;
       [key: string]: unknown;
     };
+    HeliconeEventData: {
+      /** @enum {string} */
+      _type: "data";
+      name: string;
+      meta?: components["schemas"]["Record_string.any_"];
+      [key: string]: unknown;
+    };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
       provider?: string;
@@ -1683,6 +1716,7 @@ export interface components {
       };
       toolDetails?: components["schemas"]["HeliconeEventTool"];
       vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      dataDetails?: components["schemas"]["HeliconeEventData"];
       input?: string | string[];
       /** Format: double */
       n?: number | null;
@@ -1713,6 +1747,18 @@ export interface components {
       _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
     };
     LLMResponseBody: {
+      dataDetailsResponse?: {
+        name: string;
+        /** @enum {string} */
+        _type: "data";
+        metadata: {
+          timestamp: string;
+          [key: string]: unknown;
+        };
+        message: string;
+        status: string;
+        [key: string]: unknown;
+      };
       vectorDBDetailsResponse?: {
         /** @enum {string} */
         _type: "vector_db";
@@ -1809,7 +1855,7 @@ export interface components {
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
-      gateway_endpoint_version: string | null;
+      ai_gateway_body_mapping: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2180,6 +2226,7 @@ Json: JsonObject;
     CreateCloudGatewayCheckoutSessionRequest: {
       /** Format: double */
       amount: number;
+      returnUrl?: string;
     };
     UpgradeToProRequest: {
       addons?: {
@@ -2234,6 +2281,37 @@ Json: JsonObject;
       next_page: string | null;
       /** Format: double */
       count: number;
+    };
+    AutoTopoffSettings: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string | null;
+      lastTopoffAt: string | null;
+      /** Format: double */
+      consecutiveFailures: number;
+    };
+    UpdateAutoTopoffSettingsRequest: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string;
+    };
+    PaymentMethod: {
+      id: string;
+      brand: string;
+      last4: string;
+      /** Format: double */
+      exp_month: number;
+      /** Format: double */
+      exp_year: number;
+    };
+    CreateSetupSessionRequest: {
+      returnUrl?: string;
     };
     IntegrationCreateParams: {
       integration_name: string;
@@ -2367,6 +2445,15 @@ Json: JsonObject;
               }[];
           };
         }[];
+    };
+    SendTestRequestResponse: {
+      success: boolean;
+      response?: string;
+      requestId?: string;
+      error?: string;
+    };
+    SendTestRequestRequest: {
+      apiKey: string;
     };
     SessionResult: {
       created_at: string;
@@ -2566,6 +2653,191 @@ Json: JsonObject;
     "Result_ProviderMetrics.string_": components["schemas"]["ResultSuccess_ProviderMetrics_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     TimeFrame: "24h" | "7d" | "30d";
+    ProviderMetric: {
+      provider: string;
+      /** Format: double */
+      total_requests: number;
+    };
+    "ResultSuccess_ProviderMetric-Array_": {
+      data: components["schemas"]["ProviderMetric"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderMetric-Array.string_": components["schemas"]["ResultSuccess_ProviderMetric-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_UserMetricsToOperators_: {
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      last_active?: components["schemas"]["Partial_TimestampOperators_"];
+      total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      active_for?: components["schemas"]["Partial_NumberOperators_"];
+      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      cost?: components["schemas"]["Partial_NumberOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_UserApiKeysTableToOperators_: {
+      api_key_hash?: components["schemas"]["Partial_TextOperators_"];
+      api_key_name?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PropertiesTableToOperators_: {
+      auth_hash?: components["schemas"]["Partial_TextOperators_"];
+      key?: components["schemas"]["Partial_TextOperators_"];
+      value?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_ExperimentToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_ExperimentHypothesisRunToOperator_: {
+      result_request_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_ScoreValueToOperator_: {
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseLogToOperators_: {
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      auth_hash?: components["schemas"]["Partial_TextOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PropertiesV3ToOperators_: {
+      key?: components["schemas"]["Partial_TextOperators_"];
+      value?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PropertyWithResponseV1ToOperators_: {
+      property_key?: components["schemas"]["Partial_TextOperators_"];
+      property_value?: components["schemas"]["Partial_TextOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_JobToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      name?: components["schemas"]["Partial_TextOperators_"];
+      description?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      updated_at?: components["schemas"]["Partial_TimestampOperators_"];
+      timeout_seconds?: components["schemas"]["Partial_NumberOperators_"];
+      custom_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      org_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_NodesToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      name?: components["schemas"]["Partial_TextOperators_"];
+      description?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      updated_at?: components["schemas"]["Partial_TimestampOperators_"];
+      timeout_seconds?: components["schemas"]["Partial_NumberOperators_"];
+      custom_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      org_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_CacheMetricsTableToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      date?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      hour?: components["schemas"]["Partial_NumberOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      cache_hit_count?: components["schemas"]["Partial_NumberOperators_"];
+      saved_latency_ms?: components["schemas"]["Partial_NumberOperators_"];
+      saved_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_completion_audio_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_audio_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      saved_prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      first_hit?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      last_hit?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      request_body?: components["schemas"]["Partial_TextOperators_"];
+      response_body?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_RateLimitTableToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_OrganizationPropertiesToOperators_: {
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      property_key?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TablesAndViews_: {
+      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+      user_api_keys?: components["schemas"]["Partial_UserApiKeysTableToOperators_"];
+      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
+      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
+      properties_table?: components["schemas"]["Partial_PropertiesTableToOperators_"];
+      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
+      experiment_hypothesis_run?: components["schemas"]["Partial_ExperimentHypothesisRunToOperator_"];
+      score_value?: components["schemas"]["Partial_ScoreValueToOperator_"];
+      request_response_log?: components["schemas"]["Partial_RequestResponseLogToOperators_"];
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
+      users_view?: components["schemas"]["Partial_UserViewToOperators_"];
+      properties_v3?: components["schemas"]["Partial_PropertiesV3ToOperators_"];
+      property_with_response_v1?: components["schemas"]["Partial_PropertyWithResponseV1ToOperators_"];
+      job?: components["schemas"]["Partial_JobToOperators_"];
+      job_node?: components["schemas"]["Partial_NodesToOperators_"];
+      cache_metrics?: components["schemas"]["Partial_CacheMetricsTableToOperators_"];
+      rate_limit_log?: components["schemas"]["Partial_RateLimitTableToOperators_"];
+      organization_properties?: components["schemas"]["Partial_OrganizationPropertiesToOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      values?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+    };
+    SingleKey_TablesAndViews_: components["schemas"]["Partial_TablesAndViews_"];
+    FilterLeaf: components["schemas"]["SingleKey_TablesAndViews_"];
+    FilterNode: components["schemas"]["FilterLeaf"] | components["schemas"]["FilterBranch"] | Record<string, never>;
+    FilterBranch: {
+      left: components["schemas"]["FilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      right: components["schemas"]["FilterNode"];
+    };
+    ProviderQueryParams: {
+      filter: components["schemas"]["FilterNode"];
+      /** Format: double */
+      offset: number;
+      /** Format: double */
+      limit: number;
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+    };
     Property: {
       property: string;
     };
@@ -2575,6 +2847,11 @@ Json: JsonObject;
       error: null;
     };
     "Result_Property-Array.string_": components["schemas"]["ResultSuccess_Property-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_unknown-Array_": {
+      data: unknown[];
+      /** @enum {number|null} */
+      error: null;
+    };
     "ResultSuccess__value-string--cost-number_-Array_": {
       data: {
           /** Format: double */
@@ -2964,9 +3241,9 @@ Json: JsonObject;
       timeZoneDifference: number;
     };
     /** @enum {string} */
-    AuthorName: "anthropic" | "openai" | "perplexity" | "deepseek" | "cohere" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "zai" | "passthrough";
+    AuthorName: "anthropic" | "cohere" | "deepseek" | "openai" | "perplexity" | "xai" | "google" | "meta-llama" | "mistralai" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "zai" | "baidu" | "passthrough";
     /** @enum {string} */
-    StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity";
+    StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity" | "n";
     /** @enum {string} */
     PluginId: "web";
     RateLimits: {
@@ -3007,6 +3284,8 @@ Json: JsonObject;
       /** Format: double */
       web_search?: number;
     };
+    /** @enum {string} */
+    BodyMappingType: "OPENAI" | "NO_MAPPING" | "RESPONSES";
     EndpointConfig: {
       region?: string;
       location?: string;
@@ -3016,9 +3295,9 @@ Json: JsonObject;
       resourceName?: string;
       apiVersion?: string;
       crossRegion?: boolean;
-      /** @enum {string} */
-      gatewayMapping?: "OPENAI" | "NO_MAPPING";
+      gatewayMapping?: components["schemas"]["BodyMappingType"];
       modelName?: string;
+      heliconeModelId?: string;
       providerModelId?: string;
       pricing?: components["schemas"]["ModelPricing"][];
       /** Format: double */
@@ -3057,8 +3336,10 @@ Json: JsonObject;
       /** Format: double */
       priority?: number;
       /** @enum {string} */
-      quantization?: "fp4" | "fp8" | "bf16";
+      quantization?: "fp4" | "fp8" | "fp16" | "bf16";
       responseFormat?: components["schemas"]["ResponseFormat"];
+      requireExplicitRouting?: boolean;
+      providerModelIdAliases?: string[];
     };
     UserEndpointConfig: {
       region?: string;
@@ -3069,9 +3350,9 @@ Json: JsonObject;
       resourceName?: string;
       apiVersion?: string;
       crossRegion?: boolean;
-      /** @enum {string} */
-      gatewayMapping?: "OPENAI" | "NO_MAPPING";
+      gatewayMapping?: components["schemas"]["BodyMappingType"];
       modelName?: string;
+      heliconeModelId?: string;
     };
     Endpoint: {
       pricing: components["schemas"]["ModelPricing"][];
@@ -3161,6 +3442,19 @@ Json: JsonObject;
       error: null;
     };
     "Result_ModelRegistryResponse.string_": components["schemas"]["ResultSuccess_ModelRegistryResponse_"] | components["schemas"]["ResultError_string_"];
+    OAIModel: {
+      id: string;
+      /** @enum {string} */
+      object: "model";
+      /** Format: double */
+      created: number;
+      owned_by: string;
+    };
+    OAIModelsResponse: {
+      /** @enum {string} */
+      object: "list";
+      data: components["schemas"]["OAIModel"][];
+    };
     MetricStats: {
       /** Format: double */
       p99: number;
@@ -3237,14 +3531,6 @@ Json: JsonObject;
       names: string[];
       parent: string;
     };
-    "ResultSuccess__model-string_-Array_": {
-      data: {
-          model: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__unsafe-boolean__": {
       data: {
         unsafe: boolean;
@@ -3523,11 +3809,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_ExperimentToOperators_: {
-      id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
-    };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.experiment_": {
       experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
@@ -4251,7 +4532,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita";
+            providerName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
           }) | {
             error: string;
           };
@@ -6051,9 +6332,11 @@ export interface operations {
   };
   MigrateToPro: {
     responses: {
-      /** @description No content */
-      204: {
-        content: never;
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
       };
     };
   };
@@ -6099,6 +6382,87 @@ export interface operations {
             cancel_at_period_end: boolean;
             status: string;
           }) | null;
+        };
+      };
+    };
+  };
+  GetAutoTopoffSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTopoffSettings"] | null;
+        };
+      };
+    };
+  };
+  UpdateAutoTopoffSettings: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateAutoTopoffSettingsRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTopoffSettings"];
+        };
+      };
+    };
+  };
+  DisableAutoTopoff: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
+  GetPaymentMethods: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PaymentMethod"][];
+        };
+      };
+    };
+  };
+  CreateSetupSession: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSetupSessionRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            setupUrl: string;
+          };
+        };
+      };
+    };
+  };
+  RemovePaymentMethod: {
+    parameters: {
+      path: {
+        paymentMethodId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
+          };
         };
       };
     };
@@ -6285,12 +6649,17 @@ export interface operations {
       };
     };
   };
-  HasSession: {
+  SendTestRequest: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SendTestRequestRequest"];
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_boolean.string_"];
+          "application/json": components["schemas"]["SendTestRequestResponse"];
         };
       };
     };
@@ -6442,6 +6811,21 @@ export interface operations {
       };
     };
   };
+  GetProviders: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProviderQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderMetric-Array.string_"];
+        };
+      };
+    };
+  };
   GetProperties: {
     requestBody: {
       content: {
@@ -6453,6 +6837,60 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Property-Array.string_"];
+        };
+      };
+    };
+  };
+  HideProperty: {
+    requestBody: {
+      content: {
+        "application/json": {
+          key: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | components["schemas"]["ResultSuccess_string_"] | {
+            error: unknown;
+            data: {
+              ok: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  GetHiddenProperties: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Property-Array.string_"];
+        };
+      };
+    };
+  };
+  RestoreProperty: {
+    requestBody: {
+      content: {
+        "application/json": {
+          key: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | components["schemas"]["ResultSuccess_string_"] | {
+            error: unknown;
+            data: {
+              ok: boolean;
+            };
+          };
         };
       };
     };
@@ -6640,6 +7078,16 @@ export interface operations {
       };
     };
   };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["OAIModelsResponse"];
+        };
+      };
+    };
+  };
   GetModelComparison: {
     requestBody: {
       content: {
@@ -6651,16 +7099,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Model-Array.string_"];
-        };
-      };
-    };
-  };
-  GetModels: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };

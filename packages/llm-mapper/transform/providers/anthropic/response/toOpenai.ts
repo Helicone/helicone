@@ -36,7 +36,8 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
   const anthropicUsage = response.usage;
   const cachedTokens = anthropicUsage.cache_read_input_tokens ?? 0;
   const cacheWriteTokens = anthropicUsage.cache_creation_input_tokens ?? 0;
-  const webSearchRequests = anthropicUsage.server_tool_use?.web_search_requests ?? 0;
+  const webSearchRequests =
+    anthropicUsage.server_tool_use?.web_search_requests ?? 0;
 
   return {
     id: response.id,
@@ -95,7 +96,8 @@ function buildContentAndAnnotations(textBlocks: AnthropicContentBlock[]): {
     const blockStartIndex = fullContent.length;
 
     // Convert Anthropic citations to OpenAI annotations
-    if (block.citations && block.citations.length > 0) {
+    // Only process if citations is an array (web search results), not a config object (document)
+    if (block.citations && Array.isArray(block.citations) && block.citations.length > 0) {
       // For each citation, find where the cited text appears in this block
       for (const citation of block.citations) {
         // The cited_text is what was quoted from the source

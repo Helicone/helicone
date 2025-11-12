@@ -1,4 +1,4 @@
-import { HeliconeChatCreateParams } from "@helicone-package/prompts/types";
+import { HeliconePromptParams } from "@helicone-package/prompts/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
 import { err, ok, Result } from "../util/results";
@@ -7,7 +7,7 @@ export class PromptStore {
   constructor(private supabaseClient: SupabaseClient<Database>) {}
 
   async getPromptVersionId(
-    params: HeliconeChatCreateParams,
+    params: HeliconePromptParams,
     orgId: string
   ): Promise<Result<string, string>> {
     const { prompt_id, version_id, environment } = params;

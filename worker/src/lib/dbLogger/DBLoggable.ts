@@ -37,7 +37,7 @@ import {
   ValidRequestBody,
 } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
-import { ResponseFormat } from "@helicone-package/cost/models/types";
+import { BodyMappingType } from "@helicone-package/cost/models/types";
 
 export interface DBLoggableProps {
   response: {
@@ -100,6 +100,29 @@ export interface AuthParams {
     allowNegativeBalance: boolean;
     creditLimit: number;
   };
+}
+
+export interface ParsedResponseData {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  response: {
+    id: string;
+    created_at: string;
+    request: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    body: any;
+    status: number;
+    completion_tokens?: number;
+    prompt_tokens?: number;
+    time_to_first_token?: number | null;
+    model?: string;
+    delay_ms?: number;
+    prompt_cache_write_tokens?: number;
+    prompt_cache_read_tokens?: number;
+    prompt_audio_tokens?: number;
+    completion_audio_tokens?: number;
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body: any;
 }
 
 export function dbLoggableRequestFromProxyRequest(
@@ -448,14 +471,9 @@ export class DBLoggable {
     }
   }
 
-  async parseRawResponse(rawResponse: string): Promise<
-    Result<
-      {
-        response: Database["public"]["Tables"]["response"]["Insert"];
-      },
-      string
-    >
-  > {
+  async parseRawResponse(
+    rawResponse: string
+  ): Promise<Result<{ response: ParsedResponseData["response"] }, string>> {
     try {
       const parsedData = await withTimeout(
         this.parseRawResponseInternal(rawResponse),
@@ -470,7 +488,9 @@ export class DBLoggable {
     }
   }
 
-  private async parseRawResponseInternal(rawResponse: string) {
+  private async parseRawResponseInternal(
+    rawResponse: string
+  ): Promise<ParsedResponseData> {
     const endTime = this.timing.endTime ?? new Date();
     const delay_ms = endTime.getTime() - this.timing.startTime.getTime();
     const timeToFirstToken = this.request.isStream
@@ -587,7 +607,6 @@ export class DBLoggable {
       supabase: SupabaseClient<Database>; // TODO : Deprecate
       dbWrapper: DBWrapper;
       clickhouse: ClickhouseClientWrapper;
-      queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
       producer: HeliconeProducer;
     },
@@ -647,7 +666,6 @@ export class DBLoggable {
       supabase: SupabaseClient<Database>; // TODO : Deprecate
       dbWrapper: DBWrapper;
       clickhouse: ClickhouseClientWrapper;
-      queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
       producer: HeliconeProducer;
     },
@@ -686,19 +704,29 @@ export class DBLoggable {
         const isAIGateway = this.request.attempt?.endpoint;
 
         if (isAIGateway) {
-          try {
-            openAIResponse = await normalizeAIGatewayResponse({
-              responseText: providerResponse,
-              isStream: this.request.isStream,
-              provider: this.request.attempt?.endpoint.provider ?? "openai",
-              providerModelId:
-                this.request.attempt?.endpoint.providerModelId ?? "",
-              responseFormat:
-                this.request.attempt?.endpoint.modelConfig.responseFormat ??
-                "OPENAI",
-            });
-          } catch (e) {
-            console.error("Failed to normalize AI Gateway response:", e);
+          const responseStatus = await this.response.status();
+          if (responseStatus < 400) {
+            try {
+              const bodyMapping = this.request.attempt?.endpoint.userConfig?.gatewayMapping;
+
+              // Normalize response and convert to user's requested format (OPENAI or RESPONSES)
+              openAIResponse = await normalizeAIGatewayResponse({
+                responseText: providerResponse,
+                isStream: this.request.isStream,
+                provider: this.request.attempt?.endpoint.provider ?? "openai",
+                providerModelId:
+                  this.request.attempt?.endpoint.providerModelId ?? "",
+                responseFormat:
+                  this.request.attempt?.endpoint.modelConfig.responseFormat ??
+                  "OPENAI",
+                bodyMapping: bodyMapping ?? "OPENAI",
+              });
+            } catch (e) {
+              console.error("Failed to normalize AI Gateway response:", e);
+              openAIResponse = providerResponse;
+            }
+          } else {
+            openAIResponse = providerResponse;
           }
         }
 
@@ -735,18 +763,15 @@ export class DBLoggable {
 
     let gatewayProvider: ModelProviderName | undefined;
     let gatewayModel: string | undefined;
-    let gatewayResponseFormat: ResponseFormat | undefined;
-    let gatewayEndpointVersion: string | undefined;
+    let aiGatewayBodyMapping: BodyMappingType | undefined;
     if (this.request.attempt?.source && this.request.attempt?.endpoint) {
-      const endpoint = this.request.attempt?.endpoint;
       const sourceParts = this.request.attempt?.source.split("/");
       const model = sourceParts[0];
       const provider = sourceParts[1];
 
       gatewayProvider = provider as ModelProviderName;
       gatewayModel = model as string;
-      gatewayResponseFormat = endpoint.modelConfig.responseFormat ?? "OPENAI";
-      gatewayEndpointVersion = endpoint.modelConfig.version;
+      aiGatewayBodyMapping = this.request.attempt?.endpoint.userConfig?.gatewayMapping ?? "OPENAI";
     }
 
     const kafkaMessage: MessageData = {
@@ -772,9 +797,8 @@ export class DBLoggable {
         gatewayModel: gatewayModel ?? undefined,
         providerModelId:
           this.request.attempt?.endpoint.providerModelId ?? undefined,
-        gatewayResponseFormat: gatewayResponseFormat ?? undefined,
         stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
-        gatewayEndpointVersion: gatewayEndpointVersion ?? undefined,
+        aiGatewayBodyMapping: aiGatewayBodyMapping ?? undefined,
       },
       log: {
         request: {

@@ -26,7 +26,8 @@ export const AUTHORS = [
   "moonshotai",
   "perplexity",
   "alibaba",
-  "zai"
+  "zai",
+  "baidu",
 ] as const;
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
@@ -49,12 +50,14 @@ export type Tokenizer =
   | "Llama4"
   | "Gemini"
   | "Mistral"
+  | "MoonshotAI"
   | "Qwen"
   | "DeepSeek"
   | "Cohere"
   | "Grok"
   | "Tekken"
-  | "Zai";
+  | "Zai"
+  | "Baidu";
 
 export type StandardParameter =
   | "max_tokens"
@@ -83,7 +86,8 @@ export type StandardParameter =
   | "logprobs"
   | "top_logprobs"
   | "structured_outputs"
-  | "verbosity";
+  | "verbosity"
+  | "n";
 
 export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   max_tokens: "Max Tokens",
@@ -113,6 +117,7 @@ export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   top_logprobs: "Top Log Probs",
   structured_outputs: "Structured Outputs",
   verbosity: "Verbosity",
+  n: "Number of Completions",
 };
 
 export interface ModelPricing {
@@ -181,6 +186,8 @@ export interface WebSearchPlugin extends BasePlugin<"web"> {
 
 export type Plugin = WebSearchPlugin; // Add more with | as we add plugin types
 
+export type BodyMappingType = "OPENAI" | "NO_MAPPING" | "RESPONSES";
+
 export interface ModelProviderConfig extends BaseConfig {
   providerModelId: string;
   provider: ModelProviderName;
@@ -191,8 +198,10 @@ export interface ModelProviderConfig extends BaseConfig {
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;
   priority?: number;
-  quantization?: "fp4" | "fp8" | "bf16";
+  quantization?: "fp4" | "fp8" | "fp16" | "bf16";
   responseFormat?: ResponseFormat;
+  requireExplicitRouting?: boolean;
+  providerModelIdAliases?: string[];
 }
 
 export interface EndpointConfig extends UserEndpointConfig {
@@ -208,6 +217,7 @@ export interface EndpointConfig extends UserEndpointConfig {
 
 export interface RequestParams {
   isStreaming?: boolean;
+  bodyMapping?: BodyMappingType;
 }
 
 export interface Endpoint extends BaseConfig {
@@ -229,8 +239,9 @@ export interface UserEndpointConfig {
   resourceName?: string;
   apiVersion?: string; // Azure OpenAI
   crossRegion?: boolean;
-  gatewayMapping?: "OPENAI" | "NO_MAPPING";
+  gatewayMapping?: BodyMappingType;
   modelName?: string;
+  heliconeModelId?: string; // Azure OpenAI
 }
 
 export interface ModelSpec {
@@ -244,7 +255,7 @@ export interface AuthContext {
   apiKey?: string;
   secretKey?: string;
   orgId?: string;
-  bodyMapping?: "OPENAI" | "NO_MAPPING";
+  bodyMapping?: BodyMappingType;
   requestMethod?: string;
   requestUrl?: string;
   requestBody?: string;
@@ -256,6 +267,11 @@ export interface AuthResult {
 
 export interface RequestBodyContext {
   parsedBody: any;
-  bodyMapping: "OPENAI" | "NO_MAPPING";
-  toAnthropic: (body: any, providerModelId?: string) => any;
+  bodyMapping: BodyMappingType;
+  toAnthropic: (
+    body: any,
+    providerModelId?: string,
+    options?: { includeCacheBreakpoints?: boolean }
+  ) => any;
+  toChatCompletions: (body: any) => any;
 }

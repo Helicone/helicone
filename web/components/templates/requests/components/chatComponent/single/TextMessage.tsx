@@ -115,7 +115,9 @@ export default function TextMessage({
       }
       text={
         typeof displayContent === "string"
-          ? displayContent
+          ? displayReasoning && !displayContent
+            ? displayReasoning
+            : displayContent
           : JSON.stringify(displayContent)
       }
       disabled={chatMode !== "PLAYGROUND_INPUT"}
@@ -123,10 +125,10 @@ export default function TextMessage({
   ) : (
     <>
       {displayReasoning && !displayContent && (
-        <div className="border-l-2 border-l-muted-foreground bg-muted py-2 pl-2 text-sm text-slate-400 dark:text-slate-700">
-          <div className="flex animate-pulse items-center gap-2">
+        <div className="border-l-4 border-muted-foreground/30 bg-muted py-2 pl-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
             <BrainIcon className="h-4 w-4" />
-            <span className="font-medium">Thinking...</span>
+            <span className="font-medium">Reasoning</span>
           </div>
           <ReactMarkdown
             components={markdownComponents}
@@ -145,7 +147,10 @@ export default function TextMessage({
             {displayContent}
           </ReactMarkdown>
           {annotations && annotations.length > 0 && (
-            <CitationAnnotations annotations={annotations} showAnnotations={showAnnotations} />
+            <CitationAnnotations
+              annotations={annotations}
+              showAnnotations={showAnnotations}
+            />
           )}
         </>
       ) : !displayReasoning ? (
