@@ -31,14 +31,14 @@ interface WalletAnalyticsChartsProps {
 const depositsChartConfig = {
   amount: {
     label: "Deposits",
-    color: "rgb(38, 98, 217)", // chart1 color
+    color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
 
 const spendChartConfig = {
   amount: {
     label: "Spend",
-    color: "rgb(226, 54, 112)", // chart2 color
+    color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig;
 

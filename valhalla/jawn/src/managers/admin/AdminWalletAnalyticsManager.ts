@@ -53,7 +53,6 @@ export class AdminWalletAnalyticsManager extends BaseManager {
         spend: spendResult.data || [],
       });
     } catch (error) {
-      console.error("Error fetching time-series data:", error);
       return err(`Failed to fetch time-series data: ${error}`);
     }
   }
@@ -72,9 +71,23 @@ export class AdminWalletAnalyticsManager extends BaseManager {
       const startEpoch = Math.floor(startDate.getTime() / 1000);
       const endEpoch = Math.floor(endDate.getTime() / 1000);
 
+      // Validate granularity against whitelist to prevent SQL injection
+      const allowedGranularities: Record<TimeGranularity, string> = {
+        minute: "minute",
+        hour: "hour", 
+        day: "day",
+        week: "week",
+        month: "month",
+      };
+
+      const validGranularity = allowedGranularities[granularity];
+      if (!validGranularity) {
+        return err(`Invalid granularity: ${granularity}`);
+      }
+
       const query = `
         SELECT
-          DATE_TRUNC('${granularity}', TO_TIMESTAMP(created)) as period_timestamp,
+          DATE_TRUNC('${validGranularity}', TO_TIMESTAMP(created)) as period_timestamp,
           COALESCE(SUM(amount_received), 0) as total_amount
         FROM stripe.payment_intents
         WHERE
@@ -105,7 +118,6 @@ export class AdminWalletAnalyticsManager extends BaseManager {
 
       return ok(deposits);
     } catch (error) {
-      console.error("Error fetching deposits time-series:", error);
       return err(`Error fetching deposits: ${error}`);
     }
   }
@@ -161,7 +173,6 @@ export class AdminWalletAnalyticsManager extends BaseManager {
 
       return ok(spend);
     } catch (error) {
-      console.error("Error fetching spend time-series:", error);
       return err(`Error fetching spend: ${error}`);
     }
   }

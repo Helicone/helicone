@@ -143,25 +143,12 @@ export default function AdminWallet() {
 
       if (error) throw error;
 
-      console.log("Raw API response:", data);
-
       // The API returns { data: { organizations: [...], summary: {...} } }
       // But the jawn client might unwrap it differently
       const responseData = (data as any).data || data;
       const orgs = responseData.organizations || [];
       const offset = pageParam as number;
       const paginatedOrgs = orgs.slice(offset, offset + limit);
-
-      console.log(
-        "Query function - Response data:",
-        responseData,
-        "Total orgs:",
-        orgs.length,
-        "Offset:",
-        offset,
-        "Paginated:",
-        paginatedOrgs.length,
-      );
 
       return {
         data: {
@@ -185,14 +172,6 @@ export default function AdminWallet() {
   const allOrganizations =
     data?.pages.flatMap((page: any) => page.data?.organizations || []) || [];
 
-  console.log(
-    "Pages:",
-    data?.pages.length,
-    "All organizations:",
-    allOrganizations.length,
-    "First page:",
-    data?.pages[0],
-  );
 
   // Fetch wallet details (lazy loaded when org is selected)
   const {
@@ -215,15 +194,6 @@ export default function AdminWallet() {
   );
 
   const walletDetails = (walletDetailsResponse as any)?.data;
-
-  console.log(
-    "Selected org:",
-    selectedOrg,
-    "Wallet loading:",
-    walletLoading,
-    "Wallet details:",
-    walletDetails,
-  );
 
   // Mutation for modifying wallet balance
   const modifyBalanceMutation = $JAWN_API.useMutation(
