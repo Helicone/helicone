@@ -1063,8 +1063,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.cerebras.ai/v1/chat/completions",
                 response: "success",
-                model: "openai/gpt-oss-120b",
-                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                model: "gpt-oss-120b",
+                data: createOpenAIMockResponse("gpt-oss-120b"),
                 expects: cerebrasAuthExpectations,
               },
             ],
@@ -1104,8 +1104,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.cerebras.ai/v1/chat/completions",
                 response: "success",
-                model: "openai/gpt-oss-120b",
-                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                model: "gpt-oss-120b",
+                data: createOpenAIMockResponse("gpt-oss-120b"),
                 expects: {
                   ...cerebrasAuthExpectations,
                   bodyContains: [
@@ -1140,8 +1140,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.cerebras.ai/v1/chat/completions",
                 response: "success",
-                model: "openai/gpt-oss-120b",
-                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                model: "gpt-oss-120b",
+                data: createOpenAIMockResponse("gpt-oss-120b"),
                 expects: {
                   ...cerebrasAuthExpectations,
                   bodyContains: [
@@ -1181,8 +1181,8 @@ describe("OpenAI Registry Tests", () => {
               {
                 url: "https://api.cerebras.ai/v1/chat/completions",
                 response: "success",
-                model: "openai/gpt-oss-120b",
-                data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+                model: "gpt-oss-120b",
+                data: createOpenAIMockResponse("gpt-oss-120b"),
                 expects: {
                   ...cerebrasAuthExpectations,
                   bodyContains: [
@@ -1821,8 +1821,8 @@ describe("OpenAI Registry Tests", () => {
             {
               url: "https://api.cerebras.ai/v1/chat/completions",
               response: "success",
-              model: "openai/gpt-oss-120b",
-              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              model: "gpt-oss-120b",
+              data: createOpenAIMockResponse("gpt-oss-120b"),
               expects: cerebrasAuthExpectations,
               customVerify: (_call) => {
                 // Verify that the URL is correctly constructed
@@ -1843,8 +1843,8 @@ describe("OpenAI Registry Tests", () => {
             {
               url: "https://api.cerebras.ai/v1/chat/completions",
               response: "success",
-              model: "openai/gpt-oss-120b", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              model: "gpt-oss-120b", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("gpt-oss-120b"),
               expects: cerebrasAuthExpectations,
             },
           ],
@@ -1863,8 +1863,8 @@ describe("OpenAI Registry Tests", () => {
             {
               url: "https://api.cerebras.ai/v1/chat/completions",
               response: "success",
-              model: "openai/gpt-oss-120b",
-              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              model: "gpt-oss-120b",
+              data: createOpenAIMockResponse("gpt-oss-120b"),
               expects: {
                 ...cerebrasAuthExpectations,
               },
@@ -1897,8 +1897,8 @@ describe("OpenAI Registry Tests", () => {
             {
               url: "https://api.cerebras.ai/v1/chat/completions",
               response: "success",
-              model: "openai/gpt-oss-120b",
-              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              model: "gpt-oss-120b",
+              data: createOpenAIMockResponse("gpt-oss-120b"),
               expects: {
                 ...cerebrasAuthExpectations,
                 bodyContains: [

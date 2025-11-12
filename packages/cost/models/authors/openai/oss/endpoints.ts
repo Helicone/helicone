@@ -229,7 +229,7 @@ export const endpoints = {
     },
   },
   "gpt-oss-120b:cerebras": {
-    providerModelId: "openai/gpt-oss-120b",
+    providerModelId: "gpt-oss-120b",
     provider: "cerebras",
     author: "openai",
     pricing: [

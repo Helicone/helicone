@@ -4033,7 +4033,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 131072,
       "crossRegion": false,
       "maxTokens": 40000,
-      "modelId": "openai/gpt-oss-120b",
+      "modelId": "gpt-oss-120b",
       "parameters": [
         "logprobs",
         "max_tokens",
