@@ -205,23 +205,12 @@ export class InAppThreadsManager extends BaseManager {
       // Check if this was created directly escalated (no prior conversation)
       const wasDirectlyEscalated =
         thread.metadata?.createdDirectlyEscalated === true;
-      const headerText = wasDirectlyEscalated
-        ? "🎯 Direct Support"
-        : "🚨 Escalation";
 
       const text = wasDirectlyEscalated
         ? `🎯 Direct support request`
         : `🚨 Escalation from user`;
 
       const blocks = [
-        {
-          type: "header",
-          text: {
-            type: "plain_text",
-            text: headerText,
-            emoji: true,
-          },
-        },
         {
           type: "section",
           text: {
