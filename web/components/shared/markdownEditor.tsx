@@ -100,6 +100,7 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
           language: "markdown",
           scrollBeyondLastLine: false, // Prevents extra space at bottom
           automaticLayout: true, // Enables auto-resizing
+          dragAndDrop: true, // Enables drag and drop selection
           scrollbar: {
             alwaysConsumeMouseWheel: false, // Prevents scroll lock - allows scroll to bubble up to parent
             handleMouseWheel: true,
