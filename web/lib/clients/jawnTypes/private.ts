@@ -661,6 +661,9 @@ export interface paths {
   "/v1/admin/wallet/{orgId}/disallow-list": {
     delete: operations["RemoveFromDisallowList"];
   };
+  "/v1/admin/wallet/analytics/time-series": {
+    post: operations["GetTimeSeriesData"];
+  };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
@@ -16355,6 +16358,21 @@ Json: JsonObject;
       error: null;
     };
     "Result__allowNegativeBalance-boolean--creditLimit-number_.string_": components["schemas"]["ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"] | components["schemas"]["ResultError_string_"];
+    TimeSeriesDataPoint: {
+      timestamp: string;
+      /** Format: double */
+      amount: number;
+    };
+    TimeSeriesResponse: {
+      deposits: components["schemas"]["TimeSeriesDataPoint"][];
+      spend: components["schemas"]["TimeSeriesDataPoint"][];
+    };
+    ResultSuccess_TimeSeriesResponse_: {
+      data: components["schemas"]["TimeSeriesResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TimeSeriesResponse.string_": components["schemas"]["ResultSuccess_TimeSeriesResponse_"] | components["schemas"]["ResultError_string_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -20344,6 +20362,23 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_WalletState.string_"];
+        };
+      };
+    };
+  };
+  GetTimeSeriesData: {
+    parameters: {
+      query: {
+        startDate: string;
+        endDate: string;
+        groupBy?: "minute" | "hour" | "day" | "week" | "month";
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TimeSeriesResponse.string_"];
         };
       };
     };

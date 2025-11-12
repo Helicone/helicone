@@ -14820,6 +14820,38 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TimeSeriesDataPoint": {
+        "dataType": "refObject",
+        "properties": {
+            "timestamp": {"dataType":"string","required":true},
+            "amount": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TimeSeriesResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "deposits": {"dataType":"array","array":{"dataType":"refObject","ref":"TimeSeriesDataPoint"},"required":true},
+            "spend": {"dataType":"array","array":{"dataType":"refObject","ref":"TimeSeriesDataPoint"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_TimeSeriesResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"TimeSeriesResponse","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_TimeSeriesResponse.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_TimeSeriesResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ConvertToWavResponse": {
         "dataType": "refObject",
         "properties": {
@@ -21962,6 +21994,40 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'removeFromDisallowList',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAdminWalletController_getTimeSeriesData: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                startDate: {"in":"query","name":"startDate","required":true,"dataType":"string"},
+                endDate: {"in":"query","name":"endDate","required":true,"dataType":"string"},
+                groupBy: {"in":"query","name":"groupBy","dataType":"union","subSchemas":[{"dataType":"enum","enums":["minute"]},{"dataType":"enum","enums":["hour"]},{"dataType":"enum","enums":["day"]},{"dataType":"enum","enums":["week"]},{"dataType":"enum","enums":["month"]}]},
+        };
+        app.post('/v1/admin/wallet/analytics/time-series',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController)),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController.prototype.getTimeSeriesData)),
+
+            async function AdminWalletController_getTimeSeriesData(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminWalletController_getTimeSeriesData, request, response });
+
+                const controller = new AdminWalletController();
+
+              await templateService.apiHandler({
+                methodName: 'getTimeSeriesData',
                 controller,
                 response,
                 next,

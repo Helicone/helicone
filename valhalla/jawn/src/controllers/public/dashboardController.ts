@@ -9,7 +9,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Result } from "../../packages/common/result";
+import { err, Result } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import {
   type DataOverTimeRequest,
