@@ -12,9 +12,11 @@ import {
   OrExpression,
 } from "@helicone-package/filters/types";
 
-interface FilterASTEditorProps { }
+interface FilterASTEditorProps {
+  showCurlButton?: boolean;
+}
 
-export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({ }) => {
+export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({ showCurlButton = false }) => {
   const { store: filterStore, helpers } = useFilterAST();
 
   return (
@@ -61,6 +63,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({ }) => {
             group={filterStore.filter as AndExpression | OrExpression}
             path={[]}
             isRoot={true}
+            showCurlButton={showCurlButton}
           />
         ) : (
           <Button
