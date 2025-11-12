@@ -206,16 +206,12 @@ export class InAppThreadsManager extends BaseManager {
       const wasDirectlyEscalated =
         thread.metadata?.createdDirectlyEscalated === true;
       const headerText = wasDirectlyEscalated
-        ? "🎯 Direct Support Request"
-        : "🚨 Customer Support Escalation";
-
-      const conversationText = wasDirectlyEscalated
-        ? "*Status:* Customer clicked 'Support' without prior conversation - they need direct help"
-        : "*Recent Conversation:*\n```" + recentMessages + "```";
+        ? "🎯 Direct Support"
+        : "🚨 Escalation";
 
       const text = wasDirectlyEscalated
-        ? `🎯 New direct support request`
-        : `🚨 New escalation from user`;
+        ? `🎯 Direct support request`
+        : `🚨 Escalation from user`;
 
       const blocks = [
         {
@@ -230,35 +226,20 @@ export class InAppThreadsManager extends BaseManager {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `*Organization:* ${this.authParams.organizationId}\n*User:* ${this.authParams.userId || "Unknown"}\n*User Email:* ${userEmail || "Unknown"}\n*Session:* \`${sessionId}\`\n*Current Page:* ${thread.metadata?.currentPage || "Unknown"}\n*Time:* ${new Date().toLocaleString()}`,
+            text: `*Org:* ${this.authParams.organizationId} | *Email:* ${userEmail || "Unknown"} | *Page:* ${thread.metadata?.currentPage || "Unknown"}\n<${adminLink}|View Thread>`,
           },
         },
-        {
-          type: "divider",
-        },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: conversationText,
-          },
-        },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: `<${adminLink}|View Full Thread>`,
-          },
-        },
-        {
-          type: "context",
-          elements: [
-            {
-              type: "mrkdwn",
-              text: "💡 Reply in this thread to respond to the customer. Messages will sync back to their chat.",
-            },
-          ],
-        },
+        ...(!wasDirectlyEscalated
+          ? [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: "```" + recentMessages + "```",
+                },
+              },
+            ]
+          : []),
       ];
 
       const threadTs = await slackService.postMessage(text, blocks);
