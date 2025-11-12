@@ -376,7 +376,7 @@ export class AlertManager {
       },
       body: JSON.stringify({
         from: "Helicone Alert <alerts@helicone.ai>",
-        to: ["connor@helicone.ai"], // alertStatusUpdate.alert.emails,
+        to: alertStatusUpdate.alert.emails,
         html: html,
         subject: subject,
         text: text,
