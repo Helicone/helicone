@@ -31,23 +31,16 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
           });
         } else {
           // handles the claude code integration response which has input_tokens at the root
-          // (we handle output tokens just in case other similar cases arise)
-          const inputTokens = parsedResponseBody.input_tokens ?? 0;
-          const outputTokens = parsedResponseBody.output_tokens ?? 0;
-          const cacheWriteTokens =
-            parsedResponseBody.cache_creation_input_tokens ?? 0;
-          const cacheReadTokens =
-            parsedResponseBody.cache_read_input_tokens ?? 0;
+          // Example: { input_tokens: 12470, context_management: { original_input_tokens: 12800 } }
 
           return ok({
             processedBody: parsedResponseBody,
             usage: {
-              totalTokens:
-                inputTokens + outputTokens + cacheWriteTokens + cacheReadTokens,
-              promptTokens: inputTokens,
-              promptCacheWriteTokens: cacheWriteTokens,
-              promptCacheReadTokens: cacheReadTokens,
-              completionTokens: outputTokens,
+              totalTokens: parsedResponseBody.input_tokens ?? 0,
+              promptTokens: parsedResponseBody.input_tokens ?? 0,
+              promptCacheWriteTokens: 0,
+              promptCacheReadTokens: 0,
+              completionTokens: 0,
             },
           });
         }
