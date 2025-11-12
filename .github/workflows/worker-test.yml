@@ -5,9 +5,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'worker/**'
+      - 'packages/**'
   pull_request:
     branches:
       - main
+    paths:
+      - 'worker/**'
+      - 'packages/**'
 
 jobs:
   worker-ai-gateway-tests:
