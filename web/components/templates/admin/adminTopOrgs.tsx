@@ -1,8 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  Card,
-  LineChart,
-} from "@tremor/react";
+import { LineChart } from "@tremor/react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { useOrg } from "../../layout/org/organizationContext";
@@ -11,7 +8,6 @@ import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import { useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -277,10 +273,10 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:gap-6">
-        <div className="flex flex-col gap-2 flex-1">
+        <div className="flex flex-1 flex-col gap-2">
           <Label className="flex items-center justify-between">
             <span className="font-semibold">Time Range</span>
-            <Small className="text-muted-foreground font-normal">
+            <Small className="font-normal text-muted-foreground">
               Grouped by: {getGroupBy(timeRange)}
             </Small>
           </Label>
@@ -301,7 +297,7 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
           </Select>
         </div>
 
-        <div className="flex flex-col gap-2 flex-1 md:max-w-xs">
+        <div className="flex flex-1 flex-col gap-2 md:max-w-xs">
           <Label className="font-semibold">Number of Organizations</Label>
           <Select
             value={limit.toString()}
@@ -375,11 +371,13 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
                         backgroundColor: `hsl(${(index * 360) / 14}, 70%, 50%)`,
                       }}
                     />
-                    <span className={`text-sm ${
-                      !selectedOrgs.includes(org.organization_id)
-                        ? "text-muted-foreground"
-                        : "text-foreground"
-                    }`}>
+                    <span
+                      className={`text-sm ${
+                        !selectedOrgs.includes(org.organization_id)
+                          ? "text-muted-foreground"
+                          : "text-foreground"
+                      }`}
+                    >
                       {org.organization_name}
                     </span>
                   </label>
@@ -446,7 +444,7 @@ const AdminTopOrgs = (props: AdminTopOrgsProps) => {
                         ),
                       )}
                     </P>
-                    <Small className="text-muted-foreground truncate">
+                    <Small className="truncate text-muted-foreground">
                       {org.organization_id}
                     </Small>
                   </div>

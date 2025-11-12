@@ -64,7 +64,11 @@ export const EditAlertModal = (props: EditAlertModalProps) => {
   };
 
   return (
-    <ThemedModal open={open} setOpen={setOpen} className="max-h-[90vh] w-fit max-w-[90vw] overflow-visible">
+    <ThemedModal
+      open={open}
+      setOpen={setOpen}
+      className="max-h-[90vh] w-fit max-w-[90vw] overflow-visible"
+    >
       <AlertForm
         handleSubmit={(alertReq) => handleEditAlert(alertReq)}
         onCancel={() => setOpen(false)}
@@ -120,7 +124,11 @@ export const CreateAlertModal = (props: CreateAlertModalProps) => {
   };
 
   return (
-    <ThemedModal open={open} setOpen={setOpen} className="max-h-[90vh] w-fit max-w-[90vw] overflow-visible">
+    <ThemedModal
+      open={open}
+      setOpen={setOpen}
+      className="max-h-[90vh] w-fit max-w-[90vw] overflow-visible"
+    >
       <AlertForm
         handleSubmit={(alertReq) => handleCreateAlert(alertReq)}
         onCancel={() => setOpen(false)}

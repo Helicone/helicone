@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Small } from "@/components/ui/typography";
-import { formatCurrency } from "@/lib/uiUtils";
 import {
   Tooltip,
   TooltipContent,
@@ -10,7 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface PropertyTopCostsProps {
+interface PropertyTopRequestsProps {
   property: string;
   timeFilter: {
     start: Date;
@@ -32,12 +31,22 @@ const BAR_COLORS = [
   "hsl(10, 100%, 55%)", // red
 ];
 
-const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
+const formatNumber = (num: number) => {
+  if (num === 0) return "0";
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toFixed(0);
+};
+
+const PropertyTopRequests = ({
+  property,
+  timeFilter,
+}: PropertyTopRequestsProps) => {
   const jawn = useJawnClient();
-  const topCosts = useQuery({
-    queryKey: ["topCosts", property, timeFilter?.start, timeFilter?.end],
+  const topRequests = useQuery({
+    queryKey: ["topRequests", property, timeFilter?.start, timeFilter?.end],
     queryFn: () =>
-      jawn.POST("/v1/property/{propertyKey}/top-costs/query", {
+      jawn.POST("/v1/property/{propertyKey}/top-requests/query", {
         params: {
           path: {
             propertyKey: property,
@@ -53,17 +62,17 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
     enabled: !!property,
   });
 
-  const chartData = topCosts.data?.data?.data || [];
+  const chartData = topRequests.data?.data?.data || [];
   const displayedData = chartData.filter((item: any) => item.value !== "Other");
-  const maxCost = Math.max(
-    ...displayedData.map((item: any) => Number(item.cost || 0)),
+  const maxRequests = Math.max(
+    ...displayedData.map((item: any) => Number(item.count || 0)),
   );
 
   if (!property) {
     return null;
   }
 
-  if (topCosts.isLoading) {
+  if (topRequests.isLoading) {
     return (
       <div className="h-[240px] space-y-2">
         <Skeleton className="h-8 w-full bg-muted" />
@@ -77,7 +86,9 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
   if (!chartData || chartData.length === 0) {
     return (
       <div className="flex h-[240px] items-center justify-center">
-        <Small className="text-muted-foreground">No cost data available</Small>
+        <Small className="text-muted-foreground">
+          No request data available
+        </Small>
       </div>
     );
   }
@@ -86,10 +97,10 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
     <TooltipProvider>
       <div className="h-[240px] w-full space-y-2 overflow-y-auto">
         {displayedData.map((item: any, index: number) => {
-          const percentage = (Number(item.cost) / maxCost) * 100;
+          const percentage = (Number(item.count) / maxRequests) * 100;
           return (
             <Tooltip key={index}>
-              <TooltipTrigger className="w-full">
+              <TooltipTrigger asChild>
                 <div className="relative h-8 w-full overflow-hidden rounded">
                   {/* Background bar */}
                   <div
@@ -106,7 +117,7 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
                       {item.value || "Empty"}
                     </span>
                     <span className="ml-3 shrink-0 text-sm font-medium tabular-nums text-slate-700 dark:text-slate-300">
-                      {formatCurrency(Number(item.cost), "USD", 4)}
+                      {formatNumber(Number(item.count))}
                     </span>
                   </div>
                 </div>
@@ -122,4 +133,4 @@ const PropertyTopCosts = ({ property, timeFilter }: PropertyTopCostsProps) => {
   );
 };
 
-export default PropertyTopCosts;
+export default PropertyTopRequests;

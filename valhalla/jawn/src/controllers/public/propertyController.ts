@@ -323,7 +323,7 @@ export class PropertyController extends Controller {
       }));
 
       // Get the total cost
-      const totalCost = totalRes.data?.[0]?.cost || 0;
+      const totalCost = +(totalRes.data?.[0]?.cost || 0);
 
       // Calculate the "other" category cost (total minus sum of top 10)
       const topCostsSum = topCosts.reduce((sum, item) => sum + item.cost, 0);
@@ -341,6 +341,103 @@ export class PropertyController extends Controller {
       }
 
       return topCosts;
+    });
+  }
+
+  @Post("{propertyKey}/top-requests/query")
+  public async getTopRequests(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() propertyKey: string,
+    @Body() requestBody: TimeFilterRequest
+  ) {
+    if (!propertyKey) {
+      throw new Error("Property key is required");
+    }
+
+    const builtFilter = await buildFilterWithAuthClickHouse({
+      org_id: request.authParams.organizationId,
+      argsAcc: [],
+      filter: {
+        left: {
+          request_response_rmt: {
+            request_created_at: {
+              gt: new Date(requestBody.timeFilter.start),
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            request_created_at: {
+              lt: new Date(requestBody.timeFilter.end),
+            },
+          },
+        },
+      },
+    });
+
+    const args = builtFilter.argsAcc.concat([propertyKey]);
+
+    const propertySQLKey = `{val_${args.length - 1} : String}`;
+
+    // Query to get the top 10 requests
+    const topQuery = `
+    SELECT
+      properties[${propertySQLKey}] as value,
+      count(*) as count
+    FROM request_response_rmt
+    WHERE (
+      ${builtFilter.filter}
+      AND properties[${propertySQLKey}] IS NOT NULL
+    )
+    GROUP BY properties[${propertySQLKey}]
+    ORDER BY count DESC
+    LIMIT 10
+    `;
+
+    // Query to get the total count for this property
+    const totalQuery = `
+    SELECT
+      count(*) as count
+    FROM request_response_rmt
+    WHERE (
+      ${builtFilter.filter}
+      AND properties[${propertySQLKey}] IS NOT NULL
+    )
+    `;
+
+    // Execute both queries
+    const [topRes, totalRes] = await Promise.all([
+      dbQueryClickhouse<{ value: string; count: number }>(topQuery, args),
+      dbQueryClickhouse<{ count: number }>(totalQuery, args),
+    ]);
+
+    return resultMap(topRes, (data) => {
+      // Calculate the sum of the top 10 counts
+      const topRequests = data.map((d) => ({
+        value: d.value,
+        count: +d.count,
+      }));
+
+      // Get the total count
+      const totalCount = +(totalRes.data?.[0]?.count || 0);
+
+      // Calculate the "other" category count (total minus sum of top 10)
+      const topRequestsSum = topRequests.reduce((sum, item) => sum + item.count, 0);
+      const otherCount = totalCount - topRequestsSum;
+
+      // Only add the "other" category if it has a positive count
+      if (otherCount > 0) {
+        return [
+          ...topRequests,
+          {
+            value: "Other",
+            count: otherCount,
+          },
+        ];
+      }
+
+      return topRequests;
     });
   }
 }

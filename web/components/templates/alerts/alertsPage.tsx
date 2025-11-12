@@ -53,7 +53,7 @@ const AlertsPage = () => {
     useAlertsPage(
       orgContext?.currentOrg?.id || "",
       historyCurrentPage - 1,
-      historyPageSize
+      historyPageSize,
     );
 
   const { data: slackChannelsData, isLoading: isLoadingSlackChannels } =
@@ -167,7 +167,11 @@ const AlertsPage = () => {
         <Header
           title="Alerts"
           rightActions={[
-            <FreeTierLimitWrapper key="create-alert" feature="alerts" itemCount={alertCount}>
+            <FreeTierLimitWrapper
+              key="create-alert"
+              feature="alerts"
+              itemCount={alertCount}
+            >
               <Button
                 variant="default"
                 size="sm"
@@ -188,197 +192,207 @@ const AlertsPage = () => {
           ]}
         />
 
-        <TabsContent value="alerts" className="flex-1 overflow-y-auto m-0">
-        {!canCreateAlert && (
-          <div className="border-b border-border p-4">
-            <FreeTierLimitBanner
-              feature="alerts"
-              itemCount={alertCount}
-              freeLimit={MAX_ALERTS}
-            />
-          </div>
-        )}
+        <TabsContent value="alerts" className="m-0 flex-1 overflow-y-auto">
+          {!canCreateAlert && (
+            <div className="border-b border-border p-4">
+              <FreeTierLimitBanner
+                feature="alerts"
+                itemCount={alertCount}
+                freeLimit={MAX_ALERTS}
+              />
+            </div>
+          )}
 
-        <div className="flex h-full flex-col border-b border-border">
-          <div className="flex-1 overflow-auto">
-            <SimpleTable
-              data={paginatedAlerts}
-              columns={[
-              {
-                key: undefined,
-                header: "Actions",
-                render: (alert) => (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="inline-flex items-center rounded-md bg-muted p-1.5 text-xs text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-30 transition-colors"
-                      onClick={() => {
-                        setEditAlertOpen(true);
-                        setSelectedAlert(alert);
-                      }}
-                    >
-                      <PencilIcon className="h-3 w-3" />
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex items-center rounded-md bg-destructive/10 p-1.5 text-xs text-destructive shadow-sm hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-30 transition-colors"
-                      onClick={() => {
-                        setDeleteAlertOpen(true);
-                        setSelectedAlert(alert);
-                      }}
-                    >
-                      <TrashIcon className="h-3 w-3" />
-                    </button>
-                  </div>
-                ),
-                sortable: false,
-                minSize: 100,
-              },
-              {
-                key: "name",
-                header: "Name",
-                render: (alert) => (
-                  <p className="text-xs font-semibold">{alert.name}</p>
-                ),
-                sortable: true,
-              },
-              {
-                key: "status",
-                header: "Status",
-                render: (alert) => (
-                  <AlertStatusPill
-                    status={alert.status as "resolved" | "triggered"}
-                    displayText={alert.status === "resolved" ? "Healthy" : "Triggered"}
-                  />
-                ),
-                sortable: true,
-              },
-              {
-                key: "created_at",
-                header: "Created",
-                render: (alert) => (
-                  <p className="text-xs text-muted-foreground">
-                    {getUSDate(new Date(alert.created_at || ""))}
-                  </p>
-                ),
-                sortable: true,
-              },
-              {
-                key: "metric",
-                header: "Metric",
-                render: (alert) => (
-                  <Badge variant="helicone">
-                    {formatMetric(alert.metric)}
-                  </Badge>
-                ),
-                sortable: true,
-              },
-              {
-                key: undefined,
-                header: "Aggregation",
-                render: (alert) => (
-                  <p className="text-xs">
-                    {formatAggregation(
-                      alert.metric,
-                      (alert as any).aggregation as AlertAggregation | null,
-                    )}
-                  </p>
-                ),
-                sortable: false,
-              },
-              {
-                key: "threshold",
-                header: "Threshold",
-                render: (alert) => (
-                  <p className="text-xs">
-                    {formatThreshold(alert.metric, alert.threshold)}
-                  </p>
-                ),
-                sortable: true,
-              },
-              {
-                key: undefined,
-                header: "Grouping",
-                render: (alert) => (
-                  <p className="text-xs">
-                    {(alert as any).grouping ? (alert as any).grouping : "—"}
-                  </p>
-                ),
-                sortable: false,
-              },
-              {
-                key: "time_window",
-                header: "Time Window",
-                render: (alert) => (
-                  <p className="text-xs">{formatTimeWindow(alert.time_window)}</p>
-                ),
-                sortable: true,
-              },
-              {
-                key: "minimum_request_count",
-                header: "Min Requests",
-                render: (alert) => (
-                  <p className="text-xs">{alert.minimum_request_count || 0}</p>
-                ),
-                sortable: true,
-              },
-              {
-                key: "filter",
-                header: "Filter",
-                render: (alert) => (
-                  <p className="text-xs">{alert.filter ? "Yes" : "No"}</p>
-                ),
-                sortable: false,
-              },
-              {
-                key: "emails",
-                header: "Emails",
-                render: (alert) => (
-                  <div className="flex text-xs">{alert.emails.join(", ")}</div>
-                ),
-                sortable: false,
-                minSize: 200,
-              },
-              {
-                key: "slack_channels",
-                header: "Slack Channels",
-                render: (alert) => (
-                  <div className="flex text-xs">
-                    {alert.slack_channels
-                      .map(
-                        (channel) =>
-                          slackChannels?.find(
-                            (slackChannel) => slackChannel.id === channel,
-                          )?.name,
-                      )
-                      .join(", ")}
-                  </div>
-                ),
-                sortable: false,
-                minSize: 200,
-              },
-            ]}
-            defaultSortKey="created_at"
-            defaultSortDirection="desc"
+          <div className="flex h-full flex-col border-b border-border">
+            <div className="flex-1 overflow-auto">
+              <SimpleTable
+                data={paginatedAlerts}
+                columns={[
+                  {
+                    key: undefined,
+                    header: "Actions",
+                    render: (alert) => (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="inline-flex items-center rounded-md bg-muted p-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-30"
+                          onClick={() => {
+                            setEditAlertOpen(true);
+                            setSelectedAlert(alert);
+                          }}
+                        >
+                          <PencilIcon className="h-3 w-3" />
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex items-center rounded-md bg-destructive/10 p-1.5 text-xs text-destructive shadow-sm transition-colors hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-30"
+                          onClick={() => {
+                            setDeleteAlertOpen(true);
+                            setSelectedAlert(alert);
+                          }}
+                        >
+                          <TrashIcon className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ),
+                    sortable: false,
+                    minSize: 100,
+                  },
+                  {
+                    key: "name",
+                    header: "Name",
+                    render: (alert) => (
+                      <p className="text-xs font-semibold">{alert.name}</p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "status",
+                    header: "Status",
+                    render: (alert) => (
+                      <AlertStatusPill
+                        status={alert.status as "resolved" | "triggered"}
+                        displayText={
+                          alert.status === "resolved" ? "Healthy" : "Triggered"
+                        }
+                      />
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "created_at",
+                    header: "Created",
+                    render: (alert) => (
+                      <p className="text-xs text-muted-foreground">
+                        {getUSDate(new Date(alert.created_at || ""))}
+                      </p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "metric",
+                    header: "Metric",
+                    render: (alert) => (
+                      <Badge variant="helicone">
+                        {formatMetric(alert.metric)}
+                      </Badge>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: undefined,
+                    header: "Aggregation",
+                    render: (alert) => (
+                      <p className="text-xs">
+                        {formatAggregation(
+                          alert.metric,
+                          (alert as any).aggregation as AlertAggregation | null,
+                        )}
+                      </p>
+                    ),
+                    sortable: false,
+                  },
+                  {
+                    key: "threshold",
+                    header: "Threshold",
+                    render: (alert) => (
+                      <p className="text-xs">
+                        {formatThreshold(alert.metric, alert.threshold)}
+                      </p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: undefined,
+                    header: "Grouping",
+                    render: (alert) => (
+                      <p className="text-xs">
+                        {(alert as any).grouping
+                          ? (alert as any).grouping
+                          : "—"}
+                      </p>
+                    ),
+                    sortable: false,
+                  },
+                  {
+                    key: "time_window",
+                    header: "Time Window",
+                    render: (alert) => (
+                      <p className="text-xs">
+                        {formatTimeWindow(alert.time_window)}
+                      </p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "minimum_request_count",
+                    header: "Min Requests",
+                    render: (alert) => (
+                      <p className="text-xs">
+                        {alert.minimum_request_count || 0}
+                      </p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "filter",
+                    header: "Filter",
+                    render: (alert) => (
+                      <p className="text-xs">{alert.filter ? "Yes" : "No"}</p>
+                    ),
+                    sortable: false,
+                  },
+                  {
+                    key: "emails",
+                    header: "Emails",
+                    render: (alert) => (
+                      <div className="flex text-xs">
+                        {alert.emails.join(", ")}
+                      </div>
+                    ),
+                    sortable: false,
+                    minSize: 200,
+                  },
+                  {
+                    key: "slack_channels",
+                    header: "Slack Channels",
+                    render: (alert) => (
+                      <div className="flex text-xs">
+                        {alert.slack_channels
+                          .map(
+                            (channel) =>
+                              slackChannels?.find(
+                                (slackChannel) => slackChannel.id === channel,
+                              )?.name,
+                          )
+                          .join(", ")}
+                      </div>
+                    ),
+                    sortable: false,
+                    minSize: 200,
+                  },
+                ]}
+                defaultSortKey="created_at"
+                defaultSortDirection="desc"
+              />
+            </div>
+            <TableFooter
+              currentPage={alertsCurrentPage}
+              pageSize={alertsPageSize}
+              count={alerts?.length || 0}
+              isCountLoading={isLoading}
+              onPageChange={(newPage) => setAlertsCurrentPage(newPage)}
+              onPageSizeChange={(newPageSize) => {
+                setAlertsPageSize(newPageSize);
+                setAlertsCurrentPage(1);
+              }}
+              pageSizeOptions={[10, 25, 50, 100]}
+              showCount={false}
             />
           </div>
-          <TableFooter
-            currentPage={alertsCurrentPage}
-            pageSize={alertsPageSize}
-            count={alerts?.length || 0}
-            isCountLoading={isLoading}
-            onPageChange={(newPage) => setAlertsCurrentPage(newPage)}
-            onPageSizeChange={(newPageSize) => {
-              setAlertsPageSize(newPageSize);
-              setAlertsCurrentPage(1);
-            }}
-            pageSizeOptions={[10, 25, 50, 100]}
-            showCount={false}
-          />
-        </div>
         </TabsContent>
 
-        <TabsContent value="history" className="flex-1 overflow-y-auto m-0">
+        <TabsContent value="history" className="m-0 flex-1 overflow-y-auto">
           {alertHistory.length === 0 ? (
             <div className="border-2 border-dashed border-border bg-muted p-8 text-center">
               <FileText
@@ -393,62 +407,66 @@ const AlertsPage = () => {
             <div className="flex h-full flex-col">
               <div className="flex-1 overflow-auto">
                 <SimpleTable
-                data={alertHistory ?? []}
-                columns={[
-                  {
-                    key: "status",
-                    header: "Status",
-                    render: (history) => (
-                      <AlertStatusPill status={history.status as "resolved" | "triggered"} />
-                    ),
-                    sortable: true,
-                  },
-                  {
-                    key: "alert_name",
-                    header: "Name",
-                    render: (history) => (
-                      <p className="text-xs font-semibold">{history.alert_name}</p>
-                    ),
-                    sortable: true,
-                  },
-                  {
-                    key: "alert_start_time",
-                    header: "Start Time",
-                    render: (history) => (
-                      <p className="text-xs">
-                        {getUSDate(new Date(history.alert_start_time))}
-                      </p>
-                    ),
-                    sortable: true,
-                  },
-                  {
-                    key: "alert_end_time",
-                    header: "End Time",
-                    render: (history) => (
-                      <p className="text-xs">
-                        {history.alert_end_time
-                          ? getUSDate(new Date(history.alert_end_time))
-                          : "—"}
-                      </p>
-                    ),
-                    sortable: true,
-                  },
-                  {
-                    key: "triggered_value",
-                    header: "Trigger",
-                    render: (history) => (
-                      <p className="text-xs">
-                        {formatThreshold(
-                          history.alert_metric,
-                          Number(history.triggered_value),
-                        )}
-                      </p>
-                    ),
-                    sortable: true,
-                  },
-                ]}
-                defaultSortKey="alert_start_time"
-                defaultSortDirection="desc"
+                  data={alertHistory ?? []}
+                  columns={[
+                    {
+                      key: "status",
+                      header: "Status",
+                      render: (history) => (
+                        <AlertStatusPill
+                          status={history.status as "resolved" | "triggered"}
+                        />
+                      ),
+                      sortable: true,
+                    },
+                    {
+                      key: "alert_name",
+                      header: "Name",
+                      render: (history) => (
+                        <p className="text-xs font-semibold">
+                          {history.alert_name}
+                        </p>
+                      ),
+                      sortable: true,
+                    },
+                    {
+                      key: "alert_start_time",
+                      header: "Start Time",
+                      render: (history) => (
+                        <p className="text-xs">
+                          {getUSDate(new Date(history.alert_start_time))}
+                        </p>
+                      ),
+                      sortable: true,
+                    },
+                    {
+                      key: "alert_end_time",
+                      header: "End Time",
+                      render: (history) => (
+                        <p className="text-xs">
+                          {history.alert_end_time
+                            ? getUSDate(new Date(history.alert_end_time))
+                            : "—"}
+                        </p>
+                      ),
+                      sortable: true,
+                    },
+                    {
+                      key: "triggered_value",
+                      header: "Trigger",
+                      render: (history) => (
+                        <p className="text-xs">
+                          {formatThreshold(
+                            history.alert_metric,
+                            Number(history.triggered_value),
+                          )}
+                        </p>
+                      ),
+                      sortable: true,
+                    },
+                  ]}
+                  defaultSortKey="alert_start_time"
+                  defaultSortDirection="desc"
                 />
               </div>
               <TableFooter

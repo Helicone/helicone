@@ -11,7 +11,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const adminCheck = await withAdminSSR(context);
 
   // If admin check failed (redirect), return that
-  if ('redirect' in adminCheck) {
+  if ("redirect" in adminCheck) {
     return adminCheck;
   }
 

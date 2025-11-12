@@ -132,7 +132,9 @@ export function Directory({
       <div className="border-b bg-primary/5 px-4 py-2">
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-primary"></div>
-          <span className="text-xs font-medium text-primary">Admin Queries</span>
+          <span className="text-xs font-medium text-primary">
+            Admin Queries
+          </span>
         </div>
       </div>
       {/* Tabs */}
