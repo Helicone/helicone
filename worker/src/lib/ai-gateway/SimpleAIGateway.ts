@@ -224,7 +224,7 @@ export class SimpleAIGateway {
       }
 
       // Check disallow list (only for PTB attempts)
-      if (attempt.source === "ptb" && this.isDisallowed(attempt, disallowList)) {
+      if (attempt.authType === "ptb" && this.isDisallowed(attempt, disallowList)) {
         errors.push({
           source: attempt.source,
           message:
