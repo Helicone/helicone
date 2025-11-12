@@ -133,35 +133,14 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
     }
 
     // Case 2: Claude “tool-only” token summary at the root
-    // Example: { input_tokens: 12470, output_tokens?: 0, cache_read_input_tokens?: 0, cache_creation?: { ... } }
-    if (
-      Object.prototype.hasOwnProperty.call(parsedResponse, "input_tokens") ||
-      Object.prototype.hasOwnProperty.call(parsedResponse, "output_tokens")
-    ) {
+    // Example: { input_tokens: 12470, context_management: { original_input_tokens: 12800 } }
+    if (Object.prototype.hasOwnProperty.call(parsedResponse, "input_tokens")) {
       const inputTokens = parsedResponse.input_tokens ?? 0;
-      const outputTokens = parsedResponse.output_tokens ?? 0;
-      const cacheReadInputTokens = parsedResponse.cache_read_input_tokens ?? 0;
-
-      const cacheCreation = parsedResponse.cache_creation || {};
-      const ephemeral5mTokens = cacheCreation.ephemeral_5m_input_tokens ?? 0;
-      const ephemeral1hTokens = cacheCreation.ephemeral_1h_input_tokens ?? 0;
 
       const modelUsage: ModelUsage = {
         input: inputTokens,
-        output: outputTokens,
+        output: 0,
       };
-
-      if (
-        cacheReadInputTokens > 0 ||
-        ephemeral5mTokens > 0 ||
-        ephemeral1hTokens > 0
-      ) {
-        modelUsage.cacheDetails = { cachedInput: cacheReadInputTokens };
-        if (ephemeral5mTokens > 0)
-          modelUsage.cacheDetails.write5m = ephemeral5mTokens;
-        if (ephemeral1hTokens > 0)
-          modelUsage.cacheDetails.write1h = ephemeral1hTokens;
-      }
 
       return modelUsage;
     }
