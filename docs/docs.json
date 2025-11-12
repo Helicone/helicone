@@ -293,6 +293,13 @@
             ]
           },
           {
+            "group": "Models",
+            "pages": [
+              "rest/ai-gateway/get-v1models",
+              "rest/models/get-v1public-model-registry-models"
+            ]
+          },
+          {
             "group": "Request",
             "pages": [
               "rest/request/post-v1requestquery-clickhouse",
@@ -305,7 +312,14 @@
               "rest/request/post-v1request-score"
             ]
           },
-
+          {
+            "group": "Session",
+            "pages": [
+              "rest/session/post-v1sessionquery",
+              "rest/session/post-v1sessionmetricsquery",
+              "rest/session/post-v1session-feedback"
+            ]
+          },
           {
             "group": "Prompts",
             "pages": [
@@ -365,21 +379,6 @@
           {
             "group": "Dashboard",
             "pages": ["rest/dashboard/post-v1dashboardscoresquery"]
-          },
-          {
-            "group": "Session",
-            "pages": [
-              "rest/session/post-v1sessionquery",
-              "rest/session/post-v1sessionmetricsquery",
-              "rest/session/post-v1session-feedback"
-            ]
-          },
-          {
-            "group": "Models",
-            "pages": [
-              "rest/ai-gateway/get-v1models",
-              "rest/models/get-v1public-model-registry-models"
-            ]
           }
         ]
       },
