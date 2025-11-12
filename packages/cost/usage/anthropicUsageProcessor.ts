@@ -108,6 +108,7 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
       const ephemeral5mTokens = cacheCreation.ephemeral_5m_input_tokens ?? 0;
       const ephemeral1hTokens = cacheCreation.ephemeral_1h_input_tokens ?? 0;
 
+      // Extract web search usage
       const serverToolUse = usage.server_tool_use || {};
       const webSearchRequests = serverToolUse.web_search_requests ?? 0;
 
@@ -122,13 +123,20 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
         ephemeral1hTokens > 0
       ) {
         modelUsage.cacheDetails = { cachedInput: cacheReadInputTokens };
-        if (ephemeral5mTokens > 0)
+
+        if (ephemeral5mTokens > 0) {
           modelUsage.cacheDetails.write5m = ephemeral5mTokens;
-        if (ephemeral1hTokens > 0)
+        }
+
+        if (ephemeral1hTokens > 0) {
           modelUsage.cacheDetails.write1h = ephemeral1hTokens;
+        }
       }
 
-      if (webSearchRequests > 0) modelUsage.web_search = webSearchRequests;
+      // Add web search usage if present
+      if (webSearchRequests > 0) {
+        modelUsage.web_search = webSearchRequests;
+      }
       return modelUsage;
     }
 
