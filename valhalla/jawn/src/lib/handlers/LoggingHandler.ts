@@ -172,7 +172,8 @@ export class LoggingHandler extends AbstractLogHandler {
       if (
         requestMapped.user_id !== HELICONE_PLAYGROUND_USER_ID &&
         context.orgParams &&
-        !context.orgParams.has_integrated &&
+        (!context.orgParams.has_integrated ||
+          !context.orgParams.has_onboarded) &&
         context.orgParams.id
       ) {
         this.batchPayload.orgsToMarkAsIntegrated.add(context.orgParams.id);
