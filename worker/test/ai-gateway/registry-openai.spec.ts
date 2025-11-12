@@ -36,7 +36,7 @@ const novitaAuthExpectations = {
 
 const cerebrasAuthExpectations = {
   headers: {
-    "api-key": "test-cerebras-api-key",
+    Authorization: /^Bearer /,
   },
 };
 
