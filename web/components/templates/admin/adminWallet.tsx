@@ -498,7 +498,14 @@ export default function AdminWallet() {
         <div className="flex shrink-0 items-center justify-end gap-3">
           <div className="flex items-center gap-2">
             <Label className="text-sm text-muted-foreground">Group By</Label>
-            <Select value={groupBy} onValueChange={setGroupBy}>
+            <Select
+              value={groupBy}
+              onValueChange={(value) =>
+                setGroupBy(
+                  value as "minute" | "hour" | "day" | "week" | "month"
+                )
+              }
+            >
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -512,7 +519,7 @@ export default function AdminWallet() {
             </Select>
           </div>
           <ThemedTimeFilterShadCN
-            onDateChange={setDateRange}
+            onDateChange={(date) => date && setDateRange(date)}
             initialDateRange={dateRange}
             isLive={false}
           />
