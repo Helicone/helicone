@@ -11,12 +11,4 @@ export class CerebrasProvider extends BaseProvider {
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     return `${this.baseUrl}v1/chat/completions`;
   }
-
-  authenticate(authContext: AuthContext): AuthResult {
-    return {
-      headers: {
-        "api-key": authContext.apiKey || "",
-      },
-    };
-  }
 }
