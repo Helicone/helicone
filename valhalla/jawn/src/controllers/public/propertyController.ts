@@ -323,7 +323,7 @@ export class PropertyController extends Controller {
       }));
 
       // Get the total cost
-      const totalCost = totalRes.data?.[0]?.cost || 0;
+      const totalCost = +(totalRes.data?.[0]?.cost || 0);
 
       // Calculate the "other" category cost (total minus sum of top 10)
       const topCostsSum = topCosts.reduce((sum, item) => sum + item.cost, 0);
