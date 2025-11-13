@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Small, XSmall } from "@/components/ui/typography";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown, Plus, Copy } from "lucide-react";
 import React, { useMemo } from "react";
 import {
   AndExpression,
@@ -12,20 +12,25 @@ import { useFilterAST } from "../context/filterContext";
 import FilterConditionNode from "./FilterConditionNode";
 import { Row } from "@/components/layout/common/row";
 import SaveFilterButton from "./SaveFilterButton";
+import useNotification from "@/components/shared/notification/useNotification";
+import { generateCurlCommand } from "../utils/generateCurl";
 
 interface FilterGroupNodeProps {
   group: AndExpression | OrExpression;
   path: number[];
 
   isRoot?: boolean;
+  showCurlButton?: boolean;
 }
 
 export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   group,
   path,
   isRoot = false,
+  showCurlButton = false,
 }) => {
   const { store: filterStore } = useFilterAST();
+  const notification = useNotification();
 
   // Handle adding a new condition to this group with a sensible default
   const handleAddCondition = () => {
@@ -71,6 +76,17 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
         expressions: [...group.expressions],
       };
       filterStore.updateFilterExpression(path, updated);
+    }
+  };
+
+  // Handle copying cURL command
+  const handleCopyCurl = () => {
+    try {
+      const curlCommand = generateCurlCommand(filterStore.filter);
+      navigator.clipboard.writeText(curlCommand);
+      notification.setNotification("cURL command copied to clipboard", "success");
+    } catch (error) {
+      notification.setNotification("Failed to copy cURL command", "error");
     }
   };
 
@@ -168,7 +184,21 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
                 Add Condition Group
               </span>
             </Button>
-            <SaveFilterButton />
+            <Row className="gap-2">
+              {showCurlButton && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm_sleek"
+                  onClick={handleCopyCurl}
+                  className="flex items-center gap-1 text-[10px] font-normal"
+                >
+                  <Copy size={12} />
+                  <span>Copy cURL</span>
+                </Button>
+              )}
+              <SaveFilterButton />
+            </Row>
           </Row>
         )}
       </div>

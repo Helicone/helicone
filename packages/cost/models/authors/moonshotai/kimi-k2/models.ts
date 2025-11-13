@@ -10,7 +10,7 @@ export const models = {
     maxOutputTokens: 16_384,
     created: "2025-01-01T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "GPT",
+    tokenizer: "MoonshotAI",
   },
   "kimi-k2-0905": {
     name: "Kimi K2 (09/05)",
@@ -21,8 +21,19 @@ export const models = {
     maxOutputTokens: 16_384,
     created: "2025-09-05T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
-    tokenizer: "GPT",
-  }
+    tokenizer: "MoonshotAI",
+  },
+    "kimi-k2-thinking": {
+    name: "Kimi K2 Thinking",
+    author: "moonshotai",
+    description:
+      "Kimi K2 Thinking is a powerful open-source AI model from Moonshot AI designed for complex, step-by-step reasoning and long-horizon agentic tasks. It excels at solving challenging problems that require multiple steps of reasoning, data retrieval, and tool use, as it can execute up to 200–300 sequential tool calls without degradation. This makes it proficient in areas like math, coding, and autonomous web research by interleaving reasoning with tool invocation.",
+    contextLength: 256_000,
+    maxOutputTokens: 262_144,
+    created: "2025-11-06T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "MoonshotAI",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type KimiK2ModelName = keyof typeof models;

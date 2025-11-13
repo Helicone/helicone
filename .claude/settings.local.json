@@ -91,10 +91,13 @@
       "Bash(git log:*)",
       "Bash(git grep:*)",
       "Bash(xargs git grep -l \"request\\|response\")",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "mcp__chrome-devtools__new_page"
     ],
     "deny": []
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": ["playwright"]
+  "enabledMcpjsonServers": [
+    "playwright"
+  ]
 }
