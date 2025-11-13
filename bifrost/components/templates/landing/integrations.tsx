@@ -126,7 +126,7 @@ response = client.chat.completions.create(
       docsLink: "https://docs.helicone.ai/gateway/overview",
     },
     llama: {
-      formattedName: "Llama",
+      formattedName: "DeepSeek",
       logo: "/static/home/logos/deepseek.webp",
       typescript: `import OpenAI from "openai";
 
@@ -136,7 +136,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: "llama-3.3-70b",  // Just change the model name!
+  model: "deepseek-v3.2",  // Just change the model name!
   messages: [{ role: "user", content: "Hello!" }]
 });`,
       python: `from openai import OpenAI
