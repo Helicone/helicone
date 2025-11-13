@@ -32,6 +32,27 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text", "image"] },
     tokenizer: "GPT",
   },
+  "gpt-5.1-chat-latest": {
+    name: "OpenAI GPT-5.1 Chat",
+    author: "openai",
+    description:
+      "GPT-5.1 Chat is a continuously updated version of GPT-5.1 optimized for conversational interactions. It receives regular updates with the latest improvements in dialogue management, safety, and helpfulness. Features a 128K context window and 16K max output tokens, making it ideal for focused conversations.",
+    contextLength: 128000,
+    maxOutputTokens: 16384,
+    created: "2025-01-01T00:00:00.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text", "image"] },
+    tokenizer: "GPT",
+  },
+  "codex-mini-latest": {
+    name: "OpenAI Codex Mini Latest",
+    author: "openai",
+    description: "Latest version of Codex Mini, a compact specialized model for code generation and analysis",
+    contextLength: 200000,
+    maxOutputTokens: 100000,
+    created: "2025-01-01T00:00:00.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type GPT51ModelName = keyof typeof models;

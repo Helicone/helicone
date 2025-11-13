@@ -254,6 +254,175 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-5.1-chat-latest:openai": {
+    providerModelId: "gpt-5.1-chat-latest",
+    provider: "openai",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000125, // $1.25 per 1M tokens
+        output: 0.00001, // $10.00 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.125 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    rateLimits: {
+      rpm: 15000,
+      tpm: 40000000,
+      tpd: 15000000000,
+    },
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "stop",
+      "verbosity",
+    ],
+    unsupportedParameters: [
+      "temperature",
+      "top_p",
+      "presence_penalty",
+      "frequency_penalty",
+      "logprobs",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+      "n",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5.1-chat-latest:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/gpt-5.1-chat-latest",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000132, // $1.32/1M - worst-case: $1.25/1M (OpenAI) * 1.055
+        output: 0.00001055, // $10.55/1M - worst-case: $10.00/1M (OpenAI) * 1.055
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "stop",
+    ],
+    unsupportedParameters: [
+      "temperature",
+      "top_p",
+      "presence_penalty",
+      "frequency_penalty",
+      "logprobs",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+      "n",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "codex-mini-latest:openai": {
+    providerModelId: "codex-mini-latest",
+    provider: "openai",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000015, // $1.50 per 1M tokens
+        output: 0.000006, // $6.00 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        cacheMultipliers: {
+          cachedInput: 0.25, // $0.375 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 100000,
+    rateLimits: {
+      rpm: 30000,
+      tpm: 180000000,
+      tpd: 15000000000,
+    },
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "stop",
+    ],
+    unsupportedParameters: [
+      "temperature",
+      "top_p",
+      "presence_penalty",
+      "frequency_penalty",
+      "logprobs",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+      "verbosity",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "codex-mini-latest:openrouter": {
+    provider: "openrouter",
+    author: "openai",
+    providerModelId: "openai/codex-mini-latest",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000158, // $1.58/1M - worst-case: $1.50/1M (OpenAI) * 1.055
+        output: 0.00000633, // $6.33/1M - worst-case: $6.00/1M (OpenAI) * 1.055
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+      },
+    ],
+    contextLength: 200_000,
+    maxCompletionTokens: 100_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "stop",
+    ],
+    unsupportedParameters: [
+      "temperature",
+      "top_p",
+      "presence_penalty",
+      "frequency_penalty",
+      "logprobs",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+      "verbosity",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPT51ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
