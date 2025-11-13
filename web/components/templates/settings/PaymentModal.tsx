@@ -15,7 +15,11 @@ interface PaymentModalProps {
   returnUrl?: string;
 }
 
-const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, returnUrl }) => {
+const PaymentModal: React.FC<PaymentModalProps> = ({
+  isOpen,
+  onClose,
+  returnUrl,
+}) => {
   const [amount, setAmount] = useState(5);
   const [customAmount, setCustomAmount] = useState("");
   const createCheckoutSession = useCreateCheckoutSession();
@@ -59,8 +63,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, returnUrl 
         await createCheckoutSession.mutateAsync({
           body: {
             amount,
-            ...(returnUrl && { returnUrl })
-          }
+            ...(returnUrl && { returnUrl }),
+          },
         });
       } catch (error) {
         setNotification("Failed to start checkout. Please try again.", "error");

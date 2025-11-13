@@ -3,50 +3,6 @@ import type { ModelProviderConfig } from "../../../types";
 import { KimiK2ModelName } from "./models";
 
 export const endpoints = {
-  "kimi-k2:groq": {
-    providerModelId: "moonshotai/kimi-k2-instruct",
-    provider: "groq",
-    author: "moonshotai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.000001,
-        output: 0.000003,
-        request: 0.0,
-        image: 0.0,
-        audio: 0.0,
-        web_search: 0.0,
-        cacheMultipliers: {
-          cachedInput: 0.5,
-        },
-      },
-    ],
-    contextLength: 131_072,
-    maxCompletionTokens: 16_384,
-    supportedParameters: [
-      "frequency_penalty",
-      "logit_bias",
-      "logprobs",
-      "max_tokens",
-      "min_p",
-      "presence_penalty",
-      "repetition_penalty",
-      "response_format",
-      "seed",
-      "stop",
-      "structured_outputs",
-      "temperature",
-      "tool_choice",
-      "tools",
-      "top_k",
-      "top_logprobs",
-      "top_p",
-    ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
   "kimi-k2-0905:groq": {
     providerModelId: "moonshotai/kimi-k2-instruct-0905",
     provider: "groq",
@@ -121,14 +77,14 @@ export const endpoints = {
       "top_k",
       "seed",
       "min_p",
-      "response_format"
+      "response_format",
     ],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },
   },
-  "kimi-k2:openrouter": {
+  "kimi-k2-0711:openrouter": {
     provider: "openrouter",
     author: "moonshotai",
     providerModelId: "moonshotai/kimi-k2",
@@ -156,7 +112,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -189,7 +144,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -229,7 +183,70 @@ export const endpoints = {
       "*": {},
     },
   },
-  "kimi-k2-instruct:novita": {
+  "kimi-k2-0905:baseten": {
+    provider: "baseten",
+    author: "moonshotai",
+    providerModelId: "moonshotai/Kimi-K2-Instruct-0905",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.60/1M
+        output: 0.0000025, // $2.50/1M
+      },
+    ],
+    contextLength: 262_000,
+    maxCompletionTokens: 163_800,
+    quantization: "fp4",
+    supportedParameters: [
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "stop",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-0905:fireworks": {
+    provider: "fireworks",
+    author: "moonshotai",
+    providerModelId: "accounts/fireworks/models/kimi-k2-instruct-0905",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.60/1M
+        output: 0.0000025, // $2.50/1M
+      },
+    ],
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "top_k",
+      "repetition_penalty",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "response_format",
+      "structured_outputs",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-0711:novita": {
     provider: "novita",
     author: "moonshotai",
     providerModelId: "moonshotai/kimi-k2-instruct",
@@ -244,23 +261,52 @@ export const endpoints = {
     contextLength: 131_072,
     maxCompletionTokens: 131_072,
     supportedParameters: [
-      "frequency_penalty",
-      "logprobs",
       "max_tokens",
-      "presence_penalty",
-      "response_format",
-      "seed",
-      "stop",
       "temperature",
-      "tool_choice",
-      "tools",
-      "top_logprobs",
       "top_p",
-      "functions",
-      "structured_outputs",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "repetition_penalty",
+      "tools",
+      "tool_choice",
+      "response_format",
+      "structured_outputs"
     ],
     ptbEnabled: true,
-    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-thinking:novita": {
+    provider: "novita",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2-thinking",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000006, // $0.6/1M
+        output: 0.0000025, // $2.5/1M
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "tool_choice",
+      "tools",
+      "structured_outputs",
+      "response_format"
+    ],
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

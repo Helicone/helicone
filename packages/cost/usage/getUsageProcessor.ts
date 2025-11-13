@@ -16,11 +16,14 @@ export function getUsageProcessor(
   switch (provider) {
     case "openai":
     case "azure":
+    case "baseten":
     case "chutes":
     case "deepinfra":
     case "helicone":
     case "nebius":
     case "novita":
+    case "fireworks":
+    case "cerebras":
       return new OpenAIUsageProcessor();
     case "anthropic":
       return new AnthropicUsageProcessor();

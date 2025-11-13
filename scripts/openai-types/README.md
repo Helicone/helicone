@@ -11,31 +11,36 @@ npm install
 # Generate the full OpenAI Zod schemas
 npx openapi-zod-client https://app.stainless.com/api/spec/documented/openai/openapi.documented.yml -o openai.chat.zod.ts --export-schemas --export-types
 
-# Extract just CreateChatCompletionRequest and its dependencies
-node extract-chat-completion.js
+# Extract types and their dependencies
+node extract-openai-types.js
 ```
 
-This creates `chat-completion-types.ts` with only the `CreateChatCompletionRequest` schema and its 51 dependencies (vs 17k+ lines in the full file).
+This creates:
+- `chat-completion-types.ts` - `CreateChatCompletionRequest` schema and its dependencies
+- `responses-types.ts` - `CreateResponse` schema and its dependencies
+
+Much smaller and faster than working with the full 22k+ line file!
 
 ## Usage
 
 ```typescript
 import { CreateChatCompletionRequest } from './chat-completion-types';
+import { CreateResponse } from './responses-types';
 import { z } from 'zod';
 
-// Validate request data
-const requestData = CreateChatCompletionRequest.parse({
+// Validate chat completion request data
+const chatRequest = CreateChatCompletionRequest.parse({
   model: "gpt-4o",
   messages: [{ role: "user", content: "Hello!" }]
 });
 
-// Get TypeScript type
+// Validate response request data
+const responseRequest = CreateResponse.parse({
+  model: "gpt-4o",
+  input: "Hello, world!"
+});
+
+// Get TypeScript types
 type ChatRequest = z.infer<typeof CreateChatCompletionRequest>;
-```
-
-## Customizing
-
-Edit `extract-chat-completion.js` line 85 to extract different types:
-```javascript
-findDependencies('YourTypeNameHere');
+type ResponseRequest = z.infer<typeof CreateResponse>;
 ```

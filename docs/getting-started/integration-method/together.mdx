@@ -5,6 +5,10 @@ description: "Connect Helicone with Together AI, a platform for running open-sou
 "twitter:title": "Together AI Integration - Helicone OSS LLM Observability"
 ---
 
+import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
+
+<LegacyWarning />
+
 You can seamlessly integrate Helicone with your OpenAI compatible models that are deployed on Together AI.
 
 The integration process closely mirrors the [proxy approach](/integrations/openai/javascript). The only distinction lies in the modification of the base_url to point to the dedicated TogetherAI endpoint `https://together.helicone.ai/v1`.

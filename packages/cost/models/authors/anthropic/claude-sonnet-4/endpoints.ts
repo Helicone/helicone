@@ -8,13 +8,12 @@ export const endpoints = {
     provider: "anthropic",
     author: "anthropic",
     version: "20250514",
-    priority: 2,
     pricing: [
       {
         threshold: 0,
         input: 0.000003,
         output: 0.000015,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -25,7 +24,7 @@ export const endpoints = {
         threshold: 200000,
         input: 0.000006,
         output: 0.0000225,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         // cacheMultipliers inherited from base tier
       },
     ],
@@ -54,13 +53,12 @@ export const endpoints = {
     version: "vertex-2023-10-16",
     ptbEnabled: true,
     crossRegion: true,
-    priority: 3,
     pricing: [
       {
         threshold: 0,
         input: 0.000003,
         output: 0.000015,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -70,7 +68,7 @@ export const endpoints = {
         threshold: 200000,
         input: 0.000006,
         output: 0.0000225,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 200000,
@@ -97,13 +95,12 @@ export const endpoints = {
     providerModelId: "anthropic.claude-sonnet-4-20250514-v1:0",
     version: "20250514",
     crossRegion: true,
-    priority: 3,
     pricing: [
       {
         threshold: 0,
         input: 0.000003,
         output: 0.000015,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -113,7 +110,7 @@ export const endpoints = {
         threshold: 200000,
         input: 0.000006,
         output: 0.0000225,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 200000,
@@ -144,7 +141,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000633, // $6.33/1M - worst-case: $6.00/1M (Google >200K) * 1.055
         output: 0.00002374, // $23.74/1M - worst-case: $22.50/1M (Google >200K) * 1.055
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 1000000, // OpenRouter shows 1M context for this model
@@ -159,7 +156,6 @@ export const endpoints = {
       "top_k",
     ],
     ptbEnabled: true,
-    priority: 100,
     endpointConfigs: {
       "*": {},
     },
@@ -198,7 +194,6 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},

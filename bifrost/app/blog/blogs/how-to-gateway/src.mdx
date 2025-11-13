@@ -1,0 +1,724 @@
+![Helicone AI Gateway](/static/blog/how-to-gateway/thumbnail.webp)
+
+## Table of Contents
+
+## What Is Helicone AI Gateway?
+
+Helicone AI Gateway is an open-source AI gateway, giving you access to 100+ AI models from most LLM providers. Instead of managing separate integrations for OpenAI, Anthropic, Google, and others, you use one consistent interface and API key to reach all of them.
+
+Unlike traditional API gateways, Helicone AI Gateway includes **zero markup pricing** and has **built-in observability by default**, so every request is automatically logged, tracked, and analyzed without additional configuration or pricing.
+
+The platform works as an intelligent router with embedded monitoring, handling authentication, billing, provider selection, and error handling while giving you complete visibility into costs, performance, and usage patterns.
+
+### Problems Helicone AI Gateway Solves
+
+Managing multiple AI providers creates several headaches that slow down development and increase operational complexity.
+
+**The Multi-Provider Challenge**
+
+Each AI provider has its own SDK format, authentication method, and billing system. You end up maintaining separate code paths for each service, which makes testing new models tedious and switching providers a major refactoring project.
+
+When providers experience downtime or rate limits, your application breaks, and there's no automatic failover. You're also flying blind on costs since each provider bills separately with different pricing structures.
+
+**The Observability Gap**
+
+Even after integrating multiple providers, you lack unified visibility. Request logs are scattered across different dashboards, making it impossible to compare model performance, track total costs, or understand usage patterns across your entire AI stack.
+
+Traditional solutions require adding separate monitoring tools, writing custom logging code, or stitching together multiple analytics platforms just to answer basic questions about your AI usage.
+
+### How Helicone AI Gateway Fixes This
+
+Helicone AI Gateway addresses these problems through an integrated LLMOps approach:
+
+- **One API key** accesses all providers with OpenAI SDK compatibility
+- **Automatic provider fallbacks** keep your application running when issues occur (provider outages, rate limits, etc.)
+- **Zero markup pricing** means you pay exactly what providers charge + Stripe payment processing fee
+- **Built-in observability** logs every request automatically with no extra setup
+- **Intelligent routing** finds the cheapest provider for each request
+- **Works with existing OpenAI code** — just change the endpoint URL and you're done to request whichever model you want!
+
+These features work together to eliminate infrastructure complexity while giving you complete visibility into your AI operations.
+
+### Who Should Use Helicone AI Gateway?
+
+Different teams get value from this unified approach. Here are some common use cases:
+
+- **AI Engineers** can experiment with new models without setting up multiple provider accounts. Try Claude, GPT, Gemini, and dozens of others through one interface, with automatic logging showing exactly how each performs.
+
+- **Engineering Teams** need reliability and don't want provider outages to break production. Automatic fallbacks across providers ensure requests succeed even when individual services fail.
+
+- **Budget-Conscious Organizations** want to optimize costs without manual tracking. Built-in cost analytics show exactly what you're spending on each model, making it easy to identify optimization opportunities.
+
+- **Compliance Teams** require detailed audit trails. Every request is logged with complete visibility into inputs, outputs, costs, and metadata for security and regulatory requirements.
+
+To maximize the value Helicone AI Gateway brings to the table, let's get you set up with your first API call.
+
+---
+
+## Prerequisites
+
+Before diving into Helicone AI Gateway, you'll need a few things configured. This guide assumes you're comfortable with basic API development and have worked with REST APIs before.
+
+We'll be using the OpenAI SDK since Helicone AI Gateway is fully compatible with it, although you can use any OpenAI-compatible SDK like the [Vercel AI SDK](https://docs.helicone.ai/getting-started/integration-method/vercelai) or [Langchain](https://docs.helicone.ai/gateway/integrations/langchain).
+
+Install the required packages:
+
+```bash
+# For Node.js/TypeScript
+npm install openai dotenv
+
+# For Python
+pip install openai python-dotenv
+```
+
+Create a Helicone account at [helicone.ai](https://www.helicone.ai) and generate an API key from the [dashboard](https://us.helicone.ai/settings/api-keys). This single API key gives you access to all providers! You can also set up your own [provider keys](https://us.helicone.ai/providers) for each provider if you prefer.
+
+Create a `.env` file in the root of your project with your Helicone API key:
+
+```bash
+HELICONE_API_KEY=sk-helicone-xxx
+```
+
+---
+
+## Making Your First API Call
+
+To make your first LLM call you just need to change two things: the base URL and the API key.
+
+### Your First Request
+
+```typescript TypeScript
+import OpenAI from "openai";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const response = await client.chat.completions.create({
+  model: "claude-4.5-haiku", // or 100+ other models - https://helicone.ai/models
+  messages: [
+    {
+      role: "user",
+      content: "Explain how Helicone AI Gateway works in one sentence"
+    }
+  ]
+});
+
+console.log(response.choices[0].message.content);
+```
+
+The `baseURL` parameter redirects your requests to Helicone's gateway, and the `apiKey` connects you to all providers!
+
+### Understanding the Model Format
+
+The model name follows a simple format that gives you flexibility in how requests are routed. Here are the common patterns:
+
+```typescript
+// Automatic routing across all providers offering this model
+model: "gpt-4o-mini"
+
+// Route to a specific provider
+model: "claude-sonnet-4/anthropic"
+
+// Route to your custom deployment (for Azure, AWS, etc.)
+model: "gpt-4o/azure/your-deployment-id"
+
+// Route to specific fallback providers
+model: "gpt-4o/openai,claude-sonnet-4/anthropic,gemini-2.5-flash/google"
+```
+
+You can use any model from the [Helicone Model Registry](https://helicone.ai/models).
+
+### What Makes This Different
+
+Unlike other API gateways, Helicone automatically logs every request without additional configuration. Head to your [Helicone Dashboard](https://us.helicone.ai/dashboard) and you'll immediately see:
+
+- Complete request and response data
+- Latency metrics and timestamps
+- Token usage and exact costs
+- Model and provider information
+- Any errors or warnings
+
+This built-in observability is what sets Helicone apart. By routing requests through the gateway, you're also gaining complete visibility into your AI operations by default without any additional configuration!
+
+---
+
+## Intelligent Provider Routing
+
+Building reliable AI applications means preparing for provider outages, rate limits, and unexpected failures.
+
+### Automatic Fallbacks
+
+The most straightforward approach is to let Helicone handle everything automatically. When you request a model without specifying a provider, the gateway tries all providers offering that model:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    { role: "user", content: "What's the weather like today?" }
+  ]
+});
+
+// Behind the scenes, the gateway tries:
+// OpenAI → Azure OpenAI → AWS Bedrock → Others
+// Until one succeeds
+```
+
+If OpenAI is down, the request automatically routes to Azure OpenAI or AWS Bedrock. If you hit a rate limit, traffic flows to another provider. Your application stays online without you writing any fallback logic.
+
+### Manual Fallback Chains
+
+For more control, you can specify a custom fallback sequence:
+
+```typescript
+const response = await client.chat.completions.create({
+  // Try OpenAI first, then Anthropic, then Google
+  model: "gpt-4o/openai,claude-sonnet-4/anthropic,gemini-2.5-flash/google",
+  messages: [
+    { role: "user", content: "Analyze this business proposal..." }
+  ]
+});
+```
+
+This approach works great when you want specific fallback behavior. For example, you might prefer Claude's longer context window as a backup for complex analysis tasks, even if it costs slightly more.
+
+### Building Effective Fallback Strategies
+
+Not all models make good backups for each other. Provider downtime may affect all models from that company, so choose fallbacks from different providers. Consider these patterns:
+
+```typescript
+// Pattern 1: Cost-optimized with reliability
+// Try cheapest first, fall back to premium for reliability
+model: "gpt-4o-mini,claude-haiku-4,gemini-2.5-flash"
+
+// Pattern 2: Capability-focused
+// Try most capable first, fall back to faster models
+model: "claude-opus-4-1,gpt-4o,gemini-2.5-pro"
+
+// Pattern 3: Regional compliance
+// Try EU providers first, then US providers
+model: "claude-sonnet-4/azure/eu-deployment,gpt-4o/openai"
+```
+
+Rate limits and costs vary dramatically between providers, so pairing expensive models with cheaper alternatives ensures both quality and availability.
+
+### Monitoring Routing Decisions
+
+Every request in your Helicone dashboard shows exactly which provider was used and why. You can see:
+
+- Which providers were attempted
+- Why fallbacks occurred (rate limits, errors, timeouts)
+- Latency for each attempt
+- Cost comparison across providers
+
+This visibility helps you optimize your fallback chains over time based on real performance data.
+
+### Custom Deployments
+
+If you're using custom Azure deployments, AWS Bedrock, or other enterprise setups, you can reference them by deployment ID:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "gpt-4o/azure/your-deployment-cuid",
+  messages: messages
+});
+```
+
+Configure your deployments in the [Helicone Providers](https://us.helicone.ai/providers) settings. Once set up, Helicone automatically routes to your specific deployment while still providing full observability.
+
+Automatic routing guarantees reliability, which makes your AI applications feel much more robust for your users.
+
+---
+
+## Working with Streaming Responses
+
+When building user-facing AI features, especially for longer responses, users expect to see output appear progressively rather than waiting for the complete response. Streaming solves this by sending response chunks as they're generated, creating an interactive experience similar to ChatGPT.
+
+### Basic Streaming Setup
+
+To enable streaming in Helicone AI Gateway, just add `stream: true` to your request. The response becomes an iterator that yields chunks as the model generates them:
+
+```typescript
+const stream = await client.chat.completions.create({
+  model: "claude-sonnet-4",
+  messages: [
+    { role: "user", content: "Write a detailed guide on prompt engineering" }
+  ],
+  stream: true
+});
+
+for await (const chunk of stream) {
+  if (chunk.choices[0]?.delta?.content) {
+    process.stdout.write(chunk.choices[0].delta.content);
+  }
+}
+```
+
+Each chunk contains a small piece of the response. The `delta.content` field holds the new text fragment, and we print it immediately to create the streaming effect.
+
+### Building a Production Streaming Handler
+
+For production applications, you'll probably want more control over the streaming process. Here's a comprehensive handler:
+
+```typescript
+async function streamResponse(model: string, messages: any[]) {
+  const stream = await client.chat.completions.create({
+    model,
+    messages,
+    stream: true
+  });
+
+  let completeResponse = "";
+  let tokenCount = 0;
+
+  for await (const chunk of stream) {
+    const content = chunk.choices[0]?.delta?.content;
+
+    if (content) {
+      completeResponse += content;
+      tokenCount++;
+
+      // Send to your frontend
+      process.stdout.write(content);
+    }
+  }
+
+  console.log(`\n\nStreaming complete: ${tokenCount} tokens`);
+  return completeResponse;
+}
+
+// Use it
+const result = await streamResponse(
+  "gpt-4o",
+  [{ role: "user", content: "Explain quantum computing" }]
+);
+```
+
+This handler captures the complete response while displaying progress, tracks token usage, and gives you the final text for storage or further processing.
+
+### Streaming with Observability
+
+Here's what makes Helicone different: streaming requests are still fully logged in your dashboard. You get:
+
+- Complete request and response data
+- Accurate token counts
+- Time to first token (TTFT)
+- Total streaming duration
+- Cost tracking
+
+Check your [dashboard](https://us.helicone.ai/dashboard) and you'll see streaming requests with all the same observability as non-streaming requests.
+
+### Error Handling in Streams
+
+Streaming can fail mid-response. Handle errors gracefully:
+
+```typescript
+async function robustStreaming(model: string, messages: any[]) {
+  try {
+    const stream = await client.chat.completions.create({
+      model,
+      messages,
+      stream: true
+    });
+
+    let response = "";
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        response += content;
+        process.stdout.write(content);
+      }
+    }
+
+    return response;
+  } catch (error: any) {
+    console.error(`Streaming error: ${error.message}`);
+
+    // Fallback to non-streaming request
+    const fallback = await client.chat.completions.create({
+      model,
+      messages,
+      stream: false
+    });
+
+    return fallback.choices[0].message.content;
+  }
+}
+```
+
+This approach attempts streaming first, but falls back to a non-streaming request if problems occur. Your users get a response either way.
+
+---
+
+## Leveraging Observability Features
+
+What truly sets Helicone AI Gateway apart is that observability is built into the core platform. Every request through the gateway is automatically logged, analyzed, and made queryable by default without writing any additional code.
+
+### Automatic Request Logging
+
+From your first API call, Helicone captures everything:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    { role: "user", content: "Analyze this customer feedback..." }
+  ]
+});
+```
+
+Head to your [Helicone Dashboard](https://us.helicone.ai/dashboard) and you'll see every request in real-time. No configuration required, no SDK methods to call, no separate logging service to set up.
+
+![Helicone Dashboard](/static/blog/how-to-gateway/dashboard.webp)
+
+### Adding Custom Metadata
+
+While basic logging is automatic, you often want to add business context to understand request patterns. Use custom headers to enrich your logs:
+
+```typescript
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+  defaultHeaders: {
+    // Session tracking
+    "Helicone-Session-Id": "chat-session-123",
+    "Helicone-Session-Name": "Customer Support",
+
+    // User tracking
+    "Helicone-User-Id": "user-456",
+
+    // Custom properties for filtering
+    "Helicone-Property-Environment": "production",
+    "Helicone-Property-Feature": "support-chat",
+    "Helicone-Property-Customer-Tier": "enterprise"
+  }
+});
+```
+
+Now when you view requests in the dashboard, you can:
+- Filter by environment, feature, or customer tier
+- Track costs per user or session
+- Analyze performance by business dimension
+- Create custom reports for specific segments
+
+### Session Tracking
+
+For multi-turn conversations, session tracking groups related requests together:
+
+```typescript
+const sessionId = crypto.randomUUID();
+
+// First message in conversation
+await client.chat.completions.create({
+  model: "claude-sonnet-4",
+  messages: [{ role: "user", content: "Hello!" }],
+  extra_body: {
+    helicone: {
+      session: {
+        id: sessionId,
+        name: "Customer Onboarding Chat",
+        path: "/onboarding/chat"
+      }
+    }
+  }
+});
+
+// Follow-up message (same session)
+await client.chat.completions.create({
+  model: "claude-sonnet-4",
+  messages: conversationHistory,
+  extra_body: {
+    helicone: {
+      session: {
+        id: sessionId,  // Same ID links them together
+        name: "Customer Onboarding Chat",
+        path: "/onboarding/chat"
+      }
+    }
+  }
+});
+```
+
+In your dashboard, you'll see these requests grouped together, making it easy to:
+- Understand conversation flow
+- Calculate total cost per conversation
+- Analyze response quality across turns
+- Debug issues in context
+
+![Helicone Sessions](/static/blog/how-to-gateway/sessions.webp)
+
+### Cost Analytics
+
+Helicone automatically tracks costs down to individual requests. The dashboard shows:
+
+- **Total spend** across all models and providers
+- **Cost per request** with exact provider pricing
+- **Cost trends** over time
+- **Model comparison** showing which models cost most
+- **User-level costs** when you include user IDs
+
+### Real-Time Alerts
+
+Set up alerts when certain conditions occur:
+- Costs exceed budget thresholds
+- Error rates spike
+- Latency degrades
+- Specific users hit rate limits
+
+This proactive monitoring helps catch issues before users complain and can be easily integrated into Slack, email, or your own custom notifications.
+
+![Helicone Alerts](/static/blog/how-to-gateway/alerts.webp)
+
+---
+
+## Using Prompt Management
+
+Hardcoding prompts in your application creates deployment friction and makes iteration slow. Helicone's prompt management system, integrated directly into the AI Gateway, lets you update prompts without code changes or redeployments.
+
+Consider a typical scenario where prompts are embedded in your code:
+
+```typescript
+// ❌ Hardcoded prompt - requires redeployment to change
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    {
+      role: "system",
+      content: "You are a helpful customer support agent for TechCorp. Be friendly, solution-oriented, and always offer to escalate complex issues. Use a professional but warm tone."
+    },
+    {
+      role: "user",
+      content: `Customer ${customerName} is asking about ${issueType}`
+    }
+  ]
+});
+```
+
+Every time you want to improve the prompt, you need to:
+1. Change the code
+2. Test locally
+3. Create a pull request
+4. Get code review
+5. Deploy to staging
+6. Test again
+7. Deploy to production
+
+This cycle takes hours or days for what should be a simple tweak, especially with other engineering tasks on the pipeline.
+
+### Prompt Management with AI Gateway
+
+With Helicone's integrated prompt management, you reference prompts by ID:
+
+```typescript
+// ✅ Managed prompt - update instantly without deployment
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  prompt_id: "sad98f45", // Helicone Prompt ID
+  environment: "production",
+  inputs: {
+    customer_name: customerName,
+    issue_type: issueType,
+    customer_tier: "enterprise"
+  }
+});
+```
+
+The prompt template lives in Helicone, not your code. To update it, you:
+1. Edit in the Helicone dashboard
+2. Test with real examples
+3. Deploy to production with one click
+
+No code changes, no redeployment, no waiting. Iteration that took days now takes minutes.
+
+### Creating Prompts in the Dashboard
+
+Navigate to [Helicone Prompts](https://us.helicone.ai/prompts) and create a new prompt:
+
+```
+System: You are a helpful customer support agent for TechCorp.
+
+Customer Details:
+- Name: {{customer_name}}
+- Tier: {{customer_tier}}
+
+The customer is asking about: {{issue_type}}
+
+Please provide a helpful, solution-oriented response. For enterprise customers, offer direct escalation to the dedicated support team.
+```
+
+Variables in double curly braces (`{{variable_name}}`) are filled in from the `inputs` parameter in your API call.
+
+![Helicone Prompt Management](/static/blog/how-to-gateway/prompts.webp)
+
+### Environment-Based Prompts
+
+Helicone supports separate prompt versions for different environments:
+
+```typescript
+// Development environment - uses experimental prompts
+const devResponse = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  prompt_id: "kh78f45", // Helicone Prompt ID
+  environment: "development",  // Tests new prompt versions
+  inputs: { customer_name: "Test User", issue_type: "billing" }
+});
+
+// Production environment - uses stable prompts
+const prodResponse = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  prompt_id: "mi7f468", // Helicone Prompt ID
+  environment: "production",  // Uses proven prompt versions
+  inputs: { customer_name: customerName, issue_type: issueType }
+});
+```
+
+This lets you test prompt improvements safely before rolling them out to users.
+
+## Cost Optimization Strategies
+
+One of Helicone's most powerful features is automatic cost tracking combined with intelligent routing. This visibility is key to optimizing your AI spend without sacrificing quality.
+
+### Understanding Cost Visibility
+
+Every request in your dashboard shows exact costs based on provider pricing and with filtering capabilities, you can visualize costs by model, feature, user, and more.
+
+- **Total spend** by day, week, or month
+- **Cost per model** showing which are most expensive
+- **Cost per feature** when using custom properties
+- **Cost per user** to identify power users
+- **Provider comparison** for the same model
+
+### Cost-Optimized Routing
+
+The simplest optimization is letting Helicone route to the cheapest provider automatically:
+
+```typescript
+// Automatically uses cheapest provider offering gpt-4o-mini
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: messages
+});
+```
+
+Behind the scenes, Helicone checks pricing across all providers and routes to the cheapest one. If that provider is unavailable, it tries the next cheapest. You save money without writing any optimization logic.
+
+### Model Selection Strategies
+
+Different models have dramatically different price-to-quality ratios. Use this pattern to optimize:
+
+```typescript
+function selectModel(task: string) {
+  const complexity = analyzeComplexity(task);
+
+  if (complexity === "simple") {
+    return "gpt-4o-mini";  // $0.15/$0.60 per 1M tokens
+  } else if (complexity === "medium") {
+    return "claude-haiku-4";  // $0.25/$1.25 per 1M tokens
+  } else {
+    return "claude-sonnet-4";  // $3/$15 per 1M tokens
+  }
+}
+
+const response = await client.chat.completions.create({
+  model: selectModel(userMessage),
+  messages: [{ role: "user", content: userMessage }]
+});
+```
+
+This "right-sizing" approach uses cheap models for simple tasks and expensive models only when necessary.
+
+### Prompt Optimization
+
+Shorter prompts cost less. Use Helicone's logs to identify bloated prompts:
+
+```typescript
+// ❌ Expensive: Sends entire documentation every time
+const expensiveResponse = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "system",
+      content: "Here is our complete product documentation:\n" + FULL_DOCS  // 10,000 tokens
+    },
+    { role: "user", content: userQuestion }
+  ]
+});
+
+// ✅ Optimized: Send only relevant sections
+const relevantDocs = findRelevantSections(userQuestion, FULL_DOCS);
+const optimizedResponse = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "system",
+      content: "Relevant documentation:\n" + relevantDocs  // 500 tokens
+    },
+    { role: "user", content: userQuestion }
+  ]
+});
+```
+
+### Caching Strategies
+
+For repeated queries, use prompt caching to dramatically reduce costs:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-4",
+  messages: [
+    {
+      role: "system",
+      content: largeSystemPrompt,  // Cached after first use
+      cache_control: { type: "ephemeral" }
+    },
+    { role: "user", content: userQuestion }
+  ]
+});
+```
+
+For applications with standard system prompts, this provides massive savings with zero quality impact.
+
+## Conclusion
+
+We've covered how to access 100+ AI models through Helicone's unified API Gateway, from making your first request to implementing advanced features like intelligent routing, streaming, observability, prompt management, and cost optimization.
+
+The platform's **zero markup pricing** and **built-in observability** mean you're gaining complete visibility into your AI operations while paying exactly what providers charge (plus the inevitable Stripe payment processing fee).
+
+Helicone AI Gateway removes the complexity of multi-provider AI infrastructure. You get automatic fallbacks for reliability, unified observability for insights, and flexible routing for optimization, all through a single OpenAI-compatible endpoint.
+
+**Key Takeaways:**
+
+- **Replace multiple SDKs** with one OpenAI-compatible interface
+- **Never worry about outages** with automatic provider fallbacks
+- **Track everything automatically** with built-in observability
+- **Iterate prompts instantly** without code deployments
+- **Optimize costs** using real usage data and intelligent routing
+
+Start with simple requests and gradually adopt features as your needs grow. Test different models for different types of tasks—some excel at creative writing while others are stronger at structured data or reasoning problems.
+
+The knowledge you've gained here gives you what you need to build AI applications that aren't locked into any single provider, with the visibility to understand costs and performance at every level.
+
+### Next Steps
+
+1. **Sign up** at [helicone.ai](https://www.helicone.ai) and get your API key
+2. **Add provider keys** at [Helicone Providers](https://us.helicone.ai/providers)
+3. **Make your first request** using the examples in this guide
+4. **Explore the dashboard** to see your requests and costs
+5. **Set up prompts** in the Helicone console for flexible iteration
+
+Ready to ship faster? [Get started with Helicone AI Gateway →](https://www.helicone.ai)
+
+---
+
+**Resources:**
+
+- [Helicone AI Gateway Documentation](https://docs.helicone.ai/gateway/overview)
+- [Model Registry](https://helicone.ai/models) - Browse all available models
+- [Provider Integration Guide](https://docs.helicone.ai/references/provider-integration)
+- [Discord Community](https://discord.gg/7aSCGCGUeu) - Get help from the team
+- [GitHub](https://github.com/Helicone/helicone) - Star us and contribute

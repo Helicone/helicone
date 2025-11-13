@@ -108,7 +108,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },

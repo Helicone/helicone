@@ -7,13 +7,12 @@ export const endpoints = {
     provider: "anthropic",
     author: "anthropic",
     providerModelId: "claude-haiku-4-5-20251001",
-    priority: 2,
     pricing: [
       {
         threshold: 0,
         input: 0.000001,
         output: 0.000005,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -44,13 +43,12 @@ export const endpoints = {
     author: "anthropic",
     providerModelId: "claude-haiku-4-5@20251001",
     crossRegion: false,
-    priority: 3,
     pricing: [
       {
         threshold: 0,
         input: 0.000001,
         output: 0.000005,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -80,13 +78,12 @@ export const endpoints = {
     providerModelId: "anthropic.claude-haiku-4-5-20251001-v1:0",
     version: "20251001",
     crossRegion: true,
-    priority: 3,
     pricing: [
       {
         threshold: 0,
         input: 0.000001,
         output: 0.000005,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -133,7 +130,6 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
-    priority: 100,
     endpointConfigs: {
       "*": {},
     },
@@ -166,7 +162,6 @@ export const endpoints = {
       "stop",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },

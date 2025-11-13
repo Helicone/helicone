@@ -5,6 +5,7 @@ import {
   Get,
   Path,
   Post,
+  Query,
   Request,
   Route,
   Security,
@@ -21,10 +22,15 @@ import { Result } from "../../packages/common/result";
 export class AlertController extends Controller {
   @Get("/query")
   public async getAlerts(
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() historyPage?: number,
+    @Query() historyPageSize?: number
   ): Promise<Result<AlertResponse, string>> {
     const manager = new AlertManager(request.authParams);
-    const result = await manager.getAlerts();
+    const result = await manager.getAlerts({
+      historyPage: historyPage ?? 0,
+      historyPageSize: historyPageSize ?? 25,
+    });
     return result;
   }
 

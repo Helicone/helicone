@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useOrg } from "../../layout/org/organizationContext";
 import useAlertsPage from "./useAlertsPage";
 import { CreateAlertModal, EditAlertModal } from "./createAlertModal";
 import DeleteAlertModal from "./deleteAlertModal";
-import ThemedTable from "../../shared/themed/themedTable";
+import { SimpleTable } from "@/components/shared/table/simpleTable";
 import { Database } from "../../../db/database.types";
 import { getUSDate } from "../../shared/utils/utils";
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { useGetOrgSlackChannels } from "@/services/hooks/organizations";
 import { alertTimeWindows } from "./constant";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
@@ -17,9 +16,21 @@ import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import "@/styles/settings-tables.css";
-import { SettingsContainer } from "@/components/ui/settings-container";
-import "@/styles/settings.css";
+import {
+  AlertMetric,
+  AlertAggregation,
+} from "@helicone-package/filters/alerts";
+import { PencilIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import Header from "@/components/shared/Header";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import TableFooter from "../requests/tableFooter";
+import AlertStatusPill from "./alertStatusPill";
+
+const TABS = [
+  { id: "alerts", label: "Alerts" },
+  { id: "history", label: "History" },
+];
 
 const AlertsPage = () => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
@@ -27,11 +38,23 @@ const AlertsPage = () => {
   const [editAlertOpen, setEditAlertOpen] = useState(false);
   const [selectedAlert, setSelectedAlert] =
     useState<Database["public"]["Tables"]["alert"]["Row"]>();
+  const [currentTab, setCurrentTab] = useLocalStorage<string>(
+    "alertsPageActiveTab",
+    "alerts",
+  );
+  const [alertsCurrentPage, setAlertsCurrentPage] = useState<number>(1);
+  const [alertsPageSize, setAlertsPageSize] = useState<number>(25);
+  const [historyCurrentPage, setHistoryCurrentPage] = useState<number>(1);
+  const [historyPageSize, setHistoryPageSize] = useState<number>(25);
+
   const orgContext = useOrg();
 
-  const { alertHistory, alerts, isLoading, refetch } = useAlertsPage(
-    orgContext?.currentOrg?.id || "",
-  );
+  const { alertHistory, alerts, historyTotalCount, isLoading, refetch } =
+    useAlertsPage(
+      orgContext?.currentOrg?.id || "",
+      historyCurrentPage - 1,
+      historyPageSize,
+    );
 
   const { data: slackChannelsData, isLoading: isLoadingSlackChannels } =
     useGetOrgSlackChannels(orgContext?.currentOrg?.id || "");
@@ -61,6 +84,52 @@ const AlertsPage = () => {
     return closest;
   }
 
+  function formatThreshold(metric: string, threshold: number): string {
+    if (metric === "response.status") {
+      return `${threshold}%`;
+    }
+    if (metric === "cost") {
+      return `$${Number(threshold).toFixed(2)}`;
+    }
+    // For all other metrics (latency, tokens, count), just show the number
+    return threshold.toString();
+  }
+
+  function formatAggregation(
+    metric: string,
+    aggregation: AlertAggregation | null,
+  ): string {
+    if (metric === "response.status") {
+      return "rate";
+    }
+    if (metric === "count") {
+      return "count";
+    }
+    return aggregation || "sum";
+  }
+
+  function formatMetric(metric: string): string {
+    const metricLabels: Record<AlertMetric, string> = {
+      "response.status": "Status",
+      cost: "Cost",
+      latency: "Latency (ms)",
+      total_tokens: "Total Tokens",
+      prompt_tokens: "Prompt Tokens",
+      completion_tokens: "Completion Tokens",
+      prompt_cache_read_tokens: "Prompt Cache Read Tokens",
+      prompt_cache_write_tokens: "Prompt Cache Write Tokens",
+      count: "Count",
+    };
+    return metricLabels[metric as AlertMetric] || metric;
+  }
+
+  // Paginate alerts in memory (preserves SimpleTable sorting)
+  const paginatedAlerts = useMemo(() => {
+    const startIndex = (alertsCurrentPage - 1) * alertsPageSize;
+    const endIndex = startIndex + alertsPageSize;
+    return (alerts ?? []).slice(startIndex, endIndex);
+  }, [alerts, alertsCurrentPage, alertsPageSize]);
+
   const handleCreateAlert = () => {
     setCreateNewAlertModal(true);
   };
@@ -89,228 +158,333 @@ const AlertsPage = () => {
   }
 
   return (
-    <SettingsContainer>
-      {!canCreateAlert && (
-        <div className="border-b border-border p-4">
-          <FreeTierLimitBanner
-            feature="alerts"
-            itemCount={alertCount}
-            freeLimit={MAX_ALERTS}
-          />
-        </div>
-      )}
-
-      {/* Active Alerts Section */}
-      <div className="border-b border-border p-4">
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-sm font-semibold">Active Alerts</h1>
-            <p className="text-xs text-muted-foreground">
-              These are the alerts that are currently active for your
-              organization
-            </p>
-          </div>
-
-          <div className="flex flex-col items-end gap-1">
-            <FreeTierLimitWrapper feature="alerts" itemCount={alertCount}>
+    <Tabs
+      value={currentTab}
+      onValueChange={(value) => setCurrentTab(value)}
+      className="w-full"
+    >
+      <div className="flex h-screen w-full flex-col bg-background dark:bg-sidebar-background">
+        <Header
+          title="Alerts"
+          rightActions={[
+            <FreeTierLimitWrapper
+              key="create-alert"
+              feature="alerts"
+              itemCount={alertCount}
+            >
               <Button
                 variant="default"
                 size="sm"
                 className="text-xs"
                 onClick={handleCreateAlert}
               >
-                Create a new alert
+                <PlusIcon className="mr-1 h-4 w-4" />
+                Create
               </Button>
-            </FreeTierLimitWrapper>
-          </div>
-        </div>
-      </div>
+            </FreeTierLimitWrapper>,
+            <TabsList key="tabs">
+              {TABS.map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>,
+          ]}
+        />
 
-      <div className="border-b border-border">
-        <div className="settings-table border-t border-border">
-          <ThemedTable
-            columns={[
-              { name: "Name", key: "key_name", hidden: false },
-              { name: "Status", key: "status", hidden: false },
-              { name: "Created", key: "created_at", hidden: false },
-              { name: "Threshold", key: "threshold", hidden: false },
-              { name: "Metric", key: "metric", hidden: false },
-              { name: "Time Window", key: "time_window", hidden: false },
-              {
-                name: "Min Requests",
-                key: "minimum_request_count",
-                hidden: false,
-              },
-              { name: "Emails", key: "emails", hidden: false },
-              {
-                name: "Slack Channels",
-                key: "slack_channels",
-                hidden: false,
-              },
-            ]}
-            rows={alerts?.map((key) => {
-              return {
-                ...key,
-                key_name: <p className="text-xs font-semibold">{key.name}</p>,
-                status: (
-                  <div>
-                    {key.status === "resolved" ? (
-                      <Tooltip title={"Healthy"}>
-                        <Badge
-                          variant="outline"
-                          className="border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900"
+        <TabsContent value="alerts" className="m-0 flex-1 overflow-y-auto">
+          {!canCreateAlert && (
+            <div className="border-b border-border p-4">
+              <FreeTierLimitBanner
+                feature="alerts"
+                itemCount={alertCount}
+                freeLimit={MAX_ALERTS}
+              />
+            </div>
+          )}
+
+          <div className="flex h-full flex-col border-b border-border">
+            <div className="flex-1 overflow-auto">
+              <SimpleTable
+                data={paginatedAlerts}
+                columns={[
+                  {
+                    key: undefined,
+                    header: "Actions",
+                    render: (alert) => (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="inline-flex items-center rounded-md bg-muted p-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-30"
+                          onClick={() => {
+                            setEditAlertOpen(true);
+                            setSelectedAlert(alert);
+                          }}
                         >
-                          Healthy
-                        </Badge>
-                      </Tooltip>
-                    ) : (
-                      <Tooltip title={"Triggered"}>
-                        <Badge variant="destructive">Triggered</Badge>
-                      </Tooltip>
-                    )}
-                  </div>
-                ),
-                created_at: (
-                  <p className="text-xs text-muted-foreground">
-                    {getUSDate(new Date(key.created_at || ""))}
-                  </p>
-                ),
-                threshold: (
-                  <p className="text-xs">
-                    {key.metric === "response.status" && (
-                      <span>{`${key.threshold}%`}</span>
-                    )}
-                    {key.metric === "cost" && (
-                      <span>{`$${Number(key.threshold).toFixed(2)}`}</span>
-                    )}
-                  </p>
-                ),
-                metric: (
-                  <Badge variant="helicone">
-                    {key.metric === "response.status" ? "status" : key.metric}
-                  </Badge>
-                ),
-                time_window: (
-                  <p className="text-xs">{formatTimeWindow(key.time_window)}</p>
-                ),
-                minimum_request_count: (
-                  <p className="text-xs">{key.minimum_request_count}</p>
-                ),
-                emails: <div className="flex">{key.emails.join(", ")}</div>,
-                slack_channels: (
-                  <div className="flex">
-                    {key.slack_channels
-                      .map(
-                        (channel) =>
-                          slackChannels?.find(
-                            (slackChannel) => slackChannel.id === channel,
-                          )?.name,
-                      )
-                      .join(", ")}
-                  </div>
-                ),
-              };
-            })}
-            editHandler={(row) => {
-              setEditAlertOpen(true);
-              const alertToEdit = alerts.find((alert) => alert.id === row.id);
-              setSelectedAlert(alertToEdit);
-            }}
-            deleteHandler={(row) => {
-              setDeleteAlertOpen(true);
-              setSelectedAlert(row);
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Alert History Section */}
-      <div className="border-b border-border p-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold">Alert History</h2>
-          <p className="text-xs text-muted-foreground">
-            These are the alerts that have been triggered for your organization
-          </p>
-        </div>
-      </div>
-
-      <div className="p-4">
-        {alertHistory.length === 0 ? (
-          <div className="border-2 border-dashed border-border bg-muted p-8 text-center">
-            <FileText
-              size={24}
-              className="mx-auto mb-2 text-muted-foreground"
-            />
-            <p className="text-xs font-medium">
-              No alerts have been triggered yet
-            </p>
-          </div>
-        ) : (
-          <div className="settings-table border-t border-border">
-            <ThemedTable
-              columns={[
-                {
-                  name: "Alert Start Time",
-                  key: "alertStartTime",
-                  hidden: false,
-                },
-                {
-                  name: "Alert End Time",
-                  key: "alertEndTime",
-                  hidden: false,
-                },
-                { name: "Alert Name", key: "alertName", hidden: false },
-                {
-                  name: "Trigger",
-                  key: "triggered_value",
-                  hidden: false,
-                },
-                { name: "Status", key: "status", hidden: false },
-              ]}
-              rows={alertHistory?.map((key) => {
-                return {
-                  ...key,
-                  alertStartTime: (
-                    <p className="text-xs font-semibold">
-                      {getUSDate(new Date(key.alert_start_time))}
-                    </p>
-                  ),
-                  alertEndTime: (
-                    <p className="text-xs font-semibold">
-                      {key.alert_end_time
-                        ? getUSDate(new Date(key.alert_end_time))
-                        : ""}
-                    </p>
-                  ),
-                  alertName: <p className="text-xs">{key.alert_name}</p>,
-                  triggered_value: (
-                    <p className="text-xs">
-                      {key.alert_metric === "response.status" && (
-                        <span>{`${key.triggered_value}%`}</span>
-                      )}
-                      {key.alert_metric === "cost" && (
-                        <span>{`$${key.triggered_value}`}</span>
-                      )}
-                      {key.alert_metric !== "response.status" &&
-                        key.alert_metric !== "cost" && (
-                          <span>{key.triggered_value}</span>
+                          <PencilIcon className="h-3 w-3" />
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex items-center rounded-md bg-destructive/10 p-1.5 text-xs text-destructive shadow-sm transition-colors hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-30"
+                          onClick={() => {
+                            setDeleteAlertOpen(true);
+                            setSelectedAlert(alert);
+                          }}
+                        >
+                          <TrashIcon className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ),
+                    sortable: false,
+                    minSize: 100,
+                  },
+                  {
+                    key: "name",
+                    header: "Name",
+                    render: (alert) => (
+                      <p className="text-xs font-semibold">{alert.name}</p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "status",
+                    header: "Status",
+                    render: (alert) => (
+                      <AlertStatusPill
+                        status={alert.status as "resolved" | "triggered"}
+                        displayText={
+                          alert.status === "resolved" ? "Healthy" : "Triggered"
+                        }
+                      />
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "created_at",
+                    header: "Created",
+                    render: (alert) => (
+                      <p className="text-xs text-muted-foreground">
+                        {getUSDate(new Date(alert.created_at || ""))}
+                      </p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "metric",
+                    header: "Metric",
+                    render: (alert) => (
+                      <Badge variant="helicone">
+                        {formatMetric(alert.metric)}
+                      </Badge>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: undefined,
+                    header: "Aggregation",
+                    render: (alert) => (
+                      <p className="text-xs">
+                        {formatAggregation(
+                          alert.metric,
+                          (alert as any).aggregation as AlertAggregation | null,
                         )}
-                    </p>
-                  ),
-                  status: (
-                    <Badge
-                      variant={
-                        key.status === "resolved" ? "secondary" : "destructive"
-                      }
-                    >
-                      {key.status}
-                    </Badge>
-                  ),
-                };
-              })}
+                      </p>
+                    ),
+                    sortable: false,
+                  },
+                  {
+                    key: "threshold",
+                    header: "Threshold",
+                    render: (alert) => (
+                      <p className="text-xs">
+                        {formatThreshold(alert.metric, alert.threshold)}
+                      </p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: undefined,
+                    header: "Grouping",
+                    render: (alert) => (
+                      <p className="text-xs">
+                        {(alert as any).grouping
+                          ? (alert as any).grouping
+                          : "—"}
+                      </p>
+                    ),
+                    sortable: false,
+                  },
+                  {
+                    key: "time_window",
+                    header: "Time Window",
+                    render: (alert) => (
+                      <p className="text-xs">
+                        {formatTimeWindow(alert.time_window)}
+                      </p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "minimum_request_count",
+                    header: "Min Requests",
+                    render: (alert) => (
+                      <p className="text-xs">
+                        {alert.minimum_request_count || 0}
+                      </p>
+                    ),
+                    sortable: true,
+                  },
+                  {
+                    key: "filter",
+                    header: "Filter",
+                    render: (alert) => (
+                      <p className="text-xs">{alert.filter ? "Yes" : "No"}</p>
+                    ),
+                    sortable: false,
+                  },
+                  {
+                    key: "emails",
+                    header: "Emails",
+                    render: (alert) => (
+                      <div className="flex text-xs">
+                        {alert.emails.join(", ")}
+                      </div>
+                    ),
+                    sortable: false,
+                    minSize: 200,
+                  },
+                  {
+                    key: "slack_channels",
+                    header: "Slack Channels",
+                    render: (alert) => (
+                      <div className="flex text-xs">
+                        {alert.slack_channels
+                          .map(
+                            (channel) =>
+                              slackChannels?.find(
+                                (slackChannel) => slackChannel.id === channel,
+                              )?.name,
+                          )
+                          .join(", ")}
+                      </div>
+                    ),
+                    sortable: false,
+                    minSize: 200,
+                  },
+                ]}
+                defaultSortKey="created_at"
+                defaultSortDirection="desc"
+              />
+            </div>
+            <TableFooter
+              currentPage={alertsCurrentPage}
+              pageSize={alertsPageSize}
+              count={alerts?.length || 0}
+              isCountLoading={isLoading}
+              onPageChange={(newPage) => setAlertsCurrentPage(newPage)}
+              onPageSizeChange={(newPageSize) => {
+                setAlertsPageSize(newPageSize);
+                setAlertsCurrentPage(1);
+              }}
+              pageSizeOptions={[10, 25, 50, 100]}
+              showCount={false}
             />
           </div>
-        )}
+        </TabsContent>
+
+        <TabsContent value="history" className="m-0 flex-1 overflow-y-auto">
+          {alertHistory.length === 0 ? (
+            <div className="border-2 border-dashed border-border bg-muted p-8 text-center">
+              <FileText
+                size={24}
+                className="mx-auto mb-2 text-muted-foreground"
+              />
+              <p className="text-xs font-medium">
+                No alerts have been triggered yet
+              </p>
+            </div>
+          ) : (
+            <div className="flex h-full flex-col">
+              <div className="flex-1 overflow-auto">
+                <SimpleTable
+                  data={alertHistory ?? []}
+                  columns={[
+                    {
+                      key: "status",
+                      header: "Status",
+                      render: (history) => (
+                        <AlertStatusPill
+                          status={history.status as "resolved" | "triggered"}
+                        />
+                      ),
+                      sortable: true,
+                    },
+                    {
+                      key: "alert_name",
+                      header: "Name",
+                      render: (history) => (
+                        <p className="text-xs font-semibold">
+                          {history.alert_name}
+                        </p>
+                      ),
+                      sortable: true,
+                    },
+                    {
+                      key: "alert_start_time",
+                      header: "Start Time",
+                      render: (history) => (
+                        <p className="text-xs">
+                          {getUSDate(new Date(history.alert_start_time))}
+                        </p>
+                      ),
+                      sortable: true,
+                    },
+                    {
+                      key: "alert_end_time",
+                      header: "End Time",
+                      render: (history) => (
+                        <p className="text-xs">
+                          {history.alert_end_time
+                            ? getUSDate(new Date(history.alert_end_time))
+                            : "—"}
+                        </p>
+                      ),
+                      sortable: true,
+                    },
+                    {
+                      key: "triggered_value",
+                      header: "Trigger",
+                      render: (history) => (
+                        <p className="text-xs">
+                          {formatThreshold(
+                            history.alert_metric,
+                            Number(history.triggered_value),
+                          )}
+                        </p>
+                      ),
+                      sortable: true,
+                    },
+                  ]}
+                  defaultSortKey="alert_start_time"
+                  defaultSortDirection="desc"
+                />
+              </div>
+              <TableFooter
+                currentPage={historyCurrentPage}
+                pageSize={historyPageSize}
+                count={historyTotalCount}
+                isCountLoading={isLoading}
+                onPageChange={(newPage) => setHistoryCurrentPage(newPage)}
+                onPageSizeChange={(newPageSize) => {
+                  setHistoryPageSize(newPageSize);
+                  setHistoryCurrentPage(1);
+                }}
+                pageSizeOptions={[10, 25, 50, 100]}
+                showCount={false}
+              />
+            </div>
+          )}
+        </TabsContent>
       </div>
 
       {/* Modals */}
@@ -337,7 +511,7 @@ const AlertsPage = () => {
         }}
         alertId={selectedAlert?.id || ""}
       />
-    </SettingsContainer>
+    </Tabs>
   );
 };
 

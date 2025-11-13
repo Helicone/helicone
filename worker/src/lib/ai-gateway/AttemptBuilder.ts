@@ -2,6 +2,10 @@ import { registry } from "@helicone-package/cost/models/registry";
 import { ModelProviderEntry } from "@helicone-package/cost/models/build-indexes";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import {
+  getProviderPriority,
+  sortAttemptsByPriority,
+} from "@helicone-package/cost/models/providers/priorities";
+import {
   UserEndpointConfig,
   Endpoint,
   Plugin,
@@ -14,22 +18,30 @@ import { isErr } from "../util/results";
 import { Attempt } from "./types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { PluginHandler } from "./PluginHandler";
+import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
 
 export class AttemptBuilder {
   private readonly pluginHandler: PluginHandler;
+  private readonly tracer: DataDogTracer;
+  private readonly traceContext: TraceContext | null;
 
   constructor(
     private readonly providerKeysManager: ProviderKeysManager,
-    private readonly env: Env
+    private readonly env: Env,
+    tracer: DataDogTracer,
+    traceContext: TraceContext | null
   ) {
     this.pluginHandler = new PluginHandler();
+    this.tracer = tracer;
+    this.traceContext = traceContext;
   }
 
   async buildAttempts(
     modelStrings: string[],
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    globalIgnoreProviders?: Set<ModelProviderName>
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
 
@@ -44,47 +56,71 @@ export class AttemptBuilder {
       }
 
       if (modelSpec.data.provider) {
-        // Explicit provider specified - only try this provider
+        // Explicit provider specified - sort within this model's attempts to prioritize BYOK over PTB
         const providerAttempts = await this.getProviderAttempts(
           modelSpec.data,
           orgId,
           bodyMapping,
           plugins
         );
-        allAttempts.push(...providerAttempts);
+        // Sort this model's attempts (BYOK first), but preserve order relative to other models
+        allAttempts.push(...sortAttemptsByPriority(providerAttempts));
       } else {
-        // No provider specified - try all providers
+        // No provider specified - get all providers and sort by priority
         const attempts = await this.buildAttemptsForAllProviders(
           modelSpec.data,
           orgId,
           bodyMapping,
-          plugins
+          plugins,
+          globalIgnoreProviders
         );
-        allAttempts.push(...attempts);
+        allAttempts.push(...sortAttemptsByPriority(attempts));
       }
     }
 
-    // Sort by priority (BYOK=1 before PTB=2)
-    // Within each priority, endpoints are already sorted by cost from registry
-    return allAttempts.sort((a, b) => a.priority - b.priority);
+    // Filter explicit provider routing attempts (not filtered in buildAttemptsForAllProviders)
+    if (globalIgnoreProviders && globalIgnoreProviders.size > 0) {
+      return allAttempts.filter(
+        (attempt) => !globalIgnoreProviders.has(attempt.endpoint.provider)
+      );
+    }
+
+    return allAttempts;
   }
 
   private async buildAttemptsForAllProviders(
     modelSpec: ModelSpec,
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    globalIgnoreProviders?: Set<ModelProviderName>
   ): Promise<Attempt[]> {
     // Get all provider data in one query
     const providerDataResult = registry.getModelProviderEntriesByModel(
       modelSpec.modelName
     );
     // Filter out providers that require explicit routing (e.g., helicone)
+    // and globally ignored providers
     const providerData = (providerDataResult.data || []).filter(
-      (data) => !data.config.requireExplicitRouting
+      (data) =>
+        !data.config.requireExplicitRouting &&
+        (!globalIgnoreProviders || !globalIgnoreProviders.has(data.provider))
     );
 
     // Process all providers in parallel (we know model exists because parseModelString validated it)
+    const parallelSpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.build_attempts.process_all_providers",
+          "Promise.all",
+          "ai-gateway",
+          {
+            provider_count: providerData.length.toString(),
+            model: modelSpec.modelName,
+          },
+          this.traceContext
+        )
+      : null;
+
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
         const byokAttempts = await this.buildByokAttempts(
@@ -99,11 +135,14 @@ export class AttemptBuilder {
         const ptbAttempts = await this.buildPtbAttempts(
           modelSpec,
           data,
+          bodyMapping,
           plugins
         );
         return [...byokAttempts, ...ptbAttempts];
       })
     );
+
+    this.tracer.finishSpan(parallelSpan);
 
     return attemptArrays.flat();
   }
@@ -145,6 +184,7 @@ export class AttemptBuilder {
     const ptbAttempts = await this.buildPtbAttempts(
       modelSpec,
       providerData,
+      bodyMapping,
       plugins
     );
     return [...byokAttempts, ...ptbAttempts];
@@ -158,11 +198,27 @@ export class AttemptBuilder {
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Get user's provider key
+    const keySpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.build_attempts.get_provider_key",
+          "getProviderKeyWithFetch",
+          "ai-gateway",
+          {
+            provider: providerData.provider,
+            model: modelSpec.modelName,
+          },
+          this.traceContext
+        )
+      : null;
+
     const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
+      modelSpec.modelName,
       orgId,
       modelSpec.customUid
     );
+
+    this.tracer.finishSpan(keySpan);
 
     if (!userKey || !this.isByokEnabled(userKey)) {
       return []; // No BYOK available
@@ -190,12 +246,14 @@ export class AttemptBuilder {
       plugins
     );
 
+    const providerDefaultPriority = getProviderPriority(providerData.provider);
+
     return [
       {
         endpoint: endpointResult.data,
         providerKey: userKey,
         authType: "byok",
-        priority: endpointResult.data.priority ?? 1,
+        priority: endpointResult.data.priority ?? providerDefaultPriority,
         source: `${modelSpec.modelName}/${providerData.provider}/byok${modelSpec.customUid ? `/${modelSpec.customUid}` : ""}`,
         plugins: processedPlugins.length > 0 ? processedPlugins : undefined,
       },
@@ -211,6 +269,7 @@ export class AttemptBuilder {
     // Get user's provider key for passthrough
     const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
       modelSpec.provider as ModelProviderName,
+      modelSpec.modelName,
       orgId,
       modelSpec.customUid
     );
@@ -258,6 +317,7 @@ export class AttemptBuilder {
   private async buildPtbAttempts(
     modelSpec: ModelSpec,
     providerData: ModelProviderEntry,
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
     // Check if we have PTB endpoints
@@ -266,10 +326,26 @@ export class AttemptBuilder {
     }
 
     // Get Helicone's provider key for PTB
+    const ptbKeySpan = this.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.gateway.build_attempts.get_helicone_ptb_key",
+          "getProviderKeyWithFetch",
+          "ai-gateway",
+          {
+            provider: providerData.provider,
+            model: modelSpec.modelName,
+          },
+          this.traceContext
+        )
+      : null;
+
     const heliconeKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
+      providerData.config.providerModelId,
       this.env.HELICONE_ORG_ID
     );
+
+    this.tracer.finishSpan(ptbKeySpan);
 
     if (!heliconeKey) {
       console.error("Can't do PTB without Helicone's key");
@@ -289,6 +365,7 @@ export class AttemptBuilder {
       providerData.provider,
       providerData.ptbEndpoints,
       heliconeKey,
+      bodyMapping,
       processedPlugins
     );
   }
@@ -298,6 +375,7 @@ export class AttemptBuilder {
     provider: ModelProviderName,
     endpoints: Endpoint[],
     providerKey: ProviderKey,
+    bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Attempt[] {
     // This is where dynamically injected config is applied
@@ -309,9 +387,12 @@ export class AttemptBuilder {
           projectId:
             (providerKey.config as UserEndpointConfig)?.projectId ||
             endpoint.userConfig.projectId,
+          gatewayMapping: bodyMapping,
         },
       };
     });
+
+    const providerDefaultPriority = getProviderPriority(provider);
 
     return updatedEndpoints.map(
       (endpoint) =>
@@ -319,7 +400,7 @@ export class AttemptBuilder {
           endpoint,
           providerKey,
           authType: "ptb",
-          priority: endpoint.priority ?? 2,
+          priority: endpoint.priority ?? providerDefaultPriority,
           source: `${modelName}/${provider}/ptb`,
           plugins: plugins && plugins.length > 0 ? plugins : undefined,
         }) as Attempt
@@ -334,5 +415,4 @@ export class AttemptBuilder {
       providerKey.byok_enabled === true
     );
   }
-
 }

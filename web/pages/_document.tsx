@@ -22,6 +22,21 @@ class MyDocument extends Document {
         <Head>
           {/* eslint-disable-next-line @next/next/no-sync-scripts */}
           <script src="/__ENV.js" />
+          {/* Google tag (gtag.js) */}
+          <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-WGDEGPP49F"
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'G-WGDEGPP49F');
+              `,
+            }}
+          />
         </Head>
         <body className={isOpenStatsPage ? "open-stats-body" : ""}>
           <Main />

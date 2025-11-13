@@ -28,8 +28,6 @@ interface PlaygroundMessagesPanelProps {
     commitMessage: string,
   ) => void;
   onRun: () => void;
-  useAIGateway: boolean;
-  setUseAIGateway: (_useAIGateway: boolean) => void;
   error: string | null;
   isLoading?: boolean;
   createPrompt?: boolean;
@@ -51,8 +49,6 @@ const PlaygroundMessagesPanel = ({
   onCreatePrompt,
   onSavePrompt,
   onRun,
-  useAIGateway,
-  setUseAIGateway,
   error,
   isLoading,
   createPrompt,
@@ -201,7 +197,8 @@ const PlaygroundMessagesPanel = ({
             );
           }
           switch (mappedContent?._type) {
-            case "ai-gateway":
+            case "ai-gateway-chat":
+            case "ai-gateway-responses":
             case "openai-chat":
             case "anthropic-chat":
             case "gemini-chat":
@@ -253,8 +250,6 @@ const PlaygroundMessagesPanel = ({
           onSavePrompt={onSavePrompt}
           onRun={onRun}
           isScrolled={isScrolled}
-          useAIGateway={useAIGateway}
-          setUseAIGateway={setUseAIGateway}
           error={error}
           isLoading={isLoading}
           createPrompt={createPrompt}

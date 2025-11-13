@@ -107,9 +107,12 @@ const AuthLayout = (props: AuthLayoutProps) => {
     }
 
     // Gateway discount banner for eligible orgs
-    const isEligibleForDiscount = orgContext?.currentOrg?.gateway_discount_enabled === true;
-    const gatewayBannerDismissed = bannerDismissed || (typeof window !== "undefined" &&
-      sessionStorage.getItem("gateway-discount-banner-dismissed") === "true");
+    const isEligibleForDiscount =
+      orgContext?.currentOrg?.gateway_discount_enabled === true;
+    const gatewayBannerDismissed =
+      bannerDismissed ||
+      (typeof window !== "undefined" &&
+        sessionStorage.getItem("gateway-discount-banner-dismissed") === "true");
 
     if (isEligibleForDiscount && !gatewayBannerDismissed) {
       return {
@@ -117,7 +120,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
         title: "Limited Offer: Switch to Helicone AI Gateway",
         active: true,
         onClick: () => {
-          window.open("https://cal.com/cole-gottdank/inference-discount", "_blank", "noopener,noreferrer");
+          window.open(
+            "https://cal.com/cole-gottdank/inference-discount",
+            "_blank",
+            "noopener,noreferrer",
+          );
         },
         dismissible: true,
         onDismiss: () => {

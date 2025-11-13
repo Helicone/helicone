@@ -1,0 +1,262 @@
+---
+title: "Prompt Assembly"
+sidebarTitle: "Prompt Assembly"
+description: "Understand how prompts are compiled from templates and runtime parameters"
+"twitter:title": "Prompt Assembly | Helicone OSS LLM Observability"
+---
+
+When you make an LLM call with a prompt ID, the AI Gateway compiles your saved prompt alongside runtime parameters you provide. Understanding this assembly process helps you design effective prompt templates and make the most of runtime customization.
+
+## Version Selection
+
+The AI Gateway automatically determines which prompt version to use based on the parameters you provide:
+
+<ParamField body="environment" type="string">
+  Uses the version deployed to that environment (e.g., production, staging, development)
+</ParamField>
+
+<ParamField body="version_id" type="string">
+  Uses a specific version directly by its ID
+</ParamField>
+
+<Note>
+  **Default behavior**: If neither parameter is provided, the production version is used. Environment takes precedence over version_id if both are specified.
+</Note>
+
+## Parameter Priority
+
+Saved prompts store all the configuration you set in the playground - temperature, max tokens, response format, system messages, and more. At runtime, these saved parameters are used as defaults, but any parameters you specify in your API call will override them.
+
+<CodeGroup>
+  ```json Saved Prompt Configuration
+  {
+    "model": "gpt-4o-mini",
+    "temperature": 0.6,
+    "max_tokens": 1000,
+    "messages": [
+      {
+        "role": "system", 
+        "content": "You are a helpful customer support agent for {{hc:company:string}}."
+      },
+      {
+        "role": "user",
+        "content": "Hello, I need help with my account."
+      }
+    ]
+  }
+  ```
+
+  ```typescript Runtime API Call
+  const response = await openai.chat.completions.create({
+    prompt_id: "abc123",
+    temperature: 0.4, // Overrides saved temperature of 0.6
+    inputs: {
+      company: "Acme Corp"
+    },
+    messages: [
+      {
+        "role": "user",
+        "content": "Actually, I want to cancel my subscription."
+      }
+    ]
+  });
+  ```
+
+  ```json Final Compiled Request
+  {
+    "model": "gpt-4o-mini",
+    "temperature": 0.4, // Runtime value used
+    "max_tokens": 1000, // Saved value used
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful customer support agent for Acme Corp."
+      },
+      {
+        "role": "user", 
+        "content": "Hello, I need help with my account."
+      },
+      {
+        "role": "user",
+        "content": "Actually, I want to cancel my subscription."
+      }
+    ]
+  }
+  ```
+</CodeGroup>
+
+## Message Handling
+
+Messages work differently than other parameters. Instead of overriding, runtime messages are **appended** to the saved prompt messages. This allows you to:
+
+- Define consistent system prompts and example conversations in your saved prompt
+- Add dynamic user messages at runtime
+- Build multi-turn conversations that maintain context
+
+Since your saved prompts contain the required messages, the `messages` parameter becomes optional in API calls when using Helicone prompts. However, if your prompt template is empty or lacks messages, you'll need to provide them at runtime.
+
+<Warning>
+  Runtime messages are always appended to the end of your saved prompt messages. Make sure your saved prompt structure accounts for this behavior.
+</Warning>
+
+## Prompt Partial Resolution
+
+Prompt partials are resolved before variable substitution, allowing you to reference messages from other prompts and control their variables from the main prompt.
+
+### Resolution Order
+
+The prompt assembly process follows this order:
+
+1. **Prompt Partial Resolution**: All `{{hcp:prompt_id:index:environment}}` tags are replaced with the corresponding message content
+2. **Variable Substitution**: All `{{hc:name:type}}` variables are replaced with their provided values
+
+<CodeGroup>
+  ```json Prompt Template with Partial
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "{{hcp:sysPrompt:0}} Always be {{hc:tone:string}}."
+      }
+    ]
+  }
+  ```
+
+  ```json Referenced Prompt (sysPrompt) - Message 0
+  "You are a helpful assistant for {{hc:company:string}}."
+  ```
+
+  ```json Runtime Inputs
+  {
+    "company": "Acme Corp",
+    "tone": "professional"
+  }
+  ```
+
+  ```json Step 1: Partial Resolution
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant for {{hc:company:string}}. Always be {{hc:tone:string}}."
+      }
+    ]
+  }
+  ```
+
+  ```json Step 2: Variable Substitution (Final)
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant for Acme Corp. Always be professional."
+      }
+    ]
+  }
+  ```
+</CodeGroup>
+
+### Partial Resolution Process
+
+When a prompt partial is encountered:
+
+1. **Version Selection**: The system determines which version of the referenced prompt to use based on the `environment` parameter (or defaults to production)
+2. **Message Extraction**: The message at the specified `index` is extracted from that prompt version
+3. **Content Replacement**: The partial tag is replaced with the extracted message content (which may contain its own variables)
+4. **Variable Collection**: Variables from the resolved partial are collected and made available for substitution
+
+### Variable Control
+
+Since partials are resolved before variables, variables within partials can be controlled from the main prompt's inputs:
+
+<CodeGroup>
+  ```json Main Prompt
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "{{hcp:greeting:0}} How can you help me?"
+      }
+    ]
+  }
+  ```
+
+  ```json Referenced Prompt (greeting) - Message 0
+  "Hello {{hc:customer_name:string}}, welcome to {{hc:company:string}}!"
+  ```
+
+  ```json Runtime Inputs (Main Prompt)
+  {
+    "customer_name": "Alice",
+    "company": "TechCorp"
+  }
+  ```
+
+  ```json Final Result
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello Alice, welcome to TechCorp! How can you help me?"
+      }
+    ]
+  }
+  ```
+</CodeGroup>
+
+<Note>
+  Variables from prompt partials are automatically extracted and shown in the prompt editor. You only need to provide values for these variables in your main prompt's inputs - they will be substituted in both the main prompt and any resolved partials.
+</Note>
+
+## Override Examples
+
+<Tabs>
+  <Tab title="Temperature Override">
+    ```typescript
+    // Saved prompt has temperature: 0.8
+    const response = await openai.chat.completions.create({
+      prompt_id: "abc123",
+      temperature: 0.2, // Uses 0.2, not 0.8
+      inputs: { topic: "AI safety" }
+    });
+    ```
+  </Tab>
+
+  <Tab title="Max Tokens Override">
+    ```typescript
+    // Saved prompt has max_tokens: 500
+    const response = await openai.chat.completions.create({
+      prompt_id: "abc123", 
+      max_tokens: 1500, // Uses 1500, not 500
+      inputs: { complexity: "detailed" }
+    });
+    ```
+  </Tab>
+
+  <Tab title="Response Format Override">
+    ```typescript
+    // Saved prompt has no response format
+    const response = await openai.chat.completions.create({
+      prompt_id: "abc123",
+      response_format: { type: "json_object" }, // Adds JSON formatting
+      inputs: { data_type: "user_preferences" }
+    });
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  This compilation approach gives you the flexibility to have consistent prompt templates while still allowing runtime customization for specific use cases.
+</Note>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+<Card title="Overview" icon="book" href="/features/advanced-usage/prompts/overview">
+  Get started with Prompt Management
+</Card>
+<Card title="SDK Integration" icon="code" href="/features/advanced-usage/prompts/sdk">
+  Use prompts directly via SDK
+</Card>
+</CardGroup>
+

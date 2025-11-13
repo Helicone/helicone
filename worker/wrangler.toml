@@ -9,7 +9,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
-	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
 ]
 
 
@@ -28,7 +28,7 @@ queues.producers = [
 ]
 
 containers = [
-	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" }
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" },
 ]
 
 [vars]
@@ -51,7 +51,7 @@ S3_ENDPOINT = "http://localhost:9000"
 S3_ACCESS_KEY = "minioadmin"
 S3_SECRET_KEY = "minioadmin"
 S3_BUCKET_NAME = "request-response-storage"
-HELICONE_MANUAL_ACCESS_KEY="sk-helicone-rrrrrrr-xxxxxxx-vvvvvvv-wwwwwww"
+HELICONE_MANUAL_ACCESS_KEY = "sk-helicone-rrrrrrr-xxxxxxx-vvvvvvv-wwwwwww"
 APP_URL = "https://us.helicone.ai"
 ENVIRONMENT = "development"
 TOKENIZER_COUNT_API = "https://tokens.helicone.ai/anthropic/count_tokens"
@@ -67,6 +67,9 @@ PROMPTARMOR_API_KEY = ""
 DATADOG_ENABLED = "false"
 DATADOG_API_KEY = ""
 DATADOG_ENDPOINT = ""
+DATADOG_APM_ENABLED = "false"
+DATADOG_APM_ENDPOINT = "https://http-intake.logs.us5.datadoghq.com"
+DATADOG_APM_SAMPLING_RATE = "0.01"
 GATEWAY_TARGET = ""
 S3_ENABLED = "true"
 S3_REGION = "us-west-2"
@@ -94,11 +97,11 @@ STRIPE_WEBHOOK_SECRET = ""
 HELICONE_ORG_ID = ""
 
 EU_HELICONE_ORG_ID = ""
-STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT="prod_StWk1FmJ88b9Ju"
+STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT = "prod_StWk1FmJ88b9Ju"
 
-UPSTASH_KAFKA_URL=""
-UPSTASH_KAFKA_USERNAME=""
-UPSTASH_KAFKA_PASSWORD=""
+UPSTASH_KAFKA_URL = ""
+UPSTASH_KAFKA_USERNAME = ""
+UPSTASH_KAFKA_PASSWORD = ""
 
 [triggers]
 crons = ["* * * * *", "0 * * * *", "0 10 * * mon", "*/5 * * * *"]
@@ -177,7 +180,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
-	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
 ]
 
 kv_namespaces = [
@@ -191,7 +194,7 @@ kv_namespaces = [
 ]
 
 containers = [
-	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" }
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" },
 ]
 
 [env.production.triggers]
@@ -206,6 +209,9 @@ SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 VAULT_ENABLED = "true"
 DATADOG_ENABLED = "true"
+DATADOG_APM_ENABLED = "true"
+DATADOG_APM_ENDPOINT = "https://http-intake.logs.us5.datadoghq.com"
+DATADOG_APM_SAMPLING_RATE = "0.10"
 QUEUE_PROVIDER = "sqs"
 ENVIRONMENT = "production"
 APP_URL = "https://us.helicone.ai"
@@ -258,7 +264,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
-	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
 ]
 
 queues.producers = [
@@ -266,7 +272,7 @@ queues.producers = [
 ]
 
 containers = [
-	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" }
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" },
 ]
 
 # Environment-specific variables only (inherit most from top-level [vars])
@@ -280,8 +286,6 @@ APP_URL = "https://us.helicone.ai"
 
 [env.production_staging.triggers]
 crons = []
-
-
 
 
 [[migrations]]

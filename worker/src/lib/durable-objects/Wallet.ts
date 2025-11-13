@@ -1,6 +1,9 @@
 import { DurableObject } from "cloudflare:workers";
 import { err, ok, Result } from "../util/results";
 import Stripe from "stripe";
+import { AutoTopoffManager } from "../managers/AutoTopoffManager";
+
+export const MS_BETWEEN_ALARMS = 5 * 1000 * 60; // 5 minutes
 
 // 10^10 is the scale factor for the balance
 // (which is sent to us by stripe in cents)
@@ -541,7 +544,7 @@ export class Wallet extends DurableObject<Env> {
     return this.ctx.storage.transactionSync(() => {
       const now = Date.now();
 
-      // This does an upsert update and += the deebits... it's confusing but I am writing a comment here so now you know, you're welcome and i love you.
+      // This does an upsert update and += the debits... it's confusing but I am writing a comment here so now you know, you're welcome and i love you.
       this.ctx.storage.sql.exec(
         `INSERT INTO aggregated_debits (org_id, debits, updated_at, ch_last_checked_at, ch_last_value) 
           VALUES (?, ?, ?, ?, ?) 
@@ -563,6 +566,7 @@ export class Wallet extends DurableObject<Env> {
           orgId
         )
         .one();
+
       return { clickhouseLastCheckedAt: result.checked_at };
     });
   }
@@ -774,5 +778,58 @@ export class Wallet extends DurableObject<Env> {
         return err(`Failed to update dispute: ${error}`);
       }
     });
+  }
+
+  async checkAndScheduleAutoTopoffAlarm(orgId: string): Promise<void> {
+    await this.ctx.storage.put("org_id", orgId);
+
+    const alarm = await this.ctx.storage.getAlarm();
+    if (alarm !== null) {
+      // Alarm already scheduled
+      return;
+    }
+
+    try {
+      const autoTopoffManager = new AutoTopoffManager(this.env);
+
+      const walletState = this.getWalletState(orgId);
+      const effectiveBalanceCents = walletState.effectiveBalance;
+
+      if (
+        await autoTopoffManager.shouldTriggerTopoff(
+          orgId,
+          effectiveBalanceCents
+        )
+      ) {
+        await this.ctx.storage.setAlarm(Date.now() + MS_BETWEEN_ALARMS); // 5 minutes from now
+      }
+    } catch (error) {
+      console.error(
+        `Error checking/scheduling auto topoff alarm for org ${orgId}:`,
+        error
+      );
+    }
+  }
+
+  async alarm(): Promise<void> {
+    const orgId = await this.ctx.storage.get<string>("org_id");
+    try {
+      const autoTopoffManager = new AutoTopoffManager(this.env);
+
+      const walletState = this.getWalletState(orgId!);
+      const effectiveBalanceCents = walletState.effectiveBalance;
+
+      // double check before initiating topoff
+      if (
+        await autoTopoffManager.shouldTriggerTopoff(
+          orgId!,
+          effectiveBalanceCents
+        )
+      ) {
+        await autoTopoffManager.initiateTopoff(orgId!);
+      }
+    } catch (error) {
+      console.error(`Unexpected error in auto topoff alarm handler:`, error);
+    }
   }
 }

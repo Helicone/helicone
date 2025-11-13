@@ -1,5 +1,11 @@
 import { BaseProvider } from "./base";
-import type { AuthContext, AuthResult, Endpoint, RequestBodyContext, RequestParams } from "../types";
+import type {
+  AuthContext,
+  AuthResult,
+  Endpoint,
+  RequestBodyContext,
+  RequestParams,
+} from "../types";
 
 export class HeliconeProvider extends BaseProvider {
   readonly displayName = "Helicone";
@@ -17,9 +23,10 @@ export class HeliconeProvider extends BaseProvider {
     }
 
     // Use responses endpoint for pro/codex models or when bodyMapping is RESPONSES
-    const isResponsesEndpoint = requestParams.bodyMapping === "RESPONSES" ||
-                                 endpoint.providerModelId.includes("gpt-5-pro") ||
-                                 endpoint.providerModelId.includes("gpt-5-codex");
+    const isResponsesEndpoint =
+      requestParams.bodyMapping === "RESPONSES" ||
+      endpoint.providerModelId.includes("gpt-5-pro") ||
+      endpoint.providerModelId.includes("gpt-5-codex");
 
     const path = isResponsesEndpoint ? "/responses" : "/chat/completions";
     return `${this.baseUrl}/openai/v1${path}`;
@@ -53,7 +60,16 @@ export class HeliconeProvider extends BaseProvider {
           model: endpoint.providerModelId,
         });
       }
-      const anthropicBody = context.toAnthropic(context.parsedBody, endpoint.providerModelId);
+
+      const anthropicBody = context.toAnthropic(
+        context.parsedBody,
+        endpoint.providerModelId
+      );
+
+      if (typeof anthropicBody.system === "string") {
+        anthropicBody.system = [{ type: "text", text: anthropicBody.system }];
+      }
+
       return JSON.stringify(anthropicBody);
     }
 

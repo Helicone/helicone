@@ -181,11 +181,10 @@ export class AdminWalletManager extends BaseManager {
     search: string,
     tokenUsageProductId: string,
     _sortBy: "total_spend",
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
+    page: number = 0,
+    pageSize: number = 100
   ): Promise<Result<DashboardData, string>> {
-    const order = sortOrder === "asc" ? "ASC" : "DESC";
-
-    // Get top 100 organizations by spending from ClickHouse
     const clickhouseSpendResult = await clickhouseDb.dbQuery<{
       organization_id: string;
       total_cost: number;
@@ -193,8 +192,6 @@ export class AdminWalletManager extends BaseManager {
       `
         SELECT organization_id, spend as total_cost
         FROM organization_ptb_spend_mv FINAL
-        ORDER BY total_cost ${order}
-        LIMIT 100
       `,
       []
     );
@@ -205,42 +202,33 @@ export class AdminWalletManager extends BaseManager {
       );
     }
 
-    // Get org IDs from ClickHouse results
-    const orgIds = clickhouseSpendResult.data.map((row) => row.organization_id);
+    // Create a map of org_id -> spend amount
+    const spendMap = new Map<string, number>();
+    clickhouseSpendResult.data.forEach((row) => {
+      spendMap.set(
+        row.organization_id,
+        Number(row.total_cost) / COST_PRECISION_MULTIPLIER
+      );
+    });
 
-    if (orgIds.length === 0) {
-      return ok({
-        organizations: [],
-        isProduction: ENVIRONMENT === "production",
-        summary: {
-          totalOrgsWithCredits: 0,
-          totalCreditsIssued: 0,
-          totalCreditsSpent: 0,
-        },
-      });
-    }
-
-    // Build search filter for org details query
+    // Build search filter for SQL
     const searchFilter = search
       ? `AND (
-          organization.name ILIKE $1 OR
-          organization.id::text ILIKE $1 OR
-          organization.stripe_customer_id ILIKE $1 OR
-          auth.users.email ILIKE $1
+          organization.name ILIKE $2 OR
+          organization.id::text ILIKE $2 OR
+          organization.stripe_customer_id ILIKE $2 OR
+          auth.users.email ILIKE $2
         )`
       : "";
 
     // Build query parameters
-    const queryParams = search ? [`%${search}%`] : [];
+    const queryParams: string[] = [];
     queryParams.push(tokenUsageProductId);
+    if (search) {
+      queryParams.push(`%${search}%`);
+    }
 
-    // Build IN clause with individual placeholders for each org ID
-    const orgIdPlaceholders = orgIds
-      .map((_, index) => `$${queryParams.length + index + 1}`)
-      .join(", ");
-
-    // Get organization details for these orgs
-    const orgsResult = await dbExecute<{
+    const allOrgsResult = await dbExecute<{
       org_id: string;
       org_name: string;
       stripe_customer_id: string;
@@ -268,10 +256,9 @@ export class AdminWalletManager extends BaseManager {
         LEFT JOIN auth.users ON organization.owner = auth.users.id
         LEFT JOIN stripe.payment_intents ON
           organization.stripe_customer_id = stripe.payment_intents.customer
-          AND stripe.payment_intents.metadata->>'productId' = $${search ? 2 : 1}
+          AND stripe.payment_intents.metadata->>'productId' = $1
           AND stripe.payment_intents.status = 'succeeded'
         WHERE organization.soft_delete = false
-          AND organization.id IN (${orgIdPlaceholders})
         ${searchFilter}
         GROUP BY
           organization.id,
@@ -282,14 +269,14 @@ export class AdminWalletManager extends BaseManager {
           organization.allow_negative_balance,
           organization.credit_limit
         `,
-      [...queryParams, ...orgIds]
+      queryParams
     );
 
-    if (orgsResult.error) {
-      return err(orgsResult.error);
+    if (allOrgsResult.error) {
+      return err(allOrgsResult.error);
     }
 
-    if (!orgsResult.data || orgsResult.data.length === 0) {
+    if (!allOrgsResult.data || allOrgsResult.data.length === 0) {
       return ok({
         organizations: [],
         isProduction: ENVIRONMENT === "production",
@@ -301,53 +288,71 @@ export class AdminWalletManager extends BaseManager {
       });
     }
 
-    // Create spend map from ClickHouse results
-    const clickhouseSpendMap = new Map<string, number>();
-    clickhouseSpendResult.data.forEach((row) => {
-      clickhouseSpendMap.set(
-        row.organization_id,
-        Number(row.total_cost) / COST_PRECISION_MULTIPLIER
-      );
+    // Get org IDs for wallet state fetching
+    const allOrgIds = allOrgsResult.data.map((org) => org.org_id);
+
+    if (allOrgIds.length === 0) {
+      return ok({
+        organizations: [],
+        isProduction: ENVIRONMENT === "production",
+        summary: {
+          totalOrgsWithCredits: 0,
+          totalCreditsIssued: 0,
+          totalCreditsSpent: 0,
+        },
+      });
+    }
+
+    // Transform all orgs with spend data (no wallet states yet)
+    const organizations = allOrgsResult.data.map((org) => {
+      return {
+        orgId: org.org_id,
+        orgName: org.org_name || "Unknown",
+        stripeCustomerId: org.stripe_customer_id || "",
+        totalPayments: org.total_amount_received / 100,
+        paymentsCount: org.payments_count,
+        clickhouseTotalSpend: spendMap.get(org.org_id) || 0,
+        lastPaymentDate: org.last_payment_date
+          ? Number(org.last_payment_date) * 1000
+          : null,
+        tier: org.tier || "free",
+        ownerEmail: org.owner_email || "Unknown",
+        allowNegativeBalance: org.allow_negative_balance,
+        creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0,
+      };
     });
 
-    // Fetch wallet states for all organizations in parallel
-    const walletStateMap = await this.fetchWalletStates(orgIds);
+    // Sort in TypeScript by total spend
+    organizations.sort((a, b) => {
+      if (sortOrder === "asc") {
+        return a.clickhouseTotalSpend - b.clickhouseTotalSpend;
+      } else {
+        return b.clickhouseTotalSpend - a.clickhouseTotalSpend;
+      }
+    });
 
-    // Combine the data, maintaining ClickHouse sort order
-    const orgDetailsMap = new Map(
-      orgsResult.data.map((org) => [org.org_id, org])
-    );
+    // Apply pagination AFTER sorting to get the page we need
+    const totalOrgs = organizations.length;
+    const offset = page * pageSize;
+    const paginatedOrganizations = organizations.slice(offset, offset + pageSize);
 
-    const organizations = orgIds
-      .map((orgId) => {
-        const org = orgDetailsMap.get(orgId);
-        if (!org) return null;
+    // NOW fetch wallet states ONLY for the paginated organizations
+    const paginatedOrgIds = paginatedOrganizations.map(org => org.orgId);
+    const walletStateMap = await this.fetchWalletStates(paginatedOrgIds);
 
-        const walletState = walletStateMap.get(orgId) || {};
-
-        return {
-          orgId: org.org_id,
-          orgName: org.org_name || "Unknown",
-          stripeCustomerId: org.stripe_customer_id || "",
-          totalPayments: org.total_amount_received / 100,
-          paymentsCount: org.payments_count,
-          clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
-          lastPaymentDate: org.last_payment_date
-            ? Number(org.last_payment_date) * 1000
-            : null,
-          tier: org.tier || "free",
-          ownerEmail: org.owner_email || "Unknown",
-          allowNegativeBalance: org.allow_negative_balance,
-          creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0,
-          walletBalance: walletState.balance,
-          walletEffectiveBalance: walletState.effectiveBalance,
-          walletTotalCredits: walletState.totalCredits,
-          walletTotalDebits: walletState.totalDebits,
-          walletDisallowedModelCount: walletState.disallowedModelCount,
-          walletProcessedEventsCount: walletState.processedEventsCount,
-        };
-      })
-      .filter((org): org is NonNullable<typeof org> => org !== null);
+    // Add wallet states to paginated organizations
+    const organizationsWithWalletStates = paginatedOrganizations.map((org) => {
+      const walletState = walletStateMap.get(org.orgId) || {};
+      return {
+        ...org,
+        walletBalance: walletState.balance,
+        walletEffectiveBalance: walletState.effectiveBalance,
+        walletTotalCredits: walletState.totalCredits,
+        walletTotalDebits: walletState.totalDebits,
+        walletDisallowedModelCount: walletState.disallowedModelCount,
+        walletProcessedEventsCount: walletState.processedEventsCount,
+      };
+    });
 
     // Calculate summary
     const totalCreditsIssued = organizations.reduce(
@@ -360,9 +365,9 @@ export class AdminWalletManager extends BaseManager {
     );
 
     return ok({
-      organizations,
+      organizations: organizationsWithWalletStates,
       summary: {
-        totalOrgsWithCredits: organizations.length,
+        totalOrgsWithCredits: totalOrgs,
         totalCreditsIssued,
         totalCreditsSpent,
       },
@@ -378,7 +383,9 @@ export class AdminWalletManager extends BaseManager {
       | "total_payments"
       | "credit_limit"
       | "amount_received",
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
+    page: number = 0,
+    pageSize: number = 100
   ): Promise<Result<DashboardData, string>> {
     // Build search filter
     const searchFilter = search
@@ -467,7 +474,7 @@ export class AdminWalletManager extends BaseManager {
           organization.credit_limit,
           organization.created_at
         ${orderClause}
-        LIMIT 100
+        LIMIT ${pageSize} OFFSET ${page * pageSize}
         `,
       queryParams
     );
@@ -504,7 +511,9 @@ export class AdminWalletManager extends BaseManager {
           organization_id,
           SUM(cost) as total_cost
         FROM request_response_rmt
-        WHERE organization_id IN (${orgIds.map((orgId) => `'${orgId}'`).join(",")})
+        WHERE organization_id IN (${orgIds
+          .map((orgId) => `'${orgId}'`)
+          .join(",")})
         and is_passthrough_billing = true
         GROUP BY organization_id
         `,

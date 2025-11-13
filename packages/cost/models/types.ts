@@ -50,6 +50,7 @@ export type Tokenizer =
   | "Llama4"
   | "Gemini"
   | "Mistral"
+  | "MoonshotAI"
   | "Qwen"
   | "DeepSeek"
   | "Cohere"
@@ -85,7 +86,8 @@ export type StandardParameter =
   | "logprobs"
   | "top_logprobs"
   | "structured_outputs"
-  | "verbosity";
+  | "verbosity"
+  | "n";
 
 export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   max_tokens: "Max Tokens",
@@ -115,6 +117,7 @@ export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   top_logprobs: "Top Log Probs",
   structured_outputs: "Structured Outputs",
   verbosity: "Verbosity",
+  n: "Number of Completions",
 };
 
 export interface ModelPricing {
@@ -198,6 +201,7 @@ export interface ModelProviderConfig extends BaseConfig {
   quantization?: "fp4" | "fp8" | "fp16" | "bf16";
   responseFormat?: ResponseFormat;
   requireExplicitRouting?: boolean;
+  providerModelIdAliases?: string[];
 }
 
 export interface EndpointConfig extends UserEndpointConfig {
@@ -237,6 +241,7 @@ export interface UserEndpointConfig {
   crossRegion?: boolean;
   gatewayMapping?: BodyMappingType;
   modelName?: string;
+  heliconeModelId?: string; // Azure OpenAI
 }
 
 export interface ModelSpec {
@@ -263,5 +268,10 @@ export interface AuthResult {
 export interface RequestBodyContext {
   parsedBody: any;
   bodyMapping: BodyMappingType;
-  toAnthropic: (body: any, providerModelId?: string) => any;
+  toAnthropic: (
+    body: any,
+    providerModelId?: string,
+    options?: { includeCacheBreakpoints?: boolean }
+  ) => any;
+  toChatCompletions: (body: any) => any;
 }
