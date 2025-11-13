@@ -12,7 +12,9 @@ const ThemedModal = (props: ThemedModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className={className ?? "max-h-[90vh] w-fit max-w-[90vw] overflow-auto"}>
+      <DialogContent
+        className={className ?? "max-h-[90vh] w-fit max-w-[90vw] overflow-auto"}
+      >
         {children}
       </DialogContent>
     </Dialog>

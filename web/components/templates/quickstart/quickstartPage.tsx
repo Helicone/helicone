@@ -338,7 +338,7 @@ const QuickstartPage = () => {
                   <div
                     className={`mt-4 flex items-center justify-between rounded-lg border border-border p-4 ${
                       autoTopoffSettings?.enabled
-                        ? "bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-900"
+                        ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950"
                         : hasCredits
                           ? "bg-muted/50"
                           : "bg-muted/30 opacity-60"

@@ -1,13 +1,23 @@
 import { HeliconeUser } from "@/packages/common/auth/types";
 import { TimeFilter } from "@/types/timeFilter";
 import {
-  ArrowPathIcon,
   ChartBarIcon,
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
-import { AreaChart as TremorAreaChart, BarChart as TremorBarChart, BarList, Card } from "@tremor/react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Responsive, ResponsiveProps, WidthProvider } from "react-grid-layout";
 import {
@@ -30,7 +40,6 @@ import Header from "../../shared/Header";
 import LivePill from "../../shared/LivePill";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import FilterASTButton from "@/filterAST/FilterASTButton";
-import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import {
   MetricsPanel,
@@ -42,11 +51,10 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import UnauthorizedView from "../requests/UnauthorizedView";
 import DashboardEmptyState from "./DashboardEmptyState";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
-import { Cloud } from "lucide-react";
 
 // Gateway discount configuration
-const GATEWAY_DISCOUNT_MIN = 0.10; // 10%
-const GATEWAY_DISCOUNT_MAX = 0.20; // 20%
+const GATEWAY_DISCOUNT_MIN = 0.1; // 10%
+const GATEWAY_DISCOUNT_MAX = 0.2; // 20%
 const CALENDLY_URL = "https://cal.com/cole-gottdank/inference-discount";
 import {
   getMockMetrics,
@@ -60,11 +68,9 @@ import ModelsByCostPanel from "./panels/modelsByCostPanel";
 import TopProvidersPanel from "./panels/topProvidersPanel";
 import ErrorsPanel from "./panels/errorsPanel";
 import { QuantilesGraph } from "./quantilesGraph";
-import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
-import DashboardChartTooltipContent from "./DashboardChartTooltipContent";
-import { CHART_COLORS, TREMOR_COLOR_PALETTE } from "../../../lib/chartColors";
+import { CHART_COLORS } from "../../../lib/chartColors";
 import DashboardExportButton from "./DashboardExportButton";
 const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
   ResponsiveProps & { children?: React.ReactNode }
@@ -170,10 +176,22 @@ const DashboardPage = (props: DashboardPageProps) => {
   const overTimeData = shouldShowMockData ? mockOverTimeData : realOverTimeData;
   const models = shouldShowMockData
     ? { data: mockModels.data, isLoading: false }
-    : { data: realModels.error === null ? realModels.data ?? undefined : undefined, isLoading: isModelsLoading };
+    : {
+        data:
+          realModels.error === null
+            ? (realModels.data ?? undefined)
+            : undefined,
+        isLoading: isModelsLoading,
+      };
   const providers = shouldShowMockData
     ? { data: [], isLoading: false }
-    : { data: realProviders.error === null ? realProviders.data ?? undefined : undefined, isLoading: isProvidersLoading };
+    : {
+        data:
+          realProviders.error === null
+            ? (realProviders.data ?? undefined)
+            : undefined,
+        isLoading: isProvidersLoading,
+      };
 
   const metricsData: MetricsPanelProps["metric"][] = [
     {
@@ -316,7 +334,8 @@ const DashboardPage = (props: DashboardPageProps) => {
     .filter((d) => d.value !== 0);
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
-  const [gatewayDiscountDismissed, setGatewayDiscountDismissed] = useState(false);
+  const [gatewayDiscountDismissed, setGatewayDiscountDismissed] =
+    useState(false);
 
   return (
     <>
@@ -397,9 +416,7 @@ const DashboardPage = (props: DashboardPageProps) => {
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />
         ) : (
-          <div
-            className={`${shouldShowMockData ? "pt-6" : ""}`}
-          >
+          <div className={`${shouldShowMockData ? "pt-6" : ""}`}>
             <section id="panels">
               <ResponsiveGridLayout
                 className="layout"
@@ -430,7 +447,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
-                        <p className="text-sm text-muted-foreground">Requests</p>
+                        <p className="text-sm text-muted-foreground">
+                          Requests
+                        </p>
                         <p className="text-xl font-semibold text-foreground">
                           {metrics.totalRequests?.data?.data
                             ? `${formatNumberString(
@@ -462,7 +481,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                         >
                           <AreaChart data={flattenedOverTime}>
                             <defs>
-                              <linearGradient id="fillSuccess" x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient
+                                id="fillSuccess"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
                                 <stop
                                   offset="5%"
                                   stopColor="var(--color-success)"
@@ -474,7 +499,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                                   stopOpacity={0.1}
                                 />
                               </linearGradient>
-                              <linearGradient id="fillError" x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient
+                                id="fillError"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
                                 <stop
                                   offset="5%"
                                   stopColor="var(--color-error)"
@@ -495,7 +526,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                               tickMargin={8}
                               minTickGap={50}
                             />
-                            <YAxis domain={[0, 'auto']} hide />
+                            <YAxis domain={[0, "auto"]} hide />
                             <ChartTooltip
                               cursor={false}
                               content={<ChartTooltipContent indicator="dot" />}
@@ -552,11 +583,17 @@ const DashboardPage = (props: DashboardPageProps) => {
                           {orgContext?.currentOrg?.gateway_discount_enabled &&
                             metrics.totalCost.data?.data &&
                             !gatewayDiscountDismissed &&
-                            !sessionStorage.getItem("gateway-discount-dismissed") && (
+                            !sessionStorage.getItem(
+                              "gateway-discount-dismissed",
+                            ) && (
                               <div className="group flex items-center gap-1">
                                 <button
                                   onClick={() =>
-                                    window.open(CALENDLY_URL, "_blank", "noopener,noreferrer")
+                                    window.open(
+                                      CALENDLY_URL,
+                                      "_blank",
+                                      "noopener,noreferrer",
+                                    )
                                   }
                                   className="group/button flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 transition-all hover:text-primary hover:underline"
                                 >
@@ -566,7 +603,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                                       $
                                       {formatNumberString(
                                         (
-                                          metrics.totalCost.data.data * GATEWAY_DISCOUNT_MAX
+                                          metrics.totalCost.data.data *
+                                          GATEWAY_DISCOUNT_MAX
                                         ).toFixed(2),
                                       )}
                                       /mo
@@ -591,7 +629,10 @@ const DashboardPage = (props: DashboardPageProps) => {
                                 </button>
                                 <button
                                   onClick={() => {
-                                    sessionStorage.setItem("gateway-discount-dismissed", "true");
+                                    sessionStorage.setItem(
+                                      "gateway-discount-dismissed",
+                                      "true",
+                                    );
                                     setGatewayDiscountDismissed(true);
                                   }}
                                   className="text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
@@ -649,7 +690,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                               tickMargin={8}
                               minTickGap={50}
                             />
-                            <YAxis domain={[0, 'auto']} hide />
+                            <YAxis domain={[0, "auto"]} hide />
                             <ChartTooltip
                               cursor={false}
                               content={
@@ -716,14 +757,16 @@ const DashboardPage = (props: DashboardPageProps) => {
                               tickMargin={8}
                               minTickGap={50}
                             />
-                            <YAxis domain={[0, 'auto']} hide />
+                            <YAxis domain={[0, "auto"]} hide />
                             <ChartTooltip
                               cursor={false}
                               content={
                                 <ChartTooltipContent
                                   indicator="dot"
                                   valueFormatter={(value) =>
-                                    new Intl.NumberFormat("us").format(Number(value))
+                                    new Intl.NumberFormat("us").format(
+                                      Number(value),
+                                    )
                                   }
                                 />
                               }
@@ -794,7 +837,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                             }
                           >
                             <defs>
-                              <linearGradient id="fillLatency" x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient
+                                id="fillLatency"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
                                 <stop
                                   offset="5%"
                                   stopColor="var(--color-latency)"
@@ -815,7 +864,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                               tickMargin={8}
                               minTickGap={50}
                             />
-                            <YAxis domain={[0, 'auto']} hide />
+                            <YAxis domain={[0, "auto"]} hide />
                             <ChartTooltip
                               cursor={false}
                               content={
@@ -850,7 +899,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
-                        <p className="text-sm text-muted-foreground">Time to First Token</p>
+                        <p className="text-sm text-muted-foreground">
+                          Time to First Token
+                        </p>
                         <p className="text-xl font-semibold text-foreground">
                           {`Average: ${new Intl.NumberFormat("us").format(
                             metrics.averageTimeToFirstToken.data?.data ?? 0,
@@ -876,14 +927,22 @@ const DashboardPage = (props: DashboardPageProps) => {
                         >
                           <AreaChart
                             data={
-                              overTimeData.timeToFirstToken.data?.data?.map((r) => ({
-                                date: getTimeMap(timeIncrement)(r.time),
-                                ttft: r.ttft,
-                              })) ?? []
+                              overTimeData.timeToFirstToken.data?.data?.map(
+                                (r) => ({
+                                  date: getTimeMap(timeIncrement)(r.time),
+                                  ttft: r.ttft,
+                                }),
+                              ) ?? []
                             }
                           >
                             <defs>
-                              <linearGradient id="fillTTFT" x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient
+                                id="fillTTFT"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
                                 <stop
                                   offset="5%"
                                   stopColor="var(--color-ttft)"
@@ -904,7 +963,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                               tickMargin={8}
                               minTickGap={50}
                             />
-                            <YAxis domain={[0, 'auto']} hide />
+                            <YAxis domain={[0, "auto"]} hide />
                             <ChartTooltip
                               cursor={false}
                               content={
@@ -935,7 +994,9 @@ const DashboardPage = (props: DashboardPageProps) => {
                         <p className="text-sm text-muted-foreground">Threats</p>
                         <p className="text-xl font-semibold text-foreground">
                           {formatLargeNumber(
-                            Number(metrics.totalThreats.data?.data?.toFixed(0) ?? 0),
+                            Number(
+                              metrics.totalThreats.data?.data?.toFixed(0) ?? 0,
+                            ),
                           )}
                         </p>
                       </div>
@@ -965,7 +1026,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                             }
                           >
                             <defs>
-                              <linearGradient id="fillThreats" x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient
+                                id="fillThreats"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
                                 <stop
                                   offset="5%"
                                   stopColor="var(--color-threats)"
@@ -986,14 +1053,16 @@ const DashboardPage = (props: DashboardPageProps) => {
                               tickMargin={8}
                               minTickGap={50}
                             />
-                            <YAxis domain={[0, 'auto']} hide />
+                            <YAxis domain={[0, "auto"]} hide />
                             <ChartTooltip
                               cursor={false}
                               content={
                                 <ChartTooltipContent
                                   indicator="dot"
                                   valueFormatter={(value) =>
-                                    new Intl.NumberFormat("us").format(Number(value))
+                                    new Intl.NumberFormat("us").format(
+                                      Number(value),
+                                    )
                                   }
                                 />
                               }
@@ -1040,15 +1109,21 @@ const DashboardPage = (props: DashboardPageProps) => {
                   <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
                     <div className="flex flex-row items-center justify-between">
                       <div className="flex flex-col space-y-0.5">
-                        <p className="text-sm text-muted-foreground">Tokens / Minute</p>
+                        <p className="text-sm text-muted-foreground">
+                          Tokens / Minute
+                        </p>
                         <p className="text-xl font-semibold text-foreground">
                           {`Max: ${formatLargeNumber(
                             max(
                               overTimeData.promptTokensOverTime.data?.data
-                                ?.map((d) => d.completion_tokens + d.prompt_tokens)
+                                ?.map(
+                                  (d) => d.completion_tokens + d.prompt_tokens,
+                                )
                                 .filter((d) => d !== 0) ?? [],
                             ) /
-                              Number(getIncrementAsMinutes(timeIncrement).toFixed(2)),
+                              Number(
+                                getIncrementAsMinutes(timeIncrement).toFixed(2),
+                              ),
                           )} tokens`}
                         </p>
                       </div>
@@ -1089,14 +1164,22 @@ const DashboardPage = (props: DashboardPageProps) => {
                                     (r.completion_tokens + 0.0) /
                                     getIncrementAsMinutes(timeIncrement),
                                   totalPerMin:
-                                    (r.prompt_tokens + r.completion_tokens + 0.0) /
+                                    (r.prompt_tokens +
+                                      r.completion_tokens +
+                                      0.0) /
                                     getIncrementAsMinutes(timeIncrement),
                                 }),
                               ) ?? []
                             }
                           >
                             <defs>
-                              <linearGradient id="fillPromptPerMin" x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient
+                                id="fillPromptPerMin"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
                                 <stop
                                   offset="5%"
                                   stopColor="var(--color-promptPerMin)"
@@ -1108,7 +1191,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                                   stopOpacity={0.1}
                                 />
                               </linearGradient>
-                              <linearGradient id="fillCompletionPerMin" x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient
+                                id="fillCompletionPerMin"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
                                 <stop
                                   offset="5%"
                                   stopColor="var(--color-completionPerMin)"
@@ -1120,7 +1209,13 @@ const DashboardPage = (props: DashboardPageProps) => {
                                   stopOpacity={0.1}
                                 />
                               </linearGradient>
-                              <linearGradient id="fillTotalPerMin" x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient
+                                id="fillTotalPerMin"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
                                 <stop
                                   offset="5%"
                                   stopColor="var(--color-totalPerMin)"
@@ -1141,7 +1236,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                               tickMargin={8}
                               minTickGap={50}
                             />
-                            <YAxis domain={[0, 'auto']} hide />
+                            <YAxis domain={[0, "auto"]} hide />
                             <ChartTooltip
                               cursor={false}
                               content={

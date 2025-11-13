@@ -8866,11 +8866,16 @@
 							"type": "object"
 						},
 						"type": "array"
+					},
+					"historyTotalCount": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
 					"alerts",
-					"history"
+					"history",
+					"historyTotalCount"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -56038,7 +56043,26 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "query",
+						"name": "historyPage",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "historyPageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
 			}
 		},
 		"/v1/alert/create": {

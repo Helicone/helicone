@@ -71,13 +71,15 @@ const PlaygroundHeader = ({
   createPrompt,
 }: PlaygroundHeaderProps) => {
   const [modelListOpen, setModelListOpen] = useState<boolean>(false);
-  const { data: playgroundModels, isLoading: modelsLoading } = useModelRegistry();
+  const { data: playgroundModels, isLoading: modelsLoading } =
+    useModelRegistry();
 
   // Get display name for selected model
   const selectedModelData = playgroundModels?.find(
     (m) => m.id === selectedModel,
   );
-  const displayName = selectedModelData?.name || selectedModel || "Select model...";
+  const displayName =
+    selectedModelData?.name || selectedModel || "Select model...";
   return (
     <div
       className={cn(

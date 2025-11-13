@@ -14,8 +14,6 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import {
-  CodeBracketSquareIcon,
-  CurrencyDollarIcon,
   InformationCircleIcon,
   BookOpenIcon,
   BellIcon,
@@ -46,8 +44,11 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { Check, ChevronsUpDown, X, Clock, Hash, ChevronDown } from "lucide-react";
-import { FilterProvider, useFilterAST } from "@/filterAST/context/filterContext";
+import { Check, ChevronsUpDown, X, ChevronDown } from "lucide-react";
+import {
+  FilterProvider,
+  useFilterAST,
+} from "@/filterAST/context/filterContext";
 import { useImpersistentFilterStore } from "@/filterAST/store/filterStore";
 import FilterASTEditor from "@/filterAST/FilterASTEditor";
 import { FilterExpression } from "@helicone-package/filters/types";
@@ -100,12 +101,14 @@ const AlertFormContent = (props: AlertFormProps) => {
   const [selectedMetric, setSelectedMetric] = useState<AlertMetric>(
     (initialValues?.metric as AlertMetric) || "response.status",
   );
-  const [selectedGrouping, setSelectedGrouping] = useState<AlertGrouping | null>(
-    ((initialValues as any)?.grouping as string) || null,
-  );
-  const [selectedAggregation, setSelectedAggregation] = useState<AlertAggregation>(
-    ((initialValues as any)?.aggregation as AlertAggregation) || "sum",
-  );
+  const [selectedGrouping, setSelectedGrouping] =
+    useState<AlertGrouping | null>(
+      ((initialValues as any)?.grouping as string) || null,
+    );
+  const [selectedAggregation, setSelectedAggregation] =
+    useState<AlertAggregation>(
+      ((initialValues as any)?.aggregation as AlertAggregation) || "sum",
+    );
   const [groupingOpen, setGroupingOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(true);
@@ -182,7 +185,9 @@ const AlertFormContent = (props: AlertFormProps) => {
 
   useEffect(() => {
     if (initialValues?.filter) {
-      filterStore.setFilter(initialValues.filter as unknown as FilterExpression);
+      filterStore.setFilter(
+        initialValues.filter as unknown as FilterExpression,
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues?.filter]);
@@ -237,7 +242,10 @@ const AlertFormContent = (props: AlertFormProps) => {
       selectedMetric !== "count"
     ) {
       if (!alertPercentile || alertPercentile.trim() === "") {
-        setNotification("Please enter a percentile value when using percentile aggregation", "error");
+        setNotification(
+          "Please enter a percentile value when using percentile aggregation",
+          "error",
+        );
         return;
       }
       const percentileNum = Number(alertPercentile);
@@ -268,9 +276,11 @@ const AlertFormContent = (props: AlertFormProps) => {
       return;
     }
 
-    const groupingIsProperty = selectedGrouping ? groupingOptions.properties.some(
-      (prop) => prop.value === selectedGrouping
-    ) : null;
+    const groupingIsProperty = selectedGrouping
+      ? groupingOptions.properties.some(
+          (prop) => prop.value === selectedGrouping,
+        )
+      : null;
 
     handleSubmit({
       name: alertName,
@@ -300,9 +310,9 @@ const AlertFormContent = (props: AlertFormProps) => {
   return (
     <form
       onSubmit={handleCreateAlert}
-      className="flex flex-col w-full max-w-[600px] sm:w-[600px] h-[80vh]"
+      className="flex h-[80vh] w-full max-w-[600px] flex-col sm:w-[600px]"
     >
-      <div className="flex items-center pb-4 flex-shrink-0">
+      <div className="flex flex-shrink-0 items-center pb-4">
         <div className="flex items-center gap-2">
           <BellIcon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
@@ -311,7 +321,7 @@ const AlertFormContent = (props: AlertFormProps) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0 rounded-sm border border-border py-4 px-4">
+      <div className="min-h-0 flex-1 overflow-y-auto rounded-sm border border-border px-4 py-4">
         <div className="grid grid-cols-4 gap-4">
           <div className="col-span-4 w-full space-y-3">
             <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
@@ -396,7 +406,10 @@ const AlertFormContent = (props: AlertFormProps) => {
                 <div className="relative">
                   {selectedMetric === "cost" && (
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <span className="text-gray-500 sm:text-sm" id="price-currency">
+                      <span
+                        className="text-gray-500 sm:text-sm"
+                        id="price-currency"
+                      >
                         $
                       </span>
                     </div>
@@ -416,7 +429,10 @@ const AlertFormContent = (props: AlertFormProps) => {
                   />
                   {selectedMetric === "response.status" && (
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                      <span className="text-gray-500 sm:text-sm" id="price-currency">
+                      <span
+                        className="text-gray-500 sm:text-sm"
+                        id="price-currency"
+                      >
                         %
                       </span>
                     </div>
@@ -443,123 +459,103 @@ const AlertFormContent = (props: AlertFormProps) => {
                     <SelectValue placeholder="Select a time frame" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(alertTimeWindows).map(([key, value], idx) => {
-                      return (
-                        <SelectItem value={value.toString()} key={idx}>
-                          {key}
-                        </SelectItem>
-                      );
-                    })}
+                    {Object.entries(alertTimeWindows).map(
+                      ([key, value], idx) => {
+                        return (
+                          <SelectItem value={value.toString()} key={idx}>
+                            {key}
+                          </SelectItem>
+                        );
+                      },
+                    )}
                   </SelectContent>
                 </Select>
               </div>
             </div>
           </div>
 
-      {/* Advanced Configuration */}
-      <div className="col-span-4 w-full space-y-3 pt-2 pb-3 px-4 bg-background/80 rounded-sm border border-border">
-        <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-          <CollapsibleTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              className="flex w-full items-center justify-between p-0 text-base font-semibold text-gray-900 hover:bg-transparent dark:text-gray-100"
-            >
-              <span className="text-base font-semibold">Advanced Configuration</span>
-              <ChevronDown
-                className={clsx(
-                  "h-4 w-4 transition-transform",
-                  advancedOpen && "rotate-180",
-                )}
-              />
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="grid grid-cols-4 gap-4 pb-0">
-            <div className="col-span-2 w-full space-y-1.5 text-sm mt-4">
-              <label
-                htmlFor="min-requests"
-                className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-              >
-                Min Requests (optional){" "}
-                <Tooltip title="Define this to set a minimum number of requests for this alert to be triggered.">
-                  <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                </Tooltip>
-              </label>
-              <Input
-                type="number"
-                name="min-requests"
-                id="min-requests"
-                defaultValue={initialValues?.minimum_request_count?.toString() || "0"}
-                min={0}
-                step={1}
-              />
-            </div>
-            <div className="col-span-2 w-full space-y-1.5 text-sm mt-4">
-              <label
-                htmlFor="alert-grouping"
-                className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-              >
-                Grouping (optional){" "}
-                <Tooltip title="Group alerts by a specific dimension. This allows you to track metrics separately for different groups (e.g., by model, user, provider, or property).">
-                  <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                </Tooltip>
-              </label>
-              <Popover open={groupingOpen} onOpenChange={setGroupingOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={groupingOpen}
-                    className="w-full justify-between text-sm font-normal"
+          {/* Advanced Configuration */}
+          <div className="col-span-4 w-full space-y-3 rounded-sm border border-border bg-background/80 px-4 pb-3 pt-2">
+            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="flex w-full items-center justify-between p-0 text-base font-semibold text-gray-900 hover:bg-transparent dark:text-gray-100"
+                >
+                  <span className="text-base font-semibold">
+                    Advanced Configuration
+                  </span>
+                  <ChevronDown
+                    className={clsx(
+                      "h-4 w-4 transition-transform",
+                      advancedOpen && "rotate-180",
+                    )}
+                  />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="grid grid-cols-4 gap-4 pb-0">
+                <div className="col-span-2 mt-4 w-full space-y-1.5 text-sm">
+                  <label
+                    htmlFor="min-requests"
+                    className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
                   >
-                    {selectedGrouping
-                      ? groupingOptions.base.find(
-                          (opt) => opt.value === selectedGrouping,
-                        )?.label ||
-                        groupingOptions.properties.find(
-                          (opt) => opt.value === selectedGrouping,
-                        )?.label ||
-                        selectedGrouping
-                      : "Select grouping"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search grouping..."
-                      className="h-9 text-sm"
-                    />
-                    <CommandEmpty>No grouping found.</CommandEmpty>
-                    <CommandList>
-                      <CommandGroup heading="Default">
-                        {groupingOptions.base.map((option) => (
-                          <CommandItem
-                            key={option.value}
-                            value={option.value}
-                            onSelect={() => {
-                              setSelectedGrouping(option.value);
-                              setGroupingOpen(false);
-                            }}
-                            className="text-sm"
-                          >
-                            <Check
-                              className={clsx(
-                                "mr-2 h-4 w-4",
-                                selectedGrouping === option.value
-                                  ? "opacity-100"
-                                  : "opacity-0",
-                              )}
-                            />
-                            {option.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                      {groupingOptions.properties.length > 0 && (
-                        <>
-                          <CommandSeparator />
-                          <CommandGroup heading="Properties">
-                            {groupingOptions.properties.map((option) => (
+                    Min Requests (optional){" "}
+                    <Tooltip title="Define this to set a minimum number of requests for this alert to be triggered.">
+                      <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
+                    </Tooltip>
+                  </label>
+                  <Input
+                    type="number"
+                    name="min-requests"
+                    id="min-requests"
+                    defaultValue={
+                      initialValues?.minimum_request_count?.toString() || "0"
+                    }
+                    min={0}
+                    step={1}
+                  />
+                </div>
+                <div className="col-span-2 mt-4 w-full space-y-1.5 text-sm">
+                  <label
+                    htmlFor="alert-grouping"
+                    className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
+                  >
+                    Grouping (optional){" "}
+                    <Tooltip title="Group alerts by a specific dimension. This allows you to track metrics separately for different groups (e.g., by model, user, provider, or property).">
+                      <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
+                    </Tooltip>
+                  </label>
+                  <Popover open={groupingOpen} onOpenChange={setGroupingOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={groupingOpen}
+                        className="w-full justify-between text-sm font-normal"
+                      >
+                        {selectedGrouping
+                          ? groupingOptions.base.find(
+                              (opt) => opt.value === selectedGrouping,
+                            )?.label ||
+                            groupingOptions.properties.find(
+                              (opt) => opt.value === selectedGrouping,
+                            )?.label ||
+                            selectedGrouping
+                          : "Select grouping"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Command>
+                        <CommandInput
+                          placeholder="Search grouping..."
+                          className="h-9 text-sm"
+                        />
+                        <CommandEmpty>No grouping found.</CommandEmpty>
+                        <CommandList>
+                          <CommandGroup heading="Default">
+                            {groupingOptions.base.map((option) => (
                               <CommandItem
                                 key={option.value}
                                 value={option.value}
@@ -581,346 +577,390 @@ const AlertFormContent = (props: AlertFormProps) => {
                               </CommandItem>
                             ))}
                           </CommandGroup>
-                        </>
-                      )}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="col-span-2 w-full space-y-1.5 text-sm">
-              <label
-                htmlFor="alert-aggregation"
-                className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-              >
-                Aggregation (optional){" "}
-                <Tooltip title="Select how to aggregate the metric values. Sum adds all values, Avg calculates average, Min/Max finds the minimum/maximum, and Percentile uses a specific percentile value. Not applicable for Status or Count metrics.">
-                  <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                </Tooltip>
-              </label>
-              {selectedMetric === "response.status" || selectedMetric === "count" ? (
-                <Input
-                  type="text"
-                  value="N/A"
-                  disabled
-                  className="bg-muted cursor-not-allowed"
-                />
-              ) : (
-                <Select
-                  value={selectedAggregation}
-                  onValueChange={(value) =>
-                    setSelectedAggregation(value as AlertAggregation)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select aggregation" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALERT_AGGREGATIONS.map((agg) => (
-                      <SelectItem key={agg} value={agg}>
-                        {agg.charAt(0).toUpperCase() + agg.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-            {selectedAggregation === "percentile" &&
-              selectedMetric !== "response.status" &&
-              selectedMetric !== "count" && (
-              <div className="col-span-2 w-full space-y-1.5 text-sm">
-                <label
-                  htmlFor="alert-percentile"
-                  className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-                >
-                  Percentile{" "}
-                  <Tooltip title="Specify a percentile (0-100) for the threshold. For example, entering '95' will trigger an alert when the 95th percentile exceeds the threshold value.">
-                    <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                  </Tooltip>
-                </label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    name="alert-percentile"
-                    id="alert-percentile"
-                    className="pr-8"
-                    min={0}
-                    max={100}
-                    step={0.01}
-                    defaultValue={
-                      (initialValues as any)?.percentile
-                        ? (initialValues as any).percentile.toString()
-                        : ""
-                    }
-                    placeholder="e.g., 95"
-                  />
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                    <span className="text-gray-500 sm:text-sm" id="percentile-currency">
-                      %
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div className="col-span-4 w-full space-y-1.5">
-              <label className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-200">
-                Filter (optional){" "}
-                <Tooltip title="Add filters to narrow down which requests trigger this alert. For example, filter by specific models, users, or properties.">
-                  <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                </Tooltip>
-              </label>
-              <FilterASTEditor />
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
-
-      {/* Notification */}
-      <div className="col-span-4 w-full space-y-3 pt-2 pb-3 px-4 bg-background/80 rounded-sm border border-border">
-        <Collapsible open={notificationOpen} onOpenChange={setNotificationOpen}>
-          <CollapsibleTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              className="flex w-full items-center justify-between p-0 text-base font-semibold text-gray-900 hover:bg-transparent dark:text-gray-100"
-            >
-              <span className="text-base font-semibold">Notification</span>
-              <ChevronDown
-                className={clsx(
-                  "h-4 w-4 transition-transform",
-                  notificationOpen && "rotate-180",
-                )}
-              />
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="grid grid-cols-4 gap-4 pb-0">
-            <div className="col-span-4 w-full space-y-1.5 text-sm mt-4">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor="alert-emails"
-              className="text-gray-500 dark:text-gray-200"
-            >
-              Emails
-            </label>
-            <Switch
-              size="md"
-              checked={showEmails}
-              onCheckedChange={setShowEmails}
-            />
-          </div>
-          {showEmails && (
-            <div className="space-y-2">
-              <Popover modal={true}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="w-full justify-between"
-                    size="sm"
-                  >
-                    <span className="truncate">
-                      {selectedEmails.length > 0
-                        ? `${selectedEmails.length} email${selectedEmails.length > 1 ? "s" : ""} selected`
-                        : "Select emails to send alerts to"}
-                    </span>
-                    <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[300px] p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Search emails..." />
-                    <CommandList>
-                      <CommandEmpty>No emails found.</CommandEmpty>
-                      <CommandGroup>
-                        {members.map((member) => (
-                          <CommandItem
-                            key={member.email}
-                            onSelect={() => {
-                              const email = member.email;
-                              setSelectedEmails((prev) =>
-                                prev.includes(email)
-                                  ? prev.filter((e) => e !== email)
-                                  : [...prev, email],
-                              );
-                            }}
-                            value={member.email}
-                          >
-                            <Check
-                              className={clsx(
-                                "mr-2 h-4 w-4",
-                                selectedEmails.includes(member.email)
-                                  ? "opacity-100"
-                                  : "opacity-0",
-                              )}
-                            />
-                            {member.email}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {selectedEmails.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {selectedEmails.map((email) => (
-                    <div
-                      key={email}
-                      className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm"
-                    >
-                      <span className="max-w-[200px] truncate">{email}</span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSelectedEmails((prev) =>
-                            prev.filter((e) => e !== email),
-                          )
-                        }
-                        className="ml-1 rounded-sm hover:bg-muted-foreground/20"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-            </div>
-            <div className="col-span-4 w-full space-y-1.5 text-sm">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor="alert-slack-channels"
-              className="text-gray-500 dark:text-gray-200"
-            >
-              Slack Channels
-            </label>
-            <Switch
-              size="md"
-              checked={showSlackChannels}
-              onCheckedChange={setShowSlackChannels}
-            />
-          </div>
-          {showSlackChannels &&
-            (slackIntegration?.data ? (
-              <>
-                <div className="space-y-2">
-                  <Popover modal={true}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className="w-full justify-between"
-                        size="sm"
-                      >
-                        <span className="truncate">
-                          {selectedSlackChannels.length > 0
-                            ? `${selectedSlackChannels.length} channel${selectedSlackChannels.length > 1 ? "s" : ""} selected`
-                            : "Select slack channels to send alerts to"}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[300px] p-0" align="start">
-                      <Command>
-                        <CommandInput placeholder="Search channels..." />
-                        <CommandList>
-                          <CommandEmpty>No channels found.</CommandEmpty>
-                          <CommandGroup>
-                            {slackChannels.map((channel) => (
-                              <CommandItem
-                                key={channel.id}
-                                onSelect={() => {
-                                  const channelId = channel.id;
-                                  setSelectedSlackChannels((prev) =>
-                                    prev.includes(channelId)
-                                      ? prev.filter((c) => c !== channelId)
-                                      : [...prev, channelId],
-                                  );
-                                }}
-                                value={channel.name}
-                              >
-                                <Check
-                                  className={clsx(
-                                    "mr-2 h-4 w-4",
-                                    selectedSlackChannels.includes(channel.id)
-                                      ? "opacity-100"
-                                      : "opacity-0",
-                                  )}
-                                />
-                                {channel.name}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
+                          {groupingOptions.properties.length > 0 && (
+                            <>
+                              <CommandSeparator />
+                              <CommandGroup heading="Properties">
+                                {groupingOptions.properties.map((option) => (
+                                  <CommandItem
+                                    key={option.value}
+                                    value={option.value}
+                                    onSelect={() => {
+                                      setSelectedGrouping(option.value);
+                                      setGroupingOpen(false);
+                                    }}
+                                    className="text-sm"
+                                  >
+                                    <Check
+                                      className={clsx(
+                                        "mr-2 h-4 w-4",
+                                        selectedGrouping === option.value
+                                          ? "opacity-100"
+                                          : "opacity-0",
+                                      )}
+                                    />
+                                    {option.label}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </>
+                          )}
                         </CommandList>
                       </Command>
                     </PopoverContent>
                   </Popover>
-                  {selectedSlackChannels.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {selectedSlackChannels.map((channelId) => {
-                        const channel = slackChannels.find(
-                          (c) => c.id === channelId,
-                        );
-                        return channel ? (
-                          <div
-                            key={channelId}
-                            className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm"
+                </div>
+                <div className="col-span-2 w-full space-y-1.5 text-sm">
+                  <label
+                    htmlFor="alert-aggregation"
+                    className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
+                  >
+                    Aggregation (optional){" "}
+                    <Tooltip title="Select how to aggregate the metric values. Sum adds all values, Avg calculates average, Min/Max finds the minimum/maximum, and Percentile uses a specific percentile value. Not applicable for Status or Count metrics.">
+                      <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
+                    </Tooltip>
+                  </label>
+                  {selectedMetric === "response.status" ||
+                  selectedMetric === "count" ? (
+                    <Input
+                      type="text"
+                      value="N/A"
+                      disabled
+                      className="cursor-not-allowed bg-muted"
+                    />
+                  ) : (
+                    <Select
+                      value={selectedAggregation}
+                      onValueChange={(value) =>
+                        setSelectedAggregation(value as AlertAggregation)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select aggregation" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ALERT_AGGREGATIONS.map((agg) => (
+                          <SelectItem key={agg} value={agg}>
+                            {agg.charAt(0).toUpperCase() + agg.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                {selectedAggregation === "percentile" &&
+                  selectedMetric !== "response.status" &&
+                  selectedMetric !== "count" && (
+                    <div className="col-span-2 w-full space-y-1.5 text-sm">
+                      <label
+                        htmlFor="alert-percentile"
+                        className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
+                      >
+                        Percentile{" "}
+                        <Tooltip title="Specify a percentile (0-100) for the threshold. For example, entering '95' will trigger an alert when the 95th percentile exceeds the threshold value.">
+                          <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
+                        </Tooltip>
+                      </label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          name="alert-percentile"
+                          id="alert-percentile"
+                          className="pr-8"
+                          min={0}
+                          max={100}
+                          step={0.01}
+                          defaultValue={
+                            (initialValues as any)?.percentile
+                              ? (initialValues as any).percentile.toString()
+                              : ""
+                          }
+                          placeholder="e.g., 95"
+                        />
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                          <span
+                            className="text-gray-500 sm:text-sm"
+                            id="percentile-currency"
                           >
-                            <span className="max-w-[200px] truncate">
-                              {channel.name}
+                            %
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                <div className="col-span-4 w-full space-y-1.5">
+                  <label className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-200">
+                    Filter (optional){" "}
+                    <Tooltip title="Add filters to narrow down which requests trigger this alert. For example, filter by specific models, users, or properties.">
+                      <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
+                    </Tooltip>
+                  </label>
+                  <FilterASTEditor />
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
+
+          {/* Notification */}
+          <div className="col-span-4 w-full space-y-3 rounded-sm border border-border bg-background/80 px-4 pb-3 pt-2">
+            <Collapsible
+              open={notificationOpen}
+              onOpenChange={setNotificationOpen}
+            >
+              <CollapsibleTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="flex w-full items-center justify-between p-0 text-base font-semibold text-gray-900 hover:bg-transparent dark:text-gray-100"
+                >
+                  <span className="text-base font-semibold">Notification</span>
+                  <ChevronDown
+                    className={clsx(
+                      "h-4 w-4 transition-transform",
+                      notificationOpen && "rotate-180",
+                    )}
+                  />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="grid grid-cols-4 gap-4 pb-0">
+                <div className="col-span-4 mt-4 w-full space-y-1.5 text-sm">
+                  <div className="flex items-center justify-between">
+                    <label
+                      htmlFor="alert-emails"
+                      className="text-gray-500 dark:text-gray-200"
+                    >
+                      Emails
+                    </label>
+                    <Switch
+                      size="md"
+                      checked={showEmails}
+                      onCheckedChange={setShowEmails}
+                    />
+                  </div>
+                  {showEmails && (
+                    <div className="space-y-2">
+                      <Popover modal={true}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="w-full justify-between"
+                            size="sm"
+                          >
+                            <span className="truncate">
+                              {selectedEmails.length > 0
+                                ? `${selectedEmails.length} email${selectedEmails.length > 1 ? "s" : ""} selected`
+                                : "Select emails to send alerts to"}
                             </span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setSelectedSlackChannels((prev) =>
-                                  prev.filter((c) => c !== channelId),
-                                )
-                              }
-                              className="ml-1 rounded-sm hover:bg-muted-foreground/20"
+                            <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[300px] p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search emails..." />
+                            <CommandList>
+                              <CommandEmpty>No emails found.</CommandEmpty>
+                              <CommandGroup>
+                                {members.map((member) => (
+                                  <CommandItem
+                                    key={member.email}
+                                    onSelect={() => {
+                                      const email = member.email;
+                                      setSelectedEmails((prev) =>
+                                        prev.includes(email)
+                                          ? prev.filter((e) => e !== email)
+                                          : [...prev, email],
+                                      );
+                                    }}
+                                    value={member.email}
+                                  >
+                                    <Check
+                                      className={clsx(
+                                        "mr-2 h-4 w-4",
+                                        selectedEmails.includes(member.email)
+                                          ? "opacity-100"
+                                          : "opacity-0",
+                                      )}
+                                    />
+                                    {member.email}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      {selectedEmails.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {selectedEmails.map((email) => (
+                            <div
+                              key={email}
+                              className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm"
                             >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </div>
-                        ) : null;
-                      })}
+                              <span className="max-w-[200px] truncate">
+                                {email}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSelectedEmails((prev) =>
+                                    prev.filter((e) => e !== email),
+                                  )
+                                }
+                                className="ml-1 rounded-sm hover:bg-muted-foreground/20"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-                <small className="text-gray-500">
-                  If the channel is private, you will need to add the bot to the
-                  channel by mentioning <strong>@Helicone</strong> in the
-                  channel.
-                </small>
-              </>
-            ) : (
-              <Button asChild variant="outline">
-                <a
-                  href={`https://slack.com/oauth/v2/authorize?scope=channels:read,groups:read,chat:write,chat:write.public&client_id=${
-                    process.env.NEXT_PUBLIC_SLACK_CLIENT_ID ?? ""
-                  }&state=${
-                    orgContext?.currentOrg?.id || ""
-                  }&redirect_uri=${slackRedirectUrl}`}
-                >
-                  Connect Slack
-                </a>
-              </Button>
-            ))}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
+                <div className="col-span-4 w-full space-y-1.5 text-sm">
+                  <div className="flex items-center justify-between">
+                    <label
+                      htmlFor="alert-slack-channels"
+                      className="text-gray-500 dark:text-gray-200"
+                    >
+                      Slack Channels
+                    </label>
+                    <Switch
+                      size="md"
+                      checked={showSlackChannels}
+                      onCheckedChange={setShowSlackChannels}
+                    />
+                  </div>
+                  {showSlackChannels &&
+                    (slackIntegration?.data ? (
+                      <>
+                        <div className="space-y-2">
+                          <Popover modal={true}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className="w-full justify-between"
+                                size="sm"
+                              >
+                                <span className="truncate">
+                                  {selectedSlackChannels.length > 0
+                                    ? `${selectedSlackChannels.length} channel${selectedSlackChannels.length > 1 ? "s" : ""} selected`
+                                    : "Select slack channels to send alerts to"}
+                                </span>
+                                <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-[300px] p-0"
+                              align="start"
+                            >
+                              <Command>
+                                <CommandInput placeholder="Search channels..." />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    No channels found.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {slackChannels.map((channel) => (
+                                      <CommandItem
+                                        key={channel.id}
+                                        onSelect={() => {
+                                          const channelId = channel.id;
+                                          setSelectedSlackChannels((prev) =>
+                                            prev.includes(channelId)
+                                              ? prev.filter(
+                                                  (c) => c !== channelId,
+                                                )
+                                              : [...prev, channelId],
+                                          );
+                                        }}
+                                        value={channel.name}
+                                      >
+                                        <Check
+                                          className={clsx(
+                                            "mr-2 h-4 w-4",
+                                            selectedSlackChannels.includes(
+                                              channel.id,
+                                            )
+                                              ? "opacity-100"
+                                              : "opacity-0",
+                                          )}
+                                        />
+                                        {channel.name}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          {selectedSlackChannels.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {selectedSlackChannels.map((channelId) => {
+                                const channel = slackChannels.find(
+                                  (c) => c.id === channelId,
+                                );
+                                return channel ? (
+                                  <div
+                                    key={channelId}
+                                    className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm"
+                                  >
+                                    <span className="max-w-[200px] truncate">
+                                      {channel.name}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setSelectedSlackChannels((prev) =>
+                                          prev.filter((c) => c !== channelId),
+                                        )
+                                      }
+                                      className="ml-1 rounded-sm hover:bg-muted-foreground/20"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ) : null;
+                              })}
+                            </div>
+                          )}
+                        </div>
+                        <small className="text-gray-500">
+                          If the channel is private, you will need to add the
+                          bot to the channel by mentioning{" "}
+                          <strong>@Helicone</strong> in the channel.
+                        </small>
+                      </>
+                    ) : (
+                      <Button asChild variant="outline">
+                        <a
+                          href={`https://slack.com/oauth/v2/authorize?scope=channels:read,groups:read,chat:write,chat:write.public&client_id=${
+                            process.env.NEXT_PUBLIC_SLACK_CLIENT_ID ?? ""
+                          }&state=${
+                            orgContext?.currentOrg?.id || ""
+                          }&redirect_uri=${slackRedirectUrl}`}
+                        >
+                          Connect Slack
+                        </a>
+                      </Button>
+                    ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-2 pt-4 pb-0 flex-shrink-0">
+      <div className="flex flex-shrink-0 items-center justify-between gap-2 pb-0 pt-4">
         <Button
           type="button"
           variant="link"
           size="default"
           asChild
-          className="text-muted-foreground hover:text-foreground pl-2"
+          className="pl-2 text-muted-foreground hover:text-foreground"
         >
           <a
             href="https://docs.helicone.ai/features/alerts"

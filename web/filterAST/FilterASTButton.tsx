@@ -4,7 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Filter } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { FilterASTEditor } from "./FilterASTEditor";
 import { useFilterAST } from "./context/filterContext";
@@ -16,7 +16,9 @@ interface FilterASTButtonProps {
   showCurlButton?: boolean;
 }
 
-export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ showCurlButton = false }) => {
+export const FilterASTButton: React.FC<FilterASTButtonProps> = ({
+  showCurlButton = false,
+}) => {
   const { store } = useFilterAST();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -39,24 +41,40 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ showCurlButton
   const numFilters = store.getFilterNodeCount();
 
   return (
-    <Row className="space-x-2 mr-4">
+    <Row className="mr-4 space-x-2">
       <Popover onOpenChange={setIsOpen} open={isOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2" size="sm">
-            <Filter className="h-4 w-4" />
-            Filter
+          <Button
+            variant={numFilters > 0 ? "default" : "outline"}
+            className="gap-2"
+            size="sm"
+          >
+            <Filter size={14} />
+            {numFilters > 0 ? (
+              <>
+                Filters
+                <Badge className="flex h-5 w-5 items-center justify-center rounded-full bg-white p-0 text-xs font-semibold text-slate-900 hover:bg-white/90">
+                  {numFilters}
+                </Badge>
+              </>
+            ) : (
+              "Filter"
+            )}
             {!isOpen && store.activeFilterId && (
               <Badge variant="outline" className="text-xs">
                 {store.activeFilterName}
               </Badge>
             )}
-            {!isOpen &&
-              !store.activeFilterId &&
-              store.getFilterNodeCount() > 0 && (
-                <Badge variant="default" className="text-xs">
-                  {store.getFilterNodeCount()}
-                </Badge>
-              )}
+            {numFilters > 0 && (
+              <X
+                size={14}
+                className="ml-1 transition-opacity hover:opacity-70"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  store.clearActiveFilter();
+                }}
+              />
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto min-w-[800px] max-w-[90vw] p-0">
@@ -64,17 +82,6 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({ showCurlButton
         </PopoverContent>
       </Popover>
       <SavedFiltersDropdown />
-      {store.getFilterNodeCount() > 0 && (
-        <Button
-          variant="glass"
-          size="sm"
-          onClick={() => {
-            store.clearActiveFilter();
-          }}
-        >
-          Clear {numFilters} filter{numFilters > 1 ? "s" : ""}
-        </Button>
-      )}
     </Row>
   );
 };

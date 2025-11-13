@@ -74,7 +74,10 @@ export function WalletAnalyticsCharts({
           </CardHeader>
           <CardContent>
             <div className="flex h-[220px] items-center justify-center">
-              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+              <Loader2
+                size={24}
+                className="animate-spin text-muted-foreground"
+              />
             </div>
           </CardContent>
         </Card>
@@ -84,7 +87,10 @@ export function WalletAnalyticsCharts({
           </CardHeader>
           <CardContent>
             <div className="flex h-[220px] items-center justify-center">
-              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+              <Loader2
+                size={24}
+                className="animate-spin text-muted-foreground"
+              />
             </div>
           </CardContent>
         </Card>

@@ -11,7 +11,10 @@ import { Editor as MonacoEditor } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { useTheme } from "next-themes";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { TEMPLATE_REGEX, PROMPT_PARTIAL_REGEX } from "@helicone-package/prompts/templates";
+import {
+  TEMPLATE_REGEX,
+  PROMPT_PARTIAL_REGEX,
+} from "@helicone-package/prompts/templates";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
 import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 
@@ -208,7 +211,8 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
             return `<span class="font-bold text-${color}">${match}</span>`;
           });
           highlighted = highlighted.replace(PROMPT_PARTIAL_REGEX, (match) => {
-            const variable = HeliconeTemplateManager.extractPromptPartialVariables(match)[0];
+            const variable =
+              HeliconeTemplateManager.extractPromptPartialVariables(match)[0];
             if (!variable) return match;
             const color = getColor(variable.raw);
             return `<span class="font-bold text-${color}">${match}</span>`;
