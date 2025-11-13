@@ -8,9 +8,9 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { clsx } from "../clsx";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useColumnResize } from "@/hooks/useColumnResize";
 
 export type ColumnConfig<T> = {
   key: keyof T | undefined;
@@ -56,23 +56,11 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
     direction: defaultSortDirection,
   });
 
-  // Initialize column sizes from minSize or default
-  const initialColumnSizes = columns.reduce(
-    (acc, col, idx) => {
-      acc[idx] = col.minSize ?? 120;
-      return acc;
-    },
-    {} as Record<number, number>,
-  );
-
-  const [columnSizes, setColumnSizes] = useLocalStorage<Record<number, number>>(
-    tableId ? `${tableId}-column-sizes` : "table-column-sizes",
-    initialColumnSizes,
-  );
-
-  const [resizingColumn, setResizingColumn] = useState<number | null>(null);
-  const resizeStartX = useRef<number>(0);
-  const resizeStartWidth = useRef<number>(0);
+  // Use the column resize hook
+  const { columnSizes, resizingColumn, handleResizeStart } = useColumnResize({
+    columns,
+    tableId: tableId || "table",
+  });
 
   const sortConfig = onSort
     ? {
@@ -112,103 +100,6 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
       });
     }
   };
-
-  // Measure actual text width using Canvas API
-  const measureTextWidth = useCallback((text: string, font: string): number => {
-    if (typeof document === "undefined") return 0;
-
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    if (!context) return 0;
-
-    context.font = font;
-    const metrics = context.measureText(text);
-    return metrics.width;
-  }, []);
-
-  // Calculate minimum width based on actual header text width and default width
-  const getMinColumnWidth = useCallback(
-    (column: ColumnConfig<T>, defaultWidth: number) => {
-      // Measure actual text width with the header font (12px semibold)
-      const headerTextWidth = measureTextWidth(
-        column.header,
-        "600 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      );
-      const padding = 24; // Account for padding and potential sort icons
-      const textBasedMin = Math.max(headerTextWidth + padding, 60); // Minimum 60px
-
-      // Return the smaller of text-based minimum or default width
-      // This prevents jumping when user starts to resize
-      return Math.min(textBasedMin, defaultWidth);
-    },
-    [measureTextWidth],
-  );
-
-  // Column resize handlers
-  const handleResizeStart = useCallback(
-    (columnIndex: number, event: React.MouseEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setResizingColumn(columnIndex);
-      resizeStartX.current = event.clientX;
-      resizeStartWidth.current = columnSizes[columnIndex] ?? 120;
-    },
-    [columnSizes],
-  );
-
-  const handleResizeMove = useCallback(
-    (event: MouseEvent) => {
-      if (resizingColumn === null) return;
-
-      const deltaX = event.clientX - resizeStartX.current;
-      const currentColumn = columns[resizingColumn];
-      const defaultWidth =
-        columnSizes[resizingColumn] ?? currentColumn.minSize ?? 120;
-      const minWidth = getMinColumnWidth(currentColumn, defaultWidth);
-      const newWidth = Math.max(minWidth, resizeStartWidth.current + deltaX);
-
-      setColumnSizes({
-        ...columnSizes,
-        [resizingColumn]: newWidth,
-      });
-    },
-    [resizingColumn, columnSizes, setColumnSizes, getMinColumnWidth, columns],
-  );
-
-  const handleResizeEnd = useCallback(() => {
-    setResizingColumn(null);
-  }, []);
-
-  useEffect(() => {
-    if (resizingColumn !== null) {
-      document.addEventListener("mousemove", handleResizeMove);
-      document.addEventListener("mouseup", handleResizeEnd);
-
-      return () => {
-        document.removeEventListener("mousemove", handleResizeMove);
-        document.removeEventListener("mouseup", handleResizeEnd);
-      };
-    }
-  }, [resizingColumn, handleResizeMove, handleResizeEnd]);
-
-  // Update column sizes when columns change
-  useEffect(() => {
-    const newSizes: Record<number, number> = {};
-    let shouldUpdate = false;
-
-    columns.forEach((col, idx) => {
-      if (columnSizes[idx] === undefined) {
-        newSizes[idx] = col.minSize ?? 120;
-        shouldUpdate = true;
-      } else {
-        newSizes[idx] = columnSizes[idx];
-      }
-    });
-
-    if (shouldUpdate) {
-      setColumnSizes(newSizes);
-    }
-  }, [columns]);
 
   return (
     <ScrollArea className="h-full w-full" orientation="both">

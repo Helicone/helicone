@@ -19,8 +19,8 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocalStorage } from "@/services/hooks/localStorage";
+import React, { useEffect, useMemo, useState } from "react";
+import { useColumnResize } from "@/hooks/useColumnResize";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "@/packages/common/result";
 import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
@@ -154,126 +154,11 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
 
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
-  // Initialize column sizes from minSize or default
-  const initialColumnSizes = useMemo(() => {
-    return defaultColumns.reduce(
-      (acc, col, idx) => {
-        const columnDef = col as any;
-        acc[idx] = columnDef.minSize ?? columnDef.size ?? 120;
-        return acc;
-      },
-      {} as Record<number, number>,
-    );
-  }, [defaultColumns]);
-
-  const [columnSizes, setColumnSizes] = useLocalStorage<Record<number, number>>(
-    `${id}-column-sizes`,
-    initialColumnSizes,
-  );
-
-  const [resizingColumn, setResizingColumn] = useState<number | null>(null);
-  const resizeStartX = useRef<number>(0);
-  const resizeStartWidth = useRef<number>(0);
-
-  // Measure actual text width using Canvas API
-  const measureTextWidth = useCallback((text: string, font: string): number => {
-    if (typeof document === "undefined") return 0;
-
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    if (!context) return 0;
-
-    context.font = font;
-    const metrics = context.measureText(text);
-    return metrics.width;
-  }, []);
-
-  // Calculate minimum width based on actual header text width and default width
-  const getMinColumnWidth = useCallback(
-    (column: ColumnDef<any>, defaultWidth: number) => {
-      const header = typeof column.header === "string" ? column.header : "";
-      // Measure actual text width with the header font (12px semibold)
-      const headerTextWidth = measureTextWidth(
-        header,
-        "600 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      );
-      const padding = 24; // Account for padding and potential sort icons
-      const textBasedMin = Math.max(headerTextWidth + padding, 60); // Minimum 60px
-
-      // Return the smaller of text-based minimum or default width
-      // This prevents jumping when user starts to resize
-      return Math.min(textBasedMin, defaultWidth);
-    },
-    [measureTextWidth],
-  );
-
-  // Column resize handlers
-  const handleResizeStart = useCallback(
-    (columnIndex: number, event: React.MouseEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setResizingColumn(columnIndex);
-      resizeStartX.current = event.clientX;
-      resizeStartWidth.current = columnSizes[columnIndex] ?? 120;
-    },
-    [columnSizes],
-  );
-
-  const handleResizeMove = useCallback(
-    (event: MouseEvent) => {
-      if (resizingColumn === null) return;
-
-      const deltaX = event.clientX - resizeStartX.current;
-      const currentColumn = defaultColumns[resizingColumn];
-      const columnDef = currentColumn as any;
-      const defaultWidth =
-        columnSizes[resizingColumn] ?? columnDef.minSize ?? columnDef.size ?? 120;
-      const minWidth = getMinColumnWidth(currentColumn, defaultWidth);
-      const newWidth = Math.max(minWidth, resizeStartWidth.current + deltaX);
-
-      setColumnSizes({
-        ...columnSizes,
-        [resizingColumn]: newWidth,
-      });
-    },
-    [resizingColumn, columnSizes, setColumnSizes, getMinColumnWidth, defaultColumns],
-  );
-
-  const handleResizeEnd = useCallback(() => {
-    setResizingColumn(null);
-  }, []);
-
-  useEffect(() => {
-    if (resizingColumn !== null) {
-      document.addEventListener("mousemove", handleResizeMove);
-      document.addEventListener("mouseup", handleResizeEnd);
-
-      return () => {
-        document.removeEventListener("mousemove", handleResizeMove);
-        document.removeEventListener("mouseup", handleResizeEnd);
-      };
-    }
-  }, [resizingColumn, handleResizeMove, handleResizeEnd]);
-
-  // Update column sizes when columns change
-  useEffect(() => {
-    const newSizes: Record<number, number> = {};
-    let shouldUpdate = false;
-
-    defaultColumns.forEach((col, idx) => {
-      const columnDef = col as any;
-      if (columnSizes[idx] === undefined) {
-        newSizes[idx] = columnDef.minSize ?? columnDef.size ?? 120;
-        shouldUpdate = true;
-      } else {
-        newSizes[idx] = columnSizes[idx];
-      }
-    });
-
-    if (shouldUpdate) {
-      setColumnSizes(newSizes);
-    }
-  }, [defaultColumns]);
+  // Use the column resize hook
+  const { columnSizes, resizingColumn, handleResizeStart } = useColumnResize({
+    columns: defaultColumns,
+    tableId: id,
+  });
 
   const table = useReactTable({
     data: defaultData,
