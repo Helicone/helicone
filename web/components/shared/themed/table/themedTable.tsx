@@ -388,7 +388,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   className="sticky top-0 z-[2] h-11 bg-slate-50 dark:bg-slate-950"
                 >
                   {checkboxMode !== "never" && (
-                    <th className="relative" style={{ height: "44px" }}>
+                    <th className="relative" style={{ height: "44px", width: "48px", minWidth: "48px", maxWidth: "48px" }}>
                       <div className="flex h-full items-center justify-center px-2">
                         <Checkbox
                           variant="helicone"
@@ -505,7 +505,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                         : "",
                       checkboxMode === "never" && "hidden",
                     )}
-                    style={{ verticalAlign: "middle" }}
+                    style={{ verticalAlign: "middle", width: "48px", minWidth: "48px", maxWidth: "48px" }}
                   >
                     <div
                       className={clsx(
