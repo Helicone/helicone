@@ -546,10 +546,6 @@
       "destination": "/references/how-we-calculate-cost"
     },
     {
-      "source": "/features/advanced-usage/custom-rate-limits",
-      "destination": "/ai-gateway/custom-rate-limits"
-    },
-    {
       "source": "/observability/custom-rate-limits",
       "destination": "/features/advanced-usage/custom-rate-limits"
     },
