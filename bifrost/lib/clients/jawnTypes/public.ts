@@ -461,6 +461,9 @@ export interface paths {
   "/v1/property/{propertyKey}/top-costs/query": {
     post: operations["GetTopCosts"];
   };
+  "/v1/property/{propertyKey}/top-requests/query": {
+    post: operations["GetTopRequests"];
+  };
   "/v1/playground/generate": {
     post: operations["Generate"];
   };
@@ -2911,6 +2914,16 @@ Json: JsonObject;
         start: string;
       };
     };
+    "ResultSuccess__value-string--count-number_-Array_": {
+      data: {
+          /** Format: double */
+          count: number;
+          value: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__value-string--count-number_-Array.string_": components["schemas"]["ResultSuccess__value-string--count-number_-Array_"] | components["schemas"]["ResultError_string_"];
     "ChatCompletionTokenLogprob.TopLogprob": {
       /** @description The token. */
       token: string;
@@ -6969,6 +6982,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__value-string--cost-number_-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTopRequests: {
+    parameters: {
+      path: {
+        propertyKey: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TimeFilterRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__value-string--count-number_-Array.string_"];
         };
       };
     };
