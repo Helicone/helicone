@@ -31,6 +31,10 @@ import LoadingAnimation from "../../loadingAnimation";
 import { DragColumnItem } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
 
+// Constants for table sizing
+const HEADER_HEIGHT = "44px";
+const CHECKBOX_COLUMN_WIDTH = "48px";
+
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
 function ConditionalLink({
@@ -273,7 +277,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   className="sticky top-0 z-[2] h-11 bg-slate-50 dark:bg-slate-950"
                 >
                   {checkboxMode !== "never" && (
-                    <th className="relative" style={{ height: "44px", width: "48px", minWidth: "48px", maxWidth: "48px" }}>
+                    <th className="relative" style={{ height: HEADER_HEIGHT, width: CHECKBOX_COLUMN_WIDTH, minWidth: CHECKBOX_COLUMN_WIDTH, maxWidth: CHECKBOX_COLUMN_WIDTH }}>
                       <div className="flex h-full items-center justify-center px-2">
                         <Checkbox
                           variant="helicone"
@@ -311,7 +315,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                           width: `${columnWidth}px`,
                           minWidth: `${columnWidth}px`,
                           maxWidth: `${columnWidth}px`,
-                          height: "44px",
+                          height: HEADER_HEIGHT,
                         }}
                       >
                         {index === 0 && onToggleAllRows !== undefined && (
@@ -390,7 +394,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                         : "",
                       checkboxMode === "never" && "hidden",
                     )}
-                    style={{ verticalAlign: "middle", width: "48px", minWidth: "48px", maxWidth: "48px" }}
+                    style={{ verticalAlign: "middle", width: CHECKBOX_COLUMN_WIDTH, minWidth: CHECKBOX_COLUMN_WIDTH, maxWidth: CHECKBOX_COLUMN_WIDTH }}
                   >
                     <div
                       className={clsx(
