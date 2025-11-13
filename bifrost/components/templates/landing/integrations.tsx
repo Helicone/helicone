@@ -257,7 +257,8 @@ response = client.chat.completions.create(
               One SDK for <span className="text-brand">100+ Models</span>
             </h2>
             <p className="text-lg font-normal sm:text-xl text-muted-foreground">
-              Access every AI model through the OpenAI SDK. Switch providers by changing the model name—no code rewrites needed.
+              Access every AI model through the OpenAI SDK. Switch providers by
+              changing the model name—no code rewrites needed.
             </p>
             <div className="flex flex-col items-start gap-4">
               {/* Main providers with code examples */}
@@ -350,11 +351,7 @@ response = client.chat.completions.create(
             No credit card required, 7-day free trial
           </p>
         </div>
-        <Link
-          href="https://helicone.ai/models"
-          target="_blank"
-          rel="noopener"
-        >
+        <Link href="https://helicone.ai/models" target="_blank" rel="noopener">
           <Button variant="ghost" size="landing_page">
             View all 100+ models
             <ArrowUpRight className="size-4 md:size-6" />
