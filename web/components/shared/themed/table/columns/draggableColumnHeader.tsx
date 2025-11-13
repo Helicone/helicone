@@ -17,8 +17,10 @@ export default function DraggableColumnHeader<T>(props: {
   index: number;
   totalColumns: number;
   className?: string;
+  onResizeStart?: (columnIndex: number, event: React.MouseEvent) => void;
+  isResizing?: boolean;
 }) {
-  const { header, sortable, index, totalColumns, className } = props;
+  const { header, sortable, index, totalColumns, className, onResizeStart, isResizing } = props;
   const router = useRouter();
 
   const meta = header.column.columnDef?.meta as any;
@@ -30,24 +32,16 @@ export default function DraggableColumnHeader<T>(props: {
         colSpan: header.colSpan,
       }}
       className={clsx(
-        "relative px-2 text-left font-semibold text-gray-900 dark:text-gray-100",
+        "relative h-full px-2 text-left font-semibold text-gray-900 dark:text-gray-100",
         index === 0 && "pl-10",
         index === totalColumns - 1 && "pr-10",
         className,
       )}
     >
-      <div className="flex flex-row items-center justify-between">
-        <button className="flex flex-row items-center rounded-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-          <span className="text-gray-900 dark:text-gray-100">
-            {header.isPlaceholder
-              ? null
-              : flexRender(header.column.columnDef.header, header.getContext())}
-          </span>
-        </button>
-
+      <div className="flex h-full flex-row items-center gap-2">
         {sortable && hasSortKey && (
-          <div className="items-center text-right">
-            <Menu as="div" className="relative pl-1 text-left">
+          <div className="items-center">
+            <Menu as="div" className="relative text-left">
               <div className="flex items-center">
                 <Menu.Button className="-m-0.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-900">
                   {meta.sortKey === sortable.sortKey ? (
@@ -131,28 +125,38 @@ export default function DraggableColumnHeader<T>(props: {
             </Menu>
           </div>
         )}
+
+        <span className="text-gray-900 dark:text-gray-100">
+          {header.isPlaceholder
+            ? null
+            : flexRender(header.column.columnDef.header, header.getContext())}
+        </span>
       </div>
 
-      <button
-        onClick={() => header.column.getToggleSortingHandler()}
+      <div
         className={clsx(
-          header.column.getCanSort() ? "cursor-pointer select-none" : "",
-          "resizer absolute right-0 top-0 h-full w-4 cursor-col-resize",
+          "absolute right-0 top-0 h-full w-4 cursor-col-resize select-none",
+          "flex items-center justify-center",
+          "hover:bg-slate-200 dark:hover:bg-slate-700",
         )}
-        {...{
-          onMouseDown: header.getResizeHandler(),
-          onTouchStart: header.getResizeHandler(),
+        onMouseDown={(e) => {
+          if (onResizeStart) {
+            onResizeStart(index, e);
+          }
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
         }}
       >
         <div
           className={clsx(
-            header.column.getIsResizing()
-              ? "bg-blue-700 dark:bg-blue-300"
-              : "bg-gray-500",
             "h-full w-1",
+            isResizing
+              ? "bg-blue-700 dark:bg-blue-300"
+              : "bg-transparent",
           )}
         />
-      </button>
+      </div>
     </div>
   );
 }

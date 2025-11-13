@@ -19,7 +19,8 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "@/packages/common/result";
 import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
@@ -151,7 +152,129 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     currentRow,
   } = props;
 
-  const [expanded, setExpanded] = React.useState<ExpandedState>({});
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+
+  // Initialize column sizes from minSize or default
+  const initialColumnSizes = useMemo(() => {
+    return defaultColumns.reduce(
+      (acc, col, idx) => {
+        const columnDef = col as any;
+        acc[idx] = columnDef.minSize ?? columnDef.size ?? 120;
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
+  }, [defaultColumns]);
+
+  const [columnSizes, setColumnSizes] = useLocalStorage<Record<number, number>>(
+    `${id}-column-sizes`,
+    initialColumnSizes,
+  );
+
+  const [resizingColumn, setResizingColumn] = useState<number | null>(null);
+  const resizeStartX = useRef<number>(0);
+  const resizeStartWidth = useRef<number>(0);
+
+  // Measure actual text width using Canvas API
+  const measureTextWidth = useCallback((text: string, font: string): number => {
+    if (typeof document === "undefined") return 0;
+
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) return 0;
+
+    context.font = font;
+    const metrics = context.measureText(text);
+    return metrics.width;
+  }, []);
+
+  // Calculate minimum width based on actual header text width and default width
+  const getMinColumnWidth = useCallback(
+    (column: ColumnDef<any>, defaultWidth: number) => {
+      const header = typeof column.header === "string" ? column.header : "";
+      // Measure actual text width with the header font (12px semibold)
+      const headerTextWidth = measureTextWidth(
+        header,
+        "600 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      );
+      const padding = 24; // Account for padding and potential sort icons
+      const textBasedMin = Math.max(headerTextWidth + padding, 60); // Minimum 60px
+
+      // Return the smaller of text-based minimum or default width
+      // This prevents jumping when user starts to resize
+      return Math.min(textBasedMin, defaultWidth);
+    },
+    [measureTextWidth],
+  );
+
+  // Column resize handlers
+  const handleResizeStart = useCallback(
+    (columnIndex: number, event: React.MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setResizingColumn(columnIndex);
+      resizeStartX.current = event.clientX;
+      resizeStartWidth.current = columnSizes[columnIndex] ?? 120;
+    },
+    [columnSizes],
+  );
+
+  const handleResizeMove = useCallback(
+    (event: MouseEvent) => {
+      if (resizingColumn === null) return;
+
+      const deltaX = event.clientX - resizeStartX.current;
+      const currentColumn = defaultColumns[resizingColumn];
+      const columnDef = currentColumn as any;
+      const defaultWidth =
+        columnSizes[resizingColumn] ?? columnDef.minSize ?? columnDef.size ?? 120;
+      const minWidth = getMinColumnWidth(currentColumn, defaultWidth);
+      const newWidth = Math.max(minWidth, resizeStartWidth.current + deltaX);
+
+      setColumnSizes({
+        ...columnSizes,
+        [resizingColumn]: newWidth,
+      });
+    },
+    [resizingColumn, columnSizes, setColumnSizes, getMinColumnWidth, defaultColumns],
+  );
+
+  const handleResizeEnd = useCallback(() => {
+    setResizingColumn(null);
+  }, []);
+
+  useEffect(() => {
+    if (resizingColumn !== null) {
+      document.addEventListener("mousemove", handleResizeMove);
+      document.addEventListener("mouseup", handleResizeEnd);
+
+      return () => {
+        document.removeEventListener("mousemove", handleResizeMove);
+        document.removeEventListener("mouseup", handleResizeEnd);
+      };
+    }
+  }, [resizingColumn, handleResizeMove, handleResizeEnd]);
+
+  // Update column sizes when columns change
+  useEffect(() => {
+    const newSizes: Record<number, number> = {};
+    let shouldUpdate = false;
+
+    defaultColumns.forEach((col, idx) => {
+      const columnDef = col as any;
+      if (columnSizes[idx] === undefined) {
+        newSizes[idx] = columnDef.minSize ?? columnDef.size ?? 120;
+        shouldUpdate = true;
+      } else {
+        newSizes[idx] = columnSizes[idx];
+      }
+    });
+
+    if (shouldUpdate) {
+      setColumnSizes(newSizes);
+    }
+  }, [defaultColumns]);
+
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
@@ -265,8 +388,8 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   className="sticky top-0 z-[2] h-11 bg-slate-50 dark:bg-slate-950"
                 >
                   {checkboxMode !== "never" && (
-                    <th className="relative">
-                      <div className="ml-2 flex h-full items-center justify-center">
+                    <th className="relative" style={{ height: "44px" }}>
+                      <div className="flex h-full items-center justify-center px-2">
                         <Checkbox
                           variant="helicone"
                           onCheckedChange={handleSelectAll}
@@ -287,40 +410,53 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                       <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
                     </th>
                   )}
-                  {headerGroup.headers.map((header, index) => (
-                    <th
-                      key={`header-${index}`}
-                      className={clsx(
-                        "relative",
-                        index === headerGroup.headers.length - 1 &&
-                          "border-r border-slate-300 dark:border-slate-700",
-                      )}
-                    >
-                      {index === 0 && onToggleAllRows !== undefined && (
-                        <div className="absolute left-1 top-1/2 z-10 -translate-y-1/2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onToggleAllRows(table)}
-                            className="h-6 w-6"
-                            aria-label={"Toggle expand all rows"}
-                          >
-                            <ChevronsUpDown className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                      <DraggableColumnHeader
-                        header={header}
-                        sortable={sortable}
-                        index={index}
-                        totalColumns={headerGroup.headers.length}
-                      />
-                      {index < headerGroup.headers.length - 1 && (
-                        <div className="absolute right-0 top-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
-                      )}
-                      <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
-                    </th>
-                  ))}
+                  {headerGroup.headers.map((header, index) => {
+                    const columnDef = defaultColumns[index] as any;
+                    const columnWidth = columnSizes[index] ?? columnDef.minSize ?? columnDef.size ?? 120;
+
+                    return (
+                      <th
+                        key={`header-${index}`}
+                        className={clsx(
+                          "relative",
+                          index === headerGroup.headers.length - 1 &&
+                            "border-r border-slate-300 dark:border-slate-700",
+                        )}
+                        style={{
+                          width: `${columnWidth}px`,
+                          minWidth: `${columnWidth}px`,
+                          maxWidth: `${columnWidth}px`,
+                          height: "44px",
+                        }}
+                      >
+                        {index === 0 && onToggleAllRows !== undefined && (
+                          <div className="absolute left-1 top-1/2 z-10 -translate-y-1/2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onToggleAllRows(table)}
+                              className="h-6 w-6"
+                              aria-label={"Toggle expand all rows"}
+                            >
+                              <ChevronsUpDown className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                        <DraggableColumnHeader
+                          header={header}
+                          sortable={sortable}
+                          index={index}
+                          totalColumns={headerGroup.headers.length}
+                          onResizeStart={handleResizeStart}
+                          isResizing={resizingColumn === index}
+                        />
+                        {index < headerGroup.headers.length - 1 && (
+                          <div className="absolute right-0 top-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                      </th>
+                    );
+                  })}
                 </tr>
               ))}
             </thead>
@@ -373,7 +509,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   >
                     <div
                       className={clsx(
-                        "flex h-full w-full items-center justify-center",
+                        "flex h-full w-full items-center justify-center px-2",
                         selectedIds?.includes(row.id ?? "") ||
                           (currentRow && currentRow.id === row.original.id)
                           ? "bg-inherit"
@@ -390,34 +526,40 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                       />
                     </div>
                   </td>
-                  {row.getVisibleCells().map((cell, i) => (
-                    <td
-                      key={cell.id}
-                      className={clsx(
-                        "select-none truncate text-slate-700 dark:text-slate-300",
-                        !rowLink?.(row.original) &&
-                          clsx(
-                            "py-3",
-                            i === 0 && "pr-2",
-                            i > 0 && "px-2",
-                            onRowSelect && "cursor-pointer",
-                          ),
-                        i === 0 && "relative",
-                        selectedIds?.includes(row.id ?? "") ||
-                          (currentRow && currentRow.id === row.original.id)
-                          ? "bg-inherit"
-                          : row.getCanExpand()
+                  {row.getVisibleCells().map((cell, i) => {
+                    const columnDef = defaultColumns[i] as any;
+                    const columnWidth = columnSizes[i] ?? columnDef.minSize ?? columnDef.size ?? 120;
+
+                    return (
+                      <td
+                        key={cell.id}
+                        className={clsx(
+                          "select-none text-slate-700 dark:text-slate-300",
+                          !rowLink?.(row.original) &&
+                            clsx(
+                              "py-3",
+                              i === 0 && "pr-2",
+                              i > 0 && "px-2",
+                              onRowSelect && "cursor-pointer",
+                            ),
+                          i === 0 && "relative",
+                          selectedIds?.includes(row.id ?? "") ||
+                            (currentRow && currentRow.id === row.original.id)
                             ? "bg-inherit"
-                            : row.depth > 0
-                              ? "bg-slate-50 dark:bg-slate-950/50"
-                              : "bg-white dark:bg-black",
-                        i === row.getVisibleCells().length - 1 &&
-                          "border-r border-border",
-                      )}
-                      style={{
-                        maxWidth: cell.column.getSize(),
-                      }}
-                    >
+                            : row.getCanExpand()
+                              ? "bg-inherit"
+                              : row.depth > 0
+                                ? "bg-slate-50 dark:bg-slate-950/50"
+                                : "bg-white dark:bg-black",
+                          i === row.getVisibleCells().length - 1 &&
+                            "border-r border-border",
+                        )}
+                        style={{
+                          width: `${columnWidth}px`,
+                          minWidth: `${columnWidth}px`,
+                          maxWidth: `${columnWidth}px`,
+                        }}
+                      >
                       <ConditionalLink
                         href={rowLink?.(row.original)}
                         className={clsx(
@@ -514,15 +656,18 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                               &nbsp;
                             </span>
                           ) : (
-                            flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )
+                            <div className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )}
+                            </div>
                           )}
                         </div>
                       </ConditionalLink>
                     </td>
-                  ))}
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
