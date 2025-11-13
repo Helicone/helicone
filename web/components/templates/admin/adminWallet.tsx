@@ -19,6 +19,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   TableBody,
   TableCell,
   TableHead,
@@ -28,7 +35,11 @@ import {
 import { H4, Small } from "@/components/ui/typography";
 import { $JAWN_API, getJawnClient } from "@/lib/clients/jawn";
 import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { WalletAnalyticsCharts } from "./WalletAnalyticsCharts";
+import { ThemedTimeFilterShadCN } from "@/components/shared/themed/themedTimeFilterShadCN";
+import { addDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 import {
   AlertCircle,
   ArrowDown,
@@ -92,6 +103,17 @@ export default function AdminWallet() {
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
 
+  // Time-series analytics date range state (default: last 30 days)
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: addDays(new Date(), -30),
+    to: new Date(),
+  });
+
+  // Time-series granularity state (default: day)
+  const [groupBy, setGroupBy] = useState<
+    "minute" | "hour" | "day" | "week" | "month"
+  >("day");
+
   // Fetch dashboard data with infinite scroll
   const limit = 50;
   const {
@@ -121,25 +143,12 @@ export default function AdminWallet() {
 
       if (error) throw error;
 
-      console.log("Raw API response:", data);
-
       // The API returns { data: { organizations: [...], summary: {...} } }
       // But the jawn client might unwrap it differently
       const responseData = (data as any).data || data;
       const orgs = responseData.organizations || [];
       const offset = pageParam as number;
       const paginatedOrgs = orgs.slice(offset, offset + limit);
-
-      console.log(
-        "Query function - Response data:",
-        responseData,
-        "Total orgs:",
-        orgs.length,
-        "Offset:",
-        offset,
-        "Paginated:",
-        paginatedOrgs.length,
-      );
 
       return {
         data: {
@@ -163,15 +172,6 @@ export default function AdminWallet() {
   const allOrganizations =
     data?.pages.flatMap((page: any) => page.data?.organizations || []) || [];
 
-  console.log(
-    "Pages:",
-    data?.pages.length,
-    "All organizations:",
-    allOrganizations.length,
-    "First page:",
-    data?.pages[0],
-  );
-
   // Fetch wallet details (lazy loaded when org is selected)
   const {
     data: walletDetailsResponse,
@@ -193,15 +193,6 @@ export default function AdminWallet() {
   );
 
   const walletDetails = (walletDetailsResponse as any)?.data;
-
-  console.log(
-    "Selected org:",
-    selectedOrg,
-    "Wallet loading:",
-    walletLoading,
-    "Wallet details:",
-    walletDetails,
-  );
 
   // Mutation for modifying wallet balance
   const modifyBalanceMutation = $JAWN_API.useMutation(
@@ -241,6 +232,48 @@ export default function AdminWallet() {
       enabled: !!selectedOrg && !!selectedTable,
     },
   );
+
+  // Fetch time-series analytics data
+  const {
+    data: timeSeriesData,
+    isLoading: timeSeriesLoading,
+    error: timeSeriesError,
+  } = useQuery({
+    queryKey: [
+      "walletTimeSeries",
+      dateRange.from?.toISOString(),
+      dateRange.to?.toISOString(),
+      groupBy,
+    ],
+    queryFn: async () => {
+      if (!dateRange.from || !dateRange.to) {
+        return { deposits: [], spend: [] };
+      }
+
+      const jawn = getJawnClient();
+      const { data, error } = await jawn.POST(
+        "/v1/admin/wallet/analytics/time-series",
+        {
+          params: {
+            query: {
+              startDate: dateRange.from.toISOString(),
+              endDate: dateRange.to.toISOString(),
+              groupBy: groupBy,
+            },
+          },
+        },
+      );
+
+      if (error) throw error;
+
+      const responseData = (data as any)?.data || data;
+      return {
+        deposits: responseData?.deposits || [],
+        spend: responseData?.spend || [],
+      };
+    },
+    enabled: !!dateRange.from && !!dateRange.to,
+  });
 
   const handleSearch = () => {
     setSearchQuery(searchTerm);
@@ -460,6 +493,47 @@ export default function AdminWallet() {
     <div className="flex h-screen flex-col overflow-hidden p-6">
       {/* Main Content */}
       <div className="flex min-h-0 flex-1 flex-col gap-3">
+        {/* Time Range Selector and Group By */}
+        <div className="flex shrink-0 items-center justify-end gap-3">
+          <div className="flex items-center gap-2">
+            <Label className="text-sm text-muted-foreground">Group By</Label>
+            <Select
+              value={groupBy}
+              onValueChange={(value) =>
+                setGroupBy(
+                  value as "minute" | "hour" | "day" | "week" | "month",
+                )
+              }
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="minute">1 Minute</SelectItem>
+                <SelectItem value="hour">1 Hour</SelectItem>
+                <SelectItem value="day">1 Day</SelectItem>
+                <SelectItem value="week">7 Days</SelectItem>
+                <SelectItem value="month">1 Month</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <ThemedTimeFilterShadCN
+            onDateChange={(date) => date && setDateRange(date)}
+            initialDateRange={dateRange}
+            isLive={false}
+          />
+        </div>
+
+        {/* Analytics Charts */}
+        <WalletAnalyticsCharts
+          deposits={timeSeriesData?.deposits || []}
+          spend={timeSeriesData?.spend || []}
+          isLoading={timeSeriesLoading}
+          error={
+            timeSeriesError instanceof Error ? timeSeriesError.message : null
+          }
+        />
+
         {/* Search Bar with Summary */}
         <div className="flex shrink-0 items-center justify-between gap-4">
           <form

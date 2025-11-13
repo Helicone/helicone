@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -38,15 +32,15 @@ export function AutoTopoffSettings() {
 
   const [enabled, setEnabled] = useState(settings?.enabled ?? false);
   const [threshold, setThreshold] = useState(
-    settings?.thresholdCents ? (settings.thresholdCents / 100).toString() : ""
+    settings?.thresholdCents ? (settings.thresholdCents / 100).toString() : "",
   );
   const [topoffAmount, setTopoffAmount] = useState(
     settings?.topoffAmountCents
       ? (settings.topoffAmountCents / 100).toString()
-      : ""
+      : "",
   );
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
-    settings?.stripePaymentMethodId ?? ""
+    settings?.stripePaymentMethodId ?? "",
   );
 
   // Update local state when settings load
@@ -115,7 +109,7 @@ export function AutoTopoffSettings() {
   const handleRemovePaymentMethod = async (paymentMethodId: string) => {
     if (
       confirm(
-        "Are you sure you want to remove this payment method? This will disable auto top-up if it's the only payment method."
+        "Are you sure you want to remove this payment method? This will disable auto top-up if it's the only payment method.",
       )
     ) {
       await removePaymentMethod.mutateAsync({
@@ -149,192 +143,193 @@ export function AutoTopoffSettings() {
             </Button>
           </div>
 
-        {paymentMethods && paymentMethods.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            {paymentMethods.map((pm) => (
-              <div
-                key={pm.id}
-                className="flex items-center justify-between rounded-md border border-border bg-card p-3"
-              >
-                <div className="flex items-center gap-2">
-                  <CreditCard size={16} className="text-muted-foreground" />
-                  <div className="flex flex-col">
-                    <XSmall className="font-medium">
-                      <span className="capitalize">{pm.brand}</span> •••• {pm.last4}
+          {paymentMethods && paymentMethods.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {paymentMethods.map((pm) => (
+                <div
+                  key={pm.id}
+                  className="flex items-center justify-between rounded-md border border-border bg-card p-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <CreditCard size={16} className="text-muted-foreground" />
+                    <div className="flex flex-col">
+                      <XSmall className="font-medium">
+                        <span className="capitalize">{pm.brand}</span> ••••{" "}
+                        {pm.last4}
+                      </XSmall>
+                      <XSmall className="text-muted-foreground">
+                        Expires {pm.exp_month}/{pm.exp_year}
+                      </XSmall>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => handleRemovePaymentMethod(pm.id)}
+                    disabled={removePaymentMethod.isPending}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Muted className="text-xs">No payment methods saved</Muted>
+          )}
+        </div>
+
+        {/* Auto Top-Up Toggle */}
+        <div className="flex items-center justify-between">
+          <Small className="font-semibold text-slate-900 dark:text-slate-100">
+            Auto Top-Up
+          </Small>
+          <Switch
+            checked={enabled}
+            onCheckedChange={setEnabled}
+            disabled={!hasPaymentMethods}
+          />
+        </div>
+
+        {!hasPaymentMethods ? (
+          <div className="flex flex-col gap-2 rounded-md border border-border bg-muted p-3">
+            <div className="flex items-start gap-2">
+              <AlertCircle size={16} className="mt-0.5 text-muted-foreground" />
+              <div className="flex flex-col gap-1">
+                <XSmall className="font-medium">No payment method found</XSmall>
+                <XSmall className="text-muted-foreground">
+                  Purchase credits first to save a payment method for auto
+                  top-up.
+                </XSmall>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Muted className="text-xs">
+              Automatically purchase credits when your balance falls below a
+              threshold.
+            </Muted>
+
+            {settings?.consecutiveFailures &&
+              settings.consecutiveFailures >= 2 && (
+                <div className="flex items-start gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3">
+                  <AlertCircle size={16} className="mt-0.5 text-destructive" />
+                  <div className="flex flex-col gap-1">
+                    <XSmall className="font-medium text-destructive">
+                      Payment failures detected
                     </XSmall>
-                    <XSmall className="text-muted-foreground">
-                      Expires {pm.exp_month}/{pm.exp_year}
+                    <XSmall className="text-destructive/80">
+                      Auto top-up has failed {settings.consecutiveFailures}{" "}
+                      times. Please check your payment method.
                     </XSmall>
                   </div>
                 </div>
+              )}
+
+            {enabled && (
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="threshold" className="text-xs">
+                    Balance Threshold (USD)
+                  </Label>
+                  <Input
+                    id="threshold"
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="10"
+                    value={threshold}
+                    onChange={(e) => setThreshold(e.target.value)}
+                    className="w-full"
+                  />
+                  <XSmall className="text-muted-foreground">
+                    Trigger auto top-up when balance falls below this amount.
+                    Processing may take up to 15 minutes.
+                  </XSmall>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="topoff-amount" className="text-xs">
+                    Top-off Amount (USD)
+                  </Label>
+                  <Input
+                    id="topoff-amount"
+                    type="number"
+                    min="5"
+                    max="10000"
+                    step="1"
+                    placeholder="50"
+                    value={topoffAmount}
+                    onChange={(e) => setTopoffAmount(e.target.value)}
+                    className="w-full"
+                  />
+                  <XSmall className="text-muted-foreground">
+                    Amount to purchase (minimum $5, maximum $10,000)
+                  </XSmall>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="payment-method" className="text-xs">
+                    Payment Method
+                  </Label>
+                  <Select
+                    value={selectedPaymentMethod}
+                    onValueChange={setSelectedPaymentMethod}
+                  >
+                    <SelectTrigger id="payment-method" className="w-full">
+                      <SelectValue placeholder="Select payment method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {paymentMethods?.map((pm) => (
+                        <SelectItem key={pm.id} value={pm.id}>
+                          <div className="flex items-center gap-2">
+                            <CreditCard size={14} />
+                            <span className="capitalize">{pm.brand}</span>
+                            <span>•••• {pm.last4}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {pm.exp_month}/{pm.exp_year}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <Button
-                  onClick={() => handleRemovePaymentMethod(pm.id)}
-                  disabled={removePaymentMethod.isPending}
-                  variant="ghost"
-                  size="sm"
+                  onClick={handleSave}
+                  disabled={updateSettings.isPending}
+                  className="w-full"
                 >
-                  Remove
+                  {updateSettings.isPending ? "Saving..." : "Save Settings"}
                 </Button>
               </div>
-            ))}
-          </div>
-        ) : (
-          <Muted className="text-xs">No payment methods saved</Muted>
-        )}
-      </div>
+            )}
 
-      {/* Auto Top-Up Toggle */}
-      <div className="flex items-center justify-between">
-        <Small className="font-semibold text-slate-900 dark:text-slate-100">
-          Auto Top-Up
-        </Small>
-        <Switch
-          checked={enabled}
-          onCheckedChange={setEnabled}
-          disabled={!hasPaymentMethods}
-        />
-      </div>
-
-      {!hasPaymentMethods ? (
-        <div className="flex flex-col gap-2 rounded-md border border-border bg-muted p-3">
-          <div className="flex items-start gap-2">
-            <AlertCircle size={16} className="mt-0.5 text-muted-foreground" />
-            <div className="flex flex-col gap-1">
-              <XSmall className="font-medium">No payment method found</XSmall>
-              <XSmall className="text-muted-foreground">
-                Purchase credits first to save a payment method for auto top-up.
-              </XSmall>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <>
-          <Muted className="text-xs">
-            Automatically purchase credits when your balance falls below a
-            threshold.
-          </Muted>
-
-          {settings?.consecutiveFailures && settings.consecutiveFailures >= 2 && (
-            <div className="flex items-start gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3">
-              <AlertCircle
-                size={16}
-                className="mt-0.5 text-destructive"
-              />
-              <div className="flex flex-col gap-1">
-                <XSmall className="font-medium text-destructive">
-                  Payment failures detected
-                </XSmall>
-                <XSmall className="text-destructive/80">
-                  Auto top-up has failed {settings.consecutiveFailures} times.
-                  Please check your payment method.
-                </XSmall>
-              </div>
-            </div>
-          )}
-
-          {enabled && (
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="threshold" className="text-xs">
-                  Balance Threshold (USD)
-                </Label>
-                <Input
-                  id="threshold"
-                  type="number"
-                  min="0"
-                  step="1"
-                  placeholder="10"
-                  value={threshold}
-                  onChange={(e) => setThreshold(e.target.value)}
-                  className="w-full"
-                />
-                <XSmall className="text-muted-foreground">
-                  Trigger auto top-up when balance falls below this amount. Processing may take up to 15 minutes.
-                </XSmall>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="topoff-amount" className="text-xs">
-                  Top-off Amount (USD)
-                </Label>
-                <Input
-                  id="topoff-amount"
-                  type="number"
-                  min="5"
-                  max="10000"
-                  step="1"
-                  placeholder="50"
-                  value={topoffAmount}
-                  onChange={(e) => setTopoffAmount(e.target.value)}
-                  className="w-full"
-                />
-                <XSmall className="text-muted-foreground">
-                  Amount to purchase (minimum $5, maximum $10,000)
-                </XSmall>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="payment-method" className="text-xs">
-                  Payment Method
-                </Label>
-                <Select
-                  value={selectedPaymentMethod}
-                  onValueChange={setSelectedPaymentMethod}
-                >
-                  <SelectTrigger id="payment-method" className="w-full">
-                    <SelectValue placeholder="Select payment method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {paymentMethods?.map((pm) => (
-                      <SelectItem key={pm.id} value={pm.id}>
-                        <div className="flex items-center gap-2">
-                          <CreditCard size={14} />
-                          <span className="capitalize">{pm.brand}</span>
-                          <span>•••• {pm.last4}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {pm.exp_month}/{pm.exp_year}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
+            {!enabled && (
               <Button
                 onClick={handleSave}
                 disabled={updateSettings.isPending}
+                variant="outline"
                 className="w-full"
               >
-                {updateSettings.isPending ? "Saving..." : "Save Settings"}
+                Save Settings
               </Button>
-            </div>
-          )}
+            )}
 
-          {!enabled && (
-            <Button
-              onClick={handleSave}
-              disabled={updateSettings.isPending}
-              variant="outline"
-              className="w-full"
-            >
-              Save Settings
-            </Button>
-          )}
-
-          {settings?.lastTopoffAt && (
-            <div className="flex items-start gap-2 rounded-md border border-border bg-card p-3">
-              <CheckCircle size={16} className="mt-0.5 text-green-600" />
-              <div className="flex flex-col gap-1">
-                <XSmall className="font-medium">Last top-off</XSmall>
-                <XSmall className="text-muted-foreground">
-                  {new Date(settings.lastTopoffAt).toLocaleString()}
-                </XSmall>
+            {settings?.lastTopoffAt && (
+              <div className="flex items-start gap-2 rounded-md border border-border bg-card p-3">
+                <CheckCircle size={16} className="mt-0.5 text-green-600" />
+                <div className="flex flex-col gap-1">
+                  <XSmall className="font-medium">Last top-off</XSmall>
+                  <XSmall className="text-muted-foreground">
+                    {new Date(settings.lastTopoffAt).toLocaleString()}
+                  </XSmall>
+                </div>
               </div>
-            </div>
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
       </CardContent>
     </Card>
   );

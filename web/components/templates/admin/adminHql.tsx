@@ -373,7 +373,10 @@ function AdminHql() {
             onLayout={(sizes) => {
               if (sizes[0] !== undefined) {
                 setEditorSize(sizes[0]);
-                localStorage.setItem("admin-hql-editor-size", sizes[0].toString());
+                localStorage.setItem(
+                  "admin-hql-editor-size",
+                  sizes[0].toString(),
+                );
               }
             }}
           >

@@ -2755,7 +2755,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 262000,
       "crossRegion": false,
       "maxTokens": 163800,
-      "modelId": "moonshotai/kimi-k2-0905",
+      "modelId": "moonshotai/Kimi-K2-Instruct-0905",
       "parameters": [
         "max_tokens",
         "response_format",
@@ -2927,6 +2927,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tool_choice",
         "tools",
         "top_logprobs",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-thinking:novita": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-thinking",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
         "top_p",
       ],
       "provider": "novita",
@@ -4036,7 +4059,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 131072,
       "crossRegion": false,
       "maxTokens": 40000,
-      "modelId": "openai/gpt-oss-120b",
+      "modelId": "gpt-oss-120b",
       "parameters": [
         "logprobs",
         "max_tokens",
@@ -4704,6 +4727,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "novita",
     "novita",
+    "novita",
     "openrouter",
     "openrouter",
   ],
@@ -4889,7 +4913,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 8e-7,
         "output": 0.000004,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -4901,7 +4925,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 8e-7,
         "output": 0.000004,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -4932,7 +4956,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 8e-7,
         "output": 0.000004,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -4947,7 +4971,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -4959,7 +4983,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -4990,7 +5014,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -5005,7 +5029,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -5017,7 +5041,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "deepinfra": [
@@ -5058,7 +5082,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -5073,7 +5097,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000001,
         "output": 0.000005,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -5085,7 +5109,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000001,
         "output": 0.000005,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -5116,7 +5140,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000001,
         "output": 0.000005,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -5206,7 +5230,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000001,
         "output": 0.000005,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -5218,7 +5242,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000001,
         "output": 0.000005,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -5249,7 +5273,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000001,
         "output": 0.000005,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -5264,7 +5288,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -5276,7 +5300,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -5296,7 +5320,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00001583,
         "output": 0.00007913,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "vertex": [
@@ -5308,7 +5332,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -5323,7 +5347,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -5335,7 +5359,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -5355,7 +5379,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00001583,
         "output": 0.00007913,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "vertex": [
@@ -5367,7 +5391,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -5382,7 +5406,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -5394,7 +5418,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -5414,7 +5438,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00001583,
         "output": 0.00007913,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "vertex": [
@@ -5426,7 +5450,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -5441,13 +5465,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
       {
         "input": 0.000006,
         "output": 0.0000225,
         "threshold": 200000,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -5459,13 +5483,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
       {
         "input": 0.000006,
         "output": 0.0000225,
         "threshold": 200000,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -5490,7 +5514,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000633,
         "output": 0.00002374,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "vertex": [
@@ -5502,13 +5526,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
       {
         "input": 0.000006,
         "output": 0.0000225,
         "threshold": 200000,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -5957,8 +5981,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "novita": [
       {
-        "input": 5.7e-7,
-        "output": 0.0000023,
+        "input": 6e-7,
+        "output": 0.0000025,
         "threshold": 0,
       },
     ],
@@ -5979,6 +6003,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 1e-7,
         "output": 4e-7,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -5989,6 +6014,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 4e-7,
         "output": 0.0000016,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openai": [
@@ -5999,6 +6025,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 1e-7,
         "output": 4e-7,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -6006,6 +6033,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 1.1e-7,
         "output": 4.2e-7,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -6018,6 +6046,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 1.5e-7,
         "output": 6e-7,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -6028,6 +6057,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 1.5e-7,
         "output": 6e-7,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openai": [
@@ -6038,6 +6068,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000005,
         "output": 0.00002,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -6045,6 +6076,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000528,
         "output": 0.00001582,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -6057,6 +6089,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000125,
         "output": 0.00001,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -6067,6 +6100,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000125,
         "output": 0.00001,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openai": [
@@ -6077,6 +6111,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000125,
         "output": 0.00001,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -6084,6 +6119,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000132,
         "output": 0.00001055,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -6096,6 +6132,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000011,
         "output": 0.0000044,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -6108,6 +6145,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000011,
         "output": 0.0000044,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -6115,6 +6153,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00002,
         "output": 0.00008,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openai": [
@@ -6125,6 +6164,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000011,
         "output": 0.0000044,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -6132,6 +6172,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000211,
         "output": 0.0000844,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -6144,6 +6185,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000011,
         "output": 0.0000044,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "helicone": [
@@ -6154,6 +6196,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000011,
         "output": 0.0000044,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openai": [
@@ -6164,6 +6207,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000011,
         "output": 0.0000044,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -6171,6 +6215,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000116,
         "output": 0.00000464,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -6190,7 +6235,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 1.6e-7,
         "request": 0,
         "threshold": 0,
-        "web_search": 0,
+        "web_search": 0.01,
       },
     ],
     "groq": [
@@ -6201,7 +6246,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 5e-7,
         "request": 0,
         "threshold": 0,
-        "web_search": 0,
+        "web_search": 0.01,
       },
     ],
     "novita": [
@@ -6209,6 +6254,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 5e-8,
         "output": 2e-7,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -6216,6 +6262,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 3.7e-7,
         "output": 7.9e-7,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -6653,6 +6700,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "kimi-k2-thinking",
+      "providers": [
+        "novita",
+      ],
+    },
+    {
       "model": "llama-3.1-8b-instant",
       "providers": [
         "groq",
@@ -6896,7 +6949,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 14,
+      "modelCount": 15,
       "provider": "novita",
     },
     {
@@ -6966,6 +7019,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "kimi-k2",
     "kimi-k2-0905",
     "kimi-k2-instruct",
+    "kimi-k2-thinking",
     "llama-3.1-8b-instant",
     "llama-3.1-8b-instruct",
     "llama-3.1-8b-instruct-turbo",
@@ -7003,9 +7057,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 200,
-  "totalModelProviderConfigs": 200,
-  "totalModelsWithPtb": 76,
+  "totalEndpoints": 201,
+  "totalModelProviderConfigs": 201,
+  "totalModelsWithPtb": 77,
   "totalProviders": 19,
 }
 `;

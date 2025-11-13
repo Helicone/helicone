@@ -19,7 +19,6 @@ import {
 import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
-import findBestMatch from "string-similarity-js";
 import { v4 as uuidv4 } from "uuid";
 import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
@@ -38,7 +37,10 @@ import { $JAWN_API } from "@/lib/clients/jawn";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
-import { TemplateVariable, PromptPartialVariable } from "@helicone-package/prompts/types";
+import {
+  TemplateVariable,
+  PromptPartialVariable,
+} from "@helicone-package/prompts/types";
 import { Message } from "@helicone-package/llm-mapper/types";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
 import { ResponseFormat, ResponseFormatType, VariableInput } from "./types";
@@ -661,16 +663,17 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       variables.forEach((variable: TemplateVariable) =>
         allVariables.set(variable.name, variable),
       );
-      
+
       // Also extract prompt partials
-      const partials = HeliconeTemplateManager.extractPromptPartialVariables(content);
+      const partials =
+        HeliconeTemplateManager.extractPromptPartialVariables(content);
       partials.forEach((partial) => {
         if (!seenPartials.has(partial.raw)) {
           seenPartials.add(partial.raw);
           allPromptPartials.push(partial);
         }
       });
-      
+
       return variables;
     };
 
@@ -706,37 +709,43 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
 
     setTemplateVariables(allVariables);
-    
+
     // Fetch prompt bodies for partials and extract variables from specific message indices
     const fetchPartialVariables = async () => {
       const partialVariablesMap = new Map<string, TemplateVariable>();
       const newCacheEntries = new Map<string, OpenAIChatRequest>();
-      
+
       for (const partial of allPromptPartials) {
         const cacheKey = partial.environment
           ? `${partial.prompt_id}:${partial.index}:${partial.environment}`
           : `${partial.prompt_id}:${partial.index}`;
-        
+
         // check session cache for prompt body of the partial first
         let promptBody = promptBodyCache.get(cacheKey);
-        
+
         if (!promptBody) {
           try {
             // Fetch the prompt version
             let versionResult;
             if (partial.environment) {
-              versionResult = await $JAWN_API.POST("/v1/prompt-2025/query/environment-version", {
-                body: {
-                  promptId: partial.prompt_id,
-                  environment: partial.environment,
+              versionResult = await $JAWN_API.POST(
+                "/v1/prompt-2025/query/environment-version",
+                {
+                  body: {
+                    promptId: partial.prompt_id,
+                    environment: partial.environment,
+                  },
                 },
-              });
+              );
             } else {
-              versionResult = await $JAWN_API.POST("/v1/prompt-2025/query/production-version", {
-                body: {
-                  promptId: partial.prompt_id,
+              versionResult = await $JAWN_API.POST(
+                "/v1/prompt-2025/query/production-version",
+                {
+                  body: {
+                    promptId: partial.prompt_id,
+                  },
                 },
-              });
+              );
             }
 
             if (versionResult.error || !versionResult.data?.data?.s3_url) {
@@ -750,10 +759,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             }
 
             promptBody = (await s3Response.json()) as OpenAIChatRequest;
-            
+
             newCacheEntries.set(cacheKey, promptBody);
           } catch (error) {
-            console.error(`Error fetching prompt body for partial ${partial.raw}:`, error);
+            console.error(
+              `Error fetching prompt body for partial ${partial.raw}:`,
+              error,
+            );
             continue;
           }
         }
@@ -763,12 +775,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         }
 
         const messages = promptBody.messages || [];
-        
+
         if (partial.index >= 0 && partial.index < messages.length) {
           const targetMessage = messages[partial.index];
-          
+
           if (typeof targetMessage.content === "string") {
-            const variables = HeliconeTemplateManager.extractVariables(targetMessage.content);
+            const variables = HeliconeTemplateManager.extractVariables(
+              targetMessage.content,
+            );
             variables.forEach((variable) => {
               const key = variable.name;
               if (!partialVariablesMap.has(key)) {
@@ -781,7 +795,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           } else if (Array.isArray(targetMessage.content)) {
             for (const contentPart of targetMessage.content) {
               if (contentPart.type === "text" && contentPart.text) {
-                const variables = HeliconeTemplateManager.extractVariables(contentPart.text);
+                const variables = HeliconeTemplateManager.extractVariables(
+                  contentPart.text,
+                );
                 variables.forEach((variable) => {
                   const key = variable.name;
                   if (!partialVariablesMap.has(key)) {
@@ -814,13 +830,19 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         const cacheKey = partial.environment
           ? `${partial.prompt_id}:${partial.index}:${partial.environment}`
           : `${partial.prompt_id}:${partial.index}`;
-        
-        const promptBody = promptBodyCache.get(cacheKey) || newCacheEntries.get(cacheKey);
-        
-        if (promptBody && promptBody.messages && partial.index >= 0 && partial.index < promptBody.messages.length) {
+
+        const promptBody =
+          promptBodyCache.get(cacheKey) || newCacheEntries.get(cacheKey);
+
+        if (
+          promptBody &&
+          promptBody.messages &&
+          partial.index >= 0 &&
+          partial.index < promptBody.messages.length
+        ) {
           const targetMessage = promptBody.messages[partial.index];
           let substitutionValue = "";
-          
+
           if (typeof targetMessage.content === "string") {
             substitutionValue = targetMessage.content;
           } else if (Array.isArray(targetMessage.content)) {
@@ -834,7 +856,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               .filter((text) => text.length > 0)
               .join(" ");
           }
-          
+
           if (substitutionValue) {
             updatedPartialInputs[partial.raw] = substitutionValue;
           }
@@ -930,7 +952,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           return [name, value];
         }),
       );
-      
+
       const { hasSubstitutionFailure, templatedMessages } =
         createTemplatedMessages(
           substitutionValues,
@@ -1038,7 +1060,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           }
           const error = result.error.message || result.error?.error?.message;
           if (error.includes("Insufficient credits")) {
-            setError("Insufficient credits. Please add credits to continue using the playground.");
+            setError(
+              "Insufficient credits. Please add credits to continue using the playground.",
+            );
           } else {
             setError(error);
           }

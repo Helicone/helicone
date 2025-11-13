@@ -1,4 +1,8 @@
-import { AlertRequest, AlertResponse } from "../../managers/alert/AlertManager";
+import {
+  AlertRequest,
+  AlertResponse,
+  GetAlertsOptions,
+} from "../../managers/alert/AlertManager";
 import { err, ok, Result } from "../../packages/common/result";
 import { Database } from "../db/database.types";
 import { dbExecute } from "../shared/db/dbExecute";
@@ -13,8 +17,12 @@ export class AlertStore extends BaseStore {
   private thirtySecondsInMs = 30 * 1000;
   private oneMonthInMs = 30 * 24 * 60 * 60 * 1000;
 
-  public async getAlerts(): Promise<Result<AlertResponse, string>> {
+  public async getAlerts(
+    options?: GetAlertsOptions
+  ): Promise<Result<AlertResponse, string>> {
     try {
+      const { historyPage = 0, historyPageSize = 25 } = options || {};
+
       const alertResult = await dbExecute<
         Database["public"]["Tables"]["alert"]["Row"]
       >(
@@ -25,14 +33,27 @@ export class AlertStore extends BaseStore {
         [this.organizationId]
       );
 
+      // Get total count for history
+      const historyCountResult = await dbExecute<{ count: string }>(
+        `SELECT COUNT(*) as count
+         FROM alert_history
+         WHERE org_id = $1
+         AND (soft_delete IS NULL OR soft_delete = false)`,
+        [this.organizationId]
+      );
+
+      // Get paginated history sorted by alert_start_time descending
+      const offset = historyPage * historyPageSize;
       const alertHistoryResult = await dbExecute<
         Database["public"]["Tables"]["alert_history"]["Row"]
       >(
         `SELECT id, org_id, alert_id, alert_start_time, alert_end_time, alert_metric, alert_name, triggered_value, status, soft_delete, created_at, updated_at
          FROM alert_history
          WHERE org_id = $1
-         AND (soft_delete IS NULL OR soft_delete = false)`,
-        [this.organizationId]
+         AND (soft_delete IS NULL OR soft_delete = false)
+         ORDER BY alert_start_time DESC
+         LIMIT $2 OFFSET $3`,
+        [this.organizationId, historyPageSize, offset]
       );
 
       if (alertResult.error) {
@@ -43,9 +64,19 @@ export class AlertStore extends BaseStore {
         return err(alertHistoryResult.error ?? "Failed to fetch alert history");
       }
 
+      if (historyCountResult.error) {
+        return err(historyCountResult.error ?? "Failed to fetch history count");
+      }
+
+      const historyTotalCount =
+        historyCountResult.data && historyCountResult.data.length > 0
+          ? parseInt(historyCountResult.data[0].count)
+          : 0;
+
       return ok({
         alerts: alertResult.data ?? [],
         history: alertHistoryResult.data ?? [],
+        historyTotalCount,
       });
     } catch (error) {
       console.error("Error fetching alerts:", error);

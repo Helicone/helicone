@@ -1,6 +1,10 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { useScores } from "./useScores";
 import { ScoresPanelProps } from "./ScoresPanelProps";
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -44,17 +48,30 @@ export const ScoresPanel = (props: ScoresPanelProps) => {
   const displayScoreKeys = shouldShowMockData ? mockScoreKeys : scoreKeys;
 
   // Create chart config dynamically based on score keys
-  const chartConfig = displayScoreKeys.reduce((acc, key, index) => {
-    const colorKeys = [CHART_COLORS.blue, CHART_COLORS.purple, CHART_COLORS.cyan, CHART_COLORS.pink, CHART_COLORS.orange];
-    acc[key] = {
-      label: key,
-      color: colorKeys[index % colorKeys.length],
-    };
-    return acc;
-  }, {} as Record<string, { label: string; color: string }>);
+  const chartConfig = displayScoreKeys.reduce(
+    (acc, key, index) => {
+      const colorKeys = [
+        CHART_COLORS.blue,
+        CHART_COLORS.purple,
+        CHART_COLORS.cyan,
+        CHART_COLORS.pink,
+        CHART_COLORS.orange,
+      ];
+      acc[key] = {
+        label: key,
+        color: colorKeys[index % colorKeys.length],
+      };
+      return acc;
+    },
+    {} as Record<string, { label: string; color: string }>,
+  );
 
   // Check if we have any score keys or data
-  const hasData = displayScoreKeys && displayScoreKeys.length > 0 && displayScores && displayScores.length > 0;
+  const hasData =
+    displayScoreKeys &&
+    displayScoreKeys.length > 0 &&
+    displayScores &&
+    displayScores.length > 0;
 
   return (
     <div className="flex h-full w-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
@@ -73,17 +90,23 @@ export const ScoresPanel = (props: ScoresPanelProps) => {
           </div>
         ) : !hasData ? (
           <div className="flex h-[180px] w-full items-center justify-center">
-            <p className="text-sm text-muted-foreground">No score data available</p>
+            <p className="text-sm text-muted-foreground">
+              No score data available
+            </p>
           </div>
         ) : (
-          <ChartContainer
-            config={chartConfig}
-            className="h-[180px] w-full"
-          >
+          <ChartContainer config={chartConfig} className="h-[180px] w-full">
             <AreaChart data={displayScores ?? []}>
               <defs>
                 {displayScoreKeys.map((key) => (
-                  <linearGradient key={key} id={`fill${key}`} x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    key={key}
+                    id={`fill${key}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop
                       offset="5%"
                       stopColor={`var(--color-${key})`}
@@ -105,7 +128,7 @@ export const ScoresPanel = (props: ScoresPanelProps) => {
                 tickMargin={8}
                 minTickGap={50}
               />
-              <YAxis domain={[0, 'auto']} hide />
+              <YAxis domain={[0, "auto"]} hide />
               <ChartTooltip
                 cursor={false}
                 content={

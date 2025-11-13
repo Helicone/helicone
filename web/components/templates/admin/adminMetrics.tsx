@@ -58,7 +58,7 @@ const AdminMetrics = (props: AdminStatsProps) => {
       <H1>Admin Metrics</H1>
 
       <div className="flex flex-col gap-4 md:flex-row md:gap-6">
-        <div className="flex flex-col gap-2 flex-1 md:max-w-xs">
+        <div className="flex flex-1 flex-col gap-2 md:max-w-xs">
           <Label className="font-semibold">Time Filter</Label>
           <Select
             value={timeFilter}
@@ -77,7 +77,7 @@ const AdminMetrics = (props: AdminStatsProps) => {
           </Select>
         </div>
 
-        <div className="flex flex-col gap-2 flex-1 md:max-w-xs">
+        <div className="flex flex-1 flex-col gap-2 md:max-w-xs">
           <Label className="font-semibold">Group By</Label>
           <Select
             value={groupBy}

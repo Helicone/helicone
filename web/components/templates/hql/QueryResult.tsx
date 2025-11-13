@@ -80,7 +80,11 @@ function QueryResult({
           const rowData = info.row.original;
 
           // Make org_name clickable if organization_id exists (admin only)
-          if (enableAdminLinks && col === "org_name" && rowData.organization_id) {
+          if (
+            enableAdminLinks &&
+            col === "org_name" &&
+            rowData.organization_id
+          ) {
             return (
               <Link
                 href={`/admin/org-search?q=${encodeURIComponent(rowData.organization_id)}`}
@@ -101,7 +105,7 @@ function QueryResult({
                 href={`/admin/org-search?q=${encodeURIComponent(String(value))}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline dark:text-blue-400 font-mono text-xs"
+                className="font-mono text-xs text-blue-600 hover:underline dark:text-blue-400"
                 onClick={(e) => e.stopPropagation()}
               >
                 {String(value)}
@@ -116,7 +120,7 @@ function QueryResult({
                 href={`/admin/org-search?q=${encodeURIComponent(String(value))}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline dark:text-blue-400 font-mono text-xs"
+                className="font-mono text-xs text-blue-600 hover:underline dark:text-blue-400"
                 onClick={(e) => e.stopPropagation()}
               >
                 {String(value)}
@@ -131,7 +135,7 @@ function QueryResult({
                 href={`https://dashboard.stripe.com/customers/${String(value)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline dark:text-blue-400 font-mono text-xs"
+                className="font-mono text-xs text-blue-600 hover:underline dark:text-blue-400"
                 onClick={(e) => e.stopPropagation()}
               >
                 {String(value)}
