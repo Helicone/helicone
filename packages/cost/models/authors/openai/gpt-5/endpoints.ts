@@ -694,8 +694,8 @@ export const endpoints = {
         },
       },
     ],
-    contextLength: 128000,
-    maxCompletionTokens: 32768,
+    contextLength: 400000,
+    maxCompletionTokens: 128000,
     supportedParameters: [
       "max_completion_tokens",
       "stop",
