@@ -47,12 +47,12 @@ export default function DraggableColumnHeader<T>(props: {
                   {meta.sortKey === sortable.sortKey ? (
                     sortable.sortDirection === "asc" ? (
                       <BarsArrowUpIcon
-                        className="h-3 w-3 text-sky-500"
+                        className="h-4 w-4 text-sky-500"
                         aria-hidden="true"
                       />
                     ) : (
                       <BarsArrowDownIcon
-                        className="h-3 w-3 text-sky-500"
+                        className="h-4 w-4 text-sky-500"
                         aria-hidden="true"
                       />
                     )
@@ -90,7 +90,7 @@ export default function DraggableColumnHeader<T>(props: {
                           }}
                         >
                           <BarsArrowUpIcon
-                            className="h-3 w-3"
+                            className="h-4 w-4"
                             aria-hidden="true"
                           />
                           ASC
