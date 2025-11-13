@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 
+// Constants for column sizing
+const COLUMN_PADDING = 24; // Padding and space for sort icons
+const MIN_COLUMN_WIDTH = 60; // Minimum column width in pixels
+const DEFAULT_COLUMN_WIDTH = 120; // Default column width when not specified
+const HEADER_FONT = "600 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
 interface ColumnWithSize {
   minSize?: number;
   size?: number;
@@ -24,12 +30,13 @@ export function useColumnResize<T extends ColumnWithSize>({
 }: UseColumnResizeOptions<T>): UseColumnResizeReturn {
   // Canvas ref for efficient text measurement
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const contextConfigured = useRef<boolean>(false);
 
   // Initialize column sizes from minSize or default
   const initialColumnSizes = useMemo(() => {
     return columns.reduce(
       (acc, col, idx) => {
-        acc[idx] = col.minSize ?? col.size ?? 120;
+        acc[idx] = col.minSize ?? col.size ?? DEFAULT_COLUMN_WIDTH;
         return acc;
       },
       {} as Record<number, number>,
@@ -41,23 +48,38 @@ export function useColumnResize<T extends ColumnWithSize>({
     initialColumnSizes,
   );
 
+  useEffect(() => {
+    return () => {
+      if (canvasRef.current) {
+        canvasRef.current.remove();
+        canvasRef.current = null;
+      }
+      contextConfigured.current = false;
+    };
+  }, []);
+
   const [resizingColumn, setResizingColumn] = useState<number | null>(null);
   const resizeStartX = useRef<number>(0);
   const resizeStartWidth = useRef<number>(0);
 
   // Measure actual text width using Canvas API with error handling
-  const measureTextWidth = useCallback((text: string, font: string): number => {
+  const measureTextWidth = useCallback((text: string): number => {
     if (typeof document === "undefined") return 0;
 
     try {
       if (!canvasRef.current) {
         canvasRef.current = document.createElement("canvas");
+        contextConfigured.current = false;
       }
 
       const context = canvasRef.current.getContext("2d");
       if (!context) return 0;
 
-      context.font = font;
+      if (!contextConfigured.current) {
+        context.font = HEADER_FONT;
+        contextConfigured.current = true;
+      }
+
       const metrics = context.measureText(text);
       return metrics.width;
     } catch (error) {
@@ -70,15 +92,14 @@ export function useColumnResize<T extends ColumnWithSize>({
   const getMinColumnWidth = useCallback(
     (column: T, defaultWidth: number) => {
       const header = typeof column.header === "string" ? column.header : "";
-      if (!header) return 60; // Minimum if no header text
+      if (!header) return MIN_COLUMN_WIDTH;
 
-      // Measure actual text width with the header font (12px semibold)
-      const headerTextWidth = measureTextWidth(
-        header,
-        "600 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      // Measure actual text width with the header font
+      const headerTextWidth = measureTextWidth(header);
+      const textBasedMin = Math.max(
+        headerTextWidth + COLUMN_PADDING,
+        MIN_COLUMN_WIDTH,
       );
-      const padding = 24; // Account for padding and potential sort icons
-      const textBasedMin = Math.max(headerTextWidth + padding, 60); // Minimum 60px
 
       // Return the smaller of text-based minimum or default width
       // This prevents jumping when user starts to resize
@@ -94,7 +115,7 @@ export function useColumnResize<T extends ColumnWithSize>({
       event.stopPropagation();
       setResizingColumn(columnIndex);
       resizeStartX.current = event.clientX;
-      resizeStartWidth.current = columnSizes[columnIndex] ?? 120;
+      resizeStartWidth.current = columnSizes[columnIndex] ?? DEFAULT_COLUMN_WIDTH;
     },
     [columnSizes],
   );
@@ -109,7 +130,7 @@ export function useColumnResize<T extends ColumnWithSize>({
         columnSizes[resizingColumn] ??
         currentColumn.minSize ??
         currentColumn.size ??
-        120;
+        DEFAULT_COLUMN_WIDTH;
       const minWidth = getMinColumnWidth(currentColumn, defaultWidth);
       const newWidth = Math.max(minWidth, resizeStartWidth.current + deltaX);
 
@@ -141,28 +162,17 @@ export function useColumnResize<T extends ColumnWithSize>({
     };
   }, [resizingColumn, handleResizeMove, handleResizeEnd]);
 
-  // Update column sizes when columns change - with memoization
-  const shouldUpdateSizes = useMemo(() => {
-    return columns.some((col, idx) => columnSizes[idx] === undefined);
-  }, [columns.length, columnSizes]);
-
-  useEffect(() => {
-    if (!shouldUpdateSizes) return;
-
-    const newSizes: Record<number, number> = {};
+  const mergedColumnSizes = useMemo(() => {
+    const merged: Record<number, number> = {};
     columns.forEach((col, idx) => {
-      if (columnSizes[idx] === undefined) {
-        newSizes[idx] = col.minSize ?? col.size ?? 120;
-      } else {
-        newSizes[idx] = columnSizes[idx];
-      }
+      merged[idx] =
+        columnSizes[idx] ?? col.minSize ?? col.size ?? DEFAULT_COLUMN_WIDTH;
     });
-
-    setColumnSizes(newSizes);
-  }, [shouldUpdateSizes, columns, columnSizes, setColumnSizes]);
+    return merged;
+  }, [columns, columnSizes]);
 
   return {
-    columnSizes,
+    columnSizes: mergedColumnSizes,
     resizingColumn,
     handleResizeStart,
   };
