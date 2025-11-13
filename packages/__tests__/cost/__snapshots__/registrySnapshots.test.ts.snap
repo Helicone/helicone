@@ -3501,15 +3501,53 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
     "gpt-5-codex:helicone": {
-      "context": 128000,
+      "context": 400000,
       "crossRegion": false,
-      "maxTokens": 32768,
+      "maxTokens": 128000,
       "modelId": "pa/gpt-5-codex",
       "parameters": [
         "max_completion_tokens",
         "stop",
       ],
       "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-codex:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-codex",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-codex:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5-codex",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -3712,6 +3750,200 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "crossRegion": false,
       "maxTokens": 128000,
       "modelId": "openai/gpt-5",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "openai/gpt-5.1": {
+    "codex-mini-latest:openai": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "codex-mini-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "codex-mini-latest:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "openai/codex-mini-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-chat-latest:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "gpt-5.1-chat-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-chat-latest:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "openai/gpt-5.1-chat-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-codex-mini:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.1-codex-mini",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-codex-mini:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.1-codex-mini",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-codex:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.1-codex",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-codex:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.1-codex",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.1",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.1",
       "parameters": [
         "max_completion_tokens",
         "response_format",
@@ -4709,6 +4941,20 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openai",
     "openai",
     "openai",
+    "openai",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+  ],
+  "openai/gpt-5.1": [
+    "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -6053,6 +6299,27 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "openai/gpt-5.1": {
+    "openai": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.25,
+        },
+        "input": 0.0000015,
+        "output": 0.000006,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000158,
+        "output": 0.00000633,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
   "openai/o1": {
     "helicone": [
       {
@@ -6360,6 +6627,13 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "codex-mini-latest",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
       "model": "deepseek-r1-distill-llama-70b",
       "providers": [
         "deepinfra",
@@ -6517,6 +6791,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-5-codex",
       "providers": [
         "helicone",
+        "openai",
+        "openrouter",
       ],
     },
     {
@@ -6540,6 +6816,34 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-5-pro",
       "providers": [
         "helicone",
+      ],
+    },
+    {
+      "model": "gpt-5.1",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.1-chat-latest",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.1-codex",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.1-codex-mini",
+      "providers": [
+        "openai",
+        "openrouter",
       ],
     },
     {
@@ -6867,11 +7171,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "novita",
     },
     {
-      "modelCount": 14,
+      "modelCount": 20,
       "provider": "openai",
     },
     {
-      "modelCount": 46,
+      "modelCount": 52,
       "provider": "openrouter",
     },
     {
@@ -6897,6 +7201,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-opus-4-1-20250805",
     "claude-sonnet-4",
     "claude-sonnet-4-5-20250929",
+    "codex-mini-latest",
     "deepseek-r1-distill-llama-70b",
     "deepseek-reasoner",
     "deepseek-tng-r1t2-chimera",
@@ -6921,6 +7226,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gpt-5-mini",
     "gpt-5-nano",
     "gpt-5-pro",
+    "gpt-5.1",
+    "gpt-5.1-chat-latest",
+    "gpt-5.1-codex",
+    "gpt-5.1-codex-mini",
     "gpt-oss-120b",
     "gpt-oss-20b",
     "grok-3",
@@ -6969,9 +7278,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 199,
-  "totalModelProviderConfigs": 199,
-  "totalModelsWithPtb": 75,
+  "totalEndpoints": 211,
+  "totalModelProviderConfigs": 211,
+  "totalModelsWithPtb": 80,
   "totalProviders": 18,
 }
 `;
