@@ -43,8 +43,8 @@ describe("getUsageProcessor", () => {
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
   });
 
-  it("should return OpenAIUsageProcessor for mistralai provider", () => {
-    const processor = getUsageProcessor("mistralai");
+  it("should return OpenAIUsageProcessor for mistral provider", () => {
+    const processor = getUsageProcessor("mistral");
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
   });
 

@@ -20,7 +20,7 @@ export function getUsageProcessor(
     case "chutes":
     case "deepinfra":
     case "helicone":
-    case "mistralai":
+    case "mistral":
     case "nebius":
     case "novita":
     case "fireworks":

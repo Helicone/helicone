@@ -6,7 +6,7 @@ export const endpoints = {
   "mistral-nemo:deepinfra": {
     providerModelId: "mistralai/Mistral-Nemo-Instruct-2407",
     provider: "deepinfra",
-    author: "mistralai",
+    author: "mistral",
     pricing: [
       {
         threshold: 0,

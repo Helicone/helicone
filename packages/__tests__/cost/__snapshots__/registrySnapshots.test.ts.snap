@@ -2672,8 +2672,8 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
-  "mistralai/mistral-large": {
-    "mistral-large-2411:mistralai": {
+  "mistral/mistral-large": {
+    "mistral-large-2411:mistral": {
       "context": 128000,
       "crossRegion": false,
       "maxTokens": 4096,
@@ -2691,14 +2691,14 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
         "top_p",
       ],
-      "provider": "mistralai",
+      "provider": "mistral",
       "ptbEnabled": true,
       "regions": [
         "*",
       ],
     },
   },
-  "mistralai/mistral-nemo": {
+  "mistral/mistral-nemo": {
     "mistral-nemo:deepinfra": {
       "context": 128000,
       "crossRegion": false,
@@ -2724,7 +2724,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
-  "mistralai/mistral-small": {
+  "mistral/mistral-small": {
     "mistral-small:deepinfra": {
       "context": 128000,
       "crossRegion": false,
@@ -4710,13 +4710,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
   ],
-  "mistralai/mistral-large": [
-    "mistralai",
+  "mistral/mistral-large": [
+    "mistral",
   ],
-  "mistralai/mistral-nemo": [
+  "mistral/mistral-nemo": [
     "deepinfra",
   ],
-  "mistralai/mistral-small": [
+  "mistral/mistral-small": [
     "deepinfra",
   ],
   "moonshotai/kimi-k2": [
@@ -5913,8 +5913,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
-  "mistralai/mistral-large": {
-    "mistralai": [
+  "mistral/mistral-large": {
+    "mistral": [
       {
         "input": 0.000002,
         "output": 0.000006,
@@ -5922,7 +5922,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
-  "mistralai/mistral-nemo": {
+  "mistral/mistral-nemo": {
     "deepinfra": [
       {
         "input": 0.00002,
@@ -5931,7 +5931,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
-  "mistralai/mistral-small": {
+  "mistral/mistral-small": {
     "deepinfra": [
       {
         "input": 0.000075,
@@ -6779,7 +6779,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "mistral-large-2411",
       "providers": [
-        "mistralai",
+        "mistral",
       ],
     },
     {
@@ -6942,7 +6942,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     },
     {
       "modelCount": 1,
-      "provider": "mistralai",
+      "provider": "mistral",
     },
     {
       "modelCount": 3,

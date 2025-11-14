@@ -3,7 +3,7 @@ import type { ModelConfig } from "../../../types";
 export const models = {
   "mistral-large-2411": {
     name: "Mistral-Large",
-    author: "mistralai",
+    author: "mistral",
     description: "Mistral Large 2.1",
     contextLength: 128_000,
     maxOutputTokens: 32_768,

@@ -109,7 +109,7 @@ export const providersNames = [
   "WISDOMINANUTSHELL",
   "GROQ",
   "COHERE",
-  "MISTRALAI",
+  "MISTRAL",
   "DEEPINFRA",
   "QSTASH",
   "FIRECRAWL",
@@ -255,7 +255,7 @@ export const providers: {
   },
   {
     pattern: mistralai,
-    provider: "MISTRALAI",
+    provider: "MISTRAL",
     costs: mistralCosts,
   },
   {

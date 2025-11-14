@@ -1,6 +1,6 @@
 import { BaseProvider } from "./base";
 
-export class MistralAIProvider extends BaseProvider {
+export class MistralProvider extends BaseProvider {
   readonly displayName = "Mistral AI";
   readonly baseUrl = "https://api.mistral.ai/";
   readonly auth = "api-key" as const;

@@ -15,7 +15,7 @@ export const AUTHORS = [
   "openai",
   "google",
   "meta-llama",
-  "mistralai",
+  "mistral",
   "amazon",
   "microsoft",
   "nvidia",

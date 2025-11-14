@@ -1,21 +1,26 @@
 import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
-import { MistralLargeModelName } from "./models";
+import { MistralSmallModelName } from "./models";
 
 export const endpoints = {
-  "mistral-large-2411:mistralai": {
-    providerModelId: "mistral-large-2411",
-    provider: "mistralai",
-    author: "mistralai",
+  "mistral-small:deepinfra": {
+    providerModelId: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+    provider: "deepinfra",
+    author: "mistral",
     pricing: [
       {
         threshold: 0,
-        input: 0.000002,
-        output: 0.000006,
+        input: 0.000075,
+        output: 0.0002,
       },
     ],
+    rateLimits: {
+      rpm: 12000,
+      tpm: 60000000,
+      tpd: 6000000000,
+    },
     contextLength: 128_000,
-    maxCompletionTokens: 4096,
+    maxCompletionTokens: 16_384,
     supportedParameters: [
       "max_tokens",
       "temperature",
@@ -23,20 +28,21 @@ export const endpoints = {
       "stop",
       "frequency_penalty",
       "presence_penalty",
+      "repetition_penalty",
+      "top_k",
       "seed",
+      "min_p",
       "response_format",
-      "structured_outputs",
-      "tools",
-      "tool_choice",
     ],
     ptbEnabled: true,
+    quantization: "fp8",
     endpointConfigs: {
       "*": {},
     },
   },
 } satisfies Partial<
   Record<
-    `${MistralLargeModelName}:${ModelProviderName}` | MistralLargeModelName,
+    `${MistralSmallModelName}:${ModelProviderName}` | MistralSmallModelName,
     ModelProviderConfig
   >
 >;
