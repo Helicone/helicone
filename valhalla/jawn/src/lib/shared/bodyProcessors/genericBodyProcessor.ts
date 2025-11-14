@@ -1,7 +1,6 @@
 import { Usage } from "../../handlers/HandlerContext";
 import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
-import { getOpenRouterDeclaredCost, OpenRouterCostDetails } from "@helicone-package/cost/usage/openRouterCostUtils";
 
 export class GenericBodyProcessor implements IBodyProcessor {
   public async parse(
@@ -74,7 +73,6 @@ export class GenericBodyProcessor implements IBodyProcessor {
 
         // OpenRouter
         cost?: number;
-        cost_details?: OpenRouterCostDetails;
       };
     };
 
@@ -95,7 +93,7 @@ export class GenericBodyProcessor implements IBodyProcessor {
       heliconeCalculated: false,
 
       // OpenRouter may contain these fields based on wallet/BYOK setup
-      cost: getOpenRouterDeclaredCost(false, usage?.cost, usage?.cost_details)
+      cost: usage?.cost
     };
   }
 }

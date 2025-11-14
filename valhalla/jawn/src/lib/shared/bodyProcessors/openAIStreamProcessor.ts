@@ -2,7 +2,6 @@ import { consolidateTextFields } from "../../../utils/streamParser";
 import { PromiseGenericResult, err, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
-import { OpenRouterCostDetails, getOpenRouterDeclaredCost } from "@helicone-package/cost/usage/openRouterCostUtils";
 
 export const NON_DATA_LINES = [
   "event: content_block_delta",
@@ -125,11 +124,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
           heliconeCalculated: usageData?.helicone_calculated ?? false,
 
           // OpenRouter may contain these fields based on wallet/BYOK setup
-          cost: getOpenRouterDeclaredCost(
-            false,
-            usageData?.cost ?? 0,
-            usageData?.cost_details as OpenRouterCostDetails | undefined
-          )
+          cost: usageData.cost
         };
       } else if (consolidatedData.response?.usage) {
         usage = {

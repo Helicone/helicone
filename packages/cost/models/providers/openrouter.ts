@@ -1,5 +1,5 @@
 import { BaseProvider } from "./base";
-import type { Endpoint, RequestParams } from "../types";
+import type { Endpoint, RequestBodyContext, RequestParams } from "../types";
 
 export class OpenRouterProvider extends BaseProvider {
   readonly displayName = "OpenRouter";

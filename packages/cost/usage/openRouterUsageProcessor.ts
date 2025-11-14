@@ -1,10 +1,42 @@
 import { IUsageProcessor, ParseInput } from "./IUsageProcessor";
 import { ModelUsage } from "./types";
 import { Result } from "../../common/result";
-import { OpenRouterCostDetails } from "./openRouterCostUtils";
+
+export const OPENROUTER_PTB_MARKUP = 1.055;
+export interface OpenRouterCostDetails {
+  upstream_inference_cost?: number;
+  upstream_inference_prompt_cost?: number;
+  upstream_inference_completions_cost?: number;
+}
+
+export function getOpenRouterDeclaredCost(
+  cost?: number,
+  cost_details?: OpenRouterCostDetails
+): number | undefined {
+  // Priority 1: Direct cost field
+  if (cost && cost > 0) {
+    return cost;
+  }
+
+  // Priority 2: Upstream inference cost
+  if (cost_details?.upstream_inference_cost && cost_details.upstream_inference_cost > 0) {
+    return cost_details.upstream_inference_cost;
+  }
+
+  // Priority 3: Sum of prompt and completion costs
+  if (
+    cost_details?.upstream_inference_prompt_cost &&
+    cost_details?.upstream_inference_completions_cost &&
+    cost_details.upstream_inference_prompt_cost > 0 &&
+    cost_details.upstream_inference_completions_cost > 0
+  ) {
+    return cost_details.upstream_inference_prompt_cost + cost_details.upstream_inference_completions_cost;
+  }
+
+  return undefined;
+}
 
 export interface OpenRouterUsage extends ModelUsage {
-  cost?: number; // Direct USD cost from OpenRouter
   cost_details?: OpenRouterCostDetails;
   provider?: string; // Actual provider used (e.g., "google", "anthropic")
   is_byok?: boolean; // Whether using customer's own API keys
@@ -133,11 +165,14 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
     const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
 
+    // Return raw cost without passthrough billing markup (markup is applied in cost calculation layer)
+    const declaredCost = getOpenRouterDeclaredCost(cost, cost_details);
     const modelUsage: OpenRouterUsage = {
       input: effectivePromptTokens,
       output: effectiveCompletionTokens,
-      // Include the direct cost from OpenRouter
-      cost: cost,
+      cost: declaredCost,
+      
+      // OpenRouterUsage specific info
       cost_details: cost_details,
       provider: provider,
       is_byok: is_byok,

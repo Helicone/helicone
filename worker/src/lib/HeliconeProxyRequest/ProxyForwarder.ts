@@ -36,10 +36,9 @@ import { WalletManager } from "../managers/WalletManager";
 import { costOfPrompt } from "@helicone-package/cost";
 import { EscrowInfo } from "../ai-gateway/types";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
-import { OpenRouterUsage } from "@helicone-package/cost/usage/openRouterUsageProcessor";
-import { getOpenRouterDeclaredCost, OPENROUTER_PTB_MARKUP } from "@helicone-package/cost/usage/openRouterCostUtils";
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
+import { OPENROUTER_PTB_MARKUP } from "@helicone-package/cost/usage/openRouterUsageProcessor";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -529,24 +528,20 @@ async function log(
           });
 
           if (usage.data) {
-            // For OpenRouter, calculate the cost that the user personally incurs.
-            if (attemptProvider === "openrouter") {
-              const openRouterUsage = usage.data as OpenRouterUsage;
-              cost = getOpenRouterDeclaredCost(
-                gatewayAttempt.authType === "ptb",
-                openRouterUsage.cost ?? 0,
-                openRouterUsage.cost_details ?? undefined
-              );
-            }
-            
-            if (cost === undefined) {
-              // Use the standard cost calculation from registry
-              const breakdown = modelCostBreakdownFromRegistry({
-                modelUsage: usage.data,
-                providerModelId: attemptModel,
-                provider: attemptProvider,
-              });
-              cost = breakdown?.totalCost;
+            const breakdown = modelCostBreakdownFromRegistry({
+              modelUsage: usage.data,
+              providerModelId: attemptModel,
+              provider: attemptProvider,
+            });
+
+            if (breakdown) {
+              cost = breakdown.totalCost;
+              if (
+                attemptProvider === "openrouter" && 
+                gatewayAttempt.authType === "ptb"
+              ) {
+                cost *= OPENROUTER_PTB_MARKUP;
+              }
             }
           } else {
             console.error(
@@ -584,27 +579,18 @@ async function log(
               const usage = await usageProcessor.parse({
                 responseBody: rawResponse,
                 isStream: proxyRequest.isStream,
-                model: model,
+                model: model
               });
 
               if (usage.data) {
-                if (modelProviderName === "openrouter") {
-                  const openRouterUsage = usage.data as OpenRouterUsage;
-                  cost = getOpenRouterDeclaredCost(
-                    false,
-                    openRouterUsage.cost ?? 0,
-                    openRouterUsage.cost_details ?? undefined
-                  );
-                }
+                const breakdown = modelCostBreakdownFromRegistry({
+                  modelUsage: usage.data,
+                  providerModelId: model,
+                  provider: modelProviderName,
+                });
 
-                if (cost === undefined) {
-                  const breakdown = modelCostBreakdownFromRegistry({
-                    modelUsage: usage.data,
-                    providerModelId: model,
-                    provider: modelProviderName,
-                  });
-
-                  cost = breakdown?.totalCost;
+                if (breakdown) {
+                  cost = breakdown.totalCost;
                 }
               }
             }
