@@ -1,17 +1,17 @@
 import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
-import { MistralNemoModelName } from "./models";
+import { MistralSmallModelName } from "./models";
 
 export const endpoints = {
-  "mistral-nemo:deepinfra": {
-    providerModelId: "mistralai/Mistral-Nemo-Instruct-2407",
+  "mistral-small:deepinfra": {
+    providerModelId: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
     provider: "deepinfra",
-    author: "mistralai",
+    author: "mistral",
     pricing: [
       {
         threshold: 0,
-        input: 0.00002,
-        output: 0.00004,
+        input: 0.000075,
+        output: 0.0002,
       },
     ],
     rateLimits: {
@@ -19,7 +19,6 @@ export const endpoints = {
       tpm: 60000000,
       tpd: 6000000000,
     },
-    quantization: "fp8",
     contextLength: 128_000,
     maxCompletionTokens: 16_384,
     supportedParameters: [
@@ -36,13 +35,14 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
+    quantization: "fp8",
     endpointConfigs: {
       "*": {},
     },
   },
 } satisfies Partial<
   Record<
-    `${MistralNemoModelName}:${ModelProviderName}` | MistralNemoModelName,
+    `${MistralSmallModelName}:${ModelProviderName}` | MistralSmallModelName,
     ModelProviderConfig
   >
 >;

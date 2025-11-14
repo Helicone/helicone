@@ -33,7 +33,7 @@ const authorColorMapping: Partial<Record<AuthorName, ColorKey>> = {
   google: "teal",
   "meta-llama": "blue",
   microsoft: "cyan",
-  mistralai: "pink",
+  mistral: "pink",
   deepseek: "red",
   xai: "gray",
   cohere: "emerald",
@@ -99,6 +99,7 @@ const modelProviderNameColorMapping: Partial<
   deepseek: "red",
   cohere: "emerald",
   xai: "gray",
+  mistral: "pink",
 };
 
 // search AI Gateway registry for model author

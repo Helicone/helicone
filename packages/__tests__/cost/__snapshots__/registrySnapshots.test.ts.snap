@@ -2672,7 +2672,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
-  "mistralai/mistral-nemo": {
+  "mistral/mistral-large": {
+    "mistral-large-2411:mistral": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "mistral-large-2411",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "mistral",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "mistral/mistral-nemo": {
     "mistral-nemo:deepinfra": {
       "context": 128000,
       "crossRegion": false,
@@ -2698,7 +2724,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
-  "mistralai/mistral-small": {
+  "mistral/mistral-small": {
     "mistral-small:deepinfra": {
       "context": 128000,
       "crossRegion": false,
@@ -4885,10 +4911,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
   ],
-  "mistralai/mistral-nemo": [
+  "mistral/mistral-large": [
+    "mistral",
+  ],
+  "mistral/mistral-nemo": [
     "deepinfra",
   ],
-  "mistralai/mistral-small": [
+  "mistral/mistral-small": [
     "deepinfra",
   ],
   "moonshotai/kimi-k2": [
@@ -6098,7 +6127,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
-  "mistralai/mistral-nemo": {
+  "mistral/mistral-large": {
+    "mistral": [
+      {
+        "input": 0.000002,
+        "output": 0.000006,
+        "threshold": 0,
+      },
+    ],
+  },
+  "mistral/mistral-nemo": {
     "deepinfra": [
       {
         "input": 0.00002,
@@ -6107,7 +6145,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
-  "mistralai/mistral-small": {
+  "mistral/mistral-small": {
     "deepinfra": [
       {
         "input": 0.000075,
@@ -7005,6 +7043,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "mistral-large-2411",
+      "providers": [
+        "mistral",
+      ],
+    },
+    {
       "model": "mistral-nemo",
       "providers": [
         "deepinfra",
@@ -7163,6 +7207,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "helicone",
     },
     {
+      "modelCount": 1,
+      "provider": "mistral",
+    },
+    {
       "modelCount": 3,
       "provider": "nebius",
     },
@@ -7252,6 +7300,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "llama-guard-4",
     "llama-prompt-guard-2-22m",
     "llama-prompt-guard-2-86m",
+    "mistral-large-2411",
     "mistral-nemo",
     "mistral-small",
     "o1",
@@ -7278,9 +7327,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 211,
-  "totalModelProviderConfigs": 211,
-  "totalModelsWithPtb": 80,
-  "totalProviders": 18,
+  "totalEndpoints": 212,
+  "totalModelProviderConfigs": 212,
+  "totalModelsWithPtb": 81,
+  "totalProviders": 19,
 }
 `;

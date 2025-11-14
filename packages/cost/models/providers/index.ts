@@ -11,6 +11,7 @@ import { FireworksProvider } from "./fireworks";
 import { GoogleProvider } from "./google";
 import { GroqProvider } from "./groq";
 import { HeliconeProvider } from "./helicone";
+import { MistralProvider } from "./mistral";
 import { NebiusProvider } from "./nebius";
 import { NovitaProvider } from "./novita";
 import { OpenAIProvider } from "./openai";
@@ -34,6 +35,7 @@ export const providers = {
   "google-ai-studio": new GoogleProvider(),
   groq: new GroqProvider(),
   helicone: new HeliconeProvider(),
+  mistral: new MistralProvider(),
   nebius: new NebiusProvider(),
   novita: new NovitaProvider(),
   openai: new OpenAIProvider(),
@@ -62,6 +64,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   // "google-ai-studio",
   "cerebras",
   "groq",
+  "mistral",
   "nebius",
   "novita",
   "openrouter",

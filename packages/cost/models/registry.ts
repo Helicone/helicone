@@ -30,7 +30,7 @@ import {
 } from "./authors/moonshotai";
 import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
-import { mistralModels, mistralEndpointConfig } from "./authors/mistralai";
+import { mistralModels, mistralEndpointConfig } from "./authors/mistral";
 import { zaiModels, zaiEndpointConfig } from "./authors/zai";
 import { baiduModels, baiduEndpointConfig } from "./authors/baidu";
 
