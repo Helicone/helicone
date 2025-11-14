@@ -1266,7 +1266,7 @@ describe("Mistral Registry Tests", () => {
     describe("mistral-large-2411 with MistralAI", () => {
       it("should handle passthrough billing with mistralai provider", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             body: {
               messages: [{ role: "user", content: "Test passthrough billing" }],
@@ -1995,7 +1995,7 @@ describe("Mistral Registry Tests", () => {
     describe("mistral-large-2411", () => {
       it("should handle mistralai provider", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2029,7 +2029,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle successful request with custom parameters", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [
               { role: "user", content: "Test message for Mistral Large model" },
@@ -2055,7 +2055,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle tools parameter support", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [{ role: "user", content: "What's the weather like?" }],
             // Tools would be added here in a real test, but we're just testing the structure
@@ -2076,7 +2076,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle streaming requests", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [{ role: "user", content: "Stream this response" }],
             stream: true,
@@ -2100,7 +2100,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle supported parameters correctly", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [
               { role: "user", content: "Test with various parameters" },
@@ -2127,7 +2127,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should verify context length limits are respected", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [
               {
@@ -2153,7 +2153,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should verify pricing and rate limits configuration", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2179,7 +2179,7 @@ describe("Mistral Registry Tests", () => {
     describe("Error scenarios for mistral-large-2411", () => {
       it("should handle MistralAI provider failure", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2195,7 +2195,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle rate limiting from MistralAI", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2211,7 +2211,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle authentication failure", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2227,7 +2227,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle model not found", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2243,7 +2243,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle quota exceeded", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2259,7 +2259,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle bad request with invalid parameters", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2275,7 +2275,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle timeout scenarios", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2291,7 +2291,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle content filtering violations", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [
               { role: "user", content: "Content that might be filtered" },
@@ -2314,7 +2314,7 @@ describe("Mistral Registry Tests", () => {
     describe("Advanced scenarios for mistral-large-2411", () => {
       it("should handle custom headers and body mapping", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [{ role: "user", content: "Test with custom mapping" }],
             headers: {
@@ -2344,7 +2344,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle response format parameter", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [
               { role: "user", content: "Return structured JSON response" },
@@ -2368,7 +2368,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle stop sequences", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [
               { role: "user", content: "Generate a list and stop at the end" },
@@ -2394,7 +2394,7 @@ describe("Mistral Registry Tests", () => {
     describe("Provider URL validation for mistral-large-2411", () => {
       it("should construct correct MistralAI URL", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2416,7 +2416,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle provider model ID mapping correctly", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2435,7 +2435,7 @@ describe("Mistral Registry Tests", () => {
     describe("Edge cases and robustness for mistral-large-2411", () => {
       it("should handle empty messages array", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [],
           },
@@ -2454,7 +2454,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle very long input within context limits", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [
               {
@@ -2479,7 +2479,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle unicode and special characters", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           request: {
             messages: [
               {
@@ -2504,7 +2504,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle malformed JSON gracefully", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
@@ -2520,7 +2520,7 @@ describe("Mistral Registry Tests", () => {
 
       it("should handle network connectivity issues", () =>
         runGatewayTest({
-          model: "mistral-large-2411/mistralai",
+          model: "mistral-large-2411/mistral",
           expected: {
             providers: [
               {
