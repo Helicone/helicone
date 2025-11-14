@@ -159,11 +159,12 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       const rawResponse = context.rawLog.rawResponseBody;
       const isAIGateway =
         context.message.log.request.requestReferrer === "ai-gateway";
+      const isPassthroughBilling = isAIGateway && (context.message.heliconeMeta.isPassthroughBilling ?? false);
 
       if (provider && rawResponse) {
         let usageProcessor: IUsageProcessor | null;
         if (isAIGateway) {
-          // AI Gateway always uses OpenAI processor for now
+          // AI Gateway always uses OpenAI processor
           usageProcessor = new OpenAIUsageProcessor();
         } else {
           usageProcessor = getUsageProcessor(provider);
@@ -174,6 +175,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
             responseBody: rawResponse,
             isStream: context.message.log.request.isStream,
             model: context.processedLog.model ?? "",
+            isPassthroughBilling,
           });
           if (parsedUsage.error !== null) {
             console.error(

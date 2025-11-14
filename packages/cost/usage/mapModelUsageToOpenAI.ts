@@ -61,5 +61,10 @@ export function mapModelUsageToOpenAI(modelUsage: ModelUsage): OpenAIUsage {
     };
   }
 
+  // Add cost if present
+  if (modelUsage.cost) {
+    usage.cost = modelUsage.cost;
+  }
+
   return usage;
 }

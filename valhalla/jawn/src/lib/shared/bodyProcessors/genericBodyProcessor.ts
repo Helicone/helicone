@@ -70,6 +70,9 @@ export class GenericBodyProcessor implements IBodyProcessor {
         output_tokens_details?: {
           reasoning_tokens?: number;
         };
+
+        // OpenRouter
+        cost?: number;
       };
     };
 
@@ -81,13 +84,16 @@ export class GenericBodyProcessor implements IBodyProcessor {
     const effectiveCompletionTokens = usage?.completion_tokens !== undefined
         ? Math.max(0, (usage.completion_tokens ?? 0) - (usage.completion_tokens_details?.reasoning_tokens ?? 0) - (usage.completion_tokens_details?.audio_tokens ?? 0))
         : Math.max(0, (usage.output_tokens ?? 0) - (usage.output_tokens_details?.reasoning_tokens ?? 0));
-
+    
     return {
       promptTokens: effectivePromptTokens,
       promptCacheReadTokens: usage?.prompt_tokens_details?.cached_tokens ?? usage?.input_tokens_details?.cached_tokens ?? 0,
       completionTokens: effectiveCompletionTokens,
       totalTokens: usage?.total_tokens,
       heliconeCalculated: false,
+
+      // OpenRouter may contain these fields based on wallet/BYOK setup
+      cost: usage?.cost
     };
   }
 }

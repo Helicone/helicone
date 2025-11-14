@@ -192,6 +192,10 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
       }
     }
 
+    if (usage.cost) {
+      modelUsage.cost = usage.cost;
+    }
+
     return modelUsage;
   }
 }

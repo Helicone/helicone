@@ -14,4 +14,7 @@ export interface ModelUsage {
   audio?: number;
   video?: number;
   web_search?: number;
+
+  // Direct USD cost from provider if available
+  cost?: number;
 }

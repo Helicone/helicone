@@ -116,18 +116,22 @@ export function calculateModelCostBreakdown(params: {
     breakdown.requestCost = requestCount * pricing.request;
   }
 
-  breakdown.totalCost =
-    breakdown.inputCost +
-    breakdown.outputCost +
-    breakdown.cachedInputCost +
-    breakdown.cacheWrite5mCost +
-    breakdown.cacheWrite1hCost +
-    breakdown.thinkingCost +
-    breakdown.audioCost +
-    breakdown.videoCost +
-    breakdown.webSearchCost +
-    breakdown.imageCost +
-    breakdown.requestCost;
+  if (modelUsage.cost) {
+    breakdown.totalCost = modelUsage.cost;
+  } else {
+    breakdown.totalCost =
+      breakdown.inputCost +
+      breakdown.outputCost +
+      breakdown.cachedInputCost +
+      breakdown.cacheWrite5mCost +
+      breakdown.cacheWrite1hCost +
+      breakdown.thinkingCost +
+      breakdown.audioCost +
+      breakdown.videoCost +
+      breakdown.webSearchCost +
+      breakdown.imageCost +
+      breakdown.requestCost;
+  }
 
   return breakdown;
 }

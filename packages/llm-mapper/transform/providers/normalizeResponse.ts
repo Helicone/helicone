@@ -196,6 +196,7 @@ export async function toOpenAIResponse(
   provider: ModelProviderName,
   providerModelId: string,
   isStream: boolean = false,
+  isPassthroughBilling: boolean = false,
 ): Promise<Response> {
   try {
     // Step 1: Parse response body (already in OpenAI format)
@@ -209,6 +210,7 @@ export async function toOpenAIResponse(
         responseBody: providerResponse,
         isStream,
         model: providerModelId,
+        isPassthroughBilling,
       });
 
       if (modelUsageResult.data) {
@@ -237,6 +239,7 @@ export function toOpenAIStreamResponse(
   response: Response,
   provider: ModelProviderName,
   providerModelId: string,
+  isPassthroughBilling: boolean = false,
 ): Response {
   if (!response.body) {
     return response;
@@ -246,6 +249,7 @@ export function toOpenAIStreamResponse(
     response.body,
     provider,
     providerModelId,
+    isPassthroughBilling,
   );
 
   return new Response(transformedStream, {
@@ -269,11 +273,13 @@ export function toOpenAIStreamResponse(
 export class OpenAIStreamUsageNormalizer {
   private provider: ModelProviderName;
   private providerModelId: string;
+  private isPassthroughBilling: boolean;
   private accumulatedChunks: string[] = [];
 
-  constructor(provider: ModelProviderName, providerModelId: string) {
+  constructor(provider: ModelProviderName, providerModelId: string, isPassthroughBilling: boolean = false) {
     this.provider = provider;
     this.providerModelId = providerModelId;
+    this.isPassthroughBilling = isPassthroughBilling;
   }
 
   async processLines(
@@ -310,6 +316,7 @@ export class OpenAIStreamUsageNormalizer {
                 responseBody: fullResponseText,
                 isStream: true,
                 model: this.providerModelId,
+                isPassthroughBilling: this.isPassthroughBilling,
               });
 
               if (modelUsageResult.data) {
@@ -340,8 +347,9 @@ export async function normalizeOpenAIStreamText(
   sseText: string,
   provider: ModelProviderName,
   providerModelId: string,
+  isPassthroughBilling: boolean = false,
 ): Promise<string> {
-  const normalizer = new OpenAIStreamUsageNormalizer(provider, providerModelId);
+  const normalizer = new OpenAIStreamUsageNormalizer(provider, providerModelId, isPassthroughBilling);
   const normalizedChunks: any[] = [];
 
   await normalizer.processLines(sseText, (chunk) => {
@@ -393,10 +401,11 @@ function normalizeOpenAIStream(
   stream: ReadableStream<Uint8Array>,
   provider: ModelProviderName,
   providerModelId: string,
+  isPassthroughBilling: boolean = false,
 ): ReadableStream<Uint8Array> {
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
-  const normalizer = new OpenAIStreamUsageNormalizer(provider, providerModelId);
+  const normalizer = new OpenAIStreamUsageNormalizer(provider, providerModelId, isPassthroughBilling);
   let buffer = "";
 
   return new ReadableStream({
@@ -470,6 +479,7 @@ export async function normalizeAIGatewayResponse(params: {
   providerModelId: string;
   responseFormat: ResponseFormat;
   bodyMapping?: BodyMappingType;
+  isPassthroughBilling?: boolean;
 }): Promise<string> {
   const {
     responseText,
@@ -478,6 +488,7 @@ export async function normalizeAIGatewayResponse(params: {
     providerModelId,
     responseFormat,
     bodyMapping,
+    isPassthroughBilling = false,
   } = params;
 
   try {
@@ -508,6 +519,7 @@ export async function normalizeAIGatewayResponse(params: {
           responseText,
           provider,
           providerModelId,
+          isPassthroughBilling,
         );
       }
 
@@ -533,6 +545,7 @@ export async function normalizeAIGatewayResponse(params: {
           responseBody: responseText,
           isStream: false,
           model: providerModelId,
+          isPassthroughBilling,
         });
 
         if (modelUsageResult.data) {

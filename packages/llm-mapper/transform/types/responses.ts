@@ -167,6 +167,8 @@ export interface ResponsesUsage {
   output_tokens_details?: {
     reasoning_tokens?: number;
   };
+  // AI Gateway only - when cost calculation directly provided in usage
+  cost?: number;
 }
 
 export interface ResponsesResponseBody {
