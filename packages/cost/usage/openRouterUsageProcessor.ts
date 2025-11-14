@@ -1,9 +1,11 @@
 import { IUsageProcessor, ParseInput } from "./IUsageProcessor";
 import { ModelUsage } from "./types";
 import { Result } from "../../common/result";
+import { OpenRouterCostDetails } from "./openRouterCostUtils";
 
 export interface OpenRouterUsage extends ModelUsage {
   cost?: number; // Direct USD cost from OpenRouter
+  cost_details?: OpenRouterCostDetails;
   provider?: string; // Actual provider used (e.g., "google", "anthropic")
   is_byok?: boolean; // Whether using customer's own API keys
 }
@@ -111,6 +113,7 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
 
     // OpenRouter provides direct cost in USD
     const cost = usage.cost;
+    const cost_details = usage.cost_details;
     const provider = usage.provider;
     const is_byok = usage.is_byok;
 
@@ -135,6 +138,7 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
       output: effectiveCompletionTokens,
       // Include the direct cost from OpenRouter
       cost: cost,
+      cost_details: cost_details,
       provider: provider,
       is_byok: is_byok,
     };

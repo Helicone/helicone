@@ -32,6 +32,8 @@ import { VercelBodyProcessor } from "../shared/bodyProcessors/vercelBodyProcesso
 import { VercelStreamProcessor } from "../shared/bodyProcessors/vercelStreamProcessor";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
+import { OpenRouterUsage } from "@helicone-package/cost/usage/openRouterUsageProcessor";
+import { getOpenRouterDeclaredCost, OPENROUTER_PTB_MARKUP } from "@helicone-package/cost/usage/openRouterCostUtils";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -159,6 +161,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       const rawResponse = context.rawLog.rawResponseBody;
       const isAIGateway =
         context.message.log.request.requestReferrer === "ai-gateway";
+      const isPassthroughBilling = isAIGateway && (context.message.heliconeMeta.isPassthroughBilling ?? false);
 
       if (provider && rawResponse) {
         let usageProcessor: IUsageProcessor | null;
@@ -194,6 +197,18 @@ export class ResponseBodyHandler extends AbstractLogHandler {
             });
             if (breakdown) {
               context.costBreakdown = breakdown;
+
+              if (provider === "openrouter") {
+                const openRouterUsage = parsedUsage.data as OpenRouterUsage;
+                const openRouterDeclaredCost = getOpenRouterDeclaredCost(
+                  isPassthroughBilling,
+                  openRouterUsage.cost ?? 0,
+                  openRouterUsage.cost_details ?? undefined
+                );
+                if (openRouterDeclaredCost !== undefined) {
+                  breakdown.totalCost = openRouterDeclaredCost;
+                }
+              }
             }
           }
         }

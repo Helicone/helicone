@@ -1,8 +1,8 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
-import { getTokenCountGPT3 } from "../../tokens/tokenCounter";
 import { PromiseGenericResult, err, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
+import { OpenRouterCostDetails, getOpenRouterDeclaredCost } from "@helicone-package/cost/usage/openRouterCostUtils";
 
 export const NON_DATA_LINES = [
   "event: content_block_delta",
@@ -83,6 +83,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       // since we have pricing rates that are separate for audio, input, output, and cached tokens,
       // we need to separate those components out here so that we can correctly calculate the cost.
       const usageData = consolidatedData.usage || consolidatedData.response?.usage;
+
       let usage;
       if (usageData) {
         const effectivePromptTokens =
@@ -122,6 +123,13 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
             usageData?.input_tokens_details?.cached_tokens ??
             0,
           heliconeCalculated: usageData?.helicone_calculated ?? false,
+
+          // OpenRouter may contain these fields based on wallet/BYOK setup
+          cost: getOpenRouterDeclaredCost(
+            false,
+            usageData?.cost ?? 0,
+            usageData?.cost_details as OpenRouterCostDetails | undefined
+          )
         };
       } else if (consolidatedData.response?.usage) {
         usage = {
