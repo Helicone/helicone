@@ -23,128 +23,141 @@ const Integrations = (props: IntegrationsProps) => {
   const {} = props;
 
   const CODE_SNIPPETS = {
-    openai: {
-      formattedName: "OpenAI",
+    gpt4: {
+      formattedName: "GPT-4o",
       logo: "/static/openai.webp",
       typescript: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-  baseURL: \`https://oai.helicone.ai/v1/\${HELICONE_API_KEY}\`
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",  // Just change the model name!
+  messages: [{ role: "user", content: "Hello!" }]
 });`,
       python: `from openai import OpenAI
 
 client = OpenAI(
-  api_key=OPENAI_API_KEY,
-  base_url=f"https://oai.helicone.ai/v1/{HELICONE_API_KEY}"
+  base_url="https://ai-gateway.helicone.ai",
+  api_key=os.environ["HELICONE_API_KEY"]
+)
+
+response = client.chat.completions.create(
+  model="gpt-4o-mini",  # Just change the model name!
+  messages=[{"role": "user", "content": "Hello!"}]
 )`,
-      curl: `curl "https://oai.helicone.ai/v1/$HELICONE_API_KEY/chat/completions" \\
-  -H "Authorization: Bearer $OPENAI_API_KEY" \\
+      curl: `curl "https://ai-gateway.helicone.ai/v1/chat/completions" \\
+  -H "Authorization: Bearer $HELICONE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "model": "gpt-4o-mini",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'`,
-      docsLink: "https://docs.helicone.ai/getting-started/integration/openai",
+      docsLink: "https://docs.helicone.ai/gateway/overview",
     },
-    anthropic: {
-      formattedName: "Anthropic",
+    claude: {
+      formattedName: "Claude",
       logo: "/static/anthropic.webp",
-      typescript: `import Anthropic from "@anthropic-ai/sdk";
-
-const client = new Anthropic({
-  apiKey: ANTHROPIC_API_KEY,
-  baseURL: \`https://anthropic.helicone.ai/\${HELICONE_API_KEY}\`,
-});`,
-      python: `from anthropic import Anthropic
-
-client = Anthropic(
-  api_key=ANTHROPIC_API_KEY,
-  base_url=f"https://anthropic.helicone.ai/{HELICONE_API_KEY}",
-)`,
-      curl: `curl "https://anthropic.helicone.ai/$HELICONE_API_KEY/v1/messages" \\
-  -H "x-api-key: $ANTHROPIC_API_KEY" \\
-  -H "anthropic-version: 2023-06-01" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "model": "claude-3-5-sonnet-20241022",
-    "messages": [{"role": "user", "content": "Hello!"}],
-    "max_tokens": 1024
-  }'`,
-      docsLink:
-        "https://docs.helicone.ai/getting-started/integration/anthropic",
-    },
-    google: {
-      formattedName: "Google Gemini",
-      logo: "/static/gemini.webp",
-      typescript: `import { GoogleGenAI } from "@google/genai";
-
-const genAI = new GoogleGenAI({
-  apiKey: GOOGLE_API_KEY,
-  httpOptions: {
-    baseUrl: "https://gateway.helicone.ai",
-    headers: {
-      "Helicone-Auth": \`Bearer \${HELICONE_API_KEY}\`,
-      "Helicone-Target-URL": "https://generativelanguage.googleapis.com"
-    }
-  }
-});`,
-      python: `from google import genai
-
-client = genai.Client(
-  api_key=GOOGLE_API_KEY,
-  http_options={
-    "base_url": "https://gateway.helicone.ai",
-    "headers": {
-      "helicone-auth": f"Bearer {HELICONE_API_KEY}",
-      "helicone-target-url": "https://generativelanguage.googleapis.com"
-    }
-  }
-)`,
-      curl: `curl "https://gateway.helicone.ai/v1beta/models/gemini-2.0-flash:generateContent?key=$GOOGLE_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \\
-  -H "Helicone-Target-URL: https://generativelanguage.googleapis.com" \\
-  -d '{
-    "contents": [{
-      "parts": [{
-        "text": "Hello!"
-      }]
-    }]
-  }'`,
-      docsLink: "https://docs.helicone.ai/integrations/gemini/api/curl",
-    },
-    openrouter: {
-      formattedName: "OpenRouter",
-      logo: "/static/openrouter.webp",
       typescript: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: OPENROUTER_API_KEY,
-  baseURL: "https://openrouter.helicone.ai/api/v1",
-  defaultHeaders: {
-    "Helicone-Auth": \`Bearer \${HELICONE_API_KEY}\`
-  }
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-4",  // Just change the model name!
+  messages: [{ role: "user", content: "Hello!" }]
 });`,
       python: `from openai import OpenAI
 
 client = OpenAI(
-  api_key=OPENROUTER_API_KEY,
-  base_url="https://openrouter.helicone.ai/api/v1",
-  default_headers={
-    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
-  }
+  base_url="https://ai-gateway.helicone.ai",
+  api_key=os.environ["HELICONE_API_KEY"]
+)
+
+response = client.chat.completions.create(
+  model="claude-sonnet-4",  # Just change the model name!
+  messages=[{"role": "user", "content": "Hello!"}]
 )`,
-      curl: `curl "https://openrouter.helicone.ai/api/v1/chat/completions" \\
-  -H "Authorization: Bearer $OPENROUTER_API_KEY" \\
-  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \\
+      curl: `curl "https://ai-gateway.helicone.ai/v1/chat/completions" \\
+  -H "Authorization: Bearer $HELICONE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "openai/gpt-4o-mini",
+    "model": "claude-sonnet-4",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'`,
-      docsLink:
-        "https://docs.helicone.ai/getting-started/integration-method/openrouter",
+      docsLink: "https://docs.helicone.ai/gateway/overview",
+    },
+    gemini: {
+      formattedName: "Gemini",
+      logo: "/static/gemini.webp",
+      typescript: `import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "gemini-2.0-flash-exp",  // Just change the model name!
+  messages: [{ role: "user", content: "Hello!" }]
+});`,
+      python: `from openai import OpenAI
+
+client = OpenAI(
+  base_url="https://ai-gateway.helicone.ai",
+  api_key=os.environ["HELICONE_API_KEY"]
+)
+
+response = client.chat.completions.create(
+  model="gemini-2.0-flash-exp",  # Just change the model name!
+  messages=[{"role": "user", "content": "Hello!"}]
+)`,
+      curl: `curl "https://ai-gateway.helicone.ai/v1/chat/completions" \\
+  -H "Authorization: Bearer $HELICONE_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "gemini-2.0-flash-exp",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'`,
+      docsLink: "https://docs.helicone.ai/gateway/overview",
+    },
+    llama: {
+      formattedName: "DeepSeek",
+      logo: "/static/home/logos/deepseek.webp",
+      typescript: `import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "deepseek-v3.2",  // Just change the model name!
+  messages: [{ role: "user", content: "Hello!" }]
+});`,
+      python: `from openai import OpenAI
+
+client = OpenAI(
+  base_url="https://ai-gateway.helicone.ai",
+  api_key=os.environ["HELICONE_API_KEY"]
+)
+
+response = client.chat.completions.create(
+  model="llama-3.3-70b",  # Just change the model name!
+  messages=[{"role": "user", "content": "Hello!"}]
+)`,
+      curl: `curl "https://ai-gateway.helicone.ai/v1/chat/completions" \\
+  -H "Authorization: Bearer $HELICONE_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "llama-3.3-70b",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'`,
+      docsLink: "https://docs.helicone.ai/gateway/overview",
     },
   };
 
@@ -187,7 +200,7 @@ client = OpenAI(
   ];
 
   const [currentProvider, setCurrentProvider] =
-    useState<keyof typeof CODE_SNIPPETS>("openai");
+    useState<keyof typeof CODE_SNIPPETS>("gpt4");
   const [currentLanguage, setCurrentLanguage] = useState<
     "typescript" | "python" | "curl"
   >("typescript");
@@ -241,11 +254,11 @@ client = OpenAI(
         <div className="flex flex-col lg:flex-row gap-y-8 justify-between items-center">
           <div className="flex flex-col gap-5">
             <h2 className="text-3xl sm:text-5xl font-semibold text-accent-foreground">
-              Get integrated in <span className="text-brand">seconds</span>
+              One SDK for <span className="text-brand">100+ Models</span>
             </h2>
             <p className="text-lg font-normal sm:text-xl text-muted-foreground">
-              Add logging, monitoring, and analytics to any LLM provider with a
-              single line of code.
+              Access every AI model through the OpenAI SDK. Switch providers by
+              changing the model name—no code rewrites needed.
             </p>
             <div className="flex flex-col items-start gap-4">
               {/* Main providers with code examples */}
@@ -277,20 +290,14 @@ client = OpenAI(
                 ))}
               </div>
 
-              {/* Additional providers */}
+              {/* All models link */}
               <div className="flex flex-wrap items-center gap-3">
                 <span className="text-sm text-muted-foreground">
-                  Plus 50+ more:
+                  Plus 100+ more models from providers like:
                 </span>
-                {ADDITIONAL_PROVIDERS.map((provider) => (
-                  <button
-                    key={provider.name}
-                    className="text-sm text-brand hover:text-brand/80 underline underline-offset-2 hover:no-underline transition-colors"
-                    onClick={() => window.open(provider.href, "_blank")}
-                  >
-                    {provider.name}
-                  </button>
-                ))}
+                <span className="text-sm text-muted-foreground">
+                  Mistral, Groq, Together AI, AWS Bedrock, Azure, and more
+                </span>
               </div>
             </div>
           </div>
@@ -344,13 +351,9 @@ client = OpenAI(
             No credit card required, 7-day free trial
           </p>
         </div>
-        <Link
-          href="https://docs.helicone.ai/getting-started/quick-start#quick-start"
-          target="_blank"
-          rel="noopener"
-        >
+        <Link href="https://helicone.ai/models" target="_blank" rel="noopener">
           <Button variant="ghost" size="landing_page">
-            View all providers
+            View all 100+ models
             <ArrowUpRight className="size-4 md:size-6" />
           </Button>
         </Link>

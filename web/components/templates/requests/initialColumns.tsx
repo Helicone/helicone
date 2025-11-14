@@ -105,6 +105,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     meta: {
       sortKey: "request_prompt",
     },
+    minSize: 400,
   },
   {
     id: "responseText",
@@ -114,6 +115,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     meta: {
       sortKey: "response_text",
     },
+    minSize: 400,
   },
   {
     id: "model",

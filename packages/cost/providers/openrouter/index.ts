@@ -679,6 +679,56 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "openai/gpt-5.1",
+    },
+    cost: {
+      prompt_token: 1.25e-6,
+      completion_token: 1e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-5.1-codex",
+    },
+    cost: {
+      prompt_token: 1.25e-6,
+      completion_token: 1e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-5.1-codex-mini",
+    },
+    cost: {
+      prompt_token: 2.5e-7,
+      completion_token: 2e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-5.1-chat-latest",
+    },
+    cost: {
+      prompt_token: 1.25e-6,
+      completion_token: 1e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/codex-mini-latest",
+    },
+    cost: {
+      prompt_token: 1.5e-6,
+      completion_token: 6e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "openai/gpt-oss-120b",
     },
     cost: {

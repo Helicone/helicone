@@ -521,7 +521,7 @@ const AlertFormContent = (props: AlertFormProps) => {
                     htmlFor="alert-grouping"
                     className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
                   >
-                    Grouping{" "}
+                    Grouping (optional){" "}
                     <Tooltip title="Group alerts by a specific dimension. This allows you to track metrics separately for different groups (e.g., by model, user, provider, or property).">
                       <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
                     </Tooltip>
@@ -615,7 +615,7 @@ const AlertFormContent = (props: AlertFormProps) => {
                     htmlFor="alert-aggregation"
                     className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
                   >
-                    Aggregation{" "}
+                    Aggregation (optional){" "}
                     <Tooltip title="Select how to aggregate the metric values. Sum adds all values, Avg calculates average, Min/Max finds the minimum/maximum, and Percentile uses a specific percentile value. Not applicable for Status or Count metrics.">
                       <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
                     </Tooltip>

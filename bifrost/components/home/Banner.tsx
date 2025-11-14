@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const Banner = () => {
   return (
-    <div className={cn("flex flex-col justify-center w-full h-auto relative")}>
+    <div className={cn("hidden md:flex flex-col justify-center w-full h-auto relative")}>
       <div className="bg-sky-500 text-blue-50 text-sm md:text-base py-3 w-full">
         <div className="flex items-center justify-center gap-4 px-4 flex-wrap">
           <p className="text-center">
