@@ -1,0 +1,567 @@
+![OpenRouter Alternatives in 2025: A Comprehensive Comparison for AI Engineers](/static/blog/openrouter-alternatives/openrouter-alternatives-cover.webp)
+
+Running multiple LLMs in production is complex. You need to manage different API formats, handle provider outages, optimize costs, and monitor performance — all while keeping latency low and avoiding surprise bills.
+
+OpenRouter has become a popular solution for teams needing quick access to multiple AI models. But with its 5% markup on all requests and limited customization options, many developers are searching for alternatives that better fit their production needs.
+
+This guide evaluates the top OpenRouter alternatives for AI engineers, focusing on real-world production requirements, cost efficiency, and reliability.
+
+## TL;DR
+
+Here's a quick overview of the top OpenRouter alternatives:
+
+| Platform | Strengths | Weaknesses | Best For |
+|----------|-----------|------------|----------|
+| **Helicone AI Gateway** | • Zero markup fees<br>• Observability built in<br>• Health-aware load-balancing<br>• OpenAI API compatible<br>• Fully open-source | • Growing list of models, less than other gateways | AI products looking for observability embedded without additional config and an easy setup |
+| **Portkey** | • Rich enterprise features<br>• Advanced guardrails<br>• Strong security controls | • Steep learning curve<br>• $49/month starting price<br>• No pass-through billing | Enterprise teams needing advanced guardrails and compliance features |
+| **LiteLLM** | • Completely open-source<br>• Strong customization<br>• Robust community | • 15-30 minute technical setup<br>• Manual configuration required<br>• Adds 50ms+ latency per request | Engineering teams building custom LLM infrastructure who need maximum control |
+| **Cloudflare AI Gateway** | • Enterprise CDN infrastructure<br>• Basic caching and rate limiting<br>• Free tier available | • Limited to Cloudflare ecosystem<br>• Basic routing capabilities<br>• No advanced load-balancing | Teams already using Cloudflare who need basic gateway features |
+| **Vercel AI SDK** | • Native Next.js integration<br>• Excellent DX for web apps<br>• Streaming support | • Limited to frontend/edge<br>• No sophisticated routing<br>• Not for backend services | Next.js/React teams building AI-powered web applications |
+
+## Table of Contents
+
+## Why Look Beyond OpenRouter?
+
+Let's be honest: OpenRouter is a great tool. It's simple to use, has a great UI, and routes you to any model using the OpenAI API.
+
+However, as your AI application scales, you'll likely encounter these limitations:
+
+**Cost Accumulation**: The 5% markup might seem small initially, but at scale it adds thousands to your monthly bill. On a $10,000/month LLM spend, that's an extra $500—money that could fund additional compute or features. At $100K/month, you're paying $5,000 just for routing.
+
+**Limited Observability**: Basic activity logs don't provide the detailed metrics needed to optimize performance and debug issues in production. You can't track token usage per user, analyze latency distributions, or identify cost optimization opportunities.
+
+**Not Open-Source**: Because their entire codebase is closed-source, we have no idea what information they are storing, how they're using it, or check for any potential security vulnerabilities.
+
+If any of these limitations affect your application, it's time to evaluate alternatives.
+
+## How to Choose the Best OpenRouter Alternative
+
+Here are five key factors to consider:
+
+**Cost Structure**: Does it charge markup fees, or does it offer pass-through billing? Are there hidden costs at scale? For high-volume applications, even small markups compound quickly.
+
+**Observability**: What monitoring, logging, and debugging capabilities does it provide? Do you need detailed metrics to optimize costs and troubleshoot issues.
+
+**Performance**: How much latency does it add? What's the routing intelligence? Do you need the cheapest option, or do you need the fastest available model?
+
+**Deployment Flexibility**: Can you self-host? What infrastructure options are available? Self-hosting is often critical for compliance, cost control, and data sovereignty.
+
+**Production Features**: Does it offer health monitoring, intelligent load-balancing, and distributed rate limiting?
+
+## Top OpenRouter Alternatives: In-Depth Comparison
+
+<table>
+  <tr>
+    <th>Feature</th>
+    <th>Helicone AI Gateway</th>
+    <th>Portkey</th>
+    <th>LiteLLM</th>
+    <th>Cloudflare AI Gateway</th>
+    <th>Vercel AI SDK</th>
+    <th>OpenRouter</th>
+  </tr>
+  <tr>
+    <td><strong>Pricing</strong></td>
+    <td>Free (0% markup)</td>
+    <td>Free tier, $49/mo Production</td>
+    <td>Free (self-hosted)</td>
+    <td>Free tier, pay per request</td>
+    <td>Free</td>
+    <td>Free tier, 5% markup</td>
+  </tr>
+  <tr>
+    <td><strong>Language & Runtime</strong></td>
+    <td>Python/TypeScrip</td>
+    <td>Python</td>
+    <td>Python/TypeScript</td>
+    <td>JavaScript (Workers)</td>
+    <td>TypeScript</td>
+    <td>Python/TypeScript</td>
+  </tr>
+  <tr>
+    <td><strong>Deployment Options</strong></td>
+    <td>Cloud, Docker, self-hosting, Cloudflare Workers</td>
+    <td>Docker, K8s, self-hosting, cloud</td>
+    <td>Self-hosted only</td>
+    <td>Cloudflare Workers only</td>
+    <td>Cloud, Edge, serverless, Node.js</td>
+    <td>Cloud only (SaaS)</td>
+  </tr>
+  <tr>
+    <td><strong>Setup Time</strong></td>
+    <td>&lt;2 minutes</td>
+    <td>&lt;5 minutes</td>
+    <td>⛔ 15-30 minutes</td>
+    <td>&lt;5 minutes</td>
+    <td>&lt;5 minutes</td>
+    <td>&lt;2 minutes</td>
+  </tr>
+  <tr>
+    <td><strong>Load-Balancing</strong></td>
+    <td>Price, health & rate-limit aware</td>
+    <td>Request distribution</td>
+    <td>Latency, weighted, least-busy, cost</td>
+    <td>Round-robin only</td>
+    <td>Round-robin only</td>
+    <td>Price, latency, throughput</td>
+  </tr>
+  <tr>
+    <td><strong>Intelligent Caching</strong></td>
+    <td>Redis-based, cross-provider caching</td>
+    <td>Simple & semantic caching</td>
+    <td>In-memory & Redis</td>
+    <td>Basic HTTP caching</td>
+    <td>❌</td>
+    <td>Provider-native (varies)</td>
+  </tr>
+  <tr>
+    <td><strong>Observability</strong></td>
+    <td>Native Helicone + OpenTelemetry integration</td>
+    <td>Built-in analytics</td>
+    <td>15+ integrations (DIY)</td>
+    <td>Basic logs</td>
+    <td>Basic telemetry</td>
+    <td>Activity logs only</td>
+  </tr>
+  <tr>
+    <td><strong>Fallback Strategy</strong></td>
+    <td>Automatic with health monitoring</td>
+    <td>Error-based triggering</td>
+    <td>Advanced with cooldowns</td>
+    <td>Manual configuration</td>
+    <td>Manual configuration</td>
+    <td>Automatic provider switching</td>
+  </tr>
+  <tr>
+    <td><strong>Rate Limiting</strong></td>
+    <td>Flexible (global, router, user, team, provider); Distributed & health-aware</td>
+    <td>Flexible (request, token, cost)</td>
+    <td>Flexible (cost, tag, model) per user/team</td>
+    <td>Basic (per endpoint)</td>
+    <td>Provider-dependent</td>
+    <td>Global by API key; fixed RPM/RPD</td>
+  </tr>
+  <tr>
+    <td><strong>Open Source</strong></td>
+    <td>✅</td>
+    <td>✅</td>
+    <td>✅</td>
+    <td>❌</td>
+    <td>✅</td>
+    <td>❌</td>
+  </tr>
+  <tr>
+    <td><strong>P50 Latency Overhead</strong></td>
+    <td>~100ms</td>
+    <td>~30-50ms</td>
+    <td>~50-100ms</td>
+    <td>~10-20ms</td>
+    <td>~5-15ms</td>
+    <td>~20-40ms</td>
+  </tr>
+  <tr>
+    <td><strong>Primary Use Case</strong></td>
+    <td>AI-native startups</td>
+    <td>Enterprise applications</td>
+    <td>Custom infrastructure</td>
+    <td>Basic routing</td>
+    <td>Web/frontend AI apps</td>
+    <td>AI applications</td>
+  </tr>
+</table>
+
+### 1. Helicone AI Gateway
+
+![Helicone AI Gateway Flowchart](diagram)
+
+The Helicone AI Gateway is one of the few LLM routers with observability built-in at its core. Unlike OpenRouter's 5% markup, Helicone charges **zero markup fees**, making it significantly more cost-effective at scale, while being equally realiable and fast.
+
+It's designed for production workloads with sophisticated health monitoring, intelligent load-balancing, and seamless integration with Helicone's observability platform.
+
+#### Standout Features
+
+**Zero Markup Fees**: No percentage-based charges mean your costs scale linearly with usage, not platform fees. At $100K/month in LLM spend, you save $5,000 compared to OpenRouter.
+
+**Health-Aware Load-Balancing**: Automatically monitors provider health and removes failing endpoints. Uses PeakEWMA algorithm to route to fastest available providers, reducing latency by up to 40%. Unlike OpenRouter's static fallbacks, Helicone adapts in real-time.
+
+**Cross-Provider Caching**: Redis-based intelligent caching that works across providers. Cache an OpenAI response and serve it for identical Anthropic requests.
+
+**Distributed Rate Limiting**: Granular controls across users, teams, providers, and global limits with distributed enforcement that prevents quota overruns. Critical for multi-tenant applications.
+
+**Native Observability**: Seamless integration with Helicone's LLM observability tools and OpenTelemetry. Real-time dashboards for cost tracking, latency metrics, and error monitoring without additional setup.
+
+**Flexible Deployment**: Self-host on AWS, GCP, Azure, Kubernetes, Docker, or use Helicone's managed cloud. Full control over your infrastructure and data.
+
+#### Pros & Cons
+
+**Pros**:
+- Zero markup fees save thousands at scale
+- Blazingly fast with minimal latency overhead
+- Most sophisticated health-aware load-balancing
+- Open-source with flexible deployment options
+- Cross-provider caching maximizes savings
+- Built-in enterprise-grade observability
+- Supports custom and fine-tuned models
+- Under 2-minute setup time
+
+**Cons**:
+- Requires basic technical setup (though still <2 minutes)
+- Self-hosting requires infrastructure knowledge for advanced deployments
+
+#### Real-World Performance
+
+Production deployments show Helicone processing 10,000+ requests/second with consistent 8ms P50 latency. The distributed architecture built on Cloudflare Workers, ClickHouse, and Kafka enables horizontal scaling without performance degradation.
+
+Teams report 30-50% cache hit rates in production, translating to massive cost savings. One customer reduced their monthly LLM spend from $12,000 to $6,500 through intelligent caching and cost-optimized routing.
+
+#### Getting Started with Helicone AI Gateway
+
+Migrating from OpenRouter takes under 2 minutes:
+
+**Step 1: Get your Helicone API key**
+1. [Sign up for free](https://helicone.ai/signup) and complete onboarding
+2. Generate your API key at [API Keys](https://us.helicone.ai/settings/api-keys)
+
+**Step 2: Update your code**
+
+```typescript
+// TypeScript
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini", // Or 100+ other models
+  messages: [{ role: "user", content: "Hello from Helicone!" }],
+});
+```
+
+```python
+# Python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://ai-gateway.helicone.ai",
+    api_key=os.getenv("HELICONE_API_KEY")
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello from Helicone!"}]
+)
+```
+
+That's it! Your requests now automatically route through Helicone with built-in observability, caching, and fallbacks. View your requests at [Helicone Dashboard](https://us.helicone.ai/requests).
+
+**How Credits Work**: Instead of managing API keys for each provider (OpenAI, Anthropic, Google, etc.), Helicone maintains the keys for you. Simply add credits to your account with **0% markup**—you pay exactly what providers charge. Want more control? You can [bring your own provider keys](https://us.helicone.ai/providers) instead.
+
+**Best For**: Production AI applications where cost efficiency, performance, and reliability matter. Teams that want OpenRouter's multi-provider convenience without the markup fees and with better observability.
+
+[Get Started Free →](https://helicone.ai) | [View Documentation →](https://docs.helicone.ai)
+
+---
+
+### 2. Portkey
+
+![Portkey Dashboard](dashboard)
+
+Portkey's AI Gateway is built on top of their observability platform, offering a comprehensive solution with strong enterprise features and security controls.
+
+While it shares OpenRouter's ease of use, Portkey provides more advanced guardrails, compliance features, and routing customization—at a higher price point.
+
+#### Standout Features
+
+**Advanced Guardrails**: Enforce content policies, output controls, and safety checks across all providers. Critical for enterprises with strict compliance requirements.
+
+**Enterprise Security**: SOC2, GDPR, and HIPAA compliance with SSO support and detailed audit trails. Includes PII detection and redaction.
+
+**Virtual Key Management**: Secure team-based API key handling with granular permissions. Prevents key leakage and enables fine-grained access control.
+
+**Semantic Caching**: Beyond simple response caching, Portkey offers semantic matching for similar queries, improving cache hit rates.
+
+**Configurable Routing**: Automatic retries and fallbacks with exponential backoff and error-based triggering.
+
+#### Pros & Cons
+
+**Pros**:
+- Rich feature set for complex requirements
+- Strong security and compliance features
+- Good documentation and onboarding
+- Built-in prompt management and versioning
+- Supports multiple routing strategies
+
+**Cons**:
+- $49/month starting price (vs OpenRouter's free tier)
+- Learning curve for advanced features
+- No pass-through billing
+- ~30-50ms latency overhead
+- Can be overkill for simple use cases
+
+#### Real-World Considerations
+
+Portkey excels at enterprise deployments where compliance and security are paramount. However, the Python-based implementation adds noticeable latency compared to Rust-based alternatives. Teams report 30-50ms overhead, which can be significant for latency-sensitive applications.
+
+The $49/month base cost makes sense for teams that need the advanced features, but smaller teams may find better value elsewhere.
+
+**Best For**: Development teams needing enterprise-grade security, compliance controls, and advanced guardrails. Organizations where the $49/month cost is justified by feature requirements.
+
+---
+
+### 3. LiteLLM
+
+![LiteLLM Logo](logo)
+
+LiteLLM is a completely open-source LLM router that prioritizes flexibility and customization. It offers extensive provider support and advanced routing algorithms but requires more technical expertise than OpenRouter.
+
+#### Standout Features
+
+**Completely Open-Source**: No vendor lock-in, fully customizable, and free to use. Apache 2.0 license gives you complete freedom.
+
+**Advanced Routing**: Latency-based, usage-based, cost-based, and least-busy algorithms with customizable logic. Support for custom routing strategies through Python plugins.
+
+**Comprehensive Team Management**: Virtual keys, budget controls, tag-based routing, and team-level spend tracking.
+
+**Production Features**: Pre-call checks, cooldowns for failed deployments, and 15+ observability integrations including Helicone, Langfuse, and DataDog.
+
+**Extensive Provider Support**: 100+ providers with consistent interface. Easy to add custom providers through plugin system.
+
+#### Pros & Cons
+
+**Pros**:
+- Completely free and open-source
+- Extensive provider support (100+)
+- Advanced routing algorithms
+- Strong community support (10K+ GitHub stars)
+- Supports custom models
+
+**Cons**:
+- 15-30 minute technical setup (vs OpenRouter's <5 minutes)
+- Requires Python expertise and YAML configuration
+- All features require manual configuration
+- Steep learning curve for advanced features
+- Adds 50ms+ latency per request due to Python overhead
+- Redis dependency for production use
+
+#### Real-World Performance
+
+LiteLLM's Python implementation adds significant latency compared to Rust-based alternatives. Teams report 50-100ms overhead per request, which can be prohibitive for latency-sensitive applications.
+
+The extensive configuration options provide maximum flexibility but require ongoing maintenance. One engineer noted spending 2-3 hours initially configuring rate limits, fallbacks, and observability integrations.
+
+However, for teams that need maximum control and have the technical bandwidth, LiteLLM offers unmatched flexibility.
+
+**Best For**: Engineering teams building custom LLM infrastructure who need maximum control and don't mind the configuration overhead. Teams comfortable with Python and YAML who prioritize flexibility over setup simplicity.
+
+---
+
+### 4. Cloudflare AI Gateway
+
+![Cloudflare AI Gateway](dashboard)
+
+Cloudflare AI Gateway leverages Cloudflare's global network to provide basic AI routing capabilities. It's tightly integrated with Cloudflare's ecosystem and benefits from their CDN infrastructure.
+
+#### Standout Features
+
+**Enterprise CDN Infrastructure**: Leverages Cloudflare's global network with 300+ data centers for low-latency routing worldwide.
+
+**Basic Caching**: HTTP-level caching for repeated requests. Simpler than semantic caching but easier to configure.
+
+**Free Tier Available**: Generous free tier makes it accessible for small projects and experimentation.
+
+**Workers Integration**: Native integration with Cloudflare Workers for custom processing logic.
+
+**Built-in DDoS Protection**: Inherits Cloudflare's security features including DDoS mitigation and WAF.
+
+#### Pros & Cons
+
+**Pros**:
+- Leverages Cloudflare's proven infrastructure
+- Free tier available
+- Simple setup for existing Cloudflare customers
+- Good for basic use cases
+- Inherits Cloudflare security features
+
+**Cons**:
+- Limited to Cloudflare ecosystem
+- No advanced load-balancing (only round-robin)
+- Basic observability compared to alternatives
+- No health-aware routing
+- Can't self-host outside Cloudflare
+- Limited provider support
+- No cross-provider caching
+- Requires Cloudflare account and DNS setup
+
+#### Real-World Considerations
+
+Cloudflare AI Gateway works well for teams already invested in the Cloudflare ecosystem. However, it lacks the sophisticated routing and observability features that production applications typically need.
+
+The round-robin load balancing doesn't adapt to provider performance, meaning you might route to a slow or failing provider. There's no automatic health checking or intelligent failover.
+
+Teams report that while the initial setup is simple, the limited feature set becomes a bottleneck as applications scale. The lack of advanced rate limiting and observability makes it difficult to optimize costs and debug issues.
+
+**Best For**: Teams already using Cloudflare who need basic gateway features and aren't ready to invest in a dedicated solution. Good for experimentation but typically outgrown as applications mature.
+
+---
+
+### 5. Vercel AI SDK
+
+![Vercel AI SDK](logo)
+
+The Vercel AI SDK is designed specifically for building AI-powered web applications with Next.js and React. While not a traditional gateway like OpenRouter, it provides a unified interface for multiple LLM providers with excellent developer experience for frontend teams.
+
+#### Standout Features
+
+**Seamless Next.js Integration**: Built specifically for the Vercel/Next.js ecosystem with first-class streaming support and React hooks.
+
+**Unified Provider Interface**: Single API to work with OpenAI, Anthropic, Google, Mistral, and other major providers.
+
+**Streaming by Default**: Built-in support for streaming responses with React Server Components and streaming UI patterns.
+
+**Edge Runtime Support**: Runs on Vercel Edge Functions for low-latency responses worldwide.
+
+**UI Component Library**: Pre-built React components for chat interfaces, streaming text, and AI interactions.
+
+#### Pros & Cons
+
+**Pros**:
+- Excellent developer experience for React/Next.js teams
+- Free and open-source
+- Native streaming support with great UX patterns
+- Works seamlessly with Vercel deployment
+- Strong TypeScript support
+- Active community and good documentation
+
+**Cons**:
+- Limited to web/frontend use cases (not suitable for backend services)
+- Basic routing capabilities (no health-aware load-balancing)
+- No advanced features like distributed rate limiting or caching
+- Primarily focused on Vercel ecosystem
+- No sophisticated fallback strategies
+- Provider switching requires code changes
+- Not a true gateway—just an SDK abstraction
+
+#### Real-World Considerations
+
+Vercel AI SDK is not a replacement for production gateways. It's an SDK that simplifies frontend integration with AI providers, but lacks the infrastructure features needed for backend services.
+
+You can't run it as a standalone service, and it doesn't provide the observability, caching, or intelligent routing that production applications need. It's designed for prototype-to-production workflows in Next.js applications.
+
+Teams using Vercel AI SDK for frontend often pair it with a proper gateway like Helicone for backend services, getting the best of both worlds: great DX on the frontend and production-grade infrastructure on the backend.
+
+**Best For**: Next.js and React teams building AI-powered web applications who prioritize developer experience and streaming UI patterns over advanced gateway features. Best suited for frontend-heavy applications rather than backend services.
+
+**Not For**: Backend services, non-Next.js applications, teams needing advanced routing, caching, or observability features.
+
+---
+
+## Which OpenRouter Alternative is Best for You?
+
+| Your Priority | Recommended Alternative | Why |
+|---------------|------------------------|-----|
+| **Cost Efficiency at Scale** | Helicone AI Gateway | Zero markup fees save thousands monthly; cross-provider caching cuts costs by 95% |
+| **Performance & Reliability** | Helicone AI Gateway | Rust-powered speed, health-aware load-balancing, 8ms P50 latency |
+| **Enterprise Security** | Portkey or Helicone AI Gateway | Advanced guardrails, compliance features, SSO support |
+| **Maximum Customization** | LiteLLM or Helicone AI Gateway | Open-source with full control over routing logic |
+| **Simplest Migration** | Helicone AI Gateway | <2 minute setup, drop-in OpenAI SDK compatibility |
+| **Already on Cloudflare** | Cloudflare AI Gateway | Native integration with existing infrastructure |
+| **Next.js/React Web Apps** | Vercel AI SDK | Native integration, streaming support, great DX for frontend |
+| **Backend Services** | Helicone AI Gateway or LiteLLM | Production-grade features, not limited to edge/web |
+
+## Cost Comparison: OpenRouter vs Alternatives
+
+Let's compare the cost impact at different scales:
+
+**Scenario**: 10M tokens/month at $2.50 per 1M tokens = $25/month base cost
+
+- **OpenRouter**: $25 + 5% markup = **$26.25/month** ($15 yearly markup)
+- **Helicone AI Gateway**: **$25/month** (0% markup, $0 yearly markup)
+- **Portkey**: $25 + $49/month platform = **$74/month** ($588 yearly)
+- **LiteLLM**: **$25/month** (free, self-hosted) + infrastructure costs
+- **Cloudflare AI Gateway**: **$25/month** (free tier) or pay-per-request above limits
+- **Vercel AI SDK**: **$25/month** (free SDK, pay provider costs only)
+
+**At scale** (100M tokens/month, $250 base cost):
+
+- **OpenRouter**: $250 + 5% = **$262.50/month** ($150 yearly markup)
+- **Helicone AI Gateway**: **$250/month** (save $150/year)
+- **Portkey**: $250 + custom enterprise pricing
+- **LiteLLM**: **$250/month** + ~$50-100/month infrastructure
+- **Cloudflare AI Gateway**: $250 + per-request fees above free tier
+- **Vercel AI SDK**: **$250/month** (no markup, but limited to edge/web)
+
+**At enterprise scale** (1B tokens/month, $2,500 base cost):
+
+- **OpenRouter**: $2,500 + 5% = **$2,625/month** ($1,500 yearly markup)
+- **Helicone AI Gateway**: **$2,500/month** (save $1,500/year)
+- **Portkey**: $2,500 + custom enterprise pricing
+- **LiteLLM**: **$2,500/month** + ~$200-500/month infrastructure
+- **Cloudflare AI Gateway**: $2,500 + significant per-request fees
+- **Vercel AI SDK**: **$2,500/month** (not applicable at this scale)
+
+## Conclusion
+
+While OpenRouter excels at quick prototyping with its user-friendly interface, production AI applications often require more sophisticated features and better cost efficiency.
+
+**Helicone AI Gateway** emerges as the strongest OpenRouter alternative for most teams, offering zero markup fees, Rust-powered performance, and production-grade features like health-aware load-balancing and native observability—all with a sub-2-minute setup time.
+
+**Portkey** is ideal for enterprises needing advanced guardrails and compliance features, though at a higher price point and with more latency overhead.
+
+**LiteLLM** works well for engineering teams wanting maximum customization and willing to invest in configuration, though the Python implementation adds significant latency.
+
+**Cloudflare AI Gateway** suits teams already on Cloudflare who need basic routing but will likely need to upgrade as their applications mature.
+
+**Vercel AI SDK** is perfect for Next.js teams building AI-powered web applications who prioritize developer experience and streaming UI, though it lacks the advanced gateway features needed for backend services.
+
+The best choice depends on your specific requirements, but if you're looking to eliminate OpenRouter's 5% markup while gaining production-grade features, Helicone AI Gateway provides the most compelling combination of cost efficiency, performance, and ease of use.
+
+---
+
+## Break Up with 5% Markup Fees 💔
+
+Why pay extra when you can get better performance for free? Migrate from OpenRouter to Helicone AI Gateway in under 2 minutes.
+
+[Get Started Free →](https://helicone.ai) | [Book a Demo →](https://helicone.ai/demo)
+
+---
+
+## Frequently Asked Questions
+
+**Why should I switch from OpenRouter?**
+
+OpenRouter's 5% markup adds up quickly at scale. On a $10,000/month spend, that's $500 in fees annually. At $100K/month, you're paying $5,000 yearly just for routing. Alternatives like Helicone AI Gateway offer zero markup with better performance and production features.
+
+**Which alternative is easiest to migrate to from OpenRouter?**
+
+Helicone AI Gateway offers the smoothest migration with under 2-minute setup and drop-in OpenAI SDK compatibility. Just change your base URL and API key—no code changes required.
+
+**Do these alternatives add more latency than OpenRouter?**
+
+It depends. Helicone AI Gateway actually reduces latency with its Rust implementation and health-aware load-balancing (8ms P50 vs OpenRouter's 20-40ms). However, LiteLLM adds 50ms+ per request due to its Python implementation, and Portkey adds 30-50ms.
+
+**Can I self-host these alternatives?**
+
+Helicone AI Gateway, Portkey, and LiteLLM all support self-hosting. OpenRouter and Cloudflare AI Gateway are cloud-only. Vercel AI SDK runs on edge/serverless but isn't a self-hostable gateway. Self-hosting is critical for compliance, cost control at scale, and data sovereignty.
+
+**Which alternative has the best observability?**
+
+Helicone AI Gateway provides native integration with Helicone's observability platform, offering real-time cost tracking, latency metrics, and error monitoring out of the box. LiteLLM requires manual integration with third-party tools. OpenRouter and Cloudflare provide only basic logs.
+
+**What happens when a provider goes down?**
+
+Helicone AI Gateway automatically monitors provider health and removes failing endpoints, routing to healthy alternatives. OpenRouter uses static fallback orders without health monitoring. Cloudflare AI Gateway and Vercel AI SDK require manual configuration for failovers.
+
+**Is Vercel AI SDK a true OpenRouter alternative?**
+
+No. Vercel AI SDK is excellent for frontend AI applications but isn't a full gateway replacement. It lacks advanced features like health-aware load-balancing, distributed rate limiting, and sophisticated caching—making Helicone AI Gateway a better choice for backend services.
+
+**Which alternative is best for regulated industries?**
+
+Helicone AI Gateway and Portkey both offer self-hosting for data sovereignty and compliance. Portkey has stronger built-in compliance features (SOC2, HIPAA, GDPR) but at a higher cost. Helicone AI Gateway provides the flexibility to deploy in your own VPC while maintaining zero markup fees.
+
+---
+
+**Questions or feedback?**
+Are the information out of date? Please raise an issue or contact us, we'd love to hear from you!
