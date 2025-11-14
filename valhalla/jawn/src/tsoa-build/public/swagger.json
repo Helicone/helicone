@@ -3267,6 +3267,7 @@
 					"google-ai-studio",
 					"groq",
 					"helicone",
+					"mistral",
 					"nebius",
 					"novita",
 					"openai",
@@ -9027,12 +9028,12 @@
 					"anthropic",
 					"cohere",
 					"deepseek",
+					"mistral",
 					"openai",
 					"perplexity",
 					"xai",
 					"google",
 					"meta-llama",
-					"mistralai",
 					"amazon",
 					"microsoft",
 					"nvidia",
@@ -13710,6 +13711,7 @@
 														"google-ai-studio",
 														"groq",
 														"helicone",
+														"mistral",
 														"nebius",
 														"novita",
 														"openai",
@@ -20532,6 +20534,28 @@
 		"/v1/models": {
 			"get": {
 				"operationId": "GetModels",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OAIModelsResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Models"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/v1/models/multimodal": {
+			"get": {
+				"operationId": "GetMultimodalModels",
 				"responses": {
 					"200": {
 						"description": "Ok",

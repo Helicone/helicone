@@ -212,10 +212,11 @@ export class AttemptExecutor {
     plugins?: Plugin[],
     traceContext?: TraceContext | null
   ): Promise<Result<Response, AttemptError>> {
+    const bodyMapping = endpoint.userConfig.gatewayMapping || requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
     try {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
-        bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+        bodyMapping: bodyMapping,
         toAnthropic: (body, modelId, options) =>
           toAnthropic(body, modelId, plugins, options),
         toChatCompletions: (body) => toChatCompletions(body),
@@ -243,7 +244,7 @@ export class AttemptExecutor {
         apiKey: providerKey.decrypted_provider_key,
         secretKey: providerKey.decrypted_provider_secret_key || undefined,
         orgId: orgId,
-        bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+        bodyMapping: bodyMapping,
         requestMethod: requestWrapper.getMethod(),
         requestUrl: urlResult.data,
         requestBody: bodyResult.data,
