@@ -70,7 +70,7 @@ export const providers: Provider[] = [
   //   relevanceScore: 85,
   // },
   {
-    id: "mistralai",
+    id: "mistral",
     name: "Mistral AI",
     logoUrl: "/assets/home/providers/mistral.png",
     description: "Configure your Mistral AI API keys",
