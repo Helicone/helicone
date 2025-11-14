@@ -46,9 +46,9 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
   public async parse(parseInput: ParseInput): Promise<Result<OpenRouterUsage, string>> {
     try {
       if (parseInput.isStream) {
-        return this.parseStreamResponse(parseInput.responseBody);
+        return this.parseStreamResponse(parseInput.responseBody, parseInput.isPassthroughBilling);
       } else {
-        return this.parseNonStreamResponse(parseInput.responseBody);
+        return this.parseNonStreamResponse(parseInput.responseBody, parseInput.isPassthroughBilling);
       }
     } catch (error) {
       return {
@@ -58,10 +58,10 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     }
   }
 
-  protected parseNonStreamResponse(responseBody: string): Result<OpenRouterUsage, string> {
+  protected parseNonStreamResponse(responseBody: string, isPassthroughBilling: boolean): Result<OpenRouterUsage, string> {
     try {
       const parsedResponse = JSON.parse(responseBody);
-      const usage = this.extractUsageFromResponse(parsedResponse);
+      const usage = this.extractUsageFromResponse(parsedResponse, isPassthroughBilling);
 
       return {
         data: usage,
@@ -75,7 +75,7 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     }
   }
 
-  protected parseStreamResponse(responseBody: string): Result<OpenRouterUsage, string> {
+  protected parseStreamResponse(responseBody: string, isPassthroughBilling: boolean): Result<OpenRouterUsage, string> {
     try {
       const lines = responseBody
         .split("\n")
@@ -91,7 +91,7 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
         .filter((data) => data !== null);
 
       const consolidatedData = this.consolidateStreamData(lines);
-      const usage = this.extractUsageFromResponse(consolidatedData);
+      const usage = this.extractUsageFromResponse(consolidatedData, isPassthroughBilling);
 
       return {
         data: usage,
@@ -133,7 +133,7 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     return consolidated;
   }
 
-  protected extractUsageFromResponse(parsedResponse: any): OpenRouterUsage {
+  protected extractUsageFromResponse(parsedResponse: any, isPassthroughBilling: boolean): OpenRouterUsage {
     if (!parsedResponse || typeof parsedResponse !== "object") {
       return {
         input: 0,
@@ -165,13 +165,16 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
     const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
 
-    // Return raw cost without passthrough billing markup (markup is applied in cost calculation layer)
-    const declaredCost = getOpenRouterDeclaredCost(cost, cost_details);
+    // Get declared cost and apply passthrough billing markup if needed
+    let declaredCost = getOpenRouterDeclaredCost(cost, cost_details);
+    if (isPassthroughBilling && declaredCost !== undefined) {
+      declaredCost *= OPENROUTER_PTB_MARKUP;
+    }
     const modelUsage: OpenRouterUsage = {
       input: effectivePromptTokens,
       output: effectiveCompletionTokens,
       cost: declaredCost,
-      
+
       // OpenRouterUsage specific info
       cost_details: cost_details,
       provider: provider,

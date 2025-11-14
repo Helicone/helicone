@@ -38,7 +38,6 @@ import { EscrowInfo } from "../ai-gateway/types";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
-import { OPENROUTER_PTB_MARKUP } from "@helicone-package/cost/usage/openRouterUsageProcessor";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -525,6 +524,7 @@ async function log(
             responseBody: rawResponse,
             isStream: proxyRequest.isStream,
             model: attemptModel,
+            isPassthroughBilling: gatewayAttempt.authType === "ptb",
           });
 
           if (usage.data) {
@@ -536,12 +536,6 @@ async function log(
 
             if (breakdown) {
               cost = breakdown.totalCost;
-              if (
-                attemptProvider === "openrouter" && 
-                gatewayAttempt.authType === "ptb"
-              ) {
-                cost *= OPENROUTER_PTB_MARKUP;
-              }
             }
           } else {
             console.error(
@@ -579,7 +573,8 @@ async function log(
               const usage = await usageProcessor.parse({
                 responseBody: rawResponse,
                 isStream: proxyRequest.isStream,
-                model: model
+                model: model,
+                isPassthroughBilling: false,
               });
 
               if (usage.data) {

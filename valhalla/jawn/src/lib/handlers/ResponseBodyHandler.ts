@@ -32,7 +32,6 @@ import { VercelBodyProcessor } from "../shared/bodyProcessors/vercelBodyProcesso
 import { VercelStreamProcessor } from "../shared/bodyProcessors/vercelStreamProcessor";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
-import { OPENROUTER_PTB_MARKUP } from "@helicone-package/cost/usage/openRouterUsageProcessor";
 
 export const INTERNAL_ERRORS = {
   Cancelled: -3,
@@ -165,7 +164,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       if (provider && rawResponse) {
         let usageProcessor: IUsageProcessor | null;
         if (isAIGateway) {
-          // AI Gateway always uses OpenAI processor for now
+          // AI Gateway always uses OpenAI processor
           usageProcessor = new OpenAIUsageProcessor();
         } else {
           usageProcessor = getUsageProcessor(provider);
@@ -176,6 +175,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
             responseBody: rawResponse,
             isStream: context.message.log.request.isStream,
             model: context.processedLog.model ?? "",
+            isPassthroughBilling,
           });
           if (parsedUsage.error !== null) {
             console.error(
@@ -196,9 +196,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
             });
             if (breakdown) {
               context.costBreakdown = breakdown;
-              if (provider === "openrouter" && isPassthroughBilling) {
-                breakdown.totalCost *= OPENROUTER_PTB_MARKUP;
-              }
             }
           }
         }
