@@ -318,6 +318,7 @@ export const endpoints = {
       "logprobs",
       "top_logprobs",
       "logit_bias",
+      "max_tokens",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -353,6 +354,7 @@ export const endpoints = {
       "logprobs",
       "top_logprobs",
       "logit_bias",
+      "max_tokens",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -385,6 +387,7 @@ export const endpoints = {
       "logprobs",
       "top_logprobs",
       "logit_bias",
+      "max_tokens",
     ],
     ptbEnabled: true,
     endpointConfigs: {
