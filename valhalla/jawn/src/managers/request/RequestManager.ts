@@ -88,6 +88,19 @@ export class RequestManager extends BaseManager {
     if (request.error || !request.data) {
       return err(request.error);
     }
+
+    // Check if bodies are already in the request (from ClickHouse for < 10MB requests)
+    if (
+      request.data.request_body &&
+      request.data.response_body &&
+      typeof request.data.request_body === "object" &&
+      typeof request.data.response_body === "object"
+    ) {
+      // Bodies are already populated from ClickHouse
+      return ok(request.data);
+    }
+
+    // Bodies are in S3, fetch via signed URL
     if (!request.data.signed_body_url) {
       return err("Request body not found");
     }

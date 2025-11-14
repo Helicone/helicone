@@ -287,7 +287,19 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   async uploadToS3(): PromiseGenericResult<string> {
-    const uploadPromises = this.batchPayload.s3Records.map(async (s3Record) => {
+    const SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB in bytes
+
+    // Filter out small requests (< 10MB) that will be stored only in ClickHouse
+    const largeRequests = this.batchPayload.s3Records.filter((s3Record) => {
+      const totalSize = s3Record.requestBody.length + s3Record.responseBody.length;
+      return totalSize >= SIZE_THRESHOLD;
+    });
+
+    if (largeRequests.length === 0) {
+      return ok("No S3 uploads needed (all requests < 10MB)");
+    }
+
+    const uploadPromises = largeRequests.map(async (s3Record) => {
       const key = this.s3Client.getRequestResponseKey(
         s3Record.requestId,
         s3Record.organizationId
@@ -317,7 +329,7 @@ export class LoggingHandler extends AbstractLogHandler {
 
     // TODO: How to handle errors here?
 
-    return ok("All S3 uploads successful");
+    return ok(`S3 uploads successful (${largeRequests.length} large requests)`);
   }
 
   async logToClickhouse(): PromiseGenericResult<string> {
@@ -462,8 +474,27 @@ export class LoggingHandler extends AbstractLogHandler {
       legacyUsage.completionAudioTokens ?? 0
     );
     const orgParams = context.orgParams;
-    const { requestText, responseText } =
-      this.requestResponseTextFromContext(context);
+
+    // Determine if we should store full bodies in ClickHouse or use text previews
+    const rawRequestBody = context.rawLog.rawRequestBody ?? "";
+    const rawResponseBody = context.rawLog.rawResponseBody ?? "";
+    const totalBodySize = rawRequestBody.length + rawResponseBody.length;
+    const SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB in bytes
+
+    let requestBody: string;
+    let responseBody: string;
+
+    if (totalBodySize < SIZE_THRESHOLD && totalBodySize > 0) {
+      // Store full raw JSON bodies in ClickHouse for requests < 10MB
+      requestBody = rawRequestBody;
+      responseBody = rawResponseBody;
+    } else {
+      // Store text previews for large requests (>= 10MB) or when bodies are missing
+      const { requestText, responseText } =
+        this.requestResponseTextFromContext(context);
+      requestBody = requestText;
+      responseBody = responseText;
+    }
 
     const isCacheHit =
       context.message.log.request.cacheReferenceId &&
@@ -530,8 +561,8 @@ export class LoggingHandler extends AbstractLogHandler {
           ([key, value]) => [key, +(value ?? 0)]
         )
       ),
-      request_body: requestText,
-      response_body: responseText,
+      request_body: requestBody,
+      response_body: responseBody,
       cache_reference_id:
         context.message.log.request.cacheReferenceId ?? undefined,
       cache_enabled: context.message.log.request.cacheEnabled ?? false,
