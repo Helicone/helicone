@@ -17,6 +17,7 @@ import {
 } from "../../shared/sorts/requests/sorts";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { SortDirection } from "../../shared/sorts/requests/sorts";
+import { safeJsonParse } from "../../../utils/helpers";
 
 export interface HeliconeRequestAsset {
   assetUrl: string;
@@ -170,11 +171,11 @@ export async function getRequestsClickhouseNoSort(
   const sortSQL = createdAtSort === "asc" ? "ASC" : "DESC";
   const query = `
     SELECT response_id,
-      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
+      if(notEmpty(response_body), response_body, '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}') as response_body,
       response_created_at,
       toInt32(status) AS response_status,
       request_id,
-      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
+      if(notEmpty(request_body), request_body, '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}') as request_body,
       request_created_at,
       user_id AS request_user_id,
       properties AS request_properties,
@@ -199,7 +200,8 @@ export async function getRequestsClickhouseNoSort(
       cost / ${COST_PRECISION_MULTIPLIER} as cost,
       prompt_id,
       prompt_version,
-      updated_at
+      updated_at,
+      storage_location
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
@@ -251,11 +253,11 @@ export async function getRequestsClickhouse(
 
   const query = `
     SELECT response_id,
-      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
+      if(notEmpty(response_body), response_body, '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}') as response_body,
       response_created_at,
       toInt32(status) AS response_status,
       request_id,
-      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
+      if(notEmpty(request_body), request_body, '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}') as request_body,
       request_created_at,
       user_id AS request_user_id,
       properties AS request_properties,
@@ -280,7 +282,8 @@ export async function getRequestsClickhouse(
       cost / ${COST_PRECISION_MULTIPLIER} as cost,
       prompt_id,
       prompt_version,
-      updated_at
+      updated_at,
+      storage_location
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
@@ -315,61 +318,70 @@ async function mapLLMCalls(
 ): Promise<Result<HeliconeRequest[], string>> {
   const promises =
     heliconeRequests?.map(async (heliconeRequest) => {
-      // First retrieve s3 signed urls if past the implementation date
-      const s3ImplementationDate = new Date("2024-03-30T02:00:00Z");
-      const requestCreatedAt = new Date(heliconeRequest.request_created_at);
-      if (
-        (process.env.S3_ENABLED ?? "true") === "true" &&
-        requestCreatedAt > s3ImplementationDate
-      ) {
-        const { data: signedBodyUrl, error: signedBodyUrlErr } =
-          await s3Client.getRequestResponseBodySignedUrl(
-            orgId,
-            heliconeRequest.cache_reference_id === DEFAULT_UUID
-              ? heliconeRequest.request_id
-              : (heliconeRequest.cache_reference_id ??
-                  heliconeRequest.request_id)
+      // Check storage location - if clickhouse, only parse JSON
+      if (heliconeRequest.storage_location === "clickhouse") {
+        // Parse JSON strings if they are strings
+        if (typeof heliconeRequest.response_body === "string") {
+          const parsed = safeJsonParse(heliconeRequest.response_body);
+          if (parsed) {
+            heliconeRequest.response_body = parsed;
+          }
+        }
+        if (typeof heliconeRequest.request_body === "string") {
+          const parsed = safeJsonParse(heliconeRequest.request_body);
+          if (parsed) {
+            heliconeRequest.request_body = parsed;
+          }
+        }
+        return heliconeRequest;
+      }
+
+      const { data: signedBodyUrl, error: signedBodyUrlErr } =
+        await s3Client.getRequestResponseBodySignedUrl(
+          orgId,
+          heliconeRequest.cache_reference_id === DEFAULT_UUID
+            ? heliconeRequest.request_id
+            : (heliconeRequest.cache_reference_id ?? heliconeRequest.request_id)
+        );
+
+      if (signedBodyUrlErr || !signedBodyUrl) {
+        // If there was an error, just return the request as is
+        return heliconeRequest;
+      }
+
+      heliconeRequest.signed_body_url = signedBodyUrl;
+
+      const assetUrls: Record<string, string> = {};
+
+      if (heliconeRequest.asset_ids) {
+        try {
+          const signedUrlPromises = heliconeRequest.asset_ids.map(
+            async (assetId: string) => {
+              const { data: signedImageUrl, error: signedImageUrlErr } =
+                await s3Client.getRequestResponseImageSignedUrl(
+                  orgId,
+                  heliconeRequest.request_id,
+                  assetId
+                );
+
+              return {
+                assetId,
+                signedImageUrl:
+                  signedImageUrlErr || !signedImageUrl ? "" : signedImageUrl,
+              };
+            }
           );
 
-        if (signedBodyUrlErr || !signedBodyUrl) {
-          // If there was an error, just return the request as is
+          const signedUrls = await Promise.all(signedUrlPromises);
+
+          signedUrls.forEach(({ assetId, signedImageUrl }) => {
+            assetUrls[assetId] = signedImageUrl;
+          });
+
+          heliconeRequest.asset_urls = assetUrls;
+        } catch (error) {
+          console.error(`Error fetching asset: ${error}`);
           return heliconeRequest;
-        }
-
-        heliconeRequest.signed_body_url = signedBodyUrl;
-
-        const assetUrls: Record<string, string> = {};
-
-        if (heliconeRequest.asset_ids) {
-          try {
-            const signedUrlPromises = heliconeRequest.asset_ids.map(
-              async (assetId: string) => {
-                const { data: signedImageUrl, error: signedImageUrlErr } =
-                  await s3Client.getRequestResponseImageSignedUrl(
-                    orgId,
-                    heliconeRequest.request_id,
-                    assetId
-                  );
-
-                return {
-                  assetId,
-                  signedImageUrl:
-                    signedImageUrlErr || !signedImageUrl ? "" : signedImageUrl,
-                };
-              }
-            );
-
-            const signedUrls = await Promise.all(signedUrlPromises);
-
-            signedUrls.forEach(({ assetId, signedImageUrl }) => {
-              assetUrls[assetId] = signedImageUrl;
-            });
-
-            heliconeRequest.asset_urls = assetUrls;
-          } catch (error) {
-            console.error(`Error fetching asset: ${error}`);
-            return heliconeRequest;
-          }
         }
       }
 
