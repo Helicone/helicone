@@ -57,16 +57,35 @@ export function getProviderPriority(provider: ModelProviderName): number {
 }
 
 /**
- * Sort attempts by auth type (BYOK first) and provider priority
+ * Sort attempts by auth type (BYOK first), then cost, then provider priority
  */
 export function sortAttemptsByPriority<
-  T extends { authType: "byok" | "ptb"; priority: number }
+  T extends {
+    authType: "byok" | "ptb";
+    priority: number;
+    endpoint: { pricing: Array<{ input: number; output: number }> };
+  }
 >(attempts: T[]): T[] {
   return attempts.sort((a, b) => {
     // BYOK always comes before PTB
     if (a.authType === "byok" && b.authType !== "byok") return -1;
     if (a.authType !== "byok" && b.authType === "byok") return 1;
-    // Within same auth type, sort by provider priority
+
+    // Within PTB, sort by cost (lowest first)
+    if (a.authType === "ptb" && b.authType === "ptb") {
+      const aCost = (a.endpoint.pricing[0]?.input ?? 0) + (a.endpoint.pricing[0]?.output ?? 0);
+      const bCost = (b.endpoint.pricing[0]?.input ?? 0) + (b.endpoint.pricing[0]?.output ?? 0);
+
+      // If costs are different, sort by cost
+      if (aCost !== bCost) {
+        return aCost - bCost;
+      }
+
+      // Within same cost, sort by provider priority
+      return a.priority - b.priority;
+    }
+
+    // For BYOK, sort by provider priority
     return a.priority - b.priority;
   });
 }
