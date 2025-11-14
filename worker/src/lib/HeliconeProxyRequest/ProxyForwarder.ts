@@ -589,9 +589,7 @@ async function log(
                   provider: modelProviderName,
                 });
 
-                if (breakdown) {
-                  cost = breakdown.totalCost;
-                }
+                cost = breakdown?.totalCost;
               }
             }
           }
