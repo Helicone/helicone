@@ -1,0 +1,11 @@
+{
+  "company": "DeepAI",
+  "title": "How to cut LLM costs by 65% and reduce LLM errors",
+  "description": "DeepAI processes millions of AI requests daily across chat, image, video, and music generation. Helicone gave them access to 100+ new models in seconds instead of days, cut their characters product cost by 65%, and dropping error rates by 0.13%.",
+  "logo": "/static/customers/case-studies/deepai/logo.webp",
+  "url": "deepai.org",
+  "customerSince": "2025-10-01",
+  "isOpenSourced": false,
+  "date": "2025-11-13",
+  "relatedStudies": ["tusk","cogna"]
+}
