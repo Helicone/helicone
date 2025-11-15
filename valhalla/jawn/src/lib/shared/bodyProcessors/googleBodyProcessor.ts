@@ -9,8 +9,6 @@ export class GoogleBodyProcessor implements IBodyProcessor {
     const { responseBody } = parseInput;
     const parsedResponseBody = JSON.parse(responseBody);
 
-    console.log("Google response body:", parsedResponseBody);
-    console.log("Extra google properties:", parsedResponseBody.usageMetadata?.extra_properties?.google);
     // Check for Anthropic-specific usage format
     if (
       parsedResponseBody.usage &&

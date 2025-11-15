@@ -6,7 +6,6 @@ export class GoogleUsageProcessor implements IUsageProcessor {
   public async parse(parseInput: ParseInput): Promise<Result<ModelUsage, string>> {
     try {
       const response = JSON.parse(parseInput.responseBody);
-      console.log("Parsed Google AI response (GoogleUsageProcessor):", response);
 
       // Google AI Studio (Gemini) format
       if (response.usageMetadata) {
