@@ -464,7 +464,7 @@ describe("Moonshot AI Registry Tests", () => {
           },
         }));
 
-      it("should map kimi-k2 to kimi-k2-0711 with openrouter provider", () =>
+      it("should map kimi-k2 to kimi-k2-0905 with openrouter provider", () =>
         runGatewayTest({
           model: "kimi-k2/openrouter",
           expected: {
@@ -472,8 +472,8 @@ describe("Moonshot AI Registry Tests", () => {
               {
                 url: "https://openrouter.ai/api/v1/chat/completions",
                 response: "success",
-                model: "moonshotai/kimi-k2",
-                data: createOpenAIMockResponse("moonshotai/kimi-k2"),
+                model: "moonshotai/kimi-k2-0905",
+                data: createOpenAIMockResponse("moonshotai/kimi-k2-0905"),
                 expects: openrouterAuthExpectations,
               },
             ],
@@ -481,7 +481,7 @@ describe("Moonshot AI Registry Tests", () => {
           },
         }));
 
-      it("should map kimi-k2 to kimi-k2-0711 with novita provider", () =>
+      it("should map kimi-k2 to kimi-k2-0905 with novita provider", () =>
         runGatewayTest({
           model: "kimi-k2/novita",
           expected: {
@@ -489,8 +489,8 @@ describe("Moonshot AI Registry Tests", () => {
               {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
-                model: "moonshotai/kimi-k2-instruct",
-                data: createOpenAIMockResponse("moonshotai/kimi-k2-instruct"),
+                model: "moonshotai/kimi-k2-0905",
+                data: createOpenAIMockResponse("moonshotai/kimi-k2-0905"),
                 expects: novitaAuthExpectations,
               },
             ],

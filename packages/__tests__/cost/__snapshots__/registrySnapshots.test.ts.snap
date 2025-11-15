@@ -2959,6 +2959,60 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "kimi-k2-thinking:deepinfra": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 8000,
+      "modelId": "moonshotai/Kimi-K2-Thinking",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-thinking:fireworks": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "fireworks/kimi-k2-thinking",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "fireworks",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2-thinking:novita": {
       "context": 262144,
       "crossRegion": false,
@@ -4923,6 +4977,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "moonshotai/kimi-k2": [
     "baseten",
     "deepinfra",
+    "deepinfra",
+    "fireworks",
     "fireworks",
     "groq",
     "novita",
@@ -6164,11 +6220,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "deepinfra": [
       {
-        "cacheMultipliers": {
-          "cachedInput": 0.8,
-        },
-        "input": 5e-7,
-        "output": 0.000002,
+        "input": 5.5e-7,
+        "output": 0.0000025,
         "threshold": 0,
       },
     ],
@@ -6968,6 +7021,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "kimi-k2-thinking",
       "providers": [
+        "deepinfra",
+        "fireworks",
         "novita",
       ],
     },
@@ -7183,7 +7238,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "chutes",
     },
     {
-      "modelCount": 18,
+      "modelCount": 19,
       "provider": "deepinfra",
     },
     {
@@ -7191,7 +7246,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "deepseek",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "fireworks",
     },
     {
@@ -7327,8 +7382,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 212,
-  "totalModelProviderConfigs": 212,
+  "totalEndpoints": 214,
+  "totalModelProviderConfigs": 214,
   "totalModelsWithPtb": 81,
   "totalProviders": 19,
 }
