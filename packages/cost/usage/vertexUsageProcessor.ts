@@ -12,6 +12,8 @@ export class VertexOpenAIUsageProcessor extends OpenAIUsageProcessor {
         output: 0,
       };
     }
+    console.log("Parsed Vertex AI OpenAI-compatible response:", parsedResponse);
+    console.log("Extra google properties:", parsedResponse.usage.extra_properties.google);
 
     const usage = parsedResponse.usage || {};
 
