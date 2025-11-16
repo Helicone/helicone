@@ -2996,7 +2996,7 @@ const models: TsoaRoute.Models = {
             "endpointConfigs": {"ref":"Record_string.EndpointConfig_","required":true},
             "crossRegion": {"dataType":"boolean"},
             "priority": {"dataType":"double"},
-            "quantization": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["fp4"]},{"dataType":"enum","enums":["fp8"]},{"dataType":"enum","enums":["fp16"]},{"dataType":"enum","enums":["bf16"]}]},
+            "quantization": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["fp4"]},{"dataType":"enum","enums":["fp8"]},{"dataType":"enum","enums":["fp16"]},{"dataType":"enum","enums":["bf16"]},{"dataType":"enum","enums":["int4"]}]},
             "responseFormat": {"ref":"ResponseFormat"},
             "requireExplicitRouting": {"dataType":"boolean"},
             "providerModelIdAliases": {"dataType":"array","array":{"dataType":"string"}},
