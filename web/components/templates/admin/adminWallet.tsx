@@ -32,6 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { H4, Small } from "@/components/ui/typography";
 import { $JAWN_API, getJawnClient } from "@/lib/clients/jawn";
 import { formatCurrency as remoteFormatCurrency } from "@/lib/uiUtils";
@@ -71,6 +72,7 @@ type SortColumn =
   | "amount_received";
 
 export default function AdminWallet() {
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
@@ -492,49 +494,17 @@ export default function AdminWallet() {
   return (
     <div className="flex h-screen flex-col overflow-hidden p-6">
       {/* Main Content */}
-      <div className="flex min-h-0 flex-1 flex-col gap-3">
-        {/* Time Range Selector and Group By */}
-        <div className="flex shrink-0 items-center justify-end gap-3">
-          <div className="flex items-center gap-2">
-            <Label className="text-sm text-muted-foreground">Group By</Label>
-            <Select
-              value={groupBy}
-              onValueChange={(value) =>
-                setGroupBy(
-                  value as "minute" | "hour" | "day" | "week" | "month",
-                )
-              }
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="minute">1 Minute</SelectItem>
-                <SelectItem value="hour">1 Hour</SelectItem>
-                <SelectItem value="day">1 Day</SelectItem>
-                <SelectItem value="week">7 Days</SelectItem>
-                <SelectItem value="month">1 Month</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <ThemedTimeFilterShadCN
-            onDateChange={(date) => date && setDateRange(date)}
-            initialDateRange={dateRange}
-            isLive={false}
-          />
-        </div>
-
-        {/* Analytics Charts */}
-        <WalletAnalyticsCharts
-          deposits={timeSeriesData?.deposits || []}
-          spend={timeSeriesData?.spend || []}
-          isLoading={timeSeriesLoading}
-          error={
-            timeSeriesError instanceof Error ? timeSeriesError.message : null
-          }
-        />
-
-        {/* Search Bar with Summary */}
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="flex min-h-0 flex-1 flex-col"
+      >
+        {/* Dashboard Tab */}
+        <TabsContent
+          value="dashboard"
+          className="mt-0 flex min-h-0 flex-1 flex-col gap-3 data-[state=inactive]:hidden"
+        >
+          {/* Search Bar with Summary and Tabs */}
         <div className="flex shrink-0 items-center justify-between gap-4">
           <form
             className="flex flex-1 items-center gap-2"
@@ -623,6 +593,12 @@ export default function AdminWallet() {
               </>
             )}
           </div>
+
+          {/* Tabs Navigation */}
+          <TabsList>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
         </div>
 
         {/* Organizations Table */}
@@ -1240,7 +1216,63 @@ export default function AdminWallet() {
             </table>
           )}
         </div>
-      </div>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent
+          value="analytics"
+          className="mt-0 flex min-h-0 flex-1 flex-col gap-3 data-[state=inactive]:hidden"
+        >
+          {/* Controls Row with Tabs */}
+          <div className="flex shrink-0 items-center gap-4">
+            <div className="flex flex-1 items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Label className="text-sm text-muted-foreground">Group By</Label>
+                <Select
+                  value={groupBy}
+                  onValueChange={(value) =>
+                    setGroupBy(
+                      value as "minute" | "hour" | "day" | "week" | "month",
+                    )
+                  }
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="minute">1 Minute</SelectItem>
+                    <SelectItem value="hour">1 Hour</SelectItem>
+                    <SelectItem value="day">1 Day</SelectItem>
+                    <SelectItem value="week">7 Days</SelectItem>
+                    <SelectItem value="month">1 Month</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ThemedTimeFilterShadCN
+                onDateChange={(date) => date && setDateRange(date)}
+                initialDateRange={dateRange}
+                isLive={false}
+              />
+
+              {/* Tabs Navigation */}
+              <TabsList className="ml-auto">
+                <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+
+          {/* Analytics Charts */}
+          <WalletAnalyticsCharts
+            deposits={timeSeriesData?.deposits || []}
+            spend={timeSeriesData?.spend || []}
+            isLoading={timeSeriesLoading}
+            error={
+              timeSeriesError instanceof Error ? timeSeriesError.message : null
+            }
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
