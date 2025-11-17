@@ -9,7 +9,7 @@
     "worker"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build:web": "yarn workspace helicone build",

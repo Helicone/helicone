@@ -2,7 +2,8 @@
 # docker build -t valhalla .. -f dockerfile
 
 # Use an official Node.js runtime as the base image
-FROM --platform=linux/amd64 node:20
+# Updated to Node 22 to support @peculiar/x509@1.14.2 dependency requirements
+FROM --platform=linux/amd64 node:22
 
 WORKDIR /usr/src/app/valhalla/jawn
 
