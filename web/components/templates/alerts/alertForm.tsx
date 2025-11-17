@@ -109,6 +109,9 @@ const AlertFormContent = (props: AlertFormProps) => {
     useState<AlertAggregation>(
       ((initialValues as any)?.aggregation as AlertAggregation) || "sum",
     );
+  const [selectedPercentile, setSelectedPercentile] = useState<string>(
+    (initialValues as any)?.percentile?.toString() || "95",
+  );
   const [groupingOpen, setGroupingOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(true);
@@ -249,8 +252,8 @@ const AlertFormContent = (props: AlertFormProps) => {
         return;
       }
       const percentileNum = Number(alertPercentile);
-      if (isNaN(percentileNum) || percentileNum < 0 || percentileNum > 100) {
-        setNotification("Please enter a valid percentile (0-100)", "error");
+      if (isNaN(percentileNum) || percentileNum < 0 || percentileNum > 99.9) {
+        setNotification("Please enter a valid percentile (0-99.9)", "error");
         return;
       }
       percentileValue = percentileNum;
@@ -310,7 +313,7 @@ const AlertFormContent = (props: AlertFormProps) => {
   return (
     <form
       onSubmit={handleCreateAlert}
-      className="flex h-[80vh] w-full max-w-[600px] flex-col sm:w-[600px]"
+      className="flex max-h-[80vh] w-full max-w-[600px] flex-col sm:w-[600px]"
     >
       <div className="flex flex-shrink-0 items-center pb-4">
         <div className="flex items-center gap-2">
@@ -322,240 +325,238 @@ const AlertFormContent = (props: AlertFormProps) => {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto rounded-sm border border-border px-4 py-4">
-        <div className="grid grid-cols-4 gap-4">
-          <div className="col-span-4 w-full space-y-3">
-            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-              Basic Information
-            </h2>
-            <div className="grid grid-cols-4 gap-4">
-              <div className="col-span-4 w-full space-y-1.5 text-sm">
-                <label
-                  htmlFor="alert-name"
-                  className="text-gray-500 dark:text-gray-200"
-                >
-                  Name
-                </label>
-                <Input
-                  type="text"
-                  name="alert-name"
-                  id="alert-name"
-                  required
-                  defaultValue={initialValues?.name || ""}
-                  placeholder="Alert Name"
-                />
-              </div>
-
-              <div className="col-span-2 w-full space-y-1.5 text-sm">
-                <label
-                  htmlFor="alert-metric"
-                  className="text-gray-500 dark:text-gray-200"
-                >
-                  Metric
-                </label>
-                <Select
-                  value={selectedMetric}
-                  defaultValue="response.status"
-                  onValueChange={(values: string) => {
-                    setSelectedMetric(values as AlertMetric);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a metric" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ALERT_METRICS.map((metric) => {
-                      const metricLabels: Record<AlertMetric, string> = {
-                        "response.status": "Status (Error Rate)",
-                        cost: "Cost",
-                        latency: "Latency (ms)",
-                        total_tokens: "Total Tokens",
-                        prompt_tokens: "Prompt Tokens",
-                        completion_tokens: "Completion Tokens",
-                        prompt_cache_read_tokens: "Prompt Cache Read Tokens",
-                        prompt_cache_write_tokens: "Prompt Cache Write Tokens",
-                        count: "Count",
-                      };
-
-                      return (
-                        <SelectItem value={metric} key={metric}>
-                          {metricLabels[metric]}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="col-span-2 w-full space-y-1.5 text-sm">
-                <label
-                  htmlFor="alert-threshold"
-                  className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-                >
-                  Threshold
-                  <Tooltip
-                    title={
-                      selectedMetric === "response.status"
-                        ? "Specify the percentage at which the alert should be triggered. For instance, entering '10%' will trigger an alert when the metric exceeds 10% of the set value."
-                        : selectedMetric === "cost"
-                          ? "Specify the amount at which the alert should be triggered. For instance, entering '10' will trigger an alert when the metric exceeds $10."
-                          : "Specify the value at which the alert should be triggered."
-                    }
-                  >
-                    <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                  </Tooltip>
-                </label>
-                <div className="relative">
-                  {selectedMetric === "cost" && (
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <span
-                        className="text-gray-500 sm:text-sm"
-                        id="price-currency"
-                      >
-                        $
-                      </span>
-                    </div>
-                  )}
-                  <Input
-                    type="number"
-                    name="alert-threshold"
-                    id="alert-threshold"
-                    className={clsx(
-                      selectedMetric === "response.status" && "pr-8",
-                      selectedMetric === "cost" && "pl-8",
-                    )}
-                    min={selectedMetric === "response.status" ? 1 : 0.01}
-                    defaultValue={initialValues?.threshold.toString()}
-                    step={0.01}
-                    required
-                  />
-                  {selectedMetric === "response.status" && (
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                      <span
-                        className="text-gray-500 sm:text-sm"
-                        id="price-currency"
-                      >
-                        %
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="col-span-2 w-full space-y-1.5 text-sm">
-                <label
-                  htmlFor="time-frame"
-                  className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-                >
-                  Time Frame{" "}
-                  <Tooltip title="Define the time frame over which the metric is evaluated. An alert will be triggered if the threshold is exceeded within this period.">
-                    <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                  </Tooltip>
-                </label>
-                <Select
-                  value={selectedTimeWindow}
-                  onValueChange={(values: string) => {
-                    setSelectedTimeWindow(values);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a time frame" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(alertTimeWindows).map(
-                      ([key, value], idx) => {
-                        return (
-                          <SelectItem value={value.toString()} key={idx}>
-                            {key}
-                          </SelectItem>
-                        );
-                      },
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+        <div className="flex flex-col gap-6">
+          {/* Alert Name */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="alert-name"
+              className="text-sm text-gray-500 dark:text-gray-200"
+            >
+              Alert Name
+            </label>
+            <Input
+              type="text"
+              name="alert-name"
+              id="alert-name"
+              required
+              defaultValue={initialValues?.name || ""}
+              placeholder="My Alert"
+            />
           </div>
 
-          {/* Advanced Configuration */}
-          <div className="col-span-4 w-full space-y-3 rounded-sm border border-border bg-background/80 px-4 pb-3 pt-2">
-            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-              <CollapsibleTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="flex w-full items-center justify-between p-0 text-base font-semibold text-gray-900 hover:bg-transparent dark:text-gray-100"
-                >
-                  <span className="text-base font-semibold">
-                    Advanced Configuration
-                  </span>
-                  <ChevronDown
-                    className={clsx(
-                      "h-4 w-4 transition-transform",
-                      advancedOpen && "rotate-180",
-                    )}
-                  />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="grid grid-cols-4 gap-4 pb-0">
-                <div className="col-span-2 mt-4 w-full space-y-1.5 text-sm">
-                  <label
-                    htmlFor="min-requests"
-                    className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-                  >
-                    Min Requests (optional){" "}
-                    <Tooltip title="Define this to set a minimum number of requests for this alert to be triggered.">
-                      <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                    </Tooltip>
-                  </label>
-                  <Input
-                    type="number"
-                    name="min-requests"
-                    id="min-requests"
-                    defaultValue={
-                      initialValues?.minimum_request_count?.toString() || "0"
+          {/* Alert Condition */}
+          <div className="flex flex-col gap-3 rounded-md border border-border bg-muted/20 p-4">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+              <span className="text-muted-foreground whitespace-nowrap">When</span>
+              <Select
+                value={selectedMetric}
+                defaultValue="response.status"
+                onValueChange={(values: string) => {
+                  setSelectedMetric(values as AlertMetric);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[160px] border-0 border-b border-border rounded-none bg-transparent px-2 focus:ring-0 focus:border-foreground shadow-none text-foreground">
+                  <SelectValue placeholder="Select metric" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ALERT_METRICS.map((metric) => {
+                    const metricLabels: Record<AlertMetric, string> = {
+                      "response.status": "Error Rate",
+                      cost: "Cost",
+                      latency: "Latency",
+                      total_tokens: "Total Tokens",
+                      prompt_tokens: "Prompt Tokens",
+                      completion_tokens: "Completion Tokens",
+                      prompt_cache_read_tokens: "Prompt Cache Read Tokens",
+                      prompt_cache_write_tokens: "Prompt Cache Write Tokens",
+                      count: "Count",
+                    };
+
+                    return (
+                      <SelectItem value={metric} key={metric}>
+                        {metricLabels[metric]}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <span className="text-muted-foreground whitespace-nowrap">is above</span>
+              <div className="relative">
+                {selectedMetric === "cost" && (
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span className="text-gray-500 text-sm">$</span>
+                  </div>
+                )}
+                <Input
+                  type="number"
+                  name="alert-threshold"
+                  id="alert-threshold"
+                  className={clsx(
+                    "h-9 w-20 border-0 border-b border-border rounded-none bg-transparent px-2 focus-visible:ring-0 focus-visible:border-foreground text-center",
+                    selectedMetric === "response.status" && "pr-8",
+                    selectedMetric === "cost" && "pl-7",
+                    selectedMetric === "latency" && "pr-10",
+                  )}
+                  min={selectedMetric === "response.status" ? 1 : 0.01}
+                  defaultValue={initialValues?.threshold.toString()}
+                  step={0.01}
+                  required
+                />
+                {selectedMetric === "response.status" && (
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <span className="text-gray-500 text-sm">%</span>
+                  </div>
+                )}
+                {selectedMetric === "latency" && (
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <span className="text-gray-500 text-sm">ms</span>
+                  </div>
+                )}
+              </div>
+              <span className="text-muted-foreground whitespace-nowrap">for</span>
+              <Select
+                value={selectedTimeWindow}
+                onValueChange={(values: string) => {
+                  setSelectedTimeWindow(values);
+                }}
+              >
+                <SelectTrigger className="h-9 w-[120px] border-0 border-b border-border rounded-none bg-transparent px-2 focus:ring-0 focus:border-foreground shadow-none text-foreground">
+                  <SelectValue placeholder="Time" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(alertTimeWindows).map(([key, value], idx) => {
+                    return (
+                      <SelectItem value={value.toString()} key={idx}>
+                        {key}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedMetric !== "response.status" &&
+              selectedMetric !== "count" && (
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+                  <span className="text-muted-foreground whitespace-nowrap">using</span>
+                  <Select
+                    value={selectedAggregation}
+                    onValueChange={(value) =>
+                      setSelectedAggregation(value as AlertAggregation)
                     }
-                    min={0}
-                    step={1}
-                  />
-                </div>
-                <div className="col-span-2 mt-4 w-full space-y-1.5 text-sm">
-                  <label
-                    htmlFor="alert-grouping"
-                    className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
                   >
-                    Grouping (optional){" "}
-                    <Tooltip title="Group alerts by a specific dimension. This allows you to track metrics separately for different groups (e.g., by model, user, provider, or property).">
-                      <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                    </Tooltip>
-                  </label>
-                  <Popover open={groupingOpen} onOpenChange={setGroupingOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={groupingOpen}
-                        className="w-full justify-between text-sm font-normal"
+                    <SelectTrigger className="h-9 w-[120px] border-0 border-b border-border rounded-none bg-transparent px-2 focus:ring-0 focus:border-foreground shadow-none text-foreground">
+                      <SelectValue placeholder="Aggregation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALERT_AGGREGATIONS.map((agg) => (
+                        <SelectItem key={agg} value={agg}>
+                          {agg.charAt(0).toUpperCase() + agg.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <span className="text-muted-foreground whitespace-nowrap">aggregation</span>
+                  {selectedAggregation === "percentile" && (
+                    <>
+                      <span className="text-muted-foreground whitespace-nowrap">at</span>
+                      <Select
+                        value={selectedPercentile}
+                        onValueChange={setSelectedPercentile}
                       >
-                        {selectedGrouping
-                          ? groupingOptions.base.find(
-                              (opt) => opt.value === selectedGrouping,
-                            )?.label ||
-                            groupingOptions.properties.find(
-                              (opt) => opt.value === selectedGrouping,
-                            )?.label ||
-                            selectedGrouping
-                          : "Select grouping"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0" align="start">
-                      <Command>
-                        <CommandInput
-                          placeholder="Search grouping..."
-                          className="h-9 text-sm"
-                        />
-                        <CommandEmpty>No grouping found.</CommandEmpty>
-                        <CommandList>
-                          <CommandGroup heading="Default">
-                            {groupingOptions.base.map((option) => (
+                        <SelectTrigger className="h-9 w-[80px] border-0 border-b border-border rounded-none bg-transparent px-2 focus:ring-0 focus:border-foreground shadow-none text-foreground">
+                          <SelectValue placeholder="95th" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="50">50th</SelectItem>
+                          <SelectItem value="75">75th</SelectItem>
+                          <SelectItem value="90">90th</SelectItem>
+                          <SelectItem value="95">95th</SelectItem>
+                          <SelectItem value="99">99th</SelectItem>
+                          <SelectItem value="99.9">99.9th</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <input
+                        type="hidden"
+                        name="alert-percentile"
+                        id="alert-percentile"
+                        value={selectedPercentile}
+                      />
+                      <span className="text-muted-foreground whitespace-nowrap">percentile</span>
+                    </>
+                  )}
+                </div>
+              )}
+
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+              <span className="text-muted-foreground whitespace-nowrap">grouped by</span>
+              <Popover open={groupingOpen} onOpenChange={setGroupingOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={groupingOpen}
+                    className="h-9 w-[160px] justify-between font-normal border-0 border-b border-border rounded-none bg-transparent px-2 hover:bg-transparent hover:border-foreground focus:ring-0 focus:border-foreground shadow-none text-foreground"
+                  >
+                    {selectedGrouping
+                      ? groupingOptions.base.find(
+                          (opt) => opt.value === selectedGrouping,
+                        )?.label ||
+                        groupingOptions.properties.find(
+                          (opt) => opt.value === selectedGrouping,
+                        )?.label ||
+                        selectedGrouping
+                      : "None"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[250px] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search..." className="h-9" />
+                    <CommandEmpty>No grouping found.</CommandEmpty>
+                    <CommandList>
+                      <CommandGroup heading="Standard">
+                        <CommandItem
+                          value="none"
+                          onSelect={() => {
+                            setSelectedGrouping(null);
+                            setGroupingOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={clsx(
+                              "mr-2 h-4 w-4",
+                              !selectedGrouping ? "opacity-100" : "opacity-0",
+                            )}
+                          />
+                          None
+                        </CommandItem>
+                        {groupingOptions.base.map((option) => (
+                          <CommandItem
+                            key={option.value}
+                            value={option.value}
+                            onSelect={() => {
+                              setSelectedGrouping(option.value);
+                              setGroupingOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={clsx(
+                                "mr-2 h-4 w-4",
+                                selectedGrouping === option.value
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                      {groupingOptions.properties.length > 0 && (
+                        <>
+                          <CommandSeparator />
+                          <CommandGroup heading="Custom Properties">
+                            {groupingOptions.properties.map((option) => (
                               <CommandItem
                                 key={option.value}
                                 value={option.value}
@@ -563,7 +564,6 @@ const AlertFormContent = (props: AlertFormProps) => {
                                   setSelectedGrouping(option.value);
                                   setGroupingOpen(false);
                                 }}
-                                className="text-sm"
                               >
                                 <Check
                                   className={clsx(
@@ -577,132 +577,38 @@ const AlertFormContent = (props: AlertFormProps) => {
                               </CommandItem>
                             ))}
                           </CommandGroup>
-                          {groupingOptions.properties.length > 0 && (
-                            <>
-                              <CommandSeparator />
-                              <CommandGroup heading="Properties">
-                                {groupingOptions.properties.map((option) => (
-                                  <CommandItem
-                                    key={option.value}
-                                    value={option.value}
-                                    onSelect={() => {
-                                      setSelectedGrouping(option.value);
-                                      setGroupingOpen(false);
-                                    }}
-                                    className="text-sm"
-                                  >
-                                    <Check
-                                      className={clsx(
-                                        "mr-2 h-4 w-4",
-                                        selectedGrouping === option.value
-                                          ? "opacity-100"
-                                          : "opacity-0",
-                                      )}
-                                    />
-                                    {option.label}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </>
-                          )}
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="col-span-2 w-full space-y-1.5 text-sm">
-                  <label
-                    htmlFor="alert-aggregation"
-                    className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-                  >
-                    Aggregation (optional){" "}
-                    <Tooltip title="Select how to aggregate the metric values. Sum adds all values, Avg calculates average, Min/Max finds the minimum/maximum, and Percentile uses a specific percentile value. Not applicable for Status or Count metrics.">
-                      <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                    </Tooltip>
-                  </label>
-                  {selectedMetric === "response.status" ||
-                  selectedMetric === "count" ? (
-                    <Input
-                      type="text"
-                      value="N/A"
-                      disabled
-                      className="cursor-not-allowed bg-muted"
-                    />
-                  ) : (
-                    <Select
-                      value={selectedAggregation}
-                      onValueChange={(value) =>
-                        setSelectedAggregation(value as AlertAggregation)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select aggregation" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ALERT_AGGREGATIONS.map((agg) => (
-                          <SelectItem key={agg} value={agg}>
-                            {agg.charAt(0).toUpperCase() + agg.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-                {selectedAggregation === "percentile" &&
-                  selectedMetric !== "response.status" &&
-                  selectedMetric !== "count" && (
-                    <div className="col-span-2 w-full space-y-1.5 text-sm">
-                      <label
-                        htmlFor="alert-percentile"
-                        className="flex items-center gap-1 text-gray-500 dark:text-gray-200"
-                      >
-                        Percentile{" "}
-                        <Tooltip title="Specify a percentile (0-100) for the threshold. For example, entering '95' will trigger an alert when the 95th percentile exceeds the threshold value.">
-                          <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                        </Tooltip>
-                      </label>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          name="alert-percentile"
-                          id="alert-percentile"
-                          className="pr-8"
-                          min={0}
-                          max={100}
-                          step={0.01}
-                          defaultValue={
-                            (initialValues as any)?.percentile
-                              ? (initialValues as any).percentile.toString()
-                              : ""
-                          }
-                          placeholder="e.g., 95"
-                        />
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                          <span
-                            className="text-gray-500 sm:text-sm"
-                            id="percentile-currency"
-                          >
-                            %
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                <div className="col-span-4 w-full space-y-1.5">
-                  <label className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-200">
-                    Filter (optional){" "}
-                    <Tooltip title="Add filters to narrow down which requests trigger this alert. For example, filter by specific models, users, or properties.">
-                      <InformationCircleIcon className="inline h-4 w-4 text-gray-500" />
-                    </Tooltip>
-                  </label>
-                  <FilterASTEditor />
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                        </>
+                      )}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <span className="text-muted-foreground">filtered by</span>
+              <FilterASTEditor showTitle={false} />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+              <span className="text-muted-foreground whitespace-nowrap">with at least</span>
+              <Input
+                type="number"
+                name="min-requests"
+                id="min-requests"
+                className="h-9 w-20 border-0 border-b border-border rounded-none bg-transparent px-2 focus-visible:ring-0 focus-visible:border-foreground text-center"
+                defaultValue={
+                  initialValues?.minimum_request_count?.toString() || "0"
+                }
+                min={0}
+                step={1}
+              />
+              <span className="text-muted-foreground whitespace-nowrap">requests</span>
+            </div>
           </div>
 
           {/* Notification */}
-          <div className="col-span-4 w-full space-y-3 rounded-sm border border-border bg-background/80 px-4 pb-3 pt-2">
+          <div className="w-full space-y-3 rounded-md border border-border bg-background/80 px-4 pb-3 pt-2">
             <Collapsible
               open={notificationOpen}
               onOpenChange={setNotificationOpen}

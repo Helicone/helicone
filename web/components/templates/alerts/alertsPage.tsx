@@ -215,34 +215,34 @@ const AlertsPage = () => {
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          className="inline-flex items-center rounded-md bg-muted p-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-30"
+                          className="inline-flex items-center justify-center rounded-md bg-muted p-2 text-xs text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-30"
                           onClick={() => {
                             setEditAlertOpen(true);
                             setSelectedAlert(alert);
                           }}
                         >
-                          <PencilIcon className="h-3 w-3" />
+                          <PencilIcon className="h-4 w-4" />
                         </button>
                         <button
                           type="button"
-                          className="inline-flex items-center rounded-md bg-destructive/10 p-1.5 text-xs text-destructive shadow-sm transition-colors hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-30"
+                          className="inline-flex items-center justify-center rounded-md bg-destructive/10 p-2 text-xs text-destructive shadow-sm transition-colors hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-30"
                           onClick={() => {
                             setDeleteAlertOpen(true);
                             setSelectedAlert(alert);
                           }}
                         >
-                          <TrashIcon className="h-3 w-3" />
+                          <TrashIcon className="h-4 w-4" />
                         </button>
                       </div>
                     ),
                     sortable: false,
-                    minSize: 100,
+                    minSize: 120,
                   },
                   {
                     key: "name",
                     header: "Name",
                     render: (alert) => (
-                      <p className="text-xs font-semibold">{alert.name}</p>
+                      <p className="text-sm font-semibold">{alert.name}</p>
                     ),
                     sortable: true,
                   },
@@ -263,7 +263,7 @@ const AlertsPage = () => {
                     key: "created_at",
                     header: "Created",
                     render: (alert) => (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         {getUSDate(new Date(alert.created_at || ""))}
                       </p>
                     ),
@@ -283,7 +283,7 @@ const AlertsPage = () => {
                     key: undefined,
                     header: "Aggregation",
                     render: (alert) => (
-                      <p className="text-xs">
+                      <p className="text-sm">
                         {formatAggregation(
                           alert.metric,
                           (alert as any).aggregation as AlertAggregation | null,
@@ -296,7 +296,7 @@ const AlertsPage = () => {
                     key: "threshold",
                     header: "Threshold",
                     render: (alert) => (
-                      <p className="text-xs">
+                      <p className="text-sm">
                         {formatThreshold(alert.metric, alert.threshold)}
                       </p>
                     ),
@@ -306,7 +306,7 @@ const AlertsPage = () => {
                     key: undefined,
                     header: "Grouping",
                     render: (alert) => (
-                      <p className="text-xs">
+                      <p className="text-sm">
                         {(alert as any).grouping
                           ? (alert as any).grouping
                           : "—"}
@@ -318,7 +318,7 @@ const AlertsPage = () => {
                     key: "time_window",
                     header: "Time Window",
                     render: (alert) => (
-                      <p className="text-xs">
+                      <p className="text-sm">
                         {formatTimeWindow(alert.time_window)}
                       </p>
                     ),
@@ -328,7 +328,7 @@ const AlertsPage = () => {
                     key: "minimum_request_count",
                     header: "Min Requests",
                     render: (alert) => (
-                      <p className="text-xs">
+                      <p className="text-sm">
                         {alert.minimum_request_count || 0}
                       </p>
                     ),
@@ -338,7 +338,7 @@ const AlertsPage = () => {
                     key: "filter",
                     header: "Filter",
                     render: (alert) => (
-                      <p className="text-xs">{alert.filter ? "Yes" : "No"}</p>
+                      <p className="text-sm">{alert.filter ? "Yes" : "No"}</p>
                     ),
                     sortable: false,
                   },
@@ -346,7 +346,7 @@ const AlertsPage = () => {
                     key: "emails",
                     header: "Emails",
                     render: (alert) => (
-                      <div className="flex text-xs">
+                      <div className="flex text-sm">
                         {alert.emails.join(", ")}
                       </div>
                     ),
@@ -357,7 +357,7 @@ const AlertsPage = () => {
                     key: "slack_channels",
                     header: "Slack Channels",
                     render: (alert) => (
-                      <div className="flex text-xs">
+                      <div className="flex text-sm">
                         {alert.slack_channels
                           .map(
                             (channel) =>
@@ -423,7 +423,7 @@ const AlertsPage = () => {
                       key: "alert_name",
                       header: "Name",
                       render: (history) => (
-                        <p className="text-xs font-semibold">
+                        <p className="text-sm font-semibold">
                           {history.alert_name}
                         </p>
                       ),
@@ -433,7 +433,7 @@ const AlertsPage = () => {
                       key: "alert_start_time",
                       header: "Start Time",
                       render: (history) => (
-                        <p className="text-xs">
+                        <p className="text-sm">
                           {getUSDate(new Date(history.alert_start_time))}
                         </p>
                       ),
@@ -443,7 +443,7 @@ const AlertsPage = () => {
                       key: "alert_end_time",
                       header: "End Time",
                       render: (history) => (
-                        <p className="text-xs">
+                        <p className="text-sm">
                           {history.alert_end_time
                             ? getUSDate(new Date(history.alert_end_time))
                             : "—"}
@@ -455,7 +455,7 @@ const AlertsPage = () => {
                       key: "triggered_value",
                       header: "Trigger",
                       render: (history) => (
-                        <p className="text-xs">
+                        <p className="text-sm">
                           {formatThreshold(
                             history.alert_metric,
                             Number(history.triggered_value),

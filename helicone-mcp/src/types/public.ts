@@ -3371,7 +3371,7 @@ Json: JsonObject;
       /** Format: double */
       priority?: number;
       /** @enum {string} */
-      quantization?: "fp4" | "fp8" | "fp16" | "bf16";
+      quantization?: "fp4" | "fp8" | "fp16" | "bf16" | "int4";
       responseFormat?: components["schemas"]["ResponseFormat"];
       requireExplicitRouting?: boolean;
       providerModelIdAliases?: string[];

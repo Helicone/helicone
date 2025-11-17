@@ -9334,7 +9334,8 @@
 							"fp4",
 							"fp8",
 							"fp16",
-							"bf16"
+							"bf16",
+							"int4"
 						]
 					},
 					"responseFormat": {
