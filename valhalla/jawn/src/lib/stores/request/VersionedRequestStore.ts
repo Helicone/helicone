@@ -149,6 +149,7 @@ export class VersionedRequestStore {
         cache_reference_id: row.cache_reference_id,
         is_passthrough_billing: row.is_passthrough_billing,
         ai_gateway_body_mapping: row.ai_gateway_body_mapping,
+        storage_location: row.storage_location,
       },
     ]);
 
