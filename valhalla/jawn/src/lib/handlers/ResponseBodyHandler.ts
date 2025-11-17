@@ -80,7 +80,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           processedResponseBody.data.statusOverride;
       }
       context.processedLog.response.model = getModelFromResponse(
-        processedResponseBody.data?.processedBody,
+        processedResponseBody.data?.processedBody
       );
 
       const definedModel =
@@ -88,7 +88,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           context.processedLog.request.model,
           context.processedLog.response.model,
           context.message.heliconeMeta.modelOverride,
-          this.getModelFromPath(context.message.log.request.path),
+          this.getModelFromPath(context.message.log.request.path)
         ) ?? undefined;
 
       if (typeof context.processedLog.response.model !== "string") {
@@ -97,14 +97,14 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       const responseBodyFinal = this.handleOmitResponseBody(
         context,
         processedResponseBody,
-        context.processedLog.response.model,
+        context.processedLog.response.model
       );
 
       context.processedLog.response.body = responseBodyFinal;
 
       const { responseModel, model } = this.determineAssistantModel(
         responseBodyFinal,
-        definedModel,
+        definedModel
       );
 
       context.processedLog.response.model = responseModel;
@@ -154,7 +154,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       const provider =
         gatewayProvider ??
         heliconeProviderToModelProviderName(
-          context.message.log.request.provider,
+          context.message.log.request.provider
         );
       const rawResponse = context.rawLog.rawResponseBody;
       const isAIGateway =
@@ -177,7 +177,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           });
           if (parsedUsage.error !== null) {
             console.error(
-              `Error parsing structured usage for provider ${provider}: ${parsedUsage.error}`,
+              `Error parsing structured usage for provider ${provider}: ${parsedUsage.error}`
             );
           } else if (parsedUsage.data) {
             context.usage = parsedUsage.data ?? null;
@@ -202,7 +202,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return await super.handle(context);
     } catch (error: any) {
       return err(
-        `Error processing response body: ${error}, Context: ${this.constructor.name}`,
+        `Error processing response body: ${error}, Context: ${this.constructor.name}`
       );
     }
   }
@@ -232,7 +232,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   private handleOmitResponseBody(
     context: HandlerContext,
     processedResponseBody: Result<ParseOutput, string>,
-    responseModel: any,
+    responseModel: any
   ) {
     const omitResponseLog = context.message.heliconeMeta.omitResponseLog;
 
@@ -242,7 +242,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     ) {
       console.error(
         "Error processing response body",
-        processedResponseBody.error,
+        processedResponseBody.error
       );
 
       return {
@@ -250,21 +250,21 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         parse_response_error: processedResponseBody.error,
         body: omitResponseLog
           ? {
-            model: responseModel, // Put response model here, not calculated model
-          }
+              model: responseModel, // Put response model here, not calculated model
+            }
           : (processedResponseBody.data?.processedBody ?? undefined),
       };
     } else {
       return omitResponseLog
         ? {
-          model: responseModel, // Put response model here, not calculated model
-        }
+            model: responseModel, // Put response model here, not calculated model
+          }
         : (processedResponseBody.data.processedBody ?? undefined);
     }
   }
 
   async processBody(
-    context: HandlerContext,
+    context: HandlerContext
   ): PromiseGenericResult<ParseOutput> {
     const log = context.message.log;
     const isStream =
@@ -296,7 +296,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       responseBody = this.preprocess(
         isStream,
         log.response.status,
-        responseBody,
+        responseBody
       );
       const model = context.processedLog.model;
       const parser = this.getBodyProcessor(
@@ -304,15 +304,14 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         log.request.provider,
         responseBody,
         isAIGateway,
-        model,
+        model
       );
-      const parsedValue = await parser.parse({
+      return await parser.parse({
         responseBody: responseBody,
         requestBody: requestBody ?? "{}",
         requestModel: context.processedLog.request.model,
         modelOverride: context.message.heliconeMeta.modelOverride,
       });
-      return parsedValue;
     } catch (error: any) {
       return err(`Error parsing body: ${error}, ${responseBody}`);
     }
@@ -321,7 +320,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
   preprocess(
     isStream: boolean,
     responseStatus: number,
-    responseBody: string,
+    responseBody: string
   ): string {
     if (isStream && responseStatus === INTERNAL_ERRORS["Cancelled"]) {
       // Remove last line of stream from result
@@ -372,7 +371,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
   private determineAssistantModel(
     responseBody: any,
-    currentModel?: string,
+    currentModel?: string
   ): { responseModel: string; model: string } {
     if (typeof responseBody !== "object" || responseBody === null) {
       return { responseModel: "Unknown", model: "unknown" };
@@ -406,7 +405,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     provider: string,
     responseBody: any,
     isAIGateway: boolean,
-    model?: string,
+    model?: string
   ): IBodyProcessor {
     if (!isStream) {
       if (isAIGateway) {
