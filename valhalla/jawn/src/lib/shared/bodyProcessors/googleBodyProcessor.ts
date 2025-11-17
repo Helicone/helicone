@@ -68,15 +68,12 @@ export class GoogleBodyProcessor implements IBodyProcessor {
 
     const promptTokens = usageMetadataItem?.usageMetadata
       ?.promptTokenCount;
-    console.log('promptTokens:', promptTokens);
     const cachedContentTokens = usageMetadataItem?.usageMetadata
       ?.cachedContentTokenCount;
-    console.log('cachedContentTokens:', cachedContentTokens);
     const adjustedPromptTokens =
       promptTokens !== undefined && cachedContentTokens !== undefined
         ? promptTokens - cachedContentTokens
         : undefined;
-    console.log('adjustedPromptTokens:', adjustedPromptTokens);
 
     return ok({
       processedBody: parsedResponseBody,
