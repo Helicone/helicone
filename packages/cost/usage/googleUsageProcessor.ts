@@ -18,7 +18,7 @@ export class GoogleUsageProcessor implements IUsageProcessor {
         }
         return {
           data: {
-            input: (response.usage.prompt_tokens || response.usage.promptTokens) - (response.usage.prompt_token_details.cached_tokens || 0) || 0,
+            input: (response.usageMetadata.promptTokens || response.usageMetadata.promptTokenCount || 0) - (response.usageMetadata.cachedContentTokenCount || 0),
             output: response.usageMetadata.candidatesTokens || response.usageMetadata.candidatesTokenCount || 0,
           },
           error: null,
