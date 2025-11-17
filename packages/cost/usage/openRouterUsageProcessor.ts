@@ -140,7 +140,6 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     }
 
     const usage = parsedResponse.usage || {};
-    console.log("usage", usage);
 
     // OpenRouter provides direct cost in USD
     const cost = usage.cost;
@@ -191,7 +190,6 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     if (promptAudioTokens > 0 || completionAudioTokens > 0) {
       modelUsage.audio = promptAudioTokens + completionAudioTokens;
     }
-    console.log("usage processor extracted usage", modelUsage);
 
     return modelUsage;
   }
