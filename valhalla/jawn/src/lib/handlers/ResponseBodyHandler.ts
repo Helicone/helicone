@@ -75,7 +75,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
     try {
       const processedResponseBody = await this.processBody(context);
-      console.log("Processed response body:", processedResponseBody);
       if (processedResponseBody.data?.statusOverride) {
         context.message.log.response.status =
           processedResponseBody.data.statusOverride;
@@ -176,7 +175,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
             isStream: context.message.log.request.isStream,
             model: context.processedLog.model ?? "",
           });
-          console.log("Parsed structured usage:", parsedUsage);
           if (parsedUsage.error !== null) {
             console.error(
               `Error parsing structured usage for provider ${provider}: ${parsedUsage.error}`,
@@ -275,7 +273,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     const isAIGateway = log.request.requestReferrer === "ai-gateway";
 
     let responseBody = context.rawLog.rawResponseBody;
-    console.log("responseBody before parsing:", responseBody);
     const requestBody = context.rawLog.rawRequestBody;
 
     if (!responseBody) {
@@ -315,7 +312,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         requestModel: context.processedLog.request.model,
         modelOverride: context.message.heliconeMeta.modelOverride,
       });
-      console.log("Parsed response from Legacy Processor:", parsedValue);
       return parsedValue;
     } catch (error: any) {
       return err(`Error parsing body: ${error}, ${responseBody}`);
