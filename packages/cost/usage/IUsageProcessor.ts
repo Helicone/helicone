@@ -6,7 +6,6 @@ export interface ParseInput {
   requestBody?: string;
   model: string; // used for checking format (e.g claude on vertex/bedrock)
   isStream: boolean;
-  isPassthroughBilling: boolean;
 }
 
 export interface IUsageProcessor {

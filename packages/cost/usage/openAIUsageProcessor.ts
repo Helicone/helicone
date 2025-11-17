@@ -195,6 +195,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     if (usage.cost) {
       modelUsage.cost = usage.cost;
     }
+    console.log("usage processor extracted usage", modelUsage);
 
     return modelUsage;
   }

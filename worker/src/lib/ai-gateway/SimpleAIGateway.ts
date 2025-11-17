@@ -535,8 +535,7 @@ export class SimpleAIGateway {
           const normalizedResponse = toOpenAIStreamResponse(
             response,
             provider,
-            providerModelId,
-            attempt.authType === "ptb"
+            providerModelId
           );
           return ok(normalizedResponse);
         } else {
@@ -544,8 +543,7 @@ export class SimpleAIGateway {
             response,
             provider,
             providerModelId,
-            isStream,
-            attempt.authType === "ptb"
+            isStream
           );
           return ok(normalizedResponse);
         }

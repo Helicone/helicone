@@ -524,7 +524,6 @@ async function log(
             responseBody: rawResponse,
             isStream: proxyRequest.isStream,
             model: attemptModel,
-            isPassthroughBilling: gatewayAttempt.authType === "ptb",
           });
 
           if (usage.data) {
@@ -574,7 +573,6 @@ async function log(
                 responseBody: rawResponse,
                 isStream: proxyRequest.isStream,
                 model: model,
-                isPassthroughBilling: false,
               });
 
               if (usage.data) {

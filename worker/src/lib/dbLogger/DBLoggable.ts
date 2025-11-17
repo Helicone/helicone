@@ -720,7 +720,6 @@ export class DBLoggable {
                   this.request.attempt?.endpoint.modelConfig.responseFormat ??
                   "OPENAI",
                 bodyMapping: bodyMapping ?? "OPENAI",
-                isPassthroughBilling: this.request.attempt?.authType === "ptb",
               });
             } catch (e) {
               console.error("Failed to normalize AI Gateway response:", e);

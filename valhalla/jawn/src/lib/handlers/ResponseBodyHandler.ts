@@ -159,7 +159,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       const rawResponse = context.rawLog.rawResponseBody;
       const isAIGateway =
         context.message.log.request.requestReferrer === "ai-gateway";
-      const isPassthroughBilling = isAIGateway && (context.message.heliconeMeta.isPassthroughBilling ?? false);
 
       if (provider && rawResponse) {
         let usageProcessor: IUsageProcessor | null;
@@ -175,7 +174,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
             responseBody: rawResponse,
             isStream: context.message.log.request.isStream,
             model: context.processedLog.model ?? "",
-            isPassthroughBilling,
           });
           if (parsedUsage.error !== null) {
             console.error(
