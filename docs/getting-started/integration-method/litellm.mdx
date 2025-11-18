@@ -4,6 +4,9 @@ sidebarTitle: "Callbacks"
 description: "Connect Helicone with LiteLLM using callbacks to log and monitor API calls across various AI models."
 "twitter:title": "LiteLLM Integration with Callbacks - Helicone OSS LLM Observability"
 ---
+import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
+
+<LegacyWarning />
 
 [LiteLLM](https://github.com/BerriAI/litellm) is a model I/O library to standardize API calls to Azure, Anthropic, OpenAI, etc. Here's how you can log your LLM API calls to Helicone from LiteLLM using callbacks.
 
@@ -15,7 +18,7 @@ description: "Connect Helicone with LiteLLM using callbacks to log and monitor A
 
 <Warning>
   **System Instructions Limitation:** When using LiteLLM callbacks, system instructions for Gemini and Claude may not appear as `"role": "system"` messages in Helicone logs. This is because LiteLLM processes the request before sending it to Helicone.
-  
+
   For full system instruction support, consider using [proxy-based integration](/getting-started/integration-method/litellm-proxy) instead.
 </Warning>
 

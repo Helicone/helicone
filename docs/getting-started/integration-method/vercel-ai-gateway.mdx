@@ -4,6 +4,9 @@ sidebarTitle: "Vercel AI Gateway"
 description: "Integrate Helicone with Vercel AI Gateway to monitor your multi-provider AI requests with comprehensive logging and analytics."
 "twitter:title": "Vercel AI Gateway Integration - Helicone OSS LLM Observability"
 ---
+import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
+
+<LegacyWarning />
 
 Integrate Helicone with [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to add observability to your multi-provider AI infrastructure. This integration allows you to route Vercel AI Gateway requests through Helicone while maintaining all of Vercel's routing, failover, and provider management capabilities.
 
@@ -30,11 +33,11 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
       ```bash AI Gateway SDK
       npm install @ai-sdk/gateway ai
       ```
-      
+
       ```bash Vercel AI SDK
       npm install @ai-sdk/openai ai
       ```
-      
+
       ```bash OpenAI SDK
       npm install openai
       ```
@@ -66,7 +69,7 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
         }
       });
       ```
-      
+
 
       ```typescript OpenAI TS SDK
       import OpenAI from 'openai';
@@ -151,11 +154,11 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
       temperature: 0.7,
       maxTokens: 100
     });
-    
+
     return result.text;
   }
   ```
-  
+
 
   ```typescript OpenAI TS SDK
   import OpenAI from 'openai';
@@ -177,7 +180,7 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
       temperature: 0.7,
       max_tokens: 100
     });
-    
+
     return response.choices[0].message.content;
   }
   ```
@@ -203,7 +206,7 @@ The `@ai-sdk/gateway` integration (recommended) supports all Vercel AI Gateway f
           temperature=0.7,
           max_tokens=100
       )
-      
+
       return response.choices[0].message.content
   ```
 
