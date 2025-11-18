@@ -226,6 +226,11 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "openrouter-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "how-to-gateway",
     },
   },
