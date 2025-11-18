@@ -30,12 +30,14 @@ import {
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { atLeastZero } from "../utils/helicone_math";
+import { tryToGetSize } from "../../utils/tryGetSize";
 
-type S3Record = {
+type RequestRecord = {
   requestId: string;
   organizationId: string;
   requestBody: string;
   responseBody: string;
+  location: "s3" | "clickhouse";
 };
 
 // Legacy type definitions for deleted tables
@@ -86,7 +88,7 @@ export type BatchPayload = {
   requests: RequestInsert[];
   prompts: PromptRecord[];
   assets: AssetInsert[];
-  s3Records: S3Record[];
+  s3Records: RequestRecord[];
   requestResponseVersionedCH: RequestResponseRMT[];
   cacheMetricCH: CacheMetricSMT[];
   promptInputs: Prompt2025Input[];
@@ -106,6 +108,8 @@ const maxContentLength = 2_000_000;
 const maxResponseLength = 100_000;
 const MAX_CONTENT_LENGTH = maxContentLength * avgTokenLength; // 2 MB
 const MAX_RESPONSE_LENGTH = maxResponseLength * avgTokenLength; // 100k
+
+const S3_MIN_SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB in bytes
 
 function cleanAndTruncateString(text: string, maxLength: number): string {
   return text
@@ -154,6 +158,15 @@ export class LoggingHandler extends AbstractLogHandler {
     });
     // Perform all mappings first and check for failures before updating the batch payload
     try {
+      // rough estimate of size
+      const size = tryToGetSize({
+        b1: context.processedLog.request.body,
+        b2: context.processedLog.response.body,
+      });
+      // if we know size is def less than 10mb use clickhouse otherwise just stick to s3
+      context.storageLocation =
+        size && size <= S3_MIN_SIZE_THRESHOLD ? "clickhouse" : "s3";
+
       const requestMapped = this.mapRequest(context);
       const responseMapped = this.mapResponse(context);
 
@@ -225,7 +238,7 @@ export class LoggingHandler extends AbstractLogHandler {
         });
       }
 
-      if (s3RecordMapped) {
+      if (s3RecordMapped && context.storageLocation === "s3") {
         this.batchPayload.s3Records.push(s3RecordMapped);
       }
 
@@ -288,6 +301,11 @@ export class LoggingHandler extends AbstractLogHandler {
 
   async uploadToS3(): PromiseGenericResult<string> {
     const uploadPromises = this.batchPayload.s3Records.map(async (s3Record) => {
+      if (s3Record.location === "clickhouse") {
+        return ok(
+          `Skipping S3 upload for request ID ${s3Record.requestId} as location is clickhouse`
+        );
+      }
       const key = this.s3Client.getRequestResponseKey(
         s3Record.requestId,
         s3Record.organizationId
@@ -354,7 +372,7 @@ export class LoggingHandler extends AbstractLogHandler {
     }
   }
 
-  mapS3Records(context: HandlerContext): S3Record | null {
+  mapS3Records(context: HandlerContext): RequestRecord | null {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
 
@@ -362,11 +380,12 @@ export class LoggingHandler extends AbstractLogHandler {
       return null;
     }
 
-    const s3Record: S3Record = {
+    const s3Record: RequestRecord = {
       requestId: request.id,
       organizationId: orgParams.id,
       requestBody: context.processedLog.request.body,
       responseBody: context.processedLog.response.body,
+      location: context.storageLocation ?? "s3",
     };
 
     return s3Record;
@@ -542,6 +561,7 @@ export class LoggingHandler extends AbstractLogHandler {
         context.message.heliconeMeta.isPassthroughBilling ?? false,
       ai_gateway_body_mapping:
         context.message.heliconeMeta.aiGatewayBodyMapping ?? "",
+      storage_location: context.storageLocation ?? "s3",
     };
 
     return requestResponseLog;
@@ -604,6 +624,12 @@ export class LoggingHandler extends AbstractLogHandler {
     responseText: string;
   } {
     try {
+      if (context.storageLocation === "clickhouse") {
+        return {
+          requestText: JSON.stringify(context.processedLog.request.body),
+          responseText: JSON.stringify(context.processedLog.response.body),
+        };
+      }
       const mappedContent = heliconeRequestToMappedContent(
         toHeliconeRequest(context)
       );

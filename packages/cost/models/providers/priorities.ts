@@ -30,7 +30,6 @@ export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
   deepinfra: 4,
   deepseek: 4,
   fireworks: 4,
-  "google-ai-studio": 4,
   groq: 4,
   mistral: 4,
   nebius: 4,
@@ -39,6 +38,9 @@ export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
   perplexity: 4,
   vertex: 4,
   xai: 4,
+
+  // Priority 5: Secondary primary providers
+  "google-ai-studio": 5,
 
   // Priority 10: OpenRouter - for fallback only
   openrouter: 10,
