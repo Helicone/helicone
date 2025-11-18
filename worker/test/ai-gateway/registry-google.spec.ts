@@ -11,6 +11,13 @@ const googleAuthExpectations = {
   },
 };
 
+// Define auth expectations for Vertex
+const vertexAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 // Define auth expectations for DeepInfra
 const deepinfraAuthExpectations = {
   headers: {
@@ -55,17 +62,17 @@ describe("Google Registry Tests", () => {
           },
         }));
 
-      it("should auto-select google-ai-studio provider when none specified", () =>
+      it("should auto-select vertex provider when none specified", () =>
         runGatewayTest({
           model: "gemini-2.5-flash",
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
                 response: "success",
-                model: "gemini-2.5-flash",
+                model: "google/gemini-2.5-flash",
                 data: createOpenAIMockResponse("gemini-2.5-flash"),
-                expects: googleAuthExpectations,
+                expects: vertexAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -92,17 +99,17 @@ describe("Google Registry Tests", () => {
           },
         }));
 
-      it("should auto-select google-ai-studio provider when none specified", () =>
+      it("should auto-select vertex provider when none specified", () =>
         runGatewayTest({
           model: "gemini-2.5-flash-lite",
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
                 response: "success",
-                model: "gemini-2.5-flash-lite",
+                model: "google/gemini-2.5-flash-lite",
                 data: createOpenAIMockResponse("gemini-2.5-flash-lite"),
-                expects: googleAuthExpectations,
+                expects: vertexAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -129,17 +136,17 @@ describe("Google Registry Tests", () => {
           },
         }));
 
-      it("should auto-select google-ai-studio provider when none specified", () =>
+      it("should auto-select vertex provider when none specified", () =>
         runGatewayTest({
           model: "gemini-2.5-pro",
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
                 response: "success",
-                model: "gemini-2.5-pro",
+                model: "google/gemini-2.5-pro",
                 data: createOpenAIMockResponse("gemini-2.5-pro"),
-                expects: googleAuthExpectations,
+                expects: vertexAuthExpectations,
               },
             ],
             finalStatus: 200,
