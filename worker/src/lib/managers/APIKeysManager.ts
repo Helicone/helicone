@@ -50,16 +50,4 @@ export class APIKeysManager {
       43200 // 12 hours
     );
   }
-
-  async getAPIKey(apiKeyHash: string): Promise<string | null> {
-    const key = await getFromKVCacheOnly(
-      `api_keys_${apiKeyHash}`,
-      this.env,
-      43200 // 12 hours
-    );
-    if (!key) {
-      return null;
-    }
-    return key;
-  }
 }

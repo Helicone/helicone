@@ -17,6 +17,7 @@ import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
 import { getWalletRouter } from "./walletRouter";
+import { getDORouter } from "./doRouter";
 
 function getAPIRouterV1(
   router: OpenAPIRouterType<
@@ -553,6 +554,9 @@ function getAPIRouterV1(
 
   // Register wallet endpoints
   getWalletRouter(router);
+
+  // Register DO cache endpoints
+  getDORouter(router);
 
   router.options(
     "*",
