@@ -163,7 +163,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       if (provider && rawResponse) {
         let usageProcessor: IUsageProcessor | null;
         if (isAIGateway) {
-          // AI Gateway always uses OpenAI processor for now
+          // AI Gateway always uses OpenAI processor
           usageProcessor = new OpenAIUsageProcessor();
         } else {
           usageProcessor = getUsageProcessor(provider);

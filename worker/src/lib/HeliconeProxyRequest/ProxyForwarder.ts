@@ -35,7 +35,6 @@ import {
 import { WalletManager } from "../managers/WalletManager";
 import { costOfPrompt } from "@helicone-package/cost";
 import { EscrowInfo } from "../ai-gateway/types";
-import { CostBreakdown } from "@helicone-package/cost/models/calculate-cost";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
@@ -528,22 +527,14 @@ async function log(
           });
 
           if (usage.data) {
-            // For OpenRouter, use the direct cost from their response if available
-            if (
-              attemptProvider === "openrouter" &&
-              "cost" in usage.data &&
-              typeof usage.data.cost === "number"
-            ) {
-              // OpenRouter provides total cost in USD directly
-              cost = usage.data.cost;
-            } else {
-              // Use the standard cost calculation from registry
-              const breakdown = modelCostBreakdownFromRegistry({
-                modelUsage: usage.data,
-                providerModelId: attemptModel,
-                provider: attemptProvider,
-              });
-              cost = breakdown?.totalCost;
+            const breakdown = modelCostBreakdownFromRegistry({
+              modelUsage: usage.data,
+              providerModelId: attemptModel,
+              provider: attemptProvider,
+            });
+
+            if (breakdown) {
+              cost = breakdown.totalCost;
             }
           } else {
             console.error(
