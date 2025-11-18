@@ -2054,6 +2054,77 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemini-3": {
+    "gemini-3-pro-preview:google-ai-studio": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "gemini-3-pro-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-preview:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "google/gemini-3-pro-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-preview:vertex": {
+      "context": 1048576,
+      "crossRegion": true,
+      "maxTokens": 65536,
+      "modelId": "gemini-3-pro-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "google/gemma": {
     "gemma2-9b-it:chutes": {
       "context": 8192,
@@ -4932,6 +5003,11 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "google/gemini-3": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
   "google/gemma": [
     "chutes",
     "openrouter",
@@ -6108,6 +6184,39 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "google/gemini-3": {
+    "google-ai-studio": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "cacheStoragePerHour": 0.0000045,
+        "image": 0.00516,
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000211,
+        "output": 0.00001266,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "cacheStoragePerHour": 0.0000045,
+        "image": 0.00516,
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+    ],
+  },
   "google/gemma": {
     "chutes": [
       {
@@ -6798,6 +6907,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gemini-3-pro-preview",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "gemma-3-12b-it",
       "providers": [
         "deepinfra",
@@ -7250,7 +7367,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "fireworks",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "google-ai-studio",
     },
     {
@@ -7278,11 +7395,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 52,
+      "modelCount": 53,
       "provider": "openrouter",
     },
     {
-      "modelCount": 14,
+      "modelCount": 15,
       "provider": "vertex",
     },
     {
@@ -7315,6 +7432,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
+    "gemini-3-pro-preview",
     "gemma-3-12b-it",
     "gemma2-9b-it",
     "glm-4.6",
@@ -7382,9 +7500,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 214,
-  "totalModelProviderConfigs": 214,
-  "totalModelsWithPtb": 81,
+  "totalEndpoints": 217,
+  "totalModelProviderConfigs": 217,
+  "totalModelsWithPtb": 82,
   "totalProviders": 19,
 }
 `;
