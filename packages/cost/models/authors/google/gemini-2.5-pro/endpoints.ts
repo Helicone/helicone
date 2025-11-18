@@ -12,7 +12,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000125,
         output: 0.00001,
-        image: 0.00516,
         cacheMultipliers: {
           cachedInput: 0.25,
           write5m: 1.0,
@@ -23,7 +22,6 @@ export const endpoints = {
         threshold: 200000,
         input: 0.0000025,
         output: 0.000015,
-        image: 0.00516,
       },
     ],
     contextLength: 1048576,
@@ -60,7 +58,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000125,
         output: 0.00001,
-        image: 0.00516,
         cacheMultipliers: {
           cachedInput: 0.25,
           write5m: 1.0,
@@ -71,7 +68,6 @@ export const endpoints = {
         threshold: 200000,
         input: 0.0000025,
         output: 0.000015,
-        image: 0.00516,
       },
     ],
     contextLength: 1048576,

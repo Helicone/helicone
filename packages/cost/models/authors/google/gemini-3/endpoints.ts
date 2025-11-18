@@ -12,7 +12,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.000002, // $2/1M tokens
         output: 0.000012, // $12/1M tokens
-        image: 0.00516,
         cacheMultipliers: {
           cachedInput: 0.1, // $0.2/1M = 10% of input
         },
@@ -53,7 +52,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.000002, // $2/1M tokens
         output: 0.000012, // $12/1M tokens
-        image: 0.00516,
         cacheMultipliers: {
           cachedInput: 0.1, // $0.2/1M = 10% of input
         },
