@@ -20,21 +20,21 @@ describe("Perplexity Model Registry", () => {
     });
 
     it("should have correct author for all models", () => {
-      Object.values(perplexityModels).forEach((model: ModelConfig) => {
-        expect(model.author).toBe("perplexity");
+      Object.values(perplexityModels).forEach((model) => {
+        expect((model as ModelConfig).author).toBe("perplexity");
       });
     });
 
     it("should have GPT tokenizer for all models", () => {
-      Object.values(perplexityModels).forEach((model: ModelConfig) => {
-        expect(model.tokenizer).toBe("GPT");
+      Object.values(perplexityModels).forEach((model) => {
+        expect((model as ModelConfig).tokenizer).toBe("GPT");
       });
     });
 
     it("should have text input/output modality", () => {
-      Object.values(perplexityModels).forEach((model: ModelConfig) => {
-        expect(model.modality.inputs).toContain("text");
-        expect(model.modality.outputs).toContain("text");
+      Object.values(perplexityModels).forEach((model) => {
+        expect((model as ModelConfig).modality.inputs).toContain("text");
+        expect((model as ModelConfig).modality.outputs).toContain("text");
       });
     });
 
@@ -47,8 +47,8 @@ describe("Perplexity Model Registry", () => {
     });
 
     it("should have max output tokens", () => {
-      Object.values(perplexityModels).forEach((model: ModelConfig) => {
-        expect(model.maxOutputTokens).toBe(4096);
+      Object.values(perplexityModels).forEach((model) => {
+        expect((model as ModelConfig).maxOutputTokens).toBe(4096);
       });
     });
   });
@@ -65,15 +65,15 @@ describe("Perplexity Model Registry", () => {
     });
 
     it("should have PTB enabled for all endpoints", () => {
-      Object.values(perplexityEndpoints).forEach((endpoint: ModelProviderConfig) => {
-        expect(endpoint.ptbEnabled).toBe(true);
+      Object.values(perplexityEndpoints).forEach((endpoint) => {
+        expect((endpoint as ModelProviderConfig).ptbEnabled).toBe(true);
       });
     });
 
     it("should have perplexity provider for all endpoints", () => {
-      Object.values(perplexityEndpoints).forEach((endpoint: ModelProviderConfig) => {
-        expect(endpoint.provider).toBe("perplexity");
-        expect(endpoint.author).toBe("perplexity");
+      Object.values(perplexityEndpoints).forEach((endpoint) => {
+        expect((endpoint as ModelProviderConfig).provider).toBe("perplexity");
+        expect((endpoint as ModelProviderConfig).author).toBe("perplexity");
       });
     });
 
@@ -86,17 +86,17 @@ describe("Perplexity Model Registry", () => {
     });
 
     it("should have wildcard endpoint config", () => {
-      Object.values(perplexityEndpoints).forEach((endpoint: ModelProviderConfig) => {
-        expect(endpoint.endpointConfigs).toHaveProperty("*");
+      Object.values(perplexityEndpoints).forEach((endpoint) => {
+        expect((endpoint as ModelProviderConfig).endpointConfigs).toHaveProperty("*");
       });
     });
 
     it("should support standard parameters", () => {
       const standardParams = ["max_tokens", "temperature", "top_p", "frequency_penalty", "response_format", "stop"];
 
-      Object.values(perplexityEndpoints).forEach((endpoint: ModelProviderConfig) => {
+      Object.values(perplexityEndpoints).forEach((endpoint) => {
         standardParams.forEach((param) => {
-          expect(endpoint.supportedParameters).toContain(param);
+          expect((endpoint as ModelProviderConfig).supportedParameters).toContain(param);
         });
       });
     });
@@ -115,15 +115,17 @@ describe("Perplexity Model Registry", () => {
 
   describe("Pricing Configuration", () => {
     it("should have pricing defined for all endpoints", () => {
-      Object.values(perplexityEndpoints).forEach((endpoint: ModelProviderConfig) => {
-        expect(endpoint.pricing).toBeDefined();
-        expect(endpoint.pricing.length).toBeGreaterThan(0);
+      Object.values(perplexityEndpoints).forEach((endpoint) => {
+        const ep = endpoint as ModelProviderConfig;
+        expect(ep.pricing).toBeDefined();
+        expect(ep.pricing.length).toBeGreaterThan(0);
       });
     });
 
     it("should have correct pricing structure", () => {
-      Object.values(perplexityEndpoints).forEach((endpoint: ModelProviderConfig) => {
-        const pricing = endpoint.pricing[0];
+      Object.values(perplexityEndpoints).forEach((endpoint) => {
+        const ep = endpoint as ModelProviderConfig;
+        const pricing = ep.pricing[0];
         expect(pricing.threshold).toBe(0);
         expect(pricing.input).toBeGreaterThan(0);
         expect(pricing.output).toBeGreaterThan(0);
@@ -171,8 +173,9 @@ describe("Perplexity Model Registry", () => {
     });
 
     it("should have zero cost for audio and image", () => {
-      Object.values(perplexityEndpoints).forEach((endpoint: ModelProviderConfig) => {
-        const pricing = endpoint.pricing[0];
+      Object.values(perplexityEndpoints).forEach((endpoint) => {
+        const ep = endpoint as ModelProviderConfig;
+        const pricing = ep.pricing[0];
         expect(pricing.audio).toBe(0);
         expect(pricing.image).toBe(0);
       });
@@ -209,10 +212,11 @@ describe("Perplexity Model Registry", () => {
       // Input: 1M * $0.000001 = $1.00
       // Output: 1M * $0.000001 = $1.00
       // Requests: 1000 * $0.005 = $5.00
-      expect(breakdown.inputCost).toBe(1.0);
-      expect(breakdown.outputCost).toBe(1.0);
-      expect(breakdown.requestCost).toBe(5.0);
-      expect(breakdown.totalCost).toBe(7.0);
+      expect(breakdown).toBeDefined();
+      expect(breakdown?.inputCost).toBe(1.0);
+      expect(breakdown?.outputCost).toBe(1.0);
+      expect(breakdown?.requestCost).toBe(5.0);
+      expect(breakdown?.totalCost).toBe(7.0);
     });
 
     it("should calculate cost correctly for sonar-pro", () => {
@@ -231,10 +235,11 @@ describe("Perplexity Model Registry", () => {
       // Input: 1M * $0.000003 = $3.00
       // Output: 1M * $0.000015 = $15.00
       // Requests: 1000 * $0.006 = $6.00
-      expect(breakdown.inputCost).toBe(3.0);
-      expect(breakdown.outputCost).toBe(15.0);
-      expect(breakdown.requestCost).toBe(6.0);
-      expect(breakdown.totalCost).toBe(24.0);
+      expect(breakdown).toBeDefined();
+      expect(breakdown?.inputCost).toBe(3.0);
+      expect(breakdown?.outputCost).toBe(15.0);
+      expect(breakdown?.requestCost).toBe(6.0);
+      expect(breakdown?.totalCost).toBe(24.0);
     });
 
     it("should calculate cost with web search", () => {
@@ -255,11 +260,12 @@ describe("Perplexity Model Registry", () => {
       // Output: 100K * $0.000001 = $0.10
       // Requests: 100 * $0.005 = $0.50
       // Web search: 100 * $0.005 = $0.50
-      expect(breakdown.inputCost).toBe(0.1);
-      expect(breakdown.outputCost).toBe(0.1);
-      expect(breakdown.requestCost).toBe(0.5);
-      expect(breakdown.webSearchCost).toBe(0.5);
-      expect(breakdown.totalCost).toBe(1.2);
+      expect(breakdown).toBeDefined();
+      expect(breakdown?.inputCost).toBeCloseTo(0.1, 10);
+      expect(breakdown?.outputCost).toBeCloseTo(0.1, 10);
+      expect(breakdown?.requestCost).toBeCloseTo(0.5, 10);
+      expect(breakdown?.webSearchCost).toBeCloseTo(0.5, 10);
+      expect(breakdown?.totalCost).toBeCloseTo(1.2, 10);
     });
 
     it("should handle zero usage", () => {
@@ -274,24 +280,27 @@ describe("Perplexity Model Registry", () => {
         requestCount: 0,
       });
 
-      expect(breakdown.totalCost).toBe(0);
+      expect(breakdown).toBeDefined();
+      expect(breakdown?.totalCost).toBe(0);
     });
   });
 
   describe("Model Context Lengths", () => {
     it("should match endpoint context lengths to model definitions", () => {
-      Object.entries(perplexityEndpoints).forEach(([key, endpoint]: [string, ModelProviderConfig]) => {
+      Object.entries(perplexityEndpoints).forEach(([key, endpoint]) => {
+        const ep = endpoint as ModelProviderConfig;
         const modelName = key.split(":")[0] as keyof typeof perplexityModels;
         const model = perplexityModels[modelName];
-        expect(endpoint.contextLength).toBe(model.contextLength);
+        expect(ep.contextLength).toBe(model.contextLength);
       });
     });
 
     it("should match max completion tokens to model definitions", () => {
-      Object.entries(perplexityEndpoints).forEach(([key, endpoint]: [string, ModelProviderConfig]) => {
+      Object.entries(perplexityEndpoints).forEach(([key, endpoint]) => {
+        const ep = endpoint as ModelProviderConfig;
         const modelName = key.split(":")[0] as keyof typeof perplexityModels;
         const model = perplexityModels[modelName];
-        expect(endpoint.maxCompletionTokens).toBe(model.maxOutputTokens);
+        expect(ep.maxCompletionTokens).toBe(model.maxOutputTokens);
       });
     });
   });
@@ -309,14 +318,15 @@ describe("Perplexity Model Registry", () => {
     });
 
     it("should have descriptions for all models", () => {
-      Object.values(perplexityModels).forEach((model: ModelConfig) => {
-        expect(model.description).toBeDefined();
-        expect(model.description.length).toBeGreaterThan(0);
+      Object.values(perplexityModels).forEach((model) => {
+        const m = model as ModelConfig;
+        expect(m.description).toBeDefined();
+        expect(m.description.length).toBeGreaterThan(0);
       });
     });
 
     it("should have unique names for all models", () => {
-      const names = Object.values(perplexityModels).map((m: ModelConfig) => m.name);
+      const names = Object.values(perplexityModels).map((m) => (m as ModelConfig).name);
       const uniqueNames = new Set(names);
       expect(uniqueNames.size).toBe(names.length);
     });
