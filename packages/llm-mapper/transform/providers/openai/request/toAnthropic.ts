@@ -48,6 +48,12 @@ export function toAnthropic(
     antBody.system = system;
   }
 
+  if (antBody.messages.length === 0) {
+    throw new Error(
+      "Request with Anthropic models must contain at least one non-system message."
+    );
+  }
+
   const user_id =
     openAIBody.safety_identifier ||
     openAIBody.prompt_cache_key ||

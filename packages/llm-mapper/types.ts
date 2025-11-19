@@ -390,4 +390,5 @@ export interface HeliconeRequest {
   updated_at?: string;
   request_referrer?: string | null;
   ai_gateway_body_mapping: string | null;
+  storage_location?: string;
 }
