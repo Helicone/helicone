@@ -6,15 +6,16 @@ jest.mock("../../../cost/auth/gcpServiceAccountAuth");
 
 describe("VertexProvider", () => {
   const provider = new VertexProvider();
+  const mockedGetGoogleAccessToken = jest.mocked(getGoogleAccessToken);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (getGoogleAccessToken as jest.Mock).mockResolvedValue("test-access-token");
+    mockedGetGoogleAccessToken.mockResolvedValue("test-access-token");
   });
 
   describe("buildUrl", () => {
     describe("Gemini models", () => {
-      it("should build OpenAI-compatible URL for Gemini models", () => {
+      it("should build Gemini generateContent URL for Gemini models", () => {
         const url = provider.buildUrl(
           {
             providerModelId: "gemini-1.5-pro",
@@ -26,11 +27,11 @@ describe("VertexProvider", () => {
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions"
+          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/publishers/google/models/gemini-1.5-pro:generateContent"
         );
       });
 
-      it("should use the same URL for streaming and non-streaming Gemini models", () => {
+      it("should build streamGenerateContent URL for streaming Gemini models", () => {
         const nonStreamingUrl = provider.buildUrl(
           {
             providerModelId: "gemini-1.5-flash",
@@ -51,9 +52,11 @@ describe("VertexProvider", () => {
           { isStreaming: true }
         );
 
-        expect(nonStreamingUrl).toBe(streamingUrl);
         expect(nonStreamingUrl).toBe(
-          "https://eu-west1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/eu-west1/endpoints/openapi/chat/completions"
+          "https://eu-west1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/eu-west1/publishers/google/models/gemini-1.5-flash:generateContent"
+        );
+        expect(streamingUrl).toBe(
+          "https://eu-west1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/eu-west1/publishers/google/models/gemini-1.5-flash:streamGenerateContent?alt=sse"
         );
       });
 
@@ -83,7 +86,7 @@ describe("VertexProvider", () => {
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions"
+          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/publishers/google/models/GEMINI-1.5-PRO:generateContent"
         );
       });
     });
@@ -180,7 +183,7 @@ describe("VertexProvider", () => {
         );
 
         expect(url).toBe(
-          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions"
+          "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/publishers/google/models/gemini-pro:generateContent"
         );
       });
 
@@ -204,20 +207,30 @@ describe("VertexProvider", () => {
 
   describe("buildRequestBody", () => {
     describe("Gemini models", () => {
-      it("should add google/ prefix to Gemini model names", () => {
+      it("should map chat completions body to Gemini format", () => {
         const body = provider.buildRequestBody(
           { providerModelId: "gemini-1.5-pro" } as any,
           {
             parsedBody: {
               model: "gemini-1.5-pro",
-              messages: [{ role: "user", content: "Hello" }]
-            }
+              messages: [{ role: "user", content: "Hello" }],
+              temperature: 0.5,
+              max_tokens: 1024,
+            },
           } as any
         );
 
         const parsed = JSON.parse(body);
-        expect(parsed.model).toBe("google/gemini-1.5-pro");
-        expect(parsed.messages).toEqual([{ role: "user", content: "Hello" }]);
+        expect(parsed.contents).toEqual([
+          {
+            role: "user",
+            parts: [{ text: "Hello" }],
+          },
+        ]);
+        expect(parsed.generationConfig).toEqual({
+          temperature: 0.5,
+          maxOutputTokens: 1024,
+        });
       });
 
       it("should handle case-insensitive Gemini detection in buildRequestBody", () => {
@@ -226,14 +239,15 @@ describe("VertexProvider", () => {
           {
             parsedBody: {
               model: "GEMINI-1.5-FLASH",
-              temperature: 0.7
-            }
+              messages: [{ role: "user", content: "Hi" }],
+              temperature: 0.7,
+            },
           } as any
         );
 
         const parsed = JSON.parse(body);
-        expect(parsed.model).toBe("google/GEMINI-1.5-FLASH");
-        expect(parsed.temperature).toBe(0.7);
+        expect(parsed.contents[0].parts[0].text).toBe("Hi");
+        expect(parsed.generationConfig.temperature).toBe(0.7);
       });
     });
 
@@ -383,7 +397,7 @@ describe("VertexProvider", () => {
       );
 
       expect(url).toBe(
-        "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/my-project-123/locations/us-central1/endpoints/openapi/chat/completions"
+        "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/my-project-123/locations/us-central1/publishers/google/models/gemini-pro:generateContent"
       );
     });
   });

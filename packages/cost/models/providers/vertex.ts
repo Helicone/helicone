@@ -9,6 +9,7 @@ import type {
 } from "../types";
 import { getGoogleAccessToken } from "../../auth/gcpServiceAccountAuth";
 import { CacheProvider } from "../../../common/cache/provider";
+import { toGoogle } from "@helicone-package/llm-mapper/transform/providers/openai/request/toGoogle";
 
 export class VertexProvider extends BaseProvider {
   readonly displayName = "Vertex AI";
@@ -57,7 +58,12 @@ export class VertexProvider extends BaseProvider {
           ? "https://aiplatform.googleapis.com"
           : this.baseUrl.replace("{region}", region);
 
-      return `${baseUrlWithRegion}/v1beta1/projects/${projectId}/locations/${region}/endpoints/openapi/chat/completions`;
+      const baseEndpointUrl = `${baseUrlWithRegion}/v1beta1/projects/${projectId}/locations/${region}/publishers/google/models/${modelId}`;
+      const suffix = requestParams.isStreaming
+        ? ":streamGenerateContent?alt=sse"
+        : ":generateContent";
+
+      return `${baseEndpointUrl}${suffix}`;
     }
 
     if (!projectId || !region) {
@@ -85,29 +91,32 @@ export class VertexProvider extends BaseProvider {
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
     const modelId = endpoint.providerModelId || "";
+    if (context.bodyMapping === "NO_MAPPING") {
+      return JSON.stringify({
+        ...context.parsedBody,
+        model: modelId,
+      });
+    }
+
+    let updatedBody = context.parsedBody;
+
+    // Convert to Chat Completions
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(context.parsedBody);
+    }
 
     if (modelId.toLowerCase().includes("gemini")) {
-      let updatedBody = context.parsedBody;
-      if (context.bodyMapping === "RESPONSES") {
-        updatedBody = context.toChatCompletions(context.parsedBody);
-      }
-      updatedBody = {
-        ...updatedBody,
-        model: `google/${modelId}`,
-      };
-      return JSON.stringify(updatedBody);
+      const geminiBody = toGoogle(updatedBody);
+      return JSON.stringify(geminiBody);
     }
 
     if (endpoint.providerModelId.includes("claude-")) {
-      const anthropicBody =
-        context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(
-              context.parsedBody,
-              endpoint.providerModelId,
-              { includeCacheBreakpoints: false }
-            )
-          : context.parsedBody;
-      const updatedBody = {
+      const anthropicBody = context.toAnthropic(
+        updatedBody,
+        endpoint.providerModelId,
+        { includeCacheBreakpoints: false }
+      );
+      updatedBody = {
         ...anthropicBody,
         anthropic_version: "vertex-2023-10-16",
         model: undefined, // model is not needed in Vertex inputs (as its defined via URL)

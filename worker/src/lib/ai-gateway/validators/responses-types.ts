@@ -71,7 +71,7 @@ const FunctionTool = z
     name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
     parameters: z.union([z.object({}).partial().passthrough(), z.null()]),
-    strict: z.union([z.boolean(), z.null()]),
+    strict: z.union([z.boolean(), z.null()]).optional(),
   })
   .passthrough();
 // RankerVersionType was removed

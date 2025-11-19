@@ -161,7 +161,7 @@ describe("normalizeAIGatewayResponse", () => {
         model: "gpt-4",
         output: [
           {
-            id: "fc_call_abc123",
+            id: "call_abc123",
             type: "function_call",
             status: "completed",
             name: "get_weather",
@@ -489,6 +489,67 @@ data: [DONE]
       expect(parsed.usage.prompt_tokens).toBe(75);
       expect(parsed.usage.completion_tokens).toBe(25);
       expect(parsed.usage.total_tokens).toBe(100);
+    });
+  });
+
+  describe("Gemini response format", () => {
+    it("should convert Gemini non-streaming responses to OpenAI format", async () => {
+      const geminiResponse = {
+        candidates: [
+          {
+            content: {
+              role: "model",
+              parts: [{ text: "Hello from Gemini!" }],
+            },
+            finishReason: "STOP",
+          },
+        ],
+        modelVersion: "gemini-1.5-pro",
+        usageMetadata: {
+          promptTokenCount: 12,
+          candidatesTokenCount: 8,
+          totalTokenCount: 20,
+        },
+      };
+
+      const result = await normalizeAIGatewayResponse({
+        responseText: JSON.stringify(geminiResponse),
+        isStream: false,
+        provider: "vertex",
+        providerModelId: "gemini-1.5-pro",
+        responseFormat: "GOOGLE",
+      });
+
+      const parsed = JSON.parse(result);
+      expect(parsed.object).toBe("chat.completion");
+      expect(parsed.model).toBe("gemini-1.5-pro");
+      expect(parsed.choices[0].message.content).toBe("Hello from Gemini!");
+      expect(parsed.usage).toBeDefined();
+      expect(parsed.usage.prompt_tokens).toBeGreaterThanOrEqual(0);
+      expect(parsed.usage.completion_tokens).toBeGreaterThanOrEqual(0);
+    });
+
+    it("should convert Gemini streaming responses to OpenAI SSE format", async () => {
+      const geminiStream = [
+        'data: {"candidates":[{"content":{"parts":[{"text":"Hello"}]}}]}',
+        'data: {"candidates":[{"content":{"parts":[{"text":" world"}]},"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":5,"candidatesTokenCount":3,"totalTokenCount":8}}',
+        "data: [DONE]",
+      ].join("\n\n");
+
+      const result = await normalizeAIGatewayResponse({
+        responseText: geminiStream,
+        isStream: true,
+        provider: "vertex",
+        providerModelId: "gemini-1.5-pro",
+        responseFormat: "GOOGLE",
+      });
+
+      expect(result).toContain('"object":"chat.completion.chunk"');
+      expect(result).toContain('"content":"Hello"');
+      expect(result).toContain('"content":" world"');
+      expect(result).toContain('"finish_reason":"stop"');
+      expect(result).toContain('"prompt_tokens":5');
+      expect(result).toContain("data: [DONE]");
     });
   });
 });
