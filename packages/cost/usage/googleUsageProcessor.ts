@@ -29,7 +29,7 @@ export class GoogleUsageProcessor implements IUsageProcessor {
       if (response.usage) {
         return {
           data: {
-            input: (response.usage.prompt_tokens || response.usage.promptTokens) - (response.usage.prompt_token_details.cached_tokens || 0) || 0,
+            input: ((response.usage.prompt_tokens || response.usage.promptTokens || 0) - (response.usage.prompt_token_details?.cached_tokens || 0)),
             output: response.usage.completion_tokens || response.usage.completionTokens || 0,
             cacheDetails: {
               cachedInput: response.usage.prompt_token_details.cached_tokens || 0,
