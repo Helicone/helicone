@@ -3,7 +3,7 @@
  * Combines all models and endpoints from Perplexity
  */
 
-import type { ModelConfig, ModelProviderConfig } from "../../types";
+import type { ModelConfig, ModelProviderConfig } from "../../../types";
 
 // Import models and endpoints
 import { models as perplexityModels } from "./models";

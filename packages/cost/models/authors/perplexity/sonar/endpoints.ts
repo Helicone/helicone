@@ -1,5 +1,5 @@
-import { ModelProviderName } from "../../providers";
-import type { ModelProviderConfig } from "../../types";
+import { ModelProviderName } from "../../../providers";
+import type { ModelProviderConfig } from "../../../types";
 import { PerplexityModelName } from "./models";
 
 export const endpoints = {

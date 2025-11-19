@@ -1,4 +1,4 @@
-import { ModelConfig } from "../../types";
+import { ModelConfig } from "../../../types";
 
 export const models = {
   sonar: {
