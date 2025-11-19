@@ -110,17 +110,26 @@ export class BedrockProvider extends BaseProvider {
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
-    if (endpoint.providerModelId.includes("claude-")) {
-      const anthropicBody =
-        context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(
-              context.parsedBody,
-              endpoint.providerModelId,
-              { includeCacheBreakpoints: false }
-            )
-          : context.parsedBody;
+    if (context.bodyMapping === "NO_MAPPING") {
+      return JSON.stringify({
+        ...context.parsedBody,
+        model: endpoint.providerModelId,
+      });
+    }
 
-      const updatedBody = {
+    let updatedBody = context.parsedBody;
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(updatedBody);
+    }
+
+    if (endpoint.providerModelId.includes("claude-")) {
+      const anthropicBody = context.toAnthropic(
+        updatedBody,
+        endpoint.providerModelId,
+        { includeCacheBreakpoints: false }
+      );
+
+      updatedBody = {
         ...anthropicBody,
         anthropic_version: "bedrock-2023-05-31",
         model: undefined, // model is not needed in Bedrock inputs (as its defined via URL)

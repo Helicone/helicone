@@ -40,7 +40,7 @@ export interface Modality {
   outputs: OutputModality[];
 }
 
-export type ResponseFormat = "ANTHROPIC" | "OPENAI";
+export type ResponseFormat = "ANTHROPIC" | "OPENAI" | "GOOGLE";
 
 export type Tokenizer =
   | "Claude"

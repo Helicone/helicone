@@ -6,8 +6,10 @@ import {
   BodyMappingType,
 } from "@helicone-package/cost/models/types";
 import { OpenAIResponseBody, ChatCompletionChunk } from "../types/openai";
-import { toOpenAI } from "./anthropic/response/toOpenai";
+import { toOpenAI as anthropicToOpenAI } from "./anthropic/response/toOpenai";
 import { AnthropicToOpenAIStreamConverter } from "./anthropic/streamedResponse/toOpenai";
+import { toOpenAI as googleToOpenAI } from "./google/response/toOpenai";
+import { GoogleToOpenAIStreamConverter } from "./google/streamedResponse/toOpenai";
 import { toResponses } from "./responses/openai/response/toResponses";
 import { ChatToResponsesStreamConverter } from "./responses/streamedResponse/toResponses";
 
@@ -502,6 +504,13 @@ export async function normalizeAIGatewayResponse(params: {
 
           normalizedOpenAIText = serializeOpenAIChunks(openAIChunks);
         }
+      } else if (responseFormat === "GOOGLE") {
+        const converter = new GoogleToOpenAIStreamConverter();
+        const openAIChunks: ChatCompletionChunk[] = [];
+        converter.processLines(responseText, (chunk) => {
+          openAIChunks.push(chunk);
+        });
+        normalizedOpenAIText = serializeOpenAIChunks(openAIChunks);
       } else if (responseFormat === "OPENAI") {
         // Already in OpenAI format, just normalize usage
         normalizedOpenAIText = await normalizeOpenAIStreamText(
@@ -511,6 +520,8 @@ export async function normalizeAIGatewayResponse(params: {
         );
       }
 
+      // by this line, normalizedOpenAIText is now in Chat Completions format
+      
       if (bodyMapping === "RESPONSES" && provider !== "openai") {
         return convertOpenAIStreamToResponses(normalizedOpenAIText);
       }
@@ -523,7 +534,9 @@ export async function normalizeAIGatewayResponse(params: {
       let openAIBody = providerBody;
       if (responseFormat === "ANTHROPIC") {
         // Convert Anthropic to OpenAI format
-        openAIBody = toOpenAI(providerBody);
+        openAIBody = anthropicToOpenAI(providerBody);
+      } else if (responseFormat === "GOOGLE") {
+        openAIBody = googleToOpenAI(providerBody);
       }
 
       // Normalize usage for all providers

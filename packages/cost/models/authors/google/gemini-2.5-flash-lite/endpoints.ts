@@ -77,6 +77,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
+    responseFormat: "GOOGLE",
     ptbEnabled: true,
     endpointConfigs: {
       global: {
