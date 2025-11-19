@@ -36,7 +36,7 @@ import { baiduModels, baiduEndpointConfig } from "./authors/baidu";
 import {
   perplexityModels,
   perplexityEndpointConfig,
-} from "./authors/perplexity";
+} from "./authors/perplexity/sonar";
 
 // Combine all models
 const allModels = {
