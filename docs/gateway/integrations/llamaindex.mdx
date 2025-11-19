@@ -1,0 +1,81 @@
+---
+title: "LlamaIndex Integration"
+sidebarTitle: "LlamaIndex"
+description: "Use the Helicone LLM for LlamaIndex to route OpenAI-compatible requests through the Helicone AI Gateway with full observability."
+"twitter:title": "LlamaIndex + Helicone AI Gateway - Helicone OSS LLM Observability"
+---
+
+## Introduction
+
+The Helicone LLM for LlamaIndex lets you send OpenAI‑compatible requests through the Helicone AI Gateway — no provider keys needed. Gain centralized routing, observability, and control across many models and providers.
+
+<Note>
+  This integration uses a dedicated LlamaIndex package: <code>llama-index-llms-helicone</code>.
+</Note>
+
+## Install
+
+```bash
+pip install llama-index-llms-helicone
+```
+
+## Usage
+
+```python
+from llama_index.llms.helicone import Helicone
+from llama_index.llms.openai_like.base import ChatMessage
+
+llm = Helicone(
+    api_key="<helicone-api-key>",
+    model="gpt-4o-mini",  # works across providers
+    is_chat_model=True,
+)
+
+message: ChatMessage = ChatMessage(role="user", content="Hello world!")
+
+response = llm.chat(messages=[message])
+print(str(response))
+```
+
+### Parameters
+
+- model: OpenAI‑compatible model name routed via Helicone. See the
+  <a href="https://www.helicone.ai/models" target="_blank">model registry</a>.
+- api_base (optional): Base URL for Helicone AI Gateway (defaults to the package’s `DEFAULT_API_BASE`). Can also be set via `HELICONE_API_BASE`.
+- api_key: Your Helicone API key. You can set via constructor or `HELICONE_API_KEY`.
+- default_headers (optional): Add additional headers; the `Authorization: Bearer <api_key>` header is set automatically.
+
+## Environment Variables
+
+```bash
+export HELICONE_API_KEY=sk-helicone-...
+# Optional override
+export HELICONE_API_BASE=https://ai-gateway.helicone.ai/v1
+```
+
+## Advanced Configuration
+
+```python
+from llama_index.llms.helicone import Helicone
+
+llm = Helicone(
+    model="gpt-4.1-mini",
+    api_key="<helicone-api-key>",
+    api_base="https://ai-gateway.helicone.ai/v1",
+    default_headers={
+        "Helicone-Session-Id": "demo-session",
+        "Helicone-User-Id": "user-123",
+        "Helicone-Property-Environment": "production",
+    },
+    temperature=0.2,
+    max_tokens=256,
+)
+```
+
+## Notes
+
+- Authentication uses your Helicone API key; provider keys are not required when using the AI Gateway.
+- All requests appear in the Helicone dashboard with full request/response visibility and cost tracking.
+- Learn more about routing and model coverage:
+  - <a href="/gateway/provider-routing">Provider routing</a>
+  - <a href="https://www.helicone.ai/models" target="_blank">Model registry</a>
