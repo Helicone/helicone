@@ -9266,7 +9266,8 @@
 				"type": "string",
 				"enum": [
 					"ANTHROPIC",
-					"OPENAI"
+					"OPENAI",
+					"GOOGLE"
 				]
 			},
 			"ModelProviderConfig": {

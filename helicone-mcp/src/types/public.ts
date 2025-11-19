@@ -3351,7 +3351,7 @@ Json: JsonObject;
       [key: string]: components["schemas"]["EndpointConfig"];
     };
     /** @enum {string} */
-    ResponseFormat: "ANTHROPIC" | "OPENAI";
+    ResponseFormat: "ANTHROPIC" | "OPENAI" | "GOOGLE";
     ModelProviderConfig: {
       pricing: components["schemas"]["ModelPricing"][];
       /** Format: double */
