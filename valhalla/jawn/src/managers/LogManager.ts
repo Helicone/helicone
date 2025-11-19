@@ -108,13 +108,14 @@ export class LogManager {
       .setNext(responseBodyHandler)
       .setNext(promptHandler)
       .setNext(onlineEvalHandler)
+      // note this needs to be before the logging handler since it is mutating the properties
+      .setNext(stripeIntegrationHandler)
       .setNext(loggingHandler)
       .setNext(posthogHandler)
       .setNext(lytixHandler)
       .setNext(webhookHandler)
       .setNext(segmentHandler)
-      .setNext(stripeLogHandler)
-      .setNext(stripeIntegrationHandler);
+      .setNext(stripeLogHandler);
 
     const globalTimingMetrics: Map<string, number> = new Map();
 

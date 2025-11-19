@@ -98,7 +98,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://api.anthropic.com/v1/messages",
                 response: "success",
-                model: "claude-3-5-haiku-20241022",
                 data: createAnthropicMockResponse("claude-3.5-haiku"),
                 expects: anthropicAuthExpectations,
               },
@@ -195,7 +194,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://api.anthropic.com/v1/messages",
                 response: "success",
-                model: "claude-3-5-sonnet-20241022",
                 data: createAnthropicMockResponse("claude-3.5-sonnet-v2"),
                 expects: anthropicAuthExpectations,
               },
@@ -309,7 +307,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://api.anthropic.com/v1/messages",
                 response: "success",
-                model: "claude-3-7-sonnet-20250219",
                 data: createAnthropicMockResponse("claude-3.7-sonnet"),
                 expects: anthropicAuthExpectations,
               },
@@ -406,7 +403,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://api.anthropic.com/v1/messages",
                 response: "success",
-                model: "claude-opus-4-20250514",
                 data: createAnthropicMockResponse("claude-opus-4"),
                 expects: anthropicAuthExpectations,
               },
@@ -503,7 +499,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://api.anthropic.com/v1/messages",
                 response: "success",
-                model: "claude-opus-4-1-20250805",
                 data: createAnthropicMockResponse("claude-opus-4-1"),
                 expects: anthropicAuthExpectations,
               },
@@ -600,7 +595,6 @@ describe("Anthropic Registry Tests", () => {
               {
                 url: "https://api.anthropic.com/v1/messages",
                 response: "success",
-                model: "claude-sonnet-4-20250514",
                 data: createAnthropicMockResponse("claude-sonnet-4"),
                 expects: anthropicAuthExpectations,
               },

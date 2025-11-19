@@ -3,14 +3,26 @@ import { AuthParams } from "../../packages/common/auth/types";
 import { Result } from "../../packages/common/result";
 import { AlertStore } from "../../lib/stores/AlertStore";
 import { BaseManager } from "../BaseManager";
+import { FilterExpression } from "@helicone-package/filters/types";
+import {
+  AlertMetric,
+  AlertAggregation,
+  AlertGrouping,
+} from "@helicone-package/filters/alerts";
+
 export interface AlertRequest {
   name: string;
-  metric: string;
+  metric: AlertMetric;
   threshold: number;
+  aggregation: AlertAggregation | null;
+  percentile: number | null;
+  grouping: AlertGrouping | null;
+  grouping_is_property: boolean | null;
   time_window: string;
   emails: string[];
   slack_channels: string[];
   minimum_request_count: number | undefined;
+  filter: FilterExpression | null;
 }
 
 export interface AlertHistory {
@@ -31,7 +43,14 @@ export interface AlertHistory {
 export interface AlertResponse {
   alerts: Database["public"]["Tables"]["alert"]["Row"][];
   history: Database["public"]["Tables"]["alert_history"]["Row"][];
+  historyTotalCount: number;
 }
+
+export interface GetAlertsOptions {
+  historyPage: number;
+  historyPageSize: number;
+}
+
 export class AlertManager extends BaseManager {
   private alertStore: AlertStore;
 
@@ -40,8 +59,10 @@ export class AlertManager extends BaseManager {
     this.alertStore = new AlertStore(authParams.organizationId);
   }
 
-  async getAlerts(): Promise<Result<AlertResponse, string>> {
-    return this.alertStore.getAlerts();
+  async getAlerts(
+    options?: GetAlertsOptions
+  ): Promise<Result<AlertResponse, string>> {
+    return this.alertStore.getAlerts(options);
   }
 
   async createAlert(alert: AlertRequest): Promise<Result<string, string>> {

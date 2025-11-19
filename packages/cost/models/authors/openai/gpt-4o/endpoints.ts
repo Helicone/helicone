@@ -11,6 +11,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000025,
         output: 0.00001,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5,
         },
@@ -49,6 +50,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000025,
         output: 0.00001,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5,
         },
@@ -86,6 +88,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000015,
         output: 0.0000006,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5,
         },
@@ -124,6 +127,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000015,
         output: 0.0000006,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5,
         },
@@ -161,6 +165,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000005,
         output: 0.00002,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5,
         },
@@ -199,6 +204,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000264, // $2.64/1M - worst-case: $2.50/1M (OpenAI) * 1.055
         output: 0.00001055, // $10.55/1M - worst-case: $10.00/1M (OpenAI) * 1.055
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 128_000,
@@ -216,7 +222,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -230,6 +235,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000016, // $0.16/1M - worst-case: $0.15/1M (OpenAI) * 1.055
         output: 0.00000063, // $0.63/1M - worst-case: $0.60/1M (OpenAI) * 1.055
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 128_000,
@@ -247,7 +253,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -261,6 +266,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000528, // $5.28/1M - worst-case: $5.00/1M (OpenAI) * 1.055
         output: 0.00001582, // $15.82/1M - worst-case: $15.00/1M (OpenAI) * 1.055
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 128_000,
@@ -278,7 +284,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -292,6 +297,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000025, // $2.50 per 1M tokens
         output: 0.00001, // $10.00 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5, // $1.25 per 1M tokens
         },
@@ -308,7 +314,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -322,6 +327,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000015, // $0.15 per 1M tokens
         output: 0.0000006, // $0.60 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5, // $0.075 per 1M tokens
         },
@@ -338,7 +344,6 @@ export const endpoints = {
       "presence_penalty",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },

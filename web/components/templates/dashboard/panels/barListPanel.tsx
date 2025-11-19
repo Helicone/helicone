@@ -1,7 +1,5 @@
 import { useState } from "react";
-import {
-  ArrowsPointingOutIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import {
   Tooltip,
   TooltipContent,
@@ -43,15 +41,22 @@ export const BarListWithTooltips = ({
                     style={{
                       width: `${percentage}%`,
                       backgroundColor:
-                        item.color === "blue" ? "hsl(217, 100%, 55%)" :
-                        item.color === "purple" ? "hsl(271, 100%, 60%)" :
-                        item.color === "cyan" ? "hsl(185, 100%, 40%)" :
-                        item.color === "green" ? "hsl(145, 80%, 42%)" :
-                        item.color === "pink" ? "hsl(330, 100%, 55%)" :
-                        item.color === "orange" ? "hsl(25, 100%, 50%)" :
-                        item.color === "yellow" ? "hsl(48, 100%, 50%)" :
-                        "hsl(217, 100%, 55%)",
-                      opacity: 0.35
+                        item.color === "blue"
+                          ? "hsl(217, 100%, 55%)"
+                          : item.color === "purple"
+                            ? "hsl(271, 100%, 60%)"
+                            : item.color === "cyan"
+                              ? "hsl(185, 100%, 40%)"
+                              : item.color === "green"
+                                ? "hsl(145, 80%, 42%)"
+                                : item.color === "pink"
+                                  ? "hsl(330, 100%, 55%)"
+                                  : item.color === "orange"
+                                    ? "hsl(25, 100%, 50%)"
+                                    : item.color === "yellow"
+                                      ? "hsl(48, 100%, 50%)"
+                                      : "hsl(217, 100%, 55%)",
+                      opacity: 0.35,
                     }}
                   />
                   {/* Content on top */}

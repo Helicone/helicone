@@ -106,6 +106,20 @@ export interface paths {
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
   };
+  "/v1/stripe/auto-topoff/settings": {
+    get: operations["GetAutoTopoffSettings"];
+    post: operations["UpdateAutoTopoffSettings"];
+    delete: operations["DisableAutoTopoff"];
+  };
+  "/v1/stripe/payment-methods": {
+    get: operations["GetPaymentMethods"];
+  };
+  "/v1/stripe/payment-methods/setup-session": {
+    post: operations["CreateSetupSession"];
+  };
+  "/v1/stripe/payment-methods/{paymentMethodId}": {
+    delete: operations["RemovePaymentMethod"];
+  };
   "/v1/organization": {
     get: operations["GetOrganizations"];
   };
@@ -162,6 +176,9 @@ export interface paths {
   };
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
+  };
+  "/v1/organization/models": {
+    get: operations["GetModels"];
   };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
@@ -644,6 +661,9 @@ export interface paths {
   "/v1/admin/wallet/{orgId}/disallow-list": {
     delete: operations["RemoveFromDisallowList"];
   };
+  "/v1/admin/wallet/analytics/time-series": {
+    post: operations["GetTimeSeriesData"];
+  };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
@@ -873,6 +893,37 @@ export interface components {
       next_page: string | null;
       /** Format: double */
       count: number;
+    };
+    AutoTopoffSettings: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string | null;
+      lastTopoffAt: string | null;
+      /** Format: double */
+      consecutiveFailures: number;
+    };
+    UpdateAutoTopoffSettingsRequest: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string;
+    };
+    PaymentMethod: {
+      id: string;
+      brand: string;
+      last4: string;
+      /** Format: double */
+      exp_month: number;
+      /** Format: double */
+      exp_year: number;
+    };
+    CreateSetupSessionRequest: {
+      returnUrl?: string;
     };
 Json: JsonObject;
     "ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_": {
@@ -1143,6 +1194,14 @@ Json: JsonObject;
       };
     };
     OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
+    "ResultSuccess__model-string_-Array_": {
+      data: {
+          model: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -1598,6 +1657,9 @@ Json: JsonObject;
       prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
       total_tokens?: components["schemas"]["Partial_NumberOperators_"];
       target_url?: components["schemas"]["Partial_TextOperators_"];
+      property_key?: {
+        equals: string;
+      };
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
@@ -1693,9 +1755,9 @@ Json: JsonObject;
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS" | "BASETEN";
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+    ModelProviderName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1949,7 +2011,8 @@ Json: JsonObject;
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
-      gateway_endpoint_version: string | null;
+      ai_gateway_body_mapping: string | null;
+      storage_location?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2352,10 +2415,9 @@ Json: JsonObject;
       customer_id: string;
     };
     /** @enum {string} */
-    ResponseFormat: "ANTHROPIC" | "OPENAI";
+    BodyMappingType: "OPENAI" | "NO_MAPPING" | "RESPONSES";
     HeliconeMeta: {
-      gatewayEndpointVersion?: string;
-      gatewayResponseFormat?: components["schemas"]["ResponseFormat"];
+      aiGatewayBodyMapping?: components["schemas"]["BodyMappingType"];
       providerModelId?: string;
       gatewayModel?: string;
       gatewayProvider?: components["schemas"]["ModelProviderName"];
@@ -3257,6 +3319,7 @@ Json: JsonObject;
           minimum_request_count: number | null;
           metric: string;
           id: string;
+          filter: components["schemas"]["Json"] | null;
           emails: string[];
           created_at: string | null;
         })[];
@@ -3274,6 +3337,8 @@ Json: JsonObject;
           alert_id: string;
           alert_end_time: string | null;
         })[];
+      /** Format: double */
+      historyTotalCount: number;
     };
     ResultSuccess_AlertResponse_: {
       data: components["schemas"]["AlertResponse"];
@@ -3281,16 +3346,98 @@ Json: JsonObject;
       error: null;
     };
     "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    AlertMetric: "latency" | "cost" | "prompt_tokens" | "completion_tokens" | "prompt_cache_read_tokens" | "prompt_cache_write_tokens" | "total_tokens" | "response.status" | "count";
+    /** @enum {string} */
+    AlertAggregation: "sum" | "avg" | "min" | "max" | "percentile";
+    /** @enum {string} */
+    AlertStandardGrouping: "model" | "provider" | "user";
+    AlertGrouping: components["schemas"]["AlertStandardGrouping"] | string;
+    /** @description Matches all records (no filtering) */
+    AllExpression: {
+      /** @enum {string} */
+      type: "all";
+    };
+    /** @enum {string} */
+    FilterSubType: "property" | "score" | "sessions" | "user";
+    /**
+     * @description Type for the field specification in a condition
+     * Describes what field is being filtered and how
+     */
+    BaseFieldSpec: {
+      subtype?: components["schemas"]["FilterSubType"];
+      /** @enum {string} */
+      valueMode?: "value" | "key";
+      key?: string;
+    };
+    FieldSpec: (components["schemas"]["BaseFieldSpec"] & ({
+      /** @enum {string} */
+      column: "properties" | "user_id" | "model" | "country_code" | "response_id" | "status" | "latency" | "provider" | "time_to_first_token" | "request_created_at" | "response_created_at" | "organization_id" | "threat" | "request_id" | "prompt_tokens" | "completion_tokens" | "prompt_cache_read_tokens" | "prompt_cache_write_tokens" | "target_url" | "scores" | "request_body" | "response_body" | "assets" | "proxy_key_id" | "updated_at";
+      /** @enum {string} */
+      table: "request_response_rmt";
+    })) | (components["schemas"]["BaseFieldSpec"] & ({
+      /** @enum {string} */
+      column: "created_at" | "cost" | "prompt_tokens" | "completion_tokens" | "total_tokens" | "total_requests" | "latest_request_created_at";
+      /** @enum {string} */
+      table: "sessions_request_response_rmt";
+    })) | (components["schemas"]["BaseFieldSpec"] & ({
+      /** @enum {string} */
+      column: "user_id" | "cost" | "total_requests" | "active_for" | "first_active" | "last_active" | "average_requests_per_day_active" | "average_tokens_per_request" | "total_completion_tokens" | "total_prompt_tokens";
+      /** @enum {string} */
+      table: "users_view";
+    }));
+    /**
+     * @description All supported filter operator types
+     * @enum {string}
+     */
+    FilterOperator: "eq" | "neq" | "is" | "gt" | "gte" | "lt" | "lte" | "like" | "ilike" | "contains" | "not-contains" | "in";
+    /** @description Single condition expression that compares a field against a value */
+    ConditionExpression: {
+      /** @enum {string} */
+      type: "condition";
+      field: components["schemas"]["FieldSpec"];
+      operator: components["schemas"]["FilterOperator"];
+      value: string | number | boolean;
+    };
+    /**
+     * @description Filter expression type union
+     * Represents all possible filter expression types in the AST
+     */
+    FilterExpression: components["schemas"]["AllExpression"] | components["schemas"]["ConditionExpression"] | components["schemas"]["AndExpression"] | components["schemas"]["OrExpression"];
+    /**
+     * @description Logical AND of multiple expressions
+     * All contained expressions must match for this to match
+     */
+    AndExpression: {
+      /** @enum {string} */
+      type: "and";
+      expressions: components["schemas"]["FilterExpression"][];
+    };
+    /**
+     * @description Logical OR of multiple expressions
+     * At least one contained expression must match for this to match
+     */
+    OrExpression: {
+      /** @enum {string} */
+      type: "or";
+      expressions: components["schemas"]["FilterExpression"][];
+    };
     AlertRequest: {
       name: string;
-      metric: string;
+      metric: components["schemas"]["AlertMetric"];
       /** Format: double */
       threshold: number;
+      aggregation: components["schemas"]["AlertAggregation"] | null;
+      /** Format: double */
+      percentile: number | null;
+      grouping: components["schemas"]["AlertGrouping"] | null;
+      grouping_is_property: boolean | null;
       time_window: string;
       emails: string[];
       slack_channels: string[];
       /** Format: double */
       minimum_request_count?: number;
+      filter: components["schemas"]["FilterExpression"] | null;
     };
     "ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_": {
       data: {
@@ -3413,7 +3560,7 @@ Json: JsonObject;
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq" | "stripe:products";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq" | "stripe:products" | "secrets:provider-keys";
     /**
      * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
      *
@@ -16217,6 +16364,21 @@ Json: JsonObject;
       error: null;
     };
     "Result__allowNegativeBalance-boolean--creditLimit-number_.string_": components["schemas"]["ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"] | components["schemas"]["ResultError_string_"];
+    TimeSeriesDataPoint: {
+      timestamp: string;
+      /** Format: double */
+      amount: number;
+    };
+    TimeSeriesResponse: {
+      deposits: components["schemas"]["TimeSeriesDataPoint"][];
+      spend: components["schemas"]["TimeSeriesDataPoint"][];
+    };
+    ResultSuccess_TimeSeriesResponse_: {
+      data: components["schemas"]["TimeSeriesResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TimeSeriesResponse.string_": components["schemas"]["ResultSuccess_TimeSeriesResponse_"] | components["schemas"]["ResultError_string_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -16427,7 +16589,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+            providerName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
           }) | {
             error: string;
           };
@@ -16861,6 +17023,87 @@ export interface operations {
       };
     };
   };
+  GetAutoTopoffSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTopoffSettings"] | null;
+        };
+      };
+    };
+  };
+  UpdateAutoTopoffSettings: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateAutoTopoffSettingsRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTopoffSettings"];
+        };
+      };
+    };
+  };
+  DisableAutoTopoff: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
+  GetPaymentMethods: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PaymentMethod"][];
+        };
+      };
+    };
+  };
+  CreateSetupSession: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSetupSessionRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            setupUrl: string;
+          };
+        };
+      };
+    };
+  };
+  RemovePaymentMethod: {
+    parameters: {
+      path: {
+        paymentMethodId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
   GetOrganizations: {
     responses: {
       /** @description Ok */
@@ -17176,6 +17419,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };
@@ -18915,6 +19168,12 @@ export interface operations {
     };
   };
   GetAlerts: {
+    parameters: {
+      query?: {
+        historyPage?: number;
+        historyPageSize?: number;
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
@@ -20013,6 +20272,8 @@ export interface operations {
         search?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
+        page?: number;
+        pageSize?: number;
       };
     };
     responses: {
@@ -20113,6 +20374,23 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_WalletState.string_"];
+        };
+      };
+    };
+  };
+  GetTimeSeriesData: {
+    parameters: {
+      query: {
+        startDate: string;
+        endDate: string;
+        groupBy?: "minute" | "hour" | "day" | "week" | "month";
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TimeSeriesResponse.string_"];
         };
       };
     };

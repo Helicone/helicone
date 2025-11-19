@@ -38,12 +38,16 @@ Retrieves detailed information about a specific prompt version, including the fu
   The commit message for this version
 </ResponseField>
 
+<ResponseField name="environment" type="string" optional>
+  The environment this version is assigned to (e.g., "production", "staging")
+</ResponseField>
+
 <ResponseField name="created_at" type="string">
   ISO timestamp when the version was created
 </ResponseField>
 
 <ResponseField name="s3_url" type="string" optional>
-  S3 URL where the prompt body is stored (if applicable)
+  S3 URL where the prompt body is stored
 </ResponseField>
 
 <RequestExample>
@@ -84,6 +88,7 @@ const version = await response.json();
   "major_version": 1,
   "minor_version": 2,
   "commit_message": "Updated system prompt for better responses",
+  "environment": "production",
   "created_at": "2024-01-15T10:30:00Z",
   "s3_url": "https://s3.amazonaws.com/bucket/prompt-body.json"
 }

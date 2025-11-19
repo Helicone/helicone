@@ -38,7 +38,12 @@ export const getMapperTypeFromHeliconeRequest = (
   }
 
   if (heliconeRequest.request_referrer === "ai-gateway") {
-    return "ai-gateway";
+    const bodyMapping = heliconeRequest.ai_gateway_body_mapping;
+    if (bodyMapping === "RESPONSES") {
+      return "ai-gateway-responses";
+    } else if (bodyMapping === "OPENAI") {
+      return "ai-gateway-chat";
+    }
   }
 
   // Check for OpenAI Assistant responses

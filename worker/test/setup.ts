@@ -202,6 +202,15 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
+          mistral: {
+            org_id: "test-org-id",
+            provider_name: "mistral",
+            decrypted_provider_key: "test-mistral-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
           novita: {
             org_id: "test-org-id",
             provider_name: "novita",
@@ -224,6 +233,33 @@ vi.mock("@supabase/supabase-js", () => ({
             org_id: "test-org-id",
             provider_name: "chutes",
             decrypted_provider_key: "test-chutes-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
+          cerebras: {
+            org_id: "test-org-id",
+            provider_name: "cerebras",
+            decrypted_provider_key: "test-cerebras-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
+          baseten: {
+            org_id: "test-org-id",
+            provider_name: "baseten",
+            decrypted_provider_key: "test-baseten-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
+          fireworks: {
+            org_id: "test-org-id",
+            provider_name: "fireworks",
+            decrypted_provider_key: "test-fireworks-api-key",
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,
@@ -254,6 +290,15 @@ vi.mock("@supabase/supabase-js", () => ({
 
         // Helicone provider keys (for PTB when BYOK is disabled)
         const mockHeliconeProviderKeys: Record<string, any> = {
+          helicone: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "helicone",
+            decrypted_provider_key: "helicone-ptb-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: true,
+          },
           anthropic: {
             org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
             provider_name: "anthropic",

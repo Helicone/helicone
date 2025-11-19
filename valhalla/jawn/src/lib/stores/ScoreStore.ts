@@ -175,8 +175,9 @@ export class ScoreStore extends BaseStore {
             cache_enabled: row.cache_enabled,
             cache_reference_id: row.cache_reference_id,
             cost: row.cost,
-            gateway_endpoint_version: row.gateway_endpoint_version,
+            ai_gateway_body_mapping: row.ai_gateway_body_mapping,
             is_passthrough_billing: row.is_passthrough_billing,
+            storage_location: row.storage_location,
           },
         ];
       })

@@ -148,7 +148,6 @@ export const endpoints = {
       "top_k",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -187,7 +186,6 @@ export const endpoints = {
       "tool_choice",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
     responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},

@@ -99,6 +99,7 @@ export const endpoints = {
     providerModelId: "grok-4-fast",
     provider: "xai",
     author: "xai",
+    providerModelIdAliases: ["grok-4-fast-reasoning"],
     pricing: [
       {
         threshold: 0,
@@ -291,7 +292,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -325,7 +325,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -359,7 +358,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -393,7 +391,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },

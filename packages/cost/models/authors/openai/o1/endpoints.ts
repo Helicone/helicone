@@ -12,6 +12,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000015, // $15.00 per 1M tokens
         output: 0.00006, // $60.00 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5, // $7.50 per 1M tokens
         },
@@ -23,7 +24,6 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },
@@ -37,6 +37,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000011, // $1.10 per 1M tokens
         output: 0.0000044, // $4.40 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.5, // $0.55 per 1M tokens
         },
@@ -48,7 +49,6 @@ export const endpoints = {
       "max_tokens",
     ],
     ptbEnabled: true,
-    requireExplicitRouting: true,
     endpointConfigs: {
       "*": {},
     },

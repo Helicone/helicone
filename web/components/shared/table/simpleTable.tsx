@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { clsx } from "../clsx";
 import { useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
+import { useColumnResize } from "@/hooks/useColumnResize";
 
 export type ColumnConfig<T> = {
   key: keyof T | undefined;
@@ -30,6 +31,7 @@ interface SimpleTableProps<T> {
   onSort?: (key: keyof T | undefined, direction: "asc" | "desc") => void;
   currentSortKey?: keyof T | string;
   currentSortDirection?: "asc" | "desc";
+  tableId?: string; // For persisting column sizes
 }
 
 export function SimpleTable<T>(props: SimpleTableProps<T>) {
@@ -43,6 +45,7 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
     onSort,
     currentSortKey,
     currentSortDirection,
+    tableId,
   } = props;
 
   const [internalSortConfig, setInternalSortConfig] = useState<{
@@ -51,6 +54,12 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
   }>({
     key: defaultSortKey,
     direction: defaultSortDirection,
+  });
+
+  // Use the column resize hook
+  const { columnSizes, resizingColumn, handleResizeStart } = useColumnResize({
+    columns,
+    tableId: tableId || "table",
   });
 
   const sortConfig = onSort
@@ -115,9 +124,13 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
                         "border-r border-slate-300 dark:border-slate-700",
                     )}
                     onClick={() => column.sortable && handleSort(column.key)}
+                    style={{
+                      width: `${columnSizes[index] ?? column.minSize ?? 120}px`,
+                      minWidth: `${columnSizes[index] ?? column.minSize ?? 120}px`,
+                      maxWidth: `${columnSizes[index] ?? column.minSize ?? 120}px`,
+                    }}
                   >
-                    <div className="flex items-center gap-1">
-                      {column.header}
+                    <div className="flex h-full items-center gap-2">
                       {column.sortable &&
                         sortConfig.key === column.key &&
                         (sortConfig.direction === "asc" ? (
@@ -125,11 +138,33 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
                         ) : (
                           <ArrowDown className="h-3 w-3" />
                         ))}
+                      {column.header}
                     </div>
                     {index < columns.length - 1 && (
                       <div className="absolute right-0 top-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
                     )}
                     <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                    {/* Resize handle */}
+                    <div
+                      className={clsx(
+                        "absolute right-0 top-0 h-full w-4 cursor-col-resize select-none",
+                        "flex items-center justify-center",
+                        "hover:bg-slate-200 dark:hover:bg-slate-700",
+                      )}
+                      onMouseDown={(e) => handleResizeStart(index, e)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      <div
+                        className={clsx(
+                          "h-full w-1",
+                          resizingColumn === index
+                            ? "bg-blue-700 dark:bg-blue-300"
+                            : "bg-transparent",
+                        )}
+                      />
+                    </div>
                   </TableHead>
                 ))}
               </TableRow>
@@ -149,19 +184,21 @@ export function SimpleTable<T>(props: SimpleTableProps<T>) {
                     <TableCell
                       key={String(column.key || subIndex + column.header)}
                       className={clsx(
-                        "select-none truncate px-2 py-3 text-slate-700 dark:text-slate-300",
+                        "select-none px-2 py-3 text-slate-700 dark:text-slate-300",
                         subIndex === 0 && "pl-10 pr-2",
                         subIndex > 0 && "px-2",
                         subIndex === columns.length - 1 &&
                           "border-r border-border",
                       )}
                       style={{
-                        minWidth: column.minSize
-                          ? `${column.minSize}px`
-                          : "120px",
+                        width: `${columnSizes[subIndex] ?? column.minSize ?? 120}px`,
+                        minWidth: `${columnSizes[subIndex] ?? column.minSize ?? 120}px`,
+                        maxWidth: `${columnSizes[subIndex] ?? column.minSize ?? 120}px`,
                       }}
                     >
-                      {column.render(item)}
+                      <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+                        {column.render(item)}
+                      </div>
                     </TableCell>
                   ))}
                 </TableRow>

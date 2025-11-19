@@ -301,6 +301,149 @@ await fetch(`https://api.helicone.ai/v1/request/${requestId}/property`, {
 });
 ```
 
+## Querying by Custom Properties
+
+Once you've added custom properties to your requests, you can filter and retrieve requests using those properties via the [Query API](/rest/request/post-v1requestquery-clickhouse).
+
+<Warning>
+  **Important:** When filtering by custom properties, you MUST wrap the `properties` filter inside a `request_response_rmt` object. Omitting this wrapper will return empty results.
+</Warning>
+
+### Simple Property Filter
+
+Filter requests by a single property value:
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "filter": {
+    "request_response_rmt": {
+      "properties": {
+        "Environment": {
+          "equals": "production"
+        }
+      }
+    }
+  },
+  "limit": 100
+}'
+```
+
+### Multiple Property Filters
+
+Combine multiple property filters using AND/OR operators:
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "filter": {
+    "left": {
+      "request_response_rmt": {
+        "properties": {
+          "Environment": {
+            "equals": "production"
+          }
+        }
+      }
+    },
+    "operator": "and",
+    "right": {
+      "request_response_rmt": {
+        "properties": {
+          "App": {
+            "equals": "mobile"
+          }
+        }
+      }
+    }
+  },
+  "limit": 100
+}'
+```
+
+### Combining Properties with Other Filters
+
+Filter by properties AND other criteria like date range or model:
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "filter": {
+    "left": {
+      "request_response_rmt": {
+        "request_created_at": {
+          "gte": "2024-01-01T00:00:00Z"
+        }
+      }
+    },
+    "operator": "and",
+    "right": {
+      "request_response_rmt": {
+        "properties": {
+          "Conversation": {
+            "equals": "support_issue_2"
+          }
+        }
+      }
+    }
+  },
+  "limit": 100
+}'
+```
+
+### Common Mistake
+
+<Accordion title="❌ WRONG - Properties without request_response_rmt wrapper">
+```bash
+# This will return empty results even if data exists
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "filter": {
+    "properties": {
+      "Environment": {
+        "equals": "production"
+      }
+    }
+  }
+}'
+```
+</Accordion>
+
+<Accordion title="✅ CORRECT - Properties with request_response_rmt wrapper">
+```bash
+# This will correctly return filtered results
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "filter": {
+    "request_response_rmt": {
+      "properties": {
+        "Environment": {
+          "equals": "production"
+        }
+      }
+    }
+  }
+}'
+```
+</Accordion>
+
+See the [full Query API documentation](/rest/request/post-v1requestquery-clickhouse) for more advanced filtering options.
+
 ## Related Features
 
 <CardGroup cols={2}>

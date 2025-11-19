@@ -15,6 +15,16 @@ export interface TemplateVariable {
   name: string;
   type: string;
   raw: string;
+
+  // optional, just for visibility
+  from_prompt_partial?: boolean;
+}
+
+export interface PromptPartialVariable {
+  prompt_id: string;
+  index: number;
+  environment?: string;
+  raw: string;
 }
 
 export interface ValidationError {
@@ -82,10 +92,28 @@ export interface CacheControl {
 }
 
 /**
- * OpenAI content part extended with optional cache control.
- * Allows individual content parts within a message to have cache control.
+ * Document content part type for Anthropic extended context with citations.
+ * This is specific to Anthropic and not part of the standard OpenAI API.
  */
-export type HeliconeChatCompletionContentPart = ChatCompletionContentPart & {
+export interface ChatCompletionContentPartDocument {
+  type: "document";
+  source: {
+    type: "text";
+    media_type: string;
+    data: string;
+  };
+  title?: string;
+  citations?: {
+    enabled: boolean;
+  };
+}
+
+/**
+ * OpenAI content part extended with optional cache control and document support.
+ * Allows individual content parts within a message to have cache control.
+ * Includes Anthropic-specific document type for extended context features.
+ */
+export type HeliconeChatCompletionContentPart = (ChatCompletionContentPart | ChatCompletionContentPartDocument) & {
   cache_control?: CacheControl;
 };
 

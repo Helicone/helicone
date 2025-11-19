@@ -26,24 +26,17 @@
             "pages": [
               "gateway/overview",
               "gateway/provider-routing",
-
+              "gateway/prompt-integration",
+              "features/advanced-usage/caching",
+              "features/advanced-usage/custom-rate-limits",
+              "features/advanced-usage/llm-security",
               {
-                "group": "Features",
-                "pages": [
-                  "features/advanced-usage/caching",
-                  "features/advanced-usage/custom-rate-limits",
-                  "gateway/prompt-integration",
-                  "features/advanced-usage/llm-security",
-                  "features/advanced-usage/moderations",
-                  "features/advanced-usage/retries"
-                ]
-              },
-              {
-                "group": "Concepts",
+                "group": "Provider Concepts",
                 "pages": [
                   "gateway/concepts/prompt-caching",
                   "gateway/web-search",
-                  "gateway/concepts/error-handling"
+                  "gateway/concepts/error-handling",
+                  "gateway/concepts/responses-api"
                 ]
               },
               {
@@ -53,6 +46,7 @@
                   "gateway/integrations/langgraph",
                   "gateway/integrations/semantic-kernel",
                   "other-integrations/zapier"
+                  "gateway/integrations/codex"
                 ]
               }
             ]
@@ -67,19 +61,36 @@
               "features/datasets",
               "features/alerts",
               "features/reports",
-              "features/hql"
-            ]
-          },
-          {
-            "group": "Prompt Management",
-            "pages": [
-              "features/advanced-usage/prompts",
+              "features/hql",
               "features/advanced-usage/scores",
               "features/advanced-usage/feedback",
               {
                 "group": "Webhooks",
                 "pages": ["features/webhooks", "features/webhooks-testing"]
+              },
+              {
+                "group": "Tools",
+                "pages": [
+                  "integrations/tools/curl",
+                  "integrations/tools/logger-sdk",
+                  "integrations/tools/xcode"
+                ]
+              },
+              {
+                "group": "Vector DB",
+                "pages": [
+                  "integrations/vectordb/curl",
+                  "integrations/vectordb/logger-sdk"
+                ]
               }
+            ]
+          },
+          {
+            "group": "Prompt Management",
+            "pages": [
+              "features/advanced-usage/prompts/overview",
+              "features/advanced-usage/prompts/assembly",
+              "features/advanced-usage/prompts/sdk"
             ]
           },
           {
@@ -237,24 +248,9 @@
                   "integrations/data/logger-sdk",
                   "integrations/data/curl"
                 ]
-              },
-              {
-                "group": "Tools",
-                "pages": [
-                  "integrations/tools/curl",
-                  "integrations/tools/logger-sdk"
-                ]
-              },
-              {
-                "group": "Vector DB",
-                "pages": [
-                  "integrations/vectordb/curl",
-                  "integrations/vectordb/logger-sdk"
-                ]
               }
             ]
           },
-
           {
             "group": "References",
             "pages": [
@@ -279,7 +275,8 @@
                 "group": "Legacy Features",
                 "pages": [
                   "features/prompts-legacy/editor",
-                  "features/prompts-legacy/generate"
+                  "features/prompts-legacy/generate",
+                  "features/advanced-usage/moderations"
                 ]
               }
             ]
@@ -290,6 +287,20 @@
         "anchor": "API Reference",
         "icon": "code",
         "groups": [
+          {
+            "group": "AI Gateway",
+            "pages": [
+              "rest/ai-gateway/post-v1-chat-completions",
+              "rest/ai-gateway/post-v1-responses"
+            ]
+          },
+          {
+            "group": "Models",
+            "pages": [
+              "rest/ai-gateway/get-v1models",
+              "rest/models/get-v1public-model-registry-models"
+            ]
+          },
           {
             "group": "Request",
             "pages": [
@@ -303,18 +314,35 @@
               "rest/request/post-v1request-score"
             ]
           },
-
+          {
+            "group": "Session",
+            "pages": [
+              "rest/session/post-v1sessionquery",
+              "rest/session/post-v1sessionmetricsquery",
+              "rest/session/post-v1session-feedback"
+            ]
+          },
           {
             "group": "Prompts",
             "pages": [
               "rest/prompts/post-v1prompt-2025",
               "rest/prompts/get-v1prompt-2025-id-promptid",
-              "rest/prompts/post-v1prompt-2025-update",
+              "rest/prompts/post-v1prompt-2025-id-promptid-rename",
+              "rest/prompts/patch-v1prompt-2025-id-promptid-tags",
               "rest/prompts/delete-v1prompt-2025-promptid",
+              "rest/prompts/post-v1prompt-2025-update",
+              "rest/prompts/post-v1prompt-2025-update-environment",
+              "rest/prompts/delete-v1prompt-2025-promptid-versionid",
               "rest/prompts/post-v1prompt-2025-query",
+              "rest/prompts/post-v1prompt-2025-query-version",
+              "rest/prompts/post-v1prompt-2025-query-environment-version",
               "rest/prompts/post-v1prompt-2025-query-versions",
-              "rest/prompts/post-v1prompt-2025-update-production-version",
-              "rest/prompts/delete-v1prompt-2025-promptid-versionid"
+              "rest/prompts/post-v1prompt-2025-query-production-version",
+              "rest/prompts/post-v1prompt-2025-query-total-versions",
+              "rest/prompts/get-v1prompt-2025-id-promptid-versionid-inputs",
+              "rest/prompts/get-v1prompt-2025-tags",
+              "rest/prompts/get-v1prompt-2025-environments",
+              "rest/prompts/get-v1prompt-2025-count"
             ]
           },
           {
@@ -353,18 +381,6 @@
           {
             "group": "Dashboard",
             "pages": ["rest/dashboard/post-v1dashboardscoresquery"]
-          },
-          {
-            "group": "Session",
-            "pages": [
-              "rest/session/post-v1sessionquery",
-              "rest/session/post-v1sessionmetricsquery",
-              "rest/session/post-v1session-feedback"
-            ]
-          },
-          {
-            "group": "Models",
-            "pages": ["rest/models/get-v1public-model-registry-models"]
           }
         ]
       },
@@ -472,7 +488,7 @@
     "dark": "/logo/dark.svg"
   },
   "api": {
-    "openapi": ["swagger.json"]
+    "openapi": ["swagger.json", "ai-gateway.openapi.json"]
   },
   "appearance": {
     "default": "light"
@@ -663,6 +679,10 @@
     {
       "source": "/ai-gateway/prompt-integration",
       "destination": "/gateway/prompt-integration"
+    },
+    {
+      "source": "/features/advanced-usage/prompts",
+      "destination": "/features/advanced-usage/prompts/overview"
     }
   ]
 }

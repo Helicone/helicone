@@ -19,7 +19,8 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useColumnResize } from "@/hooks/useColumnResize";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "@/packages/common/result";
 import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
@@ -29,6 +30,10 @@ import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
 import { DragColumnItem } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
+
+// Constants for table sizing
+const HEADER_HEIGHT = "44px";
+const CHECKBOX_COLUMN_WIDTH = "48px";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -151,7 +156,14 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     currentRow,
   } = props;
 
-  const [expanded, setExpanded] = React.useState<ExpandedState>({});
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+
+  // Use the column resize hook
+  const { columnSizes, resizingColumn, handleResizeStart } = useColumnResize({
+    columns: defaultColumns,
+    tableId: id,
+  });
+
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
@@ -265,8 +277,8 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   className="sticky top-0 z-[2] h-11 bg-slate-50 dark:bg-slate-950"
                 >
                   {checkboxMode !== "never" && (
-                    <th className="relative">
-                      <div className="ml-2 flex h-full items-center justify-center">
+                    <th className="relative" style={{ height: HEADER_HEIGHT, width: CHECKBOX_COLUMN_WIDTH, minWidth: CHECKBOX_COLUMN_WIDTH, maxWidth: CHECKBOX_COLUMN_WIDTH }}>
+                      <div className="flex h-full items-center justify-center px-2">
                         <Checkbox
                           variant="helicone"
                           onCheckedChange={handleSelectAll}
@@ -287,40 +299,53 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                       <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
                     </th>
                   )}
-                  {headerGroup.headers.map((header, index) => (
-                    <th
-                      key={`header-${index}`}
-                      className={clsx(
-                        "relative",
-                        index === headerGroup.headers.length - 1 &&
-                          "border-r border-slate-300 dark:border-slate-700",
-                      )}
-                    >
-                      {index === 0 && onToggleAllRows !== undefined && (
-                        <div className="absolute left-1 top-1/2 z-10 -translate-y-1/2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onToggleAllRows(table)}
-                            className="h-6 w-6"
-                            aria-label={"Toggle expand all rows"}
-                          >
-                            <ChevronsUpDown className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                      <DraggableColumnHeader
-                        header={header}
-                        sortable={sortable}
-                        index={index}
-                        totalColumns={headerGroup.headers.length}
-                      />
-                      {index < headerGroup.headers.length - 1 && (
-                        <div className="absolute right-0 top-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
-                      )}
-                      <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
-                    </th>
-                  ))}
+                  {headerGroup.headers.map((header, index) => {
+                    const columnDef = defaultColumns[index] as any;
+                    const columnWidth = columnSizes[index] ?? columnDef.minSize ?? columnDef.size ?? 120;
+
+                    return (
+                      <th
+                        key={`header-${index}`}
+                        className={clsx(
+                          "relative",
+                          index === headerGroup.headers.length - 1 &&
+                            "border-r border-slate-300 dark:border-slate-700",
+                        )}
+                        style={{
+                          width: `${columnWidth}px`,
+                          minWidth: `${columnWidth}px`,
+                          maxWidth: `${columnWidth}px`,
+                          height: HEADER_HEIGHT,
+                        }}
+                      >
+                        {index === 0 && onToggleAllRows !== undefined && (
+                          <div className="absolute left-1 top-1/2 z-10 -translate-y-1/2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onToggleAllRows(table)}
+                              className="h-6 w-6"
+                              aria-label={"Toggle expand all rows"}
+                            >
+                              <ChevronsUpDown className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                        <DraggableColumnHeader
+                          header={header}
+                          sortable={sortable}
+                          index={index}
+                          totalColumns={headerGroup.headers.length}
+                          onResizeStart={handleResizeStart}
+                          isResizing={resizingColumn === index}
+                        />
+                        {index < headerGroup.headers.length - 1 && (
+                          <div className="absolute right-0 top-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                      </th>
+                    );
+                  })}
                 </tr>
               ))}
             </thead>
@@ -369,11 +394,11 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                         : "",
                       checkboxMode === "never" && "hidden",
                     )}
-                    style={{ verticalAlign: "middle" }}
+                    style={{ verticalAlign: "middle", width: CHECKBOX_COLUMN_WIDTH, minWidth: CHECKBOX_COLUMN_WIDTH, maxWidth: CHECKBOX_COLUMN_WIDTH }}
                   >
                     <div
                       className={clsx(
-                        "flex h-full w-full items-center justify-center",
+                        "flex h-full w-full items-center justify-center px-2",
                         selectedIds?.includes(row.id ?? "") ||
                           (currentRow && currentRow.id === row.original.id)
                           ? "bg-inherit"
@@ -390,34 +415,40 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                       />
                     </div>
                   </td>
-                  {row.getVisibleCells().map((cell, i) => (
-                    <td
-                      key={cell.id}
-                      className={clsx(
-                        "select-none truncate text-slate-700 dark:text-slate-300",
-                        !rowLink?.(row.original) &&
-                          clsx(
-                            "py-3",
-                            i === 0 && "pr-2",
-                            i > 0 && "px-2",
-                            onRowSelect && "cursor-pointer",
-                          ),
-                        i === 0 && "relative",
-                        selectedIds?.includes(row.id ?? "") ||
-                          (currentRow && currentRow.id === row.original.id)
-                          ? "bg-inherit"
-                          : row.getCanExpand()
+                  {row.getVisibleCells().map((cell, i) => {
+                    const columnDef = defaultColumns[i] as any;
+                    const columnWidth = columnSizes[i] ?? columnDef.minSize ?? columnDef.size ?? 120;
+
+                    return (
+                      <td
+                        key={cell.id}
+                        className={clsx(
+                          "select-none text-slate-700 dark:text-slate-300",
+                          !rowLink?.(row.original) &&
+                            clsx(
+                              "py-3",
+                              i === 0 && "pr-2",
+                              i > 0 && "px-2",
+                              onRowSelect && "cursor-pointer",
+                            ),
+                          i === 0 && "relative",
+                          selectedIds?.includes(row.id ?? "") ||
+                            (currentRow && currentRow.id === row.original.id)
                             ? "bg-inherit"
-                            : row.depth > 0
-                              ? "bg-slate-50 dark:bg-slate-950/50"
-                              : "bg-white dark:bg-black",
-                        i === row.getVisibleCells().length - 1 &&
-                          "border-r border-border",
-                      )}
-                      style={{
-                        maxWidth: cell.column.getSize(),
-                      }}
-                    >
+                            : row.getCanExpand()
+                              ? "bg-inherit"
+                              : row.depth > 0
+                                ? "bg-slate-50 dark:bg-slate-950/50"
+                                : "bg-white dark:bg-black",
+                          i === row.getVisibleCells().length - 1 &&
+                            "border-r border-border",
+                        )}
+                        style={{
+                          width: `${columnWidth}px`,
+                          minWidth: `${columnWidth}px`,
+                          maxWidth: `${columnWidth}px`,
+                        }}
+                      >
                       <ConditionalLink
                         href={rowLink?.(row.original)}
                         className={clsx(
@@ -514,15 +545,18 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                               &nbsp;
                             </span>
                           ) : (
-                            flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )
+                            <div className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )}
+                            </div>
                           )}
                         </div>
                       </ConditionalLink>
                     </td>
-                  ))}
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>

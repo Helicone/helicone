@@ -1,6 +1,7 @@
 import { HeliconePromptManager } from "@helicone-package/prompts/HeliconePromptManager";
 import {
   HeliconeChatCreateParams,
+  HeliconePromptParams,
   ValidationError,
 } from "@helicone-package/prompts/types";
 import { ChatCompletionCreateParams } from "openai/resources/chat/completions";
@@ -16,7 +17,7 @@ export class PromptManager {
   ) {}
 
   private buildPromptVersionCacheKey(
-    params: HeliconeChatCreateParams,
+    params: HeliconePromptParams,
     orgId: string
   ): string | null {
     if (!params.prompt_id) {
@@ -41,7 +42,7 @@ export class PromptManager {
   }
 
   private async getPromptVersionIdWithCache(
-    params: HeliconeChatCreateParams,
+    params: HeliconePromptParams,
     orgId: string
   ): Promise<Result<string, string>> {
     const cacheKey = this.buildPromptVersionCacheKey(params, orgId);
@@ -61,7 +62,7 @@ export class PromptManager {
   }
 
   async getSourcePromptBodyWithFetch(
-    params: HeliconeChatCreateParams,
+    params: HeliconePromptParams,
     orgId: string
   ): Promise<
     Result<
@@ -125,9 +126,27 @@ export class PromptManager {
     const result = await this.getSourcePromptBodyWithFetch(params, orgId);
     if (isErr(result)) return err(result.error);
 
+    const promptPartials = this.promptManager.extractPromptPartials(result.data.body);
+    const promptPartialInputs: Record<string, any> = {};
+    for (const promptPartial of promptPartials) {
+      const sourceBodyOfPartial = await this.getSourcePromptBodyWithFetch({
+        prompt_id: promptPartial.prompt_id,
+        environment: promptPartial.environment,
+      }, orgId);
+      if (isErr(sourceBodyOfPartial)) return err(sourceBodyOfPartial.error);
+
+      const substitutionValue = this.promptManager.getPromptPartialSubstitutionValue(
+        promptPartial,
+        sourceBodyOfPartial.data.body
+      );
+
+      promptPartialInputs[promptPartial.raw] = substitutionValue;
+    }
+
     const mergedPromptBody = await this.promptManager.mergePromptBody(
       params,
-      result.data.body
+      result.data.body,
+      promptPartialInputs
     );
     return ok({
       ...mergedPromptBody,

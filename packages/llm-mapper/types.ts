@@ -4,7 +4,8 @@ import { ModelProviderName } from "../cost/models/providers";
 export const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
 export type MapperType =
-  | "ai-gateway"
+  | "ai-gateway-chat"
+  | "ai-gateway-responses"
   | "openai-chat"
   | "openai-response"
   | "anthropic-chat"
@@ -388,5 +389,6 @@ export interface HeliconeRequest {
   cache_enabled: boolean;
   updated_at?: string;
   request_referrer?: string | null;
-  gateway_endpoint_version: string | null;
+  ai_gateway_body_mapping: string | null;
+  storage_location?: string;
 }

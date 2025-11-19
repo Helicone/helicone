@@ -208,6 +208,17 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000004,
     },
   },
+  {
+    model: {
+      operator: "includes",
+      value: "gemini-3-pro-preview",
+    },
+    cost: {
+      prompt_token: 0.000002,
+      completion_token: 0.000012,
+      prompt_cache_read_token: 0.0000002,
+    },
+  },
 ];
 
 export const modelDetails: ModelDetailsMap = {

@@ -30,7 +30,7 @@ import {
 } from "./authors/moonshotai";
 import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
-import { mistralModels, mistralEndpointConfig } from "./authors/mistralai";
+import { mistralModels, mistralEndpointConfig } from "./authors/mistral";
 import { zaiModels, zaiEndpointConfig } from "./authors/zai";
 import { baiduModels, baiduEndpointConfig } from "./authors/baidu";
 
@@ -46,7 +46,7 @@ const allModels = {
   ...deepseekModels,
   ...mistralModels,
   ...zaiModels,
-  ...baiduModels
+  ...baiduModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -61,7 +61,7 @@ const modelProviderConfigs = {
   ...deepseekEndpointConfig,
   ...mistralEndpointConfig,
   ...zaiEndpointConfig,
-  ...baiduEndpointConfig
+  ...baiduEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 // Combine all archived endpoints
@@ -69,7 +69,10 @@ const archivedModelProviderConfigs = {
   // TODO: if any archived endpoints are added, make sure they are included here
 } satisfies Record<string, ModelProviderConfig>;
 
-const indexes: ModelIndexes = buildIndexes(modelProviderConfigs, archivedModelProviderConfigs);
+const indexes: ModelIndexes = buildIndexes(
+  modelProviderConfigs,
+  archivedModelProviderConfigs
+);
 
 function getAllModelIds(): Result<ModelName[]> {
   return ok(Object.keys(allModels) as ModelName[]);
@@ -109,7 +112,10 @@ function createPassthroughEndpoint(
     maxCompletionTokens: 0,
     supportedParameters: [],
     // Use the provider's supportedPlugins if available
-    supportedPlugins: supportedPlugins && supportedPlugins.length > 0 ? supportedPlugins : undefined,
+    supportedPlugins:
+      supportedPlugins && supportedPlugins.length > 0
+        ? supportedPlugins
+        : undefined,
     endpointConfigs: {},
   };
 
@@ -170,10 +176,18 @@ function getModelProviderConfigByProviderModelId(
   provider: ModelProviderName
 ): Result<ModelProviderConfig> {
   const providerModelIdKey = `${providerModelId}:${provider}`;
-  const result = indexes.providerModelIdToConfig.get(providerModelIdKey);
-  return result
-    ? ok(result)
-    : err(`Config not found for providerModelId: ${providerModelId}`);
+
+  let result = indexes.providerModelIdToConfig.get(providerModelIdKey);
+  if (result) {
+    return ok(result);
+  }
+
+  result = indexes.providerModelIdAliasToConfig.get(providerModelIdKey);
+  if (result) {
+    return ok(result);
+  }
+
+  return err(`Config not found for providerModelId: ${providerModelId}`);
 }
 
 function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {
@@ -235,7 +249,7 @@ function getModelProviderConfigByVersion(
   // if the given version matches the active config version (or both are undefined/empty)
   if (
     (!currentEntry.data?.config.version && !version) ||
-    (currentEntry.data?.config.version === version)
+    currentEntry.data?.config.version === version
   ) {
     return ok(currentEntry.data?.config ?? null);
   }

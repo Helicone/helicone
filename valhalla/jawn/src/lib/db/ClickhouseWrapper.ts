@@ -22,14 +22,21 @@ export class ClickhouseClientWrapper {
   private clickHouseHqlClient: ClickHouseClient;
 
   constructor(env: ClickhouseEnv) {
+    // Ensure the host contains the full URL with protocol
+    // Default to https in production, http in development
+    const defaultProtocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+    const clickhouseHost = env.CLICKHOUSE_HOST.startsWith('http') 
+      ? env.CLICKHOUSE_HOST 
+      : `${defaultProtocol}://${env.CLICKHOUSE_HOST}`;
+    
     this.clickHouseClient = createClient({
-      host: env.CLICKHOUSE_HOST,
+      host: clickhouseHost,
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
     });
 
     this.clickHouseHqlClient = createClient({
-      host: env.CLICKHOUSE_HOST,
+      host: clickhouseHost,
       username: env.CLICKHOUSE_HQL_USER,
       password: env.CLICKHOUSE_HQL_PASSWORD,
     });
@@ -298,7 +305,7 @@ export interface RequestResponseRMT {
   prompt_audio_tokens: number;
   completion_audio_tokens: number;
   model: string;
-  gateway_endpoint_version: string;
+  ai_gateway_body_mapping: string;
   request_id: string;
   request_created_at: string;
   user_id: string;
@@ -322,6 +329,7 @@ export interface RequestResponseRMT {
   prompt_version?: string;
   request_referrer?: string;
   is_passthrough_billing: boolean;
+  storage_location: string;
 }
 
 export interface Prompt2025Input {

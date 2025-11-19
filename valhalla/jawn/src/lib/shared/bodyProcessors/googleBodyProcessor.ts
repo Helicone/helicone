@@ -1,9 +1,10 @@
 import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
+// Deprecated: Use GoogleUsageProcessor instead (AI Gateway)
 export class GoogleBodyProcessor implements IBodyProcessor {
   public async parse(
-    parseInput: ParseInput
+    parseInput: ParseInput,
   ): PromiseGenericResult<ParseOutput> {
     const { responseBody } = parseInput;
     const parsedResponseBody = JSON.parse(responseBody);
@@ -30,6 +31,31 @@ export class GoogleBodyProcessor implements IBodyProcessor {
       });
     }
 
+    // Explicit cache creation responses (cachedContent)
+    if (
+      !Array.isArray(parsedResponseBody) &&
+      parsedResponseBody.usageMetadata &&
+      typeof parsedResponseBody.name === "string" &&
+      parsedResponseBody.name.includes("cachedContent")
+    ) {
+      const totalTokenCount =
+        parsedResponseBody.usageMetadata.totalTokenCount ?? 0;
+
+      return ok({
+        processedBody: parsedResponseBody,
+        usage: {
+          totalTokens: totalTokenCount,
+          promptTokens: 0,
+          completionTokens: 0,
+          promptCacheWriteTokens: totalTokenCount,
+          promptCacheReadTokens: 0,
+          promptCacheWrite5m: totalTokenCount,
+          promptCacheWrite1h: 0,
+          heliconeCalculated: false,
+        },
+      });
+    }
+
     // Standard Google format
     let usageMetadataItem;
     if (Array.isArray(parsedResponseBody)) {
@@ -40,15 +66,25 @@ export class GoogleBodyProcessor implements IBodyProcessor {
         : undefined;
     }
 
+    const promptTokens = usageMetadataItem?.usageMetadata
+      ?.promptTokenCount;
+    const cachedContentTokens = usageMetadataItem?.usageMetadata
+      ?.cachedContentTokenCount;
+    const adjustedPromptTokens =
+      promptTokens !== undefined && cachedContentTokens !== undefined
+        ? promptTokens - cachedContentTokens
+        : undefined;
+
     return ok({
       processedBody: parsedResponseBody,
       usage: {
         totalTokens: usageMetadataItem?.usageMetadata?.totalTokenCount,
-        promptTokens: usageMetadataItem?.usageMetadata?.promptTokenCount,
+        promptTokens: adjustedPromptTokens,
         completionTokens:
           (usageMetadataItem?.usageMetadata?.thoughtsTokenCount ?? 0) +
           (usageMetadataItem?.usageMetadata?.candidatesTokenCount ?? 0),
         heliconeCalculated: false,
+        promptCacheReadTokens: cachedContentTokens,
       },
     });
   }
