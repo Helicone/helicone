@@ -2012,6 +2012,7 @@ Json: JsonObject;
       updated_at?: string;
       request_referrer?: string | null;
       ai_gateway_body_mapping: string | null;
+      storage_location?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
