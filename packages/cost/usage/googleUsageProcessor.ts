@@ -18,8 +18,11 @@ export class GoogleUsageProcessor implements IUsageProcessor {
         }
         return {
           data: {
-            input: (response.usageMetadata.promptTokens || response.usageMetadata.promptTokenCount || 0) - (response.usageMetadata.cachedContentTokenCount || 0),
+            input: ((response.usageMetadata.promptTokens || response.usageMetadata.promptTokenCount || 0) - (response.usageMetadata.cachedContentTokenCount || 0)) || 0,
             output: response.usageMetadata.candidatesTokens || response.usageMetadata.candidatesTokenCount || 0,
+            cacheDetails: {
+              cachedInput: response.usageMetadata.cachedContentTokenCount || 0,
+            },
           },
           error: null,
         };
