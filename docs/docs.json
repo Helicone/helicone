@@ -45,7 +45,7 @@
                   "gateway/integrations/langchain",
                   "gateway/integrations/langgraph",
                   "gateway/integrations/semantic-kernel",
-                  "other-integrations/zapier"
+                  "gateway/integrations/zapier",
                   "gateway/integrations/codex"
                 ]
               }
