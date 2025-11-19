@@ -23,13 +23,17 @@ pip install llama-index-llms-helicone
 
 ```python
 from llama_index.llms.helicone import Helicone
+from llama_index.llms.openai_like.base import ChatMessage
 
 llm = Helicone(
     api_key="<helicone-api-key>",
     model="gpt-4o-mini",  # works across providers
+    is_chat_model=True,
 )
 
-response = llm.complete("Hello World!")
+message: ChatMessage = ChatMessage(role="user", content="Hello world!")
+
+response = llm.chat(messages=[message])
 print(str(response))
 ```
 
