@@ -103,7 +103,7 @@ export const providers: Provider[] = [
   {
     id: "deepseek",
     name: "DeepSeek",
-    logoUrl: "/assets/home/providers/anthropic.png",
+    logoUrl: "/assets/home/providers/deepseek.png",
     description: "Configure your DeepSeek API keys",
     docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
     apiKeyLabel: "DeepSeek API Key",
@@ -121,16 +121,16 @@ export const providers: Provider[] = [
     relevanceScore: 68,
   },
 
-  // {
-  //   id: "perplexity",
-  //   name: "Perplexity",
-  //   logoUrl: "/assets/home/providers/perplexity.png",
-  //   description: "Configure your Perplexity API keys",
-  //   docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
-  //   apiKeyLabel: "Perplexity API Key",
-  //   apiKeyPlaceholder: "...",
-  //   relevanceScore: 65,
-  // },
+  {
+    id: "perplexity",
+    name: "Perplexity",
+    logoUrl: "/assets/home/providers/perplexity.png",
+    description: "Configure your Perplexity API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Perplexity API Key",
+    apiKeyPlaceholder: "pplx-...",
+    relevanceScore: 65,
+  },
   // {
   //   id: "fireworks",
   //   name: "Fireworks AI",
@@ -247,7 +247,7 @@ export const providers: Provider[] = [
   {
     id: "cerebras",
     name: "Cerebras",
-    logoUrl: "/assets/home/providers/cerebras.webp",
+    logoUrl: "/assets/home/providers/cerebras.png",
     description: "Configure your Cerebras API keys",
     docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
     apiKeyLabel: "Cerebras API Key",

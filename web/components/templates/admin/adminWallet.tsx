@@ -1063,15 +1063,14 @@ export default function AdminWallet() {
                               </div>
 
                               {/* Disallow List */}
-                              {(walletDetails.data?.disallowList?.length ?? 0) >
-                                0 && (
-                                <div className="flex flex-col gap-2">
-                                  <H4>
-                                    Disallow List (
-                                    {walletDetails.data?.disallowList?.length ??
-                                      0}
-                                    )
-                                  </H4>
+                              <div className="flex flex-col gap-2">
+                                <H4>
+                                  Disallow List (
+                                  {walletDetails.data?.disallowList?.length ?? 0}
+                                  )
+                                </H4>
+                                {(walletDetails.data?.disallowList?.length ?? 0) >
+                                0 ? (
                                   <div className="border">
                                     <table className="w-full text-sm">
                                       <thead className="bg-muted">
@@ -1089,7 +1088,7 @@ export default function AdminWallet() {
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {walletDetails.disallowList?.map(
+                                        {walletDetails.data?.disallowList?.map(
                                           (entry: any, idx: number) => (
                                             <tr key={idx} className="border-t">
                                               <td className="font-mono p-2 text-xs">
@@ -1130,8 +1129,13 @@ export default function AdminWallet() {
                                       </tbody>
                                     </table>
                                   </div>
-                                </div>
-                              )}
+                                ) : (
+                                  <div className="border border-dashed p-4 text-center text-sm text-muted-foreground">
+                                    No models are currently disallowed for this
+                                    organization.
+                                  </div>
+                                )}
+                              </div>
 
                               {/* Raw Tables */}
                               <div className="flex flex-col gap-2">
@@ -1141,6 +1145,7 @@ export default function AdminWallet() {
                                     "credit_purchases",
                                     "aggregated_debits",
                                     "escrows",
+                                    "disallow_list",
                                     "processed_webhook_events",
                                   ].map((tableName) => (
                                     <Button
