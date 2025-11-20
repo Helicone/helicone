@@ -200,6 +200,7 @@ const chatCompletion = await openai.chat.completions.create(
               // Table View
               <SimpleTable
                 data={filteredPrompts ?? []}
+                tableId="prompts-table-legacy"
                 columns={[
                   {
                     key: "user_defined_id",

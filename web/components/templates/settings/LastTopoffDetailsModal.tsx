@@ -5,7 +5,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Small, XSmall } from "@/components/ui/typography";
-import { CheckCircle, CreditCard, AlertCircle, Wallet, Zap } from "lucide-react";
+import {
+  CheckCircle,
+  CreditCard,
+  AlertCircle,
+  Wallet,
+  Zap,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   useAutoTopoffSettings,
@@ -30,7 +36,7 @@ export function LastTopoffDetailsModal({
 
   // Find the payment method that was used
   const paymentMethod = paymentMethods?.find(
-    (pm) => pm.id === settings.stripePaymentMethodId
+    (pm) => pm.id === settings.stripePaymentMethodId,
   );
 
   const hasFailures = settings.consecutiveFailures > 0;
@@ -65,7 +71,7 @@ export function LastTopoffDetailsModal({
               <CheckCircle size={16} className="text-muted-foreground" />
               <Small className="font-medium">Date & Time</Small>
             </div>
-            <XSmall className="text-muted-foreground ml-6">
+            <XSmall className="ml-6 text-muted-foreground">
               {new Date(settings.lastTopoffAt).toLocaleString()}
             </XSmall>
           </div>
@@ -76,7 +82,7 @@ export function LastTopoffDetailsModal({
               <Wallet size={16} className="text-muted-foreground" />
               <Small className="font-medium">Amount Details</Small>
             </div>
-            <div className="flex flex-col gap-1 ml-6">
+            <div className="ml-6 flex flex-col gap-1">
               <XSmall className="text-muted-foreground">
                 Credits Added: ${(settings.topoffAmountCents / 100).toFixed(2)}
               </XSmall>
@@ -94,7 +100,7 @@ export function LastTopoffDetailsModal({
                 <CreditCard size={16} className="text-muted-foreground" />
                 <Small className="font-medium">Payment Method</Small>
               </div>
-              <div className="flex items-center gap-2 ml-6">
+              <div className="ml-6 flex items-center gap-2">
                 <XSmall className="text-muted-foreground">
                   <span className="capitalize">{paymentMethod.brand}</span> ••••{" "}
                   {paymentMethod.last4}
@@ -113,8 +119,8 @@ export function LastTopoffDetailsModal({
                 </XSmall>
                 <XSmall className="text-destructive/80">
                   This auto top-up attempt failed {settings.consecutiveFailures}{" "}
-                  {settings.consecutiveFailures === 1 ? "time" : "times"}. Please
-                  check your payment method.
+                  {settings.consecutiveFailures === 1 ? "time" : "times"}.
+                  Please check your payment method.
                 </XSmall>
               </div>
             </div>

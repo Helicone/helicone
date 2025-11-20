@@ -46,7 +46,8 @@ async function main() {
       "/v1/models": {
         get: {
           summary: "Get Models",
-          description: "Returns all available models supported by Helicone AI Gateway (OpenAI-compatible endpoint)",
+          description:
+            "Returns all available models supported by Helicone AI Gateway (OpenAI-compatible endpoint)",
           responses: {
             "200": {
               description: "Successful response",
@@ -124,4 +125,3 @@ main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-

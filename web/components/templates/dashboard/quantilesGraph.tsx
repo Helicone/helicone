@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useQuantiles } from "../../../services/hooks/quantiles";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import {
   Select,
   SelectContent,
@@ -201,15 +205,19 @@ export const QuantilesGraph = ({
                 tickMargin={8}
                 minTickGap={50}
               />
-              <YAxis domain={[0, 'auto']} hide />
+              <YAxis domain={[0, "auto"]} hide />
               <ChartTooltip
                 cursor={false}
                 content={
                   <ChartTooltipContent
                     indicator="dot"
                     valueFormatter={(value) => {
-                      const formatted = new Intl.NumberFormat("us").format(Number(value));
-                      return currentMetric === "Latency" ? `${formatted} s` : `${formatted} tokens`;
+                      const formatted = new Intl.NumberFormat("us").format(
+                        Number(value),
+                      );
+                      return currentMetric === "Latency"
+                        ? `${formatted} s`
+                        : `${formatted} tokens`;
                     }}
                   />
                 }

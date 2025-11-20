@@ -12,16 +12,22 @@ import {
   OrExpression,
 } from "@helicone-package/filters/types";
 
-interface FilterASTEditorProps { }
+interface FilterASTEditorProps {
+  showCurlButton?: boolean;
+  showTitle?: boolean;
+}
 
-export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({ }) => {
+export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
+  showCurlButton = false,
+  showTitle = true
+}) => {
   const { store: filterStore, helpers } = useFilterAST();
 
   return (
     <div className="w-full space-y-3 rounded-md bg-background px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex flex-col items-center gap-1.5">
-          {filterStore.activeFilterName !== null && (
+          {showTitle && filterStore.activeFilterName !== null && (
             <div className="group flex items-center gap-1 border-b border-dotted border-transparent hover:border-gray-300 dark:hover:border-slate-600">
               <Input
                 value={filterStore.activeFilterName}
@@ -61,6 +67,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({ }) => {
             group={filterStore.filter as AndExpression | OrExpression}
             path={[]}
             isRoot={true}
+            showCurlButton={showCurlButton}
           />
         ) : (
           <Button

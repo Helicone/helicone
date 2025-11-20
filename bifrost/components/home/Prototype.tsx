@@ -3,18 +3,20 @@
 import { cn, ISLAND_WIDTH } from "@/lib/utils";
 import { CircleStackIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import {
-  BeakerIcon,
+  BellIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CodeIcon,
+  DatabaseIcon,
   HomeIcon,
   ListTreeIcon,
   RocketIcon,
   ScrollTextIcon,
-  SparklesIcon,
+  ShieldIcon,
   TagIcon,
-  TestTube2Icon,
   UsersIcon,
+  WandIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { Button, buttonVariants } from "../ui/button";
@@ -77,9 +79,9 @@ const PrototypeSidebar = ({
   setOpenedPage: (page: "dashboard" | "requests" | "sessions") => void;
 }) => {
   return (
-    <div className="bg-white border-r border-[#e5e7eb] h-full flex-1 rounded-l-xl overflow-y-auto">
+    <div className="bg-white border-r border-[#e5e7eb] h-full flex-1 rounded-l-xl overflow-y-hidden">
       <div className="w-full flex flex-col h-full border-r dark:border-slate-800 px-2">
-        <div className="flex-grow overflow-y-auto pb-14">
+        <div className="flex-grow overflow-y-hidden pb-14">
           <div className="flex items-center justify-between gap-2 h-14 border-b dark:border-slate-800 mx-1">
             <Button
               variant="ghost"
@@ -98,7 +100,7 @@ const PrototypeSidebar = ({
             {/* Navigation items */}
             <div className="flex flex-col justify-between">
               <div className="group flex flex-col py-2 data-[collapsed=true]:py-2 ">
-                <nav className="grid gap-y-1 flex-grow overflow-y-auto px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+                <nav className="grid gap-y-1 flex-grow overflow-y-hidden px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
                   <div
                     className={cn(
                       buttonVariants({
@@ -187,8 +189,8 @@ const PrototypeSidebar = ({
                     )}
                   >
                     <div className="flex items-center">
-                      <TagIcon className="mr-2 h-4 w-4" />
-                      Properties
+                      <UsersIcon className="mr-2 h-4 w-4" />
+                      Users
                     </div>
                   </div>
                   <div
@@ -201,8 +203,8 @@ const PrototypeSidebar = ({
                     )}
                   >
                     <div className="flex items-center">
-                      <UsersIcon className="mr-2 h-4 w-4" />
-                      Users
+                      <CodeIcon className="mr-2 h-4 w-4" />
+                      HQL
                     </div>
                   </div>
                   <div className="flex items-center gap-1 font-normal text-slate-400 mt-[10px] text-[11px]">
@@ -235,62 +237,56 @@ const PrototypeSidebar = ({
                     )}
                   >
                     <div className="flex items-center">
-                      <TestTube2Icon className="mr-2 h-4 w-4" />
-                      Playground
-                    </div>
-                  </div>
-                  <div
-                    className={cn(
-                      buttonVariants({
-                        variant: "ghost",
-                        size: "sm",
-                      }),
-                      "justify-start w-full text-[12px] h-8 px-2"
-                    )}
-                  >
-                    <div className="flex items-center">
-                      <BeakerIcon className="mr-2 h-4 w-4" />
-                      Experiments
-                    </div>
-                  </div>
-                  <div
-                    className={cn(
-                      buttonVariants({
-                        variant: "ghost",
-                        size: "sm",
-                      }),
-                      "justify-start w-full text-[12px] h-8 px-2"
-                    )}
-                  >
-                    <div className="flex items-center">
-                      <SparklesIcon className="mr-2 h-4 w-4" />
-                      Evaluators
-                    </div>
-                  </div>
-                  <div
-                    className={cn(
-                      buttonVariants({
-                        variant: "ghost",
-                        size: "sm",
-                      }),
-                      "justify-start w-full text-[11px] h-8 px-2"
-                    )}
-                  >
-                    <div className="flex items-center text-[11px]">
                       <CircleStackIcon className="mr-2 h-4 w-4" />
                       Datasets
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 font-normal text-slate-400 mt-[10px] text-[11px]">
+                  <div
+                    className={cn(
+                      buttonVariants({
+                        variant: "ghost",
+                        size: "sm",
+                      }),
+                      "justify-start w-full text-[12px] h-8 px-2"
+                    )}
+                  >
                     <div className="flex items-center">
-                      Developer
-                      <ChevronRightIcon className="h-3 w-3 transition-transform" />
+                      <WandIcon className="mr-2 h-4 w-4" />
+                      Playground
                     </div>
                   </div>
                   <div className="flex items-center gap-1 font-normal text-slate-400 mt-[10px] text-[11px]">
                     <div className="flex items-center">
-                      Enterprise
-                      <ChevronRightIcon className="h-3 w-3 transition-transform" />
+                      Monitor
+                      <ChevronDownIcon className="h-3 w-3 transition-transform" />
+                    </div>
+                  </div>
+                  <div
+                    className={cn(
+                      buttonVariants({
+                        variant: "ghost",
+                        size: "sm",
+                      }),
+                      "justify-start w-full text-[12px] h-8 px-2"
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <ShieldIcon className="mr-2 h-4 w-4" />
+                      Rate Limits
+                    </div>
+                  </div>
+                  <div
+                    className={cn(
+                      buttonVariants({
+                        variant: "ghost",
+                        size: "sm",
+                      }),
+                      "justify-start w-full text-[12px] h-8 px-2"
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <BellIcon className="mr-2 h-4 w-4" />
+                      Alerts
                     </div>
                   </div>
                 </nav>

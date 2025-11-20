@@ -26,20 +26,12 @@
             "pages": [
               "gateway/overview",
               "gateway/provider-routing",
-
+              "gateway/prompt-integration",
+              "features/advanced-usage/caching",
+              "features/advanced-usage/custom-rate-limits",
+              "features/advanced-usage/llm-security",
               {
-                "group": "Features",
-                "pages": [
-                  "features/advanced-usage/caching",
-                  "features/advanced-usage/custom-rate-limits",
-                  "gateway/prompt-integration",
-                  "features/advanced-usage/llm-security",
-                  "features/advanced-usage/moderations",
-                  "features/advanced-usage/retries"
-                ]
-              },
-              {
-                "group": "Concepts",
+                "group": "Provider Concepts",
                 "pages": [
                   "gateway/concepts/prompt-caching",
                   "gateway/web-search",
@@ -53,6 +45,7 @@
                   "gateway/integrations/langchain",
                   "gateway/integrations/langgraph",
                   "gateway/integrations/semantic-kernel",
+                  "gateway/integrations/zapier",
                   "gateway/integrations/codex"
                 ]
               }
@@ -74,6 +67,21 @@
               {
                 "group": "Webhooks",
                 "pages": ["features/webhooks", "features/webhooks-testing"]
+              },
+              {
+                "group": "Tools",
+                "pages": [
+                  "integrations/tools/curl",
+                  "integrations/tools/logger-sdk",
+                  "integrations/tools/xcode"
+                ]
+              },
+              {
+                "group": "Vector DB",
+                "pages": [
+                  "integrations/vectordb/curl",
+                  "integrations/vectordb/logger-sdk"
+                ]
               }
             ]
           },
@@ -215,6 +223,7 @@
                   "getting-started/integration-method/vercelai",
                   "getting-started/integration-method/crewai",
                   "other-integrations/dify",
+                  "gateway/integrations/llamaindex",
                   "other-integrations/ragas"
                 ]
               },
@@ -239,25 +248,9 @@
                   "integrations/data/logger-sdk",
                   "integrations/data/curl"
                 ]
-              },
-              {
-                "group": "Tools",
-                "pages": [
-                  "integrations/tools/curl",
-                  "integrations/tools/logger-sdk",
-                  "integrations/tools/xcode"
-                ]
-              },
-              {
-                "group": "Vector DB",
-                "pages": [
-                  "integrations/vectordb/curl",
-                  "integrations/vectordb/logger-sdk"
-                ]
               }
             ]
           },
-
           {
             "group": "References",
             "pages": [
@@ -282,7 +275,8 @@
                 "group": "Legacy Features",
                 "pages": [
                   "features/prompts-legacy/editor",
-                  "features/prompts-legacy/generate"
+                  "features/prompts-legacy/generate",
+                  "features/advanced-usage/moderations"
                 ]
               }
             ]
@@ -301,6 +295,13 @@
             ]
           },
           {
+            "group": "Models",
+            "pages": [
+              "rest/ai-gateway/get-v1models",
+              "rest/models/get-v1public-model-registry-models"
+            ]
+          },
+          {
             "group": "Request",
             "pages": [
               "rest/request/post-v1requestquery-clickhouse",
@@ -313,18 +314,35 @@
               "rest/request/post-v1request-score"
             ]
           },
-
+          {
+            "group": "Session",
+            "pages": [
+              "rest/session/post-v1sessionquery",
+              "rest/session/post-v1sessionmetricsquery",
+              "rest/session/post-v1session-feedback"
+            ]
+          },
           {
             "group": "Prompts",
             "pages": [
               "rest/prompts/post-v1prompt-2025",
               "rest/prompts/get-v1prompt-2025-id-promptid",
-              "rest/prompts/post-v1prompt-2025-update",
+              "rest/prompts/post-v1prompt-2025-id-promptid-rename",
+              "rest/prompts/patch-v1prompt-2025-id-promptid-tags",
               "rest/prompts/delete-v1prompt-2025-promptid",
+              "rest/prompts/post-v1prompt-2025-update",
+              "rest/prompts/post-v1prompt-2025-update-environment",
+              "rest/prompts/delete-v1prompt-2025-promptid-versionid",
               "rest/prompts/post-v1prompt-2025-query",
+              "rest/prompts/post-v1prompt-2025-query-version",
+              "rest/prompts/post-v1prompt-2025-query-environment-version",
               "rest/prompts/post-v1prompt-2025-query-versions",
-              "rest/prompts/post-v1prompt-2025-update-production-version",
-              "rest/prompts/delete-v1prompt-2025-promptid-versionid"
+              "rest/prompts/post-v1prompt-2025-query-production-version",
+              "rest/prompts/post-v1prompt-2025-query-total-versions",
+              "rest/prompts/get-v1prompt-2025-id-promptid-versionid-inputs",
+              "rest/prompts/get-v1prompt-2025-tags",
+              "rest/prompts/get-v1prompt-2025-environments",
+              "rest/prompts/get-v1prompt-2025-count"
             ]
           },
           {
@@ -363,21 +381,6 @@
           {
             "group": "Dashboard",
             "pages": ["rest/dashboard/post-v1dashboardscoresquery"]
-          },
-          {
-            "group": "Session",
-            "pages": [
-              "rest/session/post-v1sessionquery",
-              "rest/session/post-v1sessionmetricsquery",
-              "rest/session/post-v1session-feedback"
-            ]
-          },
-          {
-            "group": "Models",
-            "pages": [
-              "rest/ai-gateway/get-v1models",
-              "rest/models/get-v1public-model-registry-models"
-            ]
           }
         ]
       },

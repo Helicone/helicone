@@ -11,7 +11,7 @@ import { deepseekEndpointConfig, deepseekModels } from "./authors/deepseek";
 import { googleEndpointConfig, googleModels } from "./authors/google";
 import { grokEndpointConfig, grokModels } from "./authors/xai";
 import { openaiEndpointConfig, openaiModels } from "./authors/openai";
-import { mistralEndpointConfig, mistralModels } from "./authors/mistralai";
+import { mistralEndpointConfig, mistralModels } from "./authors/mistral";
 import { alibabaEndpointConfig, alibabaModels } from "./authors/alibaba";
 import { metaEndpointConfig, metaModels } from "./authors/meta";
 import { zaiEndpointConfig, zaiModels } from "./authors/zai";

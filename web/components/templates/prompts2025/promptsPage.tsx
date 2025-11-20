@@ -465,6 +465,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                     currentSortKey={sortKey}
                     currentSortDirection={sortDirection}
                     className="h-full"
+                    tableId="prompts-table"
                   />
                 )}
               </div>

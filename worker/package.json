@@ -49,6 +49,7 @@
     "@cloudflare/containers": "^0.0.28",
     "@cloudflare/itty-router-openapi": "^1",
     "@helicone/prompts": "^1",
+    "@react-email/html": "0.0.11",
     "@smithy/protocol-http": "^4.1.7",
     "@smithy/signature-v4": "^4.2.3",
     "@supabase/supabase-js": "^2.45.6",

@@ -1,3 +1,8 @@
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import {
+  buildFilterWithAuthClickHouse,
+  buildFilterWithAuthClickHouseOrganizationProperties,
+} from "@helicone-package/filters/filters";
 import {
   Body,
   Controller,
@@ -8,15 +13,14 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
-  buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHouseOrganizationProperties,
-} from "@helicone-package/filters/filters";
-import { resultMap } from "../../packages/common/result";
+  type DataOverTimeRequest,
+  getXOverTime,
+} from "../../managers/helpers/getXOverTime";
+import { Result, resultMap } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export interface Property {
   property: string;
@@ -35,11 +39,60 @@ export interface TimeFilterRequest {
 @Tags("Property")
 @Security("api_key")
 export class PropertyController extends Controller {
+  @Post("/properties/over-time")
+  public async getPropertiesOverTime(
+    @Body()
+    requestBody: DataOverTimeRequest & {
+      propertyKey: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        property: string;
+        total_cost: number;
+        request_count: number;
+        created_at_trunc: string;
+      }[],
+      string
+    >
+  > {
+    return await getXOverTime<{
+      property: string;
+      total_cost: number;
+      request_count: number;
+    }>(
+      {
+        ...requestBody,
+        userFilter: {
+          left: {
+            request_response_rmt: {
+              property_key: {
+                equals: requestBody.propertyKey,
+              },
+            },
+          },
+          operator: "and",
+          right: requestBody.userFilter,
+        },
+      },
+      {
+        orgId: request.authParams.organizationId,
+        countColumns: [
+          `sum(cost) / ${COST_PRECISION_MULTIPLIER} AS total_cost`,
+          "count(*) as request_count",
+        ],
+        groupByColumns: ["properties[{val_0: String}] AS property"],
+      },
+      [requestBody.propertyKey]
+    );
+  }
+
   @Post("query")
   public async getProperties(
     @Body()
     requestBody: {},
-    @Request() request: JawnAuthenticatedRequest,
+    @Request() request: JawnAuthenticatedRequest
   ) {
     const builtFilter =
       await buildFilterWithAuthClickHouseOrganizationProperties({
@@ -62,7 +115,7 @@ export class PropertyController extends Controller {
 
     const properties = await dbQueryClickhouse<Property>(
       query,
-      builtFilter.argsAcc,
+      builtFilter.argsAcc
     );
 
     return properties;
@@ -72,7 +125,7 @@ export class PropertyController extends Controller {
   public async hideProperty(
     @Body()
     requestBody: { key: string },
-    @Request() request: JawnAuthenticatedRequest,
+    @Request() request: JawnAuthenticatedRequest
   ) {
     const orgId = request.authParams.organizationId;
     const key = requestBody.key;
@@ -93,7 +146,7 @@ export class PropertyController extends Controller {
 
     const insRes = await clickhouseDb.dbInsertClickhouse(
       "hidden_property_keys",
-      [{ organization_id: orgId, key, is_hidden: 1 }],
+      [{ organization_id: orgId, key, is_hidden: 1 }]
     );
     if (insRes.error) {
       return insRes;
@@ -104,7 +157,7 @@ export class PropertyController extends Controller {
 
   @Post("hidden/query")
   public async getHiddenProperties(
-    @Request() request: JawnAuthenticatedRequest,
+    @Request() request: JawnAuthenticatedRequest
   ) {
     const orgId = request.authParams.organizationId;
 
@@ -123,7 +176,7 @@ export class PropertyController extends Controller {
   public async restoreProperty(
     @Body()
     requestBody: { key: string },
-    @Request() request: JawnAuthenticatedRequest,
+    @Request() request: JawnAuthenticatedRequest
   ) {
     const orgId = request.authParams.organizationId;
     const key = requestBody.key;
@@ -143,7 +196,7 @@ export class PropertyController extends Controller {
 
     const insRes = await clickhouseDb.dbInsertClickhouse(
       "hidden_property_keys",
-      [{ organization_id: orgId, key, is_hidden: 0 }],
+      [{ organization_id: orgId, key, is_hidden: 0 }]
     );
     if (insRes.error) {
       return insRes;
@@ -160,7 +213,7 @@ export class PropertyController extends Controller {
     @Body()
     requestBody: {
       searchTerm: string;
-    },
+    }
   ) {
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: request.authParams.organizationId,
@@ -188,7 +241,7 @@ export class PropertyController extends Controller {
 
     const res = await dbQueryClickhouse<{ property: string }>(
       query,
-      builtFilter.argsAcc,
+      builtFilter.argsAcc
     );
 
     return resultMap(res, (data) => data.map((r) => r.property));
@@ -198,7 +251,7 @@ export class PropertyController extends Controller {
   public async getTopCosts(
     @Request() request: JawnAuthenticatedRequest,
     @Path() propertyKey: string,
-    @Body() requestBody: TimeFilterRequest,
+    @Body() requestBody: TimeFilterRequest
   ) {
     if (!propertyKey) {
       throw new Error("Property key is required");
@@ -270,7 +323,7 @@ export class PropertyController extends Controller {
       }));
 
       // Get the total cost
-      const totalCost = totalRes.data?.[0]?.cost || 0;
+      const totalCost = +(totalRes.data?.[0]?.cost || 0);
 
       // Calculate the "other" category cost (total minus sum of top 10)
       const topCostsSum = topCosts.reduce((sum, item) => sum + item.cost, 0);
@@ -288,6 +341,103 @@ export class PropertyController extends Controller {
       }
 
       return topCosts;
+    });
+  }
+
+  @Post("{propertyKey}/top-requests/query")
+  public async getTopRequests(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() propertyKey: string,
+    @Body() requestBody: TimeFilterRequest
+  ) {
+    if (!propertyKey) {
+      throw new Error("Property key is required");
+    }
+
+    const builtFilter = await buildFilterWithAuthClickHouse({
+      org_id: request.authParams.organizationId,
+      argsAcc: [],
+      filter: {
+        left: {
+          request_response_rmt: {
+            request_created_at: {
+              gt: new Date(requestBody.timeFilter.start),
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            request_created_at: {
+              lt: new Date(requestBody.timeFilter.end),
+            },
+          },
+        },
+      },
+    });
+
+    const args = builtFilter.argsAcc.concat([propertyKey]);
+
+    const propertySQLKey = `{val_${args.length - 1} : String}`;
+
+    // Query to get the top 10 requests
+    const topQuery = `
+    SELECT
+      properties[${propertySQLKey}] as value,
+      count(*) as count
+    FROM request_response_rmt
+    WHERE (
+      ${builtFilter.filter}
+      AND properties[${propertySQLKey}] IS NOT NULL
+    )
+    GROUP BY properties[${propertySQLKey}]
+    ORDER BY count DESC
+    LIMIT 10
+    `;
+
+    // Query to get the total count for this property
+    const totalQuery = `
+    SELECT
+      count(*) as count
+    FROM request_response_rmt
+    WHERE (
+      ${builtFilter.filter}
+      AND properties[${propertySQLKey}] IS NOT NULL
+    )
+    `;
+
+    // Execute both queries
+    const [topRes, totalRes] = await Promise.all([
+      dbQueryClickhouse<{ value: string; count: number }>(topQuery, args),
+      dbQueryClickhouse<{ count: number }>(totalQuery, args),
+    ]);
+
+    return resultMap(topRes, (data) => {
+      // Calculate the sum of the top 10 counts
+      const topRequests = data.map((d) => ({
+        value: d.value,
+        count: +d.count,
+      }));
+
+      // Get the total count
+      const totalCount = +(totalRes.data?.[0]?.count || 0);
+
+      // Calculate the "other" category count (total minus sum of top 10)
+      const topRequestsSum = topRequests.reduce((sum, item) => sum + item.count, 0);
+      const otherCount = totalCount - topRequestsSum;
+
+      // Only add the "other" category if it has a positive count
+      if (otherCount > 0) {
+        return [
+          ...topRequests,
+          {
+            value: "Other",
+            count: otherCount,
+          },
+        ];
+      }
+
+      return topRequests;
     });
   }
 }

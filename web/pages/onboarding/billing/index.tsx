@@ -23,12 +23,8 @@ export default function BillingOnboardingPage() {
   const router = useRouter();
   const org = useOrg();
   const { setNotification } = useNotification();
-  const {
-    isLoading,
-    updateCurrentStep,
-    hasProviderKeys,
-    refetchProviderKeys,
-  } = useOrgOnboarding(org?.currentOrg?.id ?? "");
+  const { isLoading, updateCurrentStep, hasProviderKeys, refetchProviderKeys } =
+    useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isProviderSheetOpen, setIsProviderSheetOpen] = useState(false);

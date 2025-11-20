@@ -184,7 +184,12 @@ const UserSearch = () => {
           <P className="text-sm font-medium text-destructive">
             Unable to load users.
           </P>
-          <Button variant="outline" size="sm" className="w-fit" onClick={handleRetry}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-fit"
+            onClick={handleRetry}
+          >
             Try again
           </Button>
         </div>
@@ -221,7 +226,9 @@ const UserSearch = () => {
                     <th className="px-4 py-3 font-medium">Owner Roles</th>
                     <th className="px-4 py-3 font-medium">Created</th>
                     <th className="px-4 py-3 font-medium">Last Sign In</th>
-                    <th className="px-4 py-3 font-medium text-right">Details</th>
+                    <th className="px-4 py-3 text-right font-medium">
+                      Details
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border bg-background text-sm">
@@ -262,7 +269,10 @@ const UserSearch = () => {
                             <div className="flex items-center gap-2">
                               <span>{user.name ?? "Unknown"}</span>
                               {user.is_admin ? (
-                                <Badge variant="secondary" className="border border-border/50">
+                                <Badge
+                                  variant="secondary"
+                                  className="border border-border/50"
+                                >
                                   Admin
                                 </Badge>
                               ) : null}
@@ -314,7 +324,7 @@ const UserSearch = () => {
                                         <span className="text-xs uppercase text-muted-foreground">
                                           User ID
                                         </span>
-                                        <span className="break-all font-mono text-xs">
+                                        <span className="font-mono break-all text-xs">
                                           {user.id}
                                         </span>
                                       </div>
@@ -370,7 +380,9 @@ const UserSearch = () => {
                                               </span>
                                             </div>
                                             <span className="font-mono text-[11px] text-muted-foreground">
-                                              {orgId ? `${orgId.slice(0, 8)}…` : "—"}
+                                              {orgId
+                                                ? `${orgId.slice(0, 8)}…`
+                                                : "—"}
                                             </span>
                                           </a>
                                         );
@@ -392,7 +404,10 @@ const UserSearch = () => {
         </div>
       )}
 
-      <div ref={observerTarget} className="flex w-full items-center justify-center py-4">
+      <div
+        ref={observerTarget}
+        className="flex w-full items-center justify-center py-4"
+      >
         {isFetchingNextPage ? (
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         ) : null}

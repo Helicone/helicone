@@ -1,13 +1,18 @@
 import { Result, err, ok } from "../util/results";
-import { Alert, AlertState, AlertStore } from "../db/AlertStore";
+import {
+  Alert,
+  AlertState,
+  AlertStore,
+  GroupedAlertResult,
+} from "../db/AlertStore";
 import { safePut } from "../safePut";
-import { FilterExpression } from "@helicone-package/filters/types";
 
 type AlertStateUpdate = {
   alert: Alert;
   status: "triggered" | "resolved" | "unchanged";
   timestamp: number;
   triggeredThreshold?: number;
+  groupedResults?: GroupedAlertResult[]; // For grouped alerts
 };
 
 export class AlertManager {
@@ -211,20 +216,10 @@ export class AlertManager {
 
   async getAlertState(alert: Alert): Promise<Result<AlertState, string>> {
     if (alert.metric === "response.status") {
-      return await this.alertStore.getErrorRate(
-        alert.org_id,
-        alert.time_window,
-        alert.filter as FilterExpression | null
-      );
-    } else if (alert.metric === "cost") {
-      return await this.alertStore.getCost(
-        alert.org_id,
-        alert.time_window,
-        alert.filter as FilterExpression | null
-      );
+      return await this.alertStore.getErrorRate(alert);
     }
 
-    return err(`Unsupported metric: ${alert.metric}`);
+    return await this.alertStore.getAggregatedMetric(alert);
   }
 
   async getAlertStateUpdate(
@@ -232,20 +227,37 @@ export class AlertManager {
     alertState: AlertState,
     timestamp: number
   ): Promise<AlertStateUpdate> {
+    const hasGrouping = alert.grouping !== null;
+
+    if (hasGrouping && alertState.groupedResults) {
+      const hasViolations = alertState.groupedResults.length > 0;
+
+      if (hasViolations) {
+        return await this.handleRateAboveThreshold(
+          alert,
+          alert.threshold,
+          alertState.requestCount,
+          timestamp,
+          alertState.groupedResults
+        );
+      } else {
+        return await this.handleRateBelowThreshold(alert, timestamp);
+      }
+    }
+
+    // Handle ungrouped alerts (backwards compatible)
     let isRateBelowThreshold = false;
     let triggerThreshold = 0;
+
     if (alert.metric === "response.status") {
       triggerThreshold =
         alertState.totalCount > 0 && alertState.errorCount
           ? (alertState.errorCount / alertState.totalCount) * 100
           : 0;
-
       isRateBelowThreshold = triggerThreshold < alert.threshold;
-    } else if (alert.metric === "cost") {
+    } else {
       triggerThreshold = alertState.totalCount;
       isRateBelowThreshold = alertState.totalCount < alert.threshold;
-    } else {
-      throw new Error(`Unsupported metric: ${alert.metric}`);
     }
 
     // Handle scenarios where rate is below threshold
@@ -288,7 +300,8 @@ export class AlertManager {
     alert: Alert,
     triggerThreshold: number,
     requestCount: number,
-    timestamp: number
+    timestamp: number,
+    groupedResults?: GroupedAlertResult[]
   ): Promise<AlertStateUpdate> {
     if (
       alert.status === "resolved" &&
@@ -299,6 +312,7 @@ export class AlertManager {
         status: "triggered",
         timestamp,
         triggeredThreshold: triggerThreshold,
+        groupedResults,
         alert,
       };
     }
@@ -447,6 +461,253 @@ export class AlertManager {
     return ok(null);
   }
 
+  private formatAlertEmailHtml(params: {
+    alertName: string;
+    status: "triggered" | "resolved";
+    metric: string;
+    threshold: number;
+    timeWindow: number;
+    alertTime: string;
+    actionMessage: string;
+    groupedResults?: GroupedAlertResult[];
+    groupLabel?: string;
+    formatValue: (value: number) => string;
+  }): string {
+    const {
+      alertName,
+      status,
+      metric,
+      threshold,
+      timeWindow,
+      alertTime,
+      actionMessage,
+      groupedResults = [],
+      groupLabel,
+      formatValue,
+    } = params;
+
+    // Helicone brand colors
+    const colors = {
+      primary: "#0DA5E8",
+      triggered: "#DC2626",
+      resolved: "#16A34A",
+      text: "#0F172A",
+      textMuted: "#64748B",
+      border: "#E2E8F0",
+      background: "#FFFFFF",
+      backgroundGray: "#F8FAFC",
+    };
+
+    const statusColor = status === "triggered" ? colors.triggered : colors.resolved;
+    const statusText = status === "triggered" ? "TRIGGERED" : "RESOLVED";
+
+    const formatTimespan = (ms: number) => {
+      const minutes = Math.floor(ms / 60000);
+      const hours = Math.floor(minutes / 60);
+      return hours > 0 ? `${hours} hour(s)` : `${minutes} minute(s)`;
+    };
+
+    const formatThreshold = () => {
+      if (metric === "cost") return `$${threshold}`;
+      if (metric === "response.status") return `${threshold}%`;
+      if (metric === "latency") return `${threshold}ms`;
+      if (metric === "count") return `${threshold} requests`;
+      if (metric.includes("tokens")) return `${threshold} tokens`;
+      return threshold.toString();
+    };
+
+    const getMainMessage = () => {
+      if (status === "triggered") {
+        if (metric === "response.status") {
+          return `Error rate has breached ${threshold}% in the last ${formatTimespan(timeWindow)}.`;
+        } else if (metric === "cost") {
+          return `Cost has exceeded $${threshold} in the last ${formatTimespan(timeWindow)}.`;
+        } else if (metric === "latency") {
+          return `Latency has exceeded ${threshold}ms in the last ${formatTimespan(timeWindow)}.`;
+        } else if (metric === "count") {
+          return `Request count has exceeded ${threshold} requests in the last ${formatTimespan(timeWindow)}.`;
+        } else if (metric.includes("tokens")) {
+          return `Token usage has exceeded ${threshold} tokens in the last ${formatTimespan(timeWindow)}.`;
+        }
+        return `Metric has exceeded threshold in the last ${formatTimespan(timeWindow)}.`;
+      } else {
+        if (metric === "response.status") {
+          return `Error rate is now back within ${threshold}%.`;
+        } else if (metric === "cost") {
+          return `Cost is now under $${threshold}.`;
+        } else if (metric === "latency") {
+          return `Latency is now under ${threshold}ms.`;
+        } else if (metric === "count") {
+          return `Request count is now under ${threshold} requests.`;
+        } else if (metric.includes("tokens")) {
+          return `Token usage is now under ${threshold} tokens.`;
+        }
+        return "Metric is now within threshold.";
+      }
+    };
+
+    let groupedResultsHtml = "";
+    if (groupedResults.length > 0 && status === "triggered") {
+      const rows = groupedResults
+        .map(
+          (result, idx) => `
+        <tr style="background-color: ${idx % 2 === 0 ? colors.background : colors.backgroundGray};">
+          <td style="padding: 12px 16px; color: ${colors.text}; font-size: 14px; border-bottom: 1px solid ${colors.border};">
+            ${result.groupValue || "N/A"}
+          </td>
+          <td style="padding: 12px 16px; color: ${colors.text}; font-size: 14px; font-weight: 500; border-bottom: 1px solid ${colors.border};">
+            ${formatValue(result.aggregatedValue)}
+          </td>
+        </tr>`
+        )
+        .join("");
+
+      groupedResultsHtml = `
+      <tr>
+        <td style="padding: 24px; background-color: ${colors.background};">
+          <h2 style="color: ${colors.text}; font-size: 16px; font-weight: 600; margin: 0 0 16px 0;">
+            Violated ${groupLabel || "Group"}s
+          </h2>
+          <table style="width: 100%; border-collapse: collapse; border: 1px solid ${colors.border}; border-radius: 6px; overflow: hidden;">
+            <thead>
+              <tr style="background-color: ${colors.backgroundGray};">
+                <th style="padding: 12px 16px; text-align: left; color: ${colors.text}; font-size: 12px; font-weight: 600; border-bottom: 1px solid ${colors.border};">
+                  ${groupLabel || "Group"}
+                </th>
+                <th style="padding: 12px 16px; text-align: left; color: ${colors.text}; font-size: 12px; font-weight: 600; border-bottom: 1px solid ${colors.border};">
+                  Value
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </td>
+      </tr>`;
+    }
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @media only screen and (max-width: 600px) {
+      .container { width: 100% !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: ${colors.backgroundGray}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" class="container" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: ${colors.background}; border: 1px solid ${colors.border}; border-radius: 8px; overflow: hidden;">
+          <!-- Header -->
+          <tr>
+            <td style="padding: 24px; background-color: ${colors.background}; border-bottom: 1px solid ${colors.border};">
+              <table role="presentation" style="width: 100%;">
+                <tr>
+                  <td>
+                    <img src="https://www.helicone.ai/static/logo.png" alt="Helicone" style="display: block; height: 30px; width: auto;">
+                  </td>
+                  <td style="text-align: right;">
+                    <div style="display: inline-block; padding: 6px 12px; background-color: ${statusColor}; border-radius: 6px;">
+                      <span style="color: ${colors.background}; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">${statusText}</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2" style="padding-top: 16px;">
+                    <h1 style="color: ${colors.text}; font-size: 20px; font-weight: 600; margin: 0;">${alertName}</h1>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Main Message -->
+          <tr>
+            <td style="padding: 24px; background-color: ${colors.background};">
+              <p style="color: ${colors.text}; font-size: 16px; font-weight: 500; line-height: 24px; margin: 0 0 12px 0;">
+                ${getMainMessage()}
+              </p>
+              <p style="color: ${colors.textMuted}; font-size: 14px; line-height: 20px; margin: 0;">
+                ${actionMessage}
+              </p>
+            </td>
+          </tr>
+          <!-- Alert Details -->
+          <tr>
+            <td style="padding: 24px; background-color: ${colors.background};">
+              <h2 style="color: ${colors.text}; font-size: 16px; font-weight: 600; margin: 0 0 16px 0;">Alert Details</h2>
+              <table role="presentation" style="width: 100%;">
+                <tr>
+                  <td style="padding-bottom: 8px; width: 40%; vertical-align: top;">
+                    <span style="color: ${colors.textMuted}; font-size: 14px;">Alert Time:</span>
+                  </td>
+                  <td style="padding-bottom: 8px; width: 60%; vertical-align: top;">
+                    <span style="color: ${colors.text}; font-size: 14px; font-weight: 500;">${alertTime}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom: 8px; vertical-align: top;">
+                    <span style="color: ${colors.textMuted}; font-size: 14px;">Metric:</span>
+                  </td>
+                  <td style="padding-bottom: 8px; vertical-align: top;">
+                    <span style="color: ${colors.text}; font-size: 14px; font-weight: 500;">${metric}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom: 8px; vertical-align: top;">
+                    <span style="color: ${colors.textMuted}; font-size: 14px;">Threshold:</span>
+                  </td>
+                  <td style="padding-bottom: 8px; vertical-align: top;">
+                    <span style="color: ${colors.text}; font-size: 14px; font-weight: 500;">${formatThreshold()}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="vertical-align: top;">
+                    <span style="color: ${colors.textMuted}; font-size: 14px;">Time Window:</span>
+                  </td>
+                  <td style="vertical-align: top;">
+                    <span style="color: ${colors.text}; font-size: 14px; font-weight: 500;">${formatTimespan(timeWindow)}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ${groupedResultsHtml}
+          <!-- CTA Button -->
+          <tr>
+            <td style="padding: 24px; background-color: ${colors.background};">
+              <a href="https://helicone.ai/dashboard" style="display: inline-block; padding: 12px 24px; background-color: ${colors.primary}; color: ${colors.background}; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">
+                View Dashboard
+              </a>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px; background-color: ${colors.background}; border-top: 1px solid ${colors.border};">
+              <p style="color: ${colors.textMuted}; font-size: 14px; line-height: 24px; margin: 0 0 8px 0;">
+                This alert was sent by <a href="https://helicone.ai" style="color: ${colors.primary}; text-decoration: underline;">Helicone</a>.
+              </p>
+              <p style="color: ${colors.textMuted}; font-size: 14px; line-height: 24px; margin: 0 0 16px 0;">
+                <a href="https://helicone.ai/alerts" style="color: ${colors.primary}; text-decoration: underline;">Manage alert settings</a>
+              </p>
+              <p style="color: ${colors.textMuted}; font-size: 12px; line-height: 20px; margin: 0;">
+                © ${new Date().getFullYear()} Helicone.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+  }
+
   private formatAlertNotification(alertStatusUpdate: AlertStateUpdate): {
     subject: string;
     text: string;
@@ -457,6 +718,8 @@ export class AlertManager {
     const alert = alertStatusUpdate.alert;
     const status = alertStatusUpdate.status ?? "";
     const capitalizedStatus = status.charAt(0).toUpperCase() + status.slice(1);
+    const hasGrouping = alert.grouping !== null;
+    const groupedResults = alertStatusUpdate.groupedResults || [];
 
     const formatTimestamp = (timestamp: string) =>
       timestamp ? new Date(timestamp).toUTCString() : "N/A";
@@ -467,12 +730,23 @@ export class AlertManager {
       return hours > 0 ? `${hours} hour(s)` : `${minutes} minute(s)`;
     };
 
-    const headerClass =
-      alertStatusUpdate.status === "triggered" ? "Triggered" : "Resolved";
-    const headerEmoji =
-      alertStatusUpdate.status === "triggered"
-        ? ":warning:"
-        : ":white_check_mark:";
+    const formatValue = (value: number) => {
+      if (alert.metric === "cost") {
+        return `$${value.toFixed(2)}`;
+      } else if (alert.metric === "response.status") {
+        return `${value.toFixed(2)}%`;
+      } else if (alert.metric === "latency") {
+        return `${Math.round(value)}ms`;
+      } else if (alert.metric === "count") {
+        return `${Math.round(value)} requests`;
+      } else if (alert.metric.includes("tokens")) {
+        // Handles: total_tokens, prompt_tokens, completion_tokens,
+        // prompt_cache_read_tokens, prompt_cache_write_tokens
+        return `${Math.round(value)} tokens`;
+      }
+      return value.toFixed(2);
+    };
+
     const subject = `Alert ${capitalizedStatus}: ${alert.name}`;
     const alertTime = new Date(alertStatusUpdate.timestamp).toUTCString();
     const actionMessage =
@@ -480,192 +754,177 @@ export class AlertManager {
         ? "Please take the necessary action."
         : "No further action is required.";
 
+    let groupedResultsText = "";
+    if (hasGrouping && groupedResults.length > 0 && status === "triggered") {
+      const groupLabel =
+        alert.grouping_is_property
+          ? `Property "${alert.grouping}"`
+          : alert.grouping!.charAt(0).toUpperCase() + alert.grouping!.slice(1);
+
+      groupedResultsText = `\n\nThe following ${groupLabel}s exceeded the threshold:\n`;
+
+      groupedResults.forEach((result) => {
+        const displayValue = formatValue(result.aggregatedValue);
+        groupedResultsText += `- ${result.groupValue || "N/A"}: ${displayValue}\n`;
+      });
+    }
+
     const text = `Alert '${
       alert.name
     }' has been ${capitalizedStatus}.\n\nDetails:\n- ${capitalizedStatus} At: ${
       alertTime ? formatTimestamp(alertTime) : "alertTime not found"
-    }\n- Threshold: ${alert.threshold}%\n\n${actionMessage}`;
+    }\n- Threshold: ${
+      alert.metric === "cost" ? `$${alert.threshold}` : `${alert.threshold}%`
+    }${groupedResultsText}\n\n${actionMessage}`;
 
-    const slack_json = {
-      blocks: [
-        {
-          type: "header",
-          text: {
-            type: "plain_text",
-            text: `${headerEmoji} Alert ${headerClass}: ${alert.name}`,
-          },
-        },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text:
-              (alert.metric === "response.status"
-                ? alertStatusUpdate.status === "triggered"
-                  ? `Error rate has breached *${
-                      alert.threshold
-                    }%* in the last *${formatTimespan(alert.time_window)}*.`
-                  : `Error rate is now back within *${alert.threshold}%*.`
-                : alertStatusUpdate.status === "triggered"
-                  ? `Cost has exceeded *$${
-                      alert.threshold
-                    }* in the last *${formatTimespan(alert.time_window)}*.`
-                  : `Cost is now under *$${alert.threshold}*`) +
-              (alertStatusUpdate.status === "triggered"
-                ? `\nPlease take the necessary action.`
-                : `\nNo further action is required.`),
-          },
-        },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: `Time: ${alertTime}`,
-          },
-        },
-      ],
+    // Build tasteful Slack blocks
+    const statusEmoji = status === "triggered" ? "🚨" : "✅";
+
+    // Determine main message based on metric
+    const getSlackMainMessage = () => {
+      if (status === "triggered") {
+        if (alert.metric === "response.status") {
+          return `Error rate has *breached ${alert.threshold}%* in the last *${formatTimespan(alert.time_window)}*`;
+        } else if (alert.metric === "cost") {
+          return `Cost has *exceeded $${alert.threshold}* in the last *${formatTimespan(alert.time_window)}*`;
+        } else if (alert.metric === "latency") {
+          return `Latency has *exceeded ${alert.threshold}ms* in the last *${formatTimespan(alert.time_window)}*`;
+        } else if (alert.metric === "count") {
+          return `Request count has *exceeded ${alert.threshold} requests* in the last *${formatTimespan(alert.time_window)}*`;
+        } else if (alert.metric.includes("tokens")) {
+          return `Token usage has *exceeded ${alert.threshold} tokens* in the last *${formatTimespan(alert.time_window)}*`;
+        }
+        return `Metric has exceeded threshold in the last *${formatTimespan(alert.time_window)}*`;
+      } else {
+        if (alert.metric === "response.status") {
+          return `Error rate is now *back within ${alert.threshold}%*`;
+        } else if (alert.metric === "cost") {
+          return `Cost is now *under $${alert.threshold}*`;
+        } else if (alert.metric === "latency") {
+          return `Latency is now *under ${alert.threshold}ms*`;
+        } else if (alert.metric === "count") {
+          return `Request count is now *under ${alert.threshold} requests*`;
+        } else if (alert.metric.includes("tokens")) {
+          return `Token usage is now *under ${alert.threshold} tokens*`;
+        }
+        return "Metric is now within threshold";
+      }
     };
 
-    const html = `<!DOCTYPE html>
-    <html lang="en" dir="ltr" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" style="color-scheme:light dark;supported-color-schemes:light dark;">
-      <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width,initial-scale=1 user-scalable=yes">
-        <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
-        <meta name="x-apple-disable-message-reformatting">
-        <meta name="color-scheme" content="light dark">
-        <meta name="supported-color-schemes" content="light dark">
-        <title></title>
-        <!--[if mso]> 
-        <noscript>
-          <xml>
-            <o:OfficeDocumentSettings>
-              <o:PixelsPerInch>96</o:PixelsPerInch>
-            </o:OfficeDocumentSettings>
-          </xml>
-        </noscript>
-        <![endif]-->
-        <!--[if mso]>
-        <style>table,tr,td,p,span,a{mso-line-height-rule:exactly !important;line-height:120% !important;mso-table-lspace:0 !important;mso-table-rspace:0 !important;}.mso-padding{padding-top:20px !important;padding-bottom:20px !important;}
-        </style>
-        <![endif]-->
-        <style>a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important;font-size:inherit!important;font-family:inherit!important;font-weight:inherit!important;line-height:inherit!important;}u+#body a{color:inherit!important;text-decoration:none!important;font-size:inherit!important;font-family:inherit!important;font-weight:inherit!important;line-height:inherit!important;}#MessageViewBody a{color:inherit!important;text-decoration:none!important;font-size:inherit!important;
-          font-family:inherit!important;font-weight:inherit!important;line-height:inherit!important;}:root{color-scheme:light dark;supported-color-schemes:light dark;}tr{vertical-align:middle;}p,a,li{color:#000000;font-size:16px;mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;}p:first-child{margin-top:0!important;}p:last-child{margin-bottom:0!important;}a{text-decoration:underline;font-weight:bold;color:#0000ff}.alert p{vertical-align:top;color:#fff;font-weight:500;text-align:
-          center;border-radius:3px 3px 0 0;background-color:#FF9F00;margin:0;padding:20px;}@media only screen and (max-width:599px){.full-width-mobile{width:100%!important;height:auto!important;}.mobile-padding{padding-left:10px!important;padding-right:10px!important;}.mobile-stack{display:block!important;width:100%!important;}}@media (prefers-color-scheme:dark){body,div,table,td{background-color:#000000!important;color:#ffffff!important;}.content{background-color:#222222!important;}p,li,.white-text{color:#B3BDC4!important;}a{color:#84cfe2!important;}a span,.alert-dark p{color:#ffffff!important;}}
-        </style>
-      </head>
-      <body class="body" style="background-color:#f4f4f4;">
-        <div style="display:none;font-size:1px;color:#f4f4f4;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;"></div>
-        <span style="display:none!important;visibility:hidden;mso-hide:all;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;"> &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</span>
-        <div role="article" aria-roledescription="email" aria-label="Your Email" lang="en" dir="ltr" style="font-size:16px;font-size:1rem;font-size:max(16px,1rem);background-color:#f4f4f4;">
-          <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;max-width:600px;width:100%;background-color:#f4f4f4;">
-            <tr style="vertical-align:middle;" valign="middle">
-              <td>
-                <!--[if mso]>
-                <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse:collapse;">
-                  <tr>
-                    <td align="center">
-                      <!--<![endif]-->
-                    </td>
-                  </tr>
-                  <tr style="vertical-align:middle;" valign="middle">
-                    <td align="center">
-                      <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse:collapse;max-width:600px;width:100%;background-color:#fffffe;">
-                        <tr style="vertical-align:middle;" valign="middle">
-                          <td>
-                            <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse:collapse;max-width:600px;width:100%;">
-                              <tr style="vertical-align:middle;" valign="middle">
-                                <td class="mso-padding alert alert-warning alert-dark" align="center" bgcolor="#000000" valign="top">
-                                  <p style="font-size:20px; mso-line-height-rule:exactly; line-height:28px; font-family:Arial, sans-serif; vertical-align:top; color:${
-                                    headerClass === "Resolved"
-                                      ? "#00FF00"
-                                      : "#FF0000"
-                                  }; font-weight:500; text-align:center; border-radius:3px 3px 0 0; background-color:#000000; margin:0; padding:20px; margin-top:0!important; margin-bottom:0!important;">
-                                  Helicone Alert ${
-                                    headerClass.charAt(0).toUpperCase() +
-                                    headerClass.slice(1)
-                                  }<br/>${alert.name}
-                                  </p>    
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                        <tr style="vertical-align:middle;" valign="middle">
-                          <td align="center" style="padding:30px;" class="content">
-                            <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse:collapse;max-width:600px;width:100%;background-color:#fffffe;">
-                              <tr style="vertical-align:middle;" valign="middle">
-                                <td class="content">
-                                  <ul style="list-style-type: none; padding: 0; margin: 0; color:#000000; font-size:16px; line-height:24px; font-family:Arial, sans-serif;">
-                                    <li><strong>Status:</strong> ${capitalizedStatus}</li>
-                                    <li><strong>Triggered At:</strong> ${
-                                      alertTime
-                                        ? formatTimestamp(alertTime)
-                                        : "alertTime not found"
-                                    }</li>
-                                    <li><strong>Threshold:</strong> ${
-                                      alert.metric === "cost"
-                                        ? `$${alert.threshold}`
-                                        : `${alert.threshold}%`
-                                    }</li>
-                                    <li><strong>Metric:</strong> ${alert.metric}</li>
-                                    <li><strong>Time Window:</strong> ${formatTimespan(
-                                      alert.time_window
-                                    )}
-                                    </li>
-                                    <li style="margin-top: 10px;">${actionMessage}</li>
-                                  </ul>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                        <tr style="vertical-align:middle;" valign="middle">
-                          <td align="center" class="content">
-                            <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%">
-                              <tr style="vertical-align:middle;" valign="middle">
-                                <td align="left" style="padding:0 0 0 30px;" class="content">
-                                  <a href="https://helicone.ai/alerts" style="font-size:16px;mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-weight:bold;background:#000000;text-decoration:none;padding:15px 25px;color:#fff;border-radius:4px;display:inline-block;mso-padding-alt:0;text-underline-color:#348eda;" class="dark-button">
-                                    <!--[if mso]><i style="letter-spacing:25px;mso-font-width:-100%;mso-text-raise:30pt" hidden>&nbsp;</i>
-                                    <![endif]--><span style="mso-text-raise:15pt;">View alert here</span>
-                                    <!--[if mso]><i style="letter-spacing:25px;mso-font-width:-100%" hidden>&nbsp;</i>
-                                    <![endif]-->
-                                  </a>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                        <tr style="vertical-align:middle;" valign="middle">
-                          <td align="center" style="padding:30px;" class="content">
-                            <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse:collapse;max-width:600px;width:100%;background-color:#fffffe;">
-                              <tr style="vertical-align:middle;" valign="middle">
-                                <td class="content">
-                                  <p style="color:#000000;font-size:16px;mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;margin-top:0!important;margin-bottom:0!important;">Helicone.ai</p>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-                      <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse:collapse;max-width:600px;width:100%;">
-                        <tr style="vertical-align:middle;" valign="middle">
-                          <td align="center" style="padding:30px 0;">
-                            <p style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;font-size:14px;color:#999;margin-top:0!important;margin-bottom:0!important;"><a href="https://helicone.ai/alerts" style="mso-line-height-rule:exactly;line-height:24px;font-family:Arial,sans-serif;text-decoration:underline;font-weight:bold;font-size:14px;color:#999;">Unsubscribe</a> from these&nbsp;alerts.</p>
-                            </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                  <!--[if mso]>
-                  </td></tr>
-                </table>
-                <!--<![endif]-->
-          </table>
-        </div>
-      </body>
-    </html>`;
+    const slackBlocks: any[] = [
+      {
+        type: "header",
+        text: {
+          type: "plain_text",
+          text: `${statusEmoji} ${alert.name}`,
+          emoji: true,
+        },
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: getSlackMainMessage(),
+        },
+      },
+      {
+        type: "context",
+        elements: [
+          {
+            type: "mrkdwn",
+            text: `*Metric:* ${alert.metric} | *Threshold:* ${formatValue(alert.threshold)} | *Status:* ${capitalizedStatus}`,
+          },
+        ],
+      },
+    ];
+
+    // Add grouped results as a rich table
+    if (hasGrouping && groupedResults.length > 0 && status === "triggered") {
+      const groupLabel =
+        alert.grouping_is_property
+          ? `Property "${alert.grouping}"`
+          : alert.grouping!.charAt(0).toUpperCase() + alert.grouping!.slice(1);
+
+      // Limit to top 10 results for readability
+      const topResults = groupedResults.slice(0, 10);
+      const hasMore = groupedResults.length > 10;
+
+      const resultsText = topResults
+        .map((result) => {
+          const displayValue = formatValue(result.aggregatedValue);
+          return `• *${result.groupValue || "N/A"}*: ${displayValue}`;
+        })
+        .join("\n");
+
+      slackBlocks.push({
+        type: "divider",
+      });
+
+      slackBlocks.push({
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*Violated ${groupLabel}s* ${hasMore ? `(showing top 10 of ${groupedResults.length})` : `(${groupedResults.length})`}\n${resultsText}`,
+        },
+      });
+    }
+
+    // Add divider and footer
+    slackBlocks.push({
+      type: "divider",
+    });
+
+    slackBlocks.push({
+      type: "context",
+      elements: [
+        {
+          type: "mrkdwn",
+          text: `🕐 ${alertTime}`,
+        },
+      ],
+    });
+
+    // Add action button
+    slackBlocks.push({
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: {
+            type: "plain_text",
+            text: "View Dashboard",
+            emoji: true,
+          },
+          url: "https://helicone.ai/dashboard",
+          style: status === "triggered" ? "danger" : "primary",
+        },
+      ],
+    });
+
+    const slack_json = {
+      blocks: slackBlocks,
+    };
+
+    // Determine group label for display
+    const groupLabel = hasGrouping && alert.grouping
+      ? alert.grouping_is_property
+        ? `Property "${alert.grouping}"`
+        : alert.grouping!.charAt(0).toUpperCase() + alert.grouping!.slice(1)
+      : undefined;
+
+    // Generate HTML email using clean template
+    const html = this.formatAlertEmailHtml({
+      alertName: alert.name,
+      status: alertStatusUpdate.status as "triggered" | "resolved",
+      metric: alert.metric,
+      threshold: alert.threshold,
+      timeWindow: alert.time_window,
+      alertTime: formatTimestamp(alertTime),
+      actionMessage,
+      groupedResults,
+      groupLabel,
+      formatValue,
+    });
 
     return { subject, text, html, slack_json };
   }

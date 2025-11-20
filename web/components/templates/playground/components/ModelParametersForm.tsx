@@ -143,8 +143,7 @@ export default function ModelParametersForm({
     logger.error({ error }, "Error occurred");
     if (
       error &&
-      (
-        error.includes("Insufficient credits") ||
+      (error.includes("Insufficient credits") ||
         (error.includes("No") && error.includes("API key found")))
     ) {
       setIsProviderKeyDialogOpen(true);

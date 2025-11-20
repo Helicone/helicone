@@ -422,9 +422,7 @@ export default function RequestDrawer(props: RequestDivProps) {
     if (!props) return null;
 
     return {
-      status: props["helicone-stripe-integration-status"] as
-        | string
-        | undefined,
+      status: props["helicone-stripe-integration-status"] as string | undefined,
       skipReason: props["helicone-stripe-skip-reason"] as string | undefined,
       customerId: props["helicone-stripe-customer-id"] as string | undefined,
       model: props["helicone-stripe-model"] as string | undefined,
@@ -957,7 +955,7 @@ export default function RequestDrawer(props: RequestDivProps) {
             {/* Stripe Integration Status */}
             {hasStripeData && stripeProperties && (
               <div className="mb-4 rounded-lg border border-border bg-sidebar-background p-3">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="mb-2 flex items-center gap-2">
                   <CreditCard size={14} className="text-primary" />
                   <h2 className="text-xs font-medium">Stripe Integration</h2>
                   {stripeProperties.status && (
@@ -995,7 +993,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                       <XSmall className="text-nowrap text-muted-foreground">
                         Customer
                       </XSmall>
-                      <XSmall className="min-w-0 truncate text-right font-mono">
+                      <XSmall className="font-mono min-w-0 truncate text-right">
                         {stripeProperties.customerId}
                       </XSmall>
                     </div>
@@ -1005,7 +1003,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                       <XSmall className="text-nowrap text-muted-foreground">
                         Model
                       </XSmall>
-                      <XSmall className="min-w-0 truncate text-right font-mono">
+                      <XSmall className="font-mono min-w-0 truncate text-right">
                         {stripeProperties.model}
                       </XSmall>
                     </div>
@@ -1015,7 +1013,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                       <XSmall className="text-nowrap text-muted-foreground">
                         Attempted
                       </XSmall>
-                      <XSmall className="min-w-0 truncate text-right font-mono">
+                      <XSmall className="font-mono min-w-0 truncate text-right">
                         {stripeProperties.attemptedModel}
                       </XSmall>
                     </div>

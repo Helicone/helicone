@@ -91,10 +91,16 @@
       "Bash(git log:*)",
       "Bash(git grep:*)",
       "Bash(xargs git grep -l \"request\\|response\")",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "mcp__chrome-devtools__new_page",
+      "WebFetch(domain:docs.perplexity.ai)",
+      "mcp__chrome-devtools__fill_form",
+      "mcp__chrome-devtools__press_key"
     ],
     "deny": []
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": ["playwright"]
+  "enabledMcpjsonServers": [
+    "playwright"
+  ]
 }
