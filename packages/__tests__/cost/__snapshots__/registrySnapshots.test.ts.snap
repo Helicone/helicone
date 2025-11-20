@@ -4596,6 +4596,106 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "perplexity/sonar": {
+    "sonar-deep-research:perplexity": {
+      "context": 127000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "sonar-deep-research",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "perplexity",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "sonar-pro:perplexity": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "sonar-pro",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "response_format",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "perplexity",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "sonar-reasoning-pro:perplexity": {
+      "context": 127000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "sonar-reasoning-pro",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "perplexity",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "sonar-reasoning:perplexity": {
+      "context": 127000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "sonar-reasoning",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "perplexity",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "sonar:perplexity": {
+      "context": 127000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "sonar",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "response_format",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "perplexity",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "xai/endpoints.ts": {
     "grok-3-mini:openrouter": {
       "context": 131072,
@@ -5172,6 +5272,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "novita",
     "openrouter",
     "openrouter",
+  ],
+  "perplexity/sonar": [
+    "perplexity",
+    "perplexity",
+    "perplexity",
+    "perplexity",
+    "perplexity",
   ],
   "xai/endpoints.ts": [
     "openrouter",
@@ -6685,6 +6792,19 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "perplexity/sonar": {
+    "perplexity": [
+      {
+        "audio": 0,
+        "image": 0,
+        "input": 0.000002,
+        "output": 0.000008,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0.005,
+      },
+    ],
+  },
   "xai/endpoints.ts": {
     "openrouter": [
       {
@@ -7351,6 +7471,36 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "novita",
       ],
     },
+    {
+      "model": "sonar",
+      "providers": [
+        "perplexity",
+      ],
+    },
+    {
+      "model": "sonar-deep-research",
+      "providers": [
+        "perplexity",
+      ],
+    },
+    {
+      "model": "sonar-pro",
+      "providers": [
+        "perplexity",
+      ],
+    },
+    {
+      "model": "sonar-reasoning",
+      "providers": [
+        "perplexity",
+      ],
+    },
+    {
+      "model": "sonar-reasoning-pro",
+      "providers": [
+        "perplexity",
+      ],
+    },
   ],
   "providerBreakdown": [
     {
@@ -7420,6 +7570,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "modelCount": 53,
       "provider": "openrouter",
+    },
+    {
+      "modelCount": 5,
+      "provider": "perplexity",
     },
     {
       "modelCount": 15,
@@ -7513,6 +7667,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "qwen3-coder-30b-a3b-instruct",
     "qwen3-next-80b-a3b-instruct",
     "qwen3-vl-235b-a22b-instruct",
+    "sonar",
+    "sonar-deep-research",
+    "sonar-pro",
+    "sonar-reasoning",
+    "sonar-reasoning-pro",
   ],
   "sampleArchivedKeys": [],
   "sampleEndpointIds": [
@@ -7523,9 +7682,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 218,
-  "totalModelProviderConfigs": 218,
-  "totalModelsWithPtb": 82,
-  "totalProviders": 19,
+  "totalEndpoints": 223,
+  "totalModelProviderConfigs": 223,
+  "totalModelsWithPtb": 87,
+  "totalProviders": 20,
 }
 `;
