@@ -1,0 +1,300 @@
+---
+title: "Vercel AI SDK Integration"
+sidebarTitle: "Vercel AI SDK"
+description: "Integrate Helicone AI Gateway with Vercel AI SDK to access 100+ LLM providers with full observability."
+"twitter:title": "Vercel AI SDK Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+
+## Introduction
+
+[Vercel AI SDK](https://sdk.vercel.ai) is a TypeScript toolkit for building AI-powered applications with React, Next.js, Vue, and more.
+
+<Note>
+  The Helicone provider for Vercel AI SDK is available as a dedicated package: `@helicone/ai-sdk-provider`.
+</Note>
+
+## Integration Steps
+
+<Steps>
+  <Step title={strings.generateKey}>
+    Sign up at [helicone.ai](https://www.helicone.ai) and generate an [API key](https://us.helicone.ai/settings/api-keys).
+
+    <Note>
+      You'll also need to configure your provider API keys (OpenAI, Anthropic, etc.) at [Helicone Providers](https://us.helicone.ai/providers) for BYOK (Bring Your Own Keys).
+    </Note>
+  </Step>
+
+  <Step title={strings.setApiKey}>
+    ```bash
+    HELICONE_API_KEY=sk-helicone-...
+    ```
+  </Step>
+
+  <Step title="Install the Helicone AI SDK provider">
+    <CodeGroup>
+    ```bash pnpm
+    pnpm add @helicone/ai-sdk-provider ai
+    ```
+
+    ```bash npm
+    npm install @helicone/ai-sdk-provider ai
+    ```
+
+    ```bash yarn
+    yarn add @helicone/ai-sdk-provider ai
+    ```
+
+    ```bash bun
+    bun add @helicone/ai-sdk-provider ai
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Configure Vercel AI SDK with Helicone">
+    ```typescript
+    import { createHelicone } from '@helicone/ai-sdk-provider';
+    import { generateText } from 'ai';
+
+    // Initialize Helicone provider
+    const helicone = createHelicone({
+      apiKey: process.env.HELICONE_API_KEY
+    });
+
+    // Use any model from 100+ providers
+    const result = await generateText({
+      model: helicone('claude-4.5-haiku'),
+      prompt: 'Write a haiku about artificial intelligence'
+    });
+
+    console.log(result.text);
+    ```
+
+    <Info>
+      You can switch between [100+ models](https://helicone.ai/models) without changing your code. Just update the model name!
+    </Info>
+
+  </Step>
+
+</Steps>
+
+## Complete Working Examples
+
+### Basic Text Generation
+
+```typescript
+import { createHelicone } from '@helicone/ai-sdk-provider';
+import { generateText } from 'ai';
+
+const helicone = createHelicone({
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const { text } = await generateText({
+  model: helicone('gemini-2.5-flash-lite'),
+  prompt: 'What is Helicone?'
+});
+
+console.log(text);
+```
+
+### Streaming Text
+
+```typescript
+import { createHelicone } from '@helicone/ai-sdk-provider';
+import { streamText } from 'ai';
+
+const helicone = createHelicone({
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const result = await streamText({
+  model: helicone('deepseek-v3.1-terminus'),
+  prompt: 'Write a short story about a robot learning to paint',
+  maxTokens: 300
+});
+
+for await (const chunk of result.textStream) {
+  process.stdout.write(chunk);
+}
+
+console.log('\n\nStream completed!');
+```
+
+### Provider Selection
+
+By default, Helicone's AI gateway automatically routes to the cheapest provider. You can also manually select a specific provider:
+
+```typescript
+import { createHelicone } from '@helicone/ai-sdk-provider';
+import { generateText } from 'ai';
+
+const helicone = createHelicone({
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+// Automatic routing (cheapest provider)
+const autoResult = await generateText({
+  model: helicone('gpt-4o'),
+  prompt: 'Hello!'
+});
+
+// Manual provider selection
+const manualResult = await generateText({
+  model: helicone('claude-4.5-sonnet/anthropic'),
+  prompt: 'Hello!'
+});
+
+// Multiple provider selection: first model/provider is used, if it fails, the second model/provider is used, and so on.
+const manualResult = await generateText({
+  model: helicone('claude-4.5-sonnet/anthropic,gpt-4o/openai'),
+  prompt: 'Hello!'
+});
+```
+
+### With Custom Properties and Session Tracking
+
+```typescript
+import { createHelicone } from '@helicone/ai-sdk-provider';
+import { generateText } from 'ai';
+
+const helicone = createHelicone({
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const result = await generateText({
+  model: helicone('claude-4.5-haiku', {
+    extraBody: {
+      helicone: {
+        sessionId: 'my-session',
+        userId: 'user-123',
+        properties: {
+          environment: 'production',
+          appVersion: '2.1.0',
+          feature: 'quantum-explanation'
+        }
+      }
+    }
+  }),
+  prompt: 'Explain quantum computing'
+});
+```
+
+### Tool Calling
+
+```typescript
+import { createHelicone } from '@helicone/ai-sdk-provider';
+import { generateText, tool } from 'ai';
+import { z } from 'zod';
+
+const helicone = createHelicone({
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const result = await generateText({
+  model: helicone('gpt-4o'),
+  prompt: 'What is the weather like in San Francisco?',
+  tools: {
+    getWeather: tool({
+      description: 'Get weather for a location',
+      parameters: z.object({
+        location: z.string().describe('The city name')
+      }),
+      execute: async (args) => {
+        return `It's sunny in ${args.location}`;
+      }
+    })
+  }
+});
+
+console.log(result.text);
+```
+
+### Helicone Prompts Integration
+
+Use prompts created in your Helicone dashboard instead of hardcoding messages in your application:
+
+```typescript
+import { createHelicone } from '@helicone/ai-sdk-provider';
+import type { WithHeliconePrompt } from '@helicone/ai-sdk-provider';
+import { generateText } from 'ai';
+
+const helicone = createHelicone({
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const result = await generateText({
+  model: helicone('gpt-4o', {
+    promptId: 'sg45wqc',
+    inputs: {
+      customer_name: 'Sarah Johnson',
+      issue_type: 'billing',
+      account_type: 'premium'
+    },
+    environment: 'production',
+    extraBody: {
+      helicone: {
+        sessionId: 'support-session-123',
+        properties: {
+          department: 'customer-support'
+        }
+      }
+    }
+  }),
+  messages: [{ role: 'user', content: 'placeholder' }]
+} as WithHeliconePrompt);
+```
+
+<Note>
+  When using `promptId`, you must still pass a placeholder `messages` array to satisfy the Vercel AI SDK's validation. The actual prompt content will be fetched from your Helicone dashboard, and the placeholder messages will be ignored.
+</Note>
+
+**Benefits of using Helicone prompts:**
+
+- 🎯 **Centralized Management**: Update prompts without code changes
+- 👩🏻‍💻 **Perfect for non-technical users**: Create prompts using the Helicone dashboard
+- 🚀 **Lower Latency**: Single API call, no message construction overhead
+- 🔧 **A/B Testing**: Test different prompt versions with environments
+- 📊 **Better Analytics**: Track prompt performance across versions
+
+### Additional Examples
+
+For more comprehensive examples, check out the [GitHub repository](https://github.com/Helicone/ai-sdk-provider/tree/main/examples):
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="Prompt Management" icon="code" href="/gateway/concepts/prompt-caching">
+    Version and manage prompts with Helicone Prompts
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+  <Card title="Sessions" icon="link" href="/features/sessions">
+    Track multi-turn conversations and user sessions
+  </Card>
+  <Card title="Rate Limiting" icon="gauge" href="/features/advanced-usage/custom-rate-limits">
+    Configure rate limits for your applications
+  </Card>
+  <Card title="Caching" icon="bolt" href="/features/advanced-usage/caching">
+    Reduce costs and latency with intelligent caching
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+- [Vercel AI SDK Documentation](https://sdk.vercel.ai)
+- [Helicone AI SDK Provider GitHub](https://github.com/Helicone/ai-sdk-provider)
+- [Helicone AI SDK Provider on Vercel](https://ai-sdk.dev/providers/community-providers/helicone)
+
