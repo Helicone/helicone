@@ -6,8 +6,8 @@
     "serve": "node dist/valhalla/jawn/src/index.js",
     "dev": "concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
     "dev:local": "cp .env.local .env && concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
-    "dev:us": "cp .env.us .env &&concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
-    "dev:eu": "cp .env.eu .env &&concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
+    "dev:us": "cp .env.us .env && concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
+    "dev:eu": "cp .env.eu .env && concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
     "test:jawn": "npx jest --detectOpenHandles",
     "build": "tsup && mkdir -p dist/valhalla/utils && cp src/utils/trace.proto dist/valhalla/jawn/src/utils/trace.proto && cp src/utils/trace.proto dist/valhalla/utils/trace.proto && cp dist/valhalla/jawn/src/workers/kafkaConsumer.js dist/valhalla/jawn/src/kafkaConsumer.js && cp dist/valhalla/jawn/src/workers/sqsConsumer.js dist/valhalla/jawn/src/sqsConsumer.js"
   },
