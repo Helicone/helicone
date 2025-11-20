@@ -18,17 +18,62 @@ export interface CostBreakdown {
   totalCost: number;
 }
 
-function getPricingTier(
-  pricing: ModelPricing[],
-  inputTokens: number,
-): ModelPricing | null {
-  if (!pricing || pricing.length === 0) return null;
+export type CostBreakdownField = keyof CostBreakdown;
 
-  const sortedPricing = [...pricing].sort((a, b) => b.threshold - a.threshold);
+function getPricingTier(
+  sortedPricing: ModelPricing[],
+  value: number,
+): ModelPricing {
   for (const tier of sortedPricing) {
-    if (inputTokens >= tier.threshold) return tier;
+    if (value >= tier.threshold) {
+      return tier;
+    }
   }
-  return pricing[0];
+  return sortedPricing[0];
+}
+
+function getThresholdValueFunction(provider: ModelProviderName) {
+  switch (provider) {
+    case "vertex":
+      return (usage: ModelUsage, field: CostBreakdownField) => {
+        switch (field) {
+          case "inputCost":
+          case "outputCost":
+            return usage.input;
+          case "cachedInputCost":
+            return usage.cacheDetails?.cachedInput ?? 0;
+          default:
+            return 0;
+        } 
+      };
+    case "google-ai-studio":
+      return (usage: ModelUsage, field: CostBreakdownField) => {
+        switch (field) {
+          case "inputCost":
+          case "outputCost":
+          case "cachedInputCost":
+            // total prompt length
+            return usage.input + (usage.cacheDetails?.cachedInput ?? 0);
+          default:
+            return 0;
+        }
+      }
+    case "anthropic":
+      return (usage: ModelUsage, field: CostBreakdownField) => {
+        switch (field) {
+          case "inputCost":
+          case "outputCost":
+            return usage.input + 
+              (usage.cacheDetails?.cachedInput ?? 0) + 
+              (usage.cacheDetails?.write5m ?? 0) + 
+              (usage.cacheDetails?.write1h ?? 0);
+          default:
+            return 0;
+        }
+      }
+    default:
+      return (usage: ModelUsage, field: CostBreakdownField) => 0;
+  }
 }
 
 export function calculateModelCostBreakdown(params: {
@@ -47,8 +92,13 @@ export function calculateModelCostBreakdown(params: {
 
   const config: ModelProviderConfig = configResult.data;
 
-  const pricing = getPricingTier(config.pricing, modelUsage.input);
-  if (!pricing) return null;
+  // Get a function that, given usage and the cost type we are calculating, return the value we compare against threshold.
+  // e.g Anthropic's inputCost and output cost is higher if PROMPT >= X tokens
+  // e.g Vertex's inputCost is higher if INPUT >= X tokens, but cachedInputCost is higher if CACHED_INPUT >= X tokens
+  // getThresholdValue is a function that will return the value to compare to X
+  const getThresholdValue = getThresholdValueFunction(provider);
+  const sortedPricing = [...config.pricing].sort((a, b) => b.threshold - a.threshold);
+  const basePricing = sortedPricing[0];
 
   const breakdown: CostBreakdown = {
     inputCost: 0,
@@ -65,55 +115,58 @@ export function calculateModelCostBreakdown(params: {
     totalCost: 0,
   };
 
-  breakdown.inputCost = modelUsage.input * pricing.input;
+  const inputPricing = getPricingTier(sortedPricing, getThresholdValue(modelUsage, "inputCost"));
+  breakdown.inputCost = modelUsage.input * inputPricing.input;
 
   if (modelUsage.cacheDetails) {
     if (modelUsage.cacheDetails.cachedInput > 0) {
-      const cachedMultiplier = pricing.cacheMultipliers?.cachedInput ?? 1.0;
+      const cachedInputPricing = getPricingTier(sortedPricing, getThresholdValue(modelUsage, "cachedInputCost"));
+      const cachedMultiplier = cachedInputPricing.cacheMultipliers?.cachedInput ?? 1.0;
       breakdown.cachedInputCost =
-        modelUsage.cacheDetails.cachedInput * pricing.input * cachedMultiplier;
+        modelUsage.cacheDetails.cachedInput * cachedInputPricing.input * cachedMultiplier;
     }
 
     if (modelUsage.cacheDetails.write5m) {
-      const write5mMultiplier = pricing.cacheMultipliers?.write5m ?? 1.0;
+      const write5mMultiplier = basePricing.cacheMultipliers?.write5m ?? 1.0;
       breakdown.cacheWrite5mCost =
-        modelUsage.cacheDetails.write5m * pricing.input * write5mMultiplier;
+        modelUsage.cacheDetails.write5m * basePricing.input * write5mMultiplier;
     }
 
     if (modelUsage.cacheDetails.write1h) {
-      const write1hMultiplier = pricing.cacheMultipliers?.write1h ?? 1.0;
+      const write1hMultiplier = basePricing.cacheMultipliers?.write1h ?? 1.0;
       breakdown.cacheWrite1hCost =
-        modelUsage.cacheDetails.write1h * pricing.input * write1hMultiplier;
+        modelUsage.cacheDetails.write1h * basePricing.input * write1hMultiplier;
     }
   }
 
-  breakdown.outputCost = modelUsage.output * pricing.output;
+  const outputPricing = getPricingTier(sortedPricing, getThresholdValue(modelUsage, "outputCost"));
+  breakdown.outputCost = modelUsage.output * outputPricing.output;
 
   if (modelUsage.thinking) {
-    const thinkingRate = pricing.thinking ?? pricing.output;
+    const thinkingRate = basePricing.thinking ?? basePricing.output;
     breakdown.thinkingCost = modelUsage.thinking * thinkingRate;
   }
 
   if (modelUsage.audio) {
-    const audioRate = pricing.audio ?? pricing.input;
+    const audioRate = basePricing.audio ?? inputPricing.input;
     breakdown.audioCost = modelUsage.audio * audioRate;
   }
 
   if (modelUsage.video) {
-    const videoRate = pricing.video ?? pricing.input;
+    const videoRate = basePricing.video ?? basePricing.input;
     breakdown.videoCost = modelUsage.video * videoRate;
   }
 
-  if (modelUsage.web_search && pricing.web_search) {
-    breakdown.webSearchCost = modelUsage.web_search * pricing.web_search;
+  if (modelUsage.web_search && basePricing.web_search) {
+    breakdown.webSearchCost = modelUsage.web_search * basePricing.web_search;
   }
 
-  if (modelUsage.image && pricing.image) {
-    breakdown.imageCost = modelUsage.image * pricing.image;
+  if (modelUsage.image && basePricing.image) {
+    breakdown.imageCost = modelUsage.image * basePricing.image;
   }
 
-  if (requestCount > 0 && pricing.request) {
-    breakdown.requestCost = requestCount * pricing.request;
+  if (requestCount > 0 && basePricing.request) {
+    breakdown.requestCost = requestCount * basePricing.request;
   }
 
   if (modelUsage.cost) {
