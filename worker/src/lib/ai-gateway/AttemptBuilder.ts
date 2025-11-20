@@ -180,7 +180,7 @@ export class AttemptBuilder {
         bodyMapping,
         plugins
       ),
-      this.buildPtbAttempts(modelSpec, providerData, plugins),
+      this.buildPtbAttempts(modelSpec, providerData, bodyMapping, plugins),
     ]);
     return [...byokAttempts, ...ptbAttempts];
   }
