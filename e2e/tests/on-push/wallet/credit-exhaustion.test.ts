@@ -3,22 +3,22 @@
  * Tests that requests are rate limited when wallet credits run out
  */
 
-import { gatewayClient } from "../../lib/http-client";
+import { gatewayClient } from "../../../lib/http-client";
 import {
   GATEWAY_ENDPOINTS,
   TEST_MESSAGES,
   TEST_ORG_ID,
-} from "../../lib/constants";
+} from "../../../lib/constants";
 import {
   createChatCompletionRequest,
   ChatCompletionResponse,
   sleep,
-} from "../../lib/test-helpers";
+} from "../../../lib/test-helpers";
 import {
   addCreditsToWallet,
   resetWalletCredits,
   getWalletState,
-} from "../../lib/wallet-helpers";
+} from "../../../lib/wallet-helpers";
 
 describe("Wallet Credit Exhaustion", () => {
   beforeAll(async () => {

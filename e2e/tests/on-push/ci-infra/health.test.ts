@@ -12,8 +12,8 @@ import {
   POSTGRES_URL,
   GATEWAY_ENDPOINTS,
   JAWN_ENDPOINTS,
-} from "../../lib/constants";
-import { retry } from "../../lib/test-helpers";
+} from "../../../lib/constants";
+import { retry } from "../../../lib/test-helpers";
 
 describe("System Health Checks", () => {
   describe("AI Gateway (Port 8793)", () => {
