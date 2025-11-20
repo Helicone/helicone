@@ -99,6 +99,7 @@ export const endpoints = {
     providerModelId: "grok-4-fast",
     provider: "xai",
     author: "xai",
+    providerModelIdAliases: ["grok-4-fast-reasoning"],
     pricing: [
       {
         threshold: 0,
@@ -120,7 +121,7 @@ export const endpoints = {
       },
     ],
     contextLength: 2_000_000,
-    maxCompletionTokens: 30_000,
+    maxCompletionTokens: 2_000_000,
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -131,7 +132,51 @@ export const endpoints = {
       "top_p",
       "seed",
       "logprobs",
-      "top_logprobs"
+      "top_logprobs",
+      "reasoning",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "grok-4-fast-non-reasoning:xai": {
+    providerModelId: "grok-4-fast-non-reasoning",
+    provider: "xai",
+    author: "xai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000002, // $0.20 per 1M tokens (up to 128K context)
+        output: 0.0000005, // $0.50 per 1M tokens (up to 128K context)
+        web_search: 0.025, // $25.00 per 1K sources
+        cacheMultipliers: {
+          cachedInput: 0.25, // $0.05 / $0.20 = 0.25
+        },
+      },
+      {
+        threshold: 128000, // Above 128K context window
+        input: 0.0000004, // $0.40 per 1M tokens (over 128K context)
+        output: 0.000001, // $1.00 per 1M tokens (over 128K context)
+        web_search: 0.025, // $25.00 per 1K sources
+        cacheMultipliers: {
+          cachedInput: 0.125, // $0.05 / $0.40 = 0.125
+        },
+      },
+    ],
+    contextLength: 2_000_000,
+    maxCompletionTokens: 2_000_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "seed",
+      "logprobs",
+      "top_logprobs",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -247,7 +292,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -281,7 +325,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -315,7 +358,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },
@@ -349,7 +391,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3,
     endpointConfigs: {
       "*": {},
     },

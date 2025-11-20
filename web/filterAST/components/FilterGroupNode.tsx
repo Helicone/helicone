@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Small, XSmall } from "@/components/ui/typography";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown, Plus, Copy } from "lucide-react";
 import React, { useMemo } from "react";
 import {
   AndExpression,
@@ -8,24 +8,29 @@ import {
   FilterAST,
   OrExpression,
 } from "@helicone-package/filters/types";
-import { useFilterStore } from "../store/filterStore";
+import { useFilterAST } from "../context/filterContext";
 import FilterConditionNode from "./FilterConditionNode";
 import { Row } from "@/components/layout/common/row";
 import SaveFilterButton from "./SaveFilterButton";
+import useNotification from "@/components/shared/notification/useNotification";
+import { generateCurlCommand } from "../utils/generateCurl";
 
 interface FilterGroupNodeProps {
   group: AndExpression | OrExpression;
   path: number[];
 
   isRoot?: boolean;
+  showCurlButton?: boolean;
 }
 
 export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   group,
   path,
   isRoot = false,
+  showCurlButton = false,
 }) => {
-  const filterStore = useFilterStore();
+  const { store: filterStore } = useFilterAST();
+  const notification = useNotification();
 
   // Handle adding a new condition to this group with a sensible default
   const handleAddCondition = () => {
@@ -74,6 +79,17 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
     }
   };
 
+  // Handle copying cURL command
+  const handleCopyCurl = () => {
+    try {
+      const curlCommand = generateCurlCommand(filterStore.filter);
+      navigator.clipboard.writeText(curlCommand);
+      notification.setNotification("cURL command copied to clipboard", "success");
+    } catch (error) {
+      notification.setNotification("Failed to copy cURL command", "error");
+    }
+  };
+
   return (
     <div className={`rounded-md bg-transparent ${isRoot ? "" : "border p-4"}`}>
       <div className="mb-1.5 flex items-center justify-between">
@@ -81,6 +97,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
           <XSmall className="font-normal">Match</XSmall>
 
           <Button
+            type="button"
             size="sm_sleek"
             onClick={handleToggleGroupOperator}
             variant={"secondary"}
@@ -141,6 +158,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
         {(!isRoot || !hasGroupAlready) && (
           <div className="flex justify-start">
             <Button
+              type="button"
               variant="ghost"
               onClick={handleAddCondition}
               size="sm_sleek"
@@ -155,6 +173,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
         {isRoot && (
           <Row className="w-full justify-between">
             <Button
+              type="button"
               variant="glass"
               size="xs"
               className="flex w-fit items-center gap-1"
@@ -165,7 +184,21 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
                 Add Condition Group
               </span>
             </Button>
-            <SaveFilterButton />
+            <Row className="gap-2">
+              {showCurlButton && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm_sleek"
+                  onClick={handleCopyCurl}
+                  className="flex items-center gap-1 text-[10px] font-normal"
+                >
+                  <Copy size={12} />
+                  <span>Copy cURL</span>
+                </Button>
+              )}
+              <SaveFilterButton />
+            </Row>
           </Row>
         )}
       </div>

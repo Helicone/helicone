@@ -81,7 +81,8 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       const consolidatedData = consolidateTextFields(data);
       // since we have pricing rates that are separate for audio, input, output, and cached tokens,
       // we need to separate those components out here so that we can correctly calculate the cost.
-      const usageData = consolidatedData.usage;
+      const usageData = consolidatedData.usage || consolidatedData.response?.usage;
+
       let usage;
       if (usageData) {
         const effectivePromptTokens =
@@ -89,26 +90,41 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
             ? Math.max(
                 0,
                 (usageData.prompt_tokens ?? 0) -
-                  (usageData.prompt_tokens_details?.cached_tokens ?? 0)
+                  (usageData.prompt_tokens_details?.cached_tokens ?? 0) -
+                  (usageData.prompt_tokens_details?.audio_tokens ?? 0)
               )
-            : usageData?.input_tokens;
+            : Math.max(
+                0,
+                (usageData.input_tokens ?? 0) -
+                  (usageData.input_tokens_details?.cached_tokens ?? 0)
+              );
 
         const effectiveCompletionTokens =
           usageData?.completion_tokens !== undefined
             ? Math.max(
                 0,
                 (usageData.completion_tokens ?? 0) -
+                  (usageData.completion_tokens_details?.reasoning_tokens ?? 0) -
                   (usageData.completion_tokens_details?.audio_tokens ?? 0)
               )
-            : usageData?.output_tokens;
+            : Math.max(
+                0,
+                (usageData.output_tokens ?? 0) -
+                  (usageData.output_tokens_details?.reasoning_tokens ?? 0)
+              );
 
         usage = {
           totalTokens: usageData?.total_tokens,
           completionTokens: effectiveCompletionTokens,
           promptTokens: effectivePromptTokens,
           promptCacheReadTokens:
-            usageData?.prompt_tokens_details?.cached_tokens,
+            usageData?.prompt_tokens_details?.cached_tokens ??
+            usageData?.input_tokens_details?.cached_tokens ??
+            0,
           heliconeCalculated: usageData?.helicone_calculated ?? false,
+
+          // OpenRouter may contain these fields based on wallet/BYOK setup
+          cost: usageData.cost
         };
       } else if (consolidatedData.response?.usage) {
         usage = {

@@ -7,7 +7,7 @@ import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { ModelUsage } from "@helicone-package/cost";
 import { CostBreakdown } from "@helicone-package/cost/models/calculate-cost";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
-import { ResponseFormat } from "@helicone-package/cost/models/types";
+import { BodyMappingType } from "@helicone-package/cost/models/types";
 
 export class HandlerContext extends SetOnce {
   public message: KafkaMessageContents;
@@ -16,6 +16,7 @@ export class HandlerContext extends SetOnce {
   public legacyUsage: Usage;
   public usage?: ModelUsage;
   public costBreakdown?: CostBreakdown;
+  public storageLocation?: "s3" | "clickhouse";
   public rawLog: RawLog;
   public processedLog: ProcessedLog;
   public timingMetrics: { constructor: string; start: number }[] = [];
@@ -100,7 +101,6 @@ export type ProcessedLog = {
     model?: string;
     body?: any;
     heliconeTemplate?: TemplateWithInputs;
-    assets?: Map<string, string>;
     properties?: Record<string, string>;
     scores?: Record<string, number | boolean | undefined>;
     scores_evaluatorIds?: Record<string, string>;
@@ -108,7 +108,6 @@ export type ProcessedLog = {
   response: {
     model?: string;
     body?: any;
-    assets?: Map<string, string>;
   };
 };
 
@@ -127,7 +126,7 @@ export type HeliconeMeta = {
   promptInputs?: Record<string, any>;
   heliconeManualAccessKey?: string;
   stripeCustomerId?: string;
-  
+
   // Deprecated gateway metadata
   gatewayRouterId?: string;
   gatewayDeploymentTarget?: string;
@@ -135,11 +134,10 @@ export type HeliconeMeta = {
   // AI Gateway metadata
   isPassthroughBilling?: boolean;
   gatewayProvider?: ModelProviderName;
-  
+
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
-  gatewayResponseFormat?: ResponseFormat;
-  gatewayEndpointVersion?: string; // endpoint config version
+  aiGatewayBodyMapping?: BodyMappingType; // body mapping type
 };
 
 export type KafkaMessageContents = {
@@ -184,10 +182,7 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
 
   const promptTokens = getPromptTokens(modelUsage, legacyUsage);
   const completionTokens = getCompletionTokens(modelUsage, legacyUsage);
-  const totalTokens = getTotalTokens(
-    modelUsage,
-    legacyUsage,
-  );
+  const totalTokens = getTotalTokens(modelUsage, legacyUsage);
   const promptCacheWriteTokens = getPromptCacheWriteTokens(
     modelUsage,
     legacyUsage
@@ -210,14 +205,19 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     response_created_at:
       context.message.log.response.responseCreatedAt.toISOString(),
     response_status: context.message.log.response.status,
-    request_model: context.message.heliconeMeta.gatewayModel ?? context.processedLog.request.model ?? null,
+    request_model:
+      context.message.heliconeMeta.gatewayModel ??
+      context.processedLog.request.model ??
+      null,
     response_model: null,
     request_path: context.message.log.request.path,
     request_user_id: context.message.log.request.userId ?? null,
     request_properties: context.message.log.request.properties ?? null,
     model_override: null,
     helicone_user: null,
-    provider: context.message.heliconeMeta.gatewayProvider ?? context.message.log.request.provider,
+    provider:
+      context.message.heliconeMeta.gatewayProvider ??
+      context.message.log.request.provider,
     delay_ms: context.message.log.response.delayMs ?? null,
     time_to_first_token: context.message.log.response.timeToFirstToken ?? null,
 
@@ -246,11 +246,15 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     properties: context.message.log.request.properties ?? {},
     assets: [],
     target_url: context.message.log.request.targetUrl,
-    model: context.message.heliconeMeta.gatewayModel ?? context.processedLog.model ?? "",
+    model:
+      context.message.heliconeMeta.gatewayModel ??
+      context.processedLog.model ??
+      "",
     cache_reference_id: context.message.log.request.cacheReferenceId ?? null,
     cache_enabled: context.message.log.request.cacheEnabled ?? false,
     request_referrer: context.message.log.request.requestReferrer ?? null,
-    gateway_endpoint_version: context.message.heliconeMeta.gatewayEndpointVersion ?? null,
+    ai_gateway_body_mapping:
+      context.message.heliconeMeta.aiGatewayBodyMapping ?? null,
   };
 };
 
@@ -276,7 +280,7 @@ export function getCompletionTokens(
 
 function getTotalTokens(
   modelUsage: ModelUsage | undefined,
-  legacyUsage: Usage,
+  legacyUsage: Usage
 ): number | null {
   if (modelUsage?.input || modelUsage?.output) {
     return (modelUsage.input ?? 0) + (modelUsage.output ?? 0);

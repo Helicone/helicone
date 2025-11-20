@@ -11,6 +11,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000011,
         output: 0.0000044,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.25,
         },
@@ -44,6 +45,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000011,
         output: 0.0000044,
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.25,
         },
@@ -76,6 +78,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000116, // $1.16/1M - worst-case: $1.10/1M (OpenAI) * 1.055
         output: 0.00000464, // $4.64/1M - worst-case: $4.40/1M (OpenAI) * 1.055
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 200_000,
@@ -88,7 +91,31 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
-    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "o4-mini:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/o4-mini",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000011, // $1.10 per 1M tokens
+        output: 0.0000044, // $4.40 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        cacheMultipliers: {
+          cachedInput: 0.25, // $0.275 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 100000,
+    supportedParameters: [
+      "max_tokens",
+    ],
+    ptbEnabled: true,
     endpointConfigs: {
       "*": {},
     },

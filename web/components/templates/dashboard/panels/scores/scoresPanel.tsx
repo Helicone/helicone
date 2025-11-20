@@ -1,6 +1,10 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { Card, LineChart } from "@tremor/react";
-import clsx from "clsx";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { useScores } from "./useScores";
 import { ScoresPanelProps } from "./ScoresPanelProps";
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -9,7 +13,7 @@ import {
   getMockBooleanScoresOverTimeData,
   getMockScoresOverTimeData,
 } from "../../mockDashboardData";
-import DashboardChartTooltipContent from "../../DashboardChartTooltipContent";
+import { CHART_COLORS } from "../../../../../lib/chartColors";
 
 export const ScoresPanel = (props: ScoresPanelProps) => {
   const { timeFilter, userFilters, dbIncrement, filterBool } = props;
@@ -43,56 +47,117 @@ export const ScoresPanel = (props: ScoresPanelProps) => {
   const displayScores = shouldShowMockData ? mockAllScores : allScores;
   const displayScoreKeys = shouldShowMockData ? mockScoreKeys : scoreKeys;
 
+  // Create chart config dynamically based on score keys
+  const chartConfig = displayScoreKeys.reduce(
+    (acc, key, index) => {
+      const colorKeys = [
+        CHART_COLORS.blue,
+        CHART_COLORS.purple,
+        CHART_COLORS.cyan,
+        CHART_COLORS.pink,
+        CHART_COLORS.orange,
+      ];
+      acc[key] = {
+        label: key,
+        color: colorKeys[index % colorKeys.length],
+      };
+      return acc;
+    },
+    {} as Record<string, { label: string; color: string }>,
+  );
+
+  // Check if we have any score keys or data
+  const hasData =
+    displayScoreKeys &&
+    displayScoreKeys.length > 0 &&
+    displayScores &&
+    displayScores.length > 0;
+
   return (
-    <Card className="h-full w-full rounded-lg border border-slate-200 bg-white text-slate-950 !shadow-sm ring-0 dark:border-slate-800 dark:bg-black dark:text-slate-50">
+    <div className="flex h-full w-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
       <div className="flex w-full flex-row items-center justify-between">
         <div className="flex w-full flex-col space-y-0.5">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {filterBool ? "Feedback / Bool Scores" : "Scores"}
           </p>
         </div>
       </div>
 
-      <div
-        className={clsx("p-2", "w-full")}
-        style={{
-          height: "212px",
-        }}
-      >
+      <div className="w-full pt-4">
         {scoresQuery.isLoading && !shouldShowMockData ? (
-          <div className="h-full w-full rounded-md bg-gray-200 pt-4 dark:bg-gray-800">
+          <div className="flex h-[180px] w-full items-center justify-center bg-muted">
             <LoadingAnimation height={175} width={175} />
           </div>
+        ) : !hasData ? (
+          <div className="flex h-[180px] w-full items-center justify-center">
+            <p className="text-sm text-muted-foreground">
+              No score data available
+            </p>
+          </div>
         ) : (
-          <LineChart
-            customTooltip={DashboardChartTooltipContent}
-            className="h-[14rem]"
-            data={displayScores ?? []}
-            index="date"
-            categories={displayScoreKeys}
-            colors={[
-              "yellow",
-              "red",
-              "green",
-              "blue",
-              "orange",
-              "indigo",
-              "orange",
-              "pink",
-            ]}
-            showYAxis={false}
-            curveType="monotone"
-            valueFormatter={(number: number | bigint) => {
-              if (filterBool) {
-                return `${new Intl.NumberFormat("us").format(
-                  Number(number) * 100,
-                )}%`;
-              }
-              return `${new Intl.NumberFormat("us").format(Number(number))}`;
-            }}
-          />
+          <ChartContainer config={chartConfig} className="h-[180px] w-full">
+            <AreaChart data={displayScores ?? []}>
+              <defs>
+                {displayScoreKeys.map((key) => (
+                  <linearGradient
+                    key={key}
+                    id={`fill${key}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor={`var(--color-${key})`}
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor={`var(--color-${key})`}
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={50}
+              />
+              <YAxis domain={[0, "auto"]} hide />
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    valueFormatter={(value) => {
+                      if (filterBool) {
+                        return `${new Intl.NumberFormat("us").format(
+                          Number(value) * 100,
+                        )}%`;
+                      }
+                      return `${new Intl.NumberFormat("us").format(Number(value))}`;
+                    }}
+                  />
+                }
+              />
+              {displayScoreKeys.map((key) => (
+                <Area
+                  key={key}
+                  dataKey={key}
+                  type="monotone"
+                  fill={`url(#fill${key})`}
+                  stroke={`var(--color-${key})`}
+                />
+              ))}
+            </AreaChart>
+          </ChartContainer>
         )}
       </div>
-    </Card>
+    </div>
   );
 };

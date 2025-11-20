@@ -1,5 +1,5 @@
 import { SELF, fetchMock, env, runInDurableObject } from "cloudflare:test";
-import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { registry } from "@helicone-package/cost/models/registry";
 import { UserEndpointConfig, RequestParams } from "@helicone-package/cost/models/types";
 import { buildEndpointUrl } from "@helicone-package/cost/models/provider-helpers";
@@ -10,6 +10,13 @@ import { openaiTestConfig } from "../providers/openai.test-config";
 import { groqTestConfig } from "../providers/groq.test-config";
 
 const TEST_HELICONE_API_KEY = "sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234";
+
+// Map provider names to their test configs
+const providerConfigs: Record<string, typeof anthropicTestConfig> = {
+  anthropic: anthropicTestConfig,
+  openai: openaiTestConfig,
+  groq: groqTestConfig,
+};
 
 function mockRequiredServices() {
   const callTrackers = {
@@ -194,9 +201,14 @@ describe("Registry Tests", () => {
               .reply((request) => {
                 const body = JSON.parse(request.body as string);
                 const modelName = body.model?.split("/")[0] || body.model;
+
+                // Use the correct test config based on provider
+                const config = providerConfigs[testCase.provider || "anthropic"];
+                const mockResponse = config.generateMockResponse(modelName);
+
                 return {
                   statusCode: 200,
-                  data: anthropicTestConfig.generateMockResponse(modelName),
+                  data: mockResponse,
                   responseOptions: {
                     headers: { "content-type": "application/json" },
                   },
@@ -241,7 +253,7 @@ describe("Registry Tests", () => {
             );
             expect(walletState.totalEscrow).toBeGreaterThan(0);
           });
-        });
+        }, 10000); // 10s timeout for PTB tests with Durable Objects
       });
     });
 
@@ -279,7 +291,7 @@ describe("Registry Tests", () => {
           const body = (await response.json()) as any;
           expect(body).toHaveProperty("error");
           expect(body.success).toBe(false);
-        });
+        }, 10000); // 10s timeout for PTB tests with Durable Objects
       });
     });
   });

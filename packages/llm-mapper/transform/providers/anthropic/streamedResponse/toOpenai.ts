@@ -11,6 +11,7 @@ export class AnthropicToOpenAIStreamConverter {
   private model: string = "";
   private created: number = 0;
   private finalUsage: ChatCompletionChunk["usage"] | null = null;
+  private inputTokens: number = 0; // Some providers (e.g. Anthropic) don't include input_tokens in the message_delta event
   private toolCallState: Map<
     number,
     {
@@ -66,6 +67,7 @@ export class AnthropicToOpenAIStreamConverter {
       case "message_start":
         this.messageId = event.message.id;
         this.model = event.message.model;
+        this.inputTokens = event.message.usage.input_tokens ?? 0;
         this.toolCallState.clear();
         this.nextToolCallIndex = 0;
         this.annotations = [];
@@ -91,8 +93,10 @@ export class AnthropicToOpenAIStreamConverter {
       case "content_block_start":
         if (event.content_block.type === "text") {
           // Check if this text block has citations
+          // Only process if citations is an array (web search results), not a config object (document)
           if (
             event.content_block.citations &&
+            Array.isArray(event.content_block.citations) &&
             event.content_block.citations.length > 0
           ) {
             // Calculate start position for this text block
@@ -214,6 +218,19 @@ export class AnthropicToOpenAIStreamConverter {
               );
             }
           }
+        } else if (event.delta.type === "citations_delta") {
+          // Collect citations - will be sent at the end in message_delta
+          const citation = event.delta.citation;
+          this.annotations.push({
+            type: "url_citation",
+            url_citation: {
+              url: citation.url,
+              title: citation.title,
+              content: citation.cited_text,
+              start_index: 0,
+              end_index: this.currentContentLength,
+            },
+          });
         }
         break;
 
@@ -235,9 +252,9 @@ export class AnthropicToOpenAIStreamConverter {
           event.usage.server_tool_use?.web_search_requests ?? 0;
 
         this.finalUsage = {
-          prompt_tokens: event.usage.input_tokens,
+          prompt_tokens: event.usage.input_tokens ?? this.inputTokens,
           completion_tokens: event.usage.output_tokens,
-          total_tokens: event.usage.input_tokens + event.usage.output_tokens,
+          total_tokens: (event.usage.input_tokens ?? this.inputTokens) + event.usage.output_tokens,
           ...((cachedTokens > 0 || cacheWriteTokens > 0) && {
             prompt_tokens_details: {
               cached_tokens: cachedTokens,
@@ -275,7 +292,11 @@ export class AnthropicToOpenAIStreamConverter {
             choices: [
               {
                 index: 0,
-                delta: {},
+                delta: {
+                  ...(this.annotations.length > 0 && {
+                    annotations: this.annotations,
+                  }),
+                },
                 logprobs: null,
                 finish_reason: finishReason,
               },

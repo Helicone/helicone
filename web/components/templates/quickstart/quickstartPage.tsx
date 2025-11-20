@@ -1,62 +1,85 @@
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
-import { H2, P } from "../../ui/typography";
-import { useOrg } from "../../layout/org/organizationContext";
+import useNotification from "@/components/shared/notification/useNotification";
+import { useKeys } from "@/components/templates/keys/useKeys";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useAutoTopoffSettings } from "@/services/hooks/useAutoTopoff";
+import { useCredits } from "@/services/hooks/useCredits";
 import {
-  OnboardingState,
-  useOrgOnboarding,
-} from "../../../services/hooks/useOrgOnboarding";
-import { QuickstartStepCard } from "../../onboarding/QuickstartStep";
-import IntegrationGuide from "./integrationGuide";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "../../ui/dropdown-menu";
-import { Button } from "../../ui/button";
-import {
-  ChevronDown,
+  ArrowRight,
+  BarChart,
   BookOpen,
-  MessageSquare,
-  Mail,
-  Copy,
-  Loader,
-  Check,
   Bot,
-  MoveUpRight,
+  Check,
+  ChevronDown,
+  Copy,
+  CreditCard,
+  ExternalLink,
+  ListTreeIcon,
+  Loader,
+  Mail,
+  MessageSquare,
+  Send,
+  UserPlus,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useKeys } from "@/components/templates/keys/useKeys";
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import useNotification from "@/components/shared/notification/useNotification";
+import { useCallback, useEffect, useState } from "react";
+import { useOrgOnboarding } from "../../../services/hooks/useOrgOnboarding";
+import { useOrg } from "../../layout/org/organizationContext";
+import { QuickstartStepCard } from "../../onboarding/QuickstartStep";
+import { Button } from "../../ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../../ui/dialog";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "../../ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../ui/tooltip";
+import { H2, H3, P } from "../../ui/typography";
+import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
+import { AutoTopoffModal } from "../settings/AutoTopoffModal";
+import PaymentModal from "../settings/PaymentModal";
 import { ProviderKeySettings } from "../settings/providerKeySettings";
 import HelixIntegrationDialog from "./HelixIntegrationDialog";
-import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
+import IntegrationGuide from "./integrationGuide";
 
 const QuickstartPage = () => {
-  const router = useRouter();
   const org = useOrg();
   const { setNotification } = useNotification();
   const { addKey } = useKeys();
   const [quickstartKey, setQuickstartKey] = useLocalStorage<string | undefined>(
-    `${org?.currentOrg?.id}_quickstartKey`,
+    "quickstartKey",
     undefined,
   );
-  const [isCreatingKey, setIsCreatingKey] = useState(false);
-  const [isProviderModalOpen, setIsProviderModalOpen] = useState(false);
+  const [isProviderSheetOpen, setIsProviderSheetOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isHelixDialogOpen, setIsHelixDialogOpen] = useState(false);
+  const [isAutoTopoffModalOpen, setIsAutoTopoffModalOpen] = useState(false);
+  const [isTestLoading, setIsTestLoading] = useState(false);
+  const [testResponse, setTestResponse] = useState<string | null>(null);
+  const [testRequestId, setTestRequestId] = useState<string | null>(null);
+  const [testError, setTestError] = useState<string | null>(null);
 
-  const { hasKeys, hasProviderKeys, updateOnboardingStatus } = useOrgOnboarding(
+  const { hasKeys, hasProviderKeys } = useOrgOnboarding(
     org?.currentOrg?.id ?? "",
   );
+
+  const { data: creditData } = useCredits();
+  const hasCredits = (creditData?.balance ?? 0) > 0;
+  const hasBillingSetup = hasCredits || hasProviderKeys;
+  const { data: autoTopoffSettings } = useAutoTopoffSettings();
 
   const {
     setAgentChatOpen,
@@ -67,23 +90,10 @@ const QuickstartPage = () => {
   } = useHeliconeAgent();
 
   useEffect(() => {
-    if (org?.currentOrg?.onboarding_status) {
-      const hasCompletedQuickstart = (
-        org?.currentOrg?.onboarding_status as unknown as OnboardingState
-      ).hasCompletedQuickstart;
-      if (hasCompletedQuickstart) {
-        router.push("/dashboard");
-      }
-    }
-
     if (hasKeys === false) {
       setQuickstartKey(undefined);
     }
-  }, [hasKeys]);
-
-  useEffect(() => {
-    setAgentChatOpen(true);
-  }, []);
+  }, [hasKeys, setQuickstartKey]);
 
   useEffect(() => {
     setToolHandler("quickstart-open-integration-guide", async () => {
@@ -95,23 +105,29 @@ const QuickstartPage = () => {
     });
   }, []);
 
-  const handleCreateKey = async () => {
+  const handleCreateKey = useCallback(async () => {
     try {
-      setIsCreatingKey(true);
-      const { apiKey } = await addKey.mutateAsync({
-        permission: "rw",
-        keyName: "Quickstart",
-        isEu: false,
-      });
-      if (apiKey) {
-        setQuickstartKey(apiKey);
+      let isEu = false;
+      if (typeof window !== "undefined") {
+        isEu = window.location.hostname.includes("eu.");
       }
+
+      addKey.mutateAsync(
+        {
+          permission: "rw",
+          keyName: "Quickstart",
+          isEu,
+        },
+        {
+          onSuccess: (key) => {
+            setQuickstartKey(key.apiKey);
+          },
+        },
+      );
     } catch (error) {
       console.error("Failed to create API key:", error);
-    } finally {
-      setIsCreatingKey(false);
     }
-  };
+  }, [addKey, setQuickstartKey]);
 
   const handleHelixSubmit = (message: string) => {
     const helpMessage = {
@@ -130,16 +146,53 @@ const QuickstartPage = () => {
     }, 100);
   };
 
+  const handleSendTestRequest = async () => {
+    if (!quickstartKey) {
+      setNotification("Please create an API key first", "error");
+      return;
+    }
+
+    setIsTestLoading(true);
+    setTestError(null);
+    setTestResponse(null);
+    setTestRequestId(null);
+
+    try {
+      const jawn = getJawnClient(org?.currentOrg?.id);
+      const result = await jawn.POST("/v1/test/gateway-request", {
+        body: {
+          apiKey: quickstartKey,
+        },
+      });
+
+      if (result.data?.success) {
+        setTestResponse(result.data.response ?? "Success!");
+        setTestRequestId(result.data.requestId ?? null);
+        setNotification("Test request sent successfully!", "success");
+      } else {
+        setTestError(result.data?.error ?? "Request failed");
+        setNotification(result.data?.error ?? "Request failed", "error");
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      setTestError(errorMessage);
+      setNotification(errorMessage, "error");
+    } finally {
+      setIsTestLoading(false);
+    }
+  };
+
   const steps = [
+    {
+      title: "Set up billing",
+      description: "",
+      link: "",
+    },
     {
       title: "Create Helicone API key",
       description: "Create key",
       link: "/settings/api-keys",
-    },
-    {
-      title: "Add provider key",
-      description: "Add key",
-      link: "/settings/providers",
     },
     {
       title: "Integrate",
@@ -149,7 +202,7 @@ const QuickstartPage = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-8 p-6">
+    <div className="flex min-h-screen flex-col gap-8 p-6">
       <div className="mx-auto mt-4 w-full max-w-4xl items-start">
         <H2>Quickstart</H2>
         <P className="mt-2 text-sm text-muted-foreground">
@@ -157,12 +210,16 @@ const QuickstartPage = () => {
         </P>
       </div>
 
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         {steps.map((step, index) => {
           const isCompleted =
-            (index === 0 && hasKeys) ||
-            (index === 1 && hasProviderKeys) ||
+            (index === 0 && hasBillingSetup) ||
+            (index === 1 && hasKeys) ||
             (index === 2 && org?.currentOrg?.has_integrated);
+
+          const isDisabled =
+            (index === 1 && !hasBillingSetup) ||
+            (index === 2 && !hasBillingSetup);
 
           return (
             <QuickstartStepCard
@@ -172,8 +229,179 @@ const QuickstartPage = () => {
               isCompleted={isCompleted ?? false}
               link={step.link}
               rightContent={step.description}
+              disabled={isDisabled}
+              lockedMessage={
+                index === 1
+                  ? "Complete step 1: Add credits or configure provider keys to unlock"
+                  : index === 2
+                    ? "Complete step 1: Add credits or configure provider keys to unlock"
+                    : undefined
+              }
+              headerAction={
+                index === 2 ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSendTestRequest();
+                            }}
+                            disabled={!quickstartKey || isTestLoading}
+                          >
+                            {isTestLoading ? (
+                              <>
+                                <Loader
+                                  size={14}
+                                  className="mr-1 animate-spin"
+                                />
+                                Sending...
+                              </>
+                            ) : (
+                              <>
+                                <Send size={14} className="mr-1" />
+                                Send Test Request
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      {!quickstartKey && (
+                        <TooltipContent>
+                          <p>Create API key first</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : undefined
+              }
             >
               {index === 0 && (
+                <div className="mt-4 flex flex-col gap-4">
+                  {/* Billing requirement message */}
+                  <p className="text-xs italic text-muted-foreground">
+                    To use Helicone, you need to either add credits
+                    (pay-as-you-go) or configure your own provider API keys
+                    (BYOK). Choose one option below to continue.
+                  </p>
+
+                  {/* PTB Option */}
+                  <div
+                    className={`flex items-start justify-between gap-3 rounded-lg border-2 p-5 ${
+                      hasCredits
+                        ? "border-primary bg-primary/5"
+                        : "border-primary/50 bg-primary/5"
+                    }`}
+                  >
+                    <div className="flex flex-1 items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/20">
+                        <CreditCard size={24} className="text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-semibold">
+                            Pass-Through Billing
+                          </span>
+                          <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
+                            Recommended
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Simple pay-as-you-go pricing
+                        </p>
+                      </div>
+                      {hasCredits && (
+                        <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 dark:bg-green-900">
+                          <Zap
+                            size={12}
+                            className="text-green-600 dark:text-green-400"
+                          />
+                          <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                            ${(creditData?.balance ?? 0).toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="action"
+                      size="default"
+                      onClick={() => setIsPaymentModalOpen(true)}
+                    >
+                      {hasCredits ? "Add More" : "Add Credits"}
+                    </Button>
+                  </div>
+
+                  {/* Auto Top-Up Suggestion */}
+                  <div
+                    className={`mt-4 flex items-center justify-between rounded-lg border border-border p-4 ${
+                      autoTopoffSettings?.enabled
+                        ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950"
+                        : hasCredits
+                          ? "bg-muted/50"
+                          : "bg-muted/30 opacity-60"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Zap
+                        size={20}
+                        className={
+                          autoTopoffSettings?.enabled
+                            ? "text-green-600 dark:text-green-400"
+                            : hasCredits
+                              ? "text-primary"
+                              : "text-muted-foreground"
+                        }
+                      />
+                      <div>
+                        <p className="text-sm font-medium">
+                          {autoTopoffSettings?.enabled
+                            ? "Auto Top-Up Enabled"
+                            : "Enable Auto Top-Up"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {autoTopoffSettings?.enabled
+                            ? `Recharge $${((autoTopoffSettings.topoffAmountCents ?? 0) / 100).toFixed(2)} when balance drops below $${((autoTopoffSettings.thresholdCents ?? 0) / 100).toFixed(2)}`
+                            : hasCredits
+                              ? "Never run out of credits - automatically recharge when balance is low"
+                              : "Add credits first to enable auto top-up"}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsAutoTopoffModalOpen(true)}
+                      disabled={!hasCredits && !autoTopoffSettings?.enabled}
+                    >
+                      {autoTopoffSettings?.enabled ? "Manage" : "Configure"}
+                    </Button>
+                  </div>
+
+                  {/* BYOK Option - Simple text link */}
+                  <div className="flex items-center justify-start pb-2 pt-4">
+                    <button
+                      onClick={() => setIsProviderSheetOpen(true)}
+                      className="group flex items-center gap-1 text-sm text-foreground underline-offset-2 transition-colors hover:text-primary hover:underline"
+                    >
+                      <span>or use your own provider keys</span>
+                      <ArrowRight
+                        size={14}
+                        className="transition-transform group-hover:translate-x-0.5"
+                      />
+                      {hasProviderKeys && (
+                        <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900 dark:text-green-300">
+                          <Zap size={10} />
+                          Configured
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+              {index === 1 && (
                 <div className="mt-4">
                   {quickstartKey ? (
                     <div className="rounded-sm border border-border bg-muted/30 p-2">
@@ -198,25 +426,14 @@ const QuickstartPage = () => {
                     <div className="flex flex-col gap-2">
                       <Button
                         onClick={handleCreateKey}
-                        disabled={isCreatingKey}
+                        disabled={addKey.isPending}
                         className="w-fit"
                         variant="outline"
                       >
-                        {isCreatingKey ? "Creating..." : "Create API Key"}
+                        {addKey.isPending ? "Creating..." : "Create API Key"}
                       </Button>
                     </div>
                   )}
-                </div>
-              )}
-              {index === 1 && (
-                <div className="mt-4">
-                  <Button
-                    onClick={() => setIsProviderModalOpen(true)}
-                    className="w-fit"
-                    variant="outline"
-                  >
-                    Add Provider Key
-                  </Button>
                 </div>
               )}
               {index === 2 && (
@@ -224,6 +441,56 @@ const QuickstartPage = () => {
                   <IntegrationGuide apiKey={quickstartKey} />
 
                   <div className="mx-4 mb-2 flex flex-col gap-2">
+                    {/* Test Response Display */}
+                    {testResponse && (
+                      <div className="rounded-sm border border-green-200 bg-green-50 p-3 dark:border-green-900 dark:bg-green-950">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-start gap-2">
+                            <Check
+                              size={16}
+                              className="mt-0.5 text-green-600 dark:text-green-400"
+                            />
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-green-900 dark:text-green-100">
+                                Response:
+                              </p>
+                              <p className="mt-1 text-sm text-green-800 dark:text-green-200">
+                                {testResponse}
+                              </p>
+                            </div>
+                          </div>
+                          {testRequestId && (
+                            <Link
+                              href={`/requests?requestId=${testRequestId}`}
+                              className="flex items-center gap-1 text-xs text-green-700 hover:text-green-900 dark:text-green-300 dark:hover:text-green-100"
+                            >
+                              <ExternalLink size={12} />
+                              <span>View in requests page</span>
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Test Error Display */}
+                    {testError && (
+                      <div className="rounded-sm border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950">
+                        <div className="flex items-start gap-2">
+                          <div className="mt-0.5 text-sm text-red-600 dark:text-red-400">
+                            ✗
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-red-900 dark:text-red-100">
+                              Error:
+                            </p>
+                            <p className="mt-1 text-sm text-red-800 dark:text-red-200">
+                              {testError}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div
                       className={`rounded-sm border border-border p-3 ${org?.currentOrg?.has_integrated ? "bg-confirmative/10" : "bg-muted/30"}`}
                     >
@@ -247,110 +514,176 @@ const QuickstartPage = () => {
                     </div>
                   </div>
 
-                  <Link
-                    href="https://docs.helicone.ai/getting-started/quick-start"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button
-                      variant="link"
-                      className="flex w-auto items-center gap-1"
-                    >
-                      Using another SDK?
-                      <MoveUpRight size={12} />
-                    </Button>
-                  </Link>
+                  {/* Help Section */}
+                  <div className="mx-4 mt-4">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="link" className="group w-fit p-0">
+                          Need some help?
+                          <ChevronDown
+                            size={16}
+                            className="ml-2 transition-transform group-data-[state=open]:rotate-180"
+                          />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem asChild>
+                          <button
+                            onClick={() => setAgentChatOpen(true)}
+                            className="flex w-full items-center"
+                          >
+                            <Bot size={16} className="mr-2" />
+                            Ask Helix
+                          </button>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="https://docs.helicone.ai"
+                            target="_blank"
+                            className="flex items-center"
+                          >
+                            <BookOpen size={16} className="mr-2" />
+                            Documentation
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="https://discord.com/invite/2TkeWdXNPQ"
+                            target="_blank"
+                            className="flex items-center"
+                          >
+                            <MessageSquare size={16} className="mr-2" />
+                            Ask us on Discord
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/contact"
+                            className="flex items-center"
+                            target="_blank"
+                          >
+                            <Mail size={16} className="mr-2" />
+                            Contact Us
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               )}
             </QuickstartStepCard>
           );
         })}
 
-        {org?.currentOrg?.has_integrated && (
-          <div
-            onClick={async () => {
-              await updateOnboardingStatus({ hasCompletedQuickstart: true });
-              setQuickstartKey(undefined);
-              router.push("/dashboard");
-            }}
-            className="cursor-pointer rounded-lg border border-border bg-primary py-1 transition-colors duration-150 hover:bg-primary/90"
-          >
-            <div className="flex items-center justify-center">
-              <h3 className="text-lg font-semibold text-primary-foreground">
-                Finished!
-              </h3>
+        {/* Next Steps Section - Only show when billing is setup */}
+        {hasBillingSetup && (
+          <div className="mt-8 flex flex-col gap-4">
+            <H3>Next Steps</H3>
+            <P className="text-sm text-muted-foreground">
+              Explore popular features to get the most out of Helicone
+            </P>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {/* Dashboard Card */}
+              <Link href="/dashboard">
+                <div className="group cursor-pointer rounded-lg border border-border bg-background p-4 transition-all hover:border-primary hover:shadow-md">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <BarChart size={20} className="text-primary" />
+                      </div>
+                      <ArrowRight
+                        size={16}
+                        className="text-muted-foreground transition-transform group-hover:translate-x-1"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">View Dashboard</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        See your request analytics and usage metrics
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Sessions Card */}
+              <Link href="/sessions">
+                <div className="group cursor-pointer rounded-lg border border-border bg-background p-4 transition-all hover:border-primary hover:shadow-md">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <ListTreeIcon size={20} className="text-primary" />
+                      </div>
+                      <ArrowRight
+                        size={16}
+                        className="text-muted-foreground transition-transform group-hover:translate-x-1"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Setup Sessions</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Track user conversations and interactions
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Invite Members Card */}
+              <Link href="/settings/members">
+                <div className="group cursor-pointer rounded-lg border border-border bg-background p-4 transition-all hover:border-primary hover:shadow-md">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <UserPlus size={20} className="text-primary" />
+                      </div>
+                      <ArrowRight
+                        size={16}
+                        className="text-muted-foreground transition-transform group-hover:translate-x-1"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Invite Members</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Collaborate with your team members
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
             </div>
           </div>
         )}
-
-        <div className="flex flex-col gap-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="link" className="group w-fit">
-                Need some help?
-                <ChevronDown
-                  size={16}
-                  className="ml-2 transition-transform group-data-[state=open]:rotate-180"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem asChild>
-                <button
-                  onClick={() => setIsHelixDialogOpen(true)}
-                  className="flex w-full items-center"
-                >
-                  <Bot size={16} className="mr-2" />
-                  Ask Helix
-                </button>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  href="https://docs.helicone.ai"
-                  target="_blank"
-                  className="flex items-center"
-                >
-                  <BookOpen size={16} className="mr-2" />
-                  Documentation
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  href="https://discord.com/invite/2TkeWdXNPQ"
-                  target="_blank"
-                  className="flex items-center"
-                >
-                  <MessageSquare size={16} className="mr-2" />
-                  Ask us on Discord
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  href="/contact"
-                  className="flex items-center"
-                  target="_blank"
-                >
-                  <Mail size={16} className="mr-2" />
-                  Contact Us
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
       </div>
 
-      <Dialog open={isProviderModalOpen} onOpenChange={setIsProviderModalOpen}>
-        <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add Provider Keys</DialogTitle>
-            <DialogDescription>
-              Configure your API keys for different LLM providers to start
-              making requests.
-            </DialogDescription>
-          </DialogHeader>
-          <ProviderKeySettings />
-        </DialogContent>
-      </Dialog>
+      <Sheet open={isProviderSheetOpen} onOpenChange={setIsProviderSheetOpen}>
+        <SheetContent side="right" size="large" className="overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Add Provider Keys</SheetTitle>
+            <SheetDescription>
+              Add your own provider API keys (BYOK). When "Enable for AI
+              Gateway" is toggled on, requests will attempt to use these keys
+              first, then automatically fall back to Helicone credits if they
+              fail.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-6">
+            <ProviderKeySettings />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        returnUrl="/quickstart"
+      />
+
+      <AutoTopoffModal
+        isOpen={isAutoTopoffModalOpen}
+        onClose={() => setIsAutoTopoffModalOpen(false)}
+      />
 
       <HelixIntegrationDialog
         isOpen={isHelixDialogOpen}

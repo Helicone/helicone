@@ -62,6 +62,9 @@ export interface OpenAIUsage {
     accepted_prediction_tokens?: number;
     rejected_prediction_tokens?: number;
   };
+
+  // AI Gateway only - when cost calculation upfront is possible
+  cost?: number;
 }
 
 // Content block types (shared between Anthropic request and response)
@@ -69,13 +72,14 @@ export interface AnthropicContentBlock {
   type:
     | "text"
     | "image"
+    | "document"
     | "tool_use"
     | "tool_result"
     | "thinking"
     | "server_tool_use"
     | "web_search_tool_result";
   text?: string;
-  // Image fields
+  // Image and Document fields
   source?:
     | {
         type: "base64";
@@ -85,7 +89,14 @@ export interface AnthropicContentBlock {
     | {
         type: "url";
         url: string;
+      }
+    | {
+        type: "text";
+        media_type: string;
+        data: string;
       };
+  // Document fields
+  title?: string;
   // Tool use fields
   id?: string;
   name?: string;
@@ -96,8 +107,8 @@ export interface AnthropicContentBlock {
   // Thinking fields
   thinking?: string;
   signature?: string;
-  // Text citations (for web search)
-  citations?: WebSearchCitation[];
+  // Text citations (for web search responses) OR document citation config (for document requests)
+  citations?: WebSearchCitation[] | { enabled: boolean };
   cache_control?: CacheControl;
 }
 

@@ -7,6 +7,7 @@ import {
   sortModels,
   extractAvailableFilters,
 } from '../lib/filters/modelFilters';
+import { StandardParameter } from '@helicone-package/cost/models/types';
 
 interface UseModelFilteringProps {
   models: Model[];
@@ -92,9 +93,9 @@ export function useModelFiltering({
       capabilities: selectedCapabilities,
       showPtbOnly,
       authors: selectedAuthors,
-      inputModalities: selectedInputModalities as any,
-      outputModalities: selectedOutputModalities as any,
-      parameters: selectedParameters as any,
+      inputModalities: selectedInputModalities as Set<"text" | "image" | "audio" | "video"> | undefined,
+      outputModalities: selectedOutputModalities as Set<"text" | "image" | "audio" | "video"> | undefined,
+      parameters: selectedParameters as Set<StandardParameter> | undefined,
     };
 
     // Apply all filters

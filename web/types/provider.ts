@@ -12,6 +12,7 @@ export interface Provider {
   note?: string;
   multipleAllowed?: boolean;
   auth?: "api-key" | "oauth" | "aws-signature" | "service_account";
+  publiclyVisible?: boolean;
 }
 
 // Interface for provider configuration from API

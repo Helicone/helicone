@@ -1,10 +1,10 @@
 ---
-title: "Set Production Version"
-api: "POST https://api.helicone.ai/v1/prompt-2025/update/production-version"
-description: "Set a specific prompt version as the production version"
+title: "Set Version Environment"
+api: "POST https://api.helicone.ai/v1/prompt-2025/update/environment"
+description: "Set the environment for a specific prompt version"
 ---
 
-Updates which version of a prompt is considered the production version. This affects which version is used when referencing the prompt without specifying a version.
+Updates the environment for a specific prompt version. Environments can be "production", "staging", "development", or any custom environment name.
 
 ### Request Body
 
@@ -13,7 +13,11 @@ Updates which version of a prompt is considered the production version. This aff
 </ParamField>
 
 <ParamField body="promptVersionId" type="string" required>
-  The unique identifier of the prompt version to set as production
+  The unique identifier of the prompt version to update
+</ParamField>
+
+<ParamField body="environment" type="string" required>
+  The environment to set for this version (e.g., "production", "staging", "development")
 </ParamField>
 
 ### Response
@@ -23,17 +27,18 @@ Returns `null` on successful update.
 <RequestExample>
 
 ```bash cURL
-curl -X POST "https://api.helicone.ai/v1/prompt-2025/update/production-version" \
+curl -X POST "https://api.helicone.ai/v1/prompt-2025/update/environment" \
   -H "Authorization: Bearer $HELICONE_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "promptId": "prompt_123",
-    "promptVersionId": "version_789"
+    "promptVersionId": "version_789",
+    "environment": "production"
   }'
 ```
 
 ```typescript TypeScript
-const response = await fetch('https://api.helicone.ai/v1/prompt-2025/update/production-version', {
+const response = await fetch('https://api.helicone.ai/v1/prompt-2025/update/environment', {
   method: 'POST',
   headers: {
     'Authorization': `Bearer ${HELICONE_API_KEY}`,
@@ -41,7 +46,8 @@ const response = await fetch('https://api.helicone.ai/v1/prompt-2025/update/prod
   },
   body: JSON.stringify({
     promptId: "prompt_123",
-    promptVersionId: "version_789"
+    promptVersionId: "version_789",
+    environment: "production"
   }),
 });
 ```

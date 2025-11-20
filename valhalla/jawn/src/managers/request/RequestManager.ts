@@ -15,7 +15,10 @@ import {
   getRequestsClickhouseNoSort,
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "@helicone-package/cost";
-import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
+import {
+  HeliconeRequest,
+  DEFAULT_UUID,
+} from "@helicone-package/llm-mapper/types";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
@@ -73,11 +76,89 @@ export class RequestManager extends BaseManager {
   async getRequestById(
     requestId: string
   ): Promise<Result<HeliconeRequest, string>> {
-    return await cacheResultCustom(
+    const result = await cacheResultCustom(
       "v1/request/" + requestId + this.authParams.organizationId,
       () => this.uncachedGetRequestById(requestId),
       kvCache
     );
+
+    // Refresh S3 URLs even for cached data to ensure they're not expired
+    if (result.data) {
+      result.data = await this.refreshS3Urls(result.data);
+    }
+
+    return result;
+  }
+
+  /**
+   * Refreshes S3 presigned URLs for a request to ensure they're not expired.
+   * This generates new signed URLs for both the request/response body and any assets.
+   */
+  private async refreshS3Urls(
+    heliconeRequest: HeliconeRequest
+  ): Promise<HeliconeRequest> {
+    const s3ImplementationDate = new Date("2024-03-30T02:00:00Z");
+    const requestCreatedAt = new Date(heliconeRequest.request_created_at);
+
+    // Only generate S3 URLs if S3 is enabled and request is after implementation date
+    if (
+      (process.env.S3_ENABLED ?? "true") === "true" &&
+      requestCreatedAt > s3ImplementationDate
+    ) {
+      // Generate signed URL for request/response body
+      const { data: signedBodyUrl, error: signedBodyUrlErr } =
+        await this.s3Client.getRequestResponseBodySignedUrl(
+          this.authParams.organizationId,
+          heliconeRequest.cache_reference_id === DEFAULT_UUID
+            ? heliconeRequest.request_id
+            : (heliconeRequest.cache_reference_id ??
+                heliconeRequest.request_id)
+        );
+
+      if (signedBodyUrlErr || !signedBodyUrl) {
+        // If there was an error, just return the request as is
+        return heliconeRequest;
+      }
+
+      heliconeRequest.signed_body_url = signedBodyUrl;
+
+      // Generate signed URLs for all assets
+      if (heliconeRequest.asset_ids) {
+        const assetUrls: Record<string, string> = {};
+
+        try {
+          const signedUrlPromises = heliconeRequest.asset_ids.map(
+            async (assetId: string) => {
+              const { data: signedImageUrl, error: signedImageUrlErr } =
+                await this.s3Client.getRequestResponseImageSignedUrl(
+                  this.authParams.organizationId,
+                  heliconeRequest.request_id,
+                  assetId
+                );
+
+              return {
+                assetId,
+                signedImageUrl:
+                  signedImageUrlErr || !signedImageUrl ? "" : signedImageUrl,
+              };
+            }
+          );
+
+          const signedUrls = await Promise.all(signedUrlPromises);
+
+          signedUrls.forEach(({ assetId, signedImageUrl }) => {
+            assetUrls[assetId] = signedImageUrl;
+          });
+
+          heliconeRequest.asset_urls = assetUrls;
+        } catch (error) {
+          console.error(`Error fetching asset URLs: ${error}`);
+          return heliconeRequest;
+        }
+      }
+    }
+
+    return heliconeRequest;
   }
 
   // Never cache this unless you have a good reason
@@ -172,6 +253,8 @@ export class RequestManager extends BaseManager {
     return ok(null);
   }
 
+  // DEPRECATED: This method previously waited for request/response in legacy Postgres tables.
+  // These tables no longer exist. All data is in ClickHouse now.
   private async waitForRequestAndResponse(
     heliconeId: string,
     organizationId: string
@@ -184,42 +267,26 @@ export class RequestManager extends BaseManager {
       string
     >
   > {
-    const maxRetries = 3;
+    // Check ClickHouse instead of legacy Postgres tables
+    const requestClickhouse = await this.getRequestsClickhouse({
+      filter: {
+        request_response_rmt: {
+          request_id: {
+            equals: heliconeId,
+          },
+        },
+      },
+      limit: 1,
+    });
 
-    let sleepDuration = 30_000; // 30 seconds
-    for (let i = 0; i < maxRetries; i++) {
-      const { data: response, error: responseError } = await dbExecute<{
-        request: string;
-        response: string;
-      }>(
-        `
-        SELECT
-          request.id as request,
-          response.id as response
-        FROM request inner join response on request.id = response.request
-        WHERE request.helicone_org_id = $1
-        AND request.id = $2
-        `,
-        [organizationId, heliconeId]
-      );
-
-      if (responseError) {
-        console.error("Error fetching response:", responseError);
-        return err(responseError);
-      }
-
-      if (response && response.length > 0) {
-        return ok({
-          requestId: response[0].request,
-          responseId: response[0].response,
-        });
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, sleepDuration));
-      sleepDuration *= 2.5; // 30s, 75s, 187.5s
+    if (requestClickhouse.error || !requestClickhouse.data?.[0]) {
+      return err("Request not found in ClickHouse.");
     }
 
-    return { error: "Request not found.", data: null };
+    return ok({
+      requestId: requestClickhouse.data[0].request_id,
+      responseId: requestClickhouse.data[0].response_id ?? "",
+    });
   }
   async feedbackRequest(
     requestId: string,

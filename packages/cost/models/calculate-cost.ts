@@ -20,10 +20,10 @@ export interface CostBreakdown {
 
 function getPricingTier(
   pricing: ModelPricing[],
-  inputTokens: number
+  inputTokens: number,
 ): ModelPricing | null {
   if (!pricing || pricing.length === 0) return null;
-  
+
   const sortedPricing = [...pricing].sort((a, b) => b.threshold - a.threshold);
   for (const tier of sortedPricing) {
     if (inputTokens >= tier.threshold) return tier;
@@ -31,17 +31,18 @@ function getPricingTier(
   return pricing[0];
 }
 
-export function calculateModelCostBreakdown(
-  params: {
-    modelUsage: ModelUsage;
-    providerModelId: string;
-    provider: ModelProviderName;
-    requestCount?: number;
-  }
-): CostBreakdown | null {
+export function calculateModelCostBreakdown(params: {
+  modelUsage: ModelUsage;
+  providerModelId: string;
+  provider: ModelProviderName;
+  requestCount?: number;
+}): CostBreakdown | null {
   const { modelUsage, providerModelId, provider, requestCount = 1 } = params;
 
-  const configResult = registry.getModelProviderConfigByProviderModelId(providerModelId, provider);
+  const configResult = registry.getModelProviderConfigByProviderModelId(
+    providerModelId,
+    provider,
+  );
   if (configResult.error || !configResult.data) return null;
 
   const config: ModelProviderConfig = configResult.data;
@@ -65,21 +66,24 @@ export function calculateModelCostBreakdown(
   };
 
   breakdown.inputCost = modelUsage.input * pricing.input;
-  
+
   if (modelUsage.cacheDetails) {
     if (modelUsage.cacheDetails.cachedInput > 0) {
       const cachedMultiplier = pricing.cacheMultipliers?.cachedInput ?? 1.0;
-      breakdown.cachedInputCost = modelUsage.cacheDetails.cachedInput * pricing.input * cachedMultiplier;
+      breakdown.cachedInputCost =
+        modelUsage.cacheDetails.cachedInput * pricing.input * cachedMultiplier;
     }
 
     if (modelUsage.cacheDetails.write5m) {
       const write5mMultiplier = pricing.cacheMultipliers?.write5m ?? 1.0;
-      breakdown.cacheWrite5mCost = modelUsage.cacheDetails.write5m * pricing.input * write5mMultiplier;
+      breakdown.cacheWrite5mCost =
+        modelUsage.cacheDetails.write5m * pricing.input * write5mMultiplier;
     }
 
     if (modelUsage.cacheDetails.write1h) {
       const write1hMultiplier = pricing.cacheMultipliers?.write1h ?? 1.0;
-      breakdown.cacheWrite1hCost = modelUsage.cacheDetails.write1h * pricing.input * write1hMultiplier;
+      breakdown.cacheWrite1hCost =
+        modelUsage.cacheDetails.write1h * pricing.input * write1hMultiplier;
     }
   }
 
@@ -112,18 +116,22 @@ export function calculateModelCostBreakdown(
     breakdown.requestCost = requestCount * pricing.request;
   }
 
-  breakdown.totalCost = 
-    breakdown.inputCost +
-    breakdown.outputCost +
-    breakdown.cachedInputCost +
-    breakdown.cacheWrite5mCost +
-    breakdown.cacheWrite1hCost +
-    breakdown.thinkingCost +
-    breakdown.audioCost +
-    breakdown.videoCost +
-    breakdown.webSearchCost +
-    breakdown.imageCost +
-    breakdown.requestCost;
+  if (modelUsage.cost) {
+    breakdown.totalCost = modelUsage.cost;
+  } else {
+    breakdown.totalCost =
+      breakdown.inputCost +
+      breakdown.outputCost +
+      breakdown.cachedInputCost +
+      breakdown.cacheWrite5mCost +
+      breakdown.cacheWrite1hCost +
+      breakdown.thinkingCost +
+      breakdown.audioCost +
+      breakdown.videoCost +
+      breakdown.webSearchCost +
+      breakdown.imageCost +
+      breakdown.requestCost;
+  }
 
   return breakdown;
 }

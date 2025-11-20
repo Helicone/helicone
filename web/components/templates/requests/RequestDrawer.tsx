@@ -15,6 +15,7 @@ import { useLocalStorage } from "@/services/hooks/localStorage";
 import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
 import {
+  CreditCard,
   Eye,
   ListTreeIcon,
   ScrollTextIcon,
@@ -188,7 +189,8 @@ export default function RequestDrawer(props: RequestDivProps) {
   /* -------------------------------------------------------------------------- */
   const isChatRequest = useMemo(
     () =>
-      request?._type === "ai-gateway" ||
+      request?._type === "ai-gateway-chat" ||
+      request?._type === "ai-gateway-responses" ||
       request?._type === "openai-chat" ||
       request?._type === "anthropic-chat" ||
       request?._type === "gemini-chat",
@@ -413,6 +415,55 @@ export default function RequestDrawer(props: RequestDivProps) {
     () => (request?.heliconeMetadata.scores as Record<string, number>) || {},
     [request?.heliconeMetadata.scores],
   );
+
+  // Extract Stripe integration properties
+  const stripeProperties = useMemo(() => {
+    const props = request?.heliconeMetadata.customProperties;
+    if (!props) return null;
+
+    return {
+      status: props["helicone-stripe-integration-status"] as string | undefined,
+      skipReason: props["helicone-stripe-skip-reason"] as string | undefined,
+      customerId: props["helicone-stripe-customer-id"] as string | undefined,
+      model: props["helicone-stripe-model"] as string | undefined,
+      attemptedModel: props["helicone-stripe-attempted-model"] as
+        | string
+        | undefined,
+    };
+  }, [request?.heliconeMetadata.customProperties]);
+
+  const hasStripeData = useMemo(() => {
+    return (
+      stripeProperties &&
+      Object.values(stripeProperties).some((v) => v !== undefined)
+    );
+  }, [stripeProperties]);
+
+  // Helper functions for Stripe integration status
+  const getStripeStatusColor = (status: string) => {
+    switch (status) {
+      case "processed":
+        return "bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20";
+      case "skipped":
+        return "bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 ring-1 ring-inset ring-yellow-600/20";
+      case "error":
+        return "bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/20";
+      default:
+        return "bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20";
+    }
+  };
+
+  const formatSkipReason = (reason: string) => {
+    const reasonMap: Record<string, string> = {
+      "cache-hit": "Cache Hit",
+      "no-customer-id": "No Customer ID",
+      "model-not-whitelisted": "Model Not Whitelisted",
+      "max-events-exceeded": "Max Events Exceeded",
+      "zero-tokens": "Zero Tokens",
+    };
+    return reasonMap[reason] || reason;
+  };
+
   // Handlers for adding properties and scores
   const onAddPropertyHandler = useCallback(
     async (key: string, value: string) => {
@@ -897,6 +948,76 @@ export default function RequestDrawer(props: RequestDivProps) {
                       JSON.stringify(promptInputsQuery.data?.inputs),
                     )}
                   />
+                </div>
+              </div>
+            )}
+
+            {/* Stripe Integration Status */}
+            {hasStripeData && stripeProperties && (
+              <div className="mb-4 rounded-lg border border-border bg-sidebar-background p-3">
+                <div className="mb-2 flex items-center gap-2">
+                  <CreditCard size={14} className="text-primary" />
+                  <h2 className="text-xs font-medium">Stripe Integration</h2>
+                  {stripeProperties.status && (
+                    <>
+                      <div className="h-3 w-px bg-border" />
+                      <Badge
+                        variant="outline"
+                        className={getStripeStatusColor(
+                          stripeProperties.status,
+                        )}
+                      >
+                        {stripeProperties.status === "processed"
+                          ? "Processed"
+                          : stripeProperties.status === "skipped"
+                            ? "Skipped"
+                            : "Error"}
+                      </Badge>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  {stripeProperties.skipReason && (
+                    <div className="grid grid-cols-[auto,1fr] items-center gap-x-3">
+                      <XSmall className="text-nowrap text-muted-foreground">
+                        Reason
+                      </XSmall>
+                      <XSmall className="min-w-0 text-right">
+                        {formatSkipReason(stripeProperties.skipReason)}
+                      </XSmall>
+                    </div>
+                  )}
+                  {stripeProperties.customerId && (
+                    <div className="grid grid-cols-[auto,1fr] items-center gap-x-3">
+                      <XSmall className="text-nowrap text-muted-foreground">
+                        Customer
+                      </XSmall>
+                      <XSmall className="font-mono min-w-0 truncate text-right">
+                        {stripeProperties.customerId}
+                      </XSmall>
+                    </div>
+                  )}
+                  {stripeProperties.model && (
+                    <div className="grid grid-cols-[auto,1fr] items-center gap-x-3">
+                      <XSmall className="text-nowrap text-muted-foreground">
+                        Model
+                      </XSmall>
+                      <XSmall className="font-mono min-w-0 truncate text-right">
+                        {stripeProperties.model}
+                      </XSmall>
+                    </div>
+                  )}
+                  {stripeProperties.attemptedModel && (
+                    <div className="grid grid-cols-[auto,1fr] items-center gap-x-3">
+                      <XSmall className="text-nowrap text-muted-foreground">
+                        Attempted
+                      </XSmall>
+                      <XSmall className="font-mono min-w-0 truncate text-right">
+                        {stripeProperties.attemptedModel}
+                      </XSmall>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

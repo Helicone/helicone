@@ -11,9 +11,11 @@ import { deepseekEndpointConfig, deepseekModels } from "./authors/deepseek";
 import { googleEndpointConfig, googleModels } from "./authors/google";
 import { grokEndpointConfig, grokModels } from "./authors/xai";
 import { openaiEndpointConfig, openaiModels } from "./authors/openai";
-import { mistralEndpointConfig, mistralModels } from "./authors/mistralai";
+import { mistralEndpointConfig, mistralModels } from "./authors/mistral";
 import { alibabaEndpointConfig, alibabaModels } from "./authors/alibaba";
 import { metaEndpointConfig, metaModels } from "./authors/meta";
+import { zaiEndpointConfig, zaiModels } from "./authors/zai";
+import { baiduEndpointConfig, baiduModels } from "./authors/baidu";
 
 // Combine all models for type derivation
 const allModels = {
@@ -24,7 +26,9 @@ const allModels = {
   ...mistralModels,
   ...deepseekModels,
   ...alibabaModels,
-  ...metaModels
+  ...metaModels,
+  ...baiduModels,
+  ...zaiModels
 };
 
 export type ModelName = keyof typeof allModels;
@@ -38,7 +42,9 @@ const modelProviderConfigs = {
   ...mistralEndpointConfig,
   ...deepseekEndpointConfig,
   ...alibabaEndpointConfig,
-  ...metaEndpointConfig
+  ...metaEndpointConfig,
+  ...baiduEndpointConfig,
+  ...zaiEndpointConfig
 };
 
 export type ModelProviderConfigId = keyof typeof modelProviderConfigs;

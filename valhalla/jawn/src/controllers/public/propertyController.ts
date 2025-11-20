@@ -1,3 +1,8 @@
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import {
+  buildFilterWithAuthClickHouse,
+  buildFilterWithAuthClickHouseOrganizationProperties,
+} from "@helicone-package/filters/filters";
 import {
   Body,
   Controller,
@@ -8,13 +13,14 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { KVCache } from "../../lib/cache/kvCache";
+import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { buildFilterWithAuthClickHouse, buildFilterWithAuthClickHouseOrganizationProperties } from "@helicone-package/filters/filters";
-import { resultMap } from "../../packages/common/result";
+import {
+  type DataOverTimeRequest,
+  getXOverTime,
+} from "../../managers/helpers/getXOverTime";
+import { Result, resultMap } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
-import { quickCacheResultCustom } from "../../utils/cacheResult";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export interface Property {
   property: string;
@@ -27,37 +33,176 @@ export interface TimeFilterRequest {
   };
 }
 
-const longCache = new KVCache(60 * 60 * 1000 * 7); // 1 week
+// Properties queries are cached per-org via staticMemCache (see below)
 
 @Route("v1/property")
 @Tags("Property")
 @Security("api_key")
 export class PropertyController extends Controller {
+  @Post("/properties/over-time")
+  public async getPropertiesOverTime(
+    @Body()
+    requestBody: DataOverTimeRequest & {
+      propertyKey: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        property: string;
+        total_cost: number;
+        request_count: number;
+        created_at_trunc: string;
+      }[],
+      string
+    >
+  > {
+    return await getXOverTime<{
+      property: string;
+      total_cost: number;
+      request_count: number;
+    }>(
+      {
+        ...requestBody,
+        userFilter: {
+          left: {
+            request_response_rmt: {
+              property_key: {
+                equals: requestBody.propertyKey,
+              },
+            },
+          },
+          operator: "and",
+          right: requestBody.userFilter,
+        },
+      },
+      {
+        orgId: request.authParams.organizationId,
+        countColumns: [
+          `sum(cost) / ${COST_PRECISION_MULTIPLIER} AS total_cost`,
+          "count(*) as request_count",
+        ],
+        groupByColumns: ["properties[{val_0: String}] AS property"],
+      },
+      [requestBody.propertyKey]
+    );
+  }
+
   @Post("query")
   public async getProperties(
     @Body()
     requestBody: {},
     @Request() request: JawnAuthenticatedRequest
   ) {
-    const builtFilter = await buildFilterWithAuthClickHouseOrganizationProperties({
-      org_id: request.authParams.organizationId,
-      argsAcc: [],
-      filter: {},
-    });
+    const builtFilter =
+      await buildFilterWithAuthClickHouseOrganizationProperties({
+        org_id: request.authParams.organizationId,
+        argsAcc: [],
+        filter: {},
+      });
 
     const query = `
-    SELECT DISTINCT property_key AS property
+    SELECT DISTINCT organization_properties.property_key AS property
     FROM organization_properties
+    LEFT JOIN default.hidden_property_keys AS hp
+      ON hp.organization_id = organization_properties.organization_id
+     AND hp.key = organization_properties.property_key
     WHERE (
       ${builtFilter.filter}
+      AND (hp.is_hidden = 0 OR hp.is_hidden IS NULL)
     )
   `;
 
-    return await quickCacheResultCustom(
-      "v1/property/query" + request.authParams.organizationId,
-      async () => await dbQueryClickhouse<Property>(query, builtFilter.argsAcc),
-      longCache
+    const properties = await dbQueryClickhouse<Property>(
+      query,
+      builtFilter.argsAcc
     );
+
+    return properties;
+  }
+
+  @Post("hide")
+  public async hideProperty(
+    @Body()
+    requestBody: { key: string },
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const orgId = request.authParams.organizationId;
+    const key = requestBody.key;
+
+    if (!key || typeof key !== "string") {
+      throw new Error("Property key is required");
+    }
+
+    // Ensure any existing entry is removed, then insert hidden flag
+    const deleteQuery = `
+      ALTER TABLE default.hidden_property_keys
+      DELETE WHERE organization_id = {val_0: UUID} AND key = {val_1: String}
+    `;
+    const delRes = await dbQueryClickhouse(deleteQuery, [orgId, key]);
+    if (delRes.error) {
+      return delRes;
+    }
+
+    const insRes = await clickhouseDb.dbInsertClickhouse(
+      "hidden_property_keys",
+      [{ organization_id: orgId, key, is_hidden: 1 }]
+    );
+    if (insRes.error) {
+      return insRes;
+    }
+
+    return { data: { ok: true }, error: null };
+  }
+
+  @Post("hidden/query")
+  public async getHiddenProperties(
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const orgId = request.authParams.organizationId;
+
+    const query = `
+    SELECT key AS property
+    FROM default.hidden_property_keys
+    WHERE organization_id = {val_0: UUID}
+      AND is_hidden = 1
+    ORDER BY key
+  `;
+
+    return dbQueryClickhouse<Property>(query, [orgId]);
+  }
+
+  @Post("restore")
+  public async restoreProperty(
+    @Body()
+    requestBody: { key: string },
+    @Request() request: JawnAuthenticatedRequest
+  ) {
+    const orgId = request.authParams.organizationId;
+    const key = requestBody.key;
+
+    if (!key || typeof key !== "string") {
+      throw new Error("Property key is required");
+    }
+
+    const deleteQuery = `
+      ALTER TABLE default.hidden_property_keys
+      DELETE WHERE organization_id = {val_0: UUID} AND key = {val_1: String}
+    `;
+    const delRes = await dbQueryClickhouse(deleteQuery, [orgId, key]);
+    if (delRes.error) {
+      return delRes;
+    }
+
+    const insRes = await clickhouseDb.dbInsertClickhouse(
+      "hidden_property_keys",
+      [{ organization_id: orgId, key, is_hidden: 0 }]
+    );
+    if (insRes.error) {
+      return insRes;
+    }
+
+    return { data: { ok: true }, error: null };
   }
 
   // Gets all possible values for a property
@@ -178,7 +323,7 @@ export class PropertyController extends Controller {
       }));
 
       // Get the total cost
-      const totalCost = totalRes.data?.[0]?.cost || 0;
+      const totalCost = +(totalRes.data?.[0]?.cost || 0);
 
       // Calculate the "other" category cost (total minus sum of top 10)
       const topCostsSum = topCosts.reduce((sum, item) => sum + item.cost, 0);
@@ -196,6 +341,103 @@ export class PropertyController extends Controller {
       }
 
       return topCosts;
+    });
+  }
+
+  @Post("{propertyKey}/top-requests/query")
+  public async getTopRequests(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() propertyKey: string,
+    @Body() requestBody: TimeFilterRequest
+  ) {
+    if (!propertyKey) {
+      throw new Error("Property key is required");
+    }
+
+    const builtFilter = await buildFilterWithAuthClickHouse({
+      org_id: request.authParams.organizationId,
+      argsAcc: [],
+      filter: {
+        left: {
+          request_response_rmt: {
+            request_created_at: {
+              gt: new Date(requestBody.timeFilter.start),
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            request_created_at: {
+              lt: new Date(requestBody.timeFilter.end),
+            },
+          },
+        },
+      },
+    });
+
+    const args = builtFilter.argsAcc.concat([propertyKey]);
+
+    const propertySQLKey = `{val_${args.length - 1} : String}`;
+
+    // Query to get the top 10 requests
+    const topQuery = `
+    SELECT
+      properties[${propertySQLKey}] as value,
+      count(*) as count
+    FROM request_response_rmt
+    WHERE (
+      ${builtFilter.filter}
+      AND properties[${propertySQLKey}] IS NOT NULL
+    )
+    GROUP BY properties[${propertySQLKey}]
+    ORDER BY count DESC
+    LIMIT 10
+    `;
+
+    // Query to get the total count for this property
+    const totalQuery = `
+    SELECT
+      count(*) as count
+    FROM request_response_rmt
+    WHERE (
+      ${builtFilter.filter}
+      AND properties[${propertySQLKey}] IS NOT NULL
+    )
+    `;
+
+    // Execute both queries
+    const [topRes, totalRes] = await Promise.all([
+      dbQueryClickhouse<{ value: string; count: number }>(topQuery, args),
+      dbQueryClickhouse<{ count: number }>(totalQuery, args),
+    ]);
+
+    return resultMap(topRes, (data) => {
+      // Calculate the sum of the top 10 counts
+      const topRequests = data.map((d) => ({
+        value: d.value,
+        count: +d.count,
+      }));
+
+      // Get the total count
+      const totalCount = +(totalRes.data?.[0]?.count || 0);
+
+      // Calculate the "other" category count (total minus sum of top 10)
+      const topRequestsSum = topRequests.reduce((sum, item) => sum + item.count, 0);
+      const otherCount = totalCount - topRequestsSum;
+
+      // Only add the "other" category if it has a positive count
+      if (otherCount > 0) {
+        return [
+          ...topRequests,
+          {
+            value: "Other",
+            count: otherCount,
+          },
+        ];
+      }
+
+      return topRequests;
     });
   }
 }

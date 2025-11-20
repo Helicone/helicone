@@ -828,6 +828,17 @@
 					"target_url": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
+					"property_key": {
+						"properties": {
+							"equals": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"equals"
+						],
+						"type": "object"
+					},
 					"properties": {
 						"properties": {},
 						"additionalProperties": {
@@ -3235,26 +3246,35 @@
 					"CHUTES",
 					"LLAMA",
 					"NVIDIA",
-					"VERCEL"
+					"VERCEL",
+					"CEREBRAS",
+					"BASETEN"
 				]
 			},
 			"ModelProviderName": {
 				"type": "string",
 				"enum": [
+					"baseten",
 					"anthropic",
-					"openai",
-					"bedrock",
-					"vertex",
 					"azure",
-					"perplexity",
-					"groq",
-					"deepseek",
+					"bedrock",
+					"cerebras",
+					"chutes",
 					"cohere",
-					"xai",
 					"deepinfra",
+					"deepseek",
+					"fireworks",
 					"google-ai-studio",
+					"groq",
+					"helicone",
+					"mistral",
+					"nebius",
+					"novita",
+					"openai",
 					"openrouter",
-					"novita"
+					"perplexity",
+					"vertex",
+					"xai"
 				],
 				"nullable": false
 			},
@@ -3532,6 +3552,29 @@
 				"type": "object",
 				"additionalProperties": {}
 			},
+			"HeliconeEventData": {
+				"properties": {
+					"_type": {
+						"type": "string",
+						"enum": [
+							"data"
+						],
+						"nullable": false
+					},
+					"name": {
+						"type": "string"
+					},
+					"meta": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"_type",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": {}
+			},
 			"LLMRequestBody": {
 				"properties": {
 					"llm_type": {
@@ -3675,6 +3718,9 @@
 					"vectorDBDetails": {
 						"$ref": "#/components/schemas/HeliconeEventVectorDB"
 					},
+					"dataDetails": {
+						"$ref": "#/components/schemas/HeliconeEventData"
+					},
 					"input": {
 						"anyOf": [
 							{
@@ -3792,6 +3838,47 @@
 			},
 			"LLMResponseBody": {
 				"properties": {
+					"dataDetailsResponse": {
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"data"
+								],
+								"nullable": false
+							},
+							"metadata": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": {},
+								"required": [
+									"timestamp"
+								],
+								"type": "object"
+							},
+							"message": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							}
+						},
+						"additionalProperties": {},
+						"required": [
+							"name",
+							"_type",
+							"metadata",
+							"message",
+							"status"
+						],
+						"type": "object"
+					},
 					"vectorDBDetailsResponse": {
 						"properties": {
 							"_type": {
@@ -4140,9 +4227,12 @@
 						"type": "string",
 						"nullable": true
 					},
-					"gateway_endpoint_version": {
+					"ai_gateway_body_mapping": {
 						"type": "string",
 						"nullable": true
+					},
+					"storage_location": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -4183,7 +4273,7 @@
 					"model",
 					"cache_reference_id",
 					"cache_enabled",
-					"gateway_endpoint_version"
+					"ai_gateway_body_mapping"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -5795,6 +5885,9 @@
 					"amount": {
 						"type": "number",
 						"format": "double"
+					},
+					"returnUrl": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -5973,6 +6066,108 @@
 					"next_page",
 					"count"
 				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AutoTopoffSettings": {
+				"properties": {
+					"enabled": {
+						"type": "boolean"
+					},
+					"thresholdCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"topoffAmountCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"stripePaymentMethodId": {
+						"type": "string",
+						"nullable": true
+					},
+					"lastTopoffAt": {
+						"type": "string",
+						"nullable": true
+					},
+					"consecutiveFailures": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"enabled",
+					"thresholdCents",
+					"topoffAmountCents",
+					"stripePaymentMethodId",
+					"lastTopoffAt",
+					"consecutiveFailures"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateAutoTopoffSettingsRequest": {
+				"properties": {
+					"enabled": {
+						"type": "boolean"
+					},
+					"thresholdCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"topoffAmountCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"stripePaymentMethodId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"enabled",
+					"thresholdCents",
+					"topoffAmountCents",
+					"stripePaymentMethodId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaymentMethod": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"brand": {
+						"type": "string"
+					},
+					"last4": {
+						"type": "string"
+					},
+					"exp_month": {
+						"type": "number",
+						"format": "double"
+					},
+					"exp_year": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"brand",
+					"last4",
+					"exp_month",
+					"exp_year"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateSetupSessionRequest": {
+				"properties": {
+					"returnUrl": {
+						"type": "string"
+					}
+				},
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -6489,6 +6684,39 @@
 					"resourceSpans"
 				],
 				"type": "object"
+			},
+			"SendTestRequestResponse": {
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"response": {
+						"type": "string"
+					},
+					"requestId": {
+						"type": "string"
+					},
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"success"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SendTestRequestRequest": {
+				"properties": {
+					"apiKey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"apiKey"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"SessionResult": {
 				"properties": {
@@ -7239,6 +7467,701 @@
 					"30d"
 				]
 			},
+			"ProviderMetric": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"total_requests": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"provider",
+					"total_requests"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ProviderMetric-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ProviderMetric"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderMetric-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderMetric-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Partial_UserMetricsToOperators_": {
+				"properties": {
+					"user_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"last_active": {
+						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+					},
+					"total_requests": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"active_for": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"average_requests_per_day_active": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"average_tokens_per_request": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"total_completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"total_prompt_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"cost": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_UserApiKeysTableToOperators_": {
+				"properties": {
+					"api_key_hash": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"api_key_name": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_PropertiesTableToOperators_": {
+				"properties": {
+					"auth_hash": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"key": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"value": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_ExperimentToOperators_": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_ExperimentHypothesisRunToOperator_": {
+				"properties": {
+					"result_request_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_ScoreValueToOperator_": {
+				"properties": {
+					"request_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_RequestResponseLogToOperators_": {
+				"properties": {
+					"latency": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"status": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"request_created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"response_created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"auth_hash": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"model": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"user_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"organization_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"node_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"job_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"threat": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_PropertiesV3ToOperators_": {
+				"properties": {
+					"key": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"value": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"organization_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_PropertyWithResponseV1ToOperators_": {
+				"properties": {
+					"property_key": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"property_value": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"request_created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"organization_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"threat": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_JobToOperators_": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"name": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"description": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"status": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+					},
+					"updated_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+					},
+					"timeout_seconds": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"custom_properties": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
+					"org_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_NodesToOperators_": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"name": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"description": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"job_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"status": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+					},
+					"updated_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+					},
+					"timeout_seconds": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"custom_properties": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
+					"org_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_CacheMetricsTableToOperators_": {
+				"properties": {
+					"organization_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"request_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"date": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"hour": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"model": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"cache_hit_count": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"saved_latency_ms": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"saved_completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"saved_prompt_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"saved_completion_audio_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"saved_prompt_audio_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"saved_prompt_cache_write_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"saved_prompt_cache_read_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"first_hit": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"last_hit": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"request_body": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"response_body": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_RateLimitTableToOperators_": {
+				"properties": {
+					"organization_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"created_at": {
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_OrganizationPropertiesToOperators_": {
+				"properties": {
+					"organization_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"property_key": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_TablesAndViews_": {
+				"properties": {
+					"user_metrics": {
+						"$ref": "#/components/schemas/Partial_UserMetricsToOperators_"
+					},
+					"user_api_keys": {
+						"$ref": "#/components/schemas/Partial_UserApiKeysTableToOperators_"
+					},
+					"response": {
+						"$ref": "#/components/schemas/Partial_ResponseTableToOperators_"
+					},
+					"request": {
+						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
+					},
+					"feedback": {
+						"$ref": "#/components/schemas/Partial_FeedbackTableToOperators_"
+					},
+					"properties_table": {
+						"$ref": "#/components/schemas/Partial_PropertiesTableToOperators_"
+					},
+					"prompt_v2": {
+						"$ref": "#/components/schemas/Partial_PromptToOperators_"
+					},
+					"prompts_versions": {
+						"$ref": "#/components/schemas/Partial_PromptVersionsToOperators_"
+					},
+					"experiment": {
+						"$ref": "#/components/schemas/Partial_ExperimentToOperators_"
+					},
+					"experiment_hypothesis_run": {
+						"$ref": "#/components/schemas/Partial_ExperimentHypothesisRunToOperator_"
+					},
+					"score_value": {
+						"$ref": "#/components/schemas/Partial_ScoreValueToOperator_"
+					},
+					"request_response_log": {
+						"$ref": "#/components/schemas/Partial_RequestResponseLogToOperators_"
+					},
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
+					},
+					"sessions_request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_SessionsRequestResponseRMTToOperators_"
+					},
+					"users_view": {
+						"$ref": "#/components/schemas/Partial_UserViewToOperators_"
+					},
+					"properties_v3": {
+						"$ref": "#/components/schemas/Partial_PropertiesV3ToOperators_"
+					},
+					"property_with_response_v1": {
+						"$ref": "#/components/schemas/Partial_PropertyWithResponseV1ToOperators_"
+					},
+					"job": {
+						"$ref": "#/components/schemas/Partial_JobToOperators_"
+					},
+					"job_node": {
+						"$ref": "#/components/schemas/Partial_NodesToOperators_"
+					},
+					"cache_metrics": {
+						"$ref": "#/components/schemas/Partial_CacheMetricsTableToOperators_"
+					},
+					"rate_limit_log": {
+						"$ref": "#/components/schemas/Partial_RateLimitTableToOperators_"
+					},
+					"organization_properties": {
+						"$ref": "#/components/schemas/Partial_OrganizationPropertiesToOperators_"
+					},
+					"properties": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					},
+					"values": {
+						"properties": {},
+						"additionalProperties": {
+							"$ref": "#/components/schemas/Partial_TextOperators_"
+						},
+						"type": "object"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"SingleKey_TablesAndViews_": {
+				"$ref": "#/components/schemas/Partial_TablesAndViews_"
+			},
+			"FilterLeaf": {
+				"$ref": "#/components/schemas/SingleKey_TablesAndViews_"
+			},
+			"FilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeaf"
+					},
+					{
+						"$ref": "#/components/schemas/FilterBranch"
+					},
+					{
+						"properties": {},
+						"type": "object"
+					}
+				]
+			},
+			"FilterBranch": {
+				"properties": {
+					"left": {
+						"$ref": "#/components/schemas/FilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"right": {
+						"$ref": "#/components/schemas/FilterNode"
+					}
+				},
+				"required": [
+					"left",
+					"operator",
+					"right"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProviderQueryParams": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/FilterNode"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"filter",
+					"offset",
+					"limit",
+					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess__property-string--total_cost-number--request_count-number--created_at_trunc-string_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"created_at_trunc": {
+									"type": "string"
+								},
+								"request_count": {
+									"type": "number",
+									"format": "double"
+								},
+								"total_cost": {
+									"type": "number",
+									"format": "double"
+								},
+								"property": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"created_at_trunc",
+								"request_count",
+								"total_cost",
+								"property"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__property-string--total_cost-number--request_count-number--created_at_trunc-string_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__property-string--total_cost-number--request_count-number--created_at_trunc-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Pick_FilterLeaf.request_response_rmt_": {
+				"properties": {
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.request_response_rmt_"
+			},
+			"RequestClickhouseFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_request_response_rmt_"
+					},
+					{
+						"$ref": "#/components/schemas/RequestClickhouseFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"RequestClickhouseFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"TimeIncrement": {
+				"type": "string",
+				"enum": [
+					"min",
+					"hour",
+					"day",
+					"week",
+					"month",
+					"year"
+				]
+			},
+			"DataOverTimeRequest": {
+				"properties": {
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					},
+					"userFilter": {
+						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
+					},
+					"dbIncrement": {
+						"$ref": "#/components/schemas/TimeIncrement"
+					},
+					"timeZoneDifference": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"timeFilter",
+					"userFilter",
+					"dbIncrement",
+					"timeZoneDifference"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Property": {
 				"properties": {
 					"property": {
@@ -7283,6 +8206,27 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"ResultSuccess_unknown-Array_": {
+				"properties": {
+					"data": {
+						"items": {},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"ResultSuccess__value-string--cost-number_-Array_": {
 				"properties": {
@@ -7353,6 +8297,52 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"ResultSuccess__value-string--count-number_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"count": {
+									"type": "number",
+									"format": "double"
+								},
+								"value": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"count",
+								"value"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__value-string--count-number_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__value-string--count-number_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"ChatCompletionTokenLogprob.TopLogprob": {
 				"properties": {
@@ -8035,117 +9025,18 @@
 					}
 				]
 			},
-			"Pick_FilterLeaf.request_response_rmt_": {
-				"properties": {
-					"request_response_rmt": {
-						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
-					}
-				},
-				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
-			},
-			"FilterLeafSubset_request_response_rmt_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.request_response_rmt_"
-			},
-			"RequestClickhouseFilterNode": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/FilterLeafSubset_request_response_rmt_"
-					},
-					{
-						"$ref": "#/components/schemas/RequestClickhouseFilterBranch"
-					},
-					{
-						"type": "string",
-						"enum": [
-							"all"
-						]
-					}
-				]
-			},
-			"RequestClickhouseFilterBranch": {
-				"properties": {
-					"right": {
-						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
-					},
-					"operator": {
-						"type": "string",
-						"enum": [
-							"or",
-							"and"
-						]
-					},
-					"left": {
-						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
-					}
-				},
-				"required": [
-					"right",
-					"operator",
-					"left"
-				],
-				"type": "object"
-			},
-			"TimeIncrement": {
-				"type": "string",
-				"enum": [
-					"min",
-					"hour",
-					"day",
-					"week",
-					"month",
-					"year"
-				]
-			},
-			"DataOverTimeRequest": {
-				"properties": {
-					"timeFilter": {
-						"properties": {
-							"end": {
-								"type": "string"
-							},
-							"start": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"end",
-							"start"
-						],
-						"type": "object"
-					},
-					"userFilter": {
-						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
-					},
-					"dbIncrement": {
-						"$ref": "#/components/schemas/TimeIncrement"
-					},
-					"timeZoneDifference": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"timeFilter",
-					"userFilter",
-					"dbIncrement",
-					"timeZoneDifference"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"AuthorName": {
 				"type": "string",
 				"enum": [
 					"anthropic",
+					"cohere",
+					"deepseek",
+					"mistral",
 					"openai",
 					"perplexity",
-					"deepseek",
-					"cohere",
 					"xai",
 					"google",
 					"meta-llama",
-					"mistralai",
 					"amazon",
 					"microsoft",
 					"nvidia",
@@ -8153,6 +9044,7 @@
 					"moonshotai",
 					"alibaba",
 					"zai",
+					"baidu",
 					"passthrough"
 				]
 			},
@@ -8185,7 +9077,8 @@
 					"logprobs",
 					"top_logprobs",
 					"structured_outputs",
-					"verbosity"
+					"verbosity",
+					"n"
 				]
 			},
 			"PluginId": {
@@ -8284,6 +9177,14 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"BodyMappingType": {
+				"type": "string",
+				"enum": [
+					"OPENAI",
+					"NO_MAPPING",
+					"RESPONSES"
+				]
+			},
 			"EndpointConfig": {
 				"properties": {
 					"region": {
@@ -8311,13 +9212,12 @@
 						"type": "boolean"
 					},
 					"gatewayMapping": {
-						"type": "string",
-						"enum": [
-							"OPENAI",
-							"NO_MAPPING"
-						]
+						"$ref": "#/components/schemas/BodyMappingType"
 					},
 					"modelName": {
+						"type": "string"
+					},
+					"heliconeModelId": {
 						"type": "string"
 					},
 					"providerModelId": {
@@ -8436,11 +9336,22 @@
 						"enum": [
 							"fp4",
 							"fp8",
-							"bf16"
+							"fp16",
+							"bf16",
+							"int4"
 						]
 					},
 					"responseFormat": {
 						"$ref": "#/components/schemas/ResponseFormat"
+					},
+					"requireExplicitRouting": {
+						"type": "boolean"
+					},
+					"providerModelIdAliases": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
@@ -8484,13 +9395,12 @@
 						"type": "boolean"
 					},
 					"gatewayMapping": {
-						"type": "string",
-						"enum": [
-							"OPENAI",
-							"NO_MAPPING"
-						]
+						"$ref": "#/components/schemas/BodyMappingType"
 					},
 					"modelName": {
+						"type": "string"
+					},
+					"heliconeModelId": {
 						"type": "string"
 					}
 				},
@@ -8832,6 +9742,58 @@
 					}
 				]
 			},
+			"OAIModel": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"object": {
+						"type": "string",
+						"enum": [
+							"model"
+						],
+						"nullable": false
+					},
+					"created": {
+						"type": "number",
+						"format": "double"
+					},
+					"owned_by": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"object",
+					"created",
+					"owned_by"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"OAIModelsResponse": {
+				"properties": {
+					"object": {
+						"type": "string",
+						"enum": [
+							"list"
+						],
+						"nullable": false
+					},
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/OAIModel"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"object",
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"MetricStats": {
 				"properties": {
 					"p99": {
@@ -9116,47 +10078,6 @@
 					"parent"
 				],
 				"type": "object"
-			},
-			"ResultSuccess__model-string_-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"model": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"model"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__model-string_-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__model-string_-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
 			},
 			"ResultSuccess__unsafe-boolean__": {
 				"properties": {
@@ -10352,18 +11273,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"Partial_ExperimentToOperators_": {
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"prompt_v2": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
 			},
 			"Pick_FilterLeaf.experiment_": {
 				"properties": {
@@ -12793,20 +13702,27 @@
 												"providerName": {
 													"type": "string",
 													"enum": [
+														"baseten",
 														"anthropic",
-														"openai",
-														"bedrock",
-														"vertex",
 														"azure",
-														"perplexity",
-														"groq",
-														"deepseek",
+														"bedrock",
+														"cerebras",
+														"chutes",
 														"cohere",
-														"xai",
 														"deepinfra",
+														"deepseek",
+														"fireworks",
 														"google-ai-studio",
+														"groq",
+														"helicone",
+														"mistral",
+														"nebius",
+														"novita",
+														"openai",
 														"openrouter",
-														"novita"
+														"perplexity",
+														"vertex",
+														"xai"
 													]
 												}
 											},
@@ -17553,8 +18469,13 @@
 			"post": {
 				"operationId": "MigrateToPro",
 				"responses": {
-					"204": {
-						"description": "No content"
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
 					}
 				},
 				"tags": [
@@ -17714,6 +18635,219 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/stripe/auto-topoff/settings": {
+			"get": {
+				"operationId": "GetAutoTopoffSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/AutoTopoffSettings"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "UpdateAutoTopoffSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AutoTopoffSettings"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateAutoTopoffSettingsRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DisableAutoTopoff",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/payment-methods": {
+			"get": {
+				"operationId": "GetPaymentMethods",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/PaymentMethod"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/payment-methods/setup-session": {
+			"post": {
+				"operationId": "CreateSetupSession",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"setupUrl": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"setupUrl"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSetupSessionRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/stripe/payment-methods/{paymentMethodId}": {
+			"delete": {
+				"operationId": "RemovePaymentMethod",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "paymentMethodId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/integration": {
@@ -18137,30 +19271,40 @@
 				}
 			}
 		},
-		"/v1/session/has-session": {
-			"get": {
-				"operationId": "HasSession",
+		"/v1/test/gateway-request": {
+			"post": {
+				"operationId": "SendTestRequest",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_boolean.string_"
+									"$ref": "#/components/schemas/SendTestRequestResponse"
 								}
 							}
 						}
 					}
 				},
 				"tags": [
-					"Session"
+					"Test"
 				],
 				"security": [
 					{
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SendTestRequestRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/session/query": {
@@ -18515,6 +19659,93 @@
 				]
 			}
 		},
+		"/v1/providers": {
+			"post": {
+				"operationId": "GetProviders",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderMetric-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Providers"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ProviderQueryParams"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/property/properties/over-time": {
+			"post": {
+				"operationId": "GetPropertiesOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__property-string--total_cost-number--request_count-number--created_at_trunc-string_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"allOf": [
+									{
+										"$ref": "#/components/schemas/DataOverTimeRequest"
+									},
+									{
+										"properties": {
+											"propertyKey": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"propertyKey"
+										],
+										"type": "object"
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/property/query": {
 			"post": {
 				"operationId": "GetProperties",
@@ -18545,6 +19776,182 @@
 						"application/json": {
 							"schema": {
 								"properties": {},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/property/hide": {
+			"post": {
+				"operationId": "HideProperty",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultError_string_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown-Array_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_string_"
+										},
+										{
+											"properties": {
+												"error": {},
+												"data": {
+													"properties": {
+														"ok": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"ok"
+													],
+													"type": "object"
+												}
+											},
+											"required": [
+												"error",
+												"data"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"key"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/property/hidden/query": {
+			"post": {
+				"operationId": "GetHiddenProperties",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Property-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/property/restore": {
+			"post": {
+				"operationId": "RestoreProperty",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ResultError_string_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_unknown-Array_"
+										},
+										{
+											"$ref": "#/components/schemas/ResultSuccess_string_"
+										},
+										{
+											"properties": {
+												"error": {},
+												"data": {
+													"properties": {
+														"ok": {
+															"type": "boolean"
+														}
+													},
+													"required": [
+														"ok"
+													],
+													"type": "object"
+												}
+											},
+											"required": [
+												"error",
+												"data"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"key"
+								],
 								"type": "object"
 							}
 						}
@@ -18615,6 +20022,51 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result__value-string--cost-number_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Property"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "propertyKey",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TimeFilterRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/property/{propertyKey}/top-requests/query": {
+			"post": {
+				"operationId": "GetTopRequests",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__value-string--count-number_-Array.string_"
 								}
 							}
 						}
@@ -19083,6 +20535,50 @@
 				"parameters": []
 			}
 		},
+		"/v1/models": {
+			"get": {
+				"operationId": "GetModels",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OAIModelsResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Models"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/v1/models/multimodal": {
+			"get": {
+				"operationId": "GetMultimodalModels",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OAIModelsResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Models"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/v1/public/compare/models": {
 			"post": {
 				"operationId": "GetModelComparison",
@@ -19120,32 +20616,6 @@
 						}
 					}
 				}
-			}
-		},
-		"/v1/models": {
-			"get": {
-				"operationId": "GetModels",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__model-string_-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Models"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
 			}
 		},
 		"/v1/public/security": {

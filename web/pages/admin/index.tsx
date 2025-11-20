@@ -1,16 +1,25 @@
-import AdminPage from "@/components/templates/admin/adminPage";
-import { ReactElement } from "react";
-import AdminLayout from "../../components/layout/admin/adminLayout";
+import { GetServerSideProps } from "next";
 import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
-const Admin = () => {
-  return <AdminPage />;
+export default function Admin() {
+  return null;
+}
+
+// Wrap with admin SSR check, then redirect
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  // First check admin auth
+  const adminCheck = await withAdminSSR(context);
+
+  // If admin check failed (redirect), return that
+  if ("redirect" in adminCheck) {
+    return adminCheck;
+  }
+
+  // Admin is authenticated, redirect to HQL
+  return {
+    redirect: {
+      destination: "/admin/hql",
+      permanent: false,
+    },
+  };
 };
-
-Admin.getLayout = function getLayout(page: ReactElement) {
-  return <AdminLayout>{page}</AdminLayout>;
-};
-
-export default Admin;
-
-export const getServerSideProps = withAdminSSR;

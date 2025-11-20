@@ -422,12 +422,7 @@ const DesktopSidebar = ({
                     />
                     {!isCollapsed && (
                       <span className="flex flex-1 items-center justify-between">
-                        <span className="flex items-center gap-1.5">
-                          Credits
-                          <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-                            Early Access
-                          </span>
-                        </span>
+                        <span>Credits</span>
                         <span
                           className={cn(
                             "text-xs",
@@ -436,7 +431,7 @@ const DesktopSidebar = ({
                               : "text-muted-foreground",
                           )}
                         >
-                          ${((creditData?.balance ?? 0) / 100).toFixed(0)}
+                          ${(creditData?.balance ?? 0).toFixed(2)}
                         </span>
                       </span>
                     )}

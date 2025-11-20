@@ -8,20 +8,26 @@ export function useLocalStorage<T>(
   onNothingStored?: (_setStored: (_t: T) => void) => void,
 ): [T, (_t: T) => void] {
   const org = useOrg();
-
   const orgId = org?.currentOrg?.id ?? "";
-  const orgKey = `${orgId}_${key}`; // Updated key to include orgId
+  const orgKey = `${orgId}_${key}`;
   const [storedValue, setStoredValue] = useState<T>(initialValue);
 
   const setValue = useCallback(
     (value: T) => {
       try {
-        const valueToStore =
-          value instanceof Function ? value(storedValue) : value;
-        setStoredValue(valueToStore);
-        if (typeof window !== "undefined") {
-          window.localStorage.setItem(orgKey, JSON.stringify(valueToStore)); // Use orgKey
-        }
+        setStoredValue((prevValue) => {
+          const valueToStore =
+            value instanceof Function ? value(prevValue) : value;
+          // Only save to localStorage if we have a valid orgId and the value is not undefined
+          if (
+            typeof window !== "undefined" &&
+            orgId &&
+            valueToStore !== undefined
+          ) {
+            window.localStorage.setItem(orgKey, JSON.stringify(valueToStore));
+          }
+          return valueToStore;
+        });
       } catch (error) {
         logger.error(
           {
@@ -32,13 +38,19 @@ export function useLocalStorage<T>(
         );
       }
     },
-    [orgKey, storedValue], // Updated dependency to orgKey
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [key, orgKey, orgId],
   );
 
   useEffect(() => {
+    // Only try to read from localStorage if we have a valid orgId
+    if (!orgId) {
+      return;
+    }
+
     try {
       const item =
-        typeof window !== "undefined" && window.localStorage.getItem(orgKey); // Use orgKey
+        typeof window !== "undefined" && window.localStorage.getItem(orgKey);
       if (!item) {
         throw new Error("No item stored");
       }
@@ -50,7 +62,7 @@ export function useLocalStorage<T>(
       onNothingStored && onNothingStored(setValue);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgKey, onNothingStored, setValue]); // Updated dependency to orgKey
+  }, [key, orgKey, onNothingStored, setValue, orgId]);
 
   return [storedValue, setValue];
 }

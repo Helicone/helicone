@@ -3,6 +3,7 @@ import { ok, err, Result } from "../util/results";
 import { Wallet } from "../durable-objects/Wallet";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
+import { AutoTopoffManager } from "./AutoTopoffManager";
 
 export class StripeManager {
   private webhookSecret: string;
@@ -21,7 +22,6 @@ export class StripeManager {
     this.stripeSecretKey = stripeSecretKey;
     this.wallet = wallet;
     this.stripe = new Stripe(this.stripeSecretKey, {
-      // @ts-ignore
       apiVersion: "2025-07-30.basil",
       httpClient: Stripe.createFetchHttpClient(),
     });
@@ -239,6 +239,18 @@ export class StripeManager {
       console.log(
         `Added ${creditsCents} cents of credits (total collected ${totalCents} cents) to wallet for org ${orgId} for payment intent ${paymentIntent.id} event ${eventId}`
       );
+      if (paymentIntent.metadata.autoTopoff === "true") {
+        const autoTopoffManager = new AutoTopoffManager(this.env);
+        await autoTopoffManager.resetFailureCounter(orgId);
+
+        // Update timestamp after confirmed successful payment
+        const timestampResult = await autoTopoffManager.updateLastTopoffTimestamp(orgId);
+        if (timestampResult.error) {
+          console.error(
+            `Warning: Could not update topoff timestamp after successful payment for org ${orgId}: ${timestampResult.error}`
+          );
+        }
+      }
       return ok(undefined);
     } catch (e) {
       const errorMessage = `Failed to process payment intent ${paymentIntent.id} for org ${orgId} with credits amount ${creditsCents}: ${e instanceof Error ? e.message : "Unknown error"}`;

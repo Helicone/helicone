@@ -1,0 +1,90 @@
+**TL;DR**: DeepAI **cut their characters product cost by 65%, while increasing their model count 10x**, all while processing millions of AI requests daily across chat, image, video, and music.
+
+---
+
+## Who is DeepAI?
+
+**DeepAI builds generative tools for anyone who wants frontier-level generative AI without frontier-level pricing** — from hobbyists making fun content to professionals producing assets for their work.
+
+Rather than forcing users into a single vertical, DeepAI covers the whole stack — chat, video, music, and image generation — so customers can do everything in one place instead of stitching together five different applications.
+
+![DeepAI](/static/customers/case-studies/deepai/ui.webp)
+
+## The problem
+
+DeepAI runs frontier-quality generative AI at affordable prices — $4.99/month for unlimited access to chat, images, video, and music.
+
+To ensure the best quality for users, **DeepAI routes across multiple model providers to balance quality, cost, and [uptime](/blog/how-ai-gateways-enhance-app-reliability).**
+
+Before Helicone, this meant:
+- **Custom routing logic** for every new model and provider
+- **Scattered logs** across different systems, each with its own format and edge cases
+- **Multiple authentication methods** per each provider (API keys, OAuth, etc.)
+- **No unified view** of what's working, what's failing, or where costs spike
+
+When users kept requesting more chat models, the team faced a choice: keep duct-taping logs forever, or **find a unified gateway that helped them scale.**
+
+> We still use multiple providers to maintain flexibility and quality, but integrations that once took days now take an afternoon, and debugging is dramatically more consistent and predictable.
+
+## One gateway, one dashboard, one pattern
+
+Helicone gave DeepAI a single integration point for their entire infrastructure.
+
+**🔌 Standardized routing and tracing:**
+Single API key, single unified interface. No more hunting through scattered logs.
+
+**📊 Single dashboard for everything:**
+Monitor model performance, errors patterns, and cost spikes [in a single place](/blog/implementing-llm-observability-with-helicone).
+
+**🔔 Slack notifications:**
+Instant [alerts](https://docs.helicone.ai/features/alerts) with exact request traces when issues occur, speeding up the team's debugging process.
+
+**🚀 Model onboarding speed:**
+Days of custom engineering reduced to minutes, improving the team's competitive advantage in the market.
+
+> The dashboard gives us a clear, high-level view of how all the models are performing and what users are gravitating toward. The ability to quickly collaborate in Slack around specific traces has saved us valuable engineering time.
+
+## Results in numbers
+
+#### 💰 65% cost reduction on characters product
+By optimizing routing and caching through Helicone's unified system, DeepAI was able to [cut the cost](/blog/monitor-and-optimize-llm-costs) of their characters feature by nearly two-thirds. At their scale, that's significant money back into product development.
+
+#### 🔍 10x model count increase
+With Helicone, DeepAI was able to add 30 models to their platform, increasing their model count by 10x.
+
+#### 🔍 0.13% error rate drop
+Seems like a small percentage until you're processing millions of requests. Better visibility meant catching issues before they cascaded, and layered fallbacks kept uptime high even when specific providers had bad days.
+
+#### ⏰ Hours, not days, to ship new models
+Integrations that required custom engineering work now happen in an afternoon. DeepAI now responds faster to user requests and stays competitive as new models are released.
+
+![Helicone Dashboard](/static/customers/case-studies/deepai/gateway-dashboard.webp)
+
+## Fast and reliable engineering culture
+
+[DeepAI](https://deepai.org)'s approach to infrastructure reflects how modern AI companies actually build:
+
+- **Modular backbone across modalities:**
+Their chat, video, image, and audio systems share common infrastructure. This makes adding new models fast without sacrificing reliability.
+
+- **Layered fallbacks for high success rates:**
+When one provider has issues, traffic automatically routes to backups.
+
+- **Observability from day one:**
+Every component is instrumented. When something breaks, they diagnose immediately instead of playing detective across scattered logs.
+
+- **Automatic failover to backup providers:** When one provider has issues, traffic is automatically routed to backup providers based on the cheapest available option for your configuration. Users never find out about [provider's downtime](/blog/how-ai-gateways-enhance-app-reliability).
+
+**The goal**: keep DeepAI fast, affordable, and on the frontier while giving non-technical users a seamless, stable experience.
+
+---
+
+## Test Helicone today for free
+
+If you're routing across multiple AI providers and need better visibility across your AI infrastructure, we may be able to help.
+- 100+ models through one API key
+- Built-in observability and tracing
+- Automatic failover and load balancing
+- 0% markup fees
+
+[Start for free today](https://helicone.ai)
