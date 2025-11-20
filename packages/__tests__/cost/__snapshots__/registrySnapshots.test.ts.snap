@@ -1762,6 +1762,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "deepseek/r1-distill": {
+    "deepseek-r1-distill-llama-70b:chutes": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+      "parameters": [
+        "max_tokens",
+        "min_p",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "chutes",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-r1-distill-llama-70b:deepinfra": {
       "context": 131072,
       "crossRegion": false,
@@ -5084,6 +5104,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/r1-distill": [
+    "chutes",
     "deepinfra",
     "groq",
     "openrouter",
@@ -6146,6 +6167,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/r1-distill": {
+    "chutes": [
+      {
+        "input": 3e-8,
+        "output": 1.3e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "input": 6e-7,
@@ -6950,6 +6978,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "deepseek-r1-distill-llama-70b",
       "providers": [
+        "chutes",
         "deepinfra",
         "groq",
         "openrouter",
@@ -7495,7 +7524,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "cerebras",
     },
     {
-      "modelCount": 2,
+      "modelCount": 3,
       "provider": "chutes",
     },
     {
@@ -7653,8 +7682,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 222,
-  "totalModelProviderConfigs": 222,
+  "totalEndpoints": 223,
+  "totalModelProviderConfigs": 223,
   "totalModelsWithPtb": 87,
   "totalProviders": 20,
 }
