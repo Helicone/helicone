@@ -602,18 +602,66 @@ export function ModelRegistryPage() {
                                   {formatContext(model.contextLength)} context
                                 </div>
                                 <div className="hidden sm:block">•</div>
-                                <div className="flex flex-wrap gap-1">
-                                  <span>
-                                    ${minInputCost < 1
-                                      ? minInputCost.toFixed(2)
-                                      : minInputCost.toFixed(1)}/M in
-                                  </span>
-                                  <span className="hidden sm:inline">,</span>
-                                  <span>
-                                    ${minOutputCost < 1
-                                      ? minOutputCost.toFixed(2)
-                                      : minOutputCost.toFixed(1)}/M out
-                                  </span>
+                                <div className="flex flex-col gap-1">
+                                  {(() => {
+                                    // Find the endpoint with pricing tiers that has the lowest base price
+                                    const endpointWithTiers = model.endpoints.find(
+                                      (e) => e.pricingTiers && e.pricingTiers.length > 1
+                                    );
+
+                                    if (endpointWithTiers?.pricingTiers) {
+                                      // Display each pricing tier with threshold
+                                      return endpointWithTiers.pricingTiers.map((tier, idx) => {
+                                        const inputCost = tier.prompt;
+                                        const outputCost = tier.completion;
+                                        const threshold = tier.threshold;
+
+                                        let thresholdLabel = "";
+                                        if (idx === 0) {
+                                          if (endpointWithTiers.pricingTiers!.length > 1) {
+                                            const nextThreshold = endpointWithTiers.pricingTiers![1].threshold;
+                                            thresholdLabel = ` (<=${formatContext(nextThreshold || 0)})`;
+                                          }
+                                        } else {
+                                          thresholdLabel = ` (>=${formatContext(threshold || 0)})`;
+                                        }
+
+                                        return (
+                                          <div key={idx} className="flex flex-wrap gap-1">
+                                            <span>
+                                              ${inputCost < 1
+                                                ? inputCost.toFixed(2)
+                                                : inputCost.toFixed(1)}/M in
+                                            </span>
+                                            <span className="hidden sm:inline">,</span>
+                                            <span>
+                                              ${outputCost < 1
+                                                ? outputCost.toFixed(2)
+                                                : outputCost.toFixed(1)}/M out
+                                            </span>
+                                            {thresholdLabel && <span>{thresholdLabel}</span>}
+                                          </div>
+                                        );
+                                      });
+                                    }
+
+                                    // Fallback to single pricing display if no tiers
+                                    return (
+                                      <div className="flex flex-wrap gap-1">
+                                        <span>
+                                          ${minInputCost < 1
+                                            ? minInputCost.toFixed(2)
+                                            : minInputCost.toFixed(1)}/M in
+                                        </span>
+                                        <span className="hidden sm:inline">,</span>
+                                        <span>
+                                          ${minOutputCost < 1
+                                            ? minOutputCost.toFixed(2)
+                                            : minOutputCost.toFixed(1)}/M out
+                                        </span>
+                                      </div>
+                                    );
+                                  })()}
                                 </div>
                               </div>
                             </div>
