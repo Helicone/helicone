@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 
@@ -7547,7 +7547,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 14,
+      "modelCount": 15,
       "provider": "vertex",
     },
     {
@@ -7653,9 +7653,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 219,
-  "totalModelProviderConfigs": 219,
-  "totalModelsWithPtb": 86,
+  "totalEndpoints": 222,
+  "totalModelProviderConfigs": 222,
+  "totalModelsWithPtb": 87,
   "totalProviders": 20,
 }
 `;
