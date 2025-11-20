@@ -71,6 +71,17 @@ function getThresholdValueFunction(provider: ModelProviderName) {
             return 0;
         }
       }
+    case "xai":
+      return (usage: ModelUsage, field: CostBreakdownField) => {
+        switch (field) {
+          case "inputCost":
+          case "outputCost":
+          case "cachedInputCost":
+            return usage.input + (usage.cacheDetails?.cachedInput ?? 0);
+          default:
+            return 0;
+        }
+      }
     default:
       return (usage: ModelUsage, field: CostBreakdownField) => 0;
   }
