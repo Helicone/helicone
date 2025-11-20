@@ -20,19 +20,80 @@ export interface CostBreakdown {
 
 export type CostBreakdownField = keyof CostBreakdown;
 
+function getValueAtPath(obj: any, path: string[]): any {
+  let curr = obj;
+  for (const key of path) {
+    if (curr == null) return undefined;
+    curr = curr[key];
+  }
+  return curr;
+}
+
+function fillFromPrevious<T extends object>(
+  allObjects: T[],
+  index: number
+): T {
+  const result = structuredClone(allObjects[index]); // deep copy
+
+  function fillRecursive(target: any, i: number, path: string[]) {
+    // Collect all keys that exist in any previous tier at this path
+    const allKeysSet = new Set<string>(Object.keys(target));
+    for (let j = i - 1; j >= 0; j--) {
+      const prevValue = getValueAtPath(allObjects[j], path);
+      if (prevValue && typeof prevValue === "object" && !Array.isArray(prevValue)) {
+        Object.keys(prevValue).forEach(k => allKeysSet.add(k));
+      }
+    }
+
+    const allKeys = Array.from(allKeysSet);
+    for (const key of allKeys) {
+      const value = target[key];
+
+      // If the field is an object, recurse
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        fillRecursive(value, i, path.concat(key));
+        continue;
+      }
+
+      // Skip already defined values
+      if (value !== undefined) continue;
+
+      // Field is undefined → search backwards
+      for (let j = i - 1; j >= 0; j--) {
+        // Walk to the same path to get candidate value
+        const candidate = getValueAtPath(allObjects[j], path.concat(key));
+        if (candidate !== undefined) {
+          target[key] = candidate;
+          break;
+        }
+      }
+    }
+  }
+
+  fillRecursive(result, index, []);
+
+  return result;
+}
+
+// given a sorted array of pricing tiers (thresholds ascending) and a value
+// return the pricing tier, with missing fields filled with any values defined in previous tiers
 function getPricingTier(
   sortedPricing: ModelPricing[],
   value: number,
 ): ModelPricing {
-  for (const tier of sortedPricing) {
-    if (value >= tier.threshold) {
-      return tier;
+  let matchedTierIndex = 0;
+  // Find the highest threshold that the value meets
+  for (let i = 0; i < sortedPricing.length; i++) {
+    if (value >= sortedPricing[i].threshold) {
+      matchedTierIndex = i;
+      // Don't break - continue to find the highest matching threshold
     }
   }
-  return sortedPricing[0];
+
+  return fillFromPrevious(sortedPricing, matchedTierIndex);
 }
 
-function getThresholdValueFunction(provider: ModelProviderName) {
+function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUsage, field: CostBreakdownField) => number {
   switch (provider) {
     case "vertex":
       return (usage: ModelUsage, field: CostBreakdownField) => {
@@ -108,7 +169,7 @@ export function calculateModelCostBreakdown(params: {
   // e.g Vertex's inputCost is higher if INPUT >= X tokens, but cachedInputCost is higher if CACHED_INPUT >= X tokens
   // getThresholdValue is a function that will return the value to compare to X
   const getThresholdValue = getThresholdValueFunction(provider);
-  const sortedPricing = [...config.pricing].sort((a, b) => b.threshold - a.threshold);
+  const sortedPricing = [...config.pricing].sort((a, b) => a.threshold - b.threshold);
   const basePricing = sortedPricing[0];
 
   const breakdown: CostBreakdown = {
