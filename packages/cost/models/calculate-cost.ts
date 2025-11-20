@@ -75,22 +75,30 @@ function fillFromPrevious<T extends object>(
   return result;
 }
 
-// given a sorted array of pricing tiers (thresholds ascending) and a value
-// return the pricing tier, with missing fields filled with any values defined in previous tiers
+/**
+ * Preprocesses pricing tiers by filling missing fields from previous tiers.
+ * This should be called once upfront to avoid repeated filling on every lookup.
+ */
+function preprocessPricingTiers(sortedPricing: ModelPricing[]): ModelPricing[] {
+  return sortedPricing.map((_, index) => fillFromPrevious(sortedPricing, index));
+}
+
+// given a preprocessed array of pricing tiers (thresholds ascending) and a value
+// return the pricing tier that matches the highest threshold the value meets
 function getPricingTier(
-  sortedPricing: ModelPricing[],
+  preprocessedPricing: ModelPricing[],
   value: number,
 ): ModelPricing {
   let matchedTierIndex = 0;
   // Find the highest threshold that the value meets
-  for (let i = 0; i < sortedPricing.length; i++) {
-    if (value >= sortedPricing[i].threshold) {
+  for (let i = 0; i < preprocessedPricing.length; i++) {
+    if (value >= preprocessedPricing[i].threshold) {
       matchedTierIndex = i;
       // Don't break - continue to find the highest matching threshold
     }
   }
 
-  return fillFromPrevious(sortedPricing, matchedTierIndex);
+  return preprocessedPricing[matchedTierIndex];
 }
 
 function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUsage, field: CostBreakdownField) => number {
@@ -170,7 +178,9 @@ export function calculateModelCostBreakdown(params: {
   // getThresholdValue is a function that will return the value to compare to X
   const getThresholdValue = getThresholdValueFunction(provider);
   const sortedPricing = [...config.pricing].sort((a, b) => a.threshold - b.threshold);
-  const basePricing = sortedPricing[0];
+  // Preprocess pricing tiers once upfront to fill missing fields from previous tiers
+  const preprocessedPricing = preprocessPricingTiers(sortedPricing);
+  const basePricing = preprocessedPricing[0];
 
   const breakdown: CostBreakdown = {
     inputCost: 0,
@@ -187,12 +197,12 @@ export function calculateModelCostBreakdown(params: {
     totalCost: 0,
   };
 
-  const inputPricing = getPricingTier(sortedPricing, getThresholdValue(modelUsage, "inputCost"));
+  const inputPricing = getPricingTier(preprocessedPricing, getThresholdValue(modelUsage, "inputCost"));
   breakdown.inputCost = modelUsage.input * inputPricing.input;
 
   if (modelUsage.cacheDetails) {
     if (modelUsage.cacheDetails.cachedInput > 0) {
-      const cachedInputPricing = getPricingTier(sortedPricing, getThresholdValue(modelUsage, "cachedInputCost"));
+      const cachedInputPricing = getPricingTier(preprocessedPricing, getThresholdValue(modelUsage, "cachedInputCost"));
       const cachedMultiplier = cachedInputPricing.cacheMultipliers?.cachedInput ?? 1.0;
       breakdown.cachedInputCost =
         modelUsage.cacheDetails.cachedInput * cachedInputPricing.input * cachedMultiplier;
@@ -211,7 +221,7 @@ export function calculateModelCostBreakdown(params: {
     }
   }
 
-  const outputPricing = getPricingTier(sortedPricing, getThresholdValue(modelUsage, "outputCost"));
+  const outputPricing = getPricingTier(preprocessedPricing, getThresholdValue(modelUsage, "outputCost"));
   breakdown.outputCost = modelUsage.output * outputPricing.output;
 
   if (modelUsage.thinking) {
