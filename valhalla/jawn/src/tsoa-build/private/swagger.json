@@ -5132,6 +5132,9 @@
 					"ai_gateway_body_mapping": {
 						"type": "string",
 						"nullable": true
+					},
+					"storage_location": {
+						"type": "string"
 					}
 				},
 				"required": [
