@@ -256,7 +256,7 @@ export const providers: Provider[] = [
   },
   {
     id: "nebius",
-    name: "Nebius",
+    name: "Nebius Token Factory",
     logoUrl: "/assets/home/providers/nebius.webp",
     description: "Configure your Nebius API keys",
     docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
