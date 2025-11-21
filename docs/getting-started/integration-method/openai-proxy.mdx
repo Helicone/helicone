@@ -1,6 +1,9 @@
 ---
 title: "OpenAI Compatible Endpoints"
 ---
+import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
+
+<LegacyWarning />
 
 <Note>
   If you are utilizing an OpenAI compatible endpoint, you can conveniently log
@@ -105,7 +108,7 @@ client.chat.completions.create(
     ```javascript
     export HELICONE_API_KEY=<your API key>
     ```
-    
+
   **Modify the base path and add a Helicone-Auth header**
 
 **OpenAI V4+**
@@ -226,7 +229,7 @@ const openai = new OpenAI({
   </Tab>
   <Tab title="cURL">
    **Replace the OpenAI Base URL with Helicone's**
-    
+
     ```bash
     - POST https://api.openai.com/v1
 
