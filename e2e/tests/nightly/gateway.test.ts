@@ -101,6 +101,7 @@ describe('AI Gateway Tests', () => {
       describe(provider, () => {
         describe('Basic Requests', () => {
           if (provider === 'helicone') {
+            // can't test helicone provider locally, so skip
             return;
           }
           it('should handle simple chat completion', async () => {
@@ -119,8 +120,7 @@ describe('AI Gateway Tests', () => {
                 expect(response).toHaveProperty('complete');
               });
             } catch (error) {
-              console.error(`\n❌ ${provider} chat completion failed:`);
-              console.error('Error:', JSON.stringify(error, null, 2));
+              console.error(JSON.stringify(error, null, 2));
               throw error;
             }
           });
