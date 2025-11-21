@@ -1169,7 +1169,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ModelProviderName": {
         "dataType": "refAlias",
-        "type": {"dataType":"enum","enums":["baseten","anthropic","azure","bedrock","cerebras","chutes","cohere","deepinfra","deepseek","fireworks","google-ai-studio","groq","helicone","mistral","nebius","novita","openai","openrouter","perplexity","vertex","xai"],"validators":{}},
+        "type": {"dataType":"enum","enums":["baseten","anthropic","azure","bedrock","cerebras","chutes","deepinfra","deepseek","fireworks","google-ai-studio","groq","helicone","mistral","nebius","novita","openai","openrouter","perplexity","vertex","xai"],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Provider": {
