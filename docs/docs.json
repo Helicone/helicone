@@ -42,11 +42,13 @@
               {
                 "group": "Integrations",
                 "pages": [
+                  "gateway/integrations/codex",
                   "gateway/integrations/langchain",
                   "gateway/integrations/langgraph",
+                  "gateway/integrations/n8n",
                   "gateway/integrations/semantic-kernel",
-                  "gateway/integrations/zapier",
-                  "gateway/integrations/codex"
+                  "gateway/integrations/vercel-ai-sdk",
+                  "gateway/integrations/zapier"
                 ]
               }
             ]
@@ -94,7 +96,7 @@
             ]
           },
           {
-            "group": "Alternative Integrations",
+            "group": "Legacy Integrations",
             "pages": [
               "integrations/overview",
               {
