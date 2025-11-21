@@ -45,7 +45,6 @@ print(
 
 for d in data:
     d = {snake_to_camel(k): v for k, v in d.items()}
-    print(d)
     result = requests.post("http://localhost:8585/v1/api-keys/provider-key",
                            json=d,
                            headers={
