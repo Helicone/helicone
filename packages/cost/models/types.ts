@@ -28,6 +28,7 @@ export const AUTHORS = [
   "alibaba",
   "zai",
   "baidu",
+  "canopywave",
 ] as const;
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";

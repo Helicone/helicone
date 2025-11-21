@@ -95,7 +95,8 @@
       "mcp__chrome-devtools__new_page",
       "WebFetch(domain:docs.perplexity.ai)",
       "mcp__chrome-devtools__fill_form",
-      "mcp__chrome-devtools__press_key"
+      "mcp__chrome-devtools__press_key",
+      "Bash(lsof:*)"
     ],
     "deny": []
   },

@@ -34,6 +34,17 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
+  "gpt-4.1-mini-2025-04-14": {
+    name: "OpenAI GPT-4.1 Mini",
+    author: "openai",
+    description:
+      "Smaller, faster version of GPT-4.1. Excels at instruction following and tool calling with a 1M token context window and low latency without a reasoning step.",
+    contextLength: 1047576,
+    maxOutputTokens: 32768,
+    created: "2025-04-14T17:23:05.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type GPT41ModelName = keyof typeof models;

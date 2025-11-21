@@ -4,6 +4,7 @@ import { costs as avianCosts } from "./avian";
 import { costs as awsBedrockCosts } from "./aws/awsBedrock";
 import { costs as awsNovaCosts } from "./aws/awsNova";
 import { costs as azureCosts } from "./azure";
+import { costs as canopywaveCosts } from "./canopywave";
 import { costs as llamaCosts } from "./llama";
 import { costs as nvidiaCosts } from "./nvidia";
 import { costs as cohereCosts } from "./cohere";
@@ -90,6 +91,9 @@ const chutes = /^https:\/\/(llm\.)?chutes\.com/;
 // https://api.cerebras.ai
 const cerebras = /^https:\/\/api\.cerebras\.ai/;
 
+// https://inference.canopywave.io
+const canopywave = /^https:\/\/inference\.canopywave\.io/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -127,6 +131,7 @@ export const providersNames = [
   "VERCEL",
   "CEREBRAS",
   "BASETEN",
+  "CANOPYWAVE",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -315,6 +320,11 @@ export const providers: {
     pattern: cerebras,
     provider: "CEREBRAS",
     costs: [],
+  },
+  {
+    pattern: canopywave,
+    provider: "CANOPYWAVE",
+    costs: canopywaveCosts,
   },
 ];
 

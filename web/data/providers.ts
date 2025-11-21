@@ -131,6 +131,16 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "pplx-...",
     relevanceScore: 65,
   },
+  {
+    id: "canopywave",
+    name: "CanopyWave",
+    logoUrl: "/assets/home/providers/canopywave.png",
+    description: "Configure your CanopyWave API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "CanopyWave API Key",
+    apiKeyPlaceholder: "cw-...",
+    relevanceScore: 64,
+  },
   // {
   //   id: "fireworks",
   //   name: "Fireworks AI",

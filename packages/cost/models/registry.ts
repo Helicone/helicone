@@ -37,6 +37,10 @@ import {
   perplexityModels,
   perplexityEndpointConfig,
 } from "./authors/perplexity/sonar";
+import {
+  canopywaveModels,
+  canopywaveEndpointConfig,
+} from "./authors/canopywave";
 
 // Combine all models
 const allModels = {
@@ -52,6 +56,7 @@ const allModels = {
   ...zaiModels,
   ...baiduModels,
   ...perplexityModels,
+  ...canopywaveModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -68,6 +73,7 @@ const modelProviderConfigs = {
   ...zaiEndpointConfig,
   ...baiduEndpointConfig,
   ...perplexityEndpointConfig,
+  ...canopywaveEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 // Combine all archived endpoints

@@ -360,7 +360,6 @@ export const endpoints = {
     contextLength: 256_000,
     maxCompletionTokens: 4_096,
     supportedParameters: [
-
       "max_tokens",
       "temperature",
       "top_p",
