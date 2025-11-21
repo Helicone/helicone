@@ -6075,7 +6075,6 @@ type AIGatewayProviders =
 	| 'perplexity-ai'
 	| 'replicate'
 	| 'groq'
-	| 'cohere'
 	| 'google-ai-studio'
 	| 'mistral'
 	| 'grok'
