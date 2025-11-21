@@ -123,10 +123,10 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
           processedBody: processedBody,
           usage: {
             totalTokens:
-              processedBody?.usage?.input_tokens +
-              processedBody?.usage?.output_tokens +
-              processedBody?.usage?.cache_creation_input_tokens +
-              processedBody?.usage?.cache_read_input_tokens,
+              (processedBody?.usage?.input_tokens ?? 0) +
+              (processedBody?.usage?.output_tokens ?? 0) +
+              (processedBody?.usage?.cache_creation_input_tokens ?? 0) +
+              (processedBody?.usage?.cache_read_input_tokens ?? 0),
             promptTokens: processedBody?.usage?.input_tokens,
             promptCacheWriteTokens:
               processedBody?.usage?.cache_creation_input_tokens,
@@ -137,7 +137,6 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
               processedBody?.usage?.cache_creation?.ephemeral_5m_input_tokens,
             promptCacheWrite1h:
               processedBody?.usage?.cache_creation?.ephemeral_1h_input_tokens,
-            heliconeCalculated: true,
           },
         });
       }
@@ -232,82 +231,4 @@ function processConsolidatedJsonForClaude3(events: any[]): any {
   }
 
   return acc;
-}
-
-// This function is no longer used but kept for reference
-function recursivelyConsolidateAnthropicListForClaude3(delta: any[]): any {
-  return delta.reduce((acc, item) => {
-    if (Array.isArray(item)) {
-      return recursivelyConsolidateAnthropicListForClaude3(item);
-    }
-    if (typeof item !== "object") {
-      return item;
-    }
-
-    if (Object.keys(item).length === 0) {
-      return acc;
-    }
-    if (item.type === "message_delta") {
-      return recursivelyConsolidateAnthropic(acc, {
-        ...item.delta,
-        ...item,
-        type: undefined,
-      });
-    }
-
-    if (item.type === "ping") {
-      return acc;
-    }
-
-    if (item.type === "content_block_start") {
-      return acc;
-    }
-
-    if (item.type === "content_block_stop") {
-      return acc;
-    }
-
-    if (item.type === "content_block_delta") {
-      recursivelyConsolidateAnthropic(acc, {
-        content: [
-          {
-            type: "text",
-            text: item.delta.text,
-          },
-        ],
-      });
-    }
-
-    if (item.type === "message_start") {
-      return recursivelyConsolidateAnthropic(acc, item.message);
-    }
-
-    // console.log("Item Without Ignore Keys", item);
-
-    return recursivelyConsolidateAnthropic(acc, item);
-  }, {});
-}
-
-// This function is no longer used but kept for reference
-function recursivelyConsolidateAnthropic(body: any, delta: any): any {
-  Object.keys(delta).forEach((key) => {
-    if (key === "stop_reason") {
-      // console.log("Stop Reason", delta[key]);
-    }
-    if (key === "delta") {
-    } else if (key === "type") {
-      body[key] = delta[key];
-    } else if (body[key] === undefined || body[key] === null) {
-      body[key] = delta[key];
-    } else if (typeof body[key] === "object") {
-      body[key] = recursivelyConsolidateAnthropic(body[key], delta[key]);
-    } else if (typeof body[key] === "number") {
-      body[key] += delta[key];
-    } else if (typeof body[key] === "string") {
-      body[key] += delta[key];
-    } else {
-      throw new Error("Invalid");
-    }
-  });
-  return body;
 }
