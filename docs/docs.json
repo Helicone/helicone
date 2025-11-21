@@ -557,6 +557,18 @@
       "destination": "/references/how-we-calculate-cost"
     },
     {
+      "source": "/observability/custom-rate-limits",
+      "destination": "/features/advanced-usage/custom-rate-limits"
+    },
+    {
+      "source": "/observability/custom-properties",
+      "destination": "/features/advanced-usage/custom-properties"
+    },
+    {
+      "source": "/features/advanced-usage/custom-rate-limit",
+      "destination": "/features/advanced-usage/custom-rate-limits"
+    },
+    {
       "source": "/faq/latency-affect",
       "destination": "/references/latency-affect"
     },
