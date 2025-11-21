@@ -2,6 +2,7 @@ import { AnthropicProvider } from "./anthropic";
 import { AzureOpenAIProvider } from "./azure";
 import { BasetenProvider } from "./baseten";
 import { BedrockProvider } from "./bedrock";
+import { CanopyWaveProvider } from "./canopywave";
 import { CerebrasProvider } from "./cerebras";
 import { ChutesProvider } from "./chutes";
 import { CohereProvider } from "./cohere";
@@ -26,6 +27,7 @@ export const providers = {
   anthropic: new AnthropicProvider(),
   azure: new AzureOpenAIProvider(),
   bedrock: new BedrockProvider(),
+  canopywave: new CanopyWaveProvider(),
   cerebras: new CerebrasProvider(),
   chutes: new ChutesProvider(),
   cohere: new CohereProvider(),
@@ -42,7 +44,7 @@ export const providers = {
   openrouter: new OpenRouterProvider(),
   perplexity: new PerplexityProvider(),
   vertex: new VertexProvider(),
-  xai: new XAIProvider()
+  xai: new XAIProvider(),
 } as const;
 
 export type ModelProviderName = keyof typeof providers;
@@ -74,7 +76,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "fireworks",
 
   // anthropic and chat completions provider
-  "vertex"
+  "vertex",
 
   // anthropic only
   // none right now, need anthropic mapper
