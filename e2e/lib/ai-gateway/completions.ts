@@ -64,7 +64,6 @@ async function makeRequest(
         model: model,
         messages: combinedMessages,
         temperature: 0.7,
-        user: "ip-109.248.14.81",
         stream: stream,
         ...(stream ? { stream_options: { include_usage: true } } : {}),
         ...(tools && tools.length > 0 ? { tools: tools, tool_choice: "auto" } : {}),

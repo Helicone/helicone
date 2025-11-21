@@ -94,7 +94,7 @@ export async function CreateResponse(params: {
         stream,
         testProviderCache = false,
         cacheTriggerToken = "grug ",
-        useTools = true
+        useTools = false
     } = params;
 
     const responses: Array<{ stream?: any[], complete: any }> = [];

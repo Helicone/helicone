@@ -11,4 +11,14 @@ export class PerplexityProvider extends BaseProvider {
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     return "https://api.perplexity.ai/chat/completions";
   }
+
+  async buildErrorMessage(response: Response): Promise<{
+    message: string;
+    details?: any;
+  }> {
+    const respJson = (await response.json()) as any;
+    return {
+      message: respJson.error.message || `Request failed with status ${response.status}`
+    };
+  }
 }

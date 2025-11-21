@@ -126,30 +126,28 @@ describe('AI Gateway Tests', () => {
           });
 
 
-          // TODO: enable basic Responses API tests
-          // it('should handle simple responses', async () => {
-          //   if (ResponsesAPIEnabledProviders.includes(provider as ModelProviderName)) {
-          //     try {
-          //       const responses = await CreateResponse({
-          //         client,
-          //         model: config.model,
-          //         stream: false,
-          //       });
+          it('should handle simple responses', async () => {
+            if (ResponsesAPIEnabledProviders.includes(provider as ModelProviderName)) {
+              try {
+                const responses = await CreateResponse({
+                  client,
+                  model: config.model,
+                  stream: false,
+                });
 
-          //       expect(responses).toBeDefined();
-          //       expect(Array.isArray(responses)).toBe(true);
-          //       expect(responses.length).toBeGreaterThan(0);
+                expect(responses).toBeDefined();
+                expect(Array.isArray(responses)).toBe(true);
+                expect(responses.length).toBeGreaterThan(0);
 
-          //       responses.forEach(response => {
-          //         expect(response).toHaveProperty('complete');
-          //       });
-          //     } catch (error) {
-          //       console.error(`\n❌ ${provider} esponses API failed:`);
-          //       console.error('Error:', JSON.stringify(error, null, 2));
-          //       throw error;
-          //     }
-          //   }
-          // });
+                responses.forEach(response => {
+                  expect(response).toHaveProperty('complete');
+                });
+              } catch (error) {
+                console.error(JSON.stringify(error, null, 2));
+                throw error;
+              }
+            }
+          });
         });
       });
     }
