@@ -323,7 +323,6 @@ export async function buildErrorMessage(
     return err(`Provider data is null for: ${endpoint.provider}`);
   }
 
-  console.log('endpoint.provider', endpoint.provider);
   return ok(await provider.buildErrorMessage(response));
 }
 
