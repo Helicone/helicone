@@ -71,7 +71,6 @@ export abstract class BaseProvider {
   }> {
     try {
       const respJson = (await response.json()) as any;
-      console.log('respJson', JSON.stringify(respJson, null, 2));
       if (respJson.error?.message) {
         return { message: respJson.error.message };
       }

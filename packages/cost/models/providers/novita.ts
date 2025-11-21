@@ -16,9 +16,13 @@ export class NovitaProvider extends BaseProvider {
     message: string;
     details?: any;
   }> {
-    const respJson = (await response.json()) as any;
-    return {
-      message: respJson.message || `Request failed with status ${response.status}`
-    };
+    try {
+      const respJson = (await response.json()) as any;
+      return {
+        message: respJson.message || `Request failed with status ${response.status}`
+      };
+    } catch (error) {
+      return { message: `Request failed with status ${response.status}` };
+    }
   }
 }

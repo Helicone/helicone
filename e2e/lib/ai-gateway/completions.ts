@@ -2,20 +2,24 @@ import OpenAI from 'openai';
 
 const TOKEN_REPEAT_COUNT = 2048;
 
-const calculatorTool = {
+const weatherTool = {
     type: "function",
     function: {
-        name: "calculate",
-        description: "Calculate a mathematical expression",
+        name: "get_current_weather",
+        description: "Get the current weather in a given location",
         parameters: {
             type: "object",
             properties: {
-                expression: {
+                location: {
                     type: "string",
-                    description: "The mathematical expression to calculate"
+                    description: "The city and state, e.g. San Francisco, CA"
+                },
+                unit: {
+                    type: "string",
+                    enum: ["celsius", "fahrenheit"]
                 }
             },
-            required: ["expression"]
+            required: ["location", "unit"]
         }
     }
 };
@@ -121,14 +125,6 @@ function processNonStreamingResponse(completion: any): { complete: any } {
     return { complete: completion.choices[0].message };
 }
 
-function executeCalculator(expression: string): number {
-    try {
-        return eval(expression);
-    } catch (error) {
-        throw new Error(`Failed to calculate expression: ${expression}`);
-    }
-}
-
 export async function CreateChatCompletion(params: {
     client: OpenAI,
     model: string,
@@ -148,10 +144,12 @@ export async function CreateChatCompletion(params: {
 
     const responses: Array<{ stream?: any[], complete: any }> = [];
 
-    const baseMessage = useTools ? "What is 50+50? Use the tool." : "What is 50+50?";
+    const baseMessage = useTools
+        ? "What is the weather in San Francisco in Celsius? Tell me your plan, then use the tool."
+        : "What is the weather in San Francisco in Celsius?";
     const userMessage = baseMessage;
     const messages = [{ role: "user", content: userMessage }];
-    const tools = useTools ? [calculatorTool, searchWebTool] : undefined;
+    const tools = useTools ? [weatherTool, searchWebTool] : undefined;
 
     const completion = await makeRequest(client, model, stream, testProviderCache, cacheTriggerToken, messages, tools);
 
@@ -163,16 +161,15 @@ export async function CreateChatCompletion(params: {
 
     if (useTools && firstResponse.complete.tool_calls && firstResponse.complete.tool_calls.length > 0) {
         const toolCall = firstResponse.complete.tool_calls[0];
-        if (toolCall.function.name === "calculate") {
-            const expression = JSON.parse(toolCall.function.arguments).expression;
-            const result = executeCalculator(expression);
+        if (toolCall.function.name === "get_current_weather") {
+            const result = "It is sunny at 30 degrees Celsius in San Francisco.";
 
             const finalMessages = [
                 ...messages,
                 firstResponse.complete,
                 {
                     role: "tool",
-                    content: result.toString(),
+                    content: result,
                     tool_call_id: toolCall.id
                 }
             ];

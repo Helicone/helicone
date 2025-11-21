@@ -30,7 +30,6 @@ export class MistralProvider extends BaseProvider {
   }> {
     try {
       const respJson = (await response.json()) as any;
-      console.log('respJson', JSON.stringify(respJson, null, 2));
       return {
         message: respJson.message?.detail?.[0]?.msg || respJson.detail?.[0]?.msg || `Request failed with status ${response.status}`, 
         details: respJson.message?.detail || respJson.detail

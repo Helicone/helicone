@@ -140,10 +140,14 @@ export class BedrockProvider extends BaseProvider {
     message: string;
     details?: any;
   }> {
-    const respJson = (await response.json()) as any;
-    if (respJson.message) {
-      return { message: respJson.message, details: respJson };
+    try {
+      const respJson = (await response.json()) as any;
+      if (respJson.message) {
+        return { message: respJson.message, details: respJson };
+      }
+      return { message: `Failed request with status ${response.status}` };
+    } catch (error) {
+      return { message: `Request failed with status ${response.status}` };
     }
-    return { message: `Failed request with status ${response.status}` };
   }
 }
