@@ -265,6 +265,16 @@ export const providers: Provider[] = [
     relevanceScore: 5,
   },
   {
+    id: "canopywave",
+    name: "Canopy Wave",
+    logoUrl: "/assets/home/providers/canopywave.webp", // TODO: add logo to the correct folder
+    description: "Configure your Canopy Wave API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Canopy Wave API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 4,
+  },
+  {
     id: "chutes",
     name: "Chutes",
     logoUrl: "/assets/home/providers/chutes.webp",

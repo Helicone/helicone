@@ -63,6 +63,8 @@ export function heliconeProviderToModelProviderName(
       return "baseten";
     case "FIREWORKS":
       return "fireworks";
+    case "CANOPYWAVE":
+      return "canopywave";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -135,6 +137,9 @@ export const dbProviderToProvider = (
   }
   if (provider === "openrouter" || provider === "OpenRouter") {
     return "openrouter";
+  }
+  if (provider === "canopywave" || provider === "Canopy Wave") {
+    return "canopywave";
   }
   if (provider === "novita" || provider === "Novita") {
     return "novita";
@@ -387,7 +392,9 @@ export function parseModelString(
   if (!validateProvider(provider)) {
     const validProviders = Object.keys(providers);
     return err(
-      `Invalid provider: ${provider}. Valid providers: ${validProviders.join(", ")}`
+      `Invalid provider: ${provider}. Valid providers: ${validProviders.join(
+        ", "
+      )}`
     );
   }
 
