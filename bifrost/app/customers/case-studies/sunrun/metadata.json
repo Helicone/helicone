@@ -1,0 +1,11 @@
+{
+  "company": "Sunrun",
+  "title": "How Sunrun Powers America's Leading Solar Operations",
+  "description": "Publicly traded, Sunrun is America's leading residential solar company, helping homeowners transition to clean, affordable energy reliability and at scale.",
+  "logo": "/static/customers/case-studies/sunrun.webp",
+  "url": "sunrun.com",
+  "customerSince": "2025-05-01",
+  "isOpenSourced": false,
+  "date": "2025-11-21",
+  "relatedStudies": ["deepai", "cogna"]
+}
