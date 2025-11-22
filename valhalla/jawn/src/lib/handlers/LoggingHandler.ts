@@ -163,6 +163,8 @@ export class LoggingHandler extends AbstractLogHandler {
         b1: context.processedLog.request.body,
         b2: context.processedLog.response.body,
       });
+
+      context.sizeBytes = size ?? 0;
       // if we know size is def less than 10mb use clickhouse otherwise just stick to s3
       context.storageLocation =
         size && size <= S3_MIN_SIZE_THRESHOLD ? "clickhouse" : "s3";
@@ -562,6 +564,7 @@ export class LoggingHandler extends AbstractLogHandler {
       ai_gateway_body_mapping:
         context.message.heliconeMeta.aiGatewayBodyMapping ?? "",
       storage_location: context.storageLocation ?? "s3",
+      size_bytes: context.sizeBytes ?? 0,
     };
 
     return requestResponseLog;
