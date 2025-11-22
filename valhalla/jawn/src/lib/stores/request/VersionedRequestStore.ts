@@ -51,14 +51,17 @@ export class VersionedRequestStore {
 
   // DEPRECATED: This method previously updated the legacy Postgres request table.
   // Now fetches from ClickHouse instead to get the existing properties and provider.
-  private async getRequestFromClickhouse(
-    requestId: string
-  ): Promise<Result<{
-    id: string;
-    version: number;
-    provider: string;
-    properties: Record<string, string>;
-  }, string>> {
+  private async getRequestFromClickhouse(requestId: string): Promise<
+    Result<
+      {
+        id: string;
+        version: number;
+        provider: string;
+        properties: Record<string, string>;
+      },
+      string
+    >
+  > {
     const result = await clickhouseDb.dbQuery<RequestResponseRMT>(
       `
       SELECT *
@@ -150,6 +153,7 @@ export class VersionedRequestStore {
         is_passthrough_billing: row.is_passthrough_billing,
         ai_gateway_body_mapping: row.ai_gateway_body_mapping,
         storage_location: row.storage_location,
+        size_bytes: row.size_bytes,
       },
     ]);
 

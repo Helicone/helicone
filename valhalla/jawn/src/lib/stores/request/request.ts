@@ -283,7 +283,8 @@ export async function getRequestsClickhouse(
       prompt_id,
       prompt_version,
       updated_at,
-      storage_location
+      storage_location,
+      size_bytes
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
