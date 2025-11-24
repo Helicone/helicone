@@ -1,10 +1,11 @@
 // Import shared types from packages
-import { 
-  InputModality, 
-  OutputModality, 
-  StandardParameter 
+import {
+  InputModality,
+  OutputModality,
+  StandardParameter
 } from "../../../packages/cost/models/types";
 import { getProviderDisplayName } from "../../../packages/cost/models/provider-helpers";
+import Fuse from 'fuse.js';
 
 // Define filtering-specific types
 export type ModelCapability =
@@ -68,21 +69,27 @@ export interface FilterOptions {
   showPtbOnly?: boolean;
 }
 
-// Search filter
+// Search filter with fuzzy matching
 export const filterBySearch = (models: Model[], search: string): Model[] => {
   if (!search) return models;
-  
-  const searchLower = search.toLowerCase();
-  return models.filter(model => {
-    const searchableText = [
-      model.id.toLowerCase(),
-      model.name.toLowerCase(),
-      model.author.toLowerCase(),
-      model.description?.toLowerCase() || '',
-    ].join(' ');
-    
-    return searchableText.includes(searchLower);
+
+  // Configure Fuse.js for fuzzy search
+  const fuse = new Fuse(models, {
+    keys: [
+      { name: 'name', weight: 2 },        // Higher weight for name matches
+      { name: 'id', weight: 1.5 },        // Medium weight for ID matches
+      { name: 'author', weight: 1 },      // Standard weight for author
+      { name: 'description', weight: 0.5 } // Lower weight for description
+    ],
+    threshold: 0.3,                        // 0 = perfect match, 1 = match anything
+    includeScore: true,                    // Include relevance score
+    minMatchCharLength: 2,                 // Require at least 2 characters to match
+    ignoreLocation: true,                  // Search anywhere in the string
   });
+
+  // Perform fuzzy search and extract the matched items
+  const results = fuse.search(search);
+  return results.map(result => result.item);
 };
 
 // Provider filter

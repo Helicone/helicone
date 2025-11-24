@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react';
+import Fuse from 'fuse.js';
 import {
   Model,
   FilterOptions,
@@ -49,6 +50,24 @@ export function useModelFiltering({
   selectedOutputModalities,
   selectedParameters,
 }: UseModelFilteringProps): UseModelFilteringResult {
+  // Create a memoized Fuse instance for optimal search performance
+  // Only recreated when the models array changes
+  const fuse = useMemo(
+    () => new Fuse(models, {
+      keys: [
+        { name: 'name', weight: 2 },        // Higher weight for name matches
+        { name: 'id', weight: 1.5 },        // Medium weight for ID matches
+        { name: 'author', weight: 1 },      // Standard weight for author
+        { name: 'description', weight: 0.5 } // Lower weight for description
+      ],
+      threshold: 0.3,                        // 0 = perfect match, 1 = match anything
+      includeScore: true,                    // Include relevance score
+      minMatchCharLength: 2,                 // Require at least 2 characters to match
+      ignoreLocation: true,                  // Search anywhere in the string
+    }),
+    [models]
+  );
+
   // Extract available filters from all models
   const availableFilters = useMemo(
     () => extractAvailableFilters(models),
@@ -85,8 +104,16 @@ export function useModelFiltering({
 
   // Apply filters and sorting
   const filteredModels = useMemo(() => {
+    // First, apply fuzzy search using the memoized Fuse instance
+    let searchFiltered = models;
+    if (search) {
+      const results = fuse.search(search);
+      searchFiltered = results.map(result => result.item);
+    }
+
+    // Then apply other filters to the search results
     const filterOptions: FilterOptions = {
-      search,
+      // Don't pass search to applyFilters since we handled it above
       providers: selectedProviders,
       priceRange,
       minContextSize,
@@ -98,14 +125,15 @@ export function useModelFiltering({
       parameters: selectedParameters as Set<StandardParameter> | undefined,
     };
 
-    // Apply all filters
-    const filtered = applyFilters(models, filterOptions);
-    
+    // Apply all other filters to the search-filtered results
+    const filtered = applyFilters(searchFiltered, filterOptions);
+
     // Apply sorting
     return sortModels(filtered, sortBy);
   }, [
     models,
     search,
+    fuse,
     selectedProviders,
     priceRange,
     minContextSize,
