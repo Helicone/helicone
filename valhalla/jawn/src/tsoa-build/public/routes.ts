@@ -3097,6 +3097,7 @@ const models: TsoaRoute.Models = {
             "inputModalities": {"dataType":"array","array":{"dataType":"refAlias","ref":"InputModality"},"required":true},
             "outputModalities": {"dataType":"array","array":{"dataType":"refAlias","ref":"OutputModality"},"required":true},
             "supportedParameters": {"dataType":"array","array":{"dataType":"refAlias","ref":"StandardParameter"},"required":true},
+            "pinnedVersionOfModel": {"dataType":"string"},
         },
         "additionalProperties": false,
     },

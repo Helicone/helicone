@@ -53,6 +53,7 @@ export interface Model {
   inputModalities: InputModality[];
   outputModalities: OutputModality[];
   supportedParameters: StandardParameter[];
+  pinnedVersionOfModel?: string;
 }
 
 export interface FilterOptions {
@@ -197,36 +198,62 @@ export const filterByPtb = (models: Model[], showPtbOnly: boolean): Model[] => {
 // Sort models
 export const sortModels = (models: Model[], sortBy: SortOption): Model[] => {
   const sorted = [...models];
-  
+
+  // Primary sort based on the selected option
   switch (sortBy) {
     case 'price-low':
-      return sorted.sort((a, b) => {
+      sorted.sort((a, b) => {
         const aMin = Math.min(...a.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
         const bMin = Math.min(...b.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
         return aMin - bMin;
       });
-      
+      break;
+
     case 'price-high':
-      return sorted.sort((a, b) => {
+      sorted.sort((a, b) => {
         const aMin = Math.min(...a.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
         const bMin = Math.min(...b.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
         return bMin - aMin;
       });
-      
+      break;
+
     case 'context':
-      return sorted.sort((a, b) => b.contextLength - a.contextLength);
-      
+      sorted.sort((a, b) => b.contextLength - a.contextLength);
+      break;
+
     case 'newest':
-      return sorted.sort((a, b) => {
+      sorted.sort((a, b) => {
         const aDate = a.trainingDate || '';
         const bDate = b.trainingDate || '';
         return bDate.localeCompare(aDate);
       });
-      
+      break;
+
     case 'name':
     default:
-      return sorted.sort((a, b) => a.name.localeCompare(b.name));
+      sorted.sort((a, b) => a.name.localeCompare(b.name));
+      break;
   }
+
+  // Secondary sort: ensure pinned versions always appear after their base models
+  // This maintains the primary sort order but groups base + pinned together
+  return sorted.sort((a, b) => {
+    // If both models reference the same base model (or one is the base of the other)
+    const aBase = a.pinnedVersionOfModel || a.id;
+    const bBase = b.pinnedVersionOfModel || b.id;
+
+    // If they share the same base model, sort by pinned status
+    if (aBase === bBase || aBase === b.id || bBase === a.id) {
+      // Base models (no pinnedVersionOfModel) come first
+      if (!a.pinnedVersionOfModel && b.pinnedVersionOfModel) return -1;
+      if (a.pinnedVersionOfModel && !b.pinnedVersionOfModel) return 1;
+      // If both are pinned versions, maintain existing order
+      return 0;
+    }
+
+    // Otherwise, maintain the primary sort order
+    return 0;
+  });
 };
 
 // Composite filter function
