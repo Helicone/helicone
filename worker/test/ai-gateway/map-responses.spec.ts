@@ -39,7 +39,7 @@ describe("OpenAI Chat -> Responses response mappers", () => {
     expect(out.headers.get("content-type")).toMatch(/application\/json/);
     expect(body.object).toBe("response");
     expect(body.output[0].role).toBe("assistant");
-    expect(body.output[0].content[0]).toEqual({ type: "output_text", text: "Hi from chat" });
+    expect(body.output[0].content[0]).toEqual({ type: "output_text", text: "Hi from chat", annotations: [] });
     const func = body.output.find((o: any) => o.type === "function_call");
     expect(func).toBeDefined();
     expect(func).toMatchObject({ call_id: "call_1", name: "calc", arguments: "{\"x\":1}" });
