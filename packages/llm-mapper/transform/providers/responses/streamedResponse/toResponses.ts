@@ -236,7 +236,7 @@ export class ChatToResponsesStreamConverter {
                   {
                     type: "message" as const,
                     role: "assistant" as const,
-                    content: [{ type: "output_text" as const, text: this.textBuffer }],
+                    content: [{ type: "output_text" as const, text: this.textBuffer, annotations: [] }],
                   },
                 ] as any)
               : []),
