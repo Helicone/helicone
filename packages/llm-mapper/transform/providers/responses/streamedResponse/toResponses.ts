@@ -234,7 +234,9 @@ export class ChatToResponsesStreamConverter {
             ...(this.textBuffer.length > 0
               ? ([
                   {
+                    id: `msg_${this.responseId}`,
                     type: "message" as const,
+                    status: "completed" as const,
                     role: "assistant" as const,
                     content: [{ type: "output_text" as const, text: this.textBuffer, annotations: [] }],
                   },
