@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { getJawnClient } from "@/lib/clients/jawn";
@@ -554,23 +555,19 @@ export function ModelRegistryPage() {
                   ...model.endpoints.map((e) => e.pricing.completion)
                 );
                 const isFree = minInputCost === 0;
+                const currentParams = searchParams.toString();
+                const modelUrl = `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ""}`;
 
                 return (
-                  <tbody key={model.id} className="group">
-                    <tr
-                      className="border-t-4 border-transparent cursor-pointer group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
-                      onClick={(e) => {
-                        if (!(e.target as HTMLElement).closest("button")) {
-                          const currentParams = searchParams.toString();
-                          window.open(
-                            `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ""}`,
-                            "_blank",
-                            "noopener,noreferrer"
-                          );
-                        }
-                      }}
-                    >
-                      <td className="px-4 lg:px-6 pt-6 pb-1">
+                  <tbody key={model.id} className="group relative">
+                    {/* Invisible link overlay for proper link behavior */}
+                    <Link
+                      href={modelUrl}
+                      className="absolute inset-0 z-0"
+                      aria-label={`View ${model.name}`}
+                    />
+                    <tr className="border-t-4 border-transparent cursor-pointer group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                      <td className="px-4 lg:px-6 pt-6 pb-1 relative">
                         <div className="flex items-center gap-2">
                           <span className="text-lg font-normal text-gray-900 dark:text-gray-100">
                             {model.name.replace(
@@ -582,7 +579,7 @@ export function ModelRegistryPage() {
                             textToCopy={model.id}
                             tooltipContent={`Copy: ${model.id}`}
                             iconSize={14}
-                            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            className="relative z-10 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                           />
                           {isFree && (
                             <span className="text-xs font-normal text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/40 px-2 py-0.5">
@@ -598,20 +595,8 @@ export function ModelRegistryPage() {
                       </td>
                     </tr>
 
-                    <tr
-                      className="cursor-pointer group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50"
-                      onClick={(e) => {
-                        if (!(e.target as HTMLElement).closest("button")) {
-                          const currentParams = searchParams.toString();
-                          window.open(
-                            `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ""}`,
-                            "_blank",
-                            "noopener,noreferrer"
-                          );
-                        }
-                      }}
-                    >
-                      <td className="px-4 lg:px-6 pt-1 pb-6">
+                    <tr className="cursor-pointer group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                      <td className="px-4 lg:px-6 pt-1 pb-6 relative">
                         <div className="space-y-2">
                           {model.description && (
                             <div className="text-base font-light text-gray-400 dark:text-gray-500">
