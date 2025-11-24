@@ -300,6 +300,7 @@
             "group": "Models",
             "pages": [
               "rest/ai-gateway/get-v1models",
+              "rest/ai-gateway/get-v1models-multimodal",
               "rest/models/get-v1public-model-registry-models"
             ]
           },
