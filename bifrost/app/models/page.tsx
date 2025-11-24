@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function ModelsPage() {
   return (
-    <Layout noNavbarMargin={true}>
+    <Layout noNavbarMargin={true} hideFooter={true}>
       <Suspense
         fallback={
           <div className="flex flex-col gap-4 w-full max-w-7xl mx-auto px-4 py-8">
