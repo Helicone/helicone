@@ -3,7 +3,7 @@ import type { ModelProviderConfig } from "../../../types";
 import { ClaudeOpus45ModelName } from "./model";
 
 export const endpoints = {
-  "claude-opus-4-5:anthropic": {
+  "claude-4.5-opus:anthropic": {
     providerModelId: "claude-opus-4-5",
     provider: "anthropic",
     author: "anthropic",
@@ -40,7 +40,7 @@ export const endpoints = {
     },
   },
 
-  "claude-opus-4-5:vertex": {
+  "claude-4.5-opus:vertex": {
     providerModelId: "claude-opus-4-5@20251101",
     provider: "vertex",
     author: "anthropic",
@@ -77,7 +77,7 @@ export const endpoints = {
       },
     },
   },
-  "claude-opus-4-5:bedrock": {
+  "claude-4.5-opus:bedrock": {
     provider: "bedrock",
     author: "anthropic",
     providerModelId: "anthropic.claude-opus-4-5-20251101-v1:0",
@@ -114,7 +114,7 @@ export const endpoints = {
       "us-east-1": {},
     },
   },
-  "claude-opus-4-5:openrouter": {
+  "claude-4.5-opus:openrouter": {
     provider: "openrouter",
     author: "anthropic",
     providerModelId: "anthropic/claude-opus-4.5",

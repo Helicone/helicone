@@ -233,7 +233,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "claude-opus-4-5",
+      value: "claude-4.5-opus",
     },
     cost: {
       prompt_token: 0.000005, // $5 / MTok
@@ -624,7 +624,7 @@ export const modelDetails: ModelDetailsMap = {
     },
   },
   "claude-4.5-opus": {
-    matches: ["claude-opus-4-5"],
+    matches: ["claude-4.5-opus"],
     searchTerms: ["claude 4.5 opus", "claude-4.5-opus", "opus 4.5"],
     info: {
       maxTokens: 200000,
