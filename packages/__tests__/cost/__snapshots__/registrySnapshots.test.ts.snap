@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 
@@ -1245,6 +1245,90 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "crossRegion": true,
       "maxTokens": 32000,
       "modelId": "claude-opus-4-1@20250805",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "anthropic/claude-opus-4-5": {
+    "claude-opus-4-5:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "claude-opus-4-5",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-opus-4-5:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "anthropic.claude-opus-4-5-20251101-v1:0",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-opus-4-5:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "anthropic/claude-opus-4.5",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-opus-4-5:vertex": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "claude-opus-4-5@20251101",
       "parameters": [
         "include_reasoning",
         "max_tokens",
@@ -5141,6 +5225,12 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "anthropic/claude-opus-4-5": [
+    "anthropic",
+    "bedrock",
+    "openrouter",
+    "vertex",
+  ],
   "anthropic/claude-sonnet-4": [
     "anthropic",
     "bedrock",
@@ -5995,6 +6085,53 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 0.000015,
         "output": 0.000075,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-opus-4-5": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.000005275,
+        "output": 0.000026375,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
         "threshold": 0,
         "web_search": 0.01,
       },
@@ -7033,6 +7170,15 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "claude-opus-4-5",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "claude-sonnet-4",
       "providers": [
         "anthropic",
@@ -7596,7 +7742,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
   ],
   "providerBreakdown": [
     {
-      "modelCount": 12,
+      "modelCount": 13,
       "provider": "anthropic",
     },
     {
@@ -7608,7 +7754,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "baseten",
     },
     {
-      "modelCount": 11,
+      "modelCount": 12,
       "provider": "bedrock",
     },
     {
@@ -7660,7 +7806,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 54,
+      "modelCount": 55,
       "provider": "openrouter",
     },
     {
@@ -7668,7 +7814,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 15,
+      "modelCount": 16,
       "provider": "vertex",
     },
     {
@@ -7688,6 +7834,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-opus-4",
     "claude-opus-4-1",
     "claude-opus-4-1-20250805",
+    "claude-opus-4-5",
     "claude-sonnet-4",
     "claude-sonnet-4-5-20250929",
     "codex-mini-latest",
@@ -7775,9 +7922,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 226,
-  "totalModelProviderConfigs": 226,
-  "totalModelsWithPtb": 88,
+  "totalEndpoints": 230,
+  "totalModelProviderConfigs": 230,
+  "totalModelsWithPtb": 89,
   "totalProviders": 20,
 }
 `;
