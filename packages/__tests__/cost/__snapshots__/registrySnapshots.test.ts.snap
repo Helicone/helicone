@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 
@@ -3129,6 +3129,75 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/gpt-4.1": {
+    "gpt-4.1-mini-2025-04-14:azure": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-4.1-mini-2025-04-14",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4.1-mini-2025-04-14:openai": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-4.1-mini-2025-04-14",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4.1-mini-2025-04-14:openrouter": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-4.1-mini-2025-04-14",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4.1-mini:azure": {
       "context": 1047576,
       "crossRegion": false,
@@ -5188,12 +5257,15 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "azure",
     "azure",
     "azure",
+    "azure",
     "helicone",
     "helicone",
     "helicone",
     "openai",
     "openai",
     "openai",
+    "openai",
+    "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -7107,6 +7179,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gpt-4.1-mini-2025-04-14",
+      "providers": [
+        "azure",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
       "model": "gpt-4.1-nano",
       "providers": [
         "azure",
@@ -7520,7 +7600,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "anthropic",
     },
     {
-      "modelCount": 9,
+      "modelCount": 10,
       "provider": "azure",
     },
     {
@@ -7576,11 +7656,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "novita",
     },
     {
-      "modelCount": 20,
+      "modelCount": 21,
       "provider": "openai",
     },
     {
-      "modelCount": 53,
+      "modelCount": 54,
       "provider": "openrouter",
     },
     {
@@ -7627,6 +7707,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "glm-4.6",
     "gpt-4.1",
     "gpt-4.1-mini",
+    "gpt-4.1-mini-2025-04-14",
     "gpt-4.1-nano",
     "gpt-4o",
     "gpt-4o-mini",
@@ -7694,9 +7775,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 223,
-  "totalModelProviderConfigs": 223,
-  "totalModelsWithPtb": 87,
+  "totalEndpoints": 226,
+  "totalModelProviderConfigs": 226,
+  "totalModelsWithPtb": 88,
   "totalProviders": 20,
 }
 `;

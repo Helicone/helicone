@@ -147,6 +147,7 @@ export interface ModelConfig {
   created: string;
   modality: Modality;
   tokenizer: Tokenizer;
+  pinnedVersionOfModel?: string;
 }
 
 interface BaseConfig {
