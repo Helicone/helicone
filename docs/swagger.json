@@ -9624,6 +9624,9 @@
 							"$ref": "#/components/schemas/StandardParameter"
 						},
 						"type": "array"
+					},
+					"pinnedVersionOfModel": {
+						"type": "string"
 					}
 				},
 				"required": [
