@@ -44,7 +44,7 @@ export const providers = {
   openrouter: new OpenRouterProvider(),
   perplexity: new PerplexityProvider(),
   vertex: new VertexProvider(),
-  xai: new XAIProvider(),
+  xai: new XAIProvider()
 } as const;
 
 export type ModelProviderName = keyof typeof providers;
@@ -76,7 +76,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "fireworks",
 
   // anthropic and chat completions provider
-  "vertex",
+  "vertex"
 
   // anthropic only
   // none right now, need anthropic mapper

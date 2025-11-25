@@ -67,7 +67,7 @@ export function sortAttemptsByPriority<
     authType: "byok" | "ptb";
     priority: number;
     endpoint: { pricing: Array<{ input: number; output: number }> };
-  },
+  }
 >(attempts: T[]): T[] {
   return attempts.sort((a, b) => {
     // BYOK always comes before PTB
@@ -76,12 +76,8 @@ export function sortAttemptsByPriority<
 
     // Within PTB, sort by cost (lowest first)
     if (a.authType === "ptb" && b.authType === "ptb") {
-      const aCost =
-        (a.endpoint.pricing[0]?.input ?? 0) +
-        (a.endpoint.pricing[0]?.output ?? 0);
-      const bCost =
-        (b.endpoint.pricing[0]?.input ?? 0) +
-        (b.endpoint.pricing[0]?.output ?? 0);
+      const aCost = (a.endpoint.pricing[0]?.input ?? 0) + (a.endpoint.pricing[0]?.output ?? 0);
+      const bCost = (b.endpoint.pricing[0]?.input ?? 0) + (b.endpoint.pricing[0]?.output ?? 0);
 
       // If costs are different, sort by cost
       if (aCost !== bCost) {

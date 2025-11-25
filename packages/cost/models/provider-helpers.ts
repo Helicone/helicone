@@ -392,9 +392,7 @@ export function parseModelString(
   if (!validateProvider(provider)) {
     const validProviders = Object.keys(providers);
     return err(
-      `Invalid provider: ${provider}. Valid providers: ${validProviders.join(
-        ", "
-      )}`
+      `Invalid provider: ${provider}. Valid providers: ${validProviders.join(", ")}`
     );
   }
 
