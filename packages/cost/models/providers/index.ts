@@ -51,6 +51,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "helicone",
   "anthropic",
   "bedrock",
+  "google-ai-studio",
 
   // chat completions only
   "azure",
