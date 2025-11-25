@@ -1,9 +1,7 @@
 import {
   ChatCompletionChunk,
-  OpenAIStreamChoice,
 } from "../../../types/openai";
 import {
-  GoogleResponseBody,
   GoogleStreamEvent,
 } from "../../../types/google";
 import {

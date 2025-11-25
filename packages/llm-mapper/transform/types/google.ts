@@ -1,9 +1,11 @@
+export interface GoogleFunctionCall {
+  name?: string;
+  args?: Record<string, any>;
+}
+
 export interface GoogleContentPart {
   text?: string;
-  functionCall?: {
-    name?: string;
-    args?: Record<string, any>;
-  };
+  functionCall?: GoogleFunctionCall;
 }
 
 export interface GoogleContent {
@@ -17,20 +19,32 @@ export interface GoogleCandidate {
   index?: number;
 }
 
+export interface GoogleTokenDetail {
+  modality: "MODALITY_UNSPECIFIED" | "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT";
+  tokenCount: number;
+}
+
 export interface GoogleUsageMetadata {
-  promptTokenCount?: number;
-  promptTokens?: number;
+  promptTokenCount: number;
   candidatesTokenCount?: number;
-  candidatesTokens?: number;
-  totalTokenCount?: number;
+  totalTokenCount: number;
+  toolUsePromptTokenCount?: number;
+  thoughtsTokenCount?: number;
+  cachedContentTokenCount?: number;
+  promptTokenDetails?: GoogleTokenDetail[];
+  promptTokensDetails?: GoogleTokenDetail[]; // Some responses use pluralized key
+  cacheTokenDetails?: GoogleTokenDetail[];
+  candidatesTokensDetails?: GoogleTokenDetail[];
+  toolUsePromptTokensDetails?: GoogleTokenDetail[];
+  trafficType?: 'TRAFFIC_TYPE_UNSPECIFIED' | 'ON_DEMAND' | 'PROVISIONED_THROUGHPUT';
 }
 
 export interface GoogleResponseBody {
-  candidates?: GoogleCandidate[];
-  modelVersion?: string;
-  usageMetadata?: GoogleUsageMetadata;
-  responseId?: string;
-  name?: string;
+  candidates: GoogleCandidate[];
+  modelVersion: string;
+  usageMetadata: GoogleUsageMetadata;
+  responseId: string;
+  name: string;
 }
 
 export type GoogleStreamEvent = GoogleResponseBody;

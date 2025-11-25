@@ -41,6 +41,7 @@ export const endpoints = {
       tpm: 8_000_000,
     },
     ptbEnabled: true,
+    responseFormat: "GOOGLE",
     endpointConfigs: {
       "*": {},
     },

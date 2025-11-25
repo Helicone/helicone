@@ -521,7 +521,7 @@ export async function normalizeAIGatewayResponse(params: {
       }
 
       // by this line, normalizedOpenAIText is now in Chat Completions format
-      
+
       if (bodyMapping === "RESPONSES" && provider !== "openai") {
         return convertOpenAIStreamToResponses(normalizedOpenAIText);
       }
@@ -540,6 +540,9 @@ export async function normalizeAIGatewayResponse(params: {
       }
 
       // Normalize usage for all providers
+      // We do this "extra" work because while some providers return OpenAI-format usage,
+      // the usage numbers may not be accurate or consistent.
+      // Ex: input tokens = prompt tokens + cached prompt tokens instead of just prompt tokens
       const usageProcessor = getUsageProcessor(provider);
       if (usageProcessor) {
         const modelUsageResult = await usageProcessor.parse({
