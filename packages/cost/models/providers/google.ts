@@ -10,17 +10,17 @@ export class GoogleProvider extends BaseProvider {
   readonly pricingPages = ["https://ai.google.dev/gemini-api/docs/pricing"];
   readonly modelPages = ["https://ai.google.dev/gemini-api/docs/models"];
 
-  buildUrl(endpoint: Endpoint, requestParams: RequestParams, apiKey: string): string {
+  buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     const modelId = endpoint.providerModelId || "";
     const modelPath = modelId.startsWith("models/")
       ? modelId
       : `models/${modelId}`;
 
     if (requestParams.isStreaming) {
-      return `${this.baseUrl}/${modelPath}:streamGenerateContent?alt=sse&key=${apiKey}`;
+      return `${this.baseUrl}/${modelPath}:streamGenerateContent?alt=sse&key=${requestParams.apiKey}`;
     }
     else {
-      return `${this.baseUrl}/${modelPath}:generateContent?key=${apiKey}`;
+      return `${this.baseUrl}/${modelPath}:generateContent?key=${requestParams.apiKey}`;
     }
   }
 

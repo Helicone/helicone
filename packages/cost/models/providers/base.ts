@@ -30,7 +30,7 @@ export abstract class BaseProvider {
 
   readonly requiredConfig?: ReadonlyArray<keyof UserEndpointConfig>;
 
-  abstract buildUrl(endpoint: Endpoint, requestParams: RequestParams, apiKey: string): string;
+  abstract buildUrl(endpoint: Endpoint, requestParams: RequestParams): string;
 
   buildModelId(
     modelProviderConfig: ModelProviderConfig,

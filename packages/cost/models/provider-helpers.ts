@@ -162,7 +162,6 @@ export const dbProviderToProvider = (
 export function buildEndpointUrl(
   endpoint: Endpoint,
   requestParams: RequestParams,
-  apiKey: string
 ): Result<string> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
@@ -175,7 +174,7 @@ export function buildEndpointUrl(
   }
 
   try {
-    const url = provider.buildUrl(endpoint, requestParams, apiKey);
+    const url = provider.buildUrl(endpoint, requestParams);
     return ok(url);
   } catch (error) {
     return err(error instanceof Error ? error.message : "Failed to build URL");

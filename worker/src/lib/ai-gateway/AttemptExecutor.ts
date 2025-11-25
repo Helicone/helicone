@@ -230,7 +230,8 @@ export class AttemptExecutor {
         });
       }
 
-      const urlResult = buildEndpointUrl(endpoint, requestParams, providerKey.decrypted_provider_key);
+      requestParams.apiKey = providerKey.decrypted_provider_key;
+      const urlResult = buildEndpointUrl(endpoint, requestParams);
 
       if (isErr(urlResult)) {
         return err({
