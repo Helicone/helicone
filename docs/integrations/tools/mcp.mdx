@@ -1,0 +1,128 @@
+---
+title: "Helicone MCP Server"
+sidebarTitle: "MCP"
+description: "Query your Helicone observability data directly from MCP-compatible AI assistants using the Helicone MCP server."
+---
+
+The Helicone MCP (Model Context Protocol) server enables AI assistants like Claude Desktop, Cursor, and other MCP-compatible tools to query your Helicone observability data directly. This allows you to debug errors, search logs, analyze performance, and examine request/response bodies without leaving your AI assistant.
+
+## Installation
+
+Add the Helicone MCP server to your MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "helicone": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@helicone/mcp@latest"],
+      "env": {
+        "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
+      }
+    }
+  }
+}
+```
+
+### Configuration Locations
+
+The configuration file location depends on your MCP client:
+
+| Client | Configuration File |
+| ------ | ------------------ |
+| Claude Desktop (macOS) | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Claude Desktop (Windows) | `%APPDATA%\Claude\claude_desktop_config.json` |
+| Cursor | `.cursor/mcp.json` in your project or global settings |
+
+## Getting Your API Key
+
+1. Go to [Settings → API Keys](https://us.helicone.ai/settings/api-keys) (or [EU](https://eu.helicone.ai/settings/api-keys))
+2. Generate a new API key
+3. Copy the key and add it to your MCP configuration
+
+## Available Tools
+
+### `query_requests`
+
+Query requests with filters, pagination, sorting, and optional body content.
+
+**Parameters:**
+| Parameter | Type | Description |
+| --------- | ---- | ----------- |
+| `filter` | object | Filter criteria (model, provider, status, latency, cost, properties, time, user, etc.) |
+| `offset` | number | Pagination offset (default: 0) |
+| `limit` | number | Number of results to return (default: 100) |
+| `sort` | object | Sort criteria |
+| `includeBodies` | boolean | Include request/response bodies (default: false) |
+
+**Example use cases:**
+- "Show me the last 10 failed requests"
+- "Find all requests to GPT-4 in the last hour"
+- "Search for requests with high latency"
+- "Show me requests from a specific user"
+
+### `query_sessions`
+
+Query sessions with search, time range filtering, and advanced filters.
+
+**Parameters:**
+| Parameter | Type | Description |
+| --------- | ---- | ----------- |
+| `startTimeUnixMs` | number | Start of time range (Unix timestamp in milliseconds) - **required** |
+| `endTimeUnixMs` | number | End of time range (Unix timestamp in milliseconds) - **required** |
+| `timezoneDifference` | number | Timezone offset in hours (e.g., -5 for EST) - **required** |
+| `search` | string | Search by name or metadata |
+| `nameEquals` | string | Exact session name match |
+| `filter` | object | Advanced filter criteria |
+| `offset` | number | Pagination offset (default: 0) |
+| `limit` | number | Number of results to return (default: 100) |
+
+**Example use cases:**
+- "Show me all sessions from today"
+- "Find sessions named 'checkout-flow'"
+- "Debug conversation flows in a specific time range"
+- "Analyze session performance metrics"
+
+## Filter Capabilities
+
+Both tools support comprehensive filtering options:
+
+- **Model/Provider**: Filter by specific models or providers
+- **Status/Error**: Find successful or failed requests
+- **Time**: Filter by time ranges
+- **Cost/Latency**: Filter by performance metrics
+- **Custom Properties**: Filter by your custom Helicone properties
+- **Complex Filters**: Combine filters with AND/OR logic
+
+## Example Conversations
+
+Once configured, you can ask your AI assistant questions like:
+
+- "What errors occurred in my LLM requests today?"
+- "Show me the most expensive requests from the last week"
+- "Find all requests that took longer than 5 seconds"
+- "Debug the session 'user-onboarding-123'"
+- "What's the average latency for Claude requests?"
+
+## Troubleshooting
+
+### Server not connecting
+- Verify your API key is correct
+- Ensure `npx` is available in your PATH
+- Check that you're using the correct configuration file location
+
+### No data returned
+- Confirm your API key has access to the organization's data
+- Check that you're querying the correct time range
+- Verify your filters aren't too restrictive
+
+### Rate limiting
+- The MCP server respects Helicone's rate limits
+- If you encounter rate limiting, reduce the frequency of queries
+
+## Related Resources
+
+- [Custom Properties](/features/advanced-usage/custom-properties) - Add metadata to your requests for better filtering
+- [Sessions](/features/sessions) - Group related requests into sessions
+- [User Metrics](/features/advanced-usage/user-metrics) - Track usage by user
