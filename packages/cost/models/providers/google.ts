@@ -40,7 +40,22 @@ export class GoogleProvider extends BaseProvider {
     endpoint: Endpoint,
     context: RequestBodyContext
   ): string {
-    const googleBody = toGoogle(context.parsedBody);
+    const modelId = endpoint.providerModelId || "";
+    if (context.bodyMapping === "NO_MAPPING") {
+      return JSON.stringify({
+        ...context.parsedBody,
+        model: modelId,
+      });
+    }
+
+    let updatedBody = context.parsedBody;
+
+    // Convert to Chat Completions
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(context.parsedBody);
+    }
+
+    const googleBody = toGoogle(updatedBody);
     return JSON.stringify(googleBody);
   }
 }
