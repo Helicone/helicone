@@ -36,5 +36,5 @@ export type AttemptError = {
   message: string;
   statusCode: number;
   source?: string;
-  details?: string;
+  details?: any;
 };

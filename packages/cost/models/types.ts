@@ -19,7 +19,6 @@ export const AUTHORS = [
   "amazon",
   "microsoft",
   "nvidia",
-  "cohere",
   "deepseek",
   "qwen",
   "xai",
