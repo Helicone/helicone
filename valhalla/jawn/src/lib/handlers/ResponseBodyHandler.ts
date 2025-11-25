@@ -170,8 +170,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         }
 
         if (usageProcessor) {
-          console.log("UsageProcess to use:", usageProcessor.constructor.name);
-          console.log("response body to parse for usage:", rawResponse);
           const parsedUsage = await usageProcessor.parse({
             responseBody: rawResponse,
             isStream: context.message.log.request.isStream,
@@ -194,16 +192,12 @@ export class ResponseBodyHandler extends AbstractLogHandler {
               providerModelId,
               provider,
             });
-            console.log("Calculated cost breakdown from registry:", breakdown);
             if (breakdown) {
               context.costBreakdown = breakdown;
             }
           }
         }
       }
-
-      console.log("Legacy usage after response processing:", context.legacyUsage);
-      console.log("New usage after response processing:", context.usage);
 
       return await super.handle(context);
     } catch (error: any) {
@@ -256,15 +250,15 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         parse_response_error: processedResponseBody.error,
         body: omitResponseLog
           ? {
-            model: responseModel, // Put response model here, not calculated model
-          }
+              model: responseModel, // Put response model here, not calculated model
+            }
           : (processedResponseBody.data?.processedBody ?? undefined),
       };
     } else {
       return omitResponseLog
         ? {
-          model: responseModel, // Put response model here, not calculated model
-        }
+            model: responseModel, // Put response model here, not calculated model
+          }
         : (processedResponseBody.data.processedBody ?? undefined);
     }
   }
