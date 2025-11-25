@@ -43,8 +43,6 @@ export function heliconeProviderToModelProviderName(
       return "perplexity";
     case "DEEPSEEK":
       return "deepseek";
-    case "COHERE":
-      return "cohere";
     case "OPENROUTER":
       return "openrouter";
     case "DEEPINFRA":
@@ -314,7 +312,7 @@ export async function buildRequestBody(
 export async function buildErrorMessage(
   endpoint: Endpoint,
   response: Response
-): Promise<Result<string>> {
+): Promise<Result<{ message: string; details?: any }>> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
     return err(providerResult.error);
@@ -343,7 +341,7 @@ const MODEL_NAME_MAPPINGS: Record<string, string> = {
   "claude-3.5-sonnet": "claude-3.5-sonnet-v2",
   "claude-3.5-sonnet-20240620": "claude-3.5-sonnet-v2",
   "deepseek-r1": "deepseek-reasoner",
-  "kimi-k2": "kimi-k2-0711",
+  "kimi-k2": "kimi-k2-0905",
   "kimi-k2-instruct": "kimi-k2-0905",
 };
 

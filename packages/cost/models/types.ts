@@ -19,7 +19,6 @@ export const AUTHORS = [
   "amazon",
   "microsoft",
   "nvidia",
-  "cohere",
   "deepseek",
   "qwen",
   "xai",
@@ -147,6 +146,7 @@ export interface ModelConfig {
   created: string;
   modality: Modality;
   tokenizer: Tokenizer;
+  pinnedVersionOfModel?: string;
 }
 
 interface BaseConfig {

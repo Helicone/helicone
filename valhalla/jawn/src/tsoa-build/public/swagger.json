@@ -3260,7 +3260,6 @@
 					"bedrock",
 					"cerebras",
 					"chutes",
-					"cohere",
 					"deepinfra",
 					"deepseek",
 					"fireworks",
@@ -9029,7 +9028,6 @@
 				"type": "string",
 				"enum": [
 					"anthropic",
-					"cohere",
 					"deepseek",
 					"mistral",
 					"openai",
@@ -9624,6 +9622,9 @@
 							"$ref": "#/components/schemas/StandardParameter"
 						},
 						"type": "array"
+					},
+					"pinnedVersionOfModel": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -13708,7 +13709,6 @@
 														"bedrock",
 														"cerebras",
 														"chutes",
-														"cohere",
 														"deepinfra",
 														"deepseek",
 														"fireworks",

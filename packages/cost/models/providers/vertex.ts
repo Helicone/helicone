@@ -147,19 +147,22 @@ export class VertexProvider extends BaseProvider {
     };
   }
 
-  async buildErrorMessage(response: Response): Promise<string> {
+  async buildErrorMessage(response: Response): Promise<{
+    message: string;
+    details?: any;
+  }> {
     try {
       const respJson = (await response.json()) as any;
       if (respJson.error?.message) {
         // Anthropic error format
-        return respJson.error.message;
+        return { message: respJson.error.message, details: respJson.error };
       } else if (respJson[0]?.error?.message) {
         // Gemini error format
-        return respJson[0].error.message;
+        return { message: respJson[0].error.message, details: respJson[0].error };
       }
-      return `Request failed with status ${response.status}`;
+      return { message: `Request failed with status ${response.status}`, details: undefined };
     } catch (error) {
-      return `Request failed with status ${response.status}`;
+      return { message: `Request failed with status ${response.status}`, details: undefined };
     }
   }
 

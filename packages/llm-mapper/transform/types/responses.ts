@@ -135,6 +135,7 @@ export type ResponsesOutputContentPart =
 
 export interface ResponsesMessageOutputItem {
   type: "message";
+  status: "in_progress" | "completed";
   id?: string;
   role: ResponsesRole; // Typically "assistant" on output
   content: ResponsesOutputContentPart[];

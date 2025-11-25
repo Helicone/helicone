@@ -581,6 +581,11 @@ export function ModelRegistryPage() {
                             iconSize={14}
                             className="pointer-events-auto p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                           />
+                          {model.pinnedVersionOfModel && (
+                            <span className="text-xs font-normal text-amber-800 dark:text-amber-200 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5">
+                              Pinned
+                            </span>
+                          )}
                           {isFree && (
                             <span className="text-xs font-normal text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/40 px-2 py-0.5">
                               Free
