@@ -161,7 +161,7 @@ describe("normalizeAIGatewayResponse", () => {
         model: "gpt-4",
         output: [
           {
-            id: "fc_call_abc123",
+            id: "call_abc123",
             type: "function_call",
             status: "completed",
             name: "get_weather",

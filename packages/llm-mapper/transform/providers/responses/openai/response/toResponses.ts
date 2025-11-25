@@ -24,7 +24,7 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
   const pushFunctionCall = (id: string | undefined, name: string, args: string | undefined) => {
     const call_id = id || `call_${Math.random().toString(36).slice(2, 10)}`;
     output.push({
-      id: `fc_${call_id}`,
+      id: call_id,
       type: "function_call",
       status: "completed",
       name,

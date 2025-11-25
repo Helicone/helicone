@@ -33,6 +33,16 @@ def snake_to_camel(s: str) -> str:
     return parts[0] + ''.join(p.capitalize() for p in parts[1:])
 
 
+# Delete the seeded provider key first (from supabase/seeds/0_seed.sql)
+seeded_key_id = "697e2a38-dacf-4073-b96b-de7a8fbf20f5"
+delete_result = requests.delete(f"http://localhost:8585/v1/api-keys/provider-key/{seeded_key_id}",
+                                headers={
+                                    "Authorization": "Bearer sk-helicone-zk6xu4a-kluegtq-sbljk7q-drnixzi",
+                                    "Content-Type": "application/json",
+})
+print(
+    f"Deleted seeded key: {delete_result.status_code} - {delete_result.text}")
+
 for d in data:
     d = {snake_to_camel(k): v for k, v in d.items()}
     print(d)
