@@ -53,6 +53,18 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
+  "gpt-5.1-2025-11-13": {
+    name: "OpenAI GPT-5.1",
+    author: "openai",
+    description:
+      "GPT-5.1 is an enhanced version of GPT-5 with improved performance and capabilities. It features the same 400K context window and advanced tool calling capabilities as GPT-5, with optimized pricing for better cost efficiency.",
+    contextLength: 400000,
+    maxOutputTokens: 128000,
+    created: "2025-11-13T00:00:00.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text", "image"] },
+    tokenizer: "GPT",
+    pinnedVersionOfModel: "gpt-5.1",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type GPT51ModelName = keyof typeof models;
