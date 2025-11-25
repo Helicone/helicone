@@ -135,7 +135,7 @@ export class GoogleToOpenAIStreamConverter {
       }
     }
 
-    if (candidate.finishReason || event.usageMetadata) {
+    if (candidate.finishReason) {
       chunks.push(
         this.createChunk({
           choices: [
