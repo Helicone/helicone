@@ -151,7 +151,9 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "deepseek-ai/DeepSeek-V3.1-Terminus", // Provider model ID on DeepInfra
-                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-V3.1-Terminus"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -168,7 +170,9 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "deepseek-ai/DeepSeek-V3.1-Terminus",
-                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-V3.1-Terminus"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -223,7 +227,9 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://llm.chutes.ai/v1/chat/completions",
                 response: "success",
                 model: "tngtech/DeepSeek-TNG-R1T2-Chimera",
-                data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+                data: createOpenAIMockResponse(
+                  "tngtech/DeepSeek-TNG-R1T2-Chimera"
+                ),
                 expects: chutesAuthExpectations,
               },
             ],
@@ -240,7 +246,9 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://llm.chutes.ai/v1/chat/completions",
                 response: "success",
                 model: "tngtech/DeepSeek-TNG-R1T2-Chimera",
-                data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+                data: createOpenAIMockResponse(
+                  "tngtech/DeepSeek-TNG-R1T2-Chimera"
+                ),
                 expects: chutesAuthExpectations,
               },
             ],
@@ -293,8 +301,29 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
-                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+                ),
                 expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle chutes provider", () =>
+        runGatewayTest({
+          model: "deepseek-r1-distill-llama-70b/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+                ),
+                expects: chutesAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -602,6 +631,56 @@ describe("DeepSeek Registry Tests", () => {
       }));
   });
 
+  describe("Error scenarios - Chutes Provider with DeepSeek R1 Distill Llama 70B", () => {
+    it("should handle Chutes provider failure for R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/chutes",
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Chutes service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Chutes for R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/chutes",
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Chutes for R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/chutes",
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+  });
+
   describe("Error scenarios - Novita Provider with DeepSeek V3.2", () => {
     it("should handle Novita provider failure", () =>
       runGatewayTest({
@@ -714,7 +793,7 @@ describe("DeepSeek Registry Tests", () => {
               model: "deepseek-ai/DeepSeek-V3.1",
               data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1"),
               expects: deepinfraAuthExpectations,
-              customVerify: (call) => {
+              customVerify: (_call) => {
                 // Verify that the URL is correctly constructed
                 // Base URL: https://api.deepinfra.com/
                 // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
@@ -725,7 +804,7 @@ describe("DeepSeek Registry Tests", () => {
         },
       }));
 
-      it("should construct correct DeepInfra URL for DeepSeek R1", () =>
+    it("should construct correct DeepInfra URL for DeepSeek R1", () =>
       runGatewayTest({
         model: "deepseek-reasoner/deepinfra",
         expected: {
@@ -736,7 +815,7 @@ describe("DeepSeek Registry Tests", () => {
               model: "deepseek-ai/DeepSeek-R1-0528",
               data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-0528"),
               expects: deepinfraAuthExpectations,
-              customVerify: (call) => {
+              customVerify: (_call) => {
                 // Verify that the URL is correctly constructed
                 // Base URL: https://api.deepinfra.com/
                 // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
@@ -804,8 +883,6 @@ describe("DeepSeek Registry Tests", () => {
         },
       }));
 
-
-
     it("should construct correct DeepInfra URL for DeepSeek V3.1 Terminus", () =>
       runGatewayTest({
         model: "deepseek-v3.1-terminus/deepinfra",
@@ -815,9 +892,11 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-V3.1-Terminus",
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-V3.1-Terminus"
+              ),
               expects: deepinfraAuthExpectations,
-              customVerify: (call) => {
+              customVerify: (_call) => {
                 // Verify that the URL is correctly constructed for V3.1 Terminus
                 // Base URL: https://api.deepinfra.com/
                 // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
@@ -837,7 +916,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-V3.1-Terminus", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-V3.1-Terminus"
+              ),
               expects: deepinfraAuthExpectations,
             },
           ],
@@ -857,7 +938,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-V3.1-Terminus",
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-V3.1-Terminus"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: ["user", "Test"],
@@ -879,7 +962,7 @@ describe("DeepSeek Registry Tests", () => {
               model: "deepseek/deepseek-v3.2-exp",
               data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
               expects: novitaAuthExpectations,
-              customVerify: (call) => {
+              customVerify: (_call) => {
                 // Verify that the URL is correctly constructed
                 // Base URL: https://api.novita.ai/
                 // Built URL: https://api.novita.ai/openai/v1/chat/completions
@@ -939,9 +1022,11 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+              ),
               expects: deepinfraAuthExpectations,
-              customVerify: (call) => {
+              customVerify: (_call) => {
                 // Verify that the URL is correctly constructed for R1 Distill Llama 70B
                 // Base URL: https://api.deepinfra.com/
                 // Built URL: https://api.deepinfra.com/v1/openai/chat/completions
@@ -961,7 +1046,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+              ),
               expects: deepinfraAuthExpectations,
             },
           ],
@@ -981,9 +1068,79 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://api.deepinfra.com/v1/openai/chat/completions",
               response: "success",
               model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
-              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-R1-Distill-Llama-70B"),
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+              ),
               expects: {
                 ...deepinfraAuthExpectations,
+                bodyContains: ["user", "Test"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should construct correct Chutes URL for DeepSeek R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/chutes",
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+              ),
+              expects: chutesAuthExpectations,
+              customVerify: (_call) => {
+                // Verify that the URL is correctly constructed for R1 Distill Llama 70B
+                // Base URL: https://llm.chutes.ai/
+                // Built URL: https://llm.chutes.ai/v1/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for Chutes R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/chutes",
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+              ),
+              expects: chutesAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for Chutes R1 Distill Llama 70B", () =>
+      runGatewayTest({
+        model: "deepseek-r1-distill-llama-70b/chutes",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://llm.chutes.ai/v1/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+              data: createOpenAIMockResponse(
+                "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+              ),
+              expects: {
+                ...chutesAuthExpectations,
                 bodyContains: ["user", "Test"],
               },
             },
@@ -1001,9 +1158,11 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://llm.chutes.ai/v1/chat/completions",
               response: "success",
               model: "tngtech/DeepSeek-TNG-R1T2-Chimera",
-              data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+              data: createOpenAIMockResponse(
+                "tngtech/DeepSeek-TNG-R1T2-Chimera"
+              ),
               expects: chutesAuthExpectations,
-              customVerify: (call) => {
+              customVerify: (_call) => {
                 // Verify that the URL is correctly constructed for TNG R1T2 Chimera
                 // Base URL: https://api.chutes.ai/
                 // Built URL: https://llm.chutes.ai/v1/chat/completions
@@ -1023,7 +1182,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://llm.chutes.ai/v1/chat/completions",
               response: "success",
               model: "tngtech/DeepSeek-TNG-R1T2-Chimera", // Should map to the correct provider model ID
-              data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+              data: createOpenAIMockResponse(
+                "tngtech/DeepSeek-TNG-R1T2-Chimera"
+              ),
               expects: chutesAuthExpectations,
             },
           ],
@@ -1043,7 +1204,9 @@ describe("DeepSeek Registry Tests", () => {
               url: "https://llm.chutes.ai/v1/chat/completions",
               response: "success",
               model: "tngtech/DeepSeek-TNG-R1T2-Chimera",
-              data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+              data: createOpenAIMockResponse(
+                "tngtech/DeepSeek-TNG-R1T2-Chimera"
+              ),
               expects: {
                 ...chutesAuthExpectations,
                 bodyContains: ["user", "Test"],
@@ -1062,9 +1225,7 @@ describe("DeepSeek Registry Tests", () => {
           model: "deepseek-v3/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -1089,9 +1250,7 @@ describe("DeepSeek Registry Tests", () => {
           model: "deepseek-v3.1-terminus/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -1101,7 +1260,9 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "deepseek-ai/DeepSeek-V3.1-Terminus",
-                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.1-Terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-V3.1-Terminus"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1116,9 +1277,7 @@ describe("DeepSeek Registry Tests", () => {
           model: "deepseek-v3.2/novita",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -1143,9 +1302,7 @@ describe("DeepSeek Registry Tests", () => {
           model: "deepseek-tng-r1t2-chimera/chutes",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -1155,7 +1312,36 @@ describe("DeepSeek Registry Tests", () => {
                 url: "https://llm.chutes.ai/v1/chat/completions",
                 response: "success",
                 model: "tngtech/DeepSeek-TNG-R1T2-Chimera",
-                data: createOpenAIMockResponse("tngtech/DeepSeek-TNG-R1T2-Chimera"),
+                data: createOpenAIMockResponse(
+                  "tngtech/DeepSeek-TNG-R1T2-Chimera"
+                ),
+                expects: chutesAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-r1-distill-llama-70b with Chutes", () => {
+      it("should handle passthrough billing with chutes provider", () =>
+        runGatewayTest({
+          model: "deepseek-r1-distill-llama-70b/chutes",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Test passthrough billing" }],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+                ),
                 expects: chutesAuthExpectations,
               },
             ],
@@ -1212,9 +1398,7 @@ describe("DeepSeek Registry Tests", () => {
           model: "deepseek-v3/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test with cache control" },
-              ],
+              messages: [{ role: "user", content: "Test with cache control" }],
               cache_control: { type: "ephemeral" },
             },
           },
@@ -1574,6 +1758,76 @@ describe("DeepSeek Registry Tests", () => {
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ["stream", "true"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-r1-distill-llama-70b with Chutes cache tokens", () => {
+      it("should handle response with cached input tokens", () =>
+        runGatewayTest({
+          model: "deepseek-r1-distill-llama-70b/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+                data: {
+                  id: "chatcmpl-test-cached-chutes",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Chutes response with caching",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 300,
+                    completion_tokens: 80,
+                    total_tokens: 380,
+                    prompt_tokens_details: {
+                      cached_tokens: 250,
+                    },
+                  },
+                },
+                expects: chutesAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle request with cache control parameters", () =>
+        runGatewayTest({
+          model: "deepseek-r1-distill-llama-70b/chutes",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Test with cache control" }],
+              cache_control: { type: "ephemeral" },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+                data: createOpenAIMockResponse(
+                  "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+                ),
+                expects: {
+                  ...chutesAuthExpectations,
+                  bodyContains: ["cache_control"],
                 },
               },
             ],

@@ -6,7 +6,8 @@
     "web",
     "packages/*",
     "valhalla/jawn",
-    "worker"
+    "worker",
+    "e2e"
   ],
   "engines": {
     "node": ">=20"

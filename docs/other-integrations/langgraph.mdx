@@ -5,6 +5,9 @@ description: "Use LangGraph to integrate Helicone with your LLM workflows."
 "twitter:title": "LangGraph Integration - Helicone OSS LLM Observability"
 iconType: "solid"
 ---
+import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
+
+<LegacyWarning />
 
 <Steps title="LangGraph Integration">
   <Step title="Create an account + Generate an API Key">
@@ -65,7 +68,7 @@ const model = new ChatAnthropic({
 </CodeGroup>
   </Step>
   <Step title="Add custom properties to your requests">
-    
+
 You can add custom properties to your LangGraph agent invocations when calling `invoke()`:
 
 ```typescript

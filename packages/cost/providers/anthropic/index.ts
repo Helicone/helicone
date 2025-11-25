@@ -230,6 +230,21 @@ export const costs: ModelRow[] = [
       prompt_cache_creation_1h: 0.00003, // $30 / MTok
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-opus-4-5",
+    },
+    cost: {
+      prompt_token: 0.000005, // $5 / MTok
+      completion_token: 0.000025, // $25 / MTok
+      prompt_cache_write_token: 0.00000625, // 5m cache write: $6.25 / MTok
+      prompt_cache_read_token: 0.0000005, // Cache hits/refreshes: $0.5 / MTok
+      prompt_cache_creation_5m: 0.00000625, // $6.25 / MTok
+      prompt_cache_creation_1h: 0.00001, // 1h cache write: $10 / MTok
+    },
+    showInPlayground: true,
+  },
 ];
 
 export const modelDetails: ModelDetailsMap = {
@@ -605,6 +620,60 @@ export const modelDetails: ModelDetailsMap = {
         "Quick-response systems",
         "Parallel processing workflows",
         "Resource-constrained environments",
+      ],
+    },
+  },
+  "claude-opus-4-5": {
+    matches: ["claude-opus-4-5"],
+    searchTerms: ["claude 4.5 opus", "claude-opus-4-5", "opus 4.5"],
+    info: {
+      maxTokens: 200000,
+      releaseDate: "2025-11-24",
+      description:
+        "Claude Opus 4.5 is Anthropic's flagship model released November 2025, representing the highest level of intelligence and capability. It features extended thinking, multilingual capabilities, vision processing, and exceptional performance across complex reasoning tasks with 64k max output tokens. Training data cut-off: March 2025, Training cut-off: August 2025.",
+      tradeOffs: [
+        "Premium pricing for flagship capabilities",
+        "Highest intelligence and reasoning ability",
+        "Extended output capacity (64k tokens)",
+        "Advanced thinking and reasoning features",
+      ],
+      benchmarks: {},
+      capabilities: [
+        "Extended thinking and reasoning",
+        "Complex multi-step problem solving",
+        "Advanced code generation and analysis",
+        "Vision processing (text and image inputs)",
+        "Multilingual capabilities",
+        "Tool and function calling",
+        "JSON mode support",
+        "Context window up to 200k tokens",
+        "Maximum output up to 64k tokens",
+        "Web search integration",
+      ],
+      strengths: [
+        "Highest level of intelligence",
+        "Exceptional reasoning capabilities",
+        "Extended output length (64k tokens)",
+        "Advanced thinking features",
+        "Superior complex task performance",
+        "Comprehensive multilingual support",
+        "Latest training data (March 2025)",
+        "Vision and text multimodal processing",
+      ],
+      weaknesses: [
+        "Premium pricing model",
+        "Higher latency due to advanced capabilities",
+        "Resource-intensive processing",
+      ],
+      recommendations: [
+        "Complex reasoning and analysis tasks",
+        "Advanced code generation and review",
+        "Multi-step problem solving",
+        "Research and academic applications",
+        "Long-form content generation",
+        "Complex data analysis and extraction",
+        "Vision and multimodal processing",
+        "Enterprise-critical applications",
       ],
     },
   },

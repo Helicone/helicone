@@ -7,6 +7,7 @@ iconType: "solid"
 ---
 
 import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
 
 <Info>
 This integration uses the [AI Gateway](/gateway/overview), which provides a unified API for multiple LLM providers. The AI Gateway is currently in beta.
@@ -59,7 +60,9 @@ This integration uses the [AI Gateway](/gateway/overview), which provides a unif
 
   <Step title={strings.verifyInHelicone}>
     <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Codex CLI") }} />
+    <Star />
   </Step>
+
 </Steps>
 
 ## SDK Integration

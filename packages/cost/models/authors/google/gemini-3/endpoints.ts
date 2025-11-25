@@ -17,6 +17,11 @@ export const endpoints = {
         },
         cacheStoragePerHour: 0.0000045, // $4.50/1M tokens per hour
       },
+      {
+        threshold: 200000,
+        input: 0.000004, // $4/1M tokens (over 200K context)
+        output: 0.000018, // $18/1M tokens (over 200K context)
+      },
     ],
     contextLength: 1_048_576,
     maxCompletionTokens: 65_536,
@@ -58,6 +63,11 @@ export const endpoints = {
         },
         cacheStoragePerHour: 0.0000045, // $4.50/1M tokens per hour
       },
+      {
+        threshold: 200000,
+        input: 0.000004, // $4/1M tokens (over 200K context)
+        output: 0.000018, // $18/1M tokens (over 200K context)
+      },
     ],
     contextLength: 1_048_576,
     maxCompletionTokens: 65_536,
@@ -91,6 +101,11 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000211, // $2.11/1M - $2.00/1M * 1.055
         output: 0.00001266, // $12.66/1M - $12.00/1M * 1.055
+      },
+      {
+        threshold: 200000,
+        input: 0.00000422, // $4.22/1M - worst-case: $4.00/1M * 1.055 (over 200K context)
+        output: 0.00001899, // $18.99/1M - worst-case: $18.00/1M * 1.055 (over 200K context)
       },
     ],
     contextLength: 1_048_576,

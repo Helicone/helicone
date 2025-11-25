@@ -19,19 +19,23 @@ export const Layout = async ({
   const githubData = await githubResponse.json();
   const stars = githubData.stargazers_count;
 
-  const featuredBlogFolderName = (BLOG_CONTENT[0] as any)?.dynmaicEntry?.folderName;
+  const featuredBlogFolderName = (BLOG_CONTENT[0] as any)?.dynmaicEntry
+    ?.folderName;
   const featuredBlogMetadata = await getMetadata(featuredBlogFolderName);
 
   return (
     <>
-      <Banner />
+      {/* <Banner /> */}
 
       <NavBar
         stars={stars}
-        featuredBlogMetadata={featuredBlogMetadata || {
-          title: "Check out our latest blog",
-          description: "Open-source LLM observability and monitoring platform for developers",
-        }}
+        featuredBlogMetadata={
+          featuredBlogMetadata || {
+            title: "Check out our latest blog",
+            description:
+              "Open-source LLM observability and monitoring platform for developers",
+          }
+        }
         featuredBlogFolderName={featuredBlogFolderName}
         noMargin={noNavbarMargin}
       />

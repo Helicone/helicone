@@ -24,8 +24,6 @@ export const endpoints = {
         threshold: 200000,
         input: 0.000006,
         output: 0.0000225,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
-        // cacheMultipliers inherited from base tier
       },
     ],
     contextLength: 200000,
@@ -68,7 +66,6 @@ export const endpoints = {
         threshold: 200000,
         input: 0.000006,
         output: 0.0000225,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 200000,
@@ -110,7 +107,6 @@ export const endpoints = {
         threshold: 200000,
         input: 0.000006,
         output: 0.0000225,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 200000,

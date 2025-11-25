@@ -42,10 +42,13 @@
               {
                 "group": "Integrations",
                 "pages": [
+                  "gateway/integrations/codex",
                   "gateway/integrations/langchain",
                   "gateway/integrations/langgraph",
+                  "gateway/integrations/n8n",
                   "gateway/integrations/semantic-kernel",
-                  "gateway/integrations/codex"
+                  "gateway/integrations/vercel-ai-sdk",
+                  "gateway/integrations/zapier"
                 ]
               }
             ]
@@ -93,7 +96,7 @@
             ]
           },
           {
-            "group": "Alternative Integrations",
+            "group": "Legacy Integrations",
             "pages": [
               "integrations/overview",
               {
@@ -222,6 +225,7 @@
                   "getting-started/integration-method/vercelai",
                   "getting-started/integration-method/crewai",
                   "other-integrations/dify",
+                  "gateway/integrations/llamaindex",
                   "other-integrations/ragas"
                 ]
               },
@@ -296,6 +300,7 @@
             "group": "Models",
             "pages": [
               "rest/ai-gateway/get-v1models",
+              "rest/ai-gateway/get-v1models-multimodal",
               "rest/models/get-v1public-model-registry-models"
             ]
           },
@@ -553,6 +558,18 @@
     {
       "source": "/faq/how-we-calculate-cost",
       "destination": "/references/how-we-calculate-cost"
+    },
+    {
+      "source": "/observability/custom-rate-limits",
+      "destination": "/features/advanced-usage/custom-rate-limits"
+    },
+    {
+      "source": "/observability/custom-properties",
+      "destination": "/features/advanced-usage/custom-properties"
+    },
+    {
+      "source": "/features/advanced-usage/custom-rate-limit",
+      "destination": "/features/advanced-usage/custom-rate-limits"
     },
     {
       "source": "/faq/latency-affect",

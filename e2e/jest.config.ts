@@ -5,6 +5,7 @@ const config: Config = {
   testEnvironment: "node",
   roots: ["<rootDir>/tests"],
   testMatch: ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
+  testPathIgnorePatterns: ["/node_modules/"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   collectCoverageFrom: [
     "tests/**/*.{ts,tsx}",
@@ -17,6 +18,7 @@ const config: Config = {
   coverageDirectory: "coverage",
   verbose: true,
   testTimeout: 30000,
+  maxWorkers: 1,
   setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
   transform: {
     "^.+\\.ts$": [

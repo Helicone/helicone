@@ -107,6 +107,33 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-r1-distill-llama-70b:chutes": {
+    provider: "chutes",
+    author: "deepseek",
+    providerModelId: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000003, // $0.0300 per 1M tokens
+        output: 0.00000013, // $0.1300 per 1M tokens
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 32_768,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "top_k",
+      "seed",
+      "min_p"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${DeepSeekR1ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

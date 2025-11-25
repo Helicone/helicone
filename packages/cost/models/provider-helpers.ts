@@ -42,8 +42,6 @@ export function heliconeProviderToModelProviderName(
       return "perplexity";
     case "DEEPSEEK":
       return "deepseek";
-    case "COHERE":
-      return "cohere";
     case "OPENROUTER":
       return "openrouter";
     case "DEEPINFRA":
@@ -313,7 +311,7 @@ export async function buildRequestBody(
 export async function buildErrorMessage(
   endpoint: Endpoint,
   response: Response
-): Promise<Result<string>> {
+): Promise<Result<{ message: string; details?: any }>> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
     return err(providerResult.error);

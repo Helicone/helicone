@@ -346,7 +346,9 @@ export class SimpleAIGateway {
     // Forces usage data for streaming requests
     if (
       parsedBody.stream === true &&
-      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
+      (this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
+        || this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "RESPONSES"
+      )
     ) {
       parsedBody.stream_options = {
         ...(parsedBody.stream_options || {}),

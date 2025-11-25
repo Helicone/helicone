@@ -357,8 +357,9 @@ export class AttemptExecutor {
             response.status === 429 && heliconeError === "rate_limited"
               ? "rate_limited"
               : "request_failed",
-          message: errorMessageResult.data,
+          message: errorMessageResult.data.message,
           statusCode: response.status,
+          details: errorMessageResult.data.details,
         });
       }
 
