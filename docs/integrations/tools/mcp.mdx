@@ -6,30 +6,102 @@ description: "Query your Helicone observability data directly from MCP-compatibl
 
 The Helicone MCP (Model Context Protocol) server enables AI assistants like Claude Desktop, Cursor, and other MCP-compatible tools to query your Helicone observability data directly. This allows you to debug errors, search logs, analyze performance, and examine request/response bodies without leaving your AI assistant.
 
-## Installation
+## Quick Start
 
-Add the Helicone MCP server to your MCP client configuration:
+<Steps>
+  <Step title="Generate a Helicone API Key">
+    1. Go to [Settings → API Keys](https://us.helicone.ai/settings/api-keys) (or [EU](https://eu.helicone.ai/settings/api-keys))
+    2. Click **Generate New Key**
+    3. Copy your API key
+  </Step>
 
-```json
-{
-  "mcpServers": {
-    "helicone": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["@helicone/mcp@latest"],
-      "env": {
-        "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
-      }
-    }
-  }
-}
-```
+  <Step title="Add to Your MCP Client">
+    Add the Helicone MCP server to your client's configuration file:
 
-## Getting Your API Key
+    <Tabs>
+      <Tab title="Claude Desktop">
+        **Config file location:**
+        - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+        - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
-1. Go to [Settings → API Keys](https://us.helicone.ai/settings/api-keys) (or [EU](https://eu.helicone.ai/settings/api-keys))
-2. Generate a new API key
-3. Copy the key and add it to your MCP configuration
+        ```json
+        {
+          "mcpServers": {
+            "helicone": {
+              "command": "npx",
+              "args": ["@helicone/mcp@latest"],
+              "env": {
+                "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
+              }
+            }
+          }
+        }
+        ```
+      </Tab>
+
+      <Tab title="Claude Code">
+        **Config file location:**
+        - Project-level: `.mcp.json` in your project root
+        - Global: `~/.claude.json`
+
+        ```json
+        {
+          "mcpServers": {
+            "helicone": {
+              "command": "npx",
+              "args": ["@helicone/mcp@latest"],
+              "env": {
+                "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
+              }
+            }
+          }
+        }
+        ```
+      </Tab>
+
+      <Tab title="Cursor">
+        **Config file location:**
+        - macOS/Linux: `~/.cursor/mcp.json`
+        - Windows: `%USERPROFILE%\.cursor\mcp.json`
+
+        ```json
+        {
+          "mcpServers": {
+            "helicone": {
+              "command": "npx",
+              "args": ["@helicone/mcp@latest"],
+              "env": {
+                "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
+              }
+            }
+          }
+        }
+        ```
+      </Tab>
+
+      <Tab title="Codex">
+        **Config file location:** `~/.codex/config.toml`
+
+        ```toml
+        [mcp_servers.helicone]
+        command = "npx"
+        args = ["@helicone/mcp@latest"]
+
+        [mcp_servers.helicone.env]
+        HELICONE_API_KEY = "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
+        ```
+      </Tab>
+    </Tabs>
+
+    <Note>
+      Replace `sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx` with your actual API key.
+    </Note>
+  </Step>
+
+  <Step title="Restart Your Client">
+    Restart your MCP client (Claude Desktop, Cursor, etc.) to load the new configuration.
+  </Step>
+</Steps>
 
 ## Available Tools
 
