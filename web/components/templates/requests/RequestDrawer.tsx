@@ -157,6 +157,7 @@ export default function RequestDrawer(props: RequestDivProps) {
     request?.id || "",
   );
 
+  // Sanitizes Target URL if API key is used as a query parameter
   const sanitizeTargetUrl = useCallback((url: string) => {
     try {
       const parsed = new URL(url);
@@ -280,29 +281,29 @@ export default function RequestDrawer(props: RequestDivProps) {
       },
       ...(request.heliconeMetadata.path
         ? [
-            {
-              label: "Path",
-              value: request.heliconeMetadata.path,
-            },
-          ]
+          {
+            label: "Path",
+            value: request.heliconeMetadata.path,
+          },
+        ]
         : []),
       ...(request.heliconeMetadata.promptCacheReadTokens &&
-      request.heliconeMetadata.promptCacheReadTokens > 0
+        request.heliconeMetadata.promptCacheReadTokens > 0
         ? [
-            {
-              label: "Prompt Cache Read Tokens",
-              value: request.heliconeMetadata.promptCacheReadTokens || 0,
-            },
-          ]
+          {
+            label: "Prompt Cache Read Tokens",
+            value: request.heliconeMetadata.promptCacheReadTokens || 0,
+          },
+        ]
         : []),
       ...(request.heliconeMetadata.promptCacheWriteTokens &&
-      request.heliconeMetadata.promptCacheWriteTokens > 0
+        request.heliconeMetadata.promptCacheWriteTokens > 0
         ? [
-            {
-              label: "Prompt Cache Write Tokens",
-              value: request.heliconeMetadata.promptCacheWriteTokens || 0,
-            },
-          ]
+          {
+            label: "Prompt Cache Write Tokens",
+            value: request.heliconeMetadata.promptCacheWriteTokens || 0,
+          },
+        ]
         : []),
     ];
 
@@ -930,9 +931,9 @@ export default function RequestDrawer(props: RequestDivProps) {
                         <span className="text-sm font-medium text-muted-foreground">
                           {currentPromptData.data.prompt.name.length > 15
                             ? currentPromptData.data.prompt.name.substring(
-                                0,
-                                12,
-                              ) + "..."
+                              0,
+                              12,
+                            ) + "..."
                             : currentPromptData.data.prompt.name}
                         </span>
                       </>
@@ -1112,12 +1113,12 @@ export default function RequestDrawer(props: RequestDivProps) {
               type="request"
               defaultValue={
                 request.heliconeMetadata.scores &&
-                request.heliconeMetadata.scores["helicone-score-feedback"]
+                  request.heliconeMetadata.scores["helicone-score-feedback"]
                   ? Number(
-                      request.heliconeMetadata.scores[
-                        "helicone-score-feedback"
-                      ],
-                    ) === 1
+                    request.heliconeMetadata.scores[
+                    "helicone-score-feedback"
+                    ],
+                  ) === 1
                     ? true
                     : false
                   : null
