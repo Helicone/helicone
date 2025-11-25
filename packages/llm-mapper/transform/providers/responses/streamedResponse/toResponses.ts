@@ -243,7 +243,6 @@ export class ChatToResponsesStreamConverter {
                 ] as any)
               : []),
             ...Array.from(this.toolCalls.values()).map((tc) => ({
-              id: `${tc.id}`,
               id: tc.id,
               type: "function_call" as const,
               status: "completed" as const,
