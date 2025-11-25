@@ -183,7 +183,7 @@ export async function proxyForwarder(
 
   if (
     proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled ===
-    true &&
+      true &&
     provider === "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
