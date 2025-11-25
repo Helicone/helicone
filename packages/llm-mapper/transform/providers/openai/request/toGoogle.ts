@@ -2,6 +2,7 @@ import {
   HeliconeChatCompletionContentPart,
   HeliconeChatCreateParams,
 } from "@helicone-package/prompts/types";
+import { ChatCompletionTool } from "openai/resources/chat/completions";
 
 type GeminiPart = {
   text?: string;
@@ -63,6 +64,11 @@ export interface GeminiGenerateContentRequest {
 
 type ChatCompletionMessage =
   NonNullable<HeliconeChatCreateParams["messages"]>[number];
+
+type ExtendedHeliconeChatCreateParams = HeliconeChatCreateParams & {
+  max_output_tokens?: number | null;
+  top_k?: number | null;
+};
 
 export function toGoogle(
   openAIBody: HeliconeChatCreateParams
@@ -146,10 +152,18 @@ export function toGoogle(
 function buildGenerationConfig(
   body: HeliconeChatCreateParams
 ): GeminiGenerationConfig | undefined {
+  const bodyWithExtensions = body as ExtendedHeliconeChatCreateParams;
+
+  const getNumberOrUndefined = (
+    value?: number | null
+  ): number | undefined => {
+    return typeof value === "number" ? value : undefined;
+  };
+
   const maxOutputTokens =
-    body.max_output_tokens ??
-    body.max_completion_tokens ??
-    body.max_tokens ??
+    getNumberOrUndefined(bodyWithExtensions.max_output_tokens) ??
+    getNumberOrUndefined(body.max_completion_tokens) ??
+    getNumberOrUndefined(body.max_tokens) ??
     undefined;
 
   const stopSequences = Array.isArray(body.stop)
@@ -160,14 +174,17 @@ function buildGenerationConfig(
 
   const config: GeminiGenerationConfig = {};
 
-  if (body.temperature !== undefined) {
-    config.temperature = body.temperature;
+  const temperature = getNumberOrUndefined(body.temperature);
+  if (temperature !== undefined) {
+    config.temperature = temperature;
   }
-  if (body.top_p !== undefined) {
-    config.topP = body.top_p;
+  const topP = getNumberOrUndefined(body.top_p);
+  if (topP !== undefined) {
+    config.topP = topP;
   }
-  if (body.top_k !== undefined) {
-    config.topK = body.top_k;
+  const topK = getNumberOrUndefined(bodyWithExtensions.top_k);
+  if (topK !== undefined) {
+    config.topK = topK;
   }
   if (maxOutputTokens !== undefined) {
     config.maxOutputTokens = maxOutputTokens;
@@ -175,14 +192,17 @@ function buildGenerationConfig(
   if (stopSequences && stopSequences.length > 0) {
     config.stopSequences = stopSequences;
   }
-  if (body.n !== undefined) {
-    config.candidateCount = body.n;
+  const candidateCount = getNumberOrUndefined(body.n);
+  if (candidateCount !== undefined) {
+    config.candidateCount = candidateCount;
   }
-  if (body.presence_penalty !== undefined) {
-    config.presencePenalty = body.presence_penalty;
+  const presencePenalty = getNumberOrUndefined(body.presence_penalty);
+  if (presencePenalty !== undefined) {
+    config.presencePenalty = presencePenalty;
   }
-  if (body.frequency_penalty !== undefined) {
-    config.frequencyPenalty = body.frequency_penalty;
+  const frequencyPenalty = getNumberOrUndefined(body.frequency_penalty);
+  if (frequencyPenalty !== undefined) {
+    config.frequencyPenalty = frequencyPenalty;
   }
 
   return Object.keys(config).length > 0 ? config : undefined;
@@ -193,8 +213,20 @@ function buildTools(body: HeliconeChatCreateParams): GeminiTool[] | undefined {
     return undefined;
   }
 
+  type FunctionTool = ChatCompletionTool & {
+    type: "function";
+    function?: {
+      name: string;
+      description?: string;
+      parameters?: Record<string, any>;
+    };
+  };
+
+  const isFunctionTool = (tool: ChatCompletionTool): tool is FunctionTool =>
+    tool.type === "function" && Boolean((tool as any).function);
+
   const functions = body.tools
-    .filter((tool) => tool.type === "function" && tool.function)
+    .filter(isFunctionTool)
     .map((tool) => ({
       name: tool.function!.name,
       description: tool.function!.description,
@@ -349,9 +381,26 @@ function mapToolResponse(message: ChatCompletionMessage): GeminiPart | null {
 }
 
 function parseArguments(
-  value?: string | null
+  value?: string | HeliconeChatCompletionContentPart[] | null
 ): Record<string, any> | undefined {
   if (!value) {
+    return undefined;
+  }
+
+  if (Array.isArray(value)) {
+    const textContent = value
+      .map((part) => (part.type === "text" ? part.text : undefined))
+      .filter((text): text is string => !!text?.length)
+      .join("\n");
+
+    if (!textContent) {
+      return undefined;
+    }
+
+    value = textContent;
+  }
+
+  if (typeof value !== "string") {
     return undefined;
   }
 
