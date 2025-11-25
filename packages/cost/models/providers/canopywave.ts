@@ -8,6 +8,6 @@ export class CanopyWaveProvider extends BaseProvider {
   readonly modelPages = ["https://canopywave.com/models"];
 
   buildUrl(): string {
-    return `${this.baseUrl}v1/chat/completions`;
+    return `https://inference.canopywave.io/v1/chat/completions`;
   }
 }
