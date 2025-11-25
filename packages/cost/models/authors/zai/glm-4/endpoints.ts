@@ -72,6 +72,7 @@ export const endpoints = {
       "top_k",
       "min_p",
       "repetition_penalty",
+      "logit_bias"
     ],
     ptbEnabled: true,
     endpointConfigs: {
