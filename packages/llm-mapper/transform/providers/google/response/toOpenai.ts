@@ -154,9 +154,11 @@ export function mapGoogleUsage(usage: GoogleUsageMetadata): OpenAIUsage {
   const completion =
     (usage.candidatesTokenCount || 0) + reasoningTokens;
 
-  console.log("Initial completion tokens:", completion);
+  const prompt = (usage.promptTokenCount ?? 0) + toolUsePromptTokens;
+  const completion =
+    (usage.candidatesTokenCount || 0) + reasoningTokens;
+
   const total = usage.totalTokenCount
-  console.log("Initial total tokens:", total);
 
   const promptAudioTokens =
     sumTokensByModality(usage.promptTokenDetails, "AUDIO") +
