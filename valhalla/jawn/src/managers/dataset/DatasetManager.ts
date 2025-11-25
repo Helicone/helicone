@@ -63,42 +63,10 @@ export class DatasetManager extends BaseManager {
   }
 
   async addDataset(params: NewDatasetParams): Promise<Result<string, string>> {
-    try {
-      const dataset = await dbExecute<{ id: string }>(
-        `INSERT INTO helicone_dataset (name, organization, meta, dataset_type)
-         VALUES ($1, $2, $3, $4)
-         RETURNING id`,
-        [
-          params.datasetName,
-          this.authParams.organizationId,
-          params.meta ?? null,
-          params.datasetType,
-        ]
-      );
-
-      if (dataset.error || !dataset.data || dataset.data.length === 0) {
-        return err(dataset.error ?? "Failed to create dataset");
-      }
-
-      const datasetId = dataset.data[0].id;
-
-      const res = await dbExecute(
-        `INSERT INTO experiment_dataset_v2_row (dataset_id, input_record)
-         SELECT $1, id
-         FROM prompt_input_record
-         WHERE source_request = ANY($2)`,
-        [datasetId, params.requestIds]
-      );
-
-      if (res.error) {
-        return err(res.error);
-      }
-
-      return ok(datasetId);
-    } catch (error) {
-      console.error("Error creating dataset:", error);
-      return err(String(error));
-    }
+    // DEPRECATED: This function used the deleted prompt_input_record table.
+    // The legacy prompt system has been replaced by prompts_2025_inputs.
+    // Use HeliconeDatasetManager for new dataset operations.
+    return err("addDataset is deprecated - prompt_input_record table has been removed. Use the new prompt system instead.");
   }
 
   async addDatasetRow(
@@ -142,33 +110,6 @@ export class DatasetManager extends BaseManager {
     }
   }
 
-  async getDatasetRowInputRecord(
-    datasetRowId: string
-  ): Promise<
-    Result<Database["public"]["Tables"]["prompt_input_record"]["Row"], string>
-  > {
-    try {
-      const result = await dbExecute<
-        Database["public"]["Tables"]["prompt_input_record"]["Row"]
-      >(
-        `SELECT *
-         FROM prompt_input_record
-         WHERE id = $1
-         LIMIT 1`,
-        [datasetRowId]
-      );
-
-      if (result.error || !result.data || result.data.length === 0) {
-        return err(result.error ?? "Failed to get dataset row input record");
-      }
-
-      return ok(result.data[0]);
-    } catch (error) {
-      console.error("Error getting dataset row input record:", error);
-      return err(String(error));
-    }
-  }
-
   async addRandomDataset(params: RandomDatasetParams): Promise<
     Result<
       {
@@ -177,54 +118,10 @@ export class DatasetManager extends BaseManager {
       string
     >
   > {
-    try {
-      // Create dataset
-      const dataset = await dbExecute<{
-        id: string;
-        name: string;
-        organization: string;
-      }>(
-        `INSERT INTO helicone_dataset (name, organization)
-         VALUES ($1, $2)
-         RETURNING id, name, organization`,
-        [params.datasetName, this.authParams.organizationId]
-      );
-
-      if (dataset.error || !dataset.data || dataset.data.length === 0) {
-        return err(dataset.error ?? "Failed to create dataset");
-      }
-
-      const datasetId = dataset.data[0].id;
-
-      const filterWithAuth = buildFilterPostgres({
-        filter: params.filter,
-        argsAcc: [datasetId],
-      });
-
-      const res = await dbExecute(
-        `
-        INSERT INTO experiment_dataset_v2_row (dataset_id, input_record)
-        SELECT $1, prompt_input_record.id
-        FROM prompt_input_record
-        left join request on request.id = prompt_input_record.source_request
-        left join prompts_versions on prompts_versions.id = prompt_input_record.prompt_version
-        WHERE (${filterWithAuth.filter})
-        ORDER BY random()
-        `,
-        filterWithAuth.argsAcc
-      );
-
-      if (res.error) {
-        return err(res.error);
-      }
-
-      return ok({
-        datasetId: datasetId,
-      });
-    } catch (error) {
-      console.error("Error creating random dataset:", error);
-      return err(String(error));
-    }
+    // DEPRECATED: This function used the deleted prompt_input_record and request tables.
+    // The legacy prompt system has been replaced by prompts_2025_inputs.
+    // Use HeliconeDatasetManager for new dataset operations.
+    return err("addRandomDataset is deprecated - prompt_input_record table has been removed. Use the new prompt system instead.");
   }
 
   async getPromptVersions(
@@ -329,7 +226,7 @@ export class DatasetManager extends BaseManager {
       prompts_versions.id as latest_version_id,
       prompts_versions.model as latest_model_used,
       prompt_v2.created_at as created_at,
-      (SELECT created_at FROM prompt_input_record WHERE prompt_version = prompts_versions.id ORDER BY created_at DESC LIMIT 1) as last_used,
+      (SELECT created_at FROM prompts_2025_inputs WHERE version_id = prompts_versions.id ORDER BY created_at DESC LIMIT 1) as last_used,
       (
         SELECT array_agg(pv2.versions) as versions
         FROM

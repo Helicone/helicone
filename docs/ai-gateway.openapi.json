@@ -1930,6 +1930,69 @@
                               "type": "object",
                               "properties": {
                                 "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "web_search",
+                                    "web_search_2025_08_26"
+                                  ]
+                                },
+                                "filters": {
+                                  "type": "object",
+                                  "properties": {
+                                    "allowed_domains": {
+                                      "default": [],
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "additionalProperties": {}
+                                },
+                                "search_context_size": {
+                                  "default": "medium",
+                                  "type": "string",
+                                  "enum": [
+                                    "low",
+                                    "medium",
+                                    "high"
+                                  ]
+                                },
+                                "user_location": {
+                                  "type": "object",
+                                  "properties": {
+                                    "city": {
+                                      "type": "string"
+                                    },
+                                    "country": {
+                                      "type": "string"
+                                    },
+                                    "region": {
+                                      "type": "string"
+                                    },
+                                    "timezone": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "default": "approximate",
+                                      "type": "string",
+                                      "enum": [
+                                        "approximate"
+                                      ]
+                                    }
+                                  },
+                                  "additionalProperties": {}
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ],
+                              "additionalProperties": {}
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
                                   "default": "custom",
                                   "type": "string",
                                   "enum": [
@@ -2044,6 +2107,7 @@
                                 "type": "string",
                                 "enum": [
                                   "image_generation",
+                                  "web_search",
                                   "code_interpreter"
                                 ]
                               }
@@ -3779,6 +3843,176 @@
         "responses": {
           "200": {
             "description": "Request accepted"
+          }
+        }
+      }
+    },
+    "/v1/models": {
+      "get": {
+        "summary": "Get Models",
+        "description": "Returns all available models supported by Helicone AI Gateway (OpenAI-compatible endpoint)",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "list"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Model identifier"
+                          },
+                          "object": {
+                            "type": "string",
+                            "enum": [
+                              "model"
+                            ]
+                          },
+                          "created": {
+                            "type": "integer",
+                            "description": "Unix timestamp of model creation"
+                          },
+                          "owned_by": {
+                            "type": "string",
+                            "description": "Organization that owns the model"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "object",
+                          "created",
+                          "owned_by"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/models/multimodal": {
+      "get": {
+        "summary": "Get Multimodal Models",
+        "description": "Returns all available multimodal models supported by Helicone AI Gateway. Multimodal models support more than one input modality or more than one output modality (OpenAI-compatible endpoint)",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "list"
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Model identifier"
+                          },
+                          "object": {
+                            "type": "string",
+                            "enum": [
+                              "model"
+                            ]
+                          },
+                          "created": {
+                            "type": "integer",
+                            "description": "Unix timestamp of model creation"
+                          },
+                          "owned_by": {
+                            "type": "string",
+                            "description": "Organization that owns the model"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "object",
+                          "created",
+                          "owned_by"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

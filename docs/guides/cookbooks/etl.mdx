@@ -48,6 +48,12 @@ Our export tool provides comprehensive access to your LLM data:
 
 For custom integrations or programmatic access, use our [REST API](/rest/request/post-v1requestquery-clickhouse):
 
+<Warning>
+  **Important:** When filtering by custom properties, you MUST wrap them in a `request_response_rmt` object. See examples below.
+</Warning>
+
+**Get all requests:**
+
 ```bash
 curl --request POST \
   --url https://api.helicone.ai/v1/request/query-clickhouse \
@@ -59,6 +65,62 @@ curl --request POST \
     "offset": 0
   }'
 ```
+
+**Filter by custom property:**
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+    "filter": {
+      "request_response_rmt": {
+        "properties": {
+          "environment": {
+            "equals": "production"
+          }
+        }
+      }
+    },
+    "limit": 1000,
+    "offset": 0
+  }'
+```
+
+**Filter by date range AND property:**
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/request/query-clickhouse \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+    "filter": {
+      "left": {
+        "request_response_rmt": {
+          "request_created_at": {
+            "gte": "2024-01-01T00:00:00Z"
+          }
+        }
+      },
+      "operator": "and",
+      "right": {
+        "request_response_rmt": {
+          "properties": {
+            "appname": {
+              "equals": "MyApp"
+            }
+          }
+        }
+      }
+    },
+    "limit": 1000,
+    "offset": 0
+  }'
+```
+
+See the [full API documentation](/rest/request/post-v1requestquery-clickhouse) for more filter options and examples.
 
 ## ETL Connectors
 

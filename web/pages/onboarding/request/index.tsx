@@ -37,11 +37,8 @@ export default function RequestPage() {
   const [error, setError] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const abortController = useRef<AbortController | null>(null);
-  const {
-    updateCurrentStep,
-    updateOnboardingStatus,
-    hasProviderKeys,
-  } = useOrgOnboarding(org?.currentOrg?.id ?? "");
+  const { updateCurrentStep, updateOnboardingStatus, hasProviderKeys } =
+    useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   const { data: creditData, isLoading: creditsLoading } = useCredits();
 
@@ -60,10 +57,7 @@ export default function RequestPage() {
   // Redirect back to billing if not set up
   useEffect(() => {
     if (!creditsLoading && !hasBillingSetup) {
-      setNotification(
-        "Please set up billing before sending requests",
-        "error",
-      );
+      setNotification("Please set up billing before sending requests", "error");
       router.push("/onboarding/billing");
     }
   }, [creditsLoading, hasBillingSetup, router, setNotification]);

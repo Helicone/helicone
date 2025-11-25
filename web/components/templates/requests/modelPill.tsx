@@ -53,7 +53,7 @@ const ModelPill = (props: ModelPillProps) => {
     <span
       className={clsx(
         colorClass,
-        `-my-1 w-max items-center truncate rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset`,
+        `h-6 inline-flex items-center rounded-lg px-2 py-1 text-xs font-semibold ring-1 ring-inset`,
       )}
     >
       {model && model !== "" ? model : "Unsupported"}

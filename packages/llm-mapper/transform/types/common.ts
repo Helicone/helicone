@@ -62,6 +62,9 @@ export interface OpenAIUsage {
     accepted_prediction_tokens?: number;
     rejected_prediction_tokens?: number;
   };
+
+  // AI Gateway only - when cost calculation upfront is possible
+  cost?: number;
 }
 
 // Content block types (shared between Anthropic request and response)

@@ -212,10 +212,11 @@ export class AttemptExecutor {
     plugins?: Plugin[],
     traceContext?: TraceContext | null
   ): Promise<Result<Response, AttemptError>> {
+    const bodyMapping = endpoint.userConfig.gatewayMapping || requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
     try {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
-        bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+        bodyMapping: bodyMapping,
         toAnthropic: (body, modelId, options) =>
           toAnthropic(body, modelId, plugins, options),
         toChatCompletions: (body) => toChatCompletions(body),
@@ -243,7 +244,7 @@ export class AttemptExecutor {
         apiKey: providerKey.decrypted_provider_key,
         secretKey: providerKey.decrypted_provider_secret_key || undefined,
         orgId: orgId,
-        bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+        bodyMapping: bodyMapping,
         requestMethod: requestWrapper.getMethod(),
         requestUrl: urlResult.data,
         requestBody: bodyResult.data,
@@ -293,7 +294,9 @@ export class AttemptExecutor {
       // Start provider request span
       const providerSpanId = traceContext?.sampled
         ? this.tracer.startSpan(
-            "ai_gateway.ptb.provider.llm_request",
+            `ai_gateway.${
+              endpoint.ptbEnabled ? "ptb" : "byok"
+            }.provider.llm_request`,
             `${endpoint.provider} ${endpoint.providerModelId}`,
             "llm-provider",
             {
@@ -438,18 +441,6 @@ export class AttemptExecutor {
       await walletStub.cancelEscrow(escrowId);
     } catch (error) {
       console.error(`Failed to cancel escrow ${escrowId}:`, error);
-    }
-  }
-
-  private async getTotalDebits(orgId: string): Promise<number> {
-    try {
-      const walletId = this.env.WALLET.idFromName(orgId);
-      const walletStub = this.env.WALLET.get(walletId);
-      const result = await walletStub.getTotalDebits(orgId);
-      return result.totalDebits;
-    } catch (error) {
-      console.error(`Failed to get total debits for org ${orgId}:`, error);
-      return 0;
     }
   }
 }

@@ -799,6 +799,108 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"AutoTopoffSettings": {
+				"properties": {
+					"enabled": {
+						"type": "boolean"
+					},
+					"thresholdCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"topoffAmountCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"stripePaymentMethodId": {
+						"type": "string",
+						"nullable": true
+					},
+					"lastTopoffAt": {
+						"type": "string",
+						"nullable": true
+					},
+					"consecutiveFailures": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"enabled",
+					"thresholdCents",
+					"topoffAmountCents",
+					"stripePaymentMethodId",
+					"lastTopoffAt",
+					"consecutiveFailures"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateAutoTopoffSettingsRequest": {
+				"properties": {
+					"enabled": {
+						"type": "boolean"
+					},
+					"thresholdCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"topoffAmountCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"stripePaymentMethodId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"enabled",
+					"thresholdCents",
+					"topoffAmountCents",
+					"stripePaymentMethodId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaymentMethod": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"brand": {
+						"type": "string"
+					},
+					"last4": {
+						"type": "string"
+					},
+					"exp_month": {
+						"type": "number",
+						"format": "double"
+					},
+					"exp_year": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"brand",
+					"last4",
+					"exp_month",
+					"exp_year"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateSetupSessionRequest": {
+				"properties": {
+					"returnUrl": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Json": {
 				"anyOf": [
 					{
@@ -3717,6 +3819,17 @@
 					"target_url": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
+					"property_key": {
+						"properties": {
+							"equals": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"equals"
+						],
+						"type": "object"
+					},
 					"properties": {
 						"properties": {},
 						"additionalProperties": {
@@ -4035,22 +4148,28 @@
 					"CHUTES",
 					"LLAMA",
 					"NVIDIA",
-					"VERCEL"
+					"VERCEL",
+					"CEREBRAS",
+					"BASETEN"
 				]
 			},
 			"ModelProviderName": {
 				"type": "string",
 				"enum": [
+					"baseten",
 					"anthropic",
 					"azure",
 					"bedrock",
+					"cerebras",
 					"chutes",
 					"cohere",
 					"deepinfra",
 					"deepseek",
+					"fireworks",
 					"google-ai-studio",
 					"groq",
 					"helicone",
+					"mistral",
 					"nebius",
 					"novita",
 					"openai",
@@ -5013,6 +5132,9 @@
 					"ai_gateway_body_mapping": {
 						"type": "string",
 						"nullable": true
+					},
+					"storage_location": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -8748,11 +8870,16 @@
 							"type": "object"
 						},
 						"type": "array"
+					},
+					"historyTotalCount": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
 					"alerts",
-					"history"
+					"history",
+					"historyTotalCount"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -8784,6 +8911,48 @@
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"AlertMetric": {
+				"type": "string",
+				"enum": [
+					"latency",
+					"cost",
+					"prompt_tokens",
+					"completion_tokens",
+					"prompt_cache_read_tokens",
+					"prompt_cache_write_tokens",
+					"total_tokens",
+					"response.status",
+					"count"
+				]
+			},
+			"AlertAggregation": {
+				"type": "string",
+				"enum": [
+					"sum",
+					"avg",
+					"min",
+					"max",
+					"percentile"
+				]
+			},
+			"AlertStandardGrouping": {
+				"type": "string",
+				"enum": [
+					"model",
+					"provider",
+					"user"
+				]
+			},
+			"AlertGrouping": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/AlertStandardGrouping"
+					},
+					{
+						"type": "string"
 					}
 				]
 			},
@@ -9095,11 +9264,36 @@
 						"type": "string"
 					},
 					"metric": {
-						"type": "string"
+						"$ref": "#/components/schemas/AlertMetric"
 					},
 					"threshold": {
 						"type": "number",
 						"format": "double"
+					},
+					"aggregation": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AlertAggregation"
+							}
+						],
+						"nullable": true
+					},
+					"percentile": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"grouping": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AlertGrouping"
+							}
+						],
+						"nullable": true
+					},
+					"grouping_is_property": {
+						"type": "boolean",
+						"nullable": true
 					},
 					"time_window": {
 						"type": "string"
@@ -9133,6 +9327,10 @@
 					"name",
 					"metric",
 					"threshold",
+					"aggregation",
+					"percentile",
+					"grouping",
+					"grouping_is_property",
 					"time_window",
 					"emails",
 					"slack_channels",
@@ -48531,6 +48729,75 @@
 					}
 				]
 			},
+			"TimeSeriesDataPoint": {
+				"properties": {
+					"timestamp": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"timestamp",
+					"amount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TimeSeriesResponse": {
+				"properties": {
+					"deposits": {
+						"items": {
+							"$ref": "#/components/schemas/TimeSeriesDataPoint"
+						},
+						"type": "array"
+					},
+					"spend": {
+						"items": {
+							"$ref": "#/components/schemas/TimeSeriesDataPoint"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"deposits",
+					"spend"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_TimeSeriesResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/TimeSeriesResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_TimeSeriesResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_TimeSeriesResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ConvertToWavResponse": {
 				"properties": {
 					"data": {
@@ -49015,16 +49282,20 @@
 												"providerName": {
 													"type": "string",
 													"enum": [
+														"baseten",
 														"anthropic",
 														"azure",
 														"bedrock",
+														"cerebras",
 														"chutes",
 														"cohere",
 														"deepinfra",
 														"deepseek",
+														"fireworks",
 														"google-ai-studio",
 														"groq",
 														"helicone",
+														"mistral",
 														"nebius",
 														"novita",
 														"openai",
@@ -50369,6 +50640,219 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/stripe/auto-topoff/settings": {
+			"get": {
+				"operationId": "GetAutoTopoffSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/AutoTopoffSettings"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "UpdateAutoTopoffSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AutoTopoffSettings"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateAutoTopoffSettingsRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DisableAutoTopoff",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/payment-methods": {
+			"get": {
+				"operationId": "GetPaymentMethods",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/PaymentMethod"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/payment-methods/setup-session": {
+			"post": {
+				"operationId": "CreateSetupSession",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"setupUrl": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"setupUrl"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSetupSessionRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/stripe/payment-methods/{paymentMethodId}": {
+			"delete": {
+				"operationId": "RemovePaymentMethod",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "paymentMethodId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/organization": {
@@ -55564,7 +56048,26 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "query",
+						"name": "historyPage",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "historyPageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
 			}
 		},
 		"/v1/alert/create": {
@@ -58671,6 +59174,24 @@
 								"desc"
 							]
 						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
 					}
 				]
 			}
@@ -58933,6 +59454,64 @@
 						"required": true,
 						"schema": {
 							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/analytics/time-series": {
+			"post": {
+				"operationId": "GetTimeSeriesData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_TimeSeriesResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "startDate",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "endDate",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "groupBy",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"minute",
+								"hour",
+								"day",
+								"week",
+								"month"
+							]
 						}
 					}
 				]

@@ -106,6 +106,20 @@ export interface paths {
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
   };
+  "/v1/stripe/auto-topoff/settings": {
+    get: operations["GetAutoTopoffSettings"];
+    post: operations["UpdateAutoTopoffSettings"];
+    delete: operations["DisableAutoTopoff"];
+  };
+  "/v1/stripe/payment-methods": {
+    get: operations["GetPaymentMethods"];
+  };
+  "/v1/stripe/payment-methods/setup-session": {
+    post: operations["CreateSetupSession"];
+  };
+  "/v1/stripe/payment-methods/{paymentMethodId}": {
+    delete: operations["RemovePaymentMethod"];
+  };
   "/v1/organization": {
     get: operations["GetOrganizations"];
   };
@@ -656,6 +670,9 @@ export interface paths {
   "/v1/admin/wallet/{orgId}/disallow-list": {
     delete: operations["RemoveFromDisallowList"];
   };
+  "/v1/admin/wallet/analytics/time-series": {
+    post: operations["GetTimeSeriesData"];
+  };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
@@ -885,6 +902,37 @@ export interface components {
       next_page: string | null;
       /** Format: double */
       count: number;
+    };
+    AutoTopoffSettings: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string | null;
+      lastTopoffAt: string | null;
+      /** Format: double */
+      consecutiveFailures: number;
+    };
+    UpdateAutoTopoffSettingsRequest: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string;
+    };
+    PaymentMethod: {
+      id: string;
+      brand: string;
+      last4: string;
+      /** Format: double */
+      exp_month: number;
+      /** Format: double */
+      exp_year: number;
+    };
+    CreateSetupSessionRequest: {
+      returnUrl?: string;
     };
 Json: JsonObject;
     "ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_": {
@@ -1618,6 +1666,9 @@ Json: JsonObject;
       prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
       total_tokens?: components["schemas"]["Partial_NumberOperators_"];
       target_url?: components["schemas"]["Partial_TextOperators_"];
+      property_key?: {
+        equals: string;
+      };
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
@@ -1713,9 +1764,9 @@ Json: JsonObject;
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS" | "BASETEN";
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+    ModelProviderName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1970,6 +2021,7 @@ Json: JsonObject;
       updated_at?: string;
       request_referrer?: string | null;
       ai_gateway_body_mapping: string | null;
+      storage_location?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -3294,6 +3346,8 @@ Json: JsonObject;
           alert_id: string;
           alert_end_time: string | null;
         })[];
+      /** Format: double */
+      historyTotalCount: number;
     };
     ResultSuccess_AlertResponse_: {
       data: components["schemas"]["AlertResponse"];
@@ -3301,6 +3355,13 @@ Json: JsonObject;
       error: null;
     };
     "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    AlertMetric: "latency" | "cost" | "prompt_tokens" | "completion_tokens" | "prompt_cache_read_tokens" | "prompt_cache_write_tokens" | "total_tokens" | "response.status" | "count";
+    /** @enum {string} */
+    AlertAggregation: "sum" | "avg" | "min" | "max" | "percentile";
+    /** @enum {string} */
+    AlertStandardGrouping: "model" | "provider" | "user";
+    AlertGrouping: components["schemas"]["AlertStandardGrouping"] | string;
     /** @description Matches all records (no filtering) */
     AllExpression: {
       /** @enum {string} */
@@ -3372,9 +3433,14 @@ Json: JsonObject;
     };
     AlertRequest: {
       name: string;
-      metric: string;
+      metric: components["schemas"]["AlertMetric"];
       /** Format: double */
       threshold: number;
+      aggregation: components["schemas"]["AlertAggregation"] | null;
+      /** Format: double */
+      percentile: number | null;
+      grouping: components["schemas"]["AlertGrouping"] | null;
+      grouping_is_property: boolean | null;
       time_window: string;
       emails: string[];
       slack_channels: string[];
@@ -16377,6 +16443,21 @@ Json: JsonObject;
       error: null;
     };
     "Result__allowNegativeBalance-boolean--creditLimit-number_.string_": components["schemas"]["ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"] | components["schemas"]["ResultError_string_"];
+    TimeSeriesDataPoint: {
+      timestamp: string;
+      /** Format: double */
+      amount: number;
+    };
+    TimeSeriesResponse: {
+      deposits: components["schemas"]["TimeSeriesDataPoint"][];
+      spend: components["schemas"]["TimeSeriesDataPoint"][];
+    };
+    ResultSuccess_TimeSeriesResponse_: {
+      data: components["schemas"]["TimeSeriesResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TimeSeriesResponse.string_": components["schemas"]["ResultSuccess_TimeSeriesResponse_"] | components["schemas"]["ResultError_string_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -16587,7 +16668,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "azure" | "bedrock" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "google-ai-studio" | "groq" | "helicone" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+            providerName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
           }) | {
             error: string;
           };
@@ -17017,6 +17098,87 @@ export interface operations {
             cancel_at_period_end: boolean;
             status: string;
           }) | null;
+        };
+      };
+    };
+  };
+  GetAutoTopoffSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTopoffSettings"] | null;
+        };
+      };
+    };
+  };
+  UpdateAutoTopoffSettings: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateAutoTopoffSettingsRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTopoffSettings"];
+        };
+      };
+    };
+  };
+  DisableAutoTopoff: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
+  GetPaymentMethods: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PaymentMethod"][];
+        };
+      };
+    };
+  };
+  CreateSetupSession: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSetupSessionRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            setupUrl: string;
+          };
+        };
+      };
+    };
+  };
+  RemovePaymentMethod: {
+    parameters: {
+      path: {
+        paymentMethodId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
+          };
         };
       };
     };
@@ -19085,6 +19247,12 @@ export interface operations {
     };
   };
   GetAlerts: {
+    parameters: {
+      query?: {
+        historyPage?: number;
+        historyPageSize?: number;
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
@@ -20218,6 +20386,8 @@ export interface operations {
         search?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
+        page?: number;
+        pageSize?: number;
       };
     };
     responses: {
@@ -20318,6 +20488,23 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_WalletState.string_"];
+        };
+      };
+    };
+  };
+  GetTimeSeriesData: {
+    parameters: {
+      query: {
+        startDate: string;
+        endDate: string;
+        groupBy?: "minute" | "hour" | "day" | "week" | "month";
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TimeSeriesResponse.string_"];
         };
       };
     };

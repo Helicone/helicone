@@ -14,7 +14,10 @@ import { Plugin } from "@helicone-package/cost/models/types";
 import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
-import { validateOpenAIChatPayload, validateOpenAIResponsePayload } from "./validators/openaiRequestValidator";
+import {
+  validateOpenAIChatPayload,
+  validateOpenAIResponsePayload,
+} from "./validators/openaiRequestValidator";
 import {
   RequestParams,
   BodyMappingType,
@@ -29,6 +32,8 @@ import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
 import { ResponsesAPIEnabledProviders } from "@helicone-package/cost/models/providers";
 import { oaiChat2responsesResponse } from "../clients/llmmapper/router/oaiChat2responses/nonStream";
 import { oaiChat2responsesStreamResponse } from "../clients/llmmapper/router/oaiChat2responses/stream";
+import { validateProvider } from "@helicone-package/cost/models/provider-helpers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 
 export interface AuthContext {
   orgId: string;
@@ -80,13 +85,19 @@ export class SimpleAIGateway {
       REQUEST_CACHE_KEY_2: env.REQUEST_CACHE_KEY_2,
     });
 
-    this.attemptBuilder = new AttemptBuilder(providerKeysManager, env, tracer, traceContext);
+    this.attemptBuilder = new AttemptBuilder(
+      providerKeysManager,
+      env,
+      tracer,
+      traceContext
+    );
     this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider, tracer);
   }
 
   async handle(): Promise<Response> {
     // Step 1: Parse and prepare request
-    const bodyMapping: BodyMappingType = this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
+    const bodyMapping: BodyMappingType =
+      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
     const parseSpan = this.traceContext?.sampled
       ? this.tracer.startSpan(
           "ai_gateway.gateway.parse_request",
@@ -101,7 +112,12 @@ export class SimpleAIGateway {
     if (isErr(parseResult)) {
       return parseResult.error;
     }
-    const { modelStrings, body: parsedBody, plugins } = parseResult.data;
+    const {
+      modelStrings,
+      body: parsedBody,
+      plugins,
+      globalIgnoreProviders,
+    } = parseResult.data;
 
     const requestParams: RequestParams = {
       isStreaming: parsedBody.stream === true,
@@ -142,7 +158,8 @@ export class SimpleAIGateway {
       modelStrings,
       this.orgId,
       bodyMapping,
-      plugins
+      plugins,
+      globalIgnoreProviders
     );
     this.tracer.finishSpan(buildSpan);
 
@@ -165,8 +182,9 @@ export class SimpleAIGateway {
       return this.createErrorResponse(errors);
     }
 
-    // Step 4: Get disallow list
-    const disallowSpan = this.traceContext?.sampled
+    // Step 4: Get disallow list (only if there are PTB attempts)
+    const hasPtbAttempts = attempts.some((a) => a.authType === "ptb");
+    const disallowSpan = this.traceContext?.sampled && hasPtbAttempts
       ? this.tracer.startSpan(
           "ai_gateway.gateway.get_disallow_list",
           "getDisallowList",
@@ -175,7 +193,9 @@ export class SimpleAIGateway {
           this.traceContext
         )
       : null;
-    const disallowList = await this.getDisallowList(this.orgId);
+    const disallowList = hasPtbAttempts
+      ? await this.getDisallowList(this.orgId)
+      : [];
     this.tracer.finishSpan(disallowSpan);
 
     // Step 5: Create forwarder function
@@ -206,8 +226,7 @@ export class SimpleAIGateway {
       ) {
         errors.push({
           source: attempt.source,
-          message:
-            `The Responses API is only supported for the providers: ${ResponsesAPIEnabledProviders.join(", ")}`,
+          message: `The Responses API is only supported for the providers: ${ResponsesAPIEnabledProviders.join(", ")}`,
           type: "invalid_format",
           statusCode: 400,
         });
@@ -233,8 +252,8 @@ export class SimpleAIGateway {
         }
       }
 
-      // Check disallow list
-      if (this.isDisallowed(attempt, disallowList)) {
+      // Check disallow list (only for PTB attempts)
+      if (attempt.authType === "ptb" && this.isDisallowed(attempt, disallowList)) {
         errors.push({
           source: attempt.source,
           message:
@@ -260,7 +279,10 @@ export class SimpleAIGateway {
       });
 
       if (isErr(result)) {
-        const attemptError = { ...result.error, source: attempt.source } as AttemptError;
+        const attemptError = {
+          ...result.error,
+          source: attempt.source,
+        } as AttemptError;
         // Bail early only for Helicone-generated 429s: escrow failure or rate limit
         const isHelicone429 =
           attemptError.statusCode === 429 &&
@@ -295,7 +317,15 @@ export class SimpleAIGateway {
   }
 
   private async parseAndPrepareRequest(): Promise<
-    Result<{ modelStrings: string[]; body: any; plugins?: Plugin[] }, Response>
+    Result<
+      {
+        modelStrings: string[];
+        body: any;
+        plugins?: Plugin[];
+        globalIgnoreProviders?: Set<ModelProviderName>;
+      },
+      Response
+    >
   > {
     // Get raw text body once
     // TODO: change to use safelyGetBody
@@ -314,7 +344,9 @@ export class SimpleAIGateway {
     // Forces usage data for streaming requests
     if (
       parsedBody.stream === true &&
-      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
+      (this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
+        || this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "RESPONSES"
+      )
     ) {
       parsedBody.stream_options = {
         ...(parsedBody.stream_options || {}),
@@ -335,13 +367,48 @@ export class SimpleAIGateway {
 
     const plugins = parsedBody.plugins || [];
 
-    const modelStrings = parsedBody.model
+    const rawModelStrings = parsedBody.model
       .split(",")
       .map((m: string) => m.trim());
 
+    const globalIgnoreProvidersSet = new Set<ModelProviderName>();
+    const modelStrings: string[] = [];
+
+    for (const modelString of rawModelStrings) {
+      if (modelString.startsWith("!")) {
+        // Global ignore provider
+        const provider = modelString.slice(1);
+        if (!provider) {
+          return err(
+            new Response(
+              "Invalid global ignore syntax. Use !provider (e.g., !openai)",
+              { status: 400 }
+            )
+          );
+        }
+        // Validate provider name
+        if (!validateProvider(provider)) {
+          return err(
+            new Response(
+              `Invalid provider in global ignore list: ${provider}. See supported providers at https://helicone.ai/models`,
+              { status: 400 }
+            )
+          );
+        }
+        globalIgnoreProvidersSet.add(provider);
+      } else {
+        modelStrings.push(modelString);
+      }
+    }
+
     delete parsedBody.plugins;
 
-    return ok({ modelStrings, body: parsedBody, plugins });
+    return ok({
+      modelStrings,
+      body: parsedBody,
+      plugins,
+      globalIgnoreProviders: globalIgnoreProvidersSet.size > 0 ? globalIgnoreProvidersSet : undefined,
+    });
   }
 
   private hasPromptFields(body: any): boolean {

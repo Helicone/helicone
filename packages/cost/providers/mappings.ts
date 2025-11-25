@@ -72,8 +72,8 @@ const deepseek = /^https:\/\/api\.deepseek\.com/;
 const x = /^https:\/\/api\.x\.ai/;
 const avianPattern = /^https:\/\/api\.avian\.io/;
 
-//https://api.studio.nebius.ai
-const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
+//https://api.tokenfactory.nebius.com
+const nebius = /^https:\/\/api\.tokenfactory\.nebius\.com/;
 
 // https://ai-gateway.vercel.sh
 const vercelGateway = /^https:\/\/ai-gateway\.vercel\.sh/;
@@ -86,6 +86,9 @@ const openpipe = /^https:\/\/api\.openpipe\.ai/;
 
 // llm.chutes.com and chutes.com
 const chutes = /^https:\/\/(llm\.)?chutes\.com/;
+
+// https://api.cerebras.ai
+const cerebras = /^https:\/\/api\.cerebras\.ai/;
 
 export const providersNames = [
   "OPENAI",
@@ -122,6 +125,8 @@ export const providersNames = [
   "LLAMA",
   "NVIDIA",
   "VERCEL",
+  "CEREBRAS",
+  "BASETEN",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -305,6 +310,11 @@ export const providers: {
     pattern: vercelGateway,
     provider: "VERCEL",
     costs: vercelCosts,
+  },
+  {
+    pattern: cerebras,
+    provider: "CEREBRAS",
+    costs: [],
   },
 ];
 

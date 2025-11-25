@@ -25,6 +25,13 @@ const novitaAuthExpectations = {
   },
 };
 
+// Define auth expectations for MistralAI
+const mistralaiAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Mistral Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -42,7 +49,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -59,7 +68,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -82,7 +93,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ["Test message for Mistral Small model"],
@@ -106,7 +119,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -127,7 +142,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ['"stream":true'],
@@ -155,7 +172,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -177,9 +196,11 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
-                customVerify: (call) => {
+                customVerify: (_call) => {
                   // Verify that the request supports the expected parameters
                   // like temperature, top_p, frequency_penalty, etc.
                   // This would be expanded in actual implementation
@@ -208,7 +229,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -225,7 +248,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // In a real implementation, this would verify that
@@ -394,7 +419,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   headers: {
@@ -422,7 +449,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                 },
@@ -446,7 +475,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                 },
@@ -467,7 +498,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the URL is correctly constructed
@@ -489,7 +522,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506", // Should map to the correct provider model ID
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -535,7 +570,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -560,7 +597,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -613,7 +652,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -630,7 +671,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -653,7 +696,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ["Test message for Mistral Nemo model"],
@@ -677,7 +722,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -698,7 +745,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   bodyContains: ['"stream":true'],
@@ -726,7 +775,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -887,7 +938,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: {
                   ...deepinfraAuthExpectations,
                   headers: {
@@ -915,9 +968,11 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
-                customVerify: (call) => {
+                customVerify: (_call) => {
                   // Verify that the request supports the expected parameters
                   // like temperature, top_p, frequency_penalty, etc.
                   // This would be expanded in actual implementation
@@ -946,7 +1001,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -979,7 +1036,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // In a real implementation, this would verify that
@@ -1006,7 +1065,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
                 customVerify: (call) => {
                   // Verify that the URL is correctly constructed
@@ -1028,7 +1089,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407", // Should map to the correct provider model ID
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1074,7 +1137,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1099,7 +1164,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1148,9 +1215,7 @@ describe("Mistral Registry Tests", () => {
           model: "mistral-small/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -1160,7 +1225,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-                data: createOpenAIMockResponse("mistralai/Mistral-Small-3.2-24B-Instruct-2506"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Small-3.2-24B-Instruct-2506"
+                ),
                 expects: deepinfraAuthExpectations,
               },
             ],
@@ -1175,9 +1242,7 @@ describe("Mistral Registry Tests", () => {
           model: "mistral-nemo/deepinfra",
           request: {
             body: {
-              messages: [
-                { role: "user", content: "Test passthrough billing" },
-              ],
+              messages: [{ role: "user", content: "Test passthrough billing" }],
               passthroughBilling: true,
             },
           },
@@ -1187,8 +1252,35 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
                 response: "success",
                 model: "mistralai/Mistral-Nemo-Instruct-2407",
-                data: createOpenAIMockResponse("mistralai/Mistral-Nemo-Instruct-2407"),
+                data: createOpenAIMockResponse(
+                  "mistralai/Mistral-Nemo-Instruct-2407"
+                ),
                 expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("mistral-large-2411 with MistralAI", () => {
+      it("should handle passthrough billing with mistralai provider", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Test passthrough billing" }],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -1233,7 +1325,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -1298,7 +1392,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -1350,7 +1446,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -1395,7 +1493,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -1445,7 +1545,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -1506,7 +1608,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -1556,7 +1660,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -1604,7 +1710,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -1658,7 +1766,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -1798,7 +1908,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: novitaAuthExpectations
               }
             ],
@@ -1833,7 +1945,9 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: {
                   ...novitaAuthExpectations,
                   bodyContains: [
@@ -1865,12 +1979,559 @@ describe("Mistral Registry Tests", () => {
                 url: "https://api.novita.ai/openai/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-v3.1-terminus",
-                data: createOpenAIMockResponse("deepseek/deepseek-v3.1-terminus"),
+                data: createOpenAIMockResponse(
+                  "deepseek/deepseek-v3.1-terminus"
+                ),
                 expects: novitaAuthExpectations
               }
             ],
             finalStatus: 200
           }
+        }));
+    });
+  });
+
+  describe("BYOK Tests - Mistral Large Model", () => {
+    describe("mistral-large-2411", () => {
+      it("should handle mistralai provider", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select mistralai provider when none specified", () =>
+        runGatewayTest({
+          model: "mistral-large-2411",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle successful request with custom parameters", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [
+              { role: "user", content: "Test message for Mistral Large model" },
+            ],
+            maxTokens: 1000,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: {
+                  ...mistralaiAuthExpectations,
+                  bodyContains: ["Test message for Mistral Large model"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tools parameter support", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [{ role: "user", content: "What's the weather like?" }],
+            // Tools would be added here in a real test, but we're just testing the structure
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle streaming requests", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [{ role: "user", content: "Stream this response" }],
+            stream: true,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: {
+                  ...mistralaiAuthExpectations,
+                  bodyContains: ['"stream":true'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle supported parameters correctly", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [
+              { role: "user", content: "Test with various parameters" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
+                customVerify: (_call) => {
+                  // Verify that the request supports the expected parameters
+                  // like temperature, top_p, frequency_penalty, etc.
+                  // This would be expanded in actual implementation
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify context length limits are respected", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test message within context limits",
+              },
+            ],
+            maxTokens: 128000, // Should be within the 128,000 limit
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify pricing and rate limits configuration", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
+                customVerify: (_call) => {
+                  // In a real implementation, this would verify that
+                  // pricing tiers and rate limits are correctly applied
+                  // Based on the model configuration:
+                  // - Input: 0.000002 per token
+                  // - Output: 0.000006 per token
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("Error scenarios for mistral-large-2411", () => {
+      it("should handle MistralAI provider failure", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "MistralAI service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from MistralAI", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle authentication failure", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+
+      it("should handle model not found", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle quota exceeded", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 403,
+                errorMessage: "Quota exceeded",
+              },
+            ],
+            finalStatus: 403,
+          },
+        }));
+
+      it("should handle bad request with invalid parameters", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid request parameters",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle timeout scenarios", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 408,
+                errorMessage: "Request timeout",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle content filtering violations", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [
+              { role: "user", content: "Content that might be filtered" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 422,
+                errorMessage: "Content filtering violation",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("Advanced scenarios for mistral-large-2411", () => {
+      it("should handle custom headers and body mapping", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [{ role: "user", content: "Test with custom mapping" }],
+            headers: {
+              "X-Custom-Header": "test-value",
+            },
+            bodyMapping: "NO_MAPPING",
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: {
+                  ...mistralaiAuthExpectations,
+                  headers: {
+                    ...mistralaiAuthExpectations.headers,
+                    "X-Custom-Header": "test-value",
+                  },
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle response format parameter", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [
+              { role: "user", content: "Return structured JSON response" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: {
+                  ...mistralaiAuthExpectations,
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle stop sequences", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [
+              { role: "user", content: "Generate a list and stop at the end" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: {
+                  ...mistralaiAuthExpectations,
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("Provider URL validation for mistral-large-2411", () => {
+      it("should construct correct MistralAI URL", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
+                customVerify: (_call) => {
+                  // Verify that the URL is correctly constructed
+                  // Base URL: https://api.mistral.ai/
+                  // Built URL: https://api.mistral.ai/v1/chat/completions
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle provider model ID mapping correctly", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411", // Should map to the correct provider model ID
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("Edge cases and robustness for mistral-large-2411", () => {
+      it("should handle empty messages array", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Messages array cannot be empty",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle very long input within context limits", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Very long input... ".repeat(1000), // Still within 128k token limit
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle unicode and special characters", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "测试中文 🚀 émojis and spéciål chars",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "success",
+                model: "mistral-large-2411",
+                data: createOpenAIMockResponse("mistral-large-2411"),
+                expects: mistralaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle malformed JSON gracefully", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid JSON in request body",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle network connectivity issues", () =>
+        runGatewayTest({
+          model: "mistral-large-2411/mistral",
+          expected: {
+            providers: [
+              {
+                url: "https://api.mistral.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 502,
+                errorMessage: "Bad gateway - upstream server error",
+              },
+            ],
+            finalStatus: 500,
+          },
         }));
     });
   });

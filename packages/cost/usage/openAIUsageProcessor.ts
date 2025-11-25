@@ -3,7 +3,9 @@ import { ModelUsage } from "./types";
 import { Result } from "../../common/result";
 
 export class OpenAIUsageProcessor implements IUsageProcessor {
-  public async parse(parseInput: ParseInput): Promise<Result<ModelUsage, string>> {
+  public async parse(
+    parseInput: ParseInput,
+  ): Promise<Result<ModelUsage, string>> {
     try {
       if (parseInput.isStream) {
         return this.parseStreamResponse(parseInput.responseBody);
@@ -18,11 +20,13 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
   }
 
-  protected parseNonStreamResponse(responseBody: string): Result<ModelUsage, string> {
+  protected parseNonStreamResponse(
+    responseBody: string,
+  ): Result<ModelUsage, string> {
     try {
       const parsedResponse = JSON.parse(responseBody);
       const usage = this.extractUsageFromResponse(parsedResponse);
-      
+
       return {
         data: usage,
         error: null,
@@ -35,11 +39,16 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
   }
 
-  protected parseStreamResponse(responseBody: string): Result<ModelUsage, string> {
+  protected parseStreamResponse(
+    responseBody: string,
+  ): Result<ModelUsage, string> {
     try {
       const lines = responseBody
         .split("\n")
-        .filter((line) => line.trim() !== "" && !line.includes("OPENROUTER PROCESSING"))
+        .filter(
+          (line) =>
+            line.trim() !== "" && !line.includes("OPENROUTER PROCESSING"),
+        )
         .filter((line) => !line.startsWith("event:")) // Filter out SSE event lines (Responses API)
         .map((line) => {
           if (line === "data: [DONE]") return null;
@@ -68,8 +77,9 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
 
   protected consolidateStreamData(streamData: any[]): any {
     // Check for Responses API format (chunk.response.usage)
-    const responsesAPIChunk = [...streamData].reverse()
-      .find(chunk => chunk?.response?.usage);
+    const responsesAPIChunk = [...streamData]
+      .reverse()
+      .find((chunk) => chunk?.response?.usage);
     if (responsesAPIChunk?.response?.usage) {
       return {
         usage: responsesAPIChunk.response.usage,
@@ -79,8 +89,9 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
 
     // Check for Chat Completions format (chunk.usage)
-    const chatCompletionsChunk = [...streamData].reverse()
-      .find(chunk => chunk?.usage);
+    const chatCompletionsChunk = [...streamData]
+      .reverse()
+      .find((chunk) => chunk?.usage);
     if (chatCompletionsChunk?.usage) {
       return chatCompletionsChunk;
     }
@@ -125,19 +136,28 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const usage = parsedResponse.usage || {};
 
     const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
-    const completionTokens = usage.completion_tokens ?? usage.output_tokens ?? 0;
+    const completionTokens =
+      usage.completion_tokens ?? usage.output_tokens ?? 0;
 
-    const promptDetails = usage.prompt_tokens_details || usage.input_tokens_details || {};
-    const completionDetails = usage.completion_tokens_details || usage.output_tokens_details || {};
+    const promptDetails =
+      usage.prompt_tokens_details || usage.input_tokens_details || {};
+    const completionDetails =
+      usage.completion_tokens_details || usage.output_tokens_details || {};
 
     const cachedTokens = promptDetails.cached_tokens ?? 0;
     const promptAudioTokens = promptDetails.audio_tokens ?? 0;
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
 
-    const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
-    const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
-    
+    const effectivePromptTokens = Math.max(
+      0,
+      promptTokens - cachedTokens - promptAudioTokens,
+    );
+    const effectiveCompletionTokens = Math.max(
+      0,
+      completionTokens - completionAudioTokens - reasoningTokens,
+    );
+
     const modelUsage: ModelUsage = {
       input: effectivePromptTokens,
       output: effectiveCompletionTokens,
@@ -154,7 +174,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     }
 
     if (promptAudioTokens > 0 || completionAudioTokens > 0) {
-      // TODO: add audio output support since some models support it in the 
+      // TODO: add audio output support since some models support it in the
       // chat completions endpoint
       modelUsage.audio = promptAudioTokens + completionAudioTokens;
     }
@@ -163,6 +183,17 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const acceptedTokens = completionDetails.accepted_prediction_tokens ?? 0;
     if (rejectedTokens > 0 || acceptedTokens > 0) {
       modelUsage.output = effectiveCompletionTokens + acceptedTokens;
+    }
+
+    // Add web search usage if present
+    for (const output_item of parsedResponse.output || []) {
+      if (output_item.type === "web_search_call") {
+        modelUsage.web_search = (modelUsage.web_search || 0) + 1;
+      }
+    }
+
+    if (usage.cost) {
+      modelUsage.cost = usage.cost;
     }
 
     return modelUsage;

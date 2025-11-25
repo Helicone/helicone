@@ -165,7 +165,7 @@ describe("Meta Llama Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
                 data: createOpenAIMockResponse(
@@ -208,7 +208,7 @@ describe("Meta Llama Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
                 data: createOpenAIMockResponse(
@@ -246,7 +246,7 @@ describe("Meta Llama Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://api.studio.nebius.com/v1/chat/completions",
+                url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
                 response: "success",
                 model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
                 data: createOpenAIMockResponse(
@@ -1558,7 +1558,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -1567,8 +1567,8 @@ describe("Meta Llama Registry Tests", () => {
               expects: nebiusAuthExpectations,
               customVerify: (call) => {
                 // Verify that the URL is correctly constructed
-                // Base URL: https://api.studio.nebius.com/v1/
-                // Built URL: https://api.studio.nebius.com/v1/chat/completions
+                // Base URL: https://api.tokenfactory.nebius.com/v1/
+                // Built URL: https://api.tokenfactory.nebius.com/v1/chat/completions
               },
             },
           ],
@@ -1582,7 +1582,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast", // Should map to the correct provider model ID
               data: createOpenAIMockResponse(
@@ -1604,7 +1604,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -1664,7 +1664,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -1707,7 +1707,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -1729,7 +1729,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -1777,7 +1777,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -1815,7 +1815,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -1864,7 +1864,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -1899,7 +1899,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -1948,7 +1948,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -1985,7 +1985,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -2019,7 +2019,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -2056,7 +2056,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -2111,7 +2111,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -2148,7 +2148,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "success",
               model: "meta-llama/Meta-Llama-3.1-8B-Instruct-fast",
               data: createOpenAIMockResponse(
@@ -2172,7 +2172,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "failure",
               statusCode: 500,
               errorMessage: "Nebius service unavailable",
@@ -2188,7 +2188,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "failure",
               statusCode: 429,
               errorMessage: "Rate limit exceeded",
@@ -2204,7 +2204,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "failure",
               statusCode: 401,
               errorMessage: "Invalid API key",
@@ -2220,7 +2220,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "failure",
               statusCode: 404,
               errorMessage: "Model not found",
@@ -2236,7 +2236,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "failure",
               statusCode: 408,
               errorMessage: "Request timeout",
@@ -2252,7 +2252,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "failure",
               statusCode: 402,
               errorMessage: "Insufficient credits",
@@ -2268,7 +2268,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "failure",
               statusCode: 429,
               errorMessage: "Quota exceeded",
@@ -2284,7 +2284,7 @@ describe("Meta Llama Registry Tests", () => {
         expected: {
           providers: [
             {
-              url: "https://api.studio.nebius.com/v1/chat/completions",
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
               response: "failure",
               statusCode: 400,
               errorMessage: "Invalid request body",

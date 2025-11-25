@@ -7,6 +7,7 @@ iconType: "solid"
 ---
 
 import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
 
 ## Introduction
 
@@ -149,6 +150,8 @@ import { strings } from "/snippets/strings.mdx";
     - Model performance analytics
     - Error tracking
     - Session tracking
+
+    <Star />
   </Step>
 </Steps>
 
@@ -271,9 +274,9 @@ def main():
         SystemMessage(content="You are a helpful assistant."),
         HumanMessage(content="Tell me a joke about Python programming."),
     ]
-    
+
     response = chat.invoke(messages)
-    
+
     print('🤖 Assistant response:')
     print(response.content)
     print('\n✅ Completed successfully!')
@@ -317,7 +320,7 @@ def streaming_example():
     print('🤖 Assistant (streaming):')
     for chunk in chat.stream(messages):
         print(chunk.content, end='', flush=True)
-    
+
     print('\n\n✅ Streaming completed!')
 
 streaming_example()
@@ -410,11 +413,11 @@ def batch_example():
     ]
 
     responses = chat.batch(message_batches)
-    
+
     print('🤖 Batch responses:')
     for i, response in enumerate(responses, 1):
         print(f'\nResponse {i}: {response.content}')
-    
+
     print('\n✅ Batch processing completed!')
 
 batch_example()
@@ -476,15 +479,15 @@ const chat = new ChatOpenAI({
             "Helicone-Session-Id": "session-abc-123",
             "Helicone-Session-Name": "Customer Support Chat",
             "Helicone-Session-Path": "/support/chat/456",
-            
+
             // User tracking
             "Helicone-User-Id": "user-789",
-            
+
             // Custom properties for filtering
             "Helicone-Property-Environment": "production",
             "Helicone-Property-App-Version": "2.1.0",
             "Helicone-Property-Feature": "customer-support",
-            
+
             // Rate limiting (optional)
             "Helicone-Rate-Limit-Policy": "basic-100",
         },
@@ -502,15 +505,15 @@ chat = ChatOpenAI(
         'Helicone-Session-Id': 'session-abc-123',
         'Helicone-Session-Name': 'Customer Support Chat',
         'Helicone-Session-Path': '/support/chat/456',
-        
+
         # User tracking
         'Helicone-User-Id': 'user-789',
-        
+
         # Custom properties for filtering
         'Helicone-Property-Environment': 'production',
         'Helicone-Property-App-Version': '2.1.0',
         'Helicone-Property-Feature': 'customer-support',
-        
+
         # Rate limiting (optional)
         'Helicone-Rate-Limit-Policy': 'basic-100',
     },

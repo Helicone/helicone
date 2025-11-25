@@ -13,8 +13,8 @@ import { FlaskConicalIcon, PlusIcon, Trash2, WrenchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Tool } from "@helicone-package/llm-mapper/types";
 import MarkdownEditor from "@/components/shared/markdownEditor";
-import { logger } from "@/lib/telemetry/logger";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useNotification from "@/components/shared/notification/useNotification";
 import clsx from "clsx";
 import {
   Tooltip,
@@ -45,6 +45,7 @@ export default function ToolsConfigurationModal({
     tools ? (tools.length > 0 ? 0 : null) : null,
   );
   const [currentTools, setCurrentTools] = useState<Tool[]>(tools || []);
+  const { setNotification } = useNotification();
 
   useEffect(() => {
     setSelectedToolIndex(tools ? (tools.length > 0 ? 0 : null) : null);
@@ -353,7 +354,7 @@ export default function ToolsConfigurationModal({
                   }
                   setToolsDialogOpen(false);
                 } catch (error) {
-                  logger.error("Invalid JSON");
+                  setNotification("Invalid JSON", "error");
                 }
               }}
             >

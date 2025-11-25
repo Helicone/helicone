@@ -13,7 +13,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000003,
         output: 0.000015,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -51,7 +51,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000003,
         output: 0.000015,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -86,7 +86,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000003,
         output: 0.000015,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,

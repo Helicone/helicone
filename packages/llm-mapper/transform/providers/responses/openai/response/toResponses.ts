@@ -12,9 +12,11 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
 
   if (message?.content) {
     const msg: ResponsesMessageOutputItem = {
+      id: `msg_${Math.random().toString(36).slice(2, 10)}`,
       type: "message",
+      status: "completed",
       role: "assistant",
-      content: [{ type: "output_text", text: message.content }],
+      content: [{ type: "output_text", text: message.content, annotations: message.annotations ?? [] }],
     };
     output.push(msg);
   }
@@ -22,7 +24,7 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
   const pushFunctionCall = (id: string | undefined, name: string, args: string | undefined) => {
     const call_id = id || `call_${Math.random().toString(36).slice(2, 10)}`;
     output.push({
-      id: `fc_${call_id}`,
+      id: call_id,
       type: "function_call",
       status: "completed",
       name,
@@ -58,6 +60,7 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
                 body.usage.completion_tokens_details.reasoning_tokens,
             }
           : undefined,
+        cost: body.usage.cost,
       }
     : undefined;
 

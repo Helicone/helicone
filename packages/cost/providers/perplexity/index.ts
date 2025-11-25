@@ -9,23 +9,12 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "sonar-reasoning",
-    },
-    cost: {
-      prompt_token: 0.00001,
-      completion_token: 0.00005,
-      per_call: 0.00005 / 1000,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "sonar",
     },
     cost: {
-      prompt_token: 0.00001,
-      completion_token: 0.00001,
-      per_call: 0.00005 / 1000,
+      prompt_token: 0.000001, // $1.00 per 1M tokens
+      completion_token: 0.000001, // $1.00 per 1M tokens
+      per_call: 0.005 / 1000, // $5.00 per 1K requests (Low search mode)
     },
   },
   {
@@ -34,9 +23,44 @@ export const costs: ModelRow[] = [
       value: "sonar-pro",
     },
     cost: {
-      prompt_token: 0.00003,
-      completion_token: 0.00015,
-      per_call: 0.00005 / 1000,
+      prompt_token: 0.000003, // $3.00 per 1M tokens
+      completion_token: 0.000015, // $15.00 per 1M tokens
+      per_call: 0.006 / 1000, // $6.00 per 1K requests (Low search mode)
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "sonar-reasoning",
+    },
+    cost: {
+      prompt_token: 0.000001, // $1.00 per 1M tokens
+      completion_token: 0.000005, // $5.00 per 1M tokens
+      per_call: 0.005 / 1000, // $5.00 per 1K requests (Low search mode)
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "sonar-reasoning-pro",
+    },
+    cost: {
+      prompt_token: 0.000002, // $2.00 per 1M tokens
+      completion_token: 0.000008, // $8.00 per 1M tokens
+      per_call: 0.006 / 1000, // $6.00 per 1K requests (Low search mode)
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "sonar-deep-research",
+    },
+    cost: {
+      prompt_token: 0.000002, // $2.00 per 1M tokens (base input)
+      completion_token: 0.000008, // $8.00 per 1M tokens (base output)
+      per_call: 0.005 / 1000, // $5.00 per 1K searches
+      // Note: Additional costs for citation ($2/1M) and reasoning tokens ($3/1M)
+      // are not included in this legacy format
     },
   },
 ];

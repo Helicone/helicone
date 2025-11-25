@@ -5,6 +5,10 @@ description: "Integrate Helicone with Hyperbolic, a platform for running open-so
 "twitter:title": "Hyperbolic Integration - Helicone OSS LLM Observability"
 ---
 
+import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
+
+<LegacyWarning />
+
 You can seamlessly integrate Helicone with the OpenAI compatible models that are deployed on Hyperbolic.
 
 The integration process closely mirrors the [proxy approach](/integrations/openai/javascript). The only distinction lies in the modification of the base_url to point to the dedicated Hyperbolic endpoint `https://hyperbolic.helicone.ai/v1`.

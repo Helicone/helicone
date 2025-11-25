@@ -15,7 +15,7 @@ export const AUTHORS = [
   "openai",
   "google",
   "meta-llama",
-  "mistralai",
+  "mistral",
   "amazon",
   "microsoft",
   "nvidia",
@@ -50,6 +50,7 @@ export type Tokenizer =
   | "Llama4"
   | "Gemini"
   | "Mistral"
+  | "MoonshotAI"
   | "Qwen"
   | "DeepSeek"
   | "Cohere"
@@ -146,6 +147,7 @@ export interface ModelConfig {
   created: string;
   modality: Modality;
   tokenizer: Tokenizer;
+  pinnedVersionOfModel?: string;
 }
 
 interface BaseConfig {
@@ -197,7 +199,7 @@ export interface ModelProviderConfig extends BaseConfig {
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;
   priority?: number;
-  quantization?: "fp4" | "fp8" | "fp16" | "bf16";
+  quantization?: "fp4" | "fp8" | "fp16" | "bf16" | "int4";
   responseFormat?: ResponseFormat;
   requireExplicitRouting?: boolean;
   providerModelIdAliases?: string[];
@@ -240,6 +242,7 @@ export interface UserEndpointConfig {
   crossRegion?: boolean;
   gatewayMapping?: BodyMappingType;
   modelName?: string;
+  heliconeModelId?: string; // Azure OpenAI
 }
 
 export interface ModelSpec {

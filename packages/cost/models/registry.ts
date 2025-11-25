@@ -30,9 +30,13 @@ import {
 } from "./authors/moonshotai";
 import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
-import { mistralModels, mistralEndpointConfig } from "./authors/mistralai";
+import { mistralModels, mistralEndpointConfig } from "./authors/mistral";
 import { zaiModels, zaiEndpointConfig } from "./authors/zai";
 import { baiduModels, baiduEndpointConfig } from "./authors/baidu";
+import {
+  perplexityModels,
+  perplexityEndpointConfig,
+} from "./authors/perplexity/sonar";
 
 // Combine all models
 const allModels = {
@@ -47,6 +51,7 @@ const allModels = {
   ...mistralModels,
   ...zaiModels,
   ...baiduModels,
+  ...perplexityModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -62,6 +67,7 @@ const modelProviderConfigs = {
   ...mistralEndpointConfig,
   ...zaiEndpointConfig,
   ...baiduEndpointConfig,
+  ...perplexityEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 // Combine all archived endpoints

@@ -52,6 +52,7 @@ interface ModelRegistryItem {
   inputModalities: InputModality[];
   outputModalities: OutputModality[];
   supportedParameters: StandardParameter[];
+  pinnedVersionOfModel?: string;
 }
 
 interface ModelRegistryResponse {
@@ -260,6 +261,7 @@ export class ModelRegistryController extends Controller {
           inputModalities: structuredModality.inputs,
           outputModalities: structuredModality.outputs,
           supportedParameters: Array.from(allSupportedParameters),
+          pinnedVersionOfModel: modelConfig.pinnedVersionOfModel,
         });
       }
 

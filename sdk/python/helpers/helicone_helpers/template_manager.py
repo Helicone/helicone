@@ -1,10 +1,12 @@
 import re
 import json
-from typing import Any, Dict, List, Union
-from .types import TemplateVariable, ValidationError, SubstitutionResult
+from typing import Any, Dict, List, Union, Optional
+from .types import TemplateVariable, ValidationError, SubstitutionResult, PromptPartialVariable
 
 # Regex pattern to match {{hc:name:type}} format - matches TypeScript version
 TEMPLATE_REGEX = re.compile(r'\{\{\s*hc\s*:\s*([a-zA-Z_-][a-zA-Z0-9_-]*)\s*:\s*([a-zA-Z_-][a-zA-Z0-9_-]*)\s*\}\}')
+# Regex pattern to match {{hcp:prompt_id:index:environment}} format for prompt partials
+PROMPT_PARTIAL_REGEX = re.compile(r'\{\{\s*hcp\s*:\s*([a-zA-Z0-9]{6})\s*:\s*(\d+)\s*(?::\s*([a-zA-Z_-][a-zA-Z0-9_-]*))?\s*\}\}')
 
 
 class HeliconeTemplateManager:
@@ -12,9 +14,40 @@ class HeliconeTemplateManager:
     Template manager for Helicone prompt variable substitution.
     Handles both string templates and JSON object templates with type validation.
     """
-    
+
     ALLOWED_TYPES = {"string", "number", "boolean"}
-    
+
+    @classmethod
+    def extract_prompt_partial_variables(cls, template: str) -> List[PromptPartialVariable]:
+        """
+        Extract all distinct prompt partial variables from a template string.
+
+        Args:
+            template: The template string containing {{hcp:prompt_id:index:environment}} patterns
+
+        Returns:
+            Array of unique prompt partial variables with their prompt_id, index, and optional environment
+        """
+        variables_dict: Dict[str, PromptPartialVariable] = {}
+
+        for match in PROMPT_PARTIAL_REGEX.finditer(template):
+            full_match = match.group(0)
+            prompt_id = match.group(1).strip()
+            index = int(match.group(2).strip())
+            environment = match.group(3).strip() if match.group(3) else None
+
+            key = f"{prompt_id}:{index}:{environment or ''}"
+
+            if key not in variables_dict:
+                variables_dict[key] = PromptPartialVariable(
+                    prompt_id=prompt_id,
+                    index=index,
+                    environment=environment,
+                    raw=full_match
+                )
+
+        return list(variables_dict.values())
+
     @classmethod
     def extract_variables(cls, template: str) -> List[TemplateVariable]:
         """Extract all template variables from a string."""
@@ -52,36 +85,56 @@ class HeliconeTemplateManager:
         return bool(value)
     
     @classmethod
-    def substitute_variables(cls, template: str, inputs: Dict[str, Any]) -> SubstitutionResult:
+    def substitute_variables(
+        cls,
+        template: str,
+        inputs: Dict[str, Any],
+        prompt_partial_inputs: Optional[Dict[str, Any]] = None
+    ) -> SubstitutionResult:
         """
         Substitute variables in template with provided inputs after type validation.
-        
+
         Args:
             template: The template string containing {{hc:NAME:type}} patterns
             inputs: Hash map of input values
-            
+            prompt_partial_inputs: Hash map of prompt partial replacement values (keyed by raw template string)
+
         Returns:
             SubstitutionResult with success status and either result string or errors
         """
+        if prompt_partial_inputs is None:
+            prompt_partial_inputs = {}
+
         variables = cls.extract_variables(template)
         errors: List[ValidationError] = []
-        
+
         # Validate all variables first
         for variable in variables:
             value = inputs.get(variable.name)
-            
-            if value is None or not cls.is_type_compatible(value, variable.type):
+
+            if value is None:
+                continue
+
+            if not cls.is_type_compatible(value, variable.type):
                 errors.append(ValidationError(
                     variable=variable.name,
                     expected=variable.type,
                     value=value
                 ))
-        
+
         if errors:
             return SubstitutionResult(success=False, errors=errors)
-        
-        # Perform substitution
+
+        # First replace prompt partials, since they contain variables
         result = template
+        for match in PROMPT_PARTIAL_REGEX.finditer(template):
+            full_match = match.group(0)
+            value = prompt_partial_inputs.get(full_match)
+            if value is not None:
+                result = result.replace(full_match, str(value))
+
+        # Now result contains prompt partials replaced, so a full prompt with all variables
+        # Perform variable substitution
         for variable in variables:
             value = inputs.get(variable.name)
             if value is not None:
@@ -89,7 +142,7 @@ class HeliconeTemplateManager:
                 if variable.type == "boolean":
                     value = cls.convert_boolean_value(value)
                 result = result.replace(variable.raw, str(value))
-        
+
         return SubstitutionResult(success=True, result=result)
     
     @classmethod

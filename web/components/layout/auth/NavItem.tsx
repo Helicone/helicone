@@ -58,7 +58,7 @@ const NavItem: React.FC<NavItemProps> = ({
                   "h-4 w-4",
                   link.current
                     ? "text-slate-700 dark:text-slate-300"
-                    : "text-slate-500"
+                    : "text-slate-500",
                 )}
               />
             )}
@@ -104,7 +104,7 @@ const NavItem: React.FC<NavItemProps> = ({
                 "mr-2 h-3.5 w-3.5",
                 link.current
                   ? "text-slate-700 dark:text-slate-300"
-                  : "text-slate-500"
+                  : "text-slate-500",
               )}
             />
           )}

@@ -183,6 +183,20 @@ const whereKeyMappings: KeyMappings = {
     threat: "request_response_log.threat",
   }),
   request_response_rmt: (filter, placeValueSafely) => {
+    if ("property_key" in filter && filter.property_key) {
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.property_key
+      );
+      if (operator !== "equals") {
+        throw new Error("property_key filter only supports 'equals' operator");
+      }
+      return {
+        column: `request_response_rmt.properties`,
+        operator: "has",
+        value: placeValueSafely(value),
+      };
+    }
+
     if ("properties" in filter && filter.properties) {
       const key = Object.keys(filter.properties)[0];
       const { operator, value } = extractOperatorAndValueFromAnOperator(
@@ -241,8 +255,10 @@ const whereKeyMappings: KeyMappings = {
       return {
         column: "request_response_rmt.cost",
         operator: operator,
-        value: placeValueSafely(Math.floor((value as number) * COST_PRECISION_MULTIPLIER)),
-      }
+        value: placeValueSafely(
+          Math.floor((value as number) * COST_PRECISION_MULTIPLIER)
+        ),
+      };
     }
     return easyKeyMappings<"request_response_rmt">({
       country_code: "request_response_rmt.country_code",
@@ -264,7 +280,8 @@ const whereKeyMappings: KeyMappings = {
       prompt_tokens: "request_response_rmt.prompt_tokens",
       completion_tokens: "request_response_rmt.completion_tokens",
       request_body: "request_response_rmt.request_body",
-      "helicone-score-feedback": "request_response_rmt.scores['helicone-score-feedback']",
+      "helicone-score-feedback":
+        "request_response_rmt.scores['helicone-score-feedback']",
       response_body: "request_response_rmt.response_body",
       scores_column: "request_response_rmt.scores",
       cache_enabled: "request_response_rmt.cache_enabled",
@@ -444,6 +461,8 @@ function operatorToSql(operator: AllOperators): string {
       return "@>";
     case "vector-contains":
       return "@@";
+    case "has":
+      return "HAS";
   }
 }
 
@@ -496,6 +515,8 @@ export function buildFilterLeaf(
 
     const filterClause = (() => {
       switch (true) {
+        case operatorKey === "has":
+          return `has(${column}, ${value})`;
         case operatorKey === "not-equals" && value === "null":
           return `${column} is not null`;
         case operatorKey === "equals" && value === "null":
