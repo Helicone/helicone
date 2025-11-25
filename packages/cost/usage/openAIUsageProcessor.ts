@@ -8,6 +8,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
   ): Promise<Result<ModelUsage, string>> {
     try {
       if (parseInput.isStream) {
+        console.log("Parsing OpenAI stream response for usage...");
         return this.parseStreamResponse(parseInput.responseBody);
       } else {
         return this.parseNonStreamResponse(parseInput.responseBody);
@@ -79,7 +80,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     // Check for Responses API format (chunk.response.usage)
     const responsesAPIChunk = [...streamData]
       .reverse()
-      .find((chunk) => chunk?.response?.usage);
+      .find((chunk) => chunk?.response?.usage != null);
     if (responsesAPIChunk?.response?.usage) {
       return {
         usage: responsesAPIChunk.response.usage,
@@ -91,7 +92,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     // Check for Chat Completions format (chunk.usage)
     const chatCompletionsChunk = [...streamData]
       .reverse()
-      .find((chunk) => chunk?.usage);
+      .find((chunk) => chunk?.usage != null);
     if (chatCompletionsChunk?.usage) {
       return chatCompletionsChunk;
     }
@@ -103,9 +104,9 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
 
     for (const chunk of streamData) {
       // Check both formats
-      if (chunk?.usage) {
+      if (chunk?.usage != null) {
         consolidated.usage = chunk.usage;
-      } else if (chunk?.response?.usage) {
+      } else if (chunk?.response?.usage != null) {
         consolidated.usage = chunk.response.usage;
       }
 

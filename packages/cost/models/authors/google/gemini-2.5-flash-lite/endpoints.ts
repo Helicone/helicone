@@ -40,6 +40,7 @@ export const endpoints = {
       tpm: 30_000_000,
     },
     ptbEnabled: true,
+    responseFormat: "GOOGLE",
     endpointConfigs: {
       "*": {},
     },

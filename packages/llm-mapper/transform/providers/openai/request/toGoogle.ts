@@ -356,7 +356,15 @@ function parseArguments(
   }
 
   try {
-    return JSON.parse(value);
+    const parsed = JSON.parse(value);
+
+    // If the parsed value is a primitive (number, string, boolean, null), wrap it
+    // Google's API requires functionResponse.response to be an object (Struct)
+    if (typeof parsed !== 'object' || parsed === null) {
+      return { result: parsed };
+    }
+
+    return parsed;
   } catch {
     return { raw: value };
   }

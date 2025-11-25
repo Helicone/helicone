@@ -1,13 +1,17 @@
 import {
   OpenAIChoice,
+  OpenAIFinishReason,
   OpenAIResponseBody,
+  OpenAIResponseMessage,
   OpenAIToolCall,
   OpenAIUsage,
 } from "../../../types/openai";
 import {
   GoogleCandidate,
-  GoogleContentPart,
+  GoogleContent,
+  GoogleFunctionCall,
   GoogleResponseBody,
+  GoogleTokenDetail,
   GoogleUsageMetadata,
 } from "../../../types/google";
 
@@ -19,15 +23,13 @@ export function toOpenAI(
   const model = response.modelVersion ?? "google/gemini";
   const choices = mapCandidates(response.candidates ?? []);
 
-  const usage = mapGoogleUsage(response.usageMetadata);
-
   return {
     id: response.responseId ?? response.name ?? `chatcmpl-gemini-${created}`,
     object: "chat.completion",
     created,
     model,
     choices,
-    usage,
+    usage: response.usageMetadata ? mapGoogleUsage(response.usageMetadata) : {} as OpenAIUsage,
     system_fingerprint: model,
   };
 }
@@ -40,7 +42,7 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
         message: {
           role: "assistant",
           content: null,
-        },
+        } as OpenAIResponseMessage,
         finish_reason: "stop",
         logprobs: null,
       },
@@ -48,14 +50,20 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
   }
 
   return candidates.map((candidate, index) => {
-    const { content, tool_calls } = extractContent(candidate.content);
+    let content: string[] = [];
+    let tool_calls: OpenAIToolCall[] = [];
+    if (candidate.content) {
+      const { content: extracted_content, tool_calls: extracted_tool_calls } = extractContent(candidate.content);
+      content = extracted_content;
+      tool_calls = extracted_tool_calls;
+    }
     return {
       index: candidate.index ?? index,
       message: {
         role: "assistant",
         content: content.length > 0 ? content.join("") : null,
         ...(tool_calls.length > 0 && { tool_calls }),
-      },
+      } as OpenAIResponseMessage,
       finish_reason: mapGoogleFinishReason(candidate.finishReason),
       logprobs: null,
     };
@@ -63,13 +71,9 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
 }
 
 function extractContent(
-  content: GoogleCandidate["content"]
+  content: GoogleContent | GoogleContent[]
 ): { content: string[]; tool_calls: OpenAIToolCall[] } {
-  const contents = Array.isArray(content)
-    ? content
-    : content
-      ? [content]
-      : [];
+  const contents = Array.isArray(content) ? content : [content];
   const textParts: string[] = [];
   const toolCalls: OpenAIToolCall[] = [];
 
@@ -97,7 +101,7 @@ function extractContent(
 }
 
 function mapToolCall(
-  call: GoogleContentPart["functionCall"],
+  call: GoogleFunctionCall,
   index: number
 ): OpenAIToolCall {
   return {
@@ -110,31 +114,91 @@ function mapToolCall(
   };
 }
 
-export function mapGoogleUsage(usage?: GoogleUsageMetadata): OpenAIUsage {
-  const prompt =
-    usage?.promptTokenCount ?? usage?.promptTokens ?? usage?.totalTokenCount ?? 0;
+export function mapGoogleUsage(usage: GoogleUsageMetadata): OpenAIUsage {
+  const aggregateModalityTokens = (
+    ...details: Array<GoogleTokenDetail[] | undefined>
+  ): Partial<Record<GoogleTokenDetail["modality"], number>> => {
+    const totals: Partial<Record<GoogleTokenDetail["modality"], number>> = {};
+
+    for (const detailList of details) {
+      for (const detail of detailList ?? []) {
+        if (!detail) {
+          continue;
+        }
+        const modality = detail.modality;
+        const tokenCount = detail.tokenCount ?? 0;
+        totals[modality] = (totals[modality] ?? 0) + tokenCount;
+      }
+    }
+
+    return totals;
+  };
+
+  const sumTokens = (details?: GoogleTokenDetail[]): number =>
+    details?.reduce((total, detail) => total + (detail?.tokenCount ?? 0), 0) ??
+    0;
+
+  const sumTokensByModality = (
+    details: GoogleTokenDetail[] | undefined,
+    modality: GoogleTokenDetail["modality"]
+  ): number =>
+    details?.reduce(
+      (total, detail) =>
+        total + (detail?.modality === modality ? detail.tokenCount ?? 0 : 0),
+      0
+    ) ?? 0;
+
+  const toolUsePromptTokens = usage.toolUsePromptTokenCount ?? 0;
+  const reasoningTokens = usage.thoughtsTokenCount ?? 0;
+  const prompt = (usage.promptTokenCount ?? 0) + toolUsePromptTokens;
   const completion =
-    usage?.candidatesTokenCount ??
-    usage?.candidatesTokens ??
-    Math.max(usage?.totalTokenCount ?? 0 - prompt, 0);
-  const total = usage?.totalTokenCount ?? prompt + completion;
+    (usage.candidatesTokenCount || 0) + reasoningTokens;
+
+  console.log("Initial completion tokens:", completion);
+  const total = usage.totalTokenCount
+  console.log("Initial total tokens:", total);
+
+  const promptAudioTokens =
+    sumTokensByModality(usage.promptTokenDetails, "AUDIO") +
+    sumTokensByModality(usage.toolUsePromptTokensDetails, "AUDIO") +
+    sumTokensByModality(usage.cacheTokenDetails, "AUDIO");
+
+  const completionModalityTotals = aggregateModalityTokens(
+    usage.candidatesTokensDetails
+  );
+
+  const completionAudioTokens =
+    completionModalityTotals.AUDIO ??
+    sumTokensByModality(usage.candidatesTokensDetails, "AUDIO");
+
+  const cachedTokens =
+    usage.cachedContentTokenCount ?? sumTokens(usage.cacheTokenDetails);
 
   return {
     prompt_tokens: prompt,
     completion_tokens: completion,
     total_tokens: total,
     completion_tokens_details: {
-      reasoning_tokens: 0,
-      audio_tokens: 0,
+      reasoning_tokens: reasoningTokens,
+      audio_tokens: completionAudioTokens,
       accepted_prediction_tokens: 0,
       rejected_prediction_tokens: 0,
+    },
+    prompt_tokens_details: {
+      audio_tokens: promptAudioTokens,
+      cached_tokens: cachedTokens,
+      cache_write_tokens: 0,
+      cache_write_details: {
+        write_5m_tokens: 0,
+        write_1h_tokens: 0,
+      },
     },
   };
 }
 
 export function mapGoogleFinishReason(
   reason?: string
-): OpenAIChoice["finish_reason"] {
+): OpenAIFinishReason {
   switch (reason) {
     case "STOP":
       return "stop";

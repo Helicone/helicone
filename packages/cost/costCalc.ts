@@ -54,12 +54,13 @@ export function modelCostBreakdownFromRegistry(params: {
   providerModelId: string;
   requestCount?: number;
 }): CostBreakdown | null {
+  console.log("Calculating model cost breakdown from registry with params:", params);
   const breakdown = calculateModelCostBreakdown({
     modelUsage: params.modelUsage,
     providerModelId: params.providerModelId,
     provider: params.provider,
     requestCount: params.requestCount,
   });
-  
+
   return breakdown;
 }

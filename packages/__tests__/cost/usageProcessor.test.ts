@@ -4,6 +4,7 @@ import { AnthropicUsageProcessor } from "@helicone-package/cost/usage/anthropicU
 import { GroqUsageProcessor } from "@helicone-package/cost/usage/groqUsageProcessor";
 import { XAIUsageProcessor } from "@helicone-package/cost/usage/xaiUsageProcessor";
 import { DeepSeekUsageProcessor } from "@helicone-package/cost/usage/deepseekUsageProcessor";
+import { GoogleUsageProcessor } from "@helicone-package/cost/usage/googleUsageProcessor";
 import {
   VertexUsageProcessor,
   VertexOpenAIUsageProcessor,
@@ -21,6 +22,11 @@ describe("getUsageProcessor", () => {
   it("should return AnthropicUsageProcessor for anthropic provider", () => {
     const processor = getUsageProcessor("anthropic");
     expect(processor).toBeInstanceOf(AnthropicUsageProcessor);
+  });
+
+  it("should return GoogleUsageProcessor for google ai provider", () => {
+    const processor = getUsageProcessor("google-ai-studio");
+    expect(processor).toBeInstanceOf(GoogleUsageProcessor);
   });
 
   it("should return OpenAIUsageProcessor for xai provider", () => {
@@ -51,6 +57,37 @@ describe("getUsageProcessor", () => {
   it("should return null for unsupported provider", () => {
     const processor = getUsageProcessor("unsupported-provider" as any);
     expect(processor).toBeNull();
+  });
+
+  it("should parse native google usage metadata", async () => {
+    const processor = new GoogleUsageProcessor();
+    const mockGoogleResponse = {
+      usageMetadata: {
+        promptTokenCount: 6,
+        candidatesTokenCount: 19,
+        totalTokenCount: 60,
+        thoughtsTokenCount: 35,
+        promptTokensDetails: [{ modality: "TEXT", tokenCount: 6 }],
+        candidatesTokensDetails: [{ modality: "TEXT", tokenCount: 19 }],
+      },
+      modelVersion: "gemini-2.5-flash",
+      responseId: "abc",
+      name: "abc",
+      candidates: [],
+    };
+
+    const result = await processor.parse({
+      responseBody: JSON.stringify(mockGoogleResponse),
+      isStream: false,
+      model: "gemini-2.5-flash",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 6,
+      output: 19,
+      thinking: 35,
+    });
   });
 });
 
@@ -555,6 +592,78 @@ describe("VertexUsageProcessor", () => {
       output: 45, // completion_tokens (50) - audio_tokens (5)
       thinking: 20,
       audio: 5,
+    });
+  });
+
+  it("should keep modality-specific counts for vertex responses", async () => {
+    const mockVertexResponse = {
+      usage: {
+        prompt_tokens: 200,
+        completion_tokens: 120,
+        prompt_tokens_details: {
+          cached_tokens: 20,
+          audio_tokens: 10,
+          image_tokens: 5,
+          video_tokens: 15,
+        },
+        completion_tokens_details: {
+          audio_tokens: 8,
+          image_tokens: 2,
+          video_tokens: 4,
+        },
+      },
+    };
+
+    const result = await vertexProcessor.parse({
+      responseBody: JSON.stringify(mockVertexResponse),
+      isStream: false,
+      model: "gemini-2.5-flash",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 150, // prompt_tokens (200) - cached (20) - audio (10) - image (5) - video (15)
+      output: 106, // completion_tokens (120) - audio (8) - image (2) - video (4)
+      cacheDetails: {
+        cachedInput: 20,
+      },
+      audio: 18, // prompt audio (10) + completion audio (8)
+      image: 7, // prompt image (5) + completion image (2)
+      video: 19, // prompt video (15) + completion video (4)
+    });
+  });
+
+  it("should parse native google usageMetadata from vertex responses", async () => {
+    const mockGoogleResponse = {
+      usageMetadata: {
+        promptTokenCount: 6,
+        candidatesTokenCount: 19,
+        totalTokenCount: 60,
+        thoughtsTokenCount: 35,
+        promptTokensDetails: [
+          { modality: "TEXT", tokenCount: 6 },
+        ],
+        candidatesTokensDetails: [
+          { modality: "TEXT", tokenCount: 19 },
+        ],
+      },
+      modelVersion: "gemini-2.5-flash",
+      responseId: "abc",
+      name: "abc",
+      candidates: [],
+    };
+
+    const result = await vertexProcessor.parse({
+      responseBody: JSON.stringify(mockGoogleResponse),
+      isStream: false,
+      model: "gemini-2.5-flash",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 6,
+      output: 19,
+      thinking: 35,
     });
   });
 });

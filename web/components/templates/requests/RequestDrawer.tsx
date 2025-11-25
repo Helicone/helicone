@@ -157,6 +157,23 @@ export default function RequestDrawer(props: RequestDivProps) {
     request?.id || "",
   );
 
+  const sanitizeTargetUrl = useCallback((url: string) => {
+    try {
+      const parsed = new URL(url);
+      const keyParam = parsed.searchParams.get("key");
+      if (keyParam) {
+        const masked = keyParam.startsWith("AI")
+          ? `${keyParam.slice(0, 3)}...`
+          : `${keyParam.slice(0, 1)}...`;
+        parsed.searchParams.set("key", masked);
+        return parsed.toString();
+      }
+    } catch {
+      // Fall through to return the original URL if parsing fails
+    }
+    return url;
+  }, []);
+
   // BACKWARDS COMPATABILITY FOR OLD PROMPTS
   const legacyPromptId = useMemo(
     () =>
@@ -239,9 +256,11 @@ export default function RequestDrawer(props: RequestDivProps) {
     ];
 
     if (request.heliconeMetadata.targetUrl) {
+      const safeUrl = sanitizeTargetUrl(request.heliconeMetadata.targetUrl);
       requestInfo.push({
         label: "Target URL",
-        value: request.heliconeMetadata.targetUrl,
+        value: safeUrl,
+        fullValue: safeUrl,
       });
     }
 
