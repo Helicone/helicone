@@ -37,7 +37,11 @@ export class BedrockProvider extends BaseProvider {
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     const region = endpoint.userConfig.region || "us-east-1";
     const modelId = this.getModelId(endpoint.modelConfig, endpoint.userConfig);
-    return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/invoke`;
+    const isStreaming = requestParams.isStreaming === true;
+    const endpointMethod = isStreaming
+      ? "invoke-with-response-stream"
+      : "invoke";
+    return `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/${endpointMethod}`;
   }
 
   buildModelId(
@@ -109,9 +113,13 @@ export class BedrockProvider extends BaseProvider {
     if (endpoint.providerModelId.includes("claude-")) {
       const anthropicBody =
         context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(context.parsedBody, endpoint.providerModelId)
+          ? context.toAnthropic(
+              context.parsedBody,
+              endpoint.providerModelId,
+              { includeCacheBreakpoints: false }
+            )
           : context.parsedBody;
-      
+
       const updatedBody = {
         ...anthropicBody,
         anthropic_version: "bedrock-2023-05-31",
@@ -128,11 +136,18 @@ export class BedrockProvider extends BaseProvider {
     });
   }
 
-  async buildErrorMessage(response: Response): Promise<string> {
-    const respJson = (await response.json()) as any;
-    if (respJson.message) {
-      return respJson.message;
+  async buildErrorMessage(response: Response): Promise<{
+    message: string;
+    details?: any;
+  }> {
+    try {
+      const respJson = (await response.json()) as any;
+      if (respJson.message) {
+        return { message: respJson.message, details: respJson };
+      }
+      return { message: `Failed request with status ${response.status}` };
+    } catch (error) {
+      return { message: `Request failed with status ${response.status}` };
     }
-    return `Failed request with status ${response.status}`;
   }
 }

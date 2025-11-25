@@ -56,10 +56,10 @@ const Stats = ({
       <div
         className={cn(
           ISLAND_WIDTH,
-          "flex justify-between items-start pt-0 pb-32"
+          "flex justify-between items-start pt-8 md:pt-12 pb-12 md:pb-16"
         )}
       >
-        <h1 className="gap-y-4 text-3xl md:text-6xl font-semibold !leading-[150%] text-black max-w-[1100px] text-wrap">
+        <h1 className="gap-y-4 text-2xl md:text-6xl font-semibold !leading-[150%] text-black max-w-[1100px] text-wrap">
           Today,{" "}
           <span
             ref={elementRef}

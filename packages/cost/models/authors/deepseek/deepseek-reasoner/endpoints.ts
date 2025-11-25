@@ -65,7 +65,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3, // Fallback priority
     endpointConfigs: {
       "*": {},
     },
@@ -103,6 +102,41 @@ export const endpoints = {
       "seed",
       "min_p",
       "response_format",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "deepseek-tng-r1t2-chimera:chutes": {
+    provider: "chutes",
+    author: "deepseek",
+    providerModelId: "tngtech/DeepSeek-TNG-R1T2-Chimera",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003, // $0.30 per 1M tokens
+        output: 0.0000012 // $1.20 per 1M tokens
+      },
+    ],
+    contextLength: 130_000,
+    maxCompletionTokens: 163_840,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "logprobs",
+      "logit_bias",
+      "top_logprobs",
+      "functions",
+      "tools"
     ],
     ptbEnabled: true,
     endpointConfigs: {

@@ -43,6 +43,11 @@ describe("getUsageProcessor", () => {
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
   });
 
+  it("should return OpenAIUsageProcessor for mistral provider", () => {
+    const processor = getUsageProcessor("mistral");
+    expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
+  });
+
   it("should return null for unsupported provider", () => {
     const processor = getUsageProcessor("unsupported-provider" as any);
     expect(processor).toBeNull();
@@ -334,7 +339,7 @@ describe("XAI/Grok specific features", () => {
     expect(result.error).toBeNull();
     expect(result.data).toEqual({
       input: 45, // text_tokens (45)
-      output: 35, // completion_tokens (120) - XAI excludes reasoning from this (new behavior)
+      output: 120, // completion_tokens (120) - XAI doesn't include reasoning in completion_tokens
       cacheDetails: {
         cachedInput: 5,
       },

@@ -30,21 +30,65 @@ import {
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { atLeastZero } from "../utils/helicone_math";
+import { tryToGetSize } from "../../utils/tryGetSize";
 
-type S3Record = {
+type RequestRecord = {
   requestId: string;
   organizationId: string;
   requestBody: string;
   responseBody: string;
-  assets: Map<string, string>;
+  location: "s3" | "clickhouse";
 };
 
+// Legacy type definitions for deleted tables
+export interface ResponseInsert {
+  id: string;
+  request: string;
+  helicone_org_id: string | null;
+  status: number | null;
+  model: string | null | undefined;
+  completion_tokens: number | null | undefined;
+  prompt_tokens: number | null | undefined;
+  prompt_cache_write_tokens?: number | null | undefined;
+  prompt_cache_read_tokens?: number | null | undefined;
+  time_to_first_token: number | null | undefined;
+  delay_ms: number | null | undefined;
+  created_at: string;
+}
+
+export interface RequestInsert {
+  id: string;
+  path: string;
+  auth_hash: string;
+  user_id: string | null;
+  prompt_id: string | null;
+  properties: Record<string, string>;
+  helicone_user: string | null;
+  helicone_api_key_id: number | null;
+  helicone_org_id: string | null;
+  provider: string;
+  helicone_proxy_key_id: string | null;
+  model: string | null | undefined;
+  model_override: string | null;
+  threat: boolean | null;
+  target_url: string;
+  country_code: string | null;
+  created_at: string;
+}
+
+export interface AssetInsert {
+  id: string;
+  request_id: string;
+  organization_id: string;
+  created_at: string;
+}
+
 export type BatchPayload = {
-  responses: Database["public"]["Tables"]["response"]["Insert"][];
-  requests: Database["public"]["Tables"]["request"]["Insert"][];
+  responses: ResponseInsert[];
+  requests: RequestInsert[];
   prompts: PromptRecord[];
-  assets: Database["public"]["Tables"]["asset"]["Insert"][];
-  s3Records: S3Record[];
+  assets: AssetInsert[];
+  s3Records: RequestRecord[];
   requestResponseVersionedCH: RequestResponseRMT[];
   cacheMetricCH: CacheMetricSMT[];
   promptInputs: Prompt2025Input[];
@@ -64,6 +108,8 @@ const maxContentLength = 2_000_000;
 const maxResponseLength = 100_000;
 const MAX_CONTENT_LENGTH = maxContentLength * avgTokenLength; // 2 MB
 const MAX_RESPONSE_LENGTH = maxResponseLength * avgTokenLength; // 100k
+
+const S3_MIN_SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB in bytes
 
 function cleanAndTruncateString(text: string, maxLength: number): string {
   return text
@@ -112,9 +158,19 @@ export class LoggingHandler extends AbstractLogHandler {
     });
     // Perform all mappings first and check for failures before updating the batch payload
     try {
+      // rough estimate of size
+      const size = tryToGetSize({
+        b1: context.processedLog.request.body,
+        b2: context.processedLog.response.body,
+      });
+
+      context.sizeBytes = size ?? 0;
+      // if we know size is def less than 10mb use clickhouse otherwise just stick to s3
+      context.storageLocation =
+        size && size <= S3_MIN_SIZE_THRESHOLD ? "clickhouse" : "s3";
+
       const requestMapped = this.mapRequest(context);
       const responseMapped = this.mapResponse(context);
-      const assetsMapped = this.mapAssets(context).slice(0, 100);
 
       const s3RecordMapped = this.mapS3Records(context);
 
@@ -131,7 +187,8 @@ export class LoggingHandler extends AbstractLogHandler {
       if (
         requestMapped.user_id !== HELICONE_PLAYGROUND_USER_ID &&
         context.orgParams &&
-        !context.orgParams.has_integrated &&
+        (!context.orgParams.has_integrated ||
+          !context.orgParams.has_onboarded) &&
         context.orgParams.id
       ) {
         this.batchPayload.orgsToMarkAsIntegrated.add(context.orgParams.id);
@@ -170,7 +227,6 @@ export class LoggingHandler extends AbstractLogHandler {
 
       this.batchPayload.requests.push(requestMapped);
       this.batchPayload.responses.push(responseMapped);
-      this.batchPayload.assets.push(...assetsMapped);
 
       if (
         context.processedLog.request.scores &&
@@ -184,7 +240,7 @@ export class LoggingHandler extends AbstractLogHandler {
         });
       }
 
-      if (s3RecordMapped) {
+      if (s3RecordMapped && context.storageLocation === "s3") {
         this.batchPayload.s3Records.push(s3RecordMapped);
       }
 
@@ -247,6 +303,11 @@ export class LoggingHandler extends AbstractLogHandler {
 
   async uploadToS3(): PromiseGenericResult<string> {
     const uploadPromises = this.batchPayload.s3Records.map(async (s3Record) => {
+      if (s3Record.location === "clickhouse") {
+        return ok(
+          `Skipping S3 upload for request ID ${s3Record.requestId} as location is clickhouse`
+        );
+      }
       const key = this.s3Client.getRequestResponseKey(
         s3Record.requestId,
         s3Record.organizationId
@@ -267,20 +328,7 @@ export class LoggingHandler extends AbstractLogHandler {
         );
       }
 
-      // Optionally upload assets if they exist
-      if (s3Record.assets && s3Record.assets.size > 0) {
-        const imageUploadRes = await this.storeRequestResponseImage(
-          s3Record.organizationId,
-          s3Record.requestId,
-          s3Record.assets
-        );
-
-        if (imageUploadRes.error) {
-          return err(
-            `Failed to store request response images: ${imageUploadRes.error}`
-          );
-        }
-      }
+      // Note: Assets are no longer uploaded to S3, they remain in request/response bodies as raw data
 
       return ok(`S3 upload successful for request ID ${s3Record.requestId}`);
     });
@@ -290,94 +338,6 @@ export class LoggingHandler extends AbstractLogHandler {
     // TODO: How to handle errors here?
 
     return ok("All S3 uploads successful");
-  }
-
-  private async storeRequestResponseImage(
-    organizationId: string,
-    requestId: string,
-    assets: Map<string, string>
-  ): PromiseGenericResult<string> {
-    const uploadPromises: Promise<void>[] = Array.from(assets.entries()).map(
-      ([assetId, imageUrl]) =>
-        this.handleImageUpload(assetId, imageUrl, requestId, organizationId)
-    );
-
-    await Promise.allSettled(uploadPromises);
-
-    return ok("Images uploaded successfully");
-  }
-
-  private isBase64Image(imageUrl: string): boolean {
-    const MIN_BASE64_LENGTH = 24;
-    const dataUriPattern = /^\s*data:image\/[a-zA-Z]+;base64,/;
-    const base64OnlyPattern = /^[A-Za-z0-9+/=]+\s*$/;
-
-    if (dataUriPattern.test(imageUrl)) {
-      return true;
-    }
-
-    return (
-      base64OnlyPattern.test(imageUrl) && imageUrl.length >= MIN_BASE64_LENGTH
-    );
-  }
-
-  private async handleImageUpload(
-    assetId: string,
-    imageUrl: string,
-    requestId: string,
-    organizationId: string
-  ): Promise<void> {
-    try {
-      if (this.isBase64Image(imageUrl)) {
-        const [assetType, base64Data] = this.extractBase64Data(imageUrl);
-        const buffer = Buffer.from(base64Data, "base64");
-        await this.s3Client.uploadBase64ToS3(
-          buffer,
-          assetType,
-          requestId,
-          organizationId,
-          assetId
-        );
-      } else {
-        const response = await fetch(imageUrl, {
-          headers: {
-            "User-Agent": "Helicone-Worker (https://helicone.ai)",
-          },
-        });
-        if (!response.ok) {
-          throw new Error(`Failed to download image: ${response.statusText}`);
-        }
-        const blob = await response.blob();
-        await this.s3Client.uploadImageToS3(
-          blob,
-          requestId,
-          organizationId,
-          assetId
-        );
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      // If we fail to upload an image, we don't want to fail logging the request
-    }
-  }
-
-  private extractBase64Data(dataUri: string): [string, string] {
-    const dataUriRegex =
-      /^data:(image\/(?:png|jpeg|jpg|gif|webp|svg\+xml));base64,([A-Za-z0-9+/=]+)$/;
-    const base64Regex = /^([A-Za-z0-9+/=]+)$/;
-
-    let matches = dataUri.match(dataUriRegex);
-    if (matches && matches.length === 3) {
-      return [matches[1], matches[2]];
-    }
-
-    matches = dataUri.match(base64Regex);
-    if (matches && matches.length === 2) {
-      return ["image/jpeg", matches[1]];
-    }
-
-    console.error("Invalid or unsupported base64 image data:", dataUri);
-    return ["", ""];
   }
 
   async logToClickhouse(): PromiseGenericResult<string> {
@@ -414,46 +374,23 @@ export class LoggingHandler extends AbstractLogHandler {
     }
   }
 
-  mapS3Records(context: HandlerContext): S3Record | null {
+  mapS3Records(context: HandlerContext): RequestRecord | null {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
-    const assets = context.processedLog.assets;
 
     if (!orgParams?.id) {
       return null;
     }
 
-    const s3Record: S3Record = {
+    const s3Record: RequestRecord = {
       requestId: request.id,
       organizationId: orgParams.id,
       requestBody: context.processedLog.request.body,
       responseBody: context.processedLog.response.body,
-      assets: assets ?? new Map(),
+      location: context.storageLocation ?? "s3",
     };
 
     return s3Record;
-  }
-
-  mapAssets(
-    context: HandlerContext
-  ): Database["public"]["Tables"]["asset"]["Insert"][] {
-    const request = context.message.log.request;
-    const orgParams = context.orgParams;
-    const assets = context.processedLog.assets;
-
-    if (!orgParams?.id || !assets || assets.size === 0) {
-      return [];
-    }
-
-    const assetInserts: Database["public"]["Tables"]["asset"]["Insert"][] =
-      Array.from(assets.entries()).map(([assetId]) => ({
-        id: assetId,
-        request_id: request.id,
-        organization_id: orgParams.id,
-        created_at: request.requestCreatedAt.toISOString(),
-      }));
-
-    return assetInserts;
   }
 
   mapExperimentCellValues(context: HandlerContext): ExperimentCellValue | null {
@@ -558,11 +495,11 @@ export class LoggingHandler extends AbstractLogHandler {
     // set cost to zero if we cannot calculate it from the new usage processor+registry
     // rather than falling back to legacy usage cost
     if (context.message.heliconeMeta.providerModelId) {
+      rawCost = atLeastZero(context.costBreakdown?.totalCost ?? 0);
+    } else {
       rawCost = atLeastZero(
         context.costBreakdown?.totalCost ?? context.legacyUsage.cost ?? 0
       );
-    } else {
-      rawCost = atLeastZero(context.legacyUsage.cost ?? 0);
     }
     const cost = Math.round(rawCost * COST_PRECISION_MULTIPLIER);
 
@@ -608,9 +545,7 @@ export class LoggingHandler extends AbstractLogHandler {
         context.message.heliconeMeta.gatewayProvider ?? request.provider ?? "",
       country_code: request.countryCode ?? "",
       properties: context.processedLog.request.properties ?? {},
-      assets: context.processedLog.assets
-        ? Array.from(context.processedLog.assets.keys())
-        : [],
+      assets: [],
       scores: Object.fromEntries(
         Object.entries(context.processedLog.request.scores ?? {}).map(
           ([key, value]) => [key, +(value ?? 0)]
@@ -626,8 +561,10 @@ export class LoggingHandler extends AbstractLogHandler {
       request_referrer: context.message.log.request.requestReferrer ?? "",
       is_passthrough_billing:
         context.message.heliconeMeta.isPassthroughBilling ?? false,
-      gateway_endpoint_version:
-        context.message.heliconeMeta.gatewayEndpointVersion ?? "",
+      ai_gateway_body_mapping:
+        context.message.heliconeMeta.aiGatewayBodyMapping ?? "",
+      storage_location: context.storageLocation ?? "s3",
+      size_bytes: context.sizeBytes ?? 0,
     };
 
     return requestResponseLog;
@@ -690,6 +627,12 @@ export class LoggingHandler extends AbstractLogHandler {
     responseText: string;
   } {
     try {
+      if (context.storageLocation === "clickhouse") {
+        return {
+          requestText: JSON.stringify(context.processedLog.request.body),
+          responseText: JSON.stringify(context.processedLog.response.body),
+        };
+      }
       const mappedContent = heliconeRequestToMappedContent(
         toHeliconeRequest(context)
       );
@@ -773,9 +716,7 @@ export class LoggingHandler extends AbstractLogHandler {
     }
   }
 
-  mapResponse(
-    context: HandlerContext
-  ): Database["public"]["Tables"]["response"]["Insert"] {
+  mapResponse(context: HandlerContext): ResponseInsert {
     const response = context.message.log.response;
     const processedResponse = context.processedLog.response;
     const orgParams = context.orgParams;
@@ -791,7 +732,7 @@ export class LoggingHandler extends AbstractLogHandler {
       context.usage,
       context.legacyUsage
     );
-    const responseInsert: Database["public"]["Tables"]["response"]["Insert"] = {
+    const responseInsert: ResponseInsert = {
       id: response.id,
       request: context.message.log.request.id,
       helicone_org_id: orgParams?.id ?? null,
@@ -810,16 +751,14 @@ export class LoggingHandler extends AbstractLogHandler {
     return responseInsert;
   }
 
-  mapRequest(
-    context: HandlerContext
-  ): Database["public"]["Tables"]["request"]["Insert"] {
+  mapRequest(context: HandlerContext): RequestInsert {
     const request = context.message.log.request;
     const orgParams = context.orgParams;
     const authParams = context.authParams;
     const heliconeMeta = context.message.heliconeMeta;
     const processedRequest = context.processedLog.request;
 
-    const requestInsert: Database["public"]["Tables"]["request"]["Insert"] = {
+    const requestInsert: RequestInsert = {
       id: request.id,
       path: request.path,
       auth_hash: "",

@@ -2,10 +2,14 @@ import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 import {
   HeliconeChatCreateParams,
   HeliconeChatCreateParamsStreaming,
+  HeliconePromptParams,
 } from "./types";
 import {
   Prompt2025Version,
   ValidationError,
+  PromptPartialVariable,
+  HeliconeChatCompletionMessageParam,
+  HeliconeChatCompletionContentPart,
 } from "@helicone-package/prompts/types";
 import { ChatCompletionCreateParams } from "openai/resources/chat/completions";
 
@@ -29,7 +33,7 @@ export class HeliconePromptManager {
    * @returns Object containing the compiled prompt body and any validation/substitution errors
    */
   async pullPromptVersion(
-    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming
+    params: HeliconePromptParams
   ): Promise<Prompt2025Version> {
     const { prompt_id, version_id, environment } = params;
     
@@ -53,7 +57,7 @@ export class HeliconePromptManager {
    * @returns The raw prompt body from storage
    */
   async pullPromptBody(
-    params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming
+    params: HeliconePromptParams
   ): Promise<ChatCompletionCreateParams> {
     try {
       const promptVersion = await this.pullPromptVersion(params);
@@ -87,17 +91,97 @@ export class HeliconePromptManager {
   }
 
   /**
+   * Extracts all prompt partial variables from a source prompt body.
+   * @param sourcePromptBody - The source prompt body to extract prompt partial variables from
+   * @returns Array of unique prompt partial variables found in the body
+   */
+  extractPromptPartials(
+    sourcePromptBody: ChatCompletionCreateParams
+  ): PromptPartialVariable[] {
+    const allPartialVariables: PromptPartialVariable[] = [];
+    const seenPartials = new Set<string>();
+
+    // extract prompt partial variables from all messages
+    const messages = sourcePromptBody.messages || [];
+    for (const message of messages) {
+      if (typeof message.content === "string") {
+        const partialVars = HeliconeTemplateManager.extractPromptPartialVariables(
+          message.content
+        );
+        
+        for (const partialVar of partialVars) {
+          if (!seenPartials.has(partialVar.raw)) {
+            seenPartials.add(partialVar.raw);
+            allPartialVariables.push(partialVar);
+          }
+        }
+      } else if (Array.isArray(message.content)) {
+        // extract prompt partial variables from text parts in content arrays
+        for (const contentPart of message.content) {
+          if (contentPart.type === "text") {
+            const partialVars = HeliconeTemplateManager.extractPromptPartialVariables(
+              contentPart.text
+            );
+            
+            for (const partialVar of partialVars) {
+              if (!seenPartials.has(partialVar.raw)) {
+                seenPartials.add(partialVar.raw);
+                allPartialVariables.push(partialVar);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return allPartialVariables;
+  }
+
+  getPromptPartialSubstitutionValue(
+    promptPartial: PromptPartialVariable,
+    sourceBody: ChatCompletionCreateParams
+  ): string {
+    if (!sourceBody.messages || promptPartial.index < 0) {
+      return "";
+    }
+    
+    const chosenMessage = sourceBody.messages[promptPartial.index];
+    if (!chosenMessage) {
+      return "";
+    }
+    
+    if (typeof chosenMessage.content === "string") {
+      return chosenMessage.content;
+    } else if (Array.isArray(chosenMessage.content)) {
+      return chosenMessage.content
+        .map((contentPart) => {
+          if (contentPart.type === "text" && contentPart.text) {
+            return contentPart.text;
+          }
+          return "";
+        })
+        .filter((text) => text.length > 0)
+        .join(" ");
+    }
+    return "";
+  }
+
+  /**
    * Merge 
    * @param params - The chat completion parameters containing prompt_id, optional version_id, inputs, and other OpenAI parameters
+   * @param sourcePromptBody - The source prompt body to merge with
+   * @param promptPartialInputs - Optional map of prompt partial inputs for substitution (if not provided, prompt partials will not be substituted)
    * @returns Object containing the compiled prompt body and any validation/substitution errors
    */
   async mergePromptBody(
     params: HeliconeChatCreateParams | HeliconeChatCreateParamsStreaming,
     sourcePromptBody: ChatCompletionCreateParams,
+    promptPartialInputs?: Record<string, any>
   ): Promise<{ body: ChatCompletionCreateParams; errors: ValidationError[] }> {
     const errors: ValidationError[] = [];
 
     const substitutionValues = params.inputs || {};
+    const partialInputs = promptPartialInputs || {};
 
     const mergedMessages = [
       ...(sourcePromptBody.messages || []),
@@ -108,7 +192,8 @@ export class HeliconePromptManager {
       if (typeof message.content === "string") {
         const substituted = HeliconeTemplateManager.substituteVariables(
           message.content,
-          substitutionValues
+          substitutionValues,
+          partialInputs
         );
         if (!substituted.success) {
           errors.push(...(substituted.errors || []));
@@ -116,6 +201,31 @@ export class HeliconePromptManager {
         return {
           ...message,
           content: substituted.success ? substituted.result : message.content,
+        };
+      } else if (Array.isArray(message.content)) {
+        // for content arrays, iterate and substitute each text part
+        const substitutedContentParts: HeliconeChatCompletionMessageParam["content"] = [];
+        for (const contentPart of message.content) {
+          if (contentPart.type === "text") {
+            const substituted = HeliconeTemplateManager.substituteVariables(
+              contentPart.text,
+              substitutionValues,
+              partialInputs
+            );
+            if (!substituted.success) {
+              errors.push(...(substituted.errors || []));
+            }
+            substitutedContentParts.push({
+              ...contentPart,
+              text: substituted.success ? substituted.result : contentPart.text,
+            });
+          } else {
+            substitutedContentParts.push(contentPart as HeliconeChatCompletionContentPart);
+          }
+        }
+        return {
+          ...message,
+          content: substitutedContentParts,
         };
       }
       return message;
@@ -177,7 +287,12 @@ export class HeliconePromptManager {
     }
 
     try {
-      const pulledPromptBody = await this.pullPromptBody(params); 
+      const pulledPromptBody = await this.pullPromptBody({
+        prompt_id: params.prompt_id,
+        version_id: params.version_id,
+        environment: params.environment,
+        inputs: params.inputs,
+      }); 
       return await this.mergePromptBody(params, pulledPromptBody);
     } catch (error) {
       console.error("Error getting prompt body:", error);

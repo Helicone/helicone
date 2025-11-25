@@ -1,26 +1,47 @@
 {
-  "name": "helicone-data-export",
+  "name": "@helicone/export",
   "version": "1.0.0",
   "description": "A command-line tool to export request/response data from Helicone's API",
-  "main": "index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "helicone-export": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
-    "start": "ts-node index.ts",
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "helicone",
     "export",
     "data",
-    "cli"
+    "cli",
+    "observability",
+    "llm",
+    "analytics"
   ],
-  "author": "",
+  "author": "Helicone, Inc.",
   "license": "MIT",
-  "dependencies": {
-    "typescript": "^5.0.0",
-    "ts-node": "^10.9.0"
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Helicone/helicone.git",
+    "directory": "examples/export/typescript"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.0.0"
   }
 }

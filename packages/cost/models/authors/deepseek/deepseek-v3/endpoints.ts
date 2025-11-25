@@ -50,6 +50,9 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000027, // $0.27 per 1M tokens
         output: 0.000001, // $1.00 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.8, // $0.216 per 1M tokens (cached) = $0.27 * 0.8
+        },
       },
     ],
     contextLength: 128_000,
@@ -106,7 +109,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3, // Fallback priority
     endpointConfigs: {
       "*": {},
     },

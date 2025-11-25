@@ -30,14 +30,9 @@ export const getInitialColumns = (
       sortable: true,
       minSize: 250,
       render: (item) => {
-        const displayName =
-          item.prompt.name.length > 40
-            ? item.prompt.name.substring(0, 37) + "..."
-            : item.prompt.name;
-
         return (
           <span className="text-sm font-medium text-foreground">
-            {displayName}
+            {item.prompt.name}
           </span>
         );
       },
@@ -78,9 +73,7 @@ export const getInitialColumns = (
       header: "Tags",
       sortable: false,
       minSize: 200,
-      render: (item) => (
-        <TagsSummary tags={item.prompt.tags} maxCharacters={20} />
-      ),
+      render: (item) => <TagsSummary tags={item.prompt.tags} />,
     },
     // TODO: ADD USAGE GRAPH
     // {

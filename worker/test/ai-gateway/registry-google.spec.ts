@@ -11,10 +11,25 @@ const googleAuthExpectations = {
   },
 };
 
+// Define auth expectations for Vertex
+const vertexAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 // Define auth expectations for DeepInfra
 const deepinfraAuthExpectations = {
   headers: {
     // DeepInfra uses Authorization header with Bearer token
+    Authorization: /^Bearer /,
+  },
+};
+
+// Define auth expectations for Chutes
+const chutesAuthExpectations = {
+  headers: {
+    // Chutes uses Authorization header with Bearer token
     Authorization: /^Bearer /,
   },
 };
@@ -47,17 +62,17 @@ describe("Google Registry Tests", () => {
           },
         }));
 
-      it("should auto-select google-ai-studio provider when none specified", () =>
+      it("should auto-select vertex provider when none specified", () =>
         runGatewayTest({
           model: "gemini-2.5-flash",
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
                 response: "success",
-                model: "gemini-2.5-flash",
+                model: "google/gemini-2.5-flash",
                 data: createOpenAIMockResponse("gemini-2.5-flash"),
-                expects: googleAuthExpectations,
+                expects: vertexAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -84,17 +99,17 @@ describe("Google Registry Tests", () => {
           },
         }));
 
-      it("should auto-select google-ai-studio provider when none specified", () =>
+      it("should auto-select vertex provider when none specified", () =>
         runGatewayTest({
           model: "gemini-2.5-flash-lite",
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
                 response: "success",
-                model: "gemini-2.5-flash-lite",
+                model: "google/gemini-2.5-flash-lite",
                 data: createOpenAIMockResponse("gemini-2.5-flash-lite"),
-                expects: googleAuthExpectations,
+                expects: vertexAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -121,17 +136,17 @@ describe("Google Registry Tests", () => {
           },
         }));
 
-      it("should auto-select google-ai-studio provider when none specified", () =>
+      it("should auto-select vertex provider when none specified", () =>
         runGatewayTest({
           model: "gemini-2.5-pro",
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
                 response: "success",
-                model: "gemini-2.5-pro",
+                model: "google/gemini-2.5-pro",
                 data: createOpenAIMockResponse("gemini-2.5-pro"),
-                expects: googleAuthExpectations,
+                expects: vertexAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -243,6 +258,143 @@ describe("Google Registry Tests", () => {
                 model: "google/gemma-3-12b-it",
                 data: createOpenAIMockResponse("google/gemma-3-12b-it"),
                 expects: deepinfraAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("gemma2-9b-it", () => {
+      it("should handle chutes provider", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: chutesAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select chutes provider when none specified", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: chutesAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle streaming requests", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          request: {
+            stream: true,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: {
+                  ...chutesAuthExpectations,
+                  bodyContains: ['"stream":true'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle supported parameters", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          request: {
+            maxTokens: 1000,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: {
+                  ...chutesAuthExpectations,
+                  bodyContains: ['"max_tokens":1000'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle temperature and top_p parameters", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Hello" }],
+              temperature: 0.7,
+              top_p: 0.9,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: {
+                  ...chutesAuthExpectations,
+                  bodyContains: ['"temperature":0.7', '"top_p":0.9'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle stop sequences and penalties", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Hello" }],
+              stop: ["END", "STOP"],
+              frequency_penalty: 0.5,
+              presence_penalty: 0.3,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "success",
+                model: "unsloth/gemma-2-9b-it",
+                data: createOpenAIMockResponse("unsloth/gemma-2-9b-it"),
+                expects: {
+                  ...chutesAuthExpectations,
+                  bodyContains: ['"stop":["END","STOP"]'],
+                },
               },
             ],
             finalStatus: 200,
@@ -375,6 +527,88 @@ describe("Google Registry Tests", () => {
             providers: [
               {
                 url: "https://api.deepinfra.com/v1/openai/chat/completions",
+                response: "failure",
+                statusCode: 402,
+                errorMessage: "Quota exceeded",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("Chutes Error scenarios", () => {
+      it("should handle Chutes provider failure", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "Chutes service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from Chutes", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle Chutes authentication failure", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+
+      it("should handle model not found error on Chutes", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle quota exceeded error on Chutes", () =>
+        runGatewayTest({
+          model: "gemma2-9b-it/chutes",
+          expected: {
+            providers: [
+              {
+                url: "https://llm.chutes.ai/v1/chat/completions",
                 response: "failure",
                 statusCode: 402,
                 errorMessage: "Quota exceeded",

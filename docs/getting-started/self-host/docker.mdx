@@ -15,7 +15,7 @@ docker run -d --name helicone-all-in-one -p 3000:3000 -p 8585:8585 -p 5432:5432 
 
 ## Example to test the Jawn service
 ```bash
-curl --location 'https://localhost:8585/jawn/v1/gateway/oai/v1/completions' \
+curl --location 'http://localhost:8585/v1/gateway/oai/v1/completions' \
 --header "Content-Type: application/json" \
 --header "Authorization: Bearer {{OPENAI_API_KEY}}" \
 --header "Helicone-Auth: Bearer {{HELICONE_API_KEY}}" \

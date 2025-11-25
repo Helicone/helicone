@@ -4,6 +4,9 @@ sidebarTitle: "Anthropic"
 description: "Connect Helicone with Anthropic, a platform for running open-source language models. Monitor and optimize your AI applications using Anthropic's powerful models through a simple base_url configuration."
 "twitter:title": "Anthropic Integration - Helicone OSS LLM Observability"
 ---
+import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
+
+<LegacyWarning />
 
 <Tabs>
   <Tab title="Python">
@@ -32,7 +35,7 @@ description: "Connect Helicone with Anthropic, a platform for running open-sourc
 
    <Tab title="Node (TS)">
     **Node (TS)**
-    
+
     Change the api base and add a Helicone-Auth header
     ```typescript
   const anthropic = new Anthropic({

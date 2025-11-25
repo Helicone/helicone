@@ -49,30 +49,42 @@ export class VersionedRequestStore {
     return ok(result.data);
   }
 
-  // Updates the propeties column (JSONB) of the request table
-  // to include {property: value}
-  // and bumps the version column
-  private async putPropertyAndBumpVersion(
-    requestId: string,
-    property: string,
-    value: string
-  ) {
-    return await dbExecute<{
-      id: string;
-      version: number;
-      provider: string;
-      properties: Record<string, string>;
-    }>(
+  // DEPRECATED: This method previously updated the legacy Postgres request table.
+  // Now fetches from ClickHouse instead to get the existing properties and provider.
+  private async getRequestFromClickhouse(requestId: string): Promise<
+    Result<
+      {
+        id: string;
+        version: number;
+        provider: string;
+        properties: Record<string, string>;
+      },
+      string
+    >
+  > {
+    const result = await clickhouseDb.dbQuery<RequestResponseRMT>(
       `
-      UPDATE request
-      SET properties = properties || $1,
-          version = version + 1
-      WHERE helicone_org_id = $2
-      AND id = $3
-      RETURNING version, id, provider, properties
+      SELECT *
+      FROM request_response_rmt
+      WHERE request_id = {val_0: UUID}
+      AND organization_id = {val_1: String}
+      ORDER BY updated_at DESC
+      LIMIT 1
       `,
-      [{ [property]: value }, this.orgId, requestId]
+      [requestId, this.orgId]
     );
+
+    if (result.error || !result.data?.[0]) {
+      return err("Request not found in ClickHouse");
+    }
+
+    const row = result.data[0];
+    return ok({
+      id: row.request_id,
+      version: 1, // Version is not tracked in ClickHouse, defaulting to 1
+      provider: row.provider,
+      properties: row.properties || {},
+    });
   }
 
   // Updates the request_response_rmt table in Clickhouse
@@ -139,7 +151,9 @@ export class VersionedRequestStore {
         cache_enabled: row.cache_enabled,
         cache_reference_id: row.cache_reference_id,
         is_passthrough_billing: row.is_passthrough_billing,
-        gateway_endpoint_version: row.gateway_endpoint_version,
+        ai_gateway_body_mapping: row.ai_gateway_body_mapping,
+        storage_location: row.storage_location,
+        size_bytes: row.size_bytes,
       },
     ]);
 
@@ -208,24 +222,32 @@ export class VersionedRequestStore {
     property: string,
     value: string
   ): Promise<Result<null, string>> {
-    const request = await this.putPropertyAndBumpVersion(
-      requestId,
-      property,
-      value
-    );
+    // Fetch existing request from ClickHouse
+    const request = await this.getRequestFromClickhouse(requestId);
 
     if (request.error || !request.data) {
-      return request;
+      return err(request.error || "Request not found");
     }
 
-    const requestInClickhouse = await this.putPropertyIntoClickhouse(
-      request.data[0]
-    );
+    // Merge new property with existing properties
+    const updatedProperties = {
+      ...request.data.properties,
+      [property]: value,
+    };
+
+    // Update in ClickHouse
+    const requestInClickhouse = await this.putPropertyIntoClickhouse({
+      id: request.data.id,
+      version: request.data.version,
+      provider: request.data.provider,
+      properties: updatedProperties,
+    });
 
     if (requestInClickhouse.error || !requestInClickhouse.data) {
-      return requestInClickhouse;
+      return err(requestInClickhouse.error || "Failed to update in ClickHouse");
     }
 
+    // Also update legacy tables for backward compatibility
     await this.addPropertiesToLegacyTables(requestInClickhouse.data, [
       { key: property, value },
     ]);

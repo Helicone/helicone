@@ -344,6 +344,17 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     table: "request_response_rmt",
 
   },
+  {
+    id: "ai_gateway",
+    label: "AI Gateway",
+    type: "boolean",
+    operators: ["is"],
+    valueOptions: [
+      { label: "Yes", value: true },
+      { label: "No", value: false },
+    ],
+    table: "request_response_rmt",
+  },
 
   // Datetime fields
   {

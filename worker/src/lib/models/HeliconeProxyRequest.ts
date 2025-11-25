@@ -56,6 +56,7 @@ export interface HeliconeProxyRequest {
   flaggedForModeration?: boolean;
   cf?: CfProperties;
   escrowInfo?: EscrowInfo;
+  env: Env;
 }
 
 const providerBaseUrlMappings: Record<
@@ -192,6 +193,7 @@ export class HeliconeProxyRequestMapper {
         targetUrl,
         cf: this.request.cf ?? undefined,
         escrowInfo: this.escrowInfo,
+        env: this.env,
       },
       error: null,
     };

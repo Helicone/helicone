@@ -615,6 +615,9 @@
 					"amount": {
 						"type": "number",
 						"format": "double"
+					},
+					"returnUrl": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -796,6 +799,108 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"AutoTopoffSettings": {
+				"properties": {
+					"enabled": {
+						"type": "boolean"
+					},
+					"thresholdCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"topoffAmountCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"stripePaymentMethodId": {
+						"type": "string",
+						"nullable": true
+					},
+					"lastTopoffAt": {
+						"type": "string",
+						"nullable": true
+					},
+					"consecutiveFailures": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"enabled",
+					"thresholdCents",
+					"topoffAmountCents",
+					"stripePaymentMethodId",
+					"lastTopoffAt",
+					"consecutiveFailures"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateAutoTopoffSettingsRequest": {
+				"properties": {
+					"enabled": {
+						"type": "boolean"
+					},
+					"thresholdCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"topoffAmountCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"stripePaymentMethodId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"enabled",
+					"thresholdCents",
+					"topoffAmountCents",
+					"stripePaymentMethodId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaymentMethod": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"brand": {
+						"type": "string"
+					},
+					"last4": {
+						"type": "string"
+					},
+					"exp_month": {
+						"type": "number",
+						"format": "double"
+					},
+					"exp_year": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"brand",
+					"last4",
+					"exp_month",
+					"exp_year"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateSetupSessionRequest": {
+				"properties": {
+					"returnUrl": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Json": {
 				"anyOf": [
 					{
@@ -928,6 +1033,9 @@
 											],
 											"nullable": true
 										},
+										"gateway_discount_enabled": {
+											"type": "boolean"
+										},
 										"domain": {
 											"type": "string",
 											"nullable": true
@@ -973,6 +1081,7 @@
 										"has_onboarded",
 										"has_integrated",
 										"governance_settings",
+										"gateway_discount_enabled",
 										"domain",
 										"credit_limit",
 										"created_at",
@@ -1122,6 +1231,9 @@
 								],
 								"nullable": true
 							},
+							"gateway_discount_enabled": {
+								"type": "boolean"
+							},
 							"domain": {
 								"type": "string",
 								"nullable": true
@@ -1167,6 +1279,7 @@
 							"has_onboarded",
 							"has_integrated",
 							"governance_settings",
+							"gateway_discount_enabled",
 							"domain",
 							"credit_limit",
 							"created_at",
@@ -1200,7 +1313,7 @@
 					}
 				]
 			},
-			"ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+			"ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
 				"properties": {
 					"data": {
 						"items": {
@@ -1282,6 +1395,9 @@
 								"governance_settings": {
 									"$ref": "#/components/schemas/Json"
 								},
+								"gateway_discount_enabled": {
+									"type": "boolean"
+								},
 								"domain": {
 									"type": "string"
 								},
@@ -1325,6 +1441,7 @@
 								"has_onboarded",
 								"has_integrated",
 								"governance_settings",
+								"gateway_discount_enabled",
 								"domain",
 								"credit_limit",
 								"created_at",
@@ -1350,20 +1467,20 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": {
+			"Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+			"ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
 				"properties": {
 					"data": {
-						"$ref": "#/components/schemas/Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"
+						"$ref": "#/components/schemas/Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"
 					},
 					"error": {
 						"type": "number",
@@ -1398,10 +1515,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": {
+			"Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"
+						"$ref": "#/components/schemas/ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_unknown_"
@@ -1536,6 +1653,9 @@
 							}
 						],
 						"nullable": true
+					},
+					"gateway_discount_enabled": {
+						"type": "boolean"
 					},
 					"domain": {
 						"type": "string",
@@ -1932,6 +2052,47 @@
 			},
 			"OnboardingStatus": {
 				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
+			},
+			"ResultSuccess__model-string_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"model": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"model"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__model-string_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__model-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"EvaluatorResult": {
 				"properties": {
@@ -3658,6 +3819,17 @@
 					"target_url": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
+					"property_key": {
+						"properties": {
+							"equals": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"equals"
+						],
+						"type": "object"
+					},
 					"properties": {
 						"properties": {},
 						"additionalProperties": {
@@ -3976,26 +4148,34 @@
 					"CHUTES",
 					"LLAMA",
 					"NVIDIA",
-					"VERCEL"
+					"VERCEL",
+					"CEREBRAS",
+					"BASETEN"
 				]
 			},
 			"ModelProviderName": {
 				"type": "string",
 				"enum": [
+					"baseten",
 					"anthropic",
-					"openai",
-					"bedrock",
-					"vertex",
 					"azure",
-					"perplexity",
-					"groq",
-					"deepseek",
-					"cohere",
-					"xai",
+					"bedrock",
+					"cerebras",
+					"chutes",
 					"deepinfra",
+					"deepseek",
+					"fireworks",
 					"google-ai-studio",
+					"groq",
+					"helicone",
+					"mistral",
+					"nebius",
+					"novita",
+					"openai",
 					"openrouter",
-					"novita"
+					"perplexity",
+					"vertex",
+					"xai"
 				],
 				"nullable": false
 			},
@@ -4273,6 +4453,29 @@
 				"type": "object",
 				"additionalProperties": {}
 			},
+			"HeliconeEventData": {
+				"properties": {
+					"_type": {
+						"type": "string",
+						"enum": [
+							"data"
+						],
+						"nullable": false
+					},
+					"name": {
+						"type": "string"
+					},
+					"meta": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					}
+				},
+				"required": [
+					"_type",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": {}
+			},
 			"LLMRequestBody": {
 				"properties": {
 					"llm_type": {
@@ -4416,6 +4619,9 @@
 					"vectorDBDetails": {
 						"$ref": "#/components/schemas/HeliconeEventVectorDB"
 					},
+					"dataDetails": {
+						"$ref": "#/components/schemas/HeliconeEventData"
+					},
 					"input": {
 						"anyOf": [
 							{
@@ -4533,6 +4739,47 @@
 			},
 			"LLMResponseBody": {
 				"properties": {
+					"dataDetailsResponse": {
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"_type": {
+								"type": "string",
+								"enum": [
+									"data"
+								],
+								"nullable": false
+							},
+							"metadata": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": {},
+								"required": [
+									"timestamp"
+								],
+								"type": "object"
+							},
+							"message": {
+								"type": "string"
+							},
+							"status": {
+								"type": "string"
+							}
+						},
+						"additionalProperties": {},
+						"required": [
+							"name",
+							"_type",
+							"metadata",
+							"message",
+							"status"
+						],
+						"type": "object"
+					},
 					"vectorDBDetailsResponse": {
 						"properties": {
 							"_type": {
@@ -4881,9 +5128,12 @@
 						"type": "string",
 						"nullable": true
 					},
-					"gateway_endpoint_version": {
+					"ai_gateway_body_mapping": {
 						"type": "string",
 						"nullable": true
+					},
+					"storage_location": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -4924,7 +5174,7 @@
 					"model",
 					"cache_reference_id",
 					"cache_enabled",
-					"gateway_endpoint_version"
+					"ai_gateway_body_mapping"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -6651,20 +6901,18 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResponseFormat": {
+			"BodyMappingType": {
 				"type": "string",
 				"enum": [
-					"ANTHROPIC",
-					"OPENAI"
+					"OPENAI",
+					"NO_MAPPING",
+					"RESPONSES"
 				]
 			},
 			"HeliconeMeta": {
 				"properties": {
-					"gatewayEndpointVersion": {
-						"type": "string"
-					},
-					"gatewayResponseFormat": {
-						"$ref": "#/components/schemas/ResponseFormat"
+					"aiGatewayBodyMapping": {
+						"$ref": "#/components/schemas/BodyMappingType"
 					},
 					"providerModelId": {
 						"type": "string"
@@ -8521,6 +8769,14 @@
 								"id": {
 									"type": "string"
 								},
+								"filter": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/Json"
+										}
+									],
+									"nullable": true
+								},
 								"emails": {
 									"items": {
 										"type": "string"
@@ -8545,6 +8801,7 @@
 								"minimum_request_count",
 								"metric",
 								"id",
+								"filter",
 								"emails",
 								"created_at"
 							],
@@ -8612,11 +8869,16 @@
 							"type": "object"
 						},
 						"type": "array"
+					},
+					"historyTotalCount": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
 					"alerts",
-					"history"
+					"history",
+					"historyTotalCount"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -8651,17 +8913,386 @@
 					}
 				]
 			},
+			"AlertMetric": {
+				"type": "string",
+				"enum": [
+					"latency",
+					"cost",
+					"prompt_tokens",
+					"completion_tokens",
+					"prompt_cache_read_tokens",
+					"prompt_cache_write_tokens",
+					"total_tokens",
+					"response.status",
+					"count"
+				]
+			},
+			"AlertAggregation": {
+				"type": "string",
+				"enum": [
+					"sum",
+					"avg",
+					"min",
+					"max",
+					"percentile"
+				]
+			},
+			"AlertStandardGrouping": {
+				"type": "string",
+				"enum": [
+					"model",
+					"provider",
+					"user"
+				]
+			},
+			"AlertGrouping": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/AlertStandardGrouping"
+					},
+					{
+						"type": "string"
+					}
+				]
+			},
+			"AllExpression": {
+				"description": "Matches all records (no filtering)",
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"all"
+						],
+						"nullable": false
+					}
+				},
+				"required": [
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FilterSubType": {
+				"type": "string",
+				"enum": [
+					"property",
+					"score",
+					"sessions",
+					"user"
+				]
+			},
+			"BaseFieldSpec": {
+				"description": "Type for the field specification in a condition\nDescribes what field is being filtered and how",
+				"properties": {
+					"subtype": {
+						"$ref": "#/components/schemas/FilterSubType"
+					},
+					"valueMode": {
+						"type": "string",
+						"enum": [
+							"value",
+							"key"
+						]
+					},
+					"key": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FieldSpec": {
+				"anyOf": [
+					{
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/BaseFieldSpec"
+							},
+							{
+								"properties": {
+									"column": {
+										"type": "string",
+										"enum": [
+											"properties",
+											"user_id",
+											"model",
+											"country_code",
+											"response_id",
+											"status",
+											"latency",
+											"provider",
+											"time_to_first_token",
+											"request_created_at",
+											"response_created_at",
+											"organization_id",
+											"threat",
+											"request_id",
+											"prompt_tokens",
+											"completion_tokens",
+											"prompt_cache_read_tokens",
+											"prompt_cache_write_tokens",
+											"target_url",
+											"scores",
+											"request_body",
+											"response_body",
+											"assets",
+											"proxy_key_id",
+											"updated_at"
+										],
+										"nullable": false
+									},
+									"table": {
+										"type": "string",
+										"enum": [
+											"request_response_rmt"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"column",
+									"table"
+								],
+								"type": "object"
+							}
+						]
+					},
+					{
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/BaseFieldSpec"
+							},
+							{
+								"properties": {
+									"column": {
+										"type": "string",
+										"enum": [
+											"created_at",
+											"cost",
+											"prompt_tokens",
+											"completion_tokens",
+											"total_tokens",
+											"total_requests",
+											"latest_request_created_at"
+										],
+										"nullable": false
+									},
+									"table": {
+										"type": "string",
+										"enum": [
+											"sessions_request_response_rmt"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"column",
+									"table"
+								],
+								"type": "object"
+							}
+						]
+					},
+					{
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/BaseFieldSpec"
+							},
+							{
+								"properties": {
+									"column": {
+										"type": "string",
+										"enum": [
+											"user_id",
+											"cost",
+											"total_requests",
+											"active_for",
+											"first_active",
+											"last_active",
+											"average_requests_per_day_active",
+											"average_tokens_per_request",
+											"total_completion_tokens",
+											"total_prompt_tokens"
+										],
+										"nullable": false
+									},
+									"table": {
+										"type": "string",
+										"enum": [
+											"users_view"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"column",
+									"table"
+								],
+								"type": "object"
+							}
+						]
+					}
+				]
+			},
+			"FilterOperator": {
+				"type": "string",
+				"enum": [
+					"eq",
+					"neq",
+					"is",
+					"gt",
+					"gte",
+					"lt",
+					"lte",
+					"like",
+					"ilike",
+					"contains",
+					"not-contains",
+					"in"
+				],
+				"description": "All supported filter operator types"
+			},
+			"ConditionExpression": {
+				"description": "Single condition expression that compares a field against a value",
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"condition"
+						],
+						"nullable": false
+					},
+					"field": {
+						"$ref": "#/components/schemas/FieldSpec"
+					},
+					"operator": {
+						"$ref": "#/components/schemas/FilterOperator"
+					},
+					"value": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number",
+								"format": "double"
+							},
+							{
+								"type": "boolean"
+							}
+						]
+					}
+				},
+				"required": [
+					"type",
+					"field",
+					"operator",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FilterExpression": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/AllExpression"
+					},
+					{
+						"$ref": "#/components/schemas/ConditionExpression"
+					},
+					{
+						"$ref": "#/components/schemas/AndExpression"
+					},
+					{
+						"$ref": "#/components/schemas/OrExpression"
+					}
+				],
+				"description": "Filter expression type union\nRepresents all possible filter expression types in the AST"
+			},
+			"AndExpression": {
+				"description": "Logical AND of multiple expressions\nAll contained expressions must match for this to match",
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"and"
+						],
+						"nullable": false
+					},
+					"expressions": {
+						"items": {
+							"$ref": "#/components/schemas/FilterExpression"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"type",
+					"expressions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"OrExpression": {
+				"description": "Logical OR of multiple expressions\nAt least one contained expression must match for this to match",
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"or"
+						],
+						"nullable": false
+					},
+					"expressions": {
+						"items": {
+							"$ref": "#/components/schemas/FilterExpression"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"type",
+					"expressions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"AlertRequest": {
 				"properties": {
 					"name": {
 						"type": "string"
 					},
 					"metric": {
-						"type": "string"
+						"$ref": "#/components/schemas/AlertMetric"
 					},
 					"threshold": {
 						"type": "number",
 						"format": "double"
+					},
+					"aggregation": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AlertAggregation"
+							}
+						],
+						"nullable": true
+					},
+					"percentile": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"grouping": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AlertGrouping"
+							}
+						],
+						"nullable": true
+					},
+					"grouping_is_property": {
+						"type": "boolean",
+						"nullable": true
 					},
 					"time_window": {
 						"type": "string"
@@ -8681,15 +9312,28 @@
 					"minimum_request_count": {
 						"type": "number",
 						"format": "double"
+					},
+					"filter": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/FilterExpression"
+							}
+						],
+						"nullable": true
 					}
 				},
 				"required": [
 					"name",
 					"metric",
 					"threshold",
+					"aggregation",
+					"percentile",
+					"grouping",
+					"grouping_is_property",
 					"time_window",
 					"emails",
-					"slack_channels"
+					"slack_channels",
+					"filter"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -8750,6 +9394,382 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ClickHouseTableColumn": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"default_type": {
+						"type": "string"
+					},
+					"default_expression": {
+						"type": "string"
+					},
+					"comment": {
+						"type": "string"
+					},
+					"codec_expression": {
+						"type": "string"
+					},
+					"ttl_expression": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ClickHouseTableSchema": {
+				"properties": {
+					"table_name": {
+						"type": "string"
+					},
+					"columns": {
+						"items": {
+							"$ref": "#/components/schemas/ClickHouseTableColumn"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"table_name",
+					"columns"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ClickHouseTableSchema-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ClickHouseTableSchema"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ClickHouseTableSchema-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ClickHouseTableSchema-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ExecuteSqlResponse": {
+				"properties": {
+					"rowCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"size": {
+						"type": "number",
+						"format": "double"
+					},
+					"elapsedMilliseconds": {
+						"type": "number",
+						"format": "double"
+					},
+					"rows": {
+						"items": {
+							"$ref": "#/components/schemas/Record_string.any_"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"rowCount",
+					"size",
+					"elapsedMilliseconds",
+					"rows"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_ExecuteSqlResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ExecuteSqlResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ExecuteSqlResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ExecuteSqlResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ExecuteSqlRequest": {
+				"properties": {
+					"sql": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"sql"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"HqlSavedQuery": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"organization_id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"sql": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"updated_at": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"organization_id",
+					"name",
+					"sql",
+					"created_at",
+					"updated_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Array_HqlSavedQuery__": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/HqlSavedQuery"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Array_HqlSavedQuery_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Array_HqlSavedQuery__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_HqlSavedQuery-or-null_": {
+				"properties": {
+					"data": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/HqlSavedQuery"
+							}
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HqlSavedQuery-or-null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HqlSavedQuery-or-null_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_void_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_void.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_void_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"BulkDeleteSavedQueriesRequest": {
+				"properties": {
+					"ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"ids"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_HqlSavedQuery-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/HqlSavedQuery"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HqlSavedQuery-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HqlSavedQuery-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"CreateSavedQueryRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"sql": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"sql"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_HqlSavedQuery_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/HqlSavedQuery"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HqlSavedQuery.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HqlSavedQuery_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -8889,7 +9909,8 @@
 					"sqs:helicone-scores",
 					"sqs:request-response-logs-dlq",
 					"sqs:helicone-scores-dlq",
-					"stripe:products"
+					"stripe:products",
+					"secrets:provider-keys"
 				],
 				"nullable": false
 			},
@@ -47303,6 +48324,62 @@
 					}
 				]
 			},
+			"ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"rowCount": {
+								"type": "number",
+								"format": "double"
+							},
+							"size": {
+								"type": "number",
+								"format": "double"
+							},
+							"elapsedMilliseconds": {
+								"type": "number",
+								"format": "double"
+							},
+							"rows": {
+								"items": {
+									"$ref": "#/components/schemas/Record_string.any_"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"rowCount",
+							"size",
+							"elapsedMilliseconds",
+							"rows"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"DashboardData": {
 				"properties": {
 					"organizations": {
@@ -47645,6 +48722,75 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TimeSeriesDataPoint": {
+				"properties": {
+					"timestamp": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"timestamp",
+					"amount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TimeSeriesResponse": {
+				"properties": {
+					"deposits": {
+						"items": {
+							"$ref": "#/components/schemas/TimeSeriesDataPoint"
+						},
+						"type": "array"
+					},
+					"spend": {
+						"items": {
+							"$ref": "#/components/schemas/TimeSeriesDataPoint"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"deposits",
+					"spend"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_TimeSeriesResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/TimeSeriesResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_TimeSeriesResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_TimeSeriesResponse_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -48135,20 +49281,26 @@
 												"providerName": {
 													"type": "string",
 													"enum": [
+														"baseten",
 														"anthropic",
-														"openai",
-														"bedrock",
-														"vertex",
 														"azure",
-														"perplexity",
-														"groq",
-														"deepseek",
-														"cohere",
-														"xai",
+														"bedrock",
+														"cerebras",
+														"chutes",
 														"deepinfra",
+														"deepseek",
+														"fireworks",
 														"google-ai-studio",
+														"groq",
+														"helicone",
+														"mistral",
+														"nebius",
+														"novita",
+														"openai",
 														"openrouter",
-														"novita"
+														"perplexity",
+														"vertex",
+														"xai"
 													]
 												}
 											},
@@ -49320,8 +50472,13 @@
 			"post": {
 				"operationId": "MigrateToPro",
 				"responses": {
-					"204": {
-						"description": "No content"
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
 					}
 				},
 				"tags": [
@@ -49483,6 +50640,219 @@
 				"parameters": []
 			}
 		},
+		"/v1/stripe/auto-topoff/settings": {
+			"get": {
+				"operationId": "GetAutoTopoffSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/AutoTopoffSettings"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "UpdateAutoTopoffSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AutoTopoffSettings"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateAutoTopoffSettingsRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DisableAutoTopoff",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/payment-methods": {
+			"get": {
+				"operationId": "GetPaymentMethods",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/PaymentMethod"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/payment-methods/setup-session": {
+			"post": {
+				"operationId": "CreateSetupSession",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"setupUrl": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"setupUrl"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSetupSessionRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/stripe/payment-methods/{paymentMethodId}": {
+			"delete": {
+				"operationId": "RemovePaymentMethod",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "paymentMethodId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/organization": {
 			"get": {
 				"operationId": "GetOrganizations",
@@ -49553,7 +50923,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
+									"$ref": "#/components/schemas/Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
 								}
 							}
 						}
@@ -50268,6 +51638,32 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/organization/models": {
+			"get": {
+				"operationId": "GetModels",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__model-string_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/evaluator": {
@@ -54650,7 +56046,26 @@
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "query",
+						"name": "historyPage",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "historyPageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
 			}
 		},
 		"/v1/alert/create": {
@@ -54744,6 +56159,344 @@
 				],
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/v1/helicone-sql/schema": {
+			"get": {
+				"operationId": "GetClickHouseSchema",
+				"responses": {
+					"200": {
+						"description": "Array of table schemas with columns",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ClickHouseTableSchema-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get ClickHouse schema (tables and columns)",
+				"summary": "Get database schema",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/helicone-sql/execute": {
+			"post": {
+				"operationId": "ExecuteSql",
+				"responses": {
+					"200": {
+						"description": "Query results with rows and metadata",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ExecuteSqlResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Execute a SQL query against ClickHouse",
+				"summary": "Execute SQL query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "The SQL query to execute",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExecuteSqlRequest",
+								"description": "The SQL query to execute"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/helicone-sql/download": {
+			"post": {
+				"operationId": "DownloadCsv",
+				"responses": {
+					"200": {
+						"description": "URL to download the CSV file",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Execute a SQL query and download results as CSV",
+				"summary": "Download query results as CSV",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "The SQL query to execute",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExecuteSqlRequest",
+								"description": "The SQL query to execute"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/helicone-sql/saved-queries": {
+			"get": {
+				"operationId": "GetSavedQueries",
+				"responses": {
+					"200": {
+						"description": "Array of saved queries",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Array_HqlSavedQuery_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get all saved queries for the organization",
+				"summary": "List saved queries",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/helicone-sql/saved-query/{queryId}": {
+			"get": {
+				"operationId": "GetSavedQuery",
+				"responses": {
+					"200": {
+						"description": "The saved query details",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery-or-null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a specific saved query by ID",
+				"summary": "Get saved query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the saved query",
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_void.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a saved query by ID",
+				"summary": "Delete saved query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the saved query to delete",
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateSavedQuery",
+				"responses": {
+					"200": {
+						"description": "The updated saved query",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update an existing saved query",
+				"summary": "Update saved query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the saved query to update",
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The updated query details",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSavedQueryRequest",
+								"description": "The updated query details"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/helicone-sql/saved-queries/bulk-delete": {
+			"post": {
+				"operationId": "BulkDeleteSavedQueries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_void.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete multiple saved queries at once",
+				"summary": "Bulk delete saved queries",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "Array of query IDs to delete",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BulkDeleteSavedQueriesRequest",
+								"description": "Array of query IDs to delete"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/helicone-sql/saved-query": {
+			"post": {
+				"operationId": "CreateSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Array containing the created saved query",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new saved query",
+				"summary": "Create saved query",
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "The saved query details",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSavedQueryRequest",
+								"description": "The saved query details"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/has-feature-flag": {
@@ -55477,6 +57230,775 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/admin/org-search": {
+			"post": {
+				"operationId": "OrgSearch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"organizations": {
+											"items": {
+												"properties": {
+													"usage": {
+														"properties": {
+															"all_time_count": {
+																"type": "number",
+																"format": "double"
+															},
+															"monthly_usage": {
+																"items": {
+																	"properties": {
+																		"requestCount": {
+																			"type": "number",
+																			"format": "double"
+																		},
+																		"month": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"requestCount",
+																		"month"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"requests_last_30_days": {
+																"type": "number",
+																"format": "double"
+															},
+															"total_requests": {
+																"type": "number",
+																"format": "double"
+															}
+														},
+														"required": [
+															"all_time_count",
+															"monthly_usage",
+															"requests_last_30_days",
+															"total_requests"
+														],
+														"type": "object"
+													},
+													"organization": {
+														"properties": {
+															"members": {
+																"items": {
+																	"properties": {
+																		"last_sign_in_at": {
+																			"type": "string",
+																			"nullable": true
+																		},
+																		"role": {
+																			"type": "string"
+																		},
+																		"name": {
+																			"type": "string"
+																		},
+																		"email": {
+																			"type": "string"
+																		},
+																		"id": {
+																			"type": "string"
+																		}
+																	},
+																	"required": [
+																		"last_sign_in_at",
+																		"role",
+																		"name",
+																		"email",
+																		"id"
+																	],
+																	"type": "object"
+																},
+																"type": "array"
+															},
+															"subscription_status": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_subscription_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"stripe_customer_id": {
+																"type": "string",
+																"nullable": true
+															},
+															"tier": {
+																"type": "string"
+															},
+															"owner": {
+																"type": "string"
+															},
+															"created_at": {
+																"type": "string"
+															},
+															"name": {
+																"type": "string"
+															},
+															"id": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"members",
+															"subscription_status",
+															"stripe_subscription_id",
+															"stripe_customer_id",
+															"tier",
+															"owner",
+															"created_at",
+															"name",
+															"id"
+														],
+														"type": "object"
+													}
+												},
+												"required": [
+													"usage",
+													"organization"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"query": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"query"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/org-search-fast": {
+			"post": {
+				"operationId": "OrgSearchFast",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"hasMore": {
+											"type": "boolean"
+										},
+										"total": {
+											"type": "number",
+											"format": "double"
+										},
+										"organizations": {
+											"items": {
+												"properties": {
+													"members": {
+														"items": {
+															"properties": {
+																"last_sign_in_at": {
+																	"type": "string",
+																	"nullable": true
+																},
+																"role": {
+																	"type": "string"
+																},
+																"name": {
+																	"type": "string"
+																},
+																"email": {
+																	"type": "string"
+																},
+																"id": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"last_sign_in_at",
+																"role",
+																"name",
+																"email",
+																"id"
+															],
+															"type": "object"
+														},
+														"type": "array"
+													},
+													"gateway_discount_enabled": {
+														"type": "boolean"
+													},
+													"subscription_status": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_subscription_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_customer_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"tier": {
+														"type": "string"
+													},
+													"owner": {
+														"type": "string"
+													},
+													"created_at": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"members",
+													"gateway_discount_enabled",
+													"subscription_status",
+													"stripe_subscription_id",
+													"stripe_customer_id",
+													"tier",
+													"owner",
+													"created_at",
+													"name",
+													"id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"hasMore",
+										"total",
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"offset": {
+										"type": "number",
+										"format": "double"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									},
+									"query": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"query"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/user-search": {
+			"post": {
+				"operationId": "UserSearch",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"hasMore": {
+											"type": "boolean"
+										},
+										"total": {
+											"type": "number",
+											"format": "double"
+										},
+										"users": {
+											"items": {
+												"properties": {
+													"organizations": {
+														"items": {
+															"properties": {
+																"role": {
+																	"type": "string",
+																	"nullable": true
+																},
+																"name": {
+																	"type": "string",
+																	"nullable": true
+																},
+																"id": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"role",
+																"name",
+																"id"
+															],
+															"type": "object"
+														},
+														"type": "array"
+													},
+													"is_admin": {
+														"type": "boolean"
+													},
+													"last_sign_in_at": {
+														"type": "string",
+														"nullable": true
+													},
+													"created_at": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string",
+														"nullable": true
+													},
+													"email": {
+														"type": "string"
+													},
+													"id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"organizations",
+													"is_admin",
+													"last_sign_in_at",
+													"created_at",
+													"name",
+													"email",
+													"id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"hasMore",
+										"total",
+										"users"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"offset": {
+										"type": "number",
+										"format": "double"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									},
+									"query": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"query"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/org/{orgId}/member/{memberId}": {
+			"delete": {
+				"operationId": "RemoveOrgMember",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "memberId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateOrgMemberRole",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "memberId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"role": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"role"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/org/{orgId}/gateway-discount": {
+			"patch": {
+				"operationId": "UpdateGatewayDiscount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"enabled": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"enabled"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/org/{orgId}/delete": {
+			"post": {
+				"operationId": "DeleteOrg",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/org-usage-light/{orgId}": {
+			"get": {
+				"operationId": "GetOrgUsageLight",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"requests_last_30_days": {
+											"type": "number",
+											"format": "double"
+										},
+										"last_request_at": {
+											"type": "string",
+											"nullable": true
+										}
+									},
+									"required": [
+										"requests_last_30_days",
+										"last_request_at"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/org-usage/{orgId}": {
+			"get": {
+				"operationId": "GetOrgUsage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"all_time_count": {
+											"type": "number",
+											"format": "double"
+										},
+										"monthly_usage": {
+											"items": {
+												"properties": {
+													"cost": {
+														"type": "number",
+														"format": "double"
+													},
+													"requestCount": {
+														"type": "number",
+														"format": "double"
+													},
+													"month": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"cost",
+													"requestCount",
+													"month"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										},
+										"requests_last_30_days": {
+											"type": "number",
+											"format": "double"
+										},
+										"total_requests": {
+											"type": "number",
+											"format": "double"
+										}
+									},
+									"required": [
+										"all_time_count",
+										"monthly_usage",
+										"requests_last_30_days",
+										"total_requests"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/admin/settings/{name}": {
@@ -56383,6 +58905,222 @@
 				]
 			}
 		},
+		"/v1/admin/hql-enriched": {
+			"post": {
+				"operationId": "ExecuteEnrichedHql",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"limit": {
+										"type": "number",
+										"format": "double"
+									},
+									"sql": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"sql"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/saved-queries": {
+			"get": {
+				"operationId": "GetAdminSavedQueries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get all saved queries for admin (stored under admin org ID)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/admin/saved-query": {
+			"post": {
+				"operationId": "CreateAdminSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new saved query for admin (stored under admin org ID)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"sql": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"sql",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/saved-query/{queryId}": {
+			"patch": {
+				"operationId": "UpdateAdminSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update a saved query for admin (stored under admin org ID)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"sql": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"sql",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteAdminSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a saved query for admin (stored under admin org ID)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/v1/admin/wallet/gateway/dashboard_data": {
 			"post": {
 				"operationId": "GetGatewayDashboardData",
@@ -56433,6 +59171,24 @@
 								"asc",
 								"desc"
 							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
 						}
 					}
 				]
@@ -56696,6 +59452,64 @@
 						"required": true,
 						"schema": {
 							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/wallet/analytics/time-series": {
+			"post": {
+				"operationId": "GetTimeSeriesData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_TimeSeriesResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin Wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "startDate",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "endDate",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "groupBy",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"minute",
+								"hour",
+								"day",
+								"week",
+								"month"
+							]
 						}
 					}
 				]

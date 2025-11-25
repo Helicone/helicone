@@ -1,4 +1,3 @@
-import { Card } from "@tremor/react";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import clsx from "clsx";
 
@@ -8,6 +7,7 @@ interface StyledAreaChartProps {
   isDataOverTimeLoading: boolean;
   withAnimation?: boolean;
   height?: string;
+  headerAction?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -20,6 +20,7 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
     isDataOverTimeLoading,
     withAnimation,
     height = DEFAULT_HEIGHT,
+    headerAction,
     children,
   } = props;
 
@@ -33,30 +34,35 @@ const StyledAreaChart = (props: StyledAreaChartProps) => {
   };
 
   return (
-    <Card className="rounded-lg border border-slate-200 bg-white text-slate-950 !shadow-sm ring-0 dark:border-slate-800 dark:bg-black dark:text-slate-50">
-      <div className="flex flex-col space-y-0.5">
-        <p className="text-sm text-slate-500">{title}</p>
-        {value !== undefined && (
-          <p className="text-xl font-semibold text-black dark:text-white">
-            {value}
-          </p>
-        )}
+    <div className="flex h-full flex-col border-b border-r border-border bg-card p-6 text-card-foreground">
+      <div className="flex items-start justify-between">
+        <div className="flex flex-col space-y-0.5">
+          <p className="text-sm text-muted-foreground">{title}</p>
+          {value !== undefined && (
+            <p className="text-xl font-semibold text-foreground">{value}</p>
+          )}
+        </div>
+        {headerAction && <div>{headerAction}</div>}
       </div>
       <div
-        className={clsx(value ? "p-2" : "py-4", "w-full")}
+        className={clsx(
+          value ? "p-2" : "py-4",
+          "w-full",
+          height ? "" : "flex-grow",
+        )}
         style={{
-          height: calculateHeight(),
+          height: height ? calculateHeight() : undefined,
         }}
       >
         {isDataOverTimeLoading ? (
-          <div className="h-full w-full rounded-md bg-slate-200 pt-4 dark:bg-slate-800">
+          <div className="h-full w-full rounded-md bg-muted pt-4">
             {withAnimation && <LoadingAnimation height={175} width={175} />}
           </div>
         ) : (
           <>{children}</>
         )}
       </div>
-    </Card>
+    </div>
   );
 };
 

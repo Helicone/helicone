@@ -317,7 +317,7 @@ describe("OpenAI Responses API Mapper", () => {
           {
             id: "call_[REDACTED]",
             name: "[REDACTED_FUNCTION_NAME]",
-            arguments: '{"query": "[REDACTED_QUERY]"}',
+            arguments: { query: "[REDACTED_QUERY]" },
             type: "function",
           },
         ],
@@ -358,13 +358,13 @@ describe("OpenAI Responses API Mapper", () => {
           {
             id: "call_[REDACTED_1]",
             name: "[REDACTED_FUNCTION_1]",
-            arguments: '{"param1": "[REDACTED_VALUE_1]"}',
+            arguments: { param1: "[REDACTED_VALUE_1]" },
             type: "function",
           },
           {
             id: "call_[REDACTED_2]",
             name: "[REDACTED_FUNCTION_2]",
-            arguments: '{"param2": "[REDACTED_VALUE_2]"}',
+            arguments: { param2: "[REDACTED_VALUE_2]" },
             type: "function",
           },
         ],
@@ -406,7 +406,7 @@ describe("OpenAI Responses API Mapper", () => {
           {
             id: "call_[REDACTED]",
             name: "[REDACTED_FUNCTION]",
-            arguments: '{"query": "[REDACTED]"}',
+            arguments: { query: "[REDACTED]" },
             type: "function",
           },
         ],
@@ -692,7 +692,7 @@ describe("OpenAI Responses API Mapper", () => {
           {
             id: "call_[REDACTED]",
             name: "[REDACTED_SEARCH_FUNCTION]",
-            arguments: '{"query": "[REDACTED_SEARCH_QUERY]"}',
+            arguments: { query: "[REDACTED_SEARCH_QUERY]" },
             type: "function",
           },
         ],

@@ -52,6 +52,7 @@ interface ModelRegistryItem {
   inputModalities: InputModality[];
   outputModalities: OutputModality[];
   supportedParameters: StandardParameter[];
+  pinnedVersionOfModel?: string;
 }
 
 interface ModelRegistryResponse {
@@ -92,9 +93,9 @@ export class ModelRegistryController extends Controller {
    * - Input/output modalities (text, image, audio, video)
    * - Supported parameters (temperature, max_tokens, etc.)
    * - Available capabilities (audio, video, image, thinking, web_search, caching)
-   * 
+   *
    * No authentication required - this is a public endpoint.
-   * 
+   *
    * @returns {ModelRegistryResponse} Complete model registry with models and filter options
    */
   @Get("/models")
@@ -231,6 +232,14 @@ export class ModelRegistryController extends Controller {
           continue;
         }
 
+        const allEndpointsRequireExplicitRouting = endpoints.every(
+          (ep) => ep.endpoint?.modelConfig.requireExplicitRouting === true
+        );
+
+        if (allEndpointsRequireExplicitRouting) {
+          continue;
+        }
+
         const structuredModality = modelConfig.modality;
 
         const allSupportedParameters = new Set<StandardParameter>();
@@ -252,6 +261,7 @@ export class ModelRegistryController extends Controller {
           inputModalities: structuredModality.inputs,
           outputModalities: structuredModality.outputs,
           supportedParameters: Array.from(allSupportedParameters),
+          pinnedVersionOfModel: modelConfig.pinnedVersionOfModel,
         });
       }
 

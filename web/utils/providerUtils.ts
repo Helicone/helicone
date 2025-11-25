@@ -11,6 +11,18 @@ export const getProviderNameById = (
   return provider?.name || providerId;
 };
 
+export const filterPubliclyVisibleProviders = (
+  providers: Provider[],
+  orgId?: string,
+): Provider[] => {
+  return providers.filter((provider) => {
+    if (orgId === process.env.NEXT_PUBLIC_HELICONE_ORG_ID) {
+      return true;
+    }
+    return provider.publiclyVisible !== false;
+  });
+};
+
 /**
  * Filter providers based on search query
  */

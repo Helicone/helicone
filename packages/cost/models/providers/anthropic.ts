@@ -5,7 +5,6 @@ import type {
   Endpoint,
   RequestBodyContext,
   RequestParams,
-  ResponseFormat,
   PluginId,
 } from "../types";
 

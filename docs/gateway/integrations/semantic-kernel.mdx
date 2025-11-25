@@ -1,0 +1,319 @@
+---
+title: "Semantic Kernel Integration"
+sidebarTitle: "Semantic Kernel"
+description: "Integrate Helicone AI Gateway with Microsoft Semantic Kernel to access 100+ LLM providers with unified observability."
+"twitter:title": "Semantic Kernel Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import Star from "/snippets/star.mdx";
+
+## Introduction
+
+[Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/) is Microsoft's open-source SDK for building AI agents and orchestrating LLM workflows across multiple languages (.NET, Python, Java). By integrating Helicone AI Gateway with Semantic Kernel, you can:
+
+- **Route to different models & providers** with automatic failover through a single endpoint
+- **Unified billing** with pass-through billing or bring your own keys
+- **Monitor all requests** with automatic cost tracking in one dashboard
+
+<Note>
+  This integration requires only **one line change** to your existing Semantic Kernel code - adding the AI Gateway endpoint.
+</Note>
+
+## Integration Steps
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Sign up at [helicone.ai](https://www.helicone.ai) and generate an [API key](https://us.helicone.ai/settings/api-keys).
+
+    <Note>
+      You'll also need to configure your provider API keys (OpenAI, Anthropic, etc.) at [Helicone Providers](https://us.helicone.ai/providers) for BYOK (Bring Your Own Keys).
+    </Note>
+  </Step>
+
+  <Step title="Set environment variables">
+    ```bash
+    # Your Helicone API key
+    export HELICONE_API_KEY=<your-helicone-api-key>
+    ```
+
+    Create a `.env` file in your project:
+    ```env
+    HELICONE_API_KEY=sk-helicone-...
+    ```
+  </Step>
+
+  <Step title="Add the AI Gateway endpoint to your Semantic Kernel configuration">
+    <CodeGroup>
+    ```csharp .NET
+    using Microsoft.SemanticKernel;
+    using Microsoft.SemanticKernel.ChatCompletion;
+    using DotNetEnv;
+
+    // Load environment variables
+    Env.Load();
+    var heliconeApiKey = Environment.GetEnvironmentVariable("HELICONE_API_KEY");
+
+    // Create kernel builder
+    var builder = Kernel.CreateBuilder();
+
+    // Add OpenAI chat completion with Helicone AI Gateway endpoint
+    builder.AddOpenAIChatCompletion(
+        modelId: "gpt-4.1-mini",                                // Any model from Helicone registry
+        apiKey: heliconeApiKey,                                 // Your Helicone API key
+        endpoint: new Uri("https://ai-gateway.helicone.ai/v1")  // Helicone AI Gateway
+    );
+
+    var kernel = builder.Build();
+    ```
+
+    ```python Python
+    import semantic_kernel as sk
+    from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
+    import os
+
+    # Load environment variables
+    helicone_api_key = os.getenv("HELICONE_API_KEY")
+
+    # Create kernel
+    kernel = sk.Kernel()
+
+    # Add OpenAI chat completion with Helicone AI Gateway endpoint
+    kernel.add_service(
+        OpenAIChatCompletion(
+            service_id="helicone-gateway",
+            ai_model_id="gpt-4.1-mini",               # Any model from Helicone registry
+            api_key=helicone_api_key,                 # Your Helicone API key
+            endpoint="https://ai-gateway.helicone.ai/v1"  # Helicone AI Gateway
+        )
+    )
+    ```
+    </CodeGroup>
+
+    <Info>
+      The **only change** from a standard Semantic Kernel setup is adding the `endpoint` parameter. Everything else stays the same!
+    </Info>
+  </Step>
+
+  <Step title="Use the chat service normally">
+    Your existing Semantic Kernel code continues to work without any changes:
+
+    <CodeGroup>
+    ```csharp .NET
+    using Microsoft.SemanticKernel.ChatCompletion;
+
+    // Get the chat service
+    var chatService = kernel.GetRequiredService<IChatCompletionService>();
+
+    // Create chat history
+    var chatHistory = new ChatHistory();
+    chatHistory.AddUserMessage("What is the capital of France?");
+
+    // Get response
+    var response = await chatService.GetChatMessageContentAsync(chatHistory);
+    Console.WriteLine(response.Content);
+    ```
+
+    ```python Python
+    from semantic_kernel.contents import ChatHistory
+
+    # Get the chat service
+    chat_service = kernel.get_service("helicone-gateway")
+
+    # Create chat history
+    chat_history = ChatHistory()
+    chat_history.add_user_message("What is the capital of France?")
+
+    # Get response
+    response = await chat_service.get_chat_message_content(
+        chat_history=chat_history
+    )
+    print(response.content)
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="View requests in the Helicone dashboard">
+    All your Semantic Kernel requests are now visible in your [Helicone dashboard](https://us.helicone.ai/dashboard):
+
+    - Request/response bodies
+    - Latency metrics
+    - Token usage and costs
+    - Model performance analytics
+    - Error tracking
+
+    <Star />
+  </Step>
+</Steps>
+
+## Migration Example
+
+Here's what migrating an existing Semantic Kernel application looks like:
+
+### Before (Direct OpenAI)
+
+```csharp
+var builder = Kernel.CreateBuilder();
+
+builder.AddOpenAIChatCompletion(
+    modelId: "gpt-4o-mini",
+    apiKey: openAiApiKey
+);
+
+var kernel = builder.Build();
+```
+
+### After (Helicone AI Gateway)
+
+```csharp
+var builder = Kernel.CreateBuilder();
+
+builder.AddOpenAIChatCompletion(
+    modelId: "gpt-4.1-mini",                                // Use Helicone model names
+    apiKey: heliconeApiKey,                                 // Your Helicone API key
+    endpoint: new Uri("https://ai-gateway.helicone.ai/v1")  // Add this line!
+);
+
+var kernel = builder.Build();
+```
+
+That's it! Just one additional parameter and you're routing through Helicone's AI Gateway.
+
+## Complete Working Example
+
+Here's a full example that tests multiple models:
+
+<CodeGroup>
+```csharp .NET
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using DotNetEnv;
+
+// Load environment
+Env.Load();
+var apiKey = Environment.GetEnvironmentVariable("HELICONE_API_KEY");
+
+if (string.IsNullOrEmpty(apiKey))
+{
+    Console.WriteLine("❌ HELICONE_API_KEY not found in environment");
+    return;
+}
+
+Console.WriteLine("🚀 Testing multiple models through Helicone AI Gateway\n");
+
+// Test different models
+await TestModel("gpt-4.1-mini", "OpenAI GPT-4.1 Mini");
+await TestModel("claude-opus-4-1", "Anthropic Claude Opus 4.1");
+await TestModel("gemini-2.5-flash-lite", "Google Gemini 2.5 Flash Lite");
+
+Console.WriteLine("\n✅ All models tested!");
+Console.WriteLine("🔍 Check your dashboard: https://us.helicone.ai/dashboard");
+
+async Task TestModel(string modelId, string modelName)
+{
+    try
+    {
+        var builder = Kernel.CreateBuilder();
+
+        // Configure with Helicone AI Gateway
+        builder.AddOpenAIChatCompletion(
+            modelId: modelId,
+            apiKey: apiKey,
+            endpoint: new Uri("https://ai-gateway.helicone.ai/v1")
+        );
+
+        var kernel = builder.Build();
+        var chatService = kernel.GetRequiredService<IChatCompletionService>();
+
+        var chatHistory = new ChatHistory();
+        chatHistory.AddUserMessage("Say hello in one sentence.");
+
+        Console.Write($"🤖 Testing {modelName}... ");
+        var response = await chatService.GetChatMessageContentAsync(chatHistory);
+        Console.WriteLine("✅");
+        Console.WriteLine($"   Response: {response.Content}\n");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("❌");
+        Console.WriteLine($"   Error: {ex.Message}\n");
+    }
+}
+```
+
+```python Python
+import semantic_kernel as sk
+from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
+from semantic_kernel.contents import ChatHistory
+import os
+import asyncio
+
+# Load environment
+helicone_api_key = os.getenv("HELICONE_API_KEY")
+
+if not helicone_api_key:
+    print("❌ HELICONE_API_KEY not found in environment")
+    exit(1)
+
+print("🚀 Testing multiple models through Helicone AI Gateway\n")
+
+async def test_model(model_id: str, model_name: str):
+    try:
+        # Create kernel
+        kernel = sk.Kernel()
+
+        # Configure with Helicone AI Gateway
+        kernel.add_service(
+            OpenAIChatCompletion(
+                service_id="helicone-gateway",
+                ai_model_id=model_id,
+                api_key=helicone_api_key,
+                endpoint="https://ai-gateway.helicone.ai/v1"
+            )
+        )
+
+        chat_service = kernel.get_service("helicone-gateway")
+
+        chat_history = ChatHistory()
+        chat_history.add_user_message("Say hello in one sentence.")
+
+        print(f"🤖 Testing {model_name}... ", end="")
+        response = await chat_service.get_chat_message_content(
+            chat_history=chat_history
+        )
+        print("✅")
+        print(f"   Response: {response.content}\n")
+    except Exception as ex:
+        print("❌")
+        print(f"   Error: {str(ex)}\n")
+
+async def main():
+    # Test different models
+    await test_model("gpt-4.1-mini", "OpenAI GPT-4.1 Mini")
+    await test_model("claude-opus-4-1", "Anthropic Claude Opus 4.1")
+    await test_model("gemini-2.5-flash-lite", "Google Gemini 2.5 Flash Lite")
+
+    print("\n✅ All models tested!")
+    print("🔍 Check your dashboard: https://us.helicone.ai/dashboard")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+</CodeGroup>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+</CardGroup>

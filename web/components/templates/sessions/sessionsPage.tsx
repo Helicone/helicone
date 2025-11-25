@@ -206,8 +206,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     [router],
   );
 
-  const isSessionsLoading =
-    isLoading || allNames.isLoading || names.isLoading || hasSessions.isLoading;
+  const isSessionsLoading = isLoading || allNames.isLoading || names.isLoading;
 
   // Helper function to get TimeFilter object
   const getTimeFilterObject = (start: Date, end: Date): TimeFilter => ({
@@ -316,7 +315,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                 <PopoverTrigger
                   asChild
                   className={cn(
-                    "flex h-8 w-[280px] items-center justify-between rounded-md border border-sky-200 bg-white px-3 py-2 text-xs ring-offset-white placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sidebar-background",
+                    "flex h-8 w-[180px] items-center justify-between rounded-md border border-sky-200 bg-white px-3 py-2 text-xs ring-offset-white placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sidebar-background",
                     "focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:focus:ring-slate-300",
                   )}
                 >
@@ -331,7 +330,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                     <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[280px] p-0">
+                <PopoverContent className="w-[180px] p-0">
                   <Command>
                     <CommandInput
                       placeholder="Search sessions..."

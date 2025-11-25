@@ -279,13 +279,11 @@ export class InputsManager extends BaseManager {
         prompt_input_record.auto_prompt_inputs as auto_prompt_inputs,
         prompt_input_record.source_request as source_request,
         prompt_input_record.prompt_version as prompt_version,
-        prompt_input_record.created_at as created_at,
-        response.body as response_body
+        prompt_input_record.created_at as created_at
       FROM prompt_input_record
-      left join request on prompt_input_record.source_request = request.id
-      left join response on response.request = request.id
       left join helicone_dataset_row hdr on hdr.origin_request_id = prompt_input_record.source_request
-      WHERE  request.helicone_org_id = $1 AND
+      left join prompts_versions pv on pv.id = prompt_input_record.prompt_version
+      WHERE pv.organization = $1 AND
       prompt_input_record.prompt_version = $2 AND
       hdr.dataset_id = $3
       `,
@@ -330,8 +328,8 @@ export class InputsManager extends BaseManager {
         prompt_input_record.prompt_version as prompt_version,
         prompt_input_record.created_at as created_at
       FROM prompt_input_record
-      left join request on prompt_input_record.source_request = request.id
-      WHERE request.helicone_org_id = $1 AND
+      left join prompts_versions pv on pv.id = prompt_input_record.prompt_version
+      WHERE pv.organization = $1 AND
       prompt_input_record.prompt_version = $2
       ${
         random

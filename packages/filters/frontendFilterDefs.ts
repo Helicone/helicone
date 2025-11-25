@@ -290,6 +290,7 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">
 ] = [
   {
@@ -368,5 +369,12 @@ export const REQUEST_TABLE_FILTERS: [
     table: "request_response_rmt",
     column: "helicone-score-feedback",
     category: "feedback",
+  },
+  {
+    label: "AI Gateway",
+    operators: booleanOperators,
+    table: "request_response_rmt",
+    column: "request_referrer",
+    category: "request",
   },
 ];

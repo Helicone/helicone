@@ -67,6 +67,8 @@ export type ProviderExpectation = {
   errorMessage?: string;
   /** Custom response data */
   data?: any;
+  /** Optional: headers to attach to the mocked provider response */
+  responseHeaders?: Record<string, string>;
 
   /** Declarative expectations */
   expects?: {
@@ -242,6 +244,7 @@ export async function runGatewayTest(
             "content-type": "application/json",
             "Helicone-Status": "success",
             "Helicone-Id": crypto.randomUUID(),
+            ...(expectation.responseHeaders || {}),
           },
         });
       } else {
@@ -255,6 +258,7 @@ export async function runGatewayTest(
               "content-type": "application/json",
               "Helicone-Status": "failed",
               "Helicone-Id": crypto.randomUUID(),
+              ...(expectation.responseHeaders || {}),
             },
           }
         );

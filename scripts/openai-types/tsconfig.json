@@ -12,5 +12,5 @@
     "sourceMap": true,
     "noEmit": true
   },
-  "include": ["chat-completion-types.ts"]
+  "include": ["chat-completion-types.ts", "responses-types.ts"]
 }

@@ -12,9 +12,14 @@ import {
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  returnUrl?: string;
 }
 
-const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
+const PaymentModal: React.FC<PaymentModalProps> = ({
+  isOpen,
+  onClose,
+  returnUrl,
+}) => {
   const [amount, setAmount] = useState(5);
   const [customAmount, setCustomAmount] = useState("");
   const createCheckoutSession = useCreateCheckoutSession();
@@ -55,7 +60,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
   const handleSubmit = async () => {
     if (amount >= MIN_AMOUNT) {
       try {
-        await createCheckoutSession.mutateAsync({ body: { amount } });
+        await createCheckoutSession.mutateAsync({
+          body: {
+            amount,
+            ...(returnUrl && { returnUrl }),
+          },
+        });
       } catch (error) {
         setNotification("Failed to start checkout. Please try again.", "error");
       }
