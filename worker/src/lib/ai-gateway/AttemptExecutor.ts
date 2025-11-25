@@ -240,9 +240,6 @@ export class AttemptExecutor {
         });
       }
 
-      console.log("=== GOOGLE DEBUG: Final URL ===");
-      console.log("URL:", urlResult.data);
-
       const authContext: AuthContext = {
         apiKey: providerKey.decrypted_provider_key,
         secretKey: providerKey.decrypted_provider_secret_key || undefined,
@@ -258,10 +255,6 @@ export class AttemptExecutor {
         authContext,
         this.cacheProvider
       );
-
-      console.log("=== GOOGLE DEBUG: Auth Result ===");
-      console.log("Auth headers:", JSON.stringify(authResult.data?.headers || {}));
-      console.log("Auth error:", authResult.error);
 
       if (authResult.error) {
         return err({

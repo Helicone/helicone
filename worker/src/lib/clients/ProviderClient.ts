@@ -141,11 +141,6 @@ export async function callProvider(props: CallProps): Promise<Response> {
 
   const targetUrl = buildTargetUrl(originalUrl, apiBase);
 
-  console.log("=== PROVIDER CLIENT DEBUG ===");
-  console.log("originalUrl:", originalUrl.href);
-  console.log("apiBase:", apiBase);
-  console.log("targetUrl:", targetUrl.href);
-
   const removedHeaders = removeHeliconeHeaders(headers);
 
   let headersWithExtra = removedHeaders;
@@ -163,25 +158,6 @@ export async function callProvider(props: CallProps): Promise<Response> {
   const baseInit = { method, headers: headersWithExtra };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
-  // Debug: log final headers and body
-  console.log("=== FINAL REQUEST DEBUG ===");
-  const finalHeaders: Record<string, string> = {};
-  headersWithExtra.forEach((value, key) => {
-    finalHeaders[key] = value;
-  });
-  console.log("Final headers:", JSON.stringify(finalHeaders, null, 2));
-
-  // Log body (handle different body types)
-  if (body) {
-    if (typeof body === 'string') {
-      console.log("Body (string):", body);
-    } else if (body instanceof ReadableStream) {
-      console.log("Body: [ReadableStream]");
-    } else {
-      console.log("Body type:", typeof body);
-    }
-  }
-
   let response: Response;
   if (increaseTimeout) {
     const controller = new AbortController();
@@ -194,9 +170,6 @@ export async function callProvider(props: CallProps): Promise<Response> {
   } else {
     response = await callWithMapper(targetUrl, init);
   }
-
-  console.log(`Response status from provider: ${response.status} ${response.statusText}`);
-  console.log("Response text:", await response.clone().text());
   return response;
 }
 
