@@ -178,6 +178,7 @@ export class ScoreStore extends BaseStore {
             ai_gateway_body_mapping: row.ai_gateway_body_mapping,
             is_passthrough_billing: row.is_passthrough_billing,
             storage_location: row.storage_location,
+            size_bytes: row.size_bytes,
           },
         ];
       })

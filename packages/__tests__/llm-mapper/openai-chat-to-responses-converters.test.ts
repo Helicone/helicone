@@ -44,7 +44,7 @@ describe("OpenAI Chat -> Responses converters", () => {
       expect(msg.type).toBe("message");
       expect(msg.role).toBe("assistant");
       expect(msg.content).toEqual([
-        { type: "output_text", text: "Hello from Chat Completions!" },
+        { type: "output_text", text: "Hello from Chat Completions!", annotations: [] },
       ]);
       expect(res.usage?.input_tokens).toBe(10);
       expect(res.usage?.output_tokens).toBe(5);
@@ -88,7 +88,7 @@ describe("OpenAI Chat -> Responses converters", () => {
       const func = res.output.find((o: any) => o.type === "function_call") as any;
       expect(msg).toBeDefined();
       expect(msg.content).toEqual([
-        { type: "output_text", text: "Calculating..." },
+        { type: "output_text", text: "Calculating...", annotations: [] },
       ]);
       expect(func).toBeDefined();
       expect(func).toMatchObject({
@@ -172,6 +172,7 @@ describe("OpenAI Chat -> Responses converters", () => {
       expect(firstMsg.content[0]).toEqual({
         type: "output_text",
         text: "Hello world",
+        annotations: [],
       });
       expect(completed.response.usage).toBeDefined();
       expect(completed.response.usage?.input_tokens).toBe(10);

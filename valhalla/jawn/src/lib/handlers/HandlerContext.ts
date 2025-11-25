@@ -17,6 +17,7 @@ export class HandlerContext extends SetOnce {
   public usage?: ModelUsage;
   public costBreakdown?: CostBreakdown;
   public storageLocation?: "s3" | "clickhouse";
+  public sizeBytes?: number;
   public rawLog: RawLog;
   public processedLog: ProcessedLog;
   public timingMetrics: { constructor: string; start: number }[] = [];

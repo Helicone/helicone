@@ -3456,6 +3456,7 @@ Json: JsonObject;
       inputModalities: components["schemas"]["InputModality"][];
       outputModalities: components["schemas"]["OutputModality"][];
       supportedParameters: components["schemas"]["StandardParameter"][];
+      pinnedVersionOfModel?: string;
     };
     /** @enum {string} */
     ModelCapability: "audio" | "video" | "image" | "thinking" | "web_search" | "caching" | "reasoning";

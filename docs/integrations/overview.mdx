@@ -1,5 +1,5 @@
 ---
-title: "Alternative Integration Methods"
+title: "Legacy Integrations"
 sidebarTitle: "Overview"
 description: "Legacy proxy-based integrations for existing codebases"
 ---
@@ -8,7 +8,7 @@ description: "Legacy proxy-based integrations for existing codebases"
   These integration methods are maintained but no longer actively developed. For new projects and the best experience, use our [AI Gateway](/gateway/overview) with unified API access to 100+ models.
 </Warning>
 
-## What Are Alternative Integrations?
+## What Are Legacy Integrations?
 
 Legacy proxy-based integrations that add Helicone observability by changing your base URL:
 
@@ -16,7 +16,7 @@ Legacy proxy-based integrations that add Helicone observability by changing your
 - **Anthropic**: `api.anthropic.com` → `anthropic.helicone.ai`
 - **Others**: Provider-specific proxy endpoints
 
-You keep using your existing SDK and code—just point to our proxy URL and add a Helicone-Auth header.
+You keep using your existing SDK and code — just point to our proxy URL and add a Helicone-Auth header.
 
 ## Why We Built the AI Gateway
 
@@ -29,7 +29,7 @@ These provider-specific proxies have limitations:
 
 The [AI Gateway](/gateway/overview) solves these problems with one unified API that routes to 100+ models with automatic fallbacks, intelligent routing, and zero markup.
 
-## When to Use Alternative Integrations
+## When to Use Legacy Integrations
 
 Only use these if:
 
@@ -37,10 +37,6 @@ Only use these if:
 - **Native SDK features** - You need specific features only available in the native SDK (rare)
 
 Otherwise, use the [AI Gateway](/gateway/overview) for better reliability, flexibility, and features.
-
-## Available Integrations
-
-If you need provider-specific integrations, see the navigation menu on the left under "References > Alternative Integrations" for all available providers.
 
 ## How to Migrate to AI Gateway
 

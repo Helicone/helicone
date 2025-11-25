@@ -1,10 +1,11 @@
 // Import shared types from packages
-import { 
-  InputModality, 
-  OutputModality, 
-  StandardParameter 
+import {
+  InputModality,
+  OutputModality,
+  StandardParameter
 } from "../../../packages/cost/models/types";
 import { getProviderDisplayName } from "../../../packages/cost/models/provider-helpers";
+import Fuse from 'fuse.js';
 
 // Define filtering-specific types
 export type ModelCapability =
@@ -53,6 +54,7 @@ export interface Model {
   inputModalities: InputModality[];
   outputModalities: OutputModality[];
   supportedParameters: StandardParameter[];
+  pinnedVersionOfModel?: string;
 }
 
 export interface FilterOptions {
@@ -68,21 +70,27 @@ export interface FilterOptions {
   showPtbOnly?: boolean;
 }
 
-// Search filter
+// Search filter with fuzzy matching
 export const filterBySearch = (models: Model[], search: string): Model[] => {
   if (!search) return models;
-  
-  const searchLower = search.toLowerCase();
-  return models.filter(model => {
-    const searchableText = [
-      model.id.toLowerCase(),
-      model.name.toLowerCase(),
-      model.author.toLowerCase(),
-      model.description?.toLowerCase() || '',
-    ].join(' ');
-    
-    return searchableText.includes(searchLower);
+
+  // Configure Fuse.js for fuzzy search
+  const fuse = new Fuse(models, {
+    keys: [
+      { name: 'name', weight: 2 },        // Higher weight for name matches
+      { name: 'id', weight: 1.5 },        // Medium weight for ID matches
+      { name: 'author', weight: 1 },      // Standard weight for author
+      { name: 'description', weight: 0.5 } // Lower weight for description
+    ],
+    threshold: 0.3,                        // 0 = perfect match, 1 = match anything
+    includeScore: true,                    // Include relevance score
+    minMatchCharLength: 2,                 // Require at least 2 characters to match
+    ignoreLocation: true,                  // Search anywhere in the string
   });
+
+  // Perform fuzzy search and extract the matched items
+  const results = fuse.search(search);
+  return results.map(result => result.item);
 };
 
 // Provider filter
@@ -197,36 +205,62 @@ export const filterByPtb = (models: Model[], showPtbOnly: boolean): Model[] => {
 // Sort models
 export const sortModels = (models: Model[], sortBy: SortOption): Model[] => {
   const sorted = [...models];
-  
+
+  // Primary sort based on the selected option
   switch (sortBy) {
     case 'price-low':
-      return sorted.sort((a, b) => {
+      sorted.sort((a, b) => {
         const aMin = Math.min(...a.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
         const bMin = Math.min(...b.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
         return aMin - bMin;
       });
-      
+      break;
+
     case 'price-high':
-      return sorted.sort((a, b) => {
+      sorted.sort((a, b) => {
         const aMin = Math.min(...a.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
         const bMin = Math.min(...b.endpoints.map(e => (e.pricing.prompt + e.pricing.completion) / 2));
         return bMin - aMin;
       });
-      
+      break;
+
     case 'context':
-      return sorted.sort((a, b) => b.contextLength - a.contextLength);
-      
+      sorted.sort((a, b) => b.contextLength - a.contextLength);
+      break;
+
     case 'newest':
-      return sorted.sort((a, b) => {
+      sorted.sort((a, b) => {
         const aDate = a.trainingDate || '';
         const bDate = b.trainingDate || '';
         return bDate.localeCompare(aDate);
       });
-      
+      break;
+
     case 'name':
     default:
-      return sorted.sort((a, b) => a.name.localeCompare(b.name));
+      sorted.sort((a, b) => a.name.localeCompare(b.name));
+      break;
   }
+
+  // Secondary sort: ensure pinned versions always appear after their base models
+  // This maintains the primary sort order but groups base + pinned together
+  return sorted.sort((a, b) => {
+    // If both models reference the same base model (or one is the base of the other)
+    const aBase = a.pinnedVersionOfModel || a.id;
+    const bBase = b.pinnedVersionOfModel || b.id;
+
+    // If they share the same base model, sort by pinned status
+    if (aBase === bBase || aBase === b.id || bBase === a.id) {
+      // Base models (no pinnedVersionOfModel) come first
+      if (!a.pinnedVersionOfModel && b.pinnedVersionOfModel) return -1;
+      if (a.pinnedVersionOfModel && !b.pinnedVersionOfModel) return 1;
+      // If both are pinned versions, maintain existing order
+      return 0;
+    }
+
+    // Otherwise, maintain the primary sort order
+    return 0;
+  });
 };
 
 // Composite filter function

@@ -4,8 +4,6 @@ sidebarTitle: "Model Provider Integration"
 description: "Tutorial to integrate a new model provider into the AI Gateway"
 ---
 
-This tutorial explains how to add support for a new model provider in Helicone's AI Gateway.
-
 ## Overview
 
 Adding a new provider to Helicone involves several key components:
@@ -118,15 +116,85 @@ Update `web/data/providers.ts` to include the new provider:
   ...
 ```
 
-## Step 5: Define Authors (Model Creators)
+## Step 5: Update provider helpers
+
+Include provider in `packages/cost/models/provider-helpers.ts` within the `heliconeProviderToModelProviderName` function, so the mapping is done by the AI Gateway correctly.
+
+```tsx
+case "DEEPINFRA":
+    return "deepinfra";
+case "NOVITA":
+    return "novita";
+```
+
+Also, go to the `getUsageProcessor` function within `packages/cost/usage.ts`  and add the provider. If your provider require a custom usage processor (non-OpenAI compatible), you will need to add it here.
+
+```tsx
+export function getUsageProcessor(
+  provider: ModelProviderName
+): IUsageProcessor | null {
+  switch (provider) {
+    case "openai":
+    case "azure":
+    case "chutes":
+    case "deepinfra":
+		//.... <add new provider>
+    default:
+      return null;
+  }
+}
+```
+
+## Step 6: Add provider to priorities list
+
+We need to add the provider to the list of priorities so the gateway knows how much to prioritize each provider.
+
+Go to `packages/cost/models/providers/priorities.ts` and include your provider within the `PROVIDER_PRIORITIES` constant variable.
+
+```tsx
+export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
+  // Priority 1: BYOK (Bring Your Own Key) - Reserved for user's own API keys
+  // Priority 2: Helicone-hosted inference
+  helicone: 2,
+  // Priority 3: Premium direct providers
+  anthropic: 3,
+  openai: 3,
+  //... <add new provider>
+  deepinfra: 4,
+} as const;
+```
+
+## Step 7: Update provider setup for tests
+
+Head to `worker/test/setup.ts` and include your new provider within the `supabase-js` mock.
+
+```tsx
+vi.mock("@supabase/supabase-js", () => ({
+  createClient: vi.fn(() => ({
+	  // ....
+    deepinfra: {
+          org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+          provider_name: "deepinfra",
+          decrypted_provider_key: "helicone-deepinfra-api-key",
+          decrypted_provider_secret_key: null,
+          auth_type: "api_key",
+          config: null,
+          byok_enabled: true,
+        },
+    // ...
+  })
+})
+```
+
+## Step 8: Define Authors (Model Creators)
 
 Create author definitions in `packages/cost/models/authors/[author-name]/`:
 
 ### Folder Structure
 
 ```
-authors/mistralai/         # Author name
-└── mistralai3             # Model family
+authors/mistralai/    # Author name
+└── mistral-nemo      # Model family
 	└── endpoints.ts    # Model-provider combinations
 	└── models.ts       # Model definitions
 └── index.ts          # Exports
@@ -220,42 +288,42 @@ Two important things to note here:
 
 - Some providers have multiple deployment regions:
 
-    ```tsx
-    endpointConfigs: {
-      "global": {
-        pricing: [/* global pricing */],
-        passThroughBillingEnabled: true,
-      },
-      "us-east": {
-        pricing: [/* regional pricing */],
-        passThroughBillingEnabled: true,
-      },
-    }
+```tsx
+endpointConfigs: {
+  "global": {
+    pricing: [/* global pricing */],
+    passThroughBillingEnabled: true,
+  },
+  "us-east": {
+    pricing: [/* regional pricing */],
+    passThroughBillingEnabled: true,
+  },
+}
 
-    ```
+```
 
 - Pricing Configuration
 
-    ```tsx
-    pricing: [
-      {
-        threshold: 0,              // Context length threshold
-        inputCostPerToken: 0.0000005, // Always per million tokens
-        outputCostPerToken: 0.0000015,
-        cacheReadMultiplier: 0.1,   // Cache read cost (10% of input)
-        cacheWriteMultiplier: 1.25, // Cache write cost (125% of input)
-      },
-      {
-        threshold: 200000,         // Different pricing for >200k context
-        inputCostPerToken: 0.000001,
-        outputCostPerToken: 0.000003,
-      },
-    ],
+```tsx
+pricing: [
+  {
+    threshold: 0,              // Context length threshold
+    inputCostPerToken: 0.0000005, // Always per million tokens
+    outputCostPerToken: 0.0000015,
+    cacheReadMultiplier: 0.1,   // Cache read cost (10% of input)
+    cacheWriteMultiplier: 1.25, // Cache write cost (125% of input)
+  },
+  {
+    threshold: 200000,         // Different pricing for >200k context
+    inputCostPerToken: 0.000001,
+    outputCostPerToken: 0.000003,
+  },
+],
 
-    ```
+```
 
 
-## Step 6: Add model to Author registries (if needed)
+## Step 9: Add model to Author registries (if needed)
 
 If the model family hasn't been created, you will need to add it within the AI Gateway's registry.
 
@@ -312,9 +380,9 @@ export const mistralMetadata = {
 
 ```
 
-## Step 7: Update the Model Registry & its Types
+### registry-types.ts
 
-Add your new model to `packages/cost/models/registry-types.ts`:
+Update types for the new model family in `packages/cost/models/registry-types.ts`.
 
 ```tsx
 import { mistralEndpointConfig } from "./authors/mistralai";
@@ -347,19 +415,19 @@ const modelProviderConfigs = {
 } satisfies Record<string, ModelProviderConfig>;
 ```
 
-## Step 8: Create Tests
+## Step 10: Create Tests
 
 Create test files in `worker/tests/ai-gateway/` for the author.
 
-You can use the tests there as a base example. Make sure to include all edge cases and error scenarios.
+Feel free to use the existing tests there as reference.
 
-We map out the provider errors so we don't pass them to the user directly. You'll find the correct error codes in the `worker/src/lib/ai-gateway/SimpleAIGateway.ts` in the `createErrorResponse` [function here](https://github.com/Helicone/helicone/blob/bd88e063c66edcc1f617637facda9d9f2914e4f0/worker/src/lib/ai-gateway/SimpleAIGateway.ts#L349).
+## Step 11: Snapshots
 
-## Step 9: Snapshots
+Make sure to rerun snapshots before deploying.
 
-Make sure to rerun snapshots before deploying by running this command in your console.
-
-`cd <your-path-to-the-repo>/helicone/helicone/packages && npx jest --updateSnapshot __tests__/cost/registrySnapshots.test.ts`
+```bash
+cd <your-path-to-the-repo>/helicone/helicone/packages && npx jest -u
+```
 
 ## Common Issues & Solutions
 

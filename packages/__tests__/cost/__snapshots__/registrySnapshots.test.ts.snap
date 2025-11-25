@@ -743,6 +743,90 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "anthropic/claude-4.5-opus": {
+    "claude-4.5-opus:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "claude-opus-4-5",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-opus:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "anthropic.claude-opus-4-5-20251101-v1:0",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-4.5-opus:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "anthropic/claude-opus-4.5",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-opus:vertex": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "claude-opus-4-5@20251101",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "anthropic/claude-4.5-sonnet": {
     "claude-4.5-sonnet:anthropic": {
       "context": 200000,
@@ -3129,6 +3213,75 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/gpt-4.1": {
+    "gpt-4.1-mini-2025-04-14:azure": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-4.1-mini-2025-04-14",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4.1-mini-2025-04-14:openai": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-4.1-mini-2025-04-14",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4.1-mini-2025-04-14:openrouter": {
+      "context": 1047576,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-4.1-mini-2025-04-14",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4.1-mini:azure": {
       "context": 1047576,
       "crossRegion": false,
@@ -5037,6 +5190,12 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "anthropic/claude-4.5-opus": [
+    "anthropic",
+    "bedrock",
+    "openrouter",
+    "vertex",
+  ],
   "anthropic/claude-4.5-sonnet": [
     "anthropic",
     "bedrock",
@@ -5188,12 +5347,15 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "azure",
     "azure",
     "azure",
+    "azure",
     "helicone",
     "helicone",
     "helicone",
     "openai",
     "openai",
     "openai",
+    "openai",
+    "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -5613,6 +5775,53 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 0.000001,
         "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-4.5-opus": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.000005275,
+        "output": 0.000026375,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
         "threshold": 0,
         "web_search": 0.01,
       },
@@ -6911,6 +7120,15 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "claude-4.5-opus",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "claude-4.5-sonnet",
       "providers": [
         "anthropic",
@@ -7102,6 +7320,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "azure",
         "helicone",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-4.1-mini-2025-04-14",
+      "providers": [
+        "azure",
         "openai",
         "openrouter",
       ],
@@ -7516,11 +7742,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
   ],
   "providerBreakdown": [
     {
-      "modelCount": 12,
+      "modelCount": 13,
       "provider": "anthropic",
     },
     {
-      "modelCount": 9,
+      "modelCount": 10,
       "provider": "azure",
     },
     {
@@ -7528,7 +7754,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "baseten",
     },
     {
-      "modelCount": 11,
+      "modelCount": 12,
       "provider": "bedrock",
     },
     {
@@ -7576,11 +7802,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "novita",
     },
     {
-      "modelCount": 20,
+      "modelCount": 21,
       "provider": "openai",
     },
     {
-      "modelCount": 53,
+      "modelCount": 55,
       "provider": "openrouter",
     },
     {
@@ -7588,7 +7814,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 15,
+      "modelCount": 16,
       "provider": "vertex",
     },
     {
@@ -7603,6 +7829,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-sonnet-v2",
     "claude-3.7-sonnet",
     "claude-4.5-haiku",
+    "claude-4.5-opus",
     "claude-4.5-sonnet",
     "claude-haiku-4-5-20251001",
     "claude-opus-4",
@@ -7627,6 +7854,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "glm-4.6",
     "gpt-4.1",
     "gpt-4.1-mini",
+    "gpt-4.1-mini-2025-04-14",
     "gpt-4.1-nano",
     "gpt-4o",
     "gpt-4o-mini",
@@ -7694,9 +7922,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 223,
-  "totalModelProviderConfigs": 223,
-  "totalModelsWithPtb": 87,
+  "totalEndpoints": 230,
+  "totalModelProviderConfigs": 230,
+  "totalModelsWithPtb": 89,
   "totalProviders": 20,
 }
 `;
