@@ -337,5 +337,5 @@ export const parentModelNames = providers.reduce(
     }
     return acc;
   },
-  {} as Record<ProviderName, string[]>
+  {} as Record<ProviderName, string[]>,
 );
