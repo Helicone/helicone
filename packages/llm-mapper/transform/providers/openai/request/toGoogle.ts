@@ -316,7 +316,12 @@ function mapContentToGeminiParts(
           const dataUri = part.image_url.url;
           if (dataUri.startsWith("data:")) {
             const [meta, data] = dataUri.split(",");
-            const mimeType = meta.split(";")[0].replace("data:", "");
+
+            let mimeType = meta.split(";")[0].replace("data:", "");
+            if (!mimeType || mimeType.trim() === "") {
+              mimeType = "application/octet-stream";
+            }
+
             parts.push({
               inlineData: {
                 mimeType,
@@ -324,8 +329,28 @@ function mapContentToGeminiParts(
               },
             });
           } else {
+            let mimeType: string | undefined = undefined;
+
+            try {
+              const urlObj = new URL(dataUri);
+              const pathname = urlObj.pathname.toLowerCase();
+
+              if (pathname.endsWith(".png")) mimeType = "image/png";
+              else if (pathname.endsWith(".jpg") || pathname.endsWith(".jpeg"))
+                mimeType = "image/jpeg";
+              else if (pathname.endsWith(".gif")) mimeType = "image/gif";
+              else if (pathname.endsWith(".webp")) mimeType = "image/webp";
+              else if (pathname.endsWith(".bmp")) mimeType = "image/bmp";
+              else if (pathname.endsWith(".svg")) mimeType = "image/svg+xml";
+            } catch {
+              // non-URL or extension not detectable
+            }
+
             parts.push({
-              fileData: { fileUri: dataUri },
+              fileData: {
+                fileUri: dataUri,
+                ...(mimeType ? { mimeType } : {}),
+              },
             });
           }
         }
