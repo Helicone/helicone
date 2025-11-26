@@ -298,7 +298,7 @@ describe("VertexProvider", () => {
     it("should return Bearer token with Google access token", async () => {
       const result = await provider.authenticate(
         { apiKey: '{"type":"service_account"}', orgId: "test-org" },
-        {} as any,
+        { providerModelId: "claude-3-haiku" } as any,
         undefined
       );
 
@@ -326,7 +326,7 @@ describe("VertexProvider", () => {
 
       await provider.authenticate(
         { apiKey: '{"type":"service_account"}', orgId: "test-org" },
-        {} as any,
+        { providerModelId: "claude-3-haiku" } as any,
         mockCacheProvider as any
       );
 
@@ -336,6 +336,28 @@ describe("VertexProvider", () => {
         ["https://www.googleapis.com/auth/cloud-platform"],
         mockCacheProvider
       );
+    });
+
+    it("should include anthropic-beta header for sonnet-4 models", async () => {
+      const result = await provider.authenticate(
+        { apiKey: '{"type":"service_account"}', orgId: "test-org" },
+        { providerModelId: "claude-sonnet-4-20250514" } as any,
+        undefined
+      );
+
+      expect(result.headers.Authorization).toBe("Bearer test-access-token");
+      expect(result.headers["anthropic-beta"]).toBe("context-1m-2025-08-07");
+    });
+
+    it("should not include anthropic-beta header for non-sonnet-4 models", async () => {
+      const result = await provider.authenticate(
+        { apiKey: '{"type":"service_account"}', orgId: "test-org" },
+        { providerModelId: "claude-3-5-sonnet-20241022" } as any,
+        undefined
+      );
+
+      expect(result.headers.Authorization).toBe("Bearer test-access-token");
+      expect(result.headers["anthropic-beta"]).toBeUndefined();
     });
   });
 
