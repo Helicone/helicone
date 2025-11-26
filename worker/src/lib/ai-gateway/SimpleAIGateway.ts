@@ -142,6 +142,12 @@ export class SimpleAIGateway {
       finalBody = expandResult.data.body;
     }
 
+    if (!this.requiresReasoningOptions(finalBody.model)) {
+      // Both Responses API and Chat Completions format contain optional reasoning_options
+      // Strip it before sending to provider that doesn't support it
+      delete finalBody.reasoning_options;
+    }
+
     const errors: Array<AttemptError> = [];
 
     // Step 3: Build all attempts
@@ -344,9 +350,7 @@ export class SimpleAIGateway {
     // Forces usage data for streaming requests
     if (
       parsedBody.stream === true &&
-      (this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
-        || this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "RESPONSES"
-      )
+      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
     ) {
       parsedBody.stream_options = {
         ...(parsedBody.stream_options || {}),
@@ -418,6 +422,14 @@ export class SimpleAIGateway {
       body.version_id ||
       body.inputs
     );
+  }
+
+  // reasoning_options reserved for providers with custom reasoning logic
+  private requiresReasoningOptions(providerModelId: string): boolean {
+    if (providerModelId.includes("claude")) {
+      return true;
+    }
+    return false;
   }
 
   private async expandPrompt(
