@@ -1089,4 +1089,114 @@ describe("xAI Registry Tests", () => {
         }
       }));
   });
+
+  describe("BYOK Tests - Helicone Provider for Grok Models", () => {
+    describe("grok-4", () => {
+      it("should handle helicone provider", () =>
+        runGatewayTest({
+          model: "grok-4/helicone",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.helicone.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "pa/grk-4",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("grok-4-fast-reasoning", () => {
+      it("should handle helicone provider", () =>
+        runGatewayTest({
+          model: "grok-4-fast-reasoning/helicone",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.helicone.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "pa/grok-4-fast-reasoning",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("grok-4-fast-non-reasoning", () => {
+      it("should handle helicone provider", () =>
+        runGatewayTest({
+          model: "grok-4-fast-non-reasoning/helicone",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.helicone.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "pa/grok-4-fast-non-reasoning",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("grok-code-fast-1", () => {
+      it("should handle helicone provider", () =>
+        runGatewayTest({
+          model: "grok-code-fast-1/helicone",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.helicone.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "pa/grok-code-fast-1",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("grok-3", () => {
+      it("should handle helicone provider", () =>
+        runGatewayTest({
+          model: "grok-3/helicone",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.helicone.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "pa/grk-3",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("grok-3-mini", () => {
+      it("should handle helicone provider", () =>
+        runGatewayTest({
+          model: "grok-3-mini/helicone",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.helicone.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "pa/grok-3-mini",
+                expects: xaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
 });

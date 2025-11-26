@@ -4850,6 +4850,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "xai/endpoints.ts": {
+    "grok-3-mini:helicone": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "pa/grok-3-mini",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "grok-3-mini:openrouter": {
       "context": 131072,
       "crossRegion": false,
@@ -4897,6 +4923,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-3:helicone": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "pa/grk-3",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -4954,6 +5006,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "grok-4-fast-non-reasoning:helicone": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "pa/grok-4-fast-non-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "grok-4-fast-non-reasoning:xai": {
       "context": 2000000,
       "crossRegion": false,
@@ -4972,6 +5047,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-fast-reasoning:helicone": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "pa/grok-4-fast-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -5024,6 +5123,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "grok-4:helicone": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 256000,
+      "modelId": "pa/grk-4",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "grok-4:openrouter": {
       "context": 256000,
       "crossRegion": false,
@@ -5071,6 +5196,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-code-fast-1:helicone": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 10000,
+      "modelId": "pa/grok-code-fast-1",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -5466,6 +5617,12 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "perplexity",
   ],
   "xai/endpoints.ts": [
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -7051,6 +7208,20 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "xai/endpoints.ts": {
+    "helicone": [
+      {
+        "audio": 0,
+        "cacheMultipliers": {
+          "cachedInput": 0.25,
+        },
+        "image": 0,
+        "input": 3e-7,
+        "output": 5e-7,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0.025,
+      },
+    ],
     "openrouter": [
       {
         "input": 2.1e-7,
@@ -7479,6 +7650,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "grok-3",
       "providers": [
+        "helicone",
         "openrouter",
         "xai",
       ],
@@ -7486,6 +7658,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "grok-3-mini",
       "providers": [
+        "helicone",
         "openrouter",
         "xai",
       ],
@@ -7493,6 +7666,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "grok-4",
       "providers": [
+        "helicone",
         "openrouter",
         "xai",
       ],
@@ -7500,12 +7674,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "grok-4-fast-non-reasoning",
       "providers": [
+        "helicone",
         "xai",
       ],
     },
     {
       "model": "grok-4-fast-reasoning",
       "providers": [
+        "helicone",
         "xai",
       ],
     },
@@ -7518,6 +7694,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "grok-code-fast-1",
       "providers": [
+        "helicone",
         "openrouter",
         "xai",
       ],
@@ -7816,7 +7993,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 29,
+      "modelCount": 35,
       "provider": "helicone",
     },
     {
@@ -7953,8 +8130,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 231,
-  "totalModelProviderConfigs": 231,
+  "totalEndpoints": 237,
+  "totalModelProviderConfigs": 237,
   "totalModelsWithPtb": 90,
   "totalProviders": 20,
 }
