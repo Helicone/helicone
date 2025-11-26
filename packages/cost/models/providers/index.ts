@@ -5,7 +5,6 @@ import { BedrockProvider } from "./bedrock";
 import { CanopyWaveProvider } from "./canopywave";
 import { CerebrasProvider } from "./cerebras";
 import { ChutesProvider } from "./chutes";
-import { CohereProvider } from "./cohere";
 import { DeepInfraProvider } from "./deepinfra";
 import { DeepSeekProvider } from "./deepseek";
 import { FireworksProvider } from "./fireworks";
@@ -30,7 +29,6 @@ export const providers = {
   canopywave: new CanopyWaveProvider(),
   cerebras: new CerebrasProvider(),
   chutes: new ChutesProvider(),
-  cohere: new CohereProvider(),
   deepinfra: new DeepInfraProvider(),
   deepseek: new DeepSeekProvider(),
   fireworks: new FireworksProvider(),
@@ -57,7 +55,6 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   // chat completions only
   "azure",
   "chutes",
-  "cohere",
   "deepinfra",
   "deepseek",
 

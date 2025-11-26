@@ -677,33 +677,6 @@ export interface paths {
   "/v1/evals/score-distributions/query": {
     post: operations["QueryScoreDistributions"];
   };
-  "/v1/public/dataisbeautiful/total-values": {
-    post: operations["GetTotalValues"];
-  };
-  "/v1/public/dataisbeautiful/model/usage/overtime": {
-    post: operations["GetModelUsageOverTime"];
-  };
-  "/v1/public/dataisbeautiful/provider/usage/overtime": {
-    post: operations["GetProviderUsageOverTime"];
-  };
-  "/v1/public/dataisbeautiful/total-requests": {
-    post: operations["GetTotalRequests"];
-  };
-  "/v1/public/dataisbeautiful/ttft-vs-prompt-length": {
-    post: operations["GetTTFTvsPromptInputLength"];
-  };
-  "/v1/public/dataisbeautiful/model/percentage": {
-    post: operations["GetModelPercentage"];
-  };
-  "/v1/public/dataisbeautiful/model/cost": {
-    post: operations["GetModelCost"];
-  };
-  "/v1/public/dataisbeautiful/provider/percentage": {
-    post: operations["GetProviderPercentage"];
-  };
-  "/v1/public/dataisbeautiful/model/percentage/overtime": {
-    post: operations["GetModelPercentageOverTime"];
-  };
   "/v1/dashboard/scores/query": {
     post: operations["GetScoresOverTime"];
   };
@@ -1613,7 +1586,7 @@ export interface components {
     /** @enum {string} */
     ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS" | "BASETEN";
     /** @enum {string} */
-    ModelProviderName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+    ModelProviderName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -3277,7 +3250,7 @@ Json: JsonObject;
     };
     "Result__cost-number--created_at_trunc-string_-Array.string_": components["schemas"]["ResultSuccess__cost-number--created_at_trunc-string_-Array_"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
-    AuthorName: "anthropic" | "cohere" | "deepseek" | "mistral" | "openai" | "perplexity" | "xai" | "google" | "meta-llama" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "zai" | "baidu" | "passthrough";
+    AuthorName: "anthropic" | "deepseek" | "mistral" | "openai" | "perplexity" | "xai" | "google" | "meta-llama" | "amazon" | "microsoft" | "nvidia" | "qwen" | "moonshotai" | "alibaba" | "zai" | "baidu" | "passthrough";
     /** @enum {string} */
     StandardParameter: "max_tokens" | "max_completion_tokens" | "temperature" | "top_p" | "top_k" | "stop" | "stream" | "frequency_penalty" | "presence_penalty" | "repetition_penalty" | "seed" | "tools" | "tool_choice" | "functions" | "function_call" | "reasoning" | "include_reasoning" | "thinking" | "response_format" | "json_mode" | "truncate" | "min_p" | "logit_bias" | "logprobs" | "top_logprobs" | "structured_outputs" | "verbosity" | "n";
     /** @enum {string} */
@@ -4037,123 +4010,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_ScoreDistribution-Array.string_": components["schemas"]["ResultSuccess_ScoreDistribution-Array_"] | components["schemas"]["ResultError_string_"];
-    TotalValuesForAllOfTime: {
-      /** Format: double */
-      total_cost: number;
-      /** Format: double */
-      total_tokens: number;
-      /** Format: double */
-      total_requests: number;
-    };
-    ResultSuccess_TotalValuesForAllOfTime_: {
-      data: components["schemas"]["TotalValuesForAllOfTime"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_TotalValuesForAllOfTime.string_": components["schemas"]["ResultSuccess_TotalValuesForAllOfTime_"] | components["schemas"]["ResultError_string_"];
-    ModelUsageOverTime: {
-      /** Format: double */
-      tokens: number;
-      date: string;
-      model: string;
-    };
-    "ResultSuccess_ModelUsageOverTime-Array_": {
-      data: components["schemas"]["ModelUsageOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ModelUsageOverTime-Array.string_": components["schemas"]["ResultSuccess_ModelUsageOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    ProviderUsageOverTime: {
-      /** Format: double */
-      tokens: number;
-      date: string;
-      provider: string;
-    };
-    "ResultSuccess_ProviderUsageOverTime-Array_": {
-      data: components["schemas"]["ProviderUsageOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ProviderUsageOverTime-Array.string_": components["schemas"]["ResultSuccess_ProviderUsageOverTime-Array_"] | components["schemas"]["ResultError_string_"];
-    /**
-     * @description *
-     * FUTURE HELICONE DEVS ALL THE ROUTES HERE ARE CACHE UNAUTHENTICATED!! PLEASE DO NOT USE THE AUTH PARAM
-     * @enum {string}
-     */
-    TimeSpan: "7d" | "1m" | "3m";
-    /** @enum {string} */
-    ModelName: "gpt-3.5" | "gpt-4o" | "gpt-4o-mini" | "gpt-4" | "gpt-4-turbo" | "claude-3-opus" | "claude-3-sonnet" | "claude-3-haiku" | "claude-2" | "open-mixtral" | "dall-e" | "text-moderation" | "text-embedding" | "anthropic/claude-3.5-sonnet";
-    /** @enum {string} */
-    OpenStatsProviderName: "OPENAI" | "ANTHROPIC" | "OPENROUTER" | "MISTRAL";
-    DataIsBeautifulRequestBody: {
-      provider?: components["schemas"]["OpenStatsProviderName"];
-      models?: components["schemas"]["ModelName"][];
-      timespan: components["schemas"]["TimeSpan"];
-    };
-    TTFTvsPromptLength: {
-      /** Format: double */
-      prompt_length: number;
-      /** Format: double */
-      ttft_normalized_p75: number;
-      /** Format: double */
-      ttft_normalized_p99: number;
-      /** Format: double */
-      ttft_normalized: number;
-      /** Format: double */
-      ttft_p75: number;
-      /** Format: double */
-      ttft_p99: number;
-      /** Format: double */
-      ttft: number;
-    };
-    "ResultSuccess_TTFTvsPromptLength-Array_": {
-      data: components["schemas"]["TTFTvsPromptLength"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_TTFTvsPromptLength-Array.string_": components["schemas"]["ResultSuccess_TTFTvsPromptLength-Array_"] | components["schemas"]["ResultError_string_"];
-    ModelBreakdown: {
-      /** Format: double */
-      percent: number;
-      matched_model: string;
-    };
-    "ResultSuccess_ModelBreakdown-Array_": {
-      data: components["schemas"]["ModelBreakdown"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ModelBreakdown-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
-    ModelCost: {
-      /** Format: double */
-      percent: number;
-      matched_model: string;
-    };
-    "ResultSuccess_ModelCost-Array_": {
-      data: components["schemas"]["ModelCost"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ModelCost-Array.string_": components["schemas"]["ResultSuccess_ModelCost-Array_"] | components["schemas"]["ResultError_string_"];
-    ProviderBreakdown: {
-      /** Format: double */
-      percent: number;
-      provider: string;
-    };
-    "ResultSuccess_ProviderBreakdown-Array_": {
-      data: components["schemas"]["ProviderBreakdown"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ProviderBreakdown-Array.string_": components["schemas"]["ResultSuccess_ProviderBreakdown-Array_"] | components["schemas"]["ResultError_string_"];
-    ModelBreakdownOverTime: {
-      date: string;
-    } & components["schemas"]["ModelBreakdown"];
-    "ResultSuccess_ModelBreakdownOverTime-Array_": {
-      data: components["schemas"]["ModelBreakdownOverTime"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ModelBreakdownOverTime-Array.string_": components["schemas"]["ResultSuccess_ModelBreakdownOverTime-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__score_key-string--score_sum-number--created_at_trunc-string_-Array_": {
       data: {
           created_at_trunc: string;
@@ -4569,7 +4425,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+            providerName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
           }) | {
             error: string;
           };
@@ -8061,126 +7917,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ScoreDistribution-Array.string_"];
-        };
-      };
-    };
-  };
-  GetTotalValues: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_TotalValuesForAllOfTime.string_"];
-        };
-      };
-    };
-  };
-  GetModelUsageOverTime: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ModelUsageOverTime-Array.string_"];
-        };
-      };
-    };
-  };
-  GetProviderUsageOverTime: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderUsageOverTime-Array.string_"];
-        };
-      };
-    };
-  };
-  GetTotalRequests: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_number.string_"];
-        };
-      };
-    };
-  };
-  GetTTFTvsPromptInputLength: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_TTFTvsPromptLength-Array.string_"];
-        };
-      };
-    };
-  };
-  GetModelPercentage: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ModelBreakdown-Array.string_"];
-        };
-      };
-    };
-  };
-  GetModelCost: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ModelCost-Array.string_"];
-        };
-      };
-    };
-  };
-  GetProviderPercentage: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderBreakdown-Array.string_"];
-        };
-      };
-    };
-  };
-  GetModelPercentageOverTime: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DataIsBeautifulRequestBody"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ModelBreakdownOverTime-Array.string_"];
         };
       };
     };

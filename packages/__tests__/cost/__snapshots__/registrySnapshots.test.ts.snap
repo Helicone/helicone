@@ -5001,6 +5001,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "grok-4.1-fast-non-reasoning:xai": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "grok-4-1-fast-non-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "grok-4:openrouter": {
       "context": 256000,
       "crossRegion": false,
@@ -5447,6 +5470,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
     "openrouter",
+    "xai",
     "xai",
     "xai",
     "xai",
@@ -7486,6 +7510,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "grok-4.1-fast-non-reasoning",
+      "providers": [
+        "xai",
+      ],
+    },
+    {
       "model": "grok-code-fast-1",
       "providers": [
         "openrouter",
@@ -7818,7 +7848,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "vertex",
     },
     {
-      "modelCount": 6,
+      "modelCount": 7,
       "provider": "xai",
     },
   ],
@@ -7875,6 +7905,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "grok-4",
     "grok-4-fast-non-reasoning",
     "grok-4-fast-reasoning",
+    "grok-4.1-fast-non-reasoning",
     "grok-code-fast-1",
     "hermes-2-pro-llama-3-8b",
     "kimi-k2-0711",
@@ -7922,9 +7953,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 230,
-  "totalModelProviderConfigs": 230,
-  "totalModelsWithPtb": 89,
+  "totalEndpoints": 231,
+  "totalModelProviderConfigs": 231,
+  "totalModelsWithPtb": 90,
   "totalProviders": 20,
 }
 `;

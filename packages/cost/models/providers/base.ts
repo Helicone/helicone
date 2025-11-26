@@ -65,15 +65,18 @@ export abstract class BaseProvider {
     });
   }
 
-  async buildErrorMessage(response: Response): Promise<string> {
+  async buildErrorMessage(response: Response): Promise<{
+    message: string;
+    details?: any;
+  }> {
     try {
       const respJson = (await response.json()) as any;
       if (respJson.error?.message) {
-        return respJson.error.message;
+        return { message: respJson.error.message };
       }
-      return `Request failed with status ${response.status}`;
+      return { message: `Request failed with status ${response.status}` };
     } catch (error) {
-      return `Request failed with status ${response.status}`;
+      return { message: `Request failed with status ${response.status}` };
     }
   }
 }

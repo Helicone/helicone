@@ -38,6 +38,11 @@ const nextConfig = {
         destination: "/api-public-schema.graphql",
         permanent: true,
       },
+      {
+        source: "/open-stats",
+        destination: "https://helicone.ai",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

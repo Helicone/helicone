@@ -36,7 +36,6 @@ const authorColorMapping: Partial<Record<AuthorName, ColorKey>> = {
   mistral: "pink",
   deepseek: "red",
   xai: "gray",
-  cohere: "emerald",
   alibaba: "yellow",
   qwen: "yellow",
   amazon: "cyan",
@@ -97,7 +96,6 @@ const modelProviderNameColorMapping: Partial<
   perplexity: "indigo",
   openrouter: "yellow",
   deepseek: "red",
-  cohere: "emerald",
   xai: "gray",
   mistral: "pink",
 };

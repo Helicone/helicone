@@ -136,11 +136,18 @@ export class BedrockProvider extends BaseProvider {
     });
   }
 
-  async buildErrorMessage(response: Response): Promise<string> {
-    const respJson = (await response.json()) as any;
-    if (respJson.message) {
-      return respJson.message;
+  async buildErrorMessage(response: Response): Promise<{
+    message: string;
+    details?: any;
+  }> {
+    try {
+      const respJson = (await response.json()) as any;
+      if (respJson.message) {
+        return { message: respJson.message, details: respJson };
+      }
+      return { message: `Failed request with status ${response.status}` };
+    } catch (error) {
+      return { message: `Request failed with status ${response.status}` };
     }
-    return `Failed request with status ${response.status}`;
   }
 }

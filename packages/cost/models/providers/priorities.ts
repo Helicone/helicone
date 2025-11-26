@@ -27,7 +27,6 @@ export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
   canopywave: 4,
   cerebras: 4,
   chutes: 4,
-  cohere: 4,
   deepinfra: 4,
   deepseek: 4,
   fireworks: 4,

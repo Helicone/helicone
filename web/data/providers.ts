@@ -90,16 +90,6 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "...",
     relevanceScore: 76,
   },
-  // {
-  //   id: "cohere",
-  //   name: "Cohere",
-  //   logoUrl: "/assets/home/providers/anthropic.png",
-  //   description: "Configure your Cohere API keys",
-  //   docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
-  //   apiKeyLabel: "Cohere API Key",
-  //   apiKeyPlaceholder: "...",
-  //   relevanceScore: 70,
-  // },
   {
     id: "deepseek",
     name: "DeepSeek",
