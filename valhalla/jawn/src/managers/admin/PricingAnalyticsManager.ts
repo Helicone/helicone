@@ -7,8 +7,8 @@ import Stripe from "stripe";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
 import { KVCache } from "../../lib/cache/kvCache";
 
-// Cache for 1 hour - this is strategic analysis, not real-time monitoring
-const pricingAnalyticsCache = new KVCache(60 * 60 * 1000);
+// Cache for 1 week - this is strategic analysis, not real-time monitoring
+const pricingAnalyticsCache = new KVCache(7 * 24 * 60 * 60 * 1000);
 
 // Types
 export interface OrganizationSegment {
@@ -26,6 +26,8 @@ export interface OrganizationSegment {
   stripe_customer_id: string;
   is_ptb: boolean;
   is_byok: boolean;
+  bytes_total: number;
+  hours_tracked: number;
 }
 
 export interface CohortData {
@@ -141,10 +143,10 @@ export class PricingAnalyticsManager extends BaseManager {
         SELECT
           om.organization,
           COALESCE(COUNT(DISTINCT CASE
-            WHEN um.last_active >= NOW() - INTERVAL '30 days'
+            WHEN u.last_sign_in_at >= NOW() - INTERVAL '30 days'
             THEN om.member END), 0)::text as active_users_30d
         FROM organization_member om
-        LEFT JOIN user_metrics um ON om.member = um.user_id
+        LEFT JOIN auth.users u ON om.member = u.id
         GROUP BY om.organization
         `,
         []
@@ -193,7 +195,9 @@ export class PricingAnalyticsManager extends BaseManager {
           COUNT(*) as requests_30d,
           SUM(cost) / 1000000000 as llm_cost_30d,
           countIf(prompt_id != '') as prompts_used_30d,
-          countIf(is_passthrough_billing = false) > 0 as is_byok
+          countIf(is_passthrough_billing = false) > 0 as is_byok,
+          SUM(size_bytes) as bytes_total,
+          if(SUM(size_bytes) = 0, 0, dateDiff('hour', minIf(request_created_at, size_bytes > 0), now())) as hours_tracked
         FROM request_response_rmt
         WHERE request_created_at >= now() - INTERVAL 30 DAY
         GROUP BY organization_id
@@ -205,6 +209,8 @@ export class PricingAnalyticsManager extends BaseManager {
         llm_cost_30d: number;
         prompts_used_30d: number;
         is_byok: number;
+        bytes_total: number;
+        hours_tracked: number;
       }>(usage30dQuery, []);
 
       if (usage30d.error) {
@@ -265,6 +271,8 @@ export class PricingAnalyticsManager extends BaseManager {
             llm_cost_30d: row.llm_cost_30d,
             prompts_used_30d: row.prompts_used_30d,
             is_byok: row.is_byok === 1,
+            bytes_total: row.bytes_total,
+            hours_tracked: row.hours_tracked,
           },
         ]) || []
       );
@@ -285,6 +293,8 @@ export class PricingAnalyticsManager extends BaseManager {
           llm_cost_30d: 0,
           prompts_used_30d: 0,
           is_byok: false,
+          bytes_total: 0,
+          hours_tracked: 0,
         };
         const active_users_30d = activeUsersMap.get(org.id) || 0;
         const prompts_created = promptsCreatedMap.get(org.id) || 0;
@@ -306,6 +316,8 @@ export class PricingAnalyticsManager extends BaseManager {
           stripe_customer_id: org.stripe_customer_id || "",
           is_ptb,
           is_byok: usage30.is_byok,
+          bytes_total: usage30.bytes_total,
+          hours_tracked: usage30.hours_tracked,
         };
       });
 

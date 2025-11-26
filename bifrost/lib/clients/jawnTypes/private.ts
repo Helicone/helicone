@@ -16297,6 +16297,10 @@ Json: JsonObject;
       stripe_customer_id: string;
       is_ptb: boolean;
       is_byok: boolean;
+      /** Format: double */
+      bytes_total: number;
+      /** Format: double */
+      hours_tracked: number;
     };
     "ResultSuccess_OrganizationSegment-Array_": {
       data: components["schemas"]["OrganizationSegment"][];

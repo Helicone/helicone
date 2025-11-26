@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { H2, H3, P, Small } from "@/components/ui/typography";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -30,6 +30,8 @@ interface OrganizationSegment {
   stripe_customer_id: string;
   is_ptb: boolean;
   is_byok: boolean;
+  bytes_total: number;
+  hours_tracked: number;
 }
 
 const formatNumber = (num: number) => {
@@ -43,6 +45,14 @@ const formatCurrency = (num: number) => {
   }).format(num);
 };
 
+const formatBytes = (bytes: number) => {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+};
+
 const getTierBadgeColor = (tier: string) => {
   const colors: Record<string, string> = {
     free: "bg-slate-500",
@@ -53,15 +63,16 @@ const getTierBadgeColor = (tier: string) => {
   return colors[tier] || "bg-gray-500";
 };
 
-type SortField = "name" | "tier" | "seats" | "active_users_30d" | "requests_30d" | "llm_cost_30d" | "prompts_created" | "prompts_used_30d" | "mrr";
+type SortField = "name" | "tier" | "seats" | "active_users_30d" | "requests_30d" | "llm_cost_30d" | "prompts_created" | "prompts_used_30d" | "mrr" | "bytes_total" | "hours_tracked";
 type SortDirection = "asc" | "desc";
 
 const AdminPricingAnalytics = () => {
   const jawn = getJawnClient();
-  const queryClient = useQueryClient();
   const [sortField, setSortField] = useState<SortField>("requests_30d");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [displayCount, setDisplayCount] = useState(100);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const bustCacheRef = useRef(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
   const getSortIcon = (field: SortField) => {
@@ -75,10 +86,15 @@ const AdminPricingAnalytics = () => {
     );
   };
 
-  const { data: segments, isLoading } = useQuery({
+  const { data: segments, isLoading, refetch } = useQuery({
     queryKey: ["admin", "pricing-segments"],
     queryFn: async () => {
-      const response = await jawn.GET("/v1/admin/pricing-analytics/segments");
+      const shouldBustCache = bustCacheRef.current;
+      bustCacheRef.current = false; // Reset after use
+
+      const response = await jawn.GET("/v1/admin/pricing-analytics/segments", {
+        params: shouldBustCache ? { query: { bustCache: true } } : undefined
+      });
       const rawData = response.data?.data || [];
 
       // Normalize all numeric fields to actual numbers
@@ -91,6 +107,8 @@ const AdminPricingAnalytics = () => {
         prompts_created: Number(segment.prompts_created) || 0,
         prompts_used_30d: Number(segment.prompts_used_30d) || 0,
         mrr: Number(segment.mrr) || 0,
+        bytes_total: Number(segment.bytes_total) || 0,
+        hours_tracked: Number(segment.hours_tracked) || 0,
       }));
 
       return normalizedData;
@@ -153,6 +171,8 @@ const AdminPricingAnalytics = () => {
       "Active Users (30d)",
       "Requests (30d)",
       "LLM Cost (30d)",
+      "Bytes Total (30d)",
+      "Hours Tracked (30d)",
       "Prompts Created",
       "Prompts Used (30d)",
       "MRR",
@@ -172,6 +192,8 @@ const AdminPricingAnalytics = () => {
         org.active_users_30d,
         org.requests_30d,
         org.llm_cost_30d.toFixed(2),
+        org.bytes_total,
+        org.hours_tracked,
         org.prompts_created,
         org.prompts_used_30d,
         org.mrr.toFixed(2),
@@ -263,20 +285,17 @@ const AdminPricingAnalytics = () => {
               variant="ghost"
               size="sm"
               onClick={async () => {
-                queryClient.invalidateQueries(["admin", "pricing-segments"]);
-                queryClient.fetchQuery({
-                  queryKey: ["admin", "pricing-segments"],
-                  queryFn: async () => {
-                    const response = await jawn.GET("/v1/admin/pricing-analytics/segments", {
-                      params: { query: { bustCache: true } }
-                    });
-                    return response.data?.data || [];
-                  },
-                });
+                setIsRefreshing(true);
+                bustCacheRef.current = true;
+                try {
+                  await refetch();
+                } finally {
+                  setIsRefreshing(false);
+                }
               }}
-              disabled={isLoading}
+              disabled={isLoading || isRefreshing}
             >
-              <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
+              <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
             </Button>
             <Button
               variant="default"
@@ -294,7 +313,7 @@ const AdminPricingAnalytics = () => {
       {/* Scrollable Table Container */}
       <div className="flex-1 overflow-auto px-6 pt-4">
             <div className="overflow-x-auto">
-            <Table className="table-fixed min-w-[1470px]">
+            <Table className="table-fixed min-w-[1690px]">
               <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow>
                   <TableHead onClick={() => handleSort("name")} className="cursor-pointer w-[200px] min-w-[200px]">
@@ -331,6 +350,18 @@ const AdminPricingAnalytics = () => {
                     <div className={`flex items-center gap-1 justify-end ${sortField === "llm_cost_30d" ? "text-primary font-semibold" : ""}`}>
                       LLM Cost (30d)
                       {getSortIcon("llm_cost_30d")}
+                    </div>
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("bytes_total")} className="cursor-pointer text-right w-[120px] min-w-[120px]">
+                    <div className={`flex items-center gap-1 justify-end ${sortField === "bytes_total" ? "text-primary font-semibold" : ""}`}>
+                      Bytes (30d)
+                      {getSortIcon("bytes_total")}
+                    </div>
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("hours_tracked")} className="cursor-pointer text-right w-[100px] min-w-[100px]">
+                    <div className={`flex items-center gap-1 justify-end ${sortField === "hours_tracked" ? "text-primary font-semibold" : ""}`}>
+                      Hours
+                      {getSortIcon("hours_tracked")}
                     </div>
                   </TableHead>
                   <TableHead onClick={() => handleSort("prompts_created")} className="cursor-pointer text-right w-[130px] min-w-[130px]">
@@ -377,6 +408,12 @@ const AdminPricingAnalytics = () => {
                     </TableCell>
                     <TableCell className="text-right w-[150px] min-w-[150px]">
                       {formatCurrency(org.llm_cost_30d)}
+                    </TableCell>
+                    <TableCell className="text-right w-[120px] min-w-[120px]">
+                      {formatBytes(org.bytes_total)}
+                    </TableCell>
+                    <TableCell className="text-right w-[100px] min-w-[100px]">
+                      {formatNumber(org.hours_tracked)}
                     </TableCell>
                     <TableCell className="text-right w-[130px] min-w-[130px]">
                       {formatNumber(org.prompts_created)}

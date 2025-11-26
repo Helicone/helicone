@@ -14751,6 +14751,8 @@ const models: TsoaRoute.Models = {
             "stripe_customer_id": {"dataType":"string","required":true},
             "is_ptb": {"dataType":"boolean","required":true},
             "is_byok": {"dataType":"boolean","required":true},
+            "bytes_total": {"dataType":"double","required":true},
+            "hours_tracked": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
