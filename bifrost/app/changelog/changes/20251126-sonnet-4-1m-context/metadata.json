@@ -1,0 +1,4 @@
+{
+  "title": "Claude Sonnet 4 and Sonnet 4.5 now support 1M context window",
+  "description": "Updated AI Gateway to enable 1M context window by default for Claude Sonnet 4 and Claude Sonnet 4.5 models across all providers."
+}
