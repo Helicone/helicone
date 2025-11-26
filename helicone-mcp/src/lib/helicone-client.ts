@@ -6,6 +6,7 @@ type HeliconeRequest = components["schemas"]["HeliconeRequest"];
 type SessionResult = components["schemas"]["SessionResult"];
 
 const HELICONE_API_BASE = "https://api.helicone.ai";
+const HELICONE_AI_GATEWAY_BASE = "https://ai-gateway.helicone.ai";
 const REQUEST_BODY_CACHE = new Map<string, { request?: any; response?: any }>();
 const CACHE_MAX_SIZE = 10000;
 
@@ -33,6 +34,27 @@ interface FetchSessionsOptions {
 interface RequestWithBodies extends Omit<HeliconeRequest, 'request_body' | 'response_body'> {
   request_body?: unknown;
   response_body?: unknown;
+}
+
+interface ChatCompletionMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+interface ChatCompletionRequest {
+  model: string;
+  messages: ChatCompletionMessage[];
+  max_tokens?: number;
+  temperature?: number;
+  stream?: boolean;
+  [key: string]: any;
+}
+
+interface AIGatewayOptions {
+  sessionId?: string;
+  sessionName?: string;
+  userId?: string;
+  customProperties?: Record<string, any>;
 }
 
 // idrk how caching really works with MCP servers here
@@ -185,6 +207,51 @@ export async function fetchSessions(
   } catch (error) {
     throw new Error(
       `Error querying Helicone sessions: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+export async function useAiGateway(
+  apiKey: string,
+  request: ChatCompletionRequest,
+  options?: AIGatewayOptions
+): Promise<any> {
+  try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    };
+
+    // Add Helicone headers for observability
+    if (options?.sessionId) {
+      headers["Helicone-Session-Id"] = options.sessionId;
+    }
+    if (options?.sessionName) {
+      headers["Helicone-Session-Name"] = options.sessionName;
+    }
+    if (options?.userId) {
+      headers["Helicone-User-Id"] = options.userId;
+    }
+    if (options?.customProperties) {
+      headers["Helicone-Property"] = JSON.stringify(options.customProperties);
+    }
+
+    const response = await fetch(`${HELICONE_AI_GATEWAY_BASE}/v1/chat/completions`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`AI Gateway request failed with status ${response.status}: ${errorText}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    throw new Error(
+      `Error using AI Gateway: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
