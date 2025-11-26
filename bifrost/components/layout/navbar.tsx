@@ -18,7 +18,6 @@ import {
   ChevronRight,
   Scale,
   Newspaper,
-  Earth,
   ExternalLink,
   Gem,
   Github,
@@ -232,15 +231,6 @@ const resourcesComponents: LinkItem[] = [
 ];
 
 const toolsComponents: LinkItem[] = [
-  {
-    title: "Open Stats",
-    link: {
-      href: "/open-stats",
-      isExternal: false,
-    },
-    description: "Real-time LLM usage analytics",
-    icon: <Earth className="size-5 navbar-icon-style" />,
-  },
   {
     title: "Model Comparison",
     link: {
