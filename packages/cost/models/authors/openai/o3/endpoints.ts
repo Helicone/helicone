@@ -173,7 +173,7 @@ export const endpoints = {
       "logit_bias",
       "max_tokens",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
