@@ -35,10 +35,10 @@ export function mapModelUsageToOpenAI(modelUsage: ModelUsage): OpenAIUsage {
       };
     }
   } else if (modelUsage.audio) {
-    // Audio tokens without cache details
+    // Modality tokens without cache details
     usage.prompt_tokens_details = {
       cached_tokens: 0,
-      audio_tokens: modelUsage.audio,
+      audio_tokens: modelUsage.audio ?? 0,
     };
   }
 

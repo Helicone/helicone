@@ -7,7 +7,6 @@ import type {
   AuthResult,
   RequestBodyContext,
   RequestParams,
-  ResponseFormat,
   ModelSpec,
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
@@ -160,7 +159,7 @@ export const dbProviderToProvider = (
 
 export function buildEndpointUrl(
   endpoint: Endpoint,
-  requestParams: RequestParams
+  requestParams: RequestParams,
 ): Result<string> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {

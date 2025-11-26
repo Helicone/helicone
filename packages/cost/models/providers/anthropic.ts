@@ -43,7 +43,12 @@ export class AnthropicProvider extends BaseProvider {
         model: endpoint.providerModelId,
       });
     }
-    const anthropicBody = context.toAnthropic(context.parsedBody, endpoint.providerModelId);
+    let updatedBody = context.parsedBody;
+
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(context.parsedBody);
+    }
+    const anthropicBody = context.toAnthropic(updatedBody, endpoint.providerModelId);
     return JSON.stringify(anthropicBody);
   }
 

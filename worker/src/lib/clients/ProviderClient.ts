@@ -33,12 +33,18 @@ export function callPropsFromProxyRequest(
   };
 }
 
-function removeHeliconeHeaders(request: Headers): Headers {
+function removeHeliconeHeaders(request: Headers, removeAuth: boolean = false): Headers {
   const newHeaders = new Headers();
   for (const [key, value] of request.entries()) {
-    if (!key.toLowerCase().startsWith("helicone-")) {
-      newHeaders.set(key, value);
+    const lowerKey = key.toLowerCase();
+    if (lowerKey.startsWith("helicone-")) {
+      continue;
     }
+    // Remove Authorization header if requested (for URL-based auth providers)
+    if (removeAuth && lowerKey === "authorization") {
+      continue;
+    }
+    newHeaders.set(key, value);
   }
   return newHeaders;
 }
@@ -58,14 +64,14 @@ async function callWithMapper(
   targetUrl: URL,
   init:
     | {
-        method: string;
-        headers: Headers;
-      }
+      method: string;
+      headers: Headers;
+    }
     | {
-        body: string;
-        method: string;
-        headers: Headers;
-      }
+      body: string;
+      method: string;
+      headers: Headers;
+    }
 ): Promise<Response> {
   if (targetUrl.host === "gateway.llmmapper.com") {
     try {
@@ -134,6 +140,7 @@ export async function callProvider(props: CallProps): Promise<Response> {
   }
 
   const targetUrl = buildTargetUrl(originalUrl, apiBase);
+
   const removedHeaders = removeHeliconeHeaders(headers);
 
   let headersWithExtra = removedHeaders;

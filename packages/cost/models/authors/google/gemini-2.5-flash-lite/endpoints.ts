@@ -40,6 +40,7 @@ export const endpoints = {
       tpm: 30_000_000,
     },
     ptbEnabled: true,
+    responseFormat: "GOOGLE",
     endpointConfigs: {
       "*": {},
     },
@@ -77,6 +78,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
+    responseFormat: "GOOGLE",
     ptbEnabled: true,
     endpointConfigs: {
       global: {

@@ -70,31 +70,31 @@ export interface OpenAIUsage {
 // Content block types (shared between Anthropic request and response)
 export interface AnthropicContentBlock {
   type:
-    | "text"
-    | "image"
-    | "document"
-    | "tool_use"
-    | "tool_result"
-    | "thinking"
-    | "server_tool_use"
-    | "web_search_tool_result";
+  | "text"
+  | "image"
+  | "document"
+  | "tool_use"
+  | "tool_result"
+  | "thinking"
+  | "server_tool_use"
+  | "web_search_tool_result";
   text?: string;
   // Image and Document fields
   source?:
-    | {
-        type: "base64";
-        media_type: string;
-        data: string;
-      }
-    | {
-        type: "url";
-        url: string;
-      }
-    | {
-        type: "text";
-        media_type: string;
-        data: string;
-      };
+  | {
+    type: "base64";
+    media_type: string;
+    data: string;
+  }
+  | {
+    type: "url";
+    url: string;
+  }
+  | {
+    type: "text";
+    media_type: string;
+    data: string;
+  };
   // Document fields
   title?: string;
   // Tool use fields
