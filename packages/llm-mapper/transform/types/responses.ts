@@ -311,6 +311,44 @@ export interface ResponseErrorEvent extends BaseStreamEvent {
   };
 }
 
+// Reasoning streaming events
+export interface ResponseReasoningSummaryPartAddedEvent extends BaseStreamEvent {
+  type: "response.reasoning_summary_part.added";
+  sequence_number?: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  part: { type: "summary_text"; text: string };
+}
+
+export interface ResponseReasoningSummaryTextDeltaEvent extends BaseStreamEvent {
+  type: "response.reasoning_summary_text.delta";
+  sequence_number?: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  delta: string;
+  obfuscation?: string;
+}
+
+export interface ResponseReasoningSummaryTextDoneEvent extends BaseStreamEvent {
+  type: "response.reasoning_summary_text.done";
+  sequence_number?: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  text: string;
+}
+
+export interface ResponseReasoningSummaryPartDoneEvent extends BaseStreamEvent {
+  type: "response.reasoning_summary_part.done";
+  sequence_number?: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  part: { type: "summary_text"; text: string };
+}
+
 export type ResponsesStreamEvent =
   | ResponseCreatedEvent
   | ResponseInProgressEvent
@@ -322,4 +360,8 @@ export type ResponsesStreamEvent =
   | ResponseCompletedEvent
   | ResponseErrorEvent
   | ResponseFunctionCallArgumentsDeltaEvent
-  | ResponseFunctionCallArgumentsDoneEvent;
+  | ResponseFunctionCallArgumentsDoneEvent
+  | ResponseReasoningSummaryPartAddedEvent
+  | ResponseReasoningSummaryTextDeltaEvent
+  | ResponseReasoningSummaryTextDoneEvent
+  | ResponseReasoningSummaryPartDoneEvent;

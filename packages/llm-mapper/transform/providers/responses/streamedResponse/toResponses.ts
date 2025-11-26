@@ -6,6 +6,10 @@ import {
   ResponseOutputTextDoneEvent,
   ResponseCompletedEvent,
   ResponsesUsage,
+  ResponseReasoningSummaryPartAddedEvent,
+  ResponseReasoningSummaryTextDeltaEvent,
+  ResponseReasoningSummaryTextDoneEvent,
+  ResponseReasoningSummaryPartDoneEvent,
 } from "../../../types/responses";
 
 export class ChatToResponsesStreamConverter {
@@ -15,14 +19,63 @@ export class ChatToResponsesStreamConverter {
   private started: boolean = false;
   private textBuffer: string = "";
   private toolCalls: Map<number, { id: string; name: string; arguments: string; item_id: string }>; // by index
-  private finalUsage: ResponsesUsage | null = null;
   private itemAdded: boolean = false;
   private partAdded: boolean = false;
   private emittedFunctionItems: Set<string> = new Set();
   private completedEmitted: boolean = false;
 
+  // Reasoning state
+  private reasoningBuffer: string = "";
+  private reasoningItemId: string = "";
+  private reasoningItemAdded: boolean = false;
+  private reasoningSummaryPartAdded: boolean = false;
+  private reasoningDone: boolean = false;
+
   constructor() {
     this.toolCalls = new Map();
+  }
+
+  // Get the output_index for message/function items (1 if reasoning present, 0 otherwise)
+  private getMessageOutputIndex(): number {
+    return this.reasoningItemAdded ? 1 : 0;
+  }
+
+  // Finalize reasoning if it was started but not finished
+  private finalizeReasoning(events: ResponsesStreamEvent[]): void {
+    if (this.reasoningItemAdded && !this.reasoningDone) {
+      // Emit reasoning_summary_text.done
+      const textDone: ResponseReasoningSummaryTextDoneEvent = {
+        type: "response.reasoning_summary_text.done",
+        item_id: this.reasoningItemId,
+        output_index: 0,
+        summary_index: 0,
+        text: this.reasoningBuffer,
+      };
+      events.push(textDone);
+
+      // Emit reasoning_summary_part.done
+      const partDone: ResponseReasoningSummaryPartDoneEvent = {
+        type: "response.reasoning_summary_part.done",
+        item_id: this.reasoningItemId,
+        output_index: 0,
+        summary_index: 0,
+        part: { type: "summary_text", text: this.reasoningBuffer },
+      };
+      events.push(partDone);
+
+      // Emit output_item.done for reasoning
+      events.push({
+        type: "response.output_item.done",
+        output_index: 0,
+        item: {
+          id: this.reasoningItemId,
+          type: "reasoning",
+          summary: [{ type: "summary_text", text: this.reasoningBuffer }],
+        },
+      } as any);
+
+      this.reasoningDone = true;
+    }
   }
 
   convert(chunk: OpenAIStreamEvent): ResponsesStreamEvent[] {
@@ -35,6 +88,7 @@ export class ChatToResponsesStreamConverter {
       this.model = c.model;
       this.created = c.created;
       this.started = true;
+      this.reasoningItemId = `rs_${this.responseId}`;
 
       const createdEvt: ResponseCreatedEvent = {
         type: "response.created",
@@ -55,16 +109,66 @@ export class ChatToResponsesStreamConverter {
 
     // aggregate content and emit text deltas
     for (const choice of c.choices ?? []) {
+      // Handle reasoning deltas (comes before content)
+      if (choice?.delta?.reasoning) {
+        const delta = choice.delta.reasoning;
+        if (delta.length > 0) {
+          this.reasoningBuffer += delta;
+
+          // Before first reasoning delta, add reasoning item and summary_part
+          if (!this.reasoningItemAdded) {
+            events.push({
+              type: "response.output_item.added",
+              output_index: 0,
+              item: {
+                id: this.reasoningItemId,
+                type: "reasoning",
+                summary: [],
+              },
+            } as any);
+            this.reasoningItemAdded = true;
+          }
+
+          if (!this.reasoningSummaryPartAdded) {
+            const partAdded: ResponseReasoningSummaryPartAddedEvent = {
+              type: "response.reasoning_summary_part.added",
+              item_id: this.reasoningItemId,
+              output_index: 0,
+              summary_index: 0,
+              part: { type: "summary_text", text: "" },
+            };
+            events.push(partAdded);
+            this.reasoningSummaryPartAdded = true;
+          }
+
+          // Emit reasoning_summary_text.delta
+          const deltaEvt: ResponseReasoningSummaryTextDeltaEvent = {
+            type: "response.reasoning_summary_text.delta",
+            item_id: this.reasoningItemId,
+            output_index: 0,
+            summary_index: 0,
+            delta,
+          };
+          events.push(deltaEvt);
+        }
+      }
+
       if (choice?.delta?.content) {
         const delta = choice.delta.content;
         if (delta.length > 0) {
+          // If we have reasoning and haven't finished it, finish it now
+          if (this.reasoningItemAdded && !this.reasoningDone) {
+            this.finalizeReasoning(events);
+          }
+
           this.textBuffer += delta;
+          const msgOutputIndex = this.getMessageOutputIndex();
 
           // before first text delta, add item and content_part events
           if (!this.itemAdded) {
             events.push({
               type: "response.output_item.added",
-              output_index: 0,
+              output_index: msgOutputIndex,
               item: {
                 id: `msg_${this.responseId}`,
                 type: "message",
@@ -79,7 +183,7 @@ export class ChatToResponsesStreamConverter {
             events.push({
               type: "response.content_part.added",
               item_id: `msg_${this.responseId}`,
-              output_index: 0,
+              output_index: msgOutputIndex,
               content_index: 0,
               part: { type: "output_text", text: "", annotations: [] },
             } as any);
@@ -88,7 +192,7 @@ export class ChatToResponsesStreamConverter {
           const deltaEvt: ResponseOutputTextDeltaEvent = {
             type: "response.output_text.delta",
             item_id: `msg_${this.responseId}`,
-            output_index: 0,
+            output_index: msgOutputIndex,
             content_index: 0,
             delta,
           };
@@ -98,6 +202,13 @@ export class ChatToResponsesStreamConverter {
 
       // streamed tool calls
       if (choice?.delta?.tool_calls && Array.isArray(choice.delta.tool_calls)) {
+        // If we have reasoning and haven't finished it, finish it now
+        if (this.reasoningItemAdded && !this.reasoningDone) {
+          this.finalizeReasoning(events);
+        }
+
+        const msgOutputIndex = this.getMessageOutputIndex();
+
         for (const tc of choice.delta.tool_calls) {
           const idx = tc.index ?? 0;
           const existing = this.toolCalls.get(idx) || {
@@ -115,7 +226,7 @@ export class ChatToResponsesStreamConverter {
           if (!this.emittedFunctionItems.has(existing.item_id)) {
             events.push({
               type: "response.output_item.added",
-              output_index: 0,
+              output_index: msgOutputIndex,
               item: {
                 id: existing.item_id,
                 type: "function_call",
@@ -133,7 +244,7 @@ export class ChatToResponsesStreamConverter {
             events.push({
               type: "response.function_call_arguments.delta",
               item_id: existing.item_id,
-              output_index: 0,
+              output_index: msgOutputIndex,
               delta: tc.function.arguments,
             } as any);
           }
@@ -142,11 +253,18 @@ export class ChatToResponsesStreamConverter {
 
       // if finish reason was sent for this choice, emit done + completed
       if (choice?.finish_reason) {
+        // Finalize reasoning if present
+        if (this.reasoningItemAdded && !this.reasoningDone) {
+          this.finalizeReasoning(events);
+        }
+
+        const msgOutputIndex = this.getMessageOutputIndex();
+
         if (this.itemAdded) {
           const doneEvt: ResponseOutputTextDoneEvent = {
             type: "response.output_text.done",
             item_id: `msg_${this.responseId}`,
-            output_index: 0,
+            output_index: msgOutputIndex,
             content_index: 0,
             text: this.textBuffer,
           };
@@ -156,14 +274,14 @@ export class ChatToResponsesStreamConverter {
             events.push({
               type: "response.content_part.done",
               item_id: `msg_${this.responseId}`,
-              output_index: 0,
+              output_index: msgOutputIndex,
               content_index: 0,
               part: { type: "output_text", text: this.textBuffer, annotations: [] },
             } as any);
           }
           events.push({
             type: "response.output_item.done",
-            output_index: 0,
+            output_index: msgOutputIndex,
             item: {
               id: `msg_${this.responseId}`,
               type: "message",
@@ -181,12 +299,12 @@ export class ChatToResponsesStreamConverter {
           events.push({
             type: "response.function_call_arguments.done",
             item_id: tc.item_id,
-            output_index: 0,
+            output_index: msgOutputIndex,
             arguments: tc.arguments || "{}",
           } as any);
           events.push({
             type: "response.output_item.done",
-            output_index: 0,
+            output_index: msgOutputIndex,
             item: {
               id: tc.item_id,
               type: "function_call",
@@ -200,7 +318,7 @@ export class ChatToResponsesStreamConverter {
         });
 
         // Don't emit completed here - wait for usage chunk to arrive
-        // The completed event will be emitted when usage arrives (line 244-293)
+        // The completed event will be emitted when usage arrives
       }
     }
 
@@ -219,7 +337,39 @@ export class ChatToResponsesStreamConverter {
             }
           : undefined,
       };
-      this.finalUsage = usage;
+
+      // Build output array: reasoning (if present), then message, then function calls
+      const output: any[] = [];
+
+      if (this.reasoningItemAdded) {
+        output.push({
+          id: this.reasoningItemId,
+          type: "reasoning" as const,
+          summary: [{ type: "summary_text", text: this.reasoningBuffer }],
+        });
+      }
+
+      if (this.textBuffer.length > 0) {
+        output.push({
+          id: `msg_${this.responseId}`,
+          type: "message" as const,
+          status: "completed" as const,
+          role: "assistant" as const,
+          content: [{ type: "output_text" as const, text: this.textBuffer, annotations: [] }],
+        });
+      }
+
+      output.push(
+        ...Array.from(this.toolCalls.values()).map((tc) => ({
+          id: tc.id,
+          type: "function_call" as const,
+          status: "completed" as const,
+          name: tc.name || "",
+          call_id: tc.id,
+          arguments: tc.arguments || "{}",
+          parsed_arguments: null,
+        }))
+      );
 
       const completed: ResponseCompletedEvent = {
         type: "response.completed",
@@ -230,28 +380,7 @@ export class ChatToResponsesStreamConverter {
           created_at: this.created as any,
           status: "completed" as any,
           model: this.model,
-          output: [
-            ...(this.textBuffer.length > 0
-              ? ([
-                  {
-                    id: `msg_${this.responseId}`,
-                    type: "message" as const,
-                    status: "completed" as const,
-                    role: "assistant" as const,
-                    content: [{ type: "output_text" as const, text: this.textBuffer, annotations: [] }],
-                  },
-                ] as any)
-              : []),
-            ...Array.from(this.toolCalls.values()).map((tc) => ({
-              id: tc.id,
-              type: "function_call" as const,
-              status: "completed" as const,
-              name: tc.name || "",
-              call_id: tc.id,
-              arguments: tc.arguments || "{}",
-              parsed_arguments: null,
-            })),
-          ],
+          output,
           usage,
         },
       };
@@ -261,6 +390,4 @@ export class ChatToResponsesStreamConverter {
 
     return events;
   }
-
-  
 }

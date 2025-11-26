@@ -3,12 +3,26 @@ import {
   ResponsesResponseBody,
   ResponsesMessageOutputItem,
   ResponsesUsage,
+  ResponsesReasoningOutputItem,
 } from "../../../../types/responses";
 
 export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
   const first = body.choices?.[0];
   const message = first?.message;
   const output: any[] = [];
+
+  // Add reasoning item FIRST if present (before message)
+  if (message?.reasoning || (message?.reasoning_details && message.reasoning_details.length > 0)) {
+    const reasoningText = message.reasoning ||
+      message.reasoning_details?.map(r => r.thinking).join("\n\n") || "";
+
+    const reasoningItem: ResponsesReasoningOutputItem = {
+      id: `rs_${Math.random().toString(36).slice(2, 10)}`,
+      type: "reasoning",
+      summary: [{ type: "summary_text", text: reasoningText }],
+    };
+    output.push(reasoningItem);
+  }
 
   if (message?.content) {
     const msg: ResponsesMessageOutputItem = {
