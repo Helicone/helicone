@@ -1,0 +1,165 @@
+---
+title: "Helicone MCP Server"
+sidebarTitle: "MCP"
+description: "Query your Helicone observability data directly from MCP-compatible AI assistants using the Helicone MCP server."
+---
+
+The Helicone MCP (Model Context Protocol) server enables AI assistants like Claude Desktop, Cursor, and other MCP-compatible tools to query your Helicone observability data directly. This allows you to debug errors, search logs, analyze performance, and examine request/response bodies without leaving your AI assistant.
+
+## Quick Start
+
+<Steps>
+  <Step title="Generate a Helicone API Key">
+    1. Go to [Settings → API Keys](https://us.helicone.ai/settings/api-keys) (or [EU](https://eu.helicone.ai/settings/api-keys))
+    2. Click **Generate New Key**
+    3. Copy your API key
+  </Step>
+
+  <Step title="Add to Your MCP Client">
+    Add the Helicone MCP server to your client's configuration file:
+
+    <Tabs>
+      <Tab title="Claude Desktop">
+        **Config file location:**
+        - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+        - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+        ```json
+        {
+          "mcpServers": {
+            "helicone": {
+              "command": "npx",
+              "args": ["@helicone/mcp@latest"],
+              "env": {
+                "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
+              }
+            }
+          }
+        }
+        ```
+      </Tab>
+
+      <Tab title="Claude Code">
+        **Config file location:**
+        - Project-level: `.mcp.json` in your project root
+        - Global: `~/.claude.json`
+
+        ```json
+        {
+          "mcpServers": {
+            "helicone": {
+              "command": "npx",
+              "args": ["@helicone/mcp@latest"],
+              "env": {
+                "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
+              }
+            }
+          }
+        }
+        ```
+      </Tab>
+
+      <Tab title="Cursor">
+        **Config file location:**
+        - macOS/Linux: `~/.cursor/mcp.json`
+        - Windows: `%USERPROFILE%\.cursor\mcp.json`
+
+        ```json
+        {
+          "mcpServers": {
+            "helicone": {
+              "command": "npx",
+              "args": ["@helicone/mcp@latest"],
+              "env": {
+                "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
+              }
+            }
+          }
+        }
+        ```
+      </Tab>
+
+      <Tab title="Codex">
+        **Config file location:** `~/.codex/config.toml`
+
+        ```toml
+        [mcp_servers.helicone]
+        command = "npx"
+        args = ["@helicone/mcp@latest"]
+
+        [mcp_servers.helicone.env]
+        HELICONE_API_KEY = "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
+        ```
+      </Tab>
+    </Tabs>
+
+    <Note>
+      Replace `sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx` with your actual API key.
+    </Note>
+  </Step>
+
+  <Step title="Restart Your Client">
+    Restart your MCP client (Claude Desktop, Cursor, etc.) to load the new configuration.
+  </Step>
+</Steps>
+
+## Available Tools
+
+### `query_requests`
+
+Query requests with filters, pagination, sorting, and optional body content.
+
+**Parameters:**
+| Parameter | Type | Description |
+| --------- | ---- | ----------- |
+| `filter` | object | Filter criteria (model, provider, status, latency, cost, properties, time, user, etc.) |
+| `offset` | number | Pagination offset (default: 0) |
+| `limit` | number | Number of results to return (default: 100) |
+| `sort` | object | Sort criteria |
+| `includeBodies` | boolean | Include request/response bodies (default: false) |
+
+**Example use cases:**
+- "Show me the last 10 failed requests"
+- "Find all requests to GPT-4 in the last hour"
+- "Search for requests with high latency"
+- "Show me requests from a specific user"
+
+### `query_sessions`
+
+Query sessions with search, time range filtering, and advanced filters.
+
+**Parameters:**
+| Parameter | Type | Description |
+| --------- | ---- | ----------- |
+| `startTimeUnixMs` | number | Start of time range (Unix timestamp in milliseconds) - **required** |
+| `endTimeUnixMs` | number | End of time range (Unix timestamp in milliseconds) - **required** |
+| `timezoneDifference` | number | Timezone offset in hours (e.g., -5 for EST) - **required** |
+| `search` | string | Search by name or metadata |
+| `nameEquals` | string | Exact session name match |
+| `filter` | object | Advanced filter criteria |
+| `offset` | number | Pagination offset (default: 0) |
+| `limit` | number | Number of results to return (default: 100) |
+
+**Example use cases:**
+- "Show me all sessions from today"
+- "Find sessions named 'checkout-flow'"
+- "Debug conversation flows in a specific time range"
+- "Analyze session performance metrics"
+
+## Filter Capabilities
+
+Both tools support comprehensive filtering options:
+
+- **Model/Provider**: Filter by specific models or providers
+- **Status/Error**: Find successful or failed requests
+- **Time**: Filter by time ranges
+- **Cost/Latency**: Filter by performance metrics
+- **Custom Properties**: Filter by your custom Helicone properties
+- **Complex Filters**: Combine filters with AND/OR logic
+
+## Related Resources
+
+- [@helicone/mcp on npm](https://www.npmjs.com/package/@helicone/mcp) - Package documentation and source
+- [Custom Properties](/features/advanced-usage/custom-properties) - Add metadata to your requests for better filtering
+- [Sessions](/features/sessions) - Group related requests into sessions
+- [User Metrics](/features/advanced-usage/user-metrics) - Track usage by user

@@ -75,6 +75,7 @@
                 "pages": [
                   "integrations/tools/curl",
                   "integrations/tools/logger-sdk",
+                  "integrations/tools/mcp",
                   "integrations/tools/xcode"
                 ]
               },
