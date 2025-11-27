@@ -76,6 +76,7 @@ services:
       /bin/sh -c "
       /usr/bin/mc alias set localminio http://minio:9000 minioadmin minioadmin;
       /usr/bin/mc mb --ignore-existing localminio/request-response-storage;
+      /usr/bin/mc mb --ignore-existing localminio/prompt-body-storage;
       /usr/bin/mc mb --ignore-existing localminio/hql-store;
       exit 0;
       "
@@ -150,6 +151,7 @@ services:
       S3_ACCESS_KEY: minioadmin
       S3_SECRET_KEY: minioadmin
       S3_BUCKET_NAME: "request-response-storage"
+      S3_PROMPT_BUCKET_NAME: "prompt-body-storage"
       S3_ENDPOINT_PUBLIC: http://localhost:9000
       CLICKHOUSE_CREDS: |
         {
@@ -223,6 +225,7 @@ services:
       S3_ACCESS_KEY: minioadmin
       S3_SECRET_KEY: minioadmin
       S3_BUCKET_NAME: "request-response-storage"
+      S3_PROMPT_BUCKET_NAME: "prompt-body-storage"
       S3_ENDPOINT_PUBLIC: http://localhost:9000
       CLICKHOUSE_CREDS: |
         {
@@ -304,6 +307,7 @@ services:
       S3_ACCESS_KEY: minioadmin
       S3_SECRET_KEY: minioadmin
       S3_BUCKET_NAME: request-response-storage
+      S3_PROMPT_BUCKET_NAME: prompt-body-storage
 
   worker-helicone-api:
     image: worker-local
