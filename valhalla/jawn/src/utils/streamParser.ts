@@ -50,9 +50,10 @@ export function consolidateTextFields(responseBody: any[]): any {
                   reasoning: c.delta.reasoning
                     ? c.delta.reasoning + (cur.choices[i].delta.reasoning ?? "")
                     : cur.choices[i].delta.reasoning,
-                  reasoning_details: cur.choices[i].delta.reasoning_details
-                    ? cur.choices[i].delta.reasoning_details
-                    : c.delta.reasoning_details,
+                  reasoning_details:
+                    c.delta.reasoning_details && cur.choices[i].delta.reasoning_details
+                      ? [...c.delta.reasoning_details, ...cur.choices[i].delta.reasoning_details]
+                      : c.delta.reasoning_details || cur.choices[i].delta.reasoning_details,
                   function_call: c.delta.function_call
                     ? recursivelyConsolidate(
                         c.delta.function_call,
