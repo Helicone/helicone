@@ -426,10 +426,7 @@ export class SimpleAIGateway {
 
   // reasoning_options reserved for providers with custom reasoning logic
   private requiresReasoningOptions(providerModelId: string): boolean {
-    if (providerModelId.includes("claude")) {
-      return true;
-    }
-    return false;
+    return providerModelId.includes("claude");
   }
 
   private async expandPrompt(
