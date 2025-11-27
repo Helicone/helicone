@@ -317,8 +317,8 @@ function extractSystemMessage(
       systemMessageBlocks.push({
         type: "text",
         text: convertedBlock,
-        ...(includeCache && (msg as any).cache_control
-          ? { cache_control: (msg as any).cache_control }
+        ...(includeCache && msg.cache_control
+          ? { cache_control: msg.cache_control }
           : {}),
       });
     } else {
@@ -353,8 +353,8 @@ function mapMessages(
             type: "tool_result",
             tool_use_id: message.tool_call_id,
             content: typeof message.content === "string" ? message.content : "",
-            ...(includeCache && (message as any).cache_control
-              ? { cache_control: (message as any).cache_control }
+            ...(includeCache && message.cache_control
+              ? { cache_control: message.cache_control }
               : {}),
           },
         ],
@@ -383,14 +383,14 @@ function mapMessages(
         });
       }
 
-      const hasReasoningDetails = message.role === "assistant" && (message as any).reasoning_details?.length > 0;
-      const hasReasoning = message.role === "assistant" && !!(message as any).reasoning;
+      const hasReasoningDetails = message.role === "assistant" && message.reasoning_details && message.reasoning_details?.length > 0;
+      const hasReasoning = message.role === "assistant" && !!message.reasoning;
       let processedContent: string | AnthropicContentBlock[] = [];
 
       // Thinking blocks MUST be first in Anthropic format to be valid
-      if (hasReasoningDetails) {
+      if (message.reasoning_details && hasReasoningDetails) {
         // Use reasoning_details when available (includes signatures for multi-turn)
-        for (const detail of (message as any).reasoning_details) {
+        for (const detail of message.reasoning_details) {
           processedContent.push({
             type: "thinking",
             thinking: detail.thinking,
@@ -401,7 +401,7 @@ function mapMessages(
         // Fallback to simple reasoning string (no signature - may fail on multi-turn)
         processedContent.push({
           type: "thinking",
-          thinking: (message as any).reasoning,
+          thinking: message.reasoning,
         });
       }
 
