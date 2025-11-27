@@ -41,6 +41,9 @@ const Reasoning = z
   })
   .partial()
   .passthrough();
+const ReasoningOptions = z.object({
+  budget_tokens: z.number().int().optional(),
+});
 const ResponseFormatText = z.object({ type: z.literal("text") }).passthrough();
 const ResponseFormatJsonSchemaSchema = z.object({}).partial().passthrough();
 const TextResponseFormatJsonSchema = z
@@ -320,6 +323,7 @@ const ResponseProperties = z
     // previous_response_id was removed
     model: ModelIdsResponses,
     reasoning: z.union([Reasoning, z.null()]),
+    reasoning_options: ReasoningOptions.optional(),
     // background was removed
     max_output_tokens: z.union([z.number(), z.null()]),
     max_tool_calls: z.union([z.number(), z.null()]),

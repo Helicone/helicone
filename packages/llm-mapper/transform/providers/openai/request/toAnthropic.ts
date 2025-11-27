@@ -31,6 +31,24 @@ export function toAnthropic(
     stream: openAIBody.stream ?? undefined,
   };
 
+  if (openAIBody.reasoning_effort) {
+    if (!openAIBody.reasoning_options) {
+      throw new Error("reasoning_options are required for Anthropic models");
+    }
+    
+    if (!openAIBody.reasoning_options.budget_tokens) {
+      throw new Error("reasoning_options.budget_tokens are required for Anthropic models");
+    }
+
+    antBody.thinking = {
+      type: "enabled",
+      budget_tokens: openAIBody.reasoning_options.budget_tokens,
+    };
+
+    // temperature 1 is required for Anthropic models to enable reasoning
+    antBody.temperature = 1;
+  }
+
   if (openAIBody.stop) {
     antBody.stop_sequences = Array.isArray(openAIBody.stop)
       ? openAIBody.stop
@@ -299,8 +317,8 @@ function extractSystemMessage(
       systemMessageBlocks.push({
         type: "text",
         text: convertedBlock,
-        ...(includeCache && (msg as any).cache_control
-          ? { cache_control: (msg as any).cache_control }
+        ...(includeCache && msg.cache_control
+          ? { cache_control: msg.cache_control }
           : {}),
       });
     } else {
@@ -335,8 +353,8 @@ function mapMessages(
             type: "tool_result",
             tool_use_id: message.tool_call_id,
             content: typeof message.content === "string" ? message.content : "",
-            ...(includeCache && (message as any).cache_control
-              ? { cache_control: (message as any).cache_control }
+            ...(includeCache && message.cache_control
+              ? { cache_control: message.cache_control }
               : {}),
           },
         ],
@@ -364,8 +382,29 @@ function mapMessages(
           }
         });
       }
-      
+
+      const hasReasoningDetails = message.role === "assistant" && message.reasoning_details && message.reasoning_details?.length > 0;
+      const hasReasoning = message.role === "assistant" && !!message.reasoning;
       let processedContent: string | AnthropicContentBlock[] = [];
+
+      // Thinking blocks MUST be first in Anthropic format to be valid
+      if (message.reasoning_details && hasReasoningDetails) {
+        // Use reasoning_details when available (includes signatures for multi-turn)
+        for (const detail of message.reasoning_details) {
+          processedContent.push({
+            type: "thinking",
+            thinking: detail.thinking,
+            signature: detail.signature,
+          });
+        }
+      } else if (hasReasoning) {
+        // Fallback to simple reasoning string (no signature - may fail on multi-turn)
+        processedContent.push({
+          type: "thinking",
+          thinking: message.reasoning,
+        });
+      }
+
       if (message.content) {
         const convertedContent = openAIContentToAnthropicContent(
           message.content,
@@ -374,7 +413,7 @@ function mapMessages(
         if (typeof convertedContent === "string") {
           // if the message requires forming a content array
           const hasMsgCache = includeCache && !!(message as any).cache_control;
-          if (hasMsgCache || processedToolCallContent.length > 0) {
+          if (hasMsgCache || processedToolCallContent.length > 0 || hasReasoning) {
             processedContent.push({
               type: "text",
               text: convertedContent,
@@ -384,7 +423,7 @@ function mapMessages(
             });
           } else {
             // there was no cache control breakpoint, the content was just string,
-            // and no tool calls, so we create a non-content array message.
+            // no tool calls, and no reasoning, so we create a non-content array message.
             antMessage.content = convertedContent;
             return antMessage;
           }

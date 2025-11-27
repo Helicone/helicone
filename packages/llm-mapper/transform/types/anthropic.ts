@@ -26,7 +26,15 @@ export interface AnthropicRequestBody {
   stream?: boolean;
   tools?: (AnthropicTool | AnthropicWebSearchTool)[];
   tool_choice?: AnthropicToolChoice;
+  thinking?: AnthropicThinkingConfig;
 }
+
+export type AnthropicThinkingConfig = {
+  type: "enabled";
+  budget_tokens: number;
+} | {
+  type: "disabled";
+};
 
 export interface AnthropicMessage {
   role: "user" | "assistant";

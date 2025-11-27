@@ -85,6 +85,11 @@ export interface ResponsesRequestBody {
   previous_response_id?: string;
   reasoning?: {
     effort?: "low" | "medium" | "high" | "minimal";
+    summary?: "auto" | "concise" | "detailed";
+    generate_summary?: "auto" | "concise" | "detailed";
+  };
+  reasoning_options?: {
+    budget_tokens?: number;
   };
   text?: {
     verbosity?: "low" | "medium" | "high";

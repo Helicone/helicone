@@ -25,6 +25,7 @@ export class AnthropicToOpenAIStreamConverter {
   private nextToolCallIndex: number = 0;
   private annotations: OpenAIAnnotation[] = [];
   private currentContentLength: number = 0;
+  private thinkingBlockState: Map<number, { thinking: string; signature: string }> = new Map(); // Track thinking blocks with their signatures
 
   constructor() {
     this.created = Math.floor(Date.now() / 1000);
@@ -72,6 +73,7 @@ export class AnthropicToOpenAIStreamConverter {
         this.nextToolCallIndex = 0;
         this.annotations = [];
         this.currentContentLength = 0;
+        this.thinkingBlockState.clear();
 
         chunks.push(
           this.createChunk({
@@ -153,6 +155,9 @@ export class AnthropicToOpenAIStreamConverter {
               ],
             })
           );
+        } else if (event.content_block.type === "thinking") {
+          // Initialize thinking block state for this index
+          this.thinkingBlockState.set(event.index, { thinking: "", signature: "" });
         } else if (
           event.content_block.type === "web_search_tool_result" ||
           event.content_block.type === "server_tool_use"
@@ -217,6 +222,31 @@ export class AnthropicToOpenAIStreamConverter {
                 })
               );
             }
+          }
+        } else if (event.delta.type === "thinking_delta") {
+          // Accumulate thinking content for this block
+          const thinkingState = this.thinkingBlockState.get(event.index);
+          if (thinkingState) {
+            thinkingState.thinking += event.delta.thinking;
+          }
+
+          chunks.push(
+            this.createChunk({
+              choices: [
+                {
+                  index: 0,
+                  delta: { reasoning: event.delta.thinking },
+                  logprobs: null,
+                  finish_reason: null,
+                },
+              ],
+            })
+          );
+        } else if (event.delta.type === "signature_delta") {
+          // Accumulate signature for this thinking block
+          const thinkingState = this.thinkingBlockState.get(event.index);
+          if (thinkingState) {
+            thinkingState.signature += event.delta.signature;
           }
         } else if (event.delta.type === "citations_delta") {
           // Collect citations - will be sent at the end in message_delta
@@ -287,6 +317,10 @@ export class AnthropicToOpenAIStreamConverter {
 
         const finishReason = this.mapStopReason(event.delta.stop_reason);
 
+        // Collect reasoning_details from accumulated thinking blocks
+        const reasoning_details = Array.from(this.thinkingBlockState.values())
+          .filter(state => state.thinking || state.signature);
+
         chunks.push(
           this.createChunk({
             choices: [
@@ -295,6 +329,9 @@ export class AnthropicToOpenAIStreamConverter {
                 delta: {
                   ...(this.annotations.length > 0 && {
                     annotations: this.annotations,
+                  }),
+                  ...(reasoning_details.length > 0 && {
+                    reasoning_details,
                   }),
                 },
                 logprobs: null,

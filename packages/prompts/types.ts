@@ -118,11 +118,22 @@ export type HeliconeChatCompletionContentPart = (ChatCompletionContentPart | Cha
 };
 
 /**
+ * Reasoning detail for Anthropic thinking blocks with signatures.
+ * Required for multi-turn conversations with thinking enabled.
+ */
+export interface ReasoningDetail {
+  thinking: string;
+  signature: string;
+}
+
+/**
  * OpenAI message with optional cache control support
  */
 type HeliconeMessageParam<T> = Omit<T, 'content'> & {
   content: string | HeliconeChatCompletionContentPart[] | null;
   cache_control?: CacheControl;
+  reasoning?: string;
+  reasoning_details?: ReasoningDetail[];
 };
 
 export type HeliconeChatCompletionMessageParam = 
@@ -177,6 +188,12 @@ export type HeliconePromptParams = {
   inputs?: Record<string, any>;
 };
 
+export interface HeliconeReasoningOptions {
+  reasoning_options?: {
+    budget_tokens: number;
+  }
+};
+
 /**
  * OpenAI ChatCompletion parameters extended with Helicone prompt template support.
  * Use this type when creating non-streaming chat completions with Helicone prompts.
@@ -186,6 +203,12 @@ export type HeliconePromptParams = {
  * const response = await openai.chat.completions.create({
  *   prompt_id: "123",
  *   model: "gpt-4o",
+ *   
+ *   // Optional: only for reasoning models
+ *   reasoning_options: {
+ *     // For Anthropic models
+ *     budget_tokens: 1000,
+ *   },
  *   messages: [
  *     // Message-level cache control (string content)
  *     {
@@ -217,7 +240,7 @@ export type HeliconePromptParams = {
  * ```
  */
 export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreamingPartialMessages &
-  HeliconePromptParams;
+  HeliconePromptParams & HeliconeReasoningOptions;
 
 /**
  * OpenAI ChatCompletion parameters extended with Helicone prompt template support for streaming responses.

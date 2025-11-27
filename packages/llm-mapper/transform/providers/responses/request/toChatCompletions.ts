@@ -2,7 +2,6 @@ import {
   ResponsesRequestBody,
   ResponsesInputItem,
   ResponsesMessageInputItem,
-  ResponsesInputContentPart,
 } from "../../../types/responses";
 import {
   HeliconeChatCreateParams,
@@ -138,6 +137,11 @@ export function toChatCompletions(
     }
   }
 
+  let reasoning_effort: HeliconeChatCreateParams["reasoning_effort"] | undefined;
+  if (body.reasoning) {
+    reasoning_effort = body.reasoning.effort === "minimal" ? "low" : body.reasoning.effort;
+  }
+
   const heliconeBody: HeliconeChatCreateParams = {
     model: body.model,
     messages,
@@ -148,6 +152,8 @@ export function toChatCompletions(
     stream: body.stream,
     tools,
     tool_choice,
+    reasoning_effort,
+    reasoning_options: body.reasoning_options,
     frequency_penalty: body.frequency_penalty,
     presence_penalty: body.presence_penalty,
     logit_bias: body.logit_bias,
@@ -162,6 +168,7 @@ export function toChatCompletions(
     // Deprecated passthroughs (supported by Chat Completions clients)
     function_call: (body as any).function_call,
     functions: (body as any).functions,
+    ...(body.stream ? { stream_options: { include_usage: true } } : {}),
   } as HeliconeChatCreateParams;
 
   return heliconeBody;

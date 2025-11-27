@@ -706,7 +706,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 200000,
       "crossRegion": false,
       "maxTokens": 8192,
-      "modelId": "anthropic/claude-4.5-haiku",
+      "modelId": "anthropic/claude-haiku-4.5",
       "parameters": [
         "max_tokens",
         "stop",

@@ -16,16 +16,26 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
   const toolUseBlocks = response.content.filter(
     (block) => block.type === "tool_use"
   );
+  const thinkingBlocks = response.content.filter(
+    (block) => block.type === "thinking"
+  );
 
   const { content, annotations } = buildContentAndAnnotations(textBlocks);
 
   const tool_calls = mapToolCalls(toolUseBlocks);
+  const reasoning = thinkingBlocks.map((b) => b.thinking || "").join("");
+  const reasoning_details = thinkingBlocks.map((b) => ({
+    thinking: b.thinking || "",
+    signature: b.signature || "",
+  }));
 
   const choice: OpenAIChoice = {
     index: 0,
     message: {
       role: "assistant",
       content: content || null,
+      ...(reasoning && { reasoning }),
+      ...(reasoning_details.length > 0 && { reasoning_details }),
       ...(tool_calls.length > 0 && { tool_calls }),
       ...(annotations.length > 0 && { annotations }),
     },

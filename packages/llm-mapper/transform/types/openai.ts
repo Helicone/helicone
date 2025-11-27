@@ -26,9 +26,16 @@ export interface OpenAIChoice {
   logprobs: null | OpenAILogProbs;
 }
 
+export interface OpenAIReasoningDetail {
+  thinking: string;
+  signature: string;
+}
+
 export interface OpenAIResponseMessage {
   role: "assistant" | "system" | "user" | "function" | "tool";
   content: string | null;
+  reasoning?: string;
+  reasoning_details?: OpenAIReasoningDetail[];
   function_call?: OpenAIFunctionCall;
   tool_calls?: OpenAIToolCall[];
   annotations?: OpenAIAnnotation[];
@@ -65,6 +72,8 @@ export interface OpenAIStreamChoice {
 export interface OpenAIDelta {
   role?: Role;
   content?: string;
+  reasoning?: string;
+  reasoning_details?: OpenAIReasoningDetail[];
   function_call?: {
     name?: string;
     arguments?: string;
