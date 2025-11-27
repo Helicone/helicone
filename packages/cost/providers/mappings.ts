@@ -127,6 +127,7 @@ export const providersNames = [
   "VERCEL",
   "CEREBRAS",
   "BASETEN",
+  "CANOPYWAVE",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];

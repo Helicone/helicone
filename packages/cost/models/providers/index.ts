@@ -2,6 +2,7 @@ import { AnthropicProvider } from "./anthropic";
 import { AzureOpenAIProvider } from "./azure";
 import { BasetenProvider } from "./baseten";
 import { BedrockProvider } from "./bedrock";
+import { CanopyWaveProvider } from "./canopywave";
 import { CerebrasProvider } from "./cerebras";
 import { ChutesProvider } from "./chutes";
 import { DeepInfraProvider } from "./deepinfra";
@@ -25,6 +26,7 @@ export const providers = {
   anthropic: new AnthropicProvider(),
   azure: new AzureOpenAIProvider(),
   bedrock: new BedrockProvider(),
+  canopywave: new CanopyWaveProvider(),
   cerebras: new CerebrasProvider(),
   chutes: new ChutesProvider(),
   deepinfra: new DeepInfraProvider(),
