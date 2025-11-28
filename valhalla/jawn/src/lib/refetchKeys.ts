@@ -1,9 +1,9 @@
 import { type ModelProviderName } from "@helicone-package/cost/models/providers";
-import { removeFromCache, storeInCache } from "./clients/cloudflareKV";
-import { type Json } from "./db/database.types";
+import { removeFromCache, storeInCache, updateProviderKeysInDO } from "./clients/cloudflareKV";
 import { ENVIRONMENT } from "./clients/constant";
+import { type Json } from "./db/database.types";
 
-type ProviderKey = {
+export type ProviderKey = {
   provider: ModelProviderName;
   decrypted_provider_key: string;
   decrypted_provider_secret_key: string;
@@ -22,7 +22,8 @@ async function setProviderKeyDev(
   retries = MAX_RETRIES
 ) {
   try {
-    const res = await fetch(
+    // Update KV cache in dev worker
+    const kvRes = await fetch(
       `${process.env.HELICONE_WORKER_API}/mock-set-provider-keys/${orgId}`,
       {
         method: "POST",
@@ -44,8 +45,12 @@ async function setProviderKeyDev(
         ),
       }
     );
-    if (!res.ok) {
-      console.error(res);
+
+    // Update DO cache in dev worker
+    const doRes = await updateProviderKeysInDO(orgId, providerKeys);
+
+    if (!kvRes.ok || !doRes.success) {
+      console.error("KV or DO update failed:", kvRes, doRes);
       if (retries > 0) {
         await new Promise((resolve) =>
           setTimeout(resolve, 10_000 * (MAX_RETRIES - retries))
@@ -63,7 +68,11 @@ export async function setProviderKeys(
   providerKeys: ProviderKey[]
 ) {
   if (ENVIRONMENT === "production") {
-    await storeInCache(`provider_keys_${orgId}`, JSON.stringify(providerKeys));
+    // Update both KV and DO in parallel
+    await Promise.all([
+      storeInCache(`provider_keys_${orgId}`, JSON.stringify(providerKeys)),
+      updateProviderKeysInDO(orgId, providerKeys),
+    ]);
   } else {
     await setProviderKeyDev(orgId, providerKeys);
   }
