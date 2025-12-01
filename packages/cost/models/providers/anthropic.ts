@@ -24,11 +24,14 @@ export class AnthropicProvider extends BaseProvider {
     return "https://api.anthropic.com/v1/messages";
   }
 
-  authenticate(authContext: AuthContext): AuthResult {
+  authenticate(authContext: AuthContext, endpoint: Endpoint): AuthResult {
     const headers: Record<string, string> = {};
     headers["x-api-key"] = authContext.apiKey || "";
     if (authContext.bodyMapping === "OPENAI" || !headers["anthropic-version"]) {
       headers["anthropic-version"] = "2023-06-01";
+    }
+    if (endpoint.providerModelId.includes("sonnet-4")) {
+      headers["anthropic-beta"] = "context-1m-2025-08-07";
     }
     return { headers };
   }

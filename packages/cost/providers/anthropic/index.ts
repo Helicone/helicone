@@ -232,7 +232,7 @@ export const costs: ModelRow[] = [
   },
   {
     model: {
-      operator: "equals",
+      operator: "includes",
       value: "claude-opus-4-5",
     },
     cost: {

@@ -143,6 +143,9 @@ export class VertexProvider extends BaseProvider {
     return {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        ...(endpoint.providerModelId.includes("sonnet-4") ? {
+          "anthropic-beta": "context-1m-2025-08-07"
+        } : {})
       },
     };
   }
