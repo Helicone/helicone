@@ -26,7 +26,7 @@ export const endpoints = {
         // cacheMultipliers inherited from base tier
       },
     ],
-    contextLength: 200000,
+    contextLength: 1000000,
     maxCompletionTokens: 64000,
     supportedParameters: [
       "max_tokens",
@@ -66,7 +66,7 @@ export const endpoints = {
         output: 0.0000225,
       },
     ],
-    contextLength: 200000,
+    contextLength: 1000000,
     maxCompletionTokens: 64000,
     supportedParameters: [
       "max_tokens",
@@ -106,7 +106,7 @@ export const endpoints = {
         output: 0.0000225,
       },
     ],
-    contextLength: 200000,
+    contextLength: 1000000,
     maxCompletionTokens: 64000,
     supportedParameters: [
       "max_tokens",
@@ -135,8 +135,13 @@ export const endpoints = {
         input: 0.00000633, // $6.33/1M - worst-case: $6.00/1M (Google >200K) * 1.055
         output: 0.00002374, // $23.74/1M - worst-case: $22.50/1M (Google >200K) * 1.055
       },
+      {
+        threshold: 200000,
+        input: 0.00000633, // 0.000006 * 1.055
+        output: 0.0000237375, // 0.0000225 * 1.055
+      }
     ],
-    contextLength: 200000,
+    contextLength: 1000000,
     maxCompletionTokens: 64000,
     supportedParameters: [
       "max_tokens",
@@ -174,7 +179,7 @@ export const endpoints = {
         output: 0.0000225,
       },
     ],
-    contextLength: 200000,
+    contextLength: 1000000,
     maxCompletionTokens: 64000,
     supportedParameters: [
       "max_tokens",

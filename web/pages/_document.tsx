@@ -14,11 +14,8 @@ class MyDocument extends Document {
   }
 
   render() {
-    const pathname = this.props.__NEXT_DATA__.page;
-    const isOpenStatsPage = pathname === "/open-stats";
-
     return (
-      <Html className={isOpenStatsPage ? "open-stats-html" : ""}>
+      <Html>
         <Head>
           {/* eslint-disable-next-line @next/next/no-sync-scripts */}
           <script src="/__ENV.js" />
@@ -38,7 +35,7 @@ class MyDocument extends Document {
             }}
           />
         </Head>
-        <body className={isOpenStatsPage ? "open-stats-body" : ""}>
+        <body>
           <Main />
           <Toaster />
           <NextScript />

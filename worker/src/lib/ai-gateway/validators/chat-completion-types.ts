@@ -170,6 +170,9 @@ const ReasoningEffort = z.union([
   z.enum(["minimal", "low", "medium", "high"]),
   z.null(),
 ]);
+const ReasoningOptions = z.object({
+  budget_tokens: z.number().int(),
+});
 const WebSearchLocation = z
   .object({
     country: z.string(),
@@ -213,6 +216,7 @@ const PredictionContent = z.object({
     z.string(),
     z.array(ChatCompletionRequestMessageContentPartText),
   ]),
+  reasoning: z.string().optional(),
 });
 const ChatCompletionStreamOptions = z.union([
   z
@@ -305,6 +309,7 @@ const CreateChatCompletionRequest = z
     modalities: ResponseModalities.optional(),
     verbosity: Verbosity.optional(),
     reasoning_effort: ReasoningEffort.optional(),
+    reasoning_options: ReasoningOptions.optional(),
     max_completion_tokens: z.number().int().nullish(),
     frequency_penalty: z.number().gte(-2).lte(2).nullish().default(0),
     presence_penalty: z.number().gte(-2).lte(2).nullish().default(0),

@@ -87,6 +87,9 @@ export class BedrockProvider extends BaseProvider {
     const forwardToHost = `bedrock-runtime.${awsRegion}.amazonaws.com`;
     headers.set("host", forwardToHost);
     headers.set("content-type", "application/json");
+    if (endpoint.providerModelId.includes("sonnet-4")) {
+      headers.set("anthropic-beta", "context-1m-2025-08-07");
+    }
 
     const url = new URL(authContext.requestUrl);
     const request = new HttpRequest({

@@ -32,11 +32,15 @@ export class HeliconeProvider extends BaseProvider {
     return `${this.baseUrl}/openai/v1${path}`;
   }
 
-  authenticate(authContext: AuthContext): AuthResult {
+  authenticate(authContext: AuthContext, endpoint: Endpoint): AuthResult {
     const headers: Record<string, string> = {};
 
     // Default to Bearer token auth for OpenAI models
     headers["Authorization"] = `Bearer ${authContext.apiKey || ""}`;
+
+    if (endpoint.providerModelId.includes("sonnet-4")) {
+      headers["anthropic-beta"] = "context-1m-2025-08-07";
+    }
 
     return { headers };
   }
