@@ -92,6 +92,15 @@ export class VertexProvider extends BaseProvider {
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
     const modelId = endpoint.providerModelId || "";
     if (context.bodyMapping === "NO_MAPPING") {
+      // For Claude models on Vertex, still need to add anthropic_version
+      // even when the body is already in Anthropic format (NO_MAPPING)
+      if (modelId.includes("claude-")) {
+        return JSON.stringify({
+          ...context.parsedBody,
+          anthropic_version: "vertex-2023-10-16",
+          model: undefined,
+        });
+      }
       return JSON.stringify({
         ...context.parsedBody,
         model: modelId,
