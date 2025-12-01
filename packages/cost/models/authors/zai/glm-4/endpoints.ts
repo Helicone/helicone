@@ -42,7 +42,7 @@ export const endpoints = {
     },
   },
   "glm-4.6:canopywave": {
-    providerModelId: "zai-org/glm-4.6",
+    providerModelId: "zai/glm-4.6",
     provider: "canopywave",
     author: "zai",
     pricing: [
