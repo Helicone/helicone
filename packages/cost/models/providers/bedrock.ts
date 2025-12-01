@@ -114,6 +114,15 @@ export class BedrockProvider extends BaseProvider {
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
     if (context.bodyMapping === "NO_MAPPING") {
+      // For Claude models, add anthropic_version and remove model/stream
+      if (endpoint.providerModelId.includes("claude-")) {
+        return JSON.stringify({
+          ...context.parsedBody,
+          anthropic_version: "bedrock-2023-05-31",
+          model: undefined,
+          stream: undefined,
+        });
+      }
       return JSON.stringify({
         ...context.parsedBody,
         model: endpoint.providerModelId,
